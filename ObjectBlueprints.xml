@@ -1,0 +1,11 @@
+<objects>
+ <object Name="Ephemeral Stone" Inherits="BaseStone">
+    <part Name="Render" DisplayName="pebble" Tile="Items/sw_smallstone.bmp" />
+    <part Name="SizeAdjective" Adjective="small" />
+    <part Name="Physics" Weight="10" />
+    <part Name="Description" Short="A piece of rock was water-cleaved from its birthing bed and tumbled by time into a sphere." />
+    <part Name="ThrownWeapon" />
+    <stag Name="Thrown" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
+</objects>

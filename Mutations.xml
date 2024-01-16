@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mutations>
+  <category Name="Mental">
+    <mutation Name="Earthen Barrage" Cost="4" Class="Cleo_EarthenBarrage" MaxSelected="1" BearerDescription="the earth flinging" Tile="Mutations/night_vision.bmp" />
+  </category>
+</mutations>
