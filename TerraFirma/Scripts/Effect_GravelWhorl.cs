@@ -198,7 +198,7 @@ namespace XRL.World.Effects
 			string whorlName = Object.Poss(DisplayName.Strip());
 			if (projectile == null)
 			{
-				XDidY(whorlName, "devour", "the projectile", EndMark: "!", Actor: Object);
+				XDidY(whorlName, "devours", "the projectile", EndMark: "!", Source: Object);
 				return;
 			}
 			if (projectile.HasTag("Cleo_TerraFirma_IsAnyStone"))
@@ -208,7 +208,7 @@ namespace XRL.World.Effects
 				if (grenade != null || !string.IsNullOrEmpty(grindSpawn))
 				{
 					Helpers.VerifyLog("GVW", $"devour: DANGEROUS stone {projectile.Blueprint} torn apart (grenade={grenade != null}, grindSpawn={grindSpawn ?? "none"})");
-					XDidYToZ(whorlName, "tear", projectile, "apart", EndMark: "!", Actor: Object);
+					XDidYToZ(whorlName, "tears", projectile, "apart", EndMark: "!", Source: Object);
 					if (!string.IsNullOrEmpty(grindSpawn))
 					{
 						int spawnCount = 1;
@@ -220,7 +220,7 @@ namespace XRL.World.Effects
 						projectile.Obliterate();
 					return;
 				}
-				XDidYToZ(whorlName, "devour", projectile, EndMark: "!", Actor: Object);
+				XDidYToZ(whorlName, "devours", projectile, EndMark: "!", Source: Object);
 				Cleo_TerraFirma_EarthenBarrage eb = Object.GetPart<Cleo_TerraFirma_EarthenBarrage>();
 				if (eb != null && eb.Charges < Cleo_TerraFirma_EarthenBarrage.MaxCharges(eb.Level))
 				{
@@ -236,7 +236,7 @@ namespace XRL.World.Effects
 				return;
 			}
 			Helpers.VerifyLog("GVW", $"devour: non-stone {projectile.Blueprint} OBLITERATED (flagged-vetoable delta: old spec dropped it at feet)");
-			XDidYToZ(whorlName, "devour", projectile, EndMark: "!", Actor: Object);
+			XDidYToZ(whorlName, "devours", projectile, EndMark: "!", Source: Object);
 			projectile.Obliterate();
 		}
 
@@ -264,17 +264,17 @@ namespace XRL.World.Effects
 		{
 			string whorlName = Object.Poss(DisplayName.Strip());
 			if (projectile == null)
-				XDidY(whorlName, "deflect", "the projectile", EndMark: "!", Actor: Object);
+				XDidY(whorlName, "deflects", "the projectile", EndMark: "!", Source: Object);
 			else if (projectile.HasPart<XRL.World.Parts.Projectile>())
 			{
 				// ephemeral munition (bullet, laser bolt) -- nothing real to preserve
 				Helpers.VerifyLog("GVW", $"swat: munition {projectile.Blueprint} fizzled");
-				XDidYToZ(whorlName, "deflect", projectile, EndMark: "!", Actor: Object);
+				XDidYToZ(whorlName, "deflects", projectile, EndMark: "!", Source: Object);
 				projectile.Obliterate();
 			}
 			else
 			{
-				XDidYToZ(whorlName, "swat", projectile, "aside", EndMark: "!", Actor: Object);
+				XDidYToZ(whorlName, "swats", projectile, "aside", EndMark: "!", Source: Object);
 				List<Cell> open = Object.CurrentCell?.GetLocalAdjacentCells()?.FindAll(x => !x.IsSolid());
 				Cell landing = (open != null && open.Count > 0) ? open[Stat.Random(0, open.Count - 1)] : Object.CurrentCell;
 				Helpers.VerifyLog("GVW", $"swat: real item {projectile.Blueprint} batted to ({landing?.X},{landing?.Y}), loot preserved");
@@ -307,9 +307,9 @@ namespace XRL.World.Effects
 				? projectile?.GetPart<XRL.World.Parts.Projectile>()?.BaseDamage
 				: (projectile.GetPart<XRL.World.Parts.ThrownWeapon>()?.Damage ?? "1d2");
 			if (projectile == null)
-				XDidY(whorlName, "send", "the projectile careening", EndMark: "!", Actor: Object);
+				XDidY(whorlName, "sends", "the projectile careening", EndMark: "!", Source: Object);
 			else
-				XDidYToZ(whorlName, "send", projectile, "careening", EndMark: "!", Actor: Object);
+				XDidYToZ(whorlName, "sends", projectile, "careening", EndMark: "!", Source: Object);
 			double rad = Stat.Random(0, 359) * Math.PI / 180.0;
 			int ex = Math.Max(0, Math.Min(zone.Width - 1, origin.X + (int)Math.Round(Math.Cos(rad) * RICOCHET_RANGE)));
 			int ey = Math.Max(0, Math.Min(zone.Height - 1, origin.Y + (int)Math.Round(Math.Sin(rad) * RICOCHET_RANGE)));

@@ -17,8 +17,8 @@ number/text awaiting blessing · `[polish]`/`[text]` writing or cleanup work · 
   accept both, or mark the projectile so FallenRockPart skips placement-fight/fragility.
 - [ ] 🆕 `[design]` **Devoured non-stone real items obliterated** — the vetoable delta, now exercised
   live (a spat seed). The case that matters is someone's thrown vibroblade. Revert = 2 lines.
-- [ ] 🆕 `[polish]` **Whorl verb conjugation** — "your gravel whorl **send**…" — all five outcome
-  verbs (devour/tear/deflect/swat/send) need conjugated forms or restructured calls.
+- [x] 🆕 `[polish]` **Whorl verb conjugation** — FIXED + DEPLOYED 2026-07-23 (all nine call sites,
+  verbs pre-conjugated + `Actor:` → `Source:`; full diagnosis in TODO.md). `[verify]` in-game reads.
 - [ ] 🆕 `[design]` **Ricochet has no VFX** — hits resolve invisibly. Acceptable for release?
 - [ ] 🆕 `[ratify]` **Whorl DRAFT texts** — "The whorl thickens.", ricochet range 5, beam-scatter
   verb "scatter", both whorl effect-description branches, reabsorb message "You return the stone
@@ -162,7 +162,8 @@ number/text awaiting blessing · `[polish]`/`[text]` writing or cleanup work · 
 
 ## Cross-cutting / release logistics
 
-- [ ] 📜 `[ratify]` **Manifest description** — draft pending your approval (placeholder still ships).
+- [ ] 📜 `[ratify]` **Manifest description** — two drafts benched 2026-07-23 (see TODO.md note);
+  needs a fresh angle, placeholder still ships.
 - [ ] 📜 `[polish]` **Statue Maker item description** — "placeholder description >:)".
 - [ ] 🆕 `[polish]` **Strip `[TF-VERIFY]` instrumentation before release** — kill switch
   `Helpers.VERIFY_WATCH`, or delete the call sites (now ~15 files after the session's additions).
