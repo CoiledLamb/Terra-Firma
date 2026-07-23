@@ -1,0 +1,479 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<populations>
+	<!-- ====== Fissure Spec v2 rock bands (2026-07-22): what the ceiling sheds, per tier.
+	     Bands nest (2 contains 1 at weight 60, 3 contains 2) so the power curve blends.
+	     Escalation (user ruling 2026-07-22, base-game loot-table mechanic): every roll has a
+	     small chance to reach a band up — the "Deeper" groups — and rarely two bands at once.
+	     Escalations land on band-exclusive content (the *New tables) so they're always visible. ====== -->
+	<!-- Throwable-only mirrors of the fissure bands (same weights, same "Deeper" escalation, minus
+	     creatures/standing stone). Shared by omnigeyser shots and baboon pocket-stones (2026-07-22). -->
+	<population Name="Cleo_TerraFirma_ThrowableRocksBand2">
+		<group Name="Rocks" Style="pickone">
+			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Whorlstone" />
+			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Torpor" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Volatile" />
+			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Rubber" />
+			<group Name="Fungal" Weight="9" Style="pickone">
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Fungal" />
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_FungalLuminous" />
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_FungalWax" />
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_FungalMumbles" />
+			</group>
+			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_CompressedAsh" />
+			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Spiderweb" />
+			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_ShatteredStalactite" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Oxidian" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Grimslate" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Tanglelith" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Urchinite" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_ThrowableRocksBand3">
+		<group Name="Rocks" Style="pickone">
+			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Voltaic" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Scorching" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Icy" />
+			<object Weight="7" Blueprint="Cleo_TerraFirma_Rock_Pulsestone" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Ajistone" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Vantabsidian" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Melting" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Shunting" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Hypersonic" />
+			<group Name="Glowing" Weight="7" Style="pickone">
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_GlowingRadioactive" />
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_GlowingPhosphorescent" />
+			</group>
+			<object Weight="7" Blueprint="Cleo_TerraFirma_Rock_Mullstone" />
+			<object Weight="7" Blueprint="Cleo_TerraFirma_Rock_Hexstone" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Lovestone" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Shieldstone" />
+			<object Weight="7" Blueprint="Cleo_TerraFirma_Rock_Phasalt" />
+			<object Weight="4" Blueprint="Cleo_TerraFirma_Rock_Gyrestone" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Drainstone" />
+			<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Lodestone" />
+			<object Weight="4" Blueprint="Cleo_TerraFirma_Rock_Blurring" />
+			<!-- crack + chasm are terrain: falls-only, never in the throwable mirrors -->
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_ThrowableRocks1">
+		<group Name="Rocks" Style="pickone">
+			<object Weight="25" Blueprint="Cleo_TerraFirma_Rock_Pebbles" />
+			<object Weight="25" Blueprint="Cleo_TerraFirma_Rock_Generic" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Soupstone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Sludgestone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Salt" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Strange" />
+			<object Weight="15" Blueprint="Cleo_TerraFirma_Rock_Pointy" />
+			<group Name="Deeper" Weight="5" Style="pickone">
+				<table Weight="90" Name="Cleo_TerraFirma_ThrowableRocksBand2" />
+				<table Weight="10" Name="Cleo_TerraFirma_ThrowableRocksBand3" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_ThrowableRocks2">
+		<group Name="Rocks" Style="pickone">
+			<table Weight="60" Name="Cleo_TerraFirma_ThrowableRocks1" />
+			<table Weight="40" Name="Cleo_TerraFirma_ThrowableRocksBand2" />
+			<group Name="Deeper" Weight="5" Style="pickone">
+				<table Weight="100" Name="Cleo_TerraFirma_ThrowableRocksBand3" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_ThrowableRocksBand4">
+		<group Name="Rocks" Style="pickone">
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_DeepVoltaic" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_DeepScorching" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_DeepIcy" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_DeepMelting" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_ThrowableRocks3">
+		<group Name="Rocks" Style="pickone">
+			<table Weight="60" Name="Cleo_TerraFirma_ThrowableRocks2" />
+			<table Weight="40" Name="Cleo_TerraFirma_ThrowableRocksBand3" />
+			<group Name="Deeper" Weight="5" Style="pickone">
+				<table Weight="100" Name="Cleo_TerraFirma_ThrowableRocksBand4" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_ThrowableRocks4">
+		<group Name="Rocks" Style="pickone">
+			<table Weight="60" Name="Cleo_TerraFirma_ThrowableRocks3" />
+			<table Weight="40" Name="Cleo_TerraFirma_ThrowableRocksBand4" />
+		</group>
+	</population>
+
+	<population Name="Cleo_TerraFirma_FissureRocksBand2New">
+		<group Name="Rocks" Style="pickone">
+			<object Weight="12" Blueprint="Cleo_TerraFirma_Rock_CrumbledWall" />
+			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Whorlstone" />
+			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Torpor" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Volatile" />
+			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Rubber" />
+			<group Name="Fungal" Weight="9" Style="pickone">
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Fungal" />
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_FungalLuminous" />
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_FungalWax" />
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_FungalMumbles" />
+			</group>
+			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_CompressedAsh" />
+			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Spiderweb" />
+			<!-- geography (user ruling): caves shed stalactites 3x over stalagmites; on the surface (Z<=10)
+			     the mutation substitutes every stalactite roll with a stalagmite at fall time -->
+			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_ShatteredStalactite" />
+			<object Weight="3" Blueprint="Cleo_TerraFirma_Rock_Stalagmite" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Omnigeyser1" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_BaboonFigurine" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Oxidian" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Grimslate" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Tanglelith" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Urchinite" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureRocksBand3New">
+		<group Name="Rocks" Style="pickone">
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Wall" />
+			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Voltaic" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Scorching" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Icy" />
+			<object Weight="7" Blueprint="Cleo_TerraFirma_Rock_Pulsestone" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Ajistone" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Vantabsidian" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Melting" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Shunting" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_ApeStatue" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Hypersonic" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Omnigeyser2" />
+			<object Weight="3" Blueprint="Cleo_TerraFirma_Rock_Omnigeyser3" />
+			<object Weight="7" Blueprint="Cleo_TerraFirma_Rock_Mullstone" />
+			<object Weight="7" Blueprint="Cleo_TerraFirma_Rock_Hexstone" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Lovestone" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Shieldstone" />
+			<object Weight="7" Blueprint="Cleo_TerraFirma_Rock_Phasalt" />
+			<object Weight="4" Blueprint="Cleo_TerraFirma_Rock_Gyrestone" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Drainstone" />
+			<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Lodestone" />
+			<object Weight="4" Blueprint="Cleo_TerraFirma_Rock_Blurring" />
+			<object Weight="3" Blueprint="Cleo_TerraFirma_Rock_Chasm" />
+			<group Name="Glowing" Weight="7" Style="pickone">
+				<!-- the twins ride one slot at even odds: the gamble is 50/50 by design -->
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_GlowingRadioactive" />
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_GlowingPhosphorescent" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureRocks1">
+		<group Name="Rocks" Style="pickone">
+			<object Weight="25" Blueprint="Cleo_TerraFirma_Rock_Pebbles" />
+			<object Weight="25" Blueprint="Cleo_TerraFirma_Rock_Generic" />
+			<object Weight="15" Blueprint="Cleo_TerraFirma_Rock_Rubble" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Soupstone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Sludgestone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Salt" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Strange" />
+			<object Weight="15" Blueprint="Cleo_TerraFirma_Rock_Pointy" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Crack" />
+			<group Name="Deeper" Weight="5" Style="pickone">
+				<table Weight="90" Name="Cleo_TerraFirma_FissureRocksBand2New" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureRocksBand3New" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureRocks2">
+		<group Name="Rocks" Style="pickone">
+			<table Weight="60" Name="Cleo_TerraFirma_FissureRocks1" />
+			<table Weight="40" Name="Cleo_TerraFirma_FissureRocksBand2New" />
+			<group Name="Deeper" Weight="5" Style="pickone">
+				<table Weight="100" Name="Cleo_TerraFirma_FissureRocksBand3New" />
+			</group>
+		</group>
+	</population>
+	<!-- Band 4 (effective level 10+): the deep stones. Exclusive table only - falls-side band 4 has no
+	     creatures/standing stone to strip, so the "New" table IS the whole band. -->
+	<population Name="Cleo_TerraFirma_FissureRocksBand4New">
+		<group Name="Rocks" Style="pickone">
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_DeepVoltaic" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_DeepScorching" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_DeepIcy" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_DeepMelting" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureRocks3">
+		<group Name="Rocks" Style="pickone">
+			<table Weight="60" Name="Cleo_TerraFirma_FissureRocks2" />
+			<table Weight="40" Name="Cleo_TerraFirma_FissureRocksBand3New" />
+			<group Name="Deeper" Weight="5" Style="pickone">
+				<table Weight="100" Name="Cleo_TerraFirma_FissureRocksBand4New" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureRocks4">
+		<group Name="Rocks" Style="pickone">
+			<table Weight="60" Name="Cleo_TerraFirma_FissureRocks3" />
+			<table Weight="40" Name="Cleo_TerraFirma_FissureRocksBand4New" />
+		</group>
+	</population>
+
+	<!-- ====== Legacy plant tables below: RETIRED from the roll path (Spec v2 ruling, 2026-07-22;
+	     they were verbatim Burgeoning copies). Kept dormant for possible future creature entries. ====== -->
+	<population Name="Cleo_TerraFirma_FissureTable_Generics1">
+		<group Name="Types" Style="pickone">
+			<object Weight="10" Blueprint="Watervine" />
+			<object Weight="10" Blueprint="Shimscale Mangrove Tree" />
+			<object Weight="10" Blueprint="Dogthorn Tree" />
+			<object Weight="10" Blueprint="Witchwood Tree" />
+			<object Weight="10" Blueprint="Swarmshade Tree" />
+			<object Weight="10" Blueprint="Ziv Bough" />
+			<object Weight="10" Blueprint="Slime Grass" />
+			<object Weight="10" Blueprint="Brinestalk" />
+			<object Weight="10" Blueprint="Flowers" />
+			<object Weight="10" Blueprint="Yuckwheat" />
+			<object Weight="10" Blueprint="Starapple Tree" />
+			<object Weight="10" Blueprint="Glowpad" />
+			<group Name="Fracti" Style="pickone">
+				<object Weight="10" Blueprint="Fracti" />
+				<object Weight="10" Blueprint="Fracti2" />
+				<object Weight="10" Blueprint="Fracti3" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureTable_Generics2">
+		<table Weight="100" Name="Cleo_TerraFirma_FissureTable_Generics1" />
+	</population>
+	<population Name="Cleo_TerraFirma_FissureTable_Generics3">
+		<table Weight="100" Name="Cleo_TerraFirma_FissureTable_Generics1" />
+	</population>
+	<population Name="Cleo_TerraFirma_FissureTable_Generics4">
+		<group Name="Types" Style="pickone">
+			<table Weight="100" Name="Cleo_TerraFirma_FissureTable_Generics1" />
+			<group Name="Flower" Weight="15" Style="pickone">
+				<object Blueprint="Luminous Hoarshroom" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureTable_Generics5">
+		<group Name="Types" Style="pickone">
+			<table Weight="100" Name="Cleo_TerraFirma_FissureTable_Generics1" />
+			<group Name="Flower" Weight="25" Style="pickone">
+				<object Blueprint="Luminous Hoarshroom" />
+				<object Blueprint="Sunflower" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureTable_Generics6">
+		<group Name="Types" Style="pickone">
+			<table Weight="100" Name="Cleo_TerraFirma_FissureTable_Generics1" />
+			<group Name="Flower" Weight="35" Style="pickone">
+				<object Blueprint="Luminous Hoarshroom" />
+				<object Blueprint="Sunflower" />
+				<object Blueprint="Grave Moss" />
+				<object Blueprint="Stillvine" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureTable_Generics7">
+		<group Name="Types" Style="pickone">
+			<table Weight="100" Name="Cleo_TerraFirma_FissureTable_Generics1" />
+			<group Name="Flower" Weight="45" Style="pickone">
+				<object Weight="10" Blueprint="Luminous Hoarshroom" />
+				<object Weight="10" Blueprint="Sunflower" />
+				<object Weight="10" Blueprint="Grave Moss" />
+				<object Weight="10" Blueprint="Tunnel Sponge" />
+				<object Weight="10" Blueprint="Stillvine" />
+				<object Weight="10" Blueprint="Finger Coral" />
+				<object Weight="10" Blueprint="Bop Sponge" />
+				<object Weight="4" Blueprint="Noisegrass" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureTable_Generics8Plus">
+		<group Name="Types" Style="pickone">
+			<table Weight="100" Name="Cleo_TerraFirma_FissureTable_Generics1" />
+			<group Name="Flower" Weight="55" Style="pickone">
+				<object Weight="10" Blueprint="Luminous Hoarshroom" />
+				<object Weight="10" Blueprint="Sunflower" />
+				<object Weight="10" Blueprint="Grave Moss" />
+				<object Weight="10" Blueprint="Tunnel Sponge" />
+				<object Weight="10" Blueprint="Stillvine" />
+				<object Weight="10" Blueprint="Finger Coral" />
+				<object Weight="10" Blueprint="Bop Sponge" />
+				<object Weight="10" Blueprint="n-Ary Tree" />
+				<object Weight="10" Blueprint="Glitchwood Tree" />
+				<object Weight="10" Blueprint="Icosahedar" />
+				<object Weight="8" Blueprint="Noisegrass" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureTable1">
+		<group Name="Summons" Style="pickone">
+			<group Weight="75" Name="PlantCreature" Style="pickone">
+				<object Weight="10" Blueprint="Qudzu" />
+				<object Weight="10" Blueprint="Dreadroot" />
+				<object Weight="10" Blueprint="Jilted Lover" />
+				<object Weight="10" Blueprint="Young Ivory" />
+				<object Weight="10" Blueprint="Seed-Spitting Vine" />
+			</group>
+			<group Weight="25" Name="Generics" Style="pickone">
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable_Generics1" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable2" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureTable2">
+		<group Name="Summons" Style="pickone">
+			<group Weight="75" Name="PlantCreature" Style="pickone">
+				<object Weight="10" Blueprint="Thirst Thistle" />
+				<object Weight="10" Blueprint="Prickler" />
+				<object Weight="10" Blueprint="Feral Lah" />
+				<object Weight="5" Blueprint="Jilted Lover" />
+				<object Weight="5" Blueprint="Young Ivory" />
+				<object Weight="5" Blueprint="Seed-Spitting Vine" />
+			</group>
+			<group Weight="25" Name="Generics" Style="pickone">
+				<table Weight="20" Name="Cleo_TerraFirma_FissureTable_Generics2" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable1" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable3" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureTable3">
+		<group Name="Summons" Style="pickone">
+			<group Weight="75" Name="PlantCreature" Style="pickone">
+				<object Weight="10" Blueprint="Yonderbrush" />
+				<object Weight="10" Blueprint="Aloe Volta" />
+				<object Weight="5" Blueprint="Thirst Thistle" />
+				<object Weight="5" Blueprint="Prickler" />
+				<object Weight="5" Blueprint="Feral Lah" />
+				<object Weight="5" Blueprint="Aloe Pyra" />
+			</group>
+			<group Weight="25" Name="Generics" Style="pickone">
+				<table Weight="20" Name="Cleo_TerraFirma_FissureTable_Generics3" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable2" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable4" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureTable4">
+		<group Name="Summons" Style="pickone">
+			<group Weight="75" Name="PlantCreature" Style="pickone">
+				<object Weight="5" Blueprint="Aloe Porta" />
+				<object Weight="5" Blueprint="Yonderbrush" />
+				<object Weight="10" Blueprint="Aloe Pyra" />
+				<object Weight="10" Blueprint="Livid Creeper" />
+				<object Weight="10" Blueprint="Lurking Beth" />
+				<object Weight="10" Blueprint="Holographic Ivory" />
+			</group>
+			<group Weight="25" Name="Generics" Style="pickone">
+				<table Weight="20" Name="Cleo_TerraFirma_FissureTable_Generics4" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable3" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable5" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureTable5">
+		<group Name="Summons" Style="pickone">
+			<group Weight="75" Name="PlantCreature" Style="pickone">
+				<object Weight="5" Blueprint="Aloe Porta" />
+				<object Weight="5" Blueprint="Yonderbrush" />
+				<object Weight="2" Blueprint="Aloe Fugues" />
+				<table Weight="1" Name="FungusPuffers" />
+				<object Weight="5" Blueprint="Lagroot" />
+				<object Weight="10" Blueprint="Aloe Pyra" />
+				<object Weight="10" Blueprint="Livid Creeper" />
+				<object Weight="10" Blueprint="Red Death Dacca" />
+				<object Weight="10" Blueprint="Irritable Palm" />
+			</group>
+			<group Weight="25" Name="Generics" Style="pickone">
+				<table Weight="20" Name="Cleo_TerraFirma_FissureTable_Generics5" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable4" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable6" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureTable6">
+		<group Name="Summons" Style="pickone">
+			<group Weight="75" Name="PlantCreature" Style="pickone">
+				<object Weight="5" Blueprint="Aloe Porta" />
+				<object Weight="5" Blueprint="Yonderbrush" />
+				<object Weight="2" Blueprint="Aloe Fugues" />
+				<object Weight="2" Blueprint="Gorged Growth" />
+				<table Weight="1" Name="FungusPuffers" />
+				<object Weight="5" Blueprint="Lagroot" />
+				<object Weight="10" Blueprint="Holographic Beth" />
+				<object Weight="1" Blueprint="Vantabud" />
+				<object Weight="10" Blueprint="Red Death Dacca" />
+				<object Weight="10" Blueprint="Irritable Palm" />
+			</group>
+			<group Weight="25" Name="Generics" Style="pickone">
+				<table Weight="20" Name="Cleo_TerraFirma_FissureTable_Generics6" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable5" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable7" />
+			</group>
+		</group>
+
+	</population>
+	<population Name="Cleo_TerraFirma_FissureTable7">
+		<group Name="Summons" Style="pickone">
+			<group Weight="75" Name="PlantCreature" Style="pickone">
+				<object Weight="5" Blueprint="Aloe Porta" />
+				<object Weight="4" Blueprint="Yonderbrush" />
+				<object Weight="2" Blueprint="Aloe Fugues" />
+				<object Weight="2" Blueprint="Gorged Growth" />
+				<table Weight="1" Name="FungusPuffers" />
+				<object Weight="5" Blueprint="Elder Lagroot" />
+				<object Weight="1" Blueprint="Vantabud" />
+				<object Weight="10" Blueprint="Red Death Dacca" />
+				<object Weight="10" Blueprint="Irritable Palm" />
+			</group>
+			<group Weight="25" Name="Generics" Style="pickone">
+				<table Weight="20" Name="Cleo_TerraFirma_FissureTable_Generics7" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable6" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable8" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureTable8">
+		<group Name="Summons" Style="pickone">
+			<group Weight="75" Name="PlantCreature" Style="pickone">
+				<object Weight="5" Blueprint="Aloe Porta" />
+				<object Weight="4" Blueprint="Yonderbrush" />
+				<object Weight="3" Blueprint="Aloe Fugues" />
+				<object Weight="2" Blueprint="Gorged Growth" />
+				<table Weight="1" Name="FungusPuffers" />
+				<object Weight="5" Blueprint="Elder Lagroot" />
+				<object Weight="1" Blueprint="Vantabloom" />
+				<object Weight="9" Blueprint="Red Death Dacca" />
+				<object Weight="9" Blueprint="Irritable Palm" />
+				<object Weight="5" Blueprint="Tongue Tyrant" />
+			</group>
+			<group Weight="25" Name="Generics" Style="pickone">
+				<table Weight="20" Name="Cleo_TerraFirma_FissureTable_Generics8Plus" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable7" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable9" />
+			</group>
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FissureTable9">
+		<group Name="Summons" Style="pickone">
+			<group Weight="50" Name="PlantCreature" Style="pickone">
+				<object Weight="5" Blueprint="Aloe Porta" />
+				<object Weight="4" Blueprint="Yonderbrush" />
+				<object Weight="3" Blueprint="Aloe Fugues" />
+				<object Weight="2" Blueprint="Gorged Growth" />
+				<table Weight="1" Name="FungusPuffers" />
+				<object Weight="5" Blueprint="Elder Lagroot" />
+				<object Weight="1" Blueprint="Vantabloom" />
+				<object Weight="8" Blueprint="Red Death Dacca" />
+				<object Weight="8" Blueprint="Irritable Palm" />
+				<object Weight="10" Blueprint="Tongue Tyrant" />
+				<object Weight="1" Blueprint="Dreamcrungle" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable_Generics8Plus" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable8" />
+			</group>
+			<group Weight="10" Name="Generics" Style="pickone">
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable_Generics8Plus" />
+				<table Weight="10" Name="Cleo_TerraFirma_FissureTable8" />
+			</group>
+		</group>
+	</population>
+</populations>

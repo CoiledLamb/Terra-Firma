@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+ <objects> 
+  <object Name="TerraFirma_Burrowing Urchin" Inherits="BaseUrchin">
+    <part Name="Render" DisplayName="burrowing urchin" ColorString="&amp;w" DetailColor="g" />
+    <part Name="Description" Short="A moss covered ball of spines tumbles across the earth, prying open crevices and bits of scrap to nest in the dank spaces within." />
+    <part Name="Brain" Wanders="true" Mobile="true" LivesOnWalls="true" WallWalker="true" MinKillRadius="1" MaxKillRadius="16" />
+    <stat Name="Hitpoints" Value="6" />
+    <stat Name="Level" Value="12" />
+    <mutation Name="Burrowing" Level="5" />
+    <inventoryobject Blueprint="TerraFirma_Aculei" Number="1" />
+  </object>
+</objects>

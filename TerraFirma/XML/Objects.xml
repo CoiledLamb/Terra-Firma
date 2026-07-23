@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<objects>
+	<object Name="Cleo_TerraFirma_EphemeralStone" Inherits="BaseStone">
+		<part Name="Render" DisplayName="sculpted pebble" Tile="Items/sw_smallstone.bmp" />
+		<part Name="Physics" Weight="1" Category="Thrown Weapons" />
+		<part Name="Description" Short="A piece of rock was water-cleaved from its birthing bed and tumbled by time into a sphere." />
+		<part Name="Temporary" Duration="30" /> <!-- Silent property removed from the Temporary part in a game update -->
+
+		<part Name="ThrownWeapon" Penetration="4" Damage="1d8" Attributes="Cudgel" /> <!-- these are just placeholder; actual damage is set in C# -->
+		<stag Name="Thrown" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
+	<object Name="Cleo_TerraFirma_EphemeralStoneResonant" Inherits="Cleo_TerraFirma_EphemeralStone">
+		<part Name="Render" DisplayName="{{C|resonant}} sculpted pebble" ColorString="&amp;C" TileColor="&amp;C" DetailColor="c" />
+		<part Name="Description" Short="A piece of rock was water-cleaved from its birthing bed, tumbled by time into a sphere, and hollowed by will until it hums at the frequency of whatever it meets." />
+		<part Name="VibroWeapon" ChargeUse="0" />
+		<part Name="ThrownWeapon" Penetration="4" Damage="1d8" Attributes="Cudgel Vorpal" /> <!-- Vorpal = thrown-path vibro; damage still set in C# -->
+	</object>
+	<object Name="Cleo_TerraFirma_WallCalcify" Inherits="Sandstone">
+		<!-- fallback wall for Calcify when the zone defines no default wall and no stone neighbor is found -->
+	</object>
+	<object Name="Cleo_TerraFirma_StoneshaperStatue" Inherits="Random Statue">
+		<tag Name="Animatable" />
+		<tag Name="NoTrade" />
+		<tag Name="NoFollowerDeathPopup" />
+		<tag Name="NoAnimatedNamePrefix" />
+		<tag Name="DeathSounds" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_die" />
+		<tag Name="TakeDamageSound" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_hurt" />
+		<tag Name="AmbientIdleSound" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_idle" />
+		<tag Name="PunchSound" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_attack" />
+		<part Name="RandomStatue" StatueType="sculpture" />
+	</object>
+	<object Name="Cleo_TerraFirma_StoneshaperStatueNaturalWeapon" Inherits="NaturalWeapon">
+		<part Name="Render" DisplayName="{{y|gravelly haymaker}}" Tile="Creatures/natural-weapon-fist.bmp" ColorString="&amp;K" />
+		<part Name="MeleeWeapon" MaxStrengthBonus="1000" BaseDamage="1d3+1" Skill="Cudgel" Stat="Strength" />
+		<part Name="VibroWeapon" ChargeUse="0" />
+	</object>
+	<object Name="Cleo_TerraFirma_StabilizerBands" Inherits="BaseArmlet">
+		<part Name="Render" DisplayName="stabilizer bands" Tile="items/sw_leather_bracers.bmp" ColorString="&amp;y" DetailColor="w" /> <!-- tile is a base-game reuse (leather bracer); swap for bespoke art whenever -->
+		<part Name="Armor" AV="0" DV="1" WornOn="Arm" />
+		<part Name="Physics" Weight="1" />
+		<part Name="Commerce" Value="15" />
+		<part Name="Description" Short="Strips of woven fabric wind about the wrist and elbow, holding tendon and muscle in line against the wrench of a long throw." /> <!-- DRAFT - awaiting user approval -->
+		<part Name="IntPropertyChanger" AffectedProperty="ThrowRangeBonus" Amount="1" ChargeUse="0" IsEMPSensitive="false" IsBootSensitive="false" IsTechScannable="false" WorksOnWearer="true" NameForStatus="Stabilizers" BehaviorDescription="Wearer's throw range is increased by 1." />
+		<tag Name="EquipSound" Value="sfx_equip_material_generic_cloth" />
+		<tag Name="Gender" Value="plural" />
+		<tag Name="Tier" Value="2" />
+	</object>
+	<object Name="Cleo_TerraFirma_StatueMaker" Inherits="Tool">
+		<part Name="Render" DisplayName="claysculpting loop" RenderString="004" ColorString="&amp;C" TileColor="&amp;b" DetailColor="C" Tile="Items/portable-wall.png" />
+		<part Name="Commerce" Value="25" />
+		<part Name="Description" Short="placeholder description >:)" />
+		<part Name="Physics" Weight="8" Category="Tools" />
+		<part Name="Cleo_TerraFirma_StatueMakerPart" />
+		<part Name="Examiner" Unknown="UnknownOddTrinket" Complexity="3" />
+		<tag Name="Gift" Value="*noinherit" />
+		<tag Name="GiftSkillRestriction" Value="Tinkering_Scavenger" />
+		<tag Name="Tier" Value="3" />
+		<part Name="TinkerItem" Bits="0013" CanDisassemble="true" CanBuild="true" />
+		<tag Name="DynamicObjectsTable:Trinkets" />
+	</object>
+</objects>

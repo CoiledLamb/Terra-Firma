@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<populations>
+  <population Name="Cleo_StartingGear_Stonecarver">
+    <group Name="Gear" Style="pickeach">
+		<object Blueprint="HalfFullWaterskin" Number="1"/>
+		<object Blueprint="EmptyWaterskin" Number="2"/>
+		<object Blueprint="TerraFirma_Blunted Chisel" Number="1" />
+ 		<object Blueprint="TerraFirma_Splintered Mallet" Number="1" />
+		<object Blueprint="Ash-Stained Robes" Number="1" />
+		<object Blueprint="Sandals" Number="1" />
+    	<object Blueprint="Vinewood Sap Mask" Number="1" />
+		<object Blueprint="Bubble Level" Number="1" />
+		<object Blueprint="Random Copper Figurine" Number="1" />
+		<table Name="Cleo_Stonecarver_Maquette"/>
+		<object Blueprint="Torch" Number="9-15" />
+		<object Blueprint="Witchwood Bark" Number="2-4" />
+		<object Blueprint="Boar Jerky" Number="1-2" />
+		<object Blueprint="Salthopper Chip" Number="2-4" />
+    </group>
+  </population>
+  	<population Name="Cleo_Stonecarver_Maquette">
+		<group Name="Maquette" Style="pickone">
+		<object Blueprint="Random Copper Figurine" Number="1-2"/>
+		<object Blueprint="Random Silver Figurine" Number="1"/>
+	 </group>
+	</population>
+</populations>

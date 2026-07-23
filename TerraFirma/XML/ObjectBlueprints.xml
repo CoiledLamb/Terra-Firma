@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<objects>
+    <object Name="TerraFirma_Blunted Chisel" Inherits="BaseDagger">
+    <part Name="Render" DisplayName="blunted chisel" Tile="blunted_chisel.png" DetailColor="y" ColorString="&amp;w"/>
+    <part Name="MeleeWeapon" MaxStrengthBonus="2" BaseDamage="1d2" />
+    <part Name="Commerce" Value="5" />
+    <part Name="Description" Short="A well-worn tool, long since dulled from precise impacts to solid rock." />
+    <part Name="Metal" />
+    <stag Name="Contemporary" />
+    <tag Name="Tier" Value="1" />
+  </object>
+    <object Name="TerraFirma_Splintered Mallet" Inherits="BaseCudgel">
+    <part Name="Render" DisplayName="splintered mallet" Tile="Items/sw_leatherworking_hammer.bmp" DetailColor="y" ColorString="&amp;w" />
+    <part Name="MeleeWeapon" MaxStrengthBonus="1" BaseDamage="1d2" Skill="Cudgel" Stat="Strength" />
+    <part Name="Commerce" Value="5" />
+    <part Name="Description" Short="The witchwood handle of this bronze mallet has been worn down to splinters, but its head still rings true." />
+    <tag Name="Tier" Value="0" />
+    <part Name="Physics" Weight="2" />    
+    <tag Name="SwingSound" Value="Sounds/Melee/cudgels/sfx_melee_cudgel_oneHanded_metal_swing" />
+    <tag Name="BlockedSound" Value="Sounds/Melee/multiUseBlock/sfx_melee_metal_blocked" />
+  </object>
+    <object Name="TerraFirma_Urchin Spine" Inherits="BaseLongBlade">
+    <part Name="Render" DisplayName="sharpened {{r|polyp}}" Tile="Items/sw_sharpened_polyp.bmp" ColorString="&amp;w" DetailColor="g" />
+    <part Name="MeleeWeapon" MaxStrengthBonus="8" BaseDamage="1d8+1" Skill="LongBlades" />
+    <part Name="Commerce" Value="10" />
+    <part Name="Description" Short="A sharpened spine, plucked from the still writhing corpse of a burrowing urchin." />
+    <part Name="Drill" ChargeUse="0" PenetrationBonus="20" HitsRequired="4" IsBootSensitive="false" IsEMPSensitive="false" IsPowerSwitchSensitive="false" IsPowerLoadSensitive="false" IsTechScannable="false" Sound="fly_generic_dig" />
+    <part Name="Physics" Weight="3" FlameTemperature="99999" VaporTemperature="9999" />
+    <part Name="BleedingOnHit" Amount="1-2" SaveTarget="15" Stack="true" />
+    <part Name="CrumblesOnHit" Chance="20" />
+    <tag Name="Tier" Value="3" />
+		<stag Name="Contemporary" />
+  </object>
+    <object Name="TerraFirma_Aculei" Inherits="NaturalWeapon">
+    <part Name="Render" DisplayName="{{g|boring aculei}}" Tile="Creatures/natural-weapon-thorns.bmp" ColorString="&amp;Y" />
+    <part Name="Drill" ChargeUse="0" PenetrationBonus="20" HitsRequired="8" IsBootSensitive="false" IsEMPSensitive="false" IsPowerSwitchSensitive="false" IsPowerLoadSensitive="false" IsTechScannable="false" Sound="fly_generic_dig" />
+    <part Name="MeleeWeapon" BaseDamage="1d6" Skill="Axe" Stat="Strength" Slot="Body" />
+    <tag Name="Gender" Value="plural" />
+  </object>
+</objects>

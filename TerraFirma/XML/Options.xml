@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<options>
+	<option ID="Cleo_TerraFirma_DebugLog"
+		DisplayText="Enable debug logging"
+		Category="Terra Firma" Type="Checkbox" Default="No">
+		<helptext>
+			Mod-specific mutations will output their logic to the message log. Useful for finding issues.
+		</helptext>
+	</option>
+	<option ID="Cleo_TerraFirma_TakeStonesDefaultOn"
+		DisplayText="Take Stones starts toggled on"
+		Category="Terra Firma" Type="Checkbox" Default="Yes">
+		<helptext>
+			Characters who gain Earthen Barrage begin with Take Stones already enabled, sculpting and equipping stones automatically. Does not change the toggle on existing characters.
+		</helptext>
+	</option>
+</options>

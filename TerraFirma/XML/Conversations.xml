@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<conversations>
+	<conversation ID="Cleo_TerraFirma_ConversationStoneshaperStatue">
+		<start ID="IsVain" IfSpeakerHaveProperty="Cleo_TerraFirma_IsVain" >
+			<text>
+				{{emote|*vainglorious preening*}}
+			</text>
+			<choice GotoID="End">Looking good, friend.</choice>
+		</start>
+		<start ID="IsNotVain" IfNotSpeakerHaveProperty="Cleo_TerraFirma_IsVain" >
+			<text>
+				{{emote|*menacing rumbling*}}~
+				{{emote|*protective rumbling*}}~
+				{{emote|*powerful rumbling*}}~
+				{{emote|*ominous rumbling*}}
+			</text>
+			<choice GotoID="End">Thank you for your protection, friend.</choice>
+		</start>
+	</conversation>
+</conversations>

@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<mutations>
+	<category Name="Mental">
+		<mutation Name="Geomancy" Cost="1" MaxSelected="1" Class="Cleo_TerraFirma_Geomancy" Tile="Abilities/abil_geomancy.png" />
+	</category>
+	<category Name="Physical">
+		<mutation Name="Calcify" Cost="2" MaxSelected="1" Class="Cleo_TerraFirma_Calcify" Tile="Abilities/abil_calcify.png" />
+		<mutation Name="Earthen Barrage" Cost="4" MaxSelected="1" Class="Cleo_TerraFirma_EarthenBarrage" Tile="Abilities/abil_earthenbarrage.png" />
+		<mutation Name="Stoneshaper" Cost="3" MaxSelected="1" Class="Cleo_TerraFirma_Stoneshaper" Tile="Abilities/abil_stoneshaper.png" />
+		<mutation Name="Gorgon's Gaze" Cost="5" MaxSelected="1" Class="Cleo_TerraFirma_GorgonsGaze" Tile="Abilities/abil_gorgonsgaze.png" />
+		<!-- Fissure rebuilt 2026-07-22 (Spec v2: self-ring ceiling collapse); cost 2→3 per ruling (Burgeoning parity) -->
+		<mutation Name="Fissure" Cost="3" MaxSelected="1" Class="Cleo_TerraFirma_Fissure" Tile="Abilities/abil_fissure.png" />
+
+	</category>
+	<!-- Lithovore (RULED 2026-07-22): you eat rocks, only rocks. Cost -2 = Carnivorous parity.
+	     Exclusions mirror the base Carnivorous <-> Photosynthetic Skin pair. Tile is the fallen
+	     rock's own (bespoke art whenever). BearerDescription "lithovores" is a DRAFT default. -->
+	<category Name="PhysicalDefects">
+		<mutation Name="Lithovore" Cost="-2" MaxSelected="1" Class="Cleo_TerraFirma_Lithovore" Exclusions="Carnivorous,Photosynthetic Skin" BearerDescription="lithovores" Tile="Items/sw_smallboulder.bmp" />
+	</category>
+</mutations>
