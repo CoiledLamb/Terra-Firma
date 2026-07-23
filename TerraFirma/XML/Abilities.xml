@@ -32,7 +32,7 @@
 			<p>While attuned, your gravel whorl deflects light-based projectiles instead of physical ones and grants DV in place of AV.</p>
 			<p>Attuning retunes the stone in your hand at no cost. Direct beams pass through the whorl in either mode.</p>
 		</description>
-		<UITile Tile="Abilities/abil_takestones_on.png" Foreground="C" Detail="c" />
+		<UITile Tile="Abilities/abil_attunestone.png" Foreground="C" Detail="c" />
 	</ability>
 	<ability Command="Cleo_TerraFirma_CommandStoneshaper">
 		<description>
