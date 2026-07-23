@@ -76,7 +76,7 @@ namespace XRL.World.Parts.Mutation
 				"Deflect chance: {{rules|3%}} per stone in reserve, +{{rules|1%}} per mutation level\n" +
 				"+{{rules|1}} AV while 3 or more stones are in reserve; +{{rules|2}} AV while 9 or more are" +
 				(Level >= RESONANT_UNLOCK_LEVEL
-					? "\nYou may attune your stones to {{C|resonance}}: they penetrate as vibro weapons, and your whorl deflects light instead of matter, granting {{rules|+2}}/{{rules|+3}} DV in place of AV.\nAttuning retunes the stone in your hand at no cost."
+					? "\nYou may attune your stones to {{C|resonance}}: they penetrate as vibro weapons, and your whorl deflects light instead of matter, granting {{rules|+2}}/{{rules|+4}} DV in place of AV.\nAttuning retunes the stone in your hand at no cost."
 					: "\nAt level {{rules|" + RESONANT_UNLOCK_LEVEL + "}}, you learn to attune your stones to {{C|resonance}}.");
 		}
 

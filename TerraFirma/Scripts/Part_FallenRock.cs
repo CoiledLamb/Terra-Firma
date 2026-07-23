@@ -265,9 +265,18 @@ namespace XRL.World.Parts
 		public override bool HandleEvent(AfterThrownEvent E)
 		{
 			ReturnLentAccuracy();
+			// whorl-deflected throw (RULED 2026-07-23): restore the outcome's placement BEFORE any
+			// landing-cell logic (miss payloads, deferred pulses fire from the right cell), and the
+			// stone skips its own fragility below -- a deflection is the whorl's use, not the thrower's
+			bool deflected = false;
+			if (ParentObject.GetPart<Cleo_TerraFirma_WhorlDeflectedPart>() is Cleo_TerraFirma_WhorlDeflectedPart mark)
+			{
+				deflected = true;
+				mark.Restore();
+			}
 			bool fired = FiredOnHit;
 			FiredOnHit = false;
-			Helpers.VerifyLog("ROCK", $"throw resolved: {ParentObject.Blueprint} at rest @({ParentObject.CurrentCell?.X},{ParentObject.CurrentCell?.Y}); hit-payload fired={fired}");
+			Helpers.VerifyLog("ROCK", $"throw resolved: {ParentObject.Blueprint} at rest @({ParentObject.CurrentCell?.X},{ParentObject.CurrentCell?.Y}); hit-payload fired={fired}{(deflected ? "; WHORL-DEFLECTED (fragility skipped)" : "")}");
 			// misses still sting and still shed their residue -- at the landing cell
 			if (!ThrowFXDone)
 			{
@@ -296,8 +305,9 @@ namespace XRL.World.Parts
 				if (GameObject.Validate(ParentObject) && ParentObject.CurrentCell != null)
 					DoRicochet(E.Actor);
 			}
-			// every throw risks the stone: it breaks unless it holds; grenade-carriers consume themselves instead
-			if (GameObject.Validate(ParentObject) && ParentObject.GetFirstPartDescendedFrom<IGrenade>() == null)
+			// every throw risks the stone: it breaks unless it holds; grenade-carriers consume themselves
+			// instead; whorl-deflected throws don't roll at all (the ruling above)
+			if (!deflected && GameObject.Validate(ParentObject) && ParentObject.GetFirstPartDescendedFrom<IGrenade>() == null)
 			{
 				bool holds = HoldChance.in100();
 				Helpers.VerifyLog("ROCK", $"fragility (throw): {ParentObject.Blueprint} {(holds ? $"HOLDS (chance {HoldChance})" : $"BREAKS (chance {HoldChance})")}");

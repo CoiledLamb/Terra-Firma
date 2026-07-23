@@ -69,7 +69,9 @@ namespace XRL.World.Effects
 		#region Logic
 		/// <summary>
 		/// Updates the deflect chance, attunement, and stat shift to match the current reserve.
-		/// Normal: +1 AV at 3+ stones, +2 at 9+. Resonant: +2 DV at 3+, +3 at 9+.
+		/// Normal: +1 AV at 3+ stones, +2 at 9+. Resonant: +2 DV at 3+, +4 at 9+ (RULED
+		/// 2026-07-23, supersedes the provisional +2/+3: DV is worth less per point than AV,
+		/// so the compensation runs at the full 1 AV = 2 DV rate).
 		/// </summary>
 		public void Sync(int NewDeflectChance, int Charges, bool NewResonant)
 		{
@@ -80,7 +82,7 @@ namespace XRL.World.Effects
 			if (Resonant)
 			{
 				StatShifter.SetStatShift("AV", 0);
-				StatShifter.SetStatShift("DV", Charges >= 9 ? 3 : (Charges >= 3 ? 2 : 0));
+				StatShifter.SetStatShift("DV", Charges >= 9 ? 4 : (Charges >= 3 ? 2 : 0));
 			}
 			else
 			{
@@ -187,11 +189,15 @@ namespace XRL.World.Effects
 
 		/// <summary>
 		/// Outcome 1: the projectile is devoured. A plain stone feeds the reserve -- +1 charge,
-		/// capped at the mutation's max (RULED: the whorl grows); anything else is simply unmade.
-		/// EXCEPT dangerous stones (RULED 2026-07-22): stones with effects on throw-destruction --
-		/// the mill's own hazard boundary, IGrenade part or GrindSpawn tag -- don't join the mass,
-		/// they're TORN APART in it: grenades detonate at the defender's cell (blame stays with the
-		/// thrower), grind-special stones release their contents around the defender.
+		/// capped at the mutation's max (RULED: the whorl grows); anything else is simply unmade
+		/// (obliteration RULED KEPT 2026-07-23: thrown items are almost always disposable, and
+		/// throwing expensive things at a whorl deserves what it finds out).
+		/// EXCEPT dangerous projectiles: stones with effects on throw-destruction (RULED
+		/// 2026-07-22: the mill's own hazard boundary, IGrenade part or GrindSpawn tag) --
+		/// EXTENDED to ALL grenades 2026-07-23 (a devoured grenade has done its job) -- don't
+		/// join the mass, they're TORN APART in it: grenades detonate at the defender's cell
+		/// (blame stays with the thrower), grind-special stones release their contents around
+		/// the defender.
 		/// </summary>
 		private void Devour(GameObject projectile, GameObject attacker)
 		{
@@ -201,25 +207,25 @@ namespace XRL.World.Effects
 				XDidY(whorlName, "devours", "the projectile", EndMark: "!", Source: Object);
 				return;
 			}
+			XRL.World.Parts.IGrenade grenade = projectile.GetFirstPartDescendedFrom<XRL.World.Parts.IGrenade>();
+			string grindSpawn = projectile.GetTag("Cleo_TerraFirma_GrindSpawn");
+			if (grenade != null || !string.IsNullOrEmpty(grindSpawn))
+			{
+				Helpers.VerifyLog("GVW", $"devour: DANGEROUS projectile {projectile.Blueprint} torn apart (grenade={grenade != null}, grindSpawn={grindSpawn ?? "none"})");
+				XDidYToZ(whorlName, "tears", projectile, "apart", EndMark: "!", Source: Object);
+				if (!string.IsNullOrEmpty(grindSpawn))
+				{
+					int spawnCount = 1;
+					int.TryParse(projectile.GetTag("Cleo_TerraFirma_GrindSpawnCount", "1"), out spawnCount);
+					SpawnAround(grindSpawn, Math.Max(1, spawnCount));
+				}
+				grenade?.Detonate(Object.CurrentCell, attacker ?? Object, Object, Indirect: true);
+				if (GameObject.Validate(projectile))
+					projectile.Obliterate();
+				return;
+			}
 			if (projectile.HasTag("Cleo_TerraFirma_IsAnyStone"))
 			{
-				XRL.World.Parts.IGrenade grenade = projectile.GetFirstPartDescendedFrom<XRL.World.Parts.IGrenade>();
-				string grindSpawn = projectile.GetTag("Cleo_TerraFirma_GrindSpawn");
-				if (grenade != null || !string.IsNullOrEmpty(grindSpawn))
-				{
-					Helpers.VerifyLog("GVW", $"devour: DANGEROUS stone {projectile.Blueprint} torn apart (grenade={grenade != null}, grindSpawn={grindSpawn ?? "none"})");
-					XDidYToZ(whorlName, "tears", projectile, "apart", EndMark: "!", Source: Object);
-					if (!string.IsNullOrEmpty(grindSpawn))
-					{
-						int spawnCount = 1;
-						int.TryParse(projectile.GetTag("Cleo_TerraFirma_GrindSpawnCount", "1"), out spawnCount);
-						SpawnAround(grindSpawn, Math.Max(1, spawnCount));
-					}
-					grenade?.Detonate(Object.CurrentCell, attacker ?? Object, Object, Indirect: true);
-					if (GameObject.Validate(projectile))
-						projectile.Obliterate();
-					return;
-				}
 				XDidYToZ(whorlName, "devours", projectile, EndMark: "!", Source: Object);
 				Cleo_TerraFirma_EarthenBarrage eb = Object.GetPart<Cleo_TerraFirma_EarthenBarrage>();
 				if (eb != null && eb.Charges < Cleo_TerraFirma_EarthenBarrage.MaxCharges(eb.Level))
@@ -235,7 +241,7 @@ namespace XRL.World.Effects
 				projectile.Obliterate();
 				return;
 			}
-			Helpers.VerifyLog("GVW", $"devour: non-stone {projectile.Blueprint} OBLITERATED (flagged-vetoable delta: old spec dropped it at feet)");
+			Helpers.VerifyLog("GVW", $"devour: non-stone {projectile.Blueprint} OBLITERATED (RULED KEPT 2026-07-23)");
 			XDidYToZ(whorlName, "devours", projectile, EndMark: "!", Source: Object);
 			projectile.Obliterate();
 		}
@@ -279,6 +285,7 @@ namespace XRL.World.Effects
 				Cell landing = (open != null && open.Count > 0) ? open[Stat.Random(0, open.Count - 1)] : Object.CurrentCell;
 				Helpers.VerifyLog("GVW", $"swat: real item {projectile.Blueprint} batted to ({landing?.X},{landing?.Y}), loot preserved");
 				landing?.AddObject(projectile);
+				MarkDeflected(projectile, landing);
 			}
 		}
 
@@ -290,6 +297,8 @@ namespace XRL.World.Effects
 		/// damage; the carom ends at the first body, hit or flinched. Walls stop it. Real items land
 		/// where the carom ends; munitions spend themselves. Kill attribution: the whorl's owner.
 		/// Payload channels deliberately do NOT fire (the whorl redirects mass, not triggers).
+		/// VFX (RULED 2026-07-23, "a good one to implement now"): staggered gravel blips along the
+		/// carom line + a dust puff where it ends; richer animations parked for a later pass.
 		/// All numbers DRAFT.
 		/// </summary>
 		private void Ricochet(GameObject projectile)
@@ -314,6 +323,7 @@ namespace XRL.World.Effects
 			int ex = Math.Max(0, Math.Min(zone.Width - 1, origin.X + (int)Math.Round(Math.Cos(rad) * RICOCHET_RANGE)));
 			int ey = Math.Max(0, Math.Min(zone.Height - 1, origin.Y + (int)Math.Round(Math.Sin(rad) * RICOCHET_RANGE)));
 			Cell landing = origin;
+			int traceStep = 0; // staggers the carom trace so the blips read as travel, not a flash
 			foreach (Point p in Zone.Line(origin.X, origin.Y, ex, ey))
 			{
 				Cell step = zone.GetCell(p.X, p.Y);
@@ -322,6 +332,9 @@ namespace XRL.World.Effects
 				if (step.IsSolid())
 					break;
 				landing = step;
+				if (step.InActiveZone)
+					The.ParticleManager.Add("&y±", step.X, step.Y, 0f, 0f, 12, 0f, 0f, traceStep * 40L);
+				traceStep++;
 				GameObject victim = null;
 				foreach (GameObject o in step.Objects)
 				{
@@ -349,13 +362,34 @@ namespace XRL.World.Effects
 				}
 			}
 			Helpers.VerifyLog("GVW", $"ricochet: {projectile?.Blueprint ?? "munition"} carom ended at ({landing.X},{landing.Y}); {(projectile == null || ephemeral ? "munition spent" : "item lands there")}");
+			if (landing != origin)
+				landing.DustPuff();
 			if (projectile != null)
 			{
 				if (ephemeral)
 					projectile.Obliterate();
 				else
+				{
 					landing.AddObject(projectile);
+					MarkDeflected(projectile, landing);
+				}
 			}
+		}
+
+		/// <summary>
+		/// RULED 2026-07-23: a deflected throw is the whorl's to place and not the thrower's use
+		/// to break. The engine's PerformThrow finishes the throw after this outcome has acted --
+		/// re-placing the weapon at its own landing cell and rolling throw-fragility -- so real
+		/// deflected thrown weapons get marked: the mark restores the outcome's placement at
+		/// AfterThrownEvent, and FallenRockPart skips its fragility roll while marked.
+		/// </summary>
+		private void MarkDeflected(GameObject projectile, Cell landing)
+		{
+			if (projectile == null || landing == null)
+				return;
+			XRL.World.Parts.Cleo_TerraFirma_WhorlDeflectedPart mark =
+				projectile.RequirePart<XRL.World.Parts.Cleo_TerraFirma_WhorlDeflectedPart>();
+			mark.Intended = landing;
 		}
 		#endregion
 	}

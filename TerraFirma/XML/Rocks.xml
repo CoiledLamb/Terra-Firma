@@ -615,8 +615,9 @@
 		<!-- thrown = every ability locked 10 rounds; stepped = one random ability, 5 -->
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="AbilityLock" PayloadAmount="10" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass: willpower domain (mashed lag precedent); eaten raw = the inversion survives -
-		     the ability-locker unlocks, 25%/ability to refresh (base part defaults) -->
-		<part Name="RefreshAllCooldownsOnEat" />
+		     the ability-locker unlocks exactly ONE cooling-down ability (RULED 2026-07-23, supersedes
+		     the base 25%/ability part: felt like a no-op; 100% overcorrects) -->
+		<part Name="Cleo_TerraFirma_RefreshOneCooldownOnEat" />
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d6" />
 	</object>

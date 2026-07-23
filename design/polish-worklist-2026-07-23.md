@@ -12,21 +12,21 @@ number/text awaiting blessing · `[polish]`/`[text]` writing or cleanup work · 
 
 ## Pass 1 — Earthen Barrage + Gravel Whorl
 
-- [ ] 🆕 `[bug]` **Deflected-thrown-item placement + fragility** — engine re-places deflected thrown
-  weapons after the whorl outcome (drift), and deflected mod rocks roll throw-fragility. Rule:
-  accept both, or mark the projectile so FallenRockPart skips placement-fight/fragility.
-- [ ] 🆕 `[design]` **Devoured non-stone real items obliterated** — the vetoable delta, now exercised
-  live (a spat seed). The case that matters is someone's thrown vibroblade. Revert = 2 lines.
+- [x] 🆕 `[bug]` **Deflected-thrown-item placement + fragility** — RULED mark-the-projectile + BUILT +
+  DEPLOYED 2026-07-23 (new `Cleo_TerraFirma_WhorlDeflectedPart`; details in TODO.md).
+- [x] 🆕 `[design]` **Devoured non-stone real items obliterated** — RULED KEPT 2026-07-23 ("you deserve
+  to find out"); rider BUILT: ALL devoured grenades now detonate at the defender, not just mod stones.
 - [x] 🆕 `[polish]` **Whorl verb conjugation** — FIXED + DEPLOYED 2026-07-23 (all nine call sites,
   verbs pre-conjugated + `Actor:` → `Source:`; full diagnosis in TODO.md). `[verify]` in-game reads.
-- [ ] 🆕 `[design]` **Ricochet has no VFX** — hits resolve invisibly. Acceptable for release?
+- [x] 🆕 `[design]` **Ricochet VFX** — RULED cheap-particle-line + BUILT + DEPLOYED 2026-07-23
+  (staggered gravel blips + endpoint dust puff); richer animations flagged for a later pass.
 - [ ] 🆕 `[ratify]` **Whorl DRAFT texts** — "The whorl thickens.", ricochet range 5, beam-scatter
   verb "scatter", both whorl effect-description branches, reabsorb message "You return the stone
   to the earth."
-- [ ] 📜 `[design]` **Resonant whorl DV bonus provisional** — shipped +2/+3 DV; user floated +2/+4.
-  "Testing decides" — testing has happened; rule it.
-- [ ] 🆕 `[design]` **Mullstone refresh dial** — 25% per ability (base default, felt like a no-op in
-  play) vs `ChancePerAbility="100"`. One attribute.
+- [x] 📜 `[design]` **Resonant whorl DV bonus** — RULED +2/+4 + BUILT + DEPLOYED 2026-07-23
+  ("DV is less valuable than AV so you need more to compensate").
+- [x] 🆕 `[design]` **Mullstone refresh dial** — RULED guarantee-exactly-ONE + BUILT + DEPLOYED
+  2026-07-23 (new `Cleo_TerraFirma_RefreshOneCooldownOnEat` part; 100% "vastly overcorrecting").
 - [x] 📜 `[polish]` **Bespoke Attune Stones icon — LANDED + WIRED + DEPLOYED 2026-07-23** (user art,
   `abil_attunestone.png`, 16x24, house black-main/white-detail palette; moved into `Textures/Abilities/`,
   `UITile` at `Abilities.xml:35` repointed, cyan C/c mapping kept). Single sprite for now — user may
