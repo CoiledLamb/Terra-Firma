@@ -25,7 +25,7 @@ namespace XRL.World.Effects
 	public class Cleo_TerraFirma_GravelWhorl : Effect
 	{
 		private const string DEBUG_CONTEXT = "GVW";
-		private const int RICOCHET_RANGE = 5; // DRAFT (carom line length)
+		private const int RICOCHET_RANGE = 5; // RATIFIED 2026-07-23 (carom line length; half EB throw range, a hair over the caromcobble's 4-cell legs)
 
 		/// <summary>
 		/// The chance for an incoming deflectable projectile to be deflected.
@@ -56,11 +56,12 @@ namespace XRL.World.Effects
 
 		public override string GetDetails()
 		{
-			// DRAFT text (outcome clause added with the three-stage ruling; beam-scatter clause
-			// with the RefractLight upgrade, both 2026-07-22)
+			// RATIFIED 2026-07-23 (tail reworded same day to kill the remains/remain doubling).
+			// FLAGGED for the text pass: user dislikes the resonant branch's dashes -- both
+			// descriptions are candidates for a rewrite as close to base-game language as possible.
 			if (Resonant)
-				return $"Sheathed in keening gravel. {DeflectChance}% chance to deflect light-based projectiles -- devoured, swatted aside, or sent careening -- and to scatter laser beams. Physical projectiles pass through. Effect remains while stones remain in reserve.";
-			return $"Sheathed in whorling gravel. {DeflectChance}% chance to deflect physical projectiles: devoured, swatted aside, or sent careening. Stones devoured feed the reserve. Lasers and other energy attacks pass through. Effect remains while stones remain in reserve.";
+				return $"Sheathed in keening gravel. {DeflectChance}% chance to deflect light-based projectiles -- devoured, swatted aside, or sent careening -- and to scatter laser beams. Physical projectiles pass through. Lasts while stones remain in reserve.";
+			return $"Sheathed in whorling gravel. {DeflectChance}% chance to deflect physical projectiles: devoured, swatted aside, or sent careening. Stones devoured feed the reserve. Lasers and other energy attacks pass through. Lasts while stones remain in reserve.";
 		}
 
 		public override bool UseStandardDurationCountdown() => false;
@@ -124,7 +125,7 @@ namespace XRL.World.Effects
 			{
 				Helpers.VerifyLog("GVW", $"BEAM SCATTER: resonant whorl refracted a Lase-type beam (chance={DeflectChance}%)");
 				E.SetParameter("By", Object);
-				E.SetParameter("Verb", "scatter"); // DRAFT
+				E.SetParameter("Verb", "scatter"); // RATIFIED 2026-07-23 (engine default "refract" is mirror-flavored; gravel scatters)
 				return false;
 			}
 			return base.FireEvent(E);
@@ -234,7 +235,7 @@ namespace XRL.World.Effects
 					eb.SyncWhorl();
 					Helpers.VerifyLog("GVW", $"devour: plain stone {projectile.Blueprint} fed the reserve -> charges now {eb.Charges}");
 					if (Object.IsPlayer())
-						AddPlayerMessage("The whorl thickens."); // DRAFT
+						AddPlayerMessage("The whorl thickens."); // RATIFIED 2026-07-23 ("churns" floated and withdrawn: thickens carries the growth)
 				}
 				else
 					Helpers.VerifyLog("GVW", $"devour: plain stone {projectile.Blueprint}, NO charge gained (reserve full or no EB part)");

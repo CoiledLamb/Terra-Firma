@@ -20,9 +20,10 @@ number/text awaiting blessing · `[polish]`/`[text]` writing or cleanup work · 
   verbs pre-conjugated + `Actor:` → `Source:`; full diagnosis in TODO.md). `[verify]` in-game reads.
 - [x] 🆕 `[design]` **Ricochet VFX** — RULED cheap-particle-line + BUILT + DEPLOYED 2026-07-23
   (staggered gravel blips + endpoint dust puff); richer animations flagged for a later pass.
-- [ ] 🆕 `[ratify]` **Whorl DRAFT texts** — "The whorl thickens.", ricochet range 5, beam-scatter
-  verb "scatter", both whorl effect-description branches, reabsorb message "You return the stone
-  to the earth."
+- [x] 🆕 `[ratify]` **Whorl DRAFT texts — ALL RATIFIED 2026-07-23** ("The whorl thickens.", ricochet
+  range 5, verb "scatter", reabsorb message; description tails reworded to "Lasts while stones
+  remain in reserve."). **Carry-forward flag:** both effect-description branches earmarked for a
+  base-game-voice rewrite at the text pass (user dislikes the resonant dashes).
 - [x] 📜 `[design]` **Resonant whorl DV bonus** — RULED +2/+4 + BUILT + DEPLOYED 2026-07-23
   ("DV is less valuable than AV so you need more to compensate").
 - [x] 🆕 `[design]` **Mullstone refresh dial** — RULED guarantee-exactly-ONE + BUILT + DEPLOYED
@@ -33,8 +34,8 @@ number/text awaiting blessing · `[polish]`/`[text]` writing or cleanup work · 
   double back with a second state; if so, adopt the Take Stones two-line `State="ToggleOn"` idiom.
   `[verify]` icon renders on the ability bar next boot (flip to `Foreground="c" Detail="C"` if the
   bright/dark emphasis reads inverted).
-- [ ] 🆕 `[ratify]` **GasBelly cadence drift** — vents every ~10–11 turns vs the specced 8. Accept
-  and ratify, or fix the counter. *(Lithovore-adjacent but lives on the EB/whorl code path.)*
+- [x] 🆕 `[ratify]` **GasBelly cadence drift — RATIFIED AS OBSERVED 2026-07-23** (SpewEvery=8 stays;
+  "1 turn only roughly equates to 1 turn" is accepted base-game physics; no text promises a number).
 
 ## Pass 2 — Fissure + the Rock Catalog *(the thickest folder)*
 

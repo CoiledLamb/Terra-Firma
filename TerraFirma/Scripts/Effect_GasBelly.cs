@@ -13,7 +13,10 @@ namespace XRL.World.Effects
 	/// cloud of the stone's own gas at your feet. Conchalk passes "Random" and rolls the aji-conch
 	/// table fresh per emission, as is its whole personality. Gas does not discriminate; neither do
 	/// your insides.
-	/// Numbers (all DRAFT): spew every 8 turns, density 30 (between the step-proc 40 and nothing).
+	/// Numbers: SpewEvery=8 RATIFIED 2026-07-23 with its observed ~10-11-real-turn cadence -- the
+	/// counter ticks the effect clock, not literal turns, and "1 turn only roughly equates to 1
+	/// turn" is accepted base-game physics (user). Density 30 still DRAFT (between step-proc 40
+	/// and nothing); name "roiling innards" rides the Pass 3 round-dial sweep.
 	/// Re-eating refreshes/extends rather than stacking; the newest stone's gas takes over.
 	/// </summary>
 	[Serializable]

@@ -212,7 +212,7 @@ namespace XRL.World.Parts.Mutation
 				}
 				SyncAbilityName();
 				if (ParentObject.IsPlayer())
-					XDidY(ParentObject, "return", "the stone to the earth", Source: ParentObject); // DRAFT
+					XDidY(ParentObject, "return", "the stone to the earth", Source: ParentObject); // RATIFIED 2026-07-23 (one message for both refund and crumble: the stone leaves you either way)
 			}
 			if (Charges < MaxCharges(Level))
 			{
