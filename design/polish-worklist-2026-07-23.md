@@ -22,8 +22,9 @@ number/text awaiting blessing · `[polish]`/`[text]` writing or cleanup work · 
   (staggered gravel blips + endpoint dust puff); richer animations flagged for a later pass.
 - [x] 🆕 `[ratify]` **Whorl DRAFT texts — ALL RATIFIED 2026-07-23** ("The whorl thickens.", ricochet
   range 5, verb "scatter", reabsorb message; description tails reworded to "Lasts while stones
-  remain in reserve."). **Carry-forward flag:** both effect-description branches earmarked for a
-  base-game-voice rewrite at the text pass (user dislikes the resonant dashes).
+  remain in reserve."). **Carry-forward flag (WIDENED 2026-07-23): ALL mutation and description
+  text mod-wide is earmarked for the base-game-voice standard at the final text pass** (trigger
+  was the resonant dashes, but the mandate is "as close to base game language as possible" everywhere).
 - [x] 📜 `[design]` **Resonant whorl DV bonus** — RULED +2/+4 + BUILT + DEPLOYED 2026-07-23
   ("DV is less valuable than AV so you need more to compensate").
 - [x] 🆕 `[design]` **Mullstone refresh dial** — RULED guarantee-exactly-ONE + BUILT + DEPLOYED
