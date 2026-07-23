@@ -28,6 +28,9 @@ number/text awaiting blessing · `[polish]`/`[text]` writing or cleanup work · 
 - [ ] 🆕 `[design]` **Mullstone refresh dial** — 25% per ability (base default, felt like a no-op in
   play) vs `ChancePerAbility="100"`. One attribute.
 - [ ] 📜 `[polish]` **Bespoke Attune Stones icon** — cyan-tinted takestones tile placeholder.
+  **ART EXISTS (user, 2026-07-23), pending file hand-off** — drop it in `TerraFirma/Textures/Abilities/`
+  (suggest `abil_attunestones.png`) and the wiring is one line: the `UITile` at `Abilities.xml:35`.
+  If it's an on/off pair, use the Take Stones two-line `State="ToggleOn"` idiom instead.
 - [ ] 🆕 `[ratify]` **GasBelly cadence drift** — vents every ~10–11 turns vs the specced 8. Accept
   and ratify, or fix the counter. *(Lithovore-adjacent but lives on the EB/whorl code path.)*
 
