@@ -49,6 +49,8 @@
   .vchip.pass    { color: #fff; background: var(--accent); }
   .vchip.partial { color: #1c1c1c; background: var(--eyes); }
   .vchip.fail    { color: #fff; background: #c0392b; }
+  .vchip.deferred{ color: var(--dim); border: 1px solid var(--dim); }
+  .vnote.deferred{ color: var(--dim); }
   .vnote { font-size: 13px; margin-top: 3px; color: var(--accent); }
   .vnote.partial { color: var(--eyes); }
   .vnote.fail { color: #c0392b; }
@@ -186,6 +188,8 @@ const VERDICTS = {
   "fis-tier":     {status:"partial", note:"First live cast of the realigned system, to spec: eff=5/radius 2/falls 10/spill 20%/seam rolled; seam batching visible (7 of 12 = the seam), 2 spill echoes, tier spread matches ceil(eff/2)±2, and the surface stalactite->stalagmite swap fired. Second cast rolled a DIFFERENT seam (fresh stratum per collapse, as ruled) — a statuette seam that dropped nine living baboons (flagged for scale ruling). Depth scaling is the separate fis-depth item."},
   "form-baboon":  {status:"partial", note:"LOG HALF DONE: a statuette expired live — 'lifespan spent -> BaboonFigurineItem; spilling 1 carried item(s)' (the TimedForm arc + the new spill count both working). Eyeball half: the figurine grants baboon rep (AddsRep 200 DRAFT) — check the reputation screen near baboons."},
   "gaze-dc":      {status:"pass", note:"Base DC 12 at Lv1 = the rebalanced 11+Lv formula live, +1-per-fail escalation visible tick by tick (12->21 over a death spiral). Our own GAZE logs render the show-save-rolls check redundant."},
+  "gaze-dead":    {status:"deferred", note:"RULED OUT OF THIS PASS (user 2026-07-24): no NPC has Gorgon's Gaze yet — the dead-gorgon release needs an NPC caster killed mid-channel. Deferred to the creatures/quarriers workstream (same box as the parked LOS-break dial). The self-recede code path exists and is instrumented for when they arrive."},
+  "gaze-stun":    {status:"deferred", note:"RULED OUT OF THIS PASS (user 2026-07-24): same gate — a stunned-caster test needs an NPC gorgon to stun. Deferred to the creatures/quarriers workstream."},
   "gaze-mark":    {status:"pass", note:"ALL THREE channel endings witnessed in one burst: escape at 6 fails -> stone-mark applied (500 rds); 10 fails -> PETRIFIED (statue + entombed possessions); clean 3-success escape at 2 fails -> correctly NO mark. Success ladder (pin release / slow clear / break) fired in order every time. The composite redesign is fully proven."},
   "rock-streak":  {status:"partial", note:"NPC thrower + accuracy lend/return CONFIRMED. RE-EQUIP FIX FAILED player testing (user flag) — Check() dispatches only to handlers; the engine's find-in-bag-and-equip is a protected method around it. Corrected fix shape recorded in TODO for the batch (the 'behaviorally proven' call was wrong: NPC back-to-back flights were a slot stack). Remaining: the re-equip re-fix, whorl vs incoming flight, render modes, save/load."},
   "eb-reabsorb":  {status:"pass", note:"Repeated live: unequipped sculpted stones reabsorbed with charge refunded (now N) + whorl sync following the reserve each time."},
@@ -210,7 +214,7 @@ const filters = ["All", "LOG", "EYES/EARS", "Remaining", ...groups];
 function save() { localStorage.setItem(KEY, JSON.stringify(state)); }
 
 function isDone(id) {
-  return !!state[id] || (VERDICTS[id] && VERDICTS[id].status === "pass");
+  return !!state[id] || (VERDICTS[id] && (VERDICTS[id].status === "pass" || VERDICTS[id].status === "deferred"));
 }
 
 function visible(it) {
@@ -245,7 +249,7 @@ function render() {
     const body = document.createElement("div");
     const tagStr = badge === "LOG" && tag && tag !== "—" ? ' <span class="tag">[' + tag + ']</span>' : "";
     const vchip = v ? ' <span class="vchip ' + v.status + '">' +
-        (v.status === "pass" ? "✔ LOG-CONFIRMED" : v.status === "partial" ? "◐ PARTIAL" : "✘ FAILED") + '</span>' : "";
+        (v.status === "pass" ? "✔ LOG-CONFIRMED" : v.status === "partial" ? "◐ PARTIAL" : v.status === "deferred" ? "◌ DEFERRED" : "✘ FAILED") + '</span>' : "";
     const vnote = v ? '<div class="vnote ' + v.status + '">' + v.note + '</div>' : "";
     body.innerHTML = '<div class="t">' + title + ' <span class="badge ' + badge + '">' + badge + '</span>' + tagStr + vchip + '</div>' +
                      '<div class="d">' + desc + '</div>' + vnote;

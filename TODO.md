@@ -71,8 +71,8 @@ Working list for finishing the mod. Update as things land.
   > Cooldown: {{rules|80}} rounds
 
 ### Open bugs / verifications
-- [ ] `[bug?]` `[verify]` **Dead-gorgon trap:** if the caster dies mid-gaze, `TickGaze` stops firing and nothing sets the `Petrifying` effect to receding — the effect doesn't count down while active (`UseStandardDurationCountdown() => !Active`), so the victim may stay movement-locked + quickness-drained permanently. Verify in-game (kill caster mid-channel); fix shape: effect self-cancels to receding when `Initiator` is invalid/dead, checked in its own `EndTurnEvent`. Fold into the composite implementation.
-- [ ] `[verify]` Stunned/confused/asleep caster: Sunder Mind explicitly breaks its channel on such effects; Gorgon's has no equivalent check — depends on whether skipped turns register as non-pass energy use. Test in-game; add an explicit check if a stunned gorgon keeps gazing.
+- [ ] `[bug?]` `[verify]` **Dead-gorgon trap — DEFERRED FROM THE VERIFY PASS (user ruling 2026-07-24: "no NPCs have gorgon's gaze, so we can flag those for not needing verification right now"):** the fix (effect self-recedes when `Initiator` invalid, own EndTurnEvent) is BUILT and instrumented (`GAZE DEAD-GORGON RELEASE` line); it just cannot fire until an NPC gorgon exists to kill mid-channel. Verify lands with the creatures/quarriers workstream (same box as the parked LOS-break dial). Original diagnosis kept: if the caster dies mid-gaze, `TickGaze` stops firing and the `Petrifying` effect doesn't count down while active.
+- [ ] `[verify]` **Stunned/confused/asleep caster — DEFERRED FROM THE VERIFY PASS (same 2026-07-24 ruling, same gate):** needs an NPC gorgon to stun. Sunder Mind explicitly breaks its channel on such effects; Gorgon's has no equivalent check — test when NPC gorgons exist; add an explicit check if a stunned gorgon keeps gazing.
 - [ ] `[verify]` Confirm Willpower mod lands in the save DC (enable the show-save-rolls debug option, gaze once, read the log).
 
 ### Held levers — ALL RESOLVED 2026-07-23 (the Pass 5 sitting)
