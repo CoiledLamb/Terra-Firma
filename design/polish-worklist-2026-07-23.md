@@ -71,8 +71,13 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
   size/description reading larger, crush optionally up.
 - [ ] 🆕 `[design]` **Pool-volume audit** — brine geode's `SaltyWaterPuddle` is 500 drams (renders
   "pool"); audit SlimePuddle + deep-stone pools; user floated step = splash vs break = full spill.
-- [ ] 🆕 `[design]` **Aegischist thrown = impassable cage** — bubble ring around the victim on hits
-  (step recipe), wall line demoted to misses; check forcefield owner-pass semantics + partial-cage gaps.
+- [x] 🆕 `[design]` **Aegischist thrown = impassable cage — BUILT + DEPLOYED 2026-07-23.** Hits cage
+  the victim (bubble-shard ring, shared `PlaceForceRing`); misses keep the wall line. Both recon
+  questions answered by decomp: `Unwalkable` forcefields reject EVERYONE (no owner-pass leak —
+  the prisoner can't slip out), and partial cages against walls/bystanders accepted (the wall is
+  part of the cage). Ratify rider: cage duration = the bubble shard's 12 rounds (step parity;
+  arguably the full-strength channel deserves more — DRAFT). `[verify]` thrown hit → ring closes,
+  victim trapped; miss → wall line at landing.
 - [ ] 🆕 `[design]` **Drainstone vs inorganics** — attach-but-no-leech (user lean), still withers dry
   at duration's end; distinct endings: gorged burst ("popping like a blood balloon" / "finally
   bursting, sated") vs starved dry crumble. Detection: NoBleed / mirror Syphon Vim's gating.

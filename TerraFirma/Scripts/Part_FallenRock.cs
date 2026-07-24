@@ -857,10 +857,24 @@ namespace XRL.World.Parts
 					if (GameObject.Validate(ref victim) && GameObject.Validate(ref source) && victim.Brain != null)
 						victim.ApplyEffect(new Cleo_TerraFirma_Enamored(Math.Max(1, amount), source), source);
 					break;
-				case "ForceWall": // shieldstone thrown: a short line of force across the landing cell, random orientation; detail = blueprint
+				case "ForceWall": // aegischist thrown (cage RULED 2026-07-23): a HIT closes an impassable
+				                  // ring around the victim -- the step recipe's bubble, and a true prison:
+				                  // the shards' base Forcefield is Unwalkable, whose CanPass rejects
+				                  // EVERYONE regardless of owner (decomp-verified; the old worry about
+				                  // owner-pass leaks is moot). A MISS keeps the original terrain-denial
+				                  // wall line at the landing cell. Cage blueprint = StepPayloadDetail (the
+				                  // bubble shard) when set, else detail. Partial cages against walls and
+				                  // bystanders accepted: the wall is part of the cage.
 				{
 					if (detail.IsNullOrEmpty())
 						break;
+					if (GameObject.Validate(ref victim) && victim.CurrentCell != null)
+					{
+						string cageBp = StepPayloadDetail.IsNullOrEmpty() ? detail : StepPayloadDetail;
+						Helpers.VerifyLog("ROCK", $"aegischist hit: force cage closes around {victim.Blueprint}");
+						PlaceForceRing(victim.CurrentCell, cageBp);
+						break;
+					}
 					int dir = Stat.Random(0, 3);
 					int ddx = dir == 0 ? 1 : dir == 1 ? 0 : 1, ddy = dir == 0 ? 0 : dir == 1 ? 1 : (dir == 2 ? 1 : -1);
 					Zone z = C.ParentZone;
@@ -874,19 +888,25 @@ namespace XRL.World.Parts
 				}
 				case "ForceBubble": // shieldstone stepped on: force closes around whoever set it off; detail = blueprint
 				{
-					if (detail.IsNullOrEmpty())
-						break;
-					Cell around = victim?.CurrentCell ?? C;
-					foreach (Cell bc in around.GetLocalAdjacentCells())
-					{
-						if (!bc.IsSolid() && bc.GetCombatTarget(ParentObject, IgnoreFlight: true, IgnoreAttackable: false, IgnorePhase: false, 0, null, null, null, null, null, AllowInanimate: false) == null)
-							bc.AddObject(GameObject.Create(detail));
-					}
+					if (!detail.IsNullOrEmpty())
+						PlaceForceRing(victim?.CurrentCell ?? C, detail);
 					break;
 				}
 			}
 			if (consumed)
 				ParentObject.Destroy(null, Silent: true);
+		}
+
+		/// <summary>A ring of force shards in the 8 cells around <paramref name="around"/>, skipping
+		/// solid and combatant-occupied cells (partial cages accepted: the wall is part of the cage).
+		/// Shared by the aegischist's step bubble and its thrown-hit cage.</summary>
+		private void PlaceForceRing(Cell around, string blueprint)
+		{
+			foreach (Cell bc in around.GetLocalAdjacentCells())
+			{
+				if (!bc.IsSolid() && bc.GetCombatTarget(ParentObject, IgnoreFlight: true, IgnoreAttackable: false, IgnorePhase: false, 0, null, null, null, null, null, AllowInanimate: false) == null)
+					bc.AddObject(GameObject.Create(blueprint));
+			}
 		}
 	}
 }
