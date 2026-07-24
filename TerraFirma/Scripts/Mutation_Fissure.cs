@@ -115,7 +115,9 @@ namespace XRL.World.Parts.Mutation
 			return PopulationManager.RollOneFrom(GetTierTable(RollTier(EffLevel)))?.Blueprint;
 		}
 
-		public static int GetCooldown(int Lv) => Math.Max(105 - 5 * Lv, 40);
+		// RE-RATIFIED 2026-07-24 (was 105-5L floor 40 = ~4x Burgeoning's max-level 15; user: "2x as
+		// slow at max instead"): same opening rhythm, lands at 30 = exactly 2x at Lv10
+		public static int GetCooldown(int Lv) => Math.Max(105 - 8 * Lv, 30);
 
 		/// <summary>Deeper casts spread farther (depth-quantity ruling 2026-07-23): filler-only growth,
 		/// structurally outward, frozen at SPILL_MAX so the deepest strata don't drown the disk.</summary>

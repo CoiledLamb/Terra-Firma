@@ -48,8 +48,9 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
   (c) +8 reached at Z50, flat below (old "engine floor Z=50" decomp claim struck — wrong).
 - [x] 📜 `[design]` **Prime falls scale?** — ABSORBED by the restructure (moot under the
   Burgeoning ±spread; primes' own fate is an open restructure ruling).
-- [ ] 📜 `[ratify]` **Carried-over v1 numbers** — cooldown 105−5×Lv floor 40, cost 3 MP — never
-  explicitly signed.
+- [x] 📜 `[ratify]` **Carried-over v1 numbers — RULED 2026-07-24:** cost 3 MP ratified; cooldown
+  RESHAPED to `105 − 8×Lv, floor 30` ("2x as slow at max instead of 4x" vs Burgeoning's 15) —
+  BUILT + DEPLOYED, level text renders the new value automatically.
 - [ ] 📜 `[polish]` **Multi-fall sound stack** — if per-cell slams are too loud, keep only the cast slam.
 
 **Strange rock (one-at-a-time bundle, user-held):**
@@ -99,14 +100,21 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
 - [ ] 🆕 `[design]` **Allied geyser hit the player once** — watch item; audit target selection if it recurs.
 - [ ] 📜 `[design]` **Mutating no-ops silently on robots/purestock** — "(acceptable?)" needs an answer.
 
-**Rock-catalog ratifications (Claude numbers awaiting blessing):**
-- [ ] 📜 `[ratify]` **HoldChance 25** (the one fragility dial) · **AcidResistance −50** stone-body
-  weakness · **ape statue PERMANENT** (timed 500–1000 fallback if vetoed) · **omnigeyser stats**
-  (L8/16/24, HP 50/100/175, AV 4/6/8…) · **figurine range numbers** (+5 range / 50 accuracy) ·
-  **drainstone numbers** (1d3/round, 15/7 rounds, band 3 w6) · **spiderweb numbers** (3 webs,
-  step-Stuck 12) · **phosphorescent twin's undocumented 25% Luminous step proc** · **fungal tint
-  drafts** · **caromcobble full number/text set** · 🆕 **farflint StepChance 25** · 🆕 **pebble
-  weight 0 blessing** · 🆕 **half-snack satiety knock-on** (bless or re-anchor part-based).
+**Rock-catalog ratifications — SWEEP RUN 2026-07-24, everything ratified except two revisions:**
+- [x] 📜 `[ratify]` RATIFIED: HoldChance 25 · AcidResistance −50 · omnigeyser stats · figurine
+  +5/50 · drainstone dice/durations (band placement moot post-realignment) · spiderweb 3/12 ·
+  phosphorescent 25% step proc · fungal tints · caromcobble full set · farflint 25 · pebble
+  weight 0 · half-snack satiety · aegischist cage duration 12. **REVISED + BUILT + DEPLOYED:
+  ape statue PERMANENT → lifespan 500–1000 then crumbles to devourable rubble; baboon statuette
+  gains the same lifespan and stiffens into the NEW `BaboonFigurineItem` (AddsRep Baboons 200
+  DRAFT, Commerce 30) — the catalog's original rep half finally lands via new generic
+  `Part_TimedForm` (pocket stones spill on expiry). The pocket-form pass still owes item→creature.**
+  `[verify]` ape crumbles to rubble at expiry; statuette stiffens to figurine + spills stones;
+  figurine grants baboon rep.
+- [ ] 📜 `[design]` **PARKED CONVERSATION (user, 2026-07-24): hold rate / fragility / natural
+  expiry as one system** — "interested in a conversation about hold rate, fragility, and natural
+  expiry at a certain point, but that can wait." The dials: HoldChance 25, DullAfter 1000–2500,
+  TimedForm 500–1000, healstone HoldChance 0, caromcobble 100.
 - [ ] 🆕 `[design]` **Stale +100 throw accuracy on the playtest character** — keep the god-arm or
   strip via one-line wish next session.
 

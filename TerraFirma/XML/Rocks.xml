@@ -499,6 +499,19 @@
 	     recipe). Albino ape stats copied onto BaseApe (not inherited from "Albino ape"; leaves the Albino
 	     mutation and ape corpse behind). Permanent: band 3 ruling, "it can live forever depending on what
 	     band it's in" (user, 2026-07-22). -->
+	<!-- The statuette's afterlife (RULED 2026-07-24): what a spent baboon statuette stiffens into.
+	     AddsRep = the catalog's original "gives rep like a neck ring/figure" half, finally built;
+	     Value 200 DRAFT (trinket class). The parked pocket-form pass still owes the OTHER direction
+	     (item back to creature). -->
+	<object Name="Cleo_TerraFirma_BaboonFigurineItem" Inherits="Trinket">
+		<part Name="Render" DisplayName="baboon figurine" Tile="Assets_Content_Textures_Creatures_sw_baboon.bmp" RenderString="]" ColorString="&amp;y" DetailColor="K" />
+		<part Name="Description" Short="A baboon no taller than a knee, carved by patient hands. It holds very still, the way stone remembers to." /> <!-- DRAFT -->
+		<part Name="Physics" Weight="5" />
+		<part Name="Commerce" Value="30" />
+		<part Name="AddsRep" Faction="Baboons" Value="200" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
+
 	<object Name="Cleo_TerraFirma_Rock_ApeStatue" Inherits="BaseApe">
 		<part Name="Render" DisplayName="ape statue" RenderString="a" Tile="Creatures/albino-ape.png" ColorString="&amp;y" DetailColor="K" />
 		<part Name="Description" Short="An ape rendered in stone by no sculptor anyone can name. It moves like it remembers being one or the other." /> <!-- DRAFT -->
@@ -516,6 +529,9 @@
 		<part Name="Corpse" CorpseChance="0" />
 		<part Name="MentalShield" />
 		<part Name="NoBleed" />
+		<!-- RULED 2026-07-24 (revises the PERMANENT ratify: "ape can have cooldown"): a lifespan,
+		     then it crumbles back to devourable rubble where it stands -->
+		<part Name="Cleo_TerraFirma_TimedForm" Duration="500-1000" ReplacementBlueprint="Cleo_TerraFirma_Rock_Rubble" ExpireVerb="crumble" ExpireRest="back to rubble." />
 		<tag Name="DeathSounds" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_die" />
 		<tag Name="TakeDamageSound" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_hurt" />
 		<tag Name="AmbientIdleSound" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_idle" />
@@ -558,6 +574,10 @@
 		<inventoryobject Blueprint="Small Stone" Number="5" />
 		<inventoryobject Blueprint="@Cleo_TerraFirma_ThrowableRocks1" Number="1-2" />
 		<part Name="Cleo_TerraFirma_StoneScavenger" />
+		<!-- RULED 2026-07-24 ("same for baboon... when baboon expires, maybe make it into that rep
+		     granting figure"): lifespan, then it stiffens into the AddsRep figurine item (the
+		     catalog's original rep half, finally landing); pocket stones spill on expiry -->
+		<part Name="Cleo_TerraFirma_TimedForm" Duration="500-1000" ReplacementBlueprint="Cleo_TerraFirma_BaboonFigurineItem" ExpireVerb="stiffen" ExpireRest="back into a lifeless figurine." />
 		<intproperty Name="ThrowRangeBonus" Value="5" />
 		<intproperty Name="CloseThrowRangeAccuracyBonus" Value="50" />
 		<part Name="Corpse" CorpseChance="0" />
