@@ -206,8 +206,10 @@
 		<!-- Rubber rock (RULED 2026-07-22): after every throw resolves - hit or miss, "the rock never
 		     lands where you aimed, ever" - it bounces 2 random-angle ricochet legs (flat d20 vs DV,
 		     its own die per hit) and lands intact. HoldChance 100: rubber does not break, it bounces.
-		     All numbers DRAFT. -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="0" Payload="Ricochet" PayloadDetail="1d4" PayloadAmount="2" PayloadOnThrowHit="true" HoldChance="100" />
+		     Trip-on-step BUILT 2026-07-23 (ruled earlier: house 25 rate, Prone on the stepper via the
+		     StepPayload override; HoldChance 100 means it never breaks underfoot either - a permanent
+		     banana peel is the joke and the joke is intended). All numbers DRAFT. -->
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" StepPayload="Effect" StepPayloadDetail="Prone" Payload="Ricochet" PayloadDetail="1d4" PayloadAmount="2" PayloadOnThrowHit="true" HoldChance="100" />
 		<!-- Lithovore pass: eaten raw = you bounce (involuntary harmless hop, radius 2); cooking via
 		     the Ground_ twin (base rubberLowTier verbatim - congealed rubbergum parity) -->
 		<tag Name="Cleo_TerraFirma_EatenHop" Value="2" />

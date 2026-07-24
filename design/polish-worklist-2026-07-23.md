@@ -76,8 +76,9 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
 - [ ] 🆕 `[design]` **Drainstone vs inorganics** — attach-but-no-leech (user lean), still withers dry
   at duration's end; distinct endings: gorged burst ("popping like a blood balloon" / "finally
   bursting, sated") vs starved dry crumble. Detection: NoBleed / mirror Syphon Vim's gating.
-- [ ] 🆕 `[design]` **Caromcobble trip-on-step** — ruled, unbuilt: StepChance 25 + `Effect/Prone`,
-  HoldChance stays 100. Numbers to ratify at build.
+- [x] 🆕 `[design]` **Caromcobble trip-on-step — BUILT + DEPLOYED 2026-07-23** (StepChance 25 +
+  Prone via the StepPayload override; HoldChance 100 = a permanent banana peel, intended).
+  Numbers ride the ratify pile. `[verify]` walk an enemy over it → 25% prone, rock survives.
 - [ ] 🆕 `[design]` **StoneStep coverage** — three candidates, decide together: ape statue (the
   acid-bane A/B evidence), Stoneshaper statues (C# — runtime creation path), future stonefrog.
 - [ ] 🆕 `[design]` **Stone creatures catch fungal infections** — keep (stone grows gills) vs immunize.
