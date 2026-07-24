@@ -174,7 +174,12 @@ three of four closed, BUILT + DEPLOYED:**
 - [ ] 📜 `[design]` **Pass-2 bespoke cooking parts** — tanglelith major-stability, ash weak-armor
   (+1 AV unit), shivshale weak-agility, oxidian rust domain (needs real design), waxshroom's wax
   definition (blocked on you inventing what eating wax does), shieldstone force-bubble action;
-  examine gyrestone-spacetime / drainstone-HP / gossamarl-Spinnerets keep-or-upgrade calls.
+  examine gyrestone-spacetime / drainstone-HP / gossamarl-Spinnerets keep-or-upgrade calls;
+  🆕 **deep galvena stronger electric domain (user flag 2026-07-24: "deep galvena needs a
+  stronger electric cooking effect")** — its powder currently carries the same plain
+  `type="electric"` as regular galvena's, so the deep stone cooks identically to its T1 cousin;
+  wants a bespoke stronger-electric tier (the ash `armorMinor` precedent, inverted: base domain
+  exists, the mod builds the heavy sibling).
 - [ ] 📜 `[design]` **Cooking umbrellas** — the mutation-domain slate (which mutations, slot shapes,
   packaging 2–3 domains vs one, carriers) and the Tier-2 `stone` domain with the ceiling-drop
   signature action; Minor-vs-full tiering lever; six flags on the pass-1 assignment (twins'
