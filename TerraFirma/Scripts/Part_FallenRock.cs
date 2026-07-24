@@ -112,6 +112,11 @@ namespace XRL.World.Parts
 		[NonSerialized]
 		private bool FiredOnHit;
 
+		/// <summary>Set on the use-path destruction sites (fragility breaks, ConsumedOnStep) so the
+		/// death-spill doesn't double the puddle a payload already made this use.</summary>
+		[NonSerialized]
+		private bool SuppressDeathSpill;
+
 		[NonSerialized]
 		private bool ThrowFXDone; // sting + byproducts fired for the throw in flight (hit path); AfterThrown covers misses and resets
 
@@ -177,9 +182,35 @@ namespace XRL.World.Parts
 				ID != GetAdjacentNavigationWeightEvent.ID &&
 				ID != AfterThrownEvent.ID &&
 				ID != GetInventoryActionsAlwaysEvent.ID &&
+				ID != BeforeDestroyObjectEvent.ID &&
 				ID != PooledEvent<GetThrowProfileEvent>.ID)
 				return ID == PooledEvent<InterruptAutowalkEvent>.ID;
 			return true;
+		}
+
+		/// <summary>Spill on destruction (RULED 2026-07-24): a liquid rock that DIES releases what it
+		/// held -- burned in your pack, caught in a blast, shot on the ground, the brine gets out.
+		/// Deliberately NOT on obliteration (a whorl-devoured stone was drunk by the mass; decay
+		/// crumbles dry -- the potency left with the dull) and NOT on use-path breaks (the payload
+		/// already puddled this use; see SuppressDeathSpill).</summary>
+		public override bool HandleEvent(BeforeDestroyObjectEvent E)
+		{
+			if (!E.Obliterate && !SuppressDeathSpill)
+			{
+				string puddle = Payload == "Liquid" ? PayloadDetail : (StepPayload == "Liquid" ? StepPayloadDetail : null);
+				if (!puddle.IsNullOrEmpty())
+				{
+					Cell cell = ParentObject.GetCurrentCell();
+					if (cell != null)
+					{
+						Helpers.VerifyLog("ROCK", $"death spill: {ParentObject.Blueprint} destroyed -> {puddle} released");
+						if (IComponent<GameObject>.Visible(ParentObject))
+							IComponent<GameObject>.AddPlayerMessage(ParentObject.Does("break") + " open, spilling what it held.");
+						cell.AddObject(GameObject.Create(puddle));
+					}
+				}
+			}
+			return base.HandleEvent(E);
 		}
 
 		public override bool HandleEvent(GetThrowProfileEvent E)
@@ -312,7 +343,10 @@ namespace XRL.World.Parts
 				bool holds = HoldChance.in100();
 				Helpers.VerifyLog("ROCK", $"fragility (throw): {ParentObject.Blueprint} {(holds ? $"HOLDS (chance {HoldChance})" : $"BREAKS (chance {HoldChance})")}");
 				if (!holds)
+				{
+					SuppressDeathSpill = true; // the throw's payload already released this use
 					ParentObject.Destroy(null, Silent: true);
+				}
 			}
 			return base.HandleEvent(E);
 		}
@@ -459,7 +493,10 @@ namespace XRL.World.Parts
 					bool holds = HoldChance.in100();
 					Helpers.VerifyLog("ROCK", $"fragility (step): {ParentObject.Blueprint} {(holds ? "HOLDS" : "BREAKS")}");
 					if (!holds)
+					{
+						SuppressDeathSpill = true; // the step payload already released this use
 						ParentObject.Destroy(null, Silent: true);
+					}
 				}
 			}
 			return base.HandleEvent(E);
@@ -892,7 +929,10 @@ namespace XRL.World.Parts
 				}
 			}
 			if (consumed)
+			{
+				SuppressDeathSpill = true; // consumption follows its own payload; no double spill
 				ParentObject.Destroy(null, Silent: true);
+			}
 		}
 
 		/// <summary>A ring of force shards in the 8 cells around <paramref name="around"/>, skipping
