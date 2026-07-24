@@ -814,7 +814,7 @@
 		<!-- Lithovore pass: HP domain (jerky family - the life-drinker feeds you); eaten raw = it drinks
 		     on the way down (DRAFT dice; a true inner latch is eat-pass 2 work) -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
-		<tag Name="Cleo_TerraFirma_EatenDrain" Value="7" /> <!-- RE-RULED 2026-07-24: the drain goes NOWHERE (StoneSiphon effect, flat 2/round pooled in the stone) and bursts back as healing at natural expiry; supersedes the LifeDrain random-drainer version -->
+		<tag Name="Cleo_TerraFirma_EatenDrain" Value="10" /> <!-- RE-RULED 2026-07-24, numbers "1d3 for 10 turns": the drain goes NOWHERE (StoneSiphon effect, 1d3/round pooled in the stone) and bursts back as healing at natural expiry; supersedes the LifeDrain random-drainer version -->
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d6" />
 	</object>
 

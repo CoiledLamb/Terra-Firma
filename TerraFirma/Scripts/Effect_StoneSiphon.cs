@@ -1,5 +1,6 @@
 using System;
 using Cleo.TerraFirma.Scripts;
+using XRL.Rules;
 
 namespace XRL.World.Effects
 {
@@ -14,8 +15,8 @@ namespace XRL.World.Effects
 	[Serializable]
 	public class Cleo_TerraFirma_StoneSiphon : Effect
 	{
-		/// <summary>Flat damage per round ("consistent damage" per the ruling). DRAFT: 2.</summary>
-		public int DamagePerRound = 2;
+		/// <summary>Damage die per round (RE-NUMBERED 2026-07-24: "1d3 for 10 turns sounds better", was flat 2 for 7).</summary>
+		public string DrainDie = "1d3";
 
 		/// <summary>Everything the stone has drunk so far; returned in full at natural expiry.</summary>
 		public int TotalDrained;
@@ -25,15 +26,15 @@ namespace XRL.World.Effects
 			DisplayName = "{{r|siphoned}}"; // DRAFT name
 		}
 
-		public Cleo_TerraFirma_StoneSiphon(int Duration, int DamagePerRound) : this()
+		public Cleo_TerraFirma_StoneSiphon(int Duration, string DrainDie) : this()
 		{
 			base.Duration = Duration;
-			this.DamagePerRound = DamagePerRound;
+			this.DrainDie = DrainDie;
 		}
 
 		public override string GetDetails()
 		{
-			return "The swallowed stone drinks " + DamagePerRound + " HP each round. What it takes returns all at once when it is sated."; // DRAFT
+			return "The swallowed stone drinks " + DrainDie + " HP each round. What it takes returns all at once when it is sated."; // DRAFT
 		}
 
 		public override bool UseStandardDurationCountdown() => true;
@@ -45,7 +46,9 @@ namespace XRL.World.Effects
 			GameObject holder = base.Object;
 			if (holder == null || Duration <= 0)
 				return;
-			int drink = DamagePerRound * Math.Max(1, Amount);
+			int drink = 0;
+			for (int i = 0; i < Math.Max(1, Amount); i++)
+				drink += Math.Max(1, DrainDie.RollCached());
 			TotalDrained += drink;
 			Helpers.VerifyLog("LITH", $"siphon: {holder.Blueprint} loses {drink} (pooled {TotalDrained}, {Duration} rounds left)");
 			holder.TakeDamage(drink, "from the stone siphoning within!", "Physical",

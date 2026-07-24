@@ -305,10 +305,10 @@ namespace XRL.World.Parts.Mutation
 				if (int.TryParse(tag, out int drainRounds))
 				{
 					// RE-RULED 2026-07-24 (supersedes the LifeDrain/random-drainer version): the
-					// drain goes NOWHERE -- flat 2/round pooled inside the stone, then everything
+					// drain goes NOWHERE -- 1d3/round pooled inside the stone, then everything
 					// bursts back into the eater when the effect runs its full course. Early
 					// removal returns nothing.
-					actor.ApplyEffect(new XRL.World.Effects.Cleo_TerraFirma_StoneSiphon(Math.Max(1, drainRounds), 2));
+					actor.ApplyEffect(new XRL.World.Effects.Cleo_TerraFirma_StoneSiphon(Math.Max(1, drainRounds), "1d3"));
 				}
 			}
 
