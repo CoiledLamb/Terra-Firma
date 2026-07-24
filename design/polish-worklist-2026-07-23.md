@@ -288,9 +288,10 @@ house rule set mid-session: FLAG mid-session, fix in the post-session batch):**
 - [ ] 🆕 `[design]` **Caromcobble StepChance 25 → higher? (user flag: "could be higher")** —
   re-opens a sweep-ratified number; the peel never breaks so the proc rate is pure zoning
   strength. One XML dial, rule at the batch.
-- [ ] 🆕 `[design]` **Millstone → HOPPER model (user lean: grind from the mill's own inventory,
-  "its normal process")** — also explains the hidden-option flakiness (menu gated on the wheel
-  turning at menu-open). Details + build shape in TODO.md; kitchen pass.
+- [ ] 🆕 `[design]` **Millstone → HOPPER model — RULED (user: "sounds great - menu probably
+  goes")**: mill home becomes hopper-only (stones into its inventory, native powered grind);
+  the mill's menu grind is removed; pestle/campfire homes unchanged. Build at the kitchen
+  pass; shape in TODO.md.
 
 - [x] 📜 `[design]` **NPC-caster gap — RULED batch-now + BUILT + DEPLOYED 2026-07-23** ("let's
   knock calcify off the list"). AI advertises on DEFENSIVE + RETREAT channels only — never
