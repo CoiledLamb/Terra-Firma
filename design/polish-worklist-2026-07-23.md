@@ -292,7 +292,8 @@ three of four closed, BUILT + DEPLOYED:**
 - [ ] 📜 **Parked design budget** — ceiling creatures (your shortlist), wall-growth harvestables,
   stonecarver static content (the lithovore's restaurant), lore items/books, wall kick, Geomancy
   consumable, transmute-gemstone concept, throw-augmenting late-game items; 🆕 geode family
-  (beyond brine geode), 🆕 pour-into-container on the liquid rocks (ties to the pool-volume audit).
+  (beyond brine geode), 🆕 pour-into-container on the liquid rocks (ties to the pool-volume audit),
+  🆕 modular disable options (per-mutation off switches + a stones-off switch; recon notes in TODO).
 
 ## Appendix — remaining verify items (testing leftovers, not polish)
 
