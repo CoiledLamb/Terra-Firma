@@ -70,7 +70,7 @@ namespace XRL.World.Parts.Mutation
 		private const string EAT_COMMAND = "Cleo_TerraFirma_EatStone";
 		private const string DEVOUR_COMMAND = "Cleo_TerraFirma_DevourStatue";
 		private const string STONE_TAG = "Cleo_TerraFirma_IsAnyStone";
-		private const string STRANGE_ROLL_TABLE = "Cleo_TerraFirma_FissureRocks3";
+		private const string STRANGE_ROLL_TABLE = "Cleo_TerraFirma_FissureRocksAny"; // full 9-tier spread (realignment 2026-07-23)
 		private const int STRANGE_ROLL_TRIES = 30;
 		private const int EATEN_ARC_RANGE = 5; // DRAFT (galvena arc reach)
 

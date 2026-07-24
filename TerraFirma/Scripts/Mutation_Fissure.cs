@@ -19,7 +19,12 @@ namespace XRL.World.Parts.Mutation
 	{
 		#region Fields
 		private const string COMMAND_ID = "Cleo_TerraFirma_CommandFissure";
-		private const int SPILL_CHANCE = 20;
+		// base spill; +5 per depth step, frozen at SPILL_MAX (depth-quantity ruling 2026-07-23)
+		private const int SPILL_CHANCE_BASE = 20;
+		private const int SPILL_MAX = 50;
+		// Burgeoning's prime-plant batching read geologically (seam ruling 2026-07-23): one stratum
+		// dominates each collapse -- this share of falls shed the per-cast seam stone
+		private const int SEAM_CHANCE = 50;
 		private const int MAX_RING_RADIUS = 4;
 		// Calcify's verified "large stone impact" -- the collapse slam
 		private const string SLAM_SOUND = "Sounds/Throw/sfx_throwing_stone_large_impact";
@@ -48,8 +53,8 @@ namespace XRL.World.Parts.Mutation
 			return "The earth above you gives way, and its stones come down around you.\n" +
 				"{{rules|" + GetFalls(Level) + "}} rocks fall within {{rules|" + GetRingRadius(Level) + "}} squares of you, crushing whatever they strike for their heft plus {{rules|" + Level + "}}.\n" +
 				"The ceiling nearest you falls thickest and hardest.\n" +
-				"The heaviest {{rules|" + GetPrimeFalls(Level) + "}} falls are drawn from the strongest stratum you can reach; the rest are looser stone.\n" +
-				"The collapse sometimes spreads outward.\n" +
+				"Each collapse favors one seam of stone; about half the falls shed it.\n" +
+				"The collapse sometimes spreads outward. Deeper, it spreads farther.\n" +
 				"Deeper strata shed stronger stone.\n" +
 				"What falls lies where it fell: take it up and hurl it, or leave it underfoot. Your enemies pay fallen rocks no mind. Pocketed too long, a fissure rock crumbles to plain stone.\n" +
 				"Cooldown: {{rules|" + GetCooldown(Level) + "}} rounds";
@@ -91,39 +96,45 @@ namespace XRL.World.Parts.Mutation
 			}
 		}
 
-		/// <summary>How many falls are guaranteed to roll the highest reachable band's exclusive table (user ruling 2026-07-22).</summary>
-		public static int GetPrimeFalls(int Lv) => GetRingRadius(Lv);
-
-		/// <summary>The band-exclusive table for prime falls; below band 2 there is no exclusive tier, so primes roll
-		/// the normal pool. At the deep band (effective 10+) each prime coin-flips between the deep stones and band 3
-		/// (50/50 RULED 2026-07-22: deep stones stay special even at endgame depth) — call per fall, not per cast.</summary>
-		public static string GetPrimeRockTable(int Lv)
+		/// <summary>Burgeoning's tier roll, realigned (RULED 2026-07-23, supersedes bands + primes):
+		/// par = ceil(eff/2), spread rand(-1..+2) per fall — half of all rolls land ABOVE par —
+		/// clamped to the nine tier tables. Effective level tops at 18 (Lv10 + depth cap 8), so
+		/// tier 9 is exactly the deepest strata's par. Primes RETIRED same ruling: they existed to
+		/// patch the old tables' downward skew, and the spread skews up instead.</summary>
+		public static int RollTier(int EffLevel)
 		{
-			if (Lv >= 10)
-				return Stat.Random(0, 1) == 0 ? "Cleo_TerraFirma_FissureRocksBand4New" : "Cleo_TerraFirma_FissureRocksBand3New";
-			if (Lv >= 7)
-				return "Cleo_TerraFirma_FissureRocksBand3New";
-			if (Lv >= 4)
-				return "Cleo_TerraFirma_FissureRocksBand2New";
-			return GetRockTable(Lv);
+			int tier = (int)Math.Ceiling(EffLevel / 2f) + Stat.Random(-1, 2);
+			return Math.Max(1, Math.Min(9, tier));
+		}
+
+		public static string GetTierTable(int Tier) => "Cleo_TerraFirma_FissureTier" + Tier;
+
+		/// <summary>One roll of the tier machinery resolved to a blueprint — seam, falls, and spill all draw from here.</summary>
+		public static string RollRockBlueprint(int EffLevel)
+		{
+			return PopulationManager.RollOneFrom(GetTierTable(RollTier(EffLevel)))?.Blueprint;
 		}
 
 		public static int GetCooldown(int Lv) => Math.Max(105 - 5 * Lv, 40);
 
-		public static string GetRockTable(int Lv) => "Cleo_TerraFirma_FissureRocks" + (Lv >= 10 ? 4 : Lv >= 7 ? 3 : (Lv >= 4 ? 2 : 1));
+		/// <summary>Deeper casts spread farther (depth-quantity ruling 2026-07-23): filler-only growth,
+		/// structurally outward, frozen at SPILL_MAX so the deepest strata don't drown the disk.</summary>
+		public static int GetSpillChance(GameObject who) => Math.Min(SPILL_CHANCE_BASE + 5 * GetDepthBonus(who), SPILL_MAX);
 
 		/// <summary>
 		/// The deeper the strata, the stronger the stone the ceiling sheds (user ruling 2026-07-22).
 		/// Surface is stratum 10 (engine convention: Z > 10 = "the deep underground"); every 5 strata
-		/// below adds +1 effective level for band selection only, capped at +6 (two full bands) — the
-		/// mutation's own numbers (falls, radius, cooldown) never change with depth.
+		/// below adds +1 effective level for tier selection only, capped at +8 — reached at Z50 and
+		/// flat below (RULED 2026-07-23; the strata run far deeper than 50, but the ceiling's
+		/// generosity plateaus). The mutation's own numbers (falls, radius, cooldown) never change
+		/// with depth; spill chance does (see GetSpillChance).
 		/// </summary>
 		public static int GetDepthBonus(GameObject who)
 		{
 			Zone zone = who?.CurrentZone;
 			if (zone == null || zone.IsWorldMap())
 				return 0;
-			return Math.Min(Math.Max((zone.Z - 10) / 5, 0), 6);
+			return Math.Min(Math.Max((zone.Z - 10) / 5, 0), 8);
 		}
 		#endregion
 
@@ -172,21 +183,22 @@ namespace XRL.World.Parts.Mutation
 			else
 				XDidY(ParentObject, "bring", "the ceiling down", "!", ColorAsGoodFor: ParentObject);
 			int effectiveLevel = Level + GetDepthBonus(ParentObject);
-			string fillerTable = GetRockTable(effectiveLevel);
 			int falls = Math.Min(GetFalls(Level), area.Count);
-			int primes = Math.Min(GetPrimeFalls(Level), falls);
-			Helpers.VerifyLog("FIS", $"cast by {ParentObject.Blueprint} Lv{Level} at Z={ParentObject.CurrentZone?.Z}: eff={effectiveLevel} (depth+{GetDepthBonus(ParentObject)}), radius={radius}, falls={falls}, primes={primes}, filler={fillerTable}");
+			int spillChance = GetSpillChance(ParentObject);
+			// the seam (RULED 2026-07-23): one stratum dominates each collapse — rolled once, and
+			// every fall and spill echo coin-flips between the seam stone and a fresh tier roll.
+			// Same-stone falls also stack in the pack: the batching is quality-of-life, not power.
+			string seam = RollRockBlueprint(effectiveLevel);
+			Helpers.VerifyLog("FIS", $"cast by {ParentObject.Blueprint} Lv{Level} at Z={ParentObject.CurrentZone?.Z}: eff={effectiveLevel} (depth+{GetDepthBonus(ParentObject)}), radius={radius}, falls={falls}, spill={spillChance}%, seam={seam ?? "none"}");
 			for (int i = 0; i < falls; i++)
 			{
 				Cell landing = TakeWeightedCell(area, origin, radius);
-				// primes first: the heaviest strata come down before the crumbs. Prime table rolled per
-				// fall — at the deep band each prime coin-flips band 4 vs band 3 (50/50 ruling).
-				DropRock(landing, i < primes ? GetPrimeRockTable(effectiveLevel) : fillerTable, origin, radius, i < primes ? "prime" : "filler");
-				if (SPILL_CHANCE.in100())
+				DropRock(landing, PickFallBlueprint(seam, effectiveLevel), origin, radius, "fall");
+				if (spillChance.in100())
 				{
 					Cell echo = PickSpillCell(origin, landing);
 					if (echo != null)
-						DropRock(echo, fillerTable, origin, radius, "spill"); // one echo, never chained; spread is always filler
+						DropRock(echo, PickFallBlueprint(seam, effectiveLevel), origin, radius, "spill"); // one echo, never chained
 				}
 			}
 			return base.HandleEvent(E);
@@ -265,10 +277,19 @@ namespace XRL.World.Parts.Mutation
 			return Math.Max(Math.Abs(a.X - b.X), Math.Abs(a.Y - b.Y));
 		}
 
-		/// <summary>One rock falls into <paramref name="C"/> from <paramref name="Table"/>: smoke, crush, then the rock itself (or debris, if something solid failed to kill what it landed on).</summary>
-		private void DropRock(Cell C, string Table, Cell origin, int Radius, string FallKind = "?")
+		/// <summary>The seam stone half the time, a fresh tier roll otherwise. Spill echoes draw here
+		/// identically — Burgeoning treats its spread cells the same as its burst cells.</summary>
+		private static string PickFallBlueprint(string seam, int effLevel)
 		{
-			string blueprint = PopulationManager.RollOneFrom(Table)?.Blueprint;
+			if (seam != null && SEAM_CHANCE.in100())
+				return seam;
+			return RollRockBlueprint(effLevel);
+		}
+
+		/// <summary>One rock (<paramref name="Blueprint"/>, pre-rolled by the seam/tier machinery) falls into <paramref name="C"/>: smoke, crush, then the rock itself (or debris, if something solid failed to kill what it landed on).</summary>
+		private void DropRock(Cell C, string Blueprint, Cell origin, int Radius, string FallKind = "?")
+		{
+			string blueprint = Blueprint;
 			if (blueprint == null)
 				return;
 			// spawn geography (user ruling 2026-07-22): under open sky there is no ceiling to shed stalactites --
@@ -276,7 +297,7 @@ namespace XRL.World.Parts.Mutation
 			bool surfaceSwap = blueprint == STALACTITE_BLUEPRINT && (C.ParentZone?.Z ?? 10) <= 10;
 			if (surfaceSwap)
 				blueprint = STALAGMITE_BLUEPRINT;
-			Helpers.VerifyLog("FIS", $"{FallKind} fall @({C.X},{C.Y}) d={ChebyshevDistance(origin, C)} from {Table}: {blueprint}{(surfaceSwap ? " (surface: stalactite->stalagmite)" : "")}");
+			Helpers.VerifyLog("FIS", $"{FallKind} fall @({C.X},{C.Y}) d={ChebyshevDistance(origin, C)}: {blueprint}{(surfaceSwap ? " (surface: stalactite->stalagmite)" : "")}");
 			GameObject rock = GameObject.Create(blueprint);
 			SmokePuff(C);
 			C.PlayWorldSound(SLAM_SOUND);

@@ -23,10 +23,10 @@ namespace XRL.World.Parts
 		/// <summary>Chance in 100 that a creature entering this rock's cell sets off the payload. 0 = inert underfoot.</summary>
 		public int StepChance;
 
-		/// <summary>Payload type: Gas, Explosion, Discharge, Temperature, EMP, Bleed, Liquid, Effect, Water, RandomGas, SpawnObject, Teleport, Strange, RustGear, BreakGear, QuillBurst, AbilityLock, TempAlly, Latch, FallThrough, MagnetPulse, FugueClones, ForceWall, ForceBubble, or Ricochet (caromcobble: bounces after the throw resolves, hit or miss; amount = legs, detail = damage die). Empty = no payload (a rock that only breaks or blocks).</summary>
+		/// <summary>Payload type: Gas, Explosion, Discharge, Temperature, EMP, Bleed, Liquid, Effect, Water, Heal, RandomGas, SpawnObject, Teleport, Strange, RustGear, BreakGear, QuillBurst, AbilityLock, TempAlly, Latch, FallThrough, MagnetPulse, FugueClones, ForceWall, ForceBubble, or Ricochet (caromcobble: bounces after the throw resolves, hit or miss; amount = legs, detail = damage die). Empty = no payload (a rock that only breaks or blocks).</summary>
 		public string Payload = "";
 
-		/// <summary>Payload detail: gas/puddle/spawn blueprint, damage die (Discharge/Bleed/Explosion), duration die (EMP), effect name (Effect: Blind/Luminous/Mutating/Stuck/ShatteredArmor), or population table (RandomGas; empty = the aji conch's table).</summary>
+		/// <summary>Payload detail: gas/puddle/spawn blueprint, damage die (Discharge/Bleed/Explosion), heal die (Heal), duration die (EMP), effect name (Effect: Blind/Luminous/Mutating/Stuck/ShatteredArmor/Terrified/Prone/Phased/Lovesick/Dazed), or population table (RandomGas; empty = the aji conch's table).</summary>
 		public string PayloadDetail = "";
 
 		/// <summary>Payload magnitude: gas density, explosion force, discharge voltage, temperature delta, EMP radius, effect duration (Effect), water units (Water). Step-on procs use half.</summary>
@@ -623,6 +623,8 @@ namespace XRL.World.Parts
 						fx = new Terrified(Math.Max(1, amount), C); // flees the place the rock struck
 					else if (detail == "Prone")
 						fx = new Prone();
+					else if (detail == "Dazed")
+						fx = new Dazed(Math.Max(1, amount)); // dazestone: Effect channel on purpose, so strange's mimic sees it
 					else if (detail == "Phased")
 						fx = new Phased(Math.Max(1, amount));
 					else if (detail == "Lovesick")
@@ -657,7 +659,7 @@ namespace XRL.World.Parts
 				}
 				case "Strange": // strange rock: it was some other rock's trouble all along; detail = rock table (default: the full pool)
 				{
-					string table = detail.IsNullOrEmpty() ? "Cleo_TerraFirma_FissureRocks3" : detail;
+					string table = detail.IsNullOrEmpty() ? "Cleo_TerraFirma_FissureRocksAny" : detail; // full 9-tier spread (realignment 2026-07-23)
 					string rolled = null;
 					for (int tries = 0; tries < 6 && rolled == null; tries++)
 					{
@@ -711,6 +713,18 @@ namespace XRL.World.Parts
 					if (GameObject.Validate(ref victim))
 						victim.FireEvent(Event.New("AddWater", "Amount", Math.Max(1, amount)));
 					break;
+				case "Heal": // healstone: mends the creature struck (throw it at yourself) or the stepper; detail = heal die, step procs half
+				{
+					if (!GameObject.Validate(ref victim))
+						break;
+					string healDie = detail.IsNullOrEmpty() ? "2d4" : detail;
+					int heal = Math.Max(1, healDie.RollCached());
+					if (Reduced)
+						heal = Math.Max(1, heal / 2);
+					Helpers.VerifyLog("ROCK", $"heal: {ParentObject.Blueprint} mends {victim.Blueprint} for {heal} (die {healDie}, reduced={Reduced})");
+					victim.Heal(heal, Message: true, FloatText: true);
+					break;
+				}
 				case "RustGear": // oxidian: rust seeks a random metal thing the victim is wearing
 				{
 					if (!GameObject.Validate(ref victim))

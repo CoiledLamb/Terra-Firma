@@ -83,6 +83,45 @@
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
 
+	<!-- ============ Filler trio (RULED 2026-07-23 with the 9-tier realignment; names WIP -
+	     blueprint IDs stay mechanical per the naming convention, rename via DisplayName only) ============ -->
+
+	<object Name="Cleo_TerraFirma_Rock_Healstone" Inherits="Cleo_TerraFirma_BaseFallenRock">
+		<part Name="Render" DisplayName="healstone" Tile="Items/sw_smallstone.bmp" ColorString="&amp;W" DetailColor="R" />
+		<part Name="Description" Short="A warm stone. Flesh near it remembers how to knit." /> <!-- DRAFT -->
+		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
+		<!-- consumable by design (ruling 2026-07-23): heals the creature struck (throw it at yourself)
+		     or the stepper, then ALWAYS breaks - HoldChance 0 never survives a throw, ConsumedOnStep
+		     covers step. Heal die 2d4 DRAFT, step procs half. Eaten = healing-over-time, owed to
+		     eat-pass 2. -->
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Heal" PayloadDetail="2d4" PayloadOnThrowHit="true" ConsumedOnStep="true" HoldChance="0" />
+		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
+	</object>
+
+	<object Name="Cleo_TerraFirma_Rock_Dazestone" Inherits="Cleo_TerraFirma_BaseFallenRock">
+		<part Name="Render" DisplayName="dazestone" Tile="Items/sw_smallstone.bmp" ColorString="&amp;B" DetailColor="W" />
+		<part Name="Description" Short="A stone with a ring in it that never quite stops." /> <!-- DRAFT -->
+		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
+		<!-- Effect payload channel ON PURPOSE (debt-audit ruling 2026-07-23): a separate daze part
+		     would be invisible to strange rock's mimic. Duration 6 rounds DRAFT, step = half.
+		     No ground twin yet - cooking domain OPEN (user), grinds to flour meanwhile (shivshale
+		     precedent). Eaten = dazes the eater, owed to eat-pass 2. -->
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Effect" PayloadDetail="Dazed" PayloadAmount="6" PayloadOnThrowHit="true" />
+		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
+	</object>
+
+	<object Name="Cleo_TerraFirma_Rock_Oilstone" Inherits="Cleo_TerraFirma_BaseFallenRock">
+		<part Name="Render" DisplayName="oilstone" Tile="Items/sw_smallstone.bmp" ColorString="&amp;K" DetailColor="w" />
+		<part Name="Description" Short="A stone that weeps slow black beads. They burn." /> <!-- DRAFT -->
+		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
+		<!-- the liquid family recipe (soupstone/sludgestone shape) pointed at base OilPuddle -
+		     LiquidOil verified: Combustibility 90, FlameTemperature 250, natively slippery.
+		     OilPuddle is 500-dram like SaltyWaterPuddle: rides the pool-volume audit with its
+		     siblings. Eaten = drink-oil event, owed to eat-pass 2. -->
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="Liquid" PayloadDetail="OilPuddle" PayloadOnThrowHit="true" />
+		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
+	</object>
+
 	<object Name="Cleo_TerraFirma_Rock_Pointy" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="shivshale" Tile="Items/sw_smallstone.bmp" ColorString="&amp;Y" DetailColor="r" /> <!-- was "pointy rock"; rename pass 2026-07-22 -->
 		<part Name="Description" Short="Stone drawn to an argument. Its point has never once been dulled by use." />
@@ -1024,6 +1063,17 @@
 		<part Name="PreparedCookingIngredient" type="acidMinor" charges="1" />
 		<tag Name="AggregatedIngredient" Value="Vitriolite" />
 	</object>
+	<object Name="Cleo_TerraFirma_Ground_Healstone" Inherits="Cleo_TerraFirma_BaseGroundRock">
+		<part Name="Render" DisplayName="ground healstone" ColorString="&amp;W" DetailColor="R" />
+		<part Name="PreparedCookingIngredient" type="regenLowtier" charges="1" /> <!-- "simple healing/regeneration" (user direction 2026-07-23) -->
+		<tag Name="AggregatedIngredient" Value="Healstone" />
+	</object>
+	<object Name="Cleo_TerraFirma_Ground_Oilstone" Inherits="Cleo_TerraFirma_BaseGroundRock">
+		<part Name="Render" DisplayName="ground oilstone" ColorString="&amp;K" DetailColor="w" />
+		<part Name="PreparedCookingIngredient" type="heat" charges="1" /> <!-- "simple heat related effects" tentative (user direction 2026-07-23) -->
+		<tag Name="AggregatedIngredient" Value="Oilstone" />
+	</object>
+	<!-- no Ground_Dazestone: cooking domain OPEN (user 2026-07-23) - the mill's flour fallback covers it until ruled -->
 	<object Name="Cleo_TerraFirma_Ground_Mullstone" Inherits="Cleo_TerraFirma_BaseGroundRock">
 		<part Name="Render" DisplayName="ground mullstone" ColorString="&amp;y" DetailColor="K" />
 		<part Name="PreparedCookingIngredient" type="willpower" charges="1" />

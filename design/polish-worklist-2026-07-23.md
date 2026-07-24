@@ -40,9 +40,9 @@ number/text awaiting blessing · `[polish]`/`[text]` writing or cleanup work · 
 
 ## Pass 2 — Fissure + the Rock Catalog *(the thickest folder)*
 
-**Geometry / cast — SUPERSEDED 2026-07-23 by the 9-tier Burgeoning realignment (see TODO.md
-"DRAWING BOARD" section). Filler trio RULED same day (healstone T1 / dazestone T2 / oilstone T3;
-stun-gas rock parked) — remaining before build: adopt-architecture, primes/seam, deep four, wobblers:**
+**Geometry / cast — the 9-tier Burgeoning realignment RULED + BUILT + DEPLOYED 2026-07-23**
+(architecture adopted; primes retired + seam batching in; deep four tier-9 plain; filler trio
+live; mullstone→T6; pits deferred; full record + sim + verify checklist in TODO.md):**
 - [~] 🆕 `[design]` **Depth QUANTITY buff — RULED 2026-07-23, build held with the restructure:**
   spill scaling (a) YES (20%+5%/step, freeze at 50%); +falls (b) HELD as future dial; quality cap
   (c) +8 reached at Z50, flat below (old "engine floor Z=50" decomp claim struck — wrong).
