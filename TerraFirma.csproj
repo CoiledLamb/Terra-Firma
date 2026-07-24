@@ -10,10 +10,11 @@
 		<QudLibPath>D:\Steam\steamapps\common\Caves of Qud\CoQ_Data\Managed\</QudLibPath>
 		<DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
 	</PropertyGroup>
-	<ItemGroup>
-	  <Compile Include="TerraFirma\XML\Options.xml" />
-	  <Compile Include="TerraFirma\XML\Populations.xml" />
-	</ItemGroup>
+	<!-- The original csproj listed two XML files as <Compile> items, producing ~73 garbage
+	     C# syntax errors per build. That noise masked a REAL error on 2026-07-23 (a missing
+	     using directive the game's own compiler caught) - removed so local builds are
+	     trustworthy: any error output now means a genuine problem. -->
+
 	<ItemGroup>
 		<Reference Include="$(QudLibPath)/0Harmony.dll" />
 		<Reference Include="$(QudLibPath)/Accessibility.dll" />

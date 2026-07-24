@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using XRL.Rules;
 using XRL.World.Effects;
