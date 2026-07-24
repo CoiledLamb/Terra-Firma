@@ -191,8 +191,14 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
 
 ## Pass 6 — Calcify
 
-- [ ] 📜 `[design]` **NPC-caster gap** — confirm parking with the innate-creatures workstream, or
-  batch the AI handler + cell-picking now (quarriers ruling already commits the AI work).
+- [x] 📜 `[design]` **NPC-caster gap — RULED batch-now + BUILT + DEPLOYED 2026-07-23** ("let's
+  knock calcify off the list"). AI advertises on DEFENSIVE + RETREAT channels only — never
+  offensive, since calcified stone is opaque both ways and Force Wall's owner-shoots-through
+  trick doesn't apply; threat = event target or Force Wall's nearest-visible-hostile scan.
+  NPC cell-picking = perpendicular line across the approach, anchored adjacent to the caster
+  (honoring Calcify's own contiguity rule); occupied cells skipped by the placer, partial lines
+  accepted. `[verify]` wish Calcify onto a creature, hurt it, watch it wall you off (unlocks the
+  existing NPC-caster appendix item).
 - [ ] 📜 `[text]` **Calcify text pass.**
 
 ## Pass 7 — Geomancy

@@ -52,9 +52,86 @@ namespace XRL.World.Parts.Mutation
 		#region Events
 		public override bool WantEvent(int ID, int cascade)
 		{
-			if (!base.WantEvent(ID, cascade))
+			if (!base.WantEvent(ID, cascade) && ID != AIGetDefensiveAbilityListEvent.ID && ID != AIGetRetreatAbilityListEvent.ID)
 				return ID == PooledEvent<CommandEvent>.ID;
 			return true;
+		}
+
+		// ---- AI advertisement (NPC gap closed 2026-07-23; the quarriers ruling had already
+		// committed this work). DEFENSIVE and RETREAT channels only, never offensive: unlike
+		// Force Wall, whose owner can shoot out through their own fields, calcified stone is
+		// opaque to everyone -- an offensive advertisement would teach NPCs to wall off their
+		// own attacks. ----
+		public override bool HandleEvent(AIGetDefensiveAbilityListEvent E)
+		{
+			GameObject threat;
+			if (IsMyActivatedAbilityAIUsable(ActivatedAbilityID) && (threat = FindWallThreat(E.Target)) != null)
+				E.Add(COMMAND_ID, 1, null, Inv: false, Self: false, threat);
+			return base.HandleEvent(E);
+		}
+
+		public override bool HandleEvent(AIGetRetreatAbilityListEvent E)
+		{
+			GameObject threat;
+			if (IsMyActivatedAbilityAIUsable(ActivatedAbilityID) && (threat = FindWallThreat(E.Target)) != null)
+				E.Add(COMMAND_ID, 1, null, Inv: false, Self: false, threat);
+			return base.HandleEvent(E);
+		}
+
+		/// <summary>The wall-off target: the event's target when valid, else the nearest visible
+		/// hostile (Force Wall's retreat-scan recipe -- the retreat event's Target is often null).</summary>
+		private GameObject FindWallThreat(GameObject given)
+		{
+			if (GameObject.Validate(ref given))
+				return given;
+			GameObject nearest = null;
+			int nearestDistance = int.MaxValue;
+			ParentObject.CurrentZone?.ForeachObject(delegate(GameObject obj)
+			{
+				if (obj.IsCreature && obj != ParentObject && ParentObject.IsHostileTowards(obj)
+					&& ParentObject.HasLOSTo(obj, IncludeSolid: true, BlackoutStops: false, UseTargetability: true))
+				{
+					int d = ParentObject.DistanceTo(obj);
+					if (d < nearestDistance)
+					{
+						nearest = obj;
+						nearestDistance = d;
+					}
+				}
+			});
+			return nearest;
+		}
+
+		/// <summary>NPC cell-picking (the other half of the gap): a contiguous line across the
+		/// approach -- the cell adjacent to the caster toward the threat, extended along both
+		/// orthogonals. Force Wall's perpendicular-line brain, anchored caster-side to honor
+		/// Calcify's own walls-start-adjacent-to-you rule. Occupied cells stay in the list;
+		/// the placer below skips them (partial lines accepted, same as partial player casts).</summary>
+		private List<Cell> PickNpcWallLine(GameObject threat)
+		{
+			Cell here = ParentObject.CurrentCell;
+			Cell there = threat?.CurrentCell;
+			if (here == null || there == null || here.ParentZone != there.ParentZone)
+				return null;
+			string dir = here.GetDirectionFromCell(there);
+			Cell anchor = here.GetCellFromDirection(dir);
+			if (anchor == null)
+				return null;
+			int walls = GetWallsCreated(Level);
+			List<Cell> line = new List<Cell>(walls) { anchor };
+			string[] flanks = XRL.Rules.Directions.GetOrthogonalDirections(dir);
+			Cell left = anchor, right = anchor;
+			while (line.Count < walls && (left != null || right != null))
+			{
+				left = left?.GetCellFromDirection(flanks[0]);
+				if (left != null && line.Count < walls)
+					line.Add(left);
+				right = right?.GetCellFromDirection(flanks[1]);
+				if (right != null && line.Count < walls)
+					line.Add(right);
+			}
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CALC", $"NPC cast: {ParentObject.Blueprint} walls off {threat.Blueprint} ({dir}ward), {line.Count} candidate cells");
+			return line;
 		}
 
 		public override bool HandleEvent(CommandEvent E)
@@ -64,6 +141,8 @@ namespace XRL.World.Parts.Mutation
 			List<Cell> targeted = null;
 			if (ParentObject.IsPlayer())
 				targeted = PickFieldAdjacent(GetWallsCreated(Level), ParentObject);
+			else
+				targeted = PickNpcWallLine(E.Target ?? ParentObject.Target);
 			if (targeted.IsNullOrEmpty())
 				return false;
 			UseEnergy(1000, $"Physical Mutation {Name}");
