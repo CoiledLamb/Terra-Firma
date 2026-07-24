@@ -282,6 +282,9 @@ house rule set mid-session: FLAG mid-session, fix in the post-session batch):**
 - [ ] 🆕 `[bug]` **Baboons never scavenge ([SCAV] silent all session)** — recon done (Thrown
   Weapon slot exists; prime suspect = MoveTo gate vs AIThrowAndScoot's scoot loop); sparse
   gate diagnostics DEPLOYED, experiment protocol in TODO.md; fix post-verdict.
+- [ ] 🆕 `[design]` **Caromcobble StepChance 25 → higher? (user flag: "could be higher")** —
+  re-opens a sweep-ratified number; the peel never breaks so the proc rate is pure zoning
+  strength. One XML dial, rule at the batch.
 
 - [x] 📜 `[design]` **NPC-caster gap — RULED batch-now + BUILT + DEPLOYED 2026-07-23** ("let's
   knock calcify off the list"). AI advertises on DEFENSIVE + RETREAT channels only — never
