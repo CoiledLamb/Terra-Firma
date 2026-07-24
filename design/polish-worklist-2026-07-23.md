@@ -43,9 +43,9 @@ number/text awaiting blessing · `[polish]`/`[text]` writing or cleanup work · 
 **Geometry / cast — the 9-tier Burgeoning realignment RULED + BUILT + DEPLOYED 2026-07-23**
 (architecture adopted; primes retired + seam batching in; deep four tier-9 plain; filler trio
 live; mullstone→T6; pits deferred; full record + sim + verify checklist in TODO.md):**
-- [~] 🆕 `[design]` **Depth QUANTITY buff — RULED 2026-07-23, build held with the restructure:**
-  spill scaling (a) YES (20%+5%/step, freeze at 50%); +falls (b) HELD as future dial; quality cap
-  (c) +8 reached at Z50, flat below (old "engine floor Z=50" decomp claim struck — wrong).
+- [x] 🆕 `[design]` **Depth QUANTITY buff — RULED 2026-07-23 + BUILT + DEPLOYED** (closed on
+  code-verify 2026-07-24: `GetSpillChance` 20%+5%/step frozen at 50%; `GetDepthBonus` cap +8 at
+  Z50). +falls (b) stays HELD as a future dial — deliberately unbuilt, not a gap.
 - [x] 📜 `[design]` **Prime falls scale?** — ABSORBED by the restructure (moot under the
   Burgeoning ±spread; primes' own fate is an open restructure ruling).
 - [x] 📜 `[ratify]` **Carried-over v1 numbers — RULED 2026-07-24:** cost 3 MP ratified; cooldown
@@ -163,8 +163,10 @@ three of four closed, BUILT + DEPLOYED:**
   `historyspice.json` (JSON union merge, `HistoricSpice.Init`); the recipe-namer's lookup key is
   the **`AggregatedIngredient` tag value** — already set on every powder ("BrineGeode",
   "Mullstone", "Healstone"…); entry shape = `adj`/`adj1`/`adj2`/`noun`/`nounPlural` phrase lists.
-  All that remains is the writing itself (~33 keys) — a pure phrase-drafting sitting, zero
-  technical risk. Carbide Chef is in `kitchenrock` for live preview.
+  All that remains is the writing itself — a pure phrase-drafting sitting, zero
+  technical risk. Carbide Chef is in `kitchenrock` for live preview. **Prep sheet compiled
+  2026-07-24: `design/historyspice-prep.md`** — the real key list is 36 (pulled from Rocks.xml;
+  the ~33 estimate corrected), plus the StoneMeal/dazestone/ash edge cases and seed drafts.
 - [ ] 📜 `[design]` **Eat-pass 2 worklist** — mutation-grant eats (sludgabbro→Slime Glands,
   urchinite→Quills, galvena→Electrical Generation), ash's true choke, fungal eat matching the
   lottery's own infection, drainstone inner latch, gemstone eats (earmark: transmute-enemy-into-
@@ -199,7 +201,8 @@ three of four closed, BUILT + DEPLOYED:**
   USER A SECOND TIME** (13-for-14 again; the stone is dodging ratification) · thunderclap eat —
   FLAGGED FOR REVISIT (user cooled on it now that dazestone is the canon daze rock; consider a new
   streakschorl eat at eat-pass 2) · static-bubble + aegis self-cage — deferred to their OWN pass
-  (user) · per-rock powders — explanation owed in another pass before ruling · streakschorl leg
+  (user) · per-rock powders — explanation DELIVERED 2026-07-24
+  (`design/per-rock-powders-explainer.md`), ruling pending · streakschorl leg
   range 6 — elaboration delivered, ruling pending.
 - [ ] 📜 `[design]` **Accepted deviations — revisit only if they grate** — banned learned recipes
   still nourish; gas immunity is full-type not partial; pantry rules text stays commented out
