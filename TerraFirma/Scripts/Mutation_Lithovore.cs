@@ -552,7 +552,10 @@ namespace XRL.World.Parts.Mutation
 				// a living Stoneshaper statue: devouring kills it; death drops its possessions the
 				// way death always does, and the Stoneshaper mutation's own handlers see a normal death
 				if (actor.IsPlayer())
-					Popup.Show("You set upon " + statue.t() + " and devour " + statue.them + ", stone and all.");
+					// literal "it" on purpose (live-fire find 2026-07-23: the statue's pronoun provider
+				// yielded possessive "its" in the objective slot) -- a statue is an object whatever
+				// its muse was, so the hardcoded neuter is always correct
+				Popup.Show("You set upon " + statue.t() + " and devour it, stone and all.");
 				statue.Die(actor);
 			}
 			else

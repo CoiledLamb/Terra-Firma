@@ -78,9 +78,12 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
   part of the cage). Ratify rider: cage duration = the bubble shard's 12 rounds (step parity;
   arguably the full-strength channel deserves more — DRAFT). `[verify]` thrown hit → ring closes,
   victim trapped; miss → wall line at landing.
-- [ ] 🆕 `[design]` **Drainstone vs inorganics** — attach-but-no-leech (user lean), still withers dry
-  at duration's end; distinct endings: gorged burst ("popping like a blood balloon" / "finally
-  bursting, sated") vs starved dry crumble. Detection: NoBleed / mirror Syphon Vim's gating.
+- [x] 🆕 `[design]` **Drainstone vs inorganics — BUILT + DEPLOYED 2026-07-23** per the user lean:
+  attach-but-no-leech on inorganics (detection = the engine's own `LifeDrain.IsValidTarget`
+  IsOrganic gate — better than NoBleed, robots bleed oil), rides out its rounds, then distinct
+  endings: gorged "bursts like a blood balloon, finally sated" vs starved "withers and crumbles
+  away, dry and unfed" (both DRAFT, phrases from the ruling). `[verify]` latch a robot → no drain,
+  dry crumble; latch flesh → drain + burst.
 - [x] 🆕 `[design]` **Caromcobble trip-on-step — BUILT + DEPLOYED 2026-07-23** (StepChance 25 +
   Prone via the StepPayload override; HoldChance 100 = a permanent banana peel, intended).
   Numbers ride the ratify pile. `[verify]` walk an enemy over it → 25% prone, rock survives.
@@ -113,8 +116,9 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
 
 ## Pass 3 — Lithovore + Kitchen
 
-- [ ] 🆕 `[polish]` **Devour pronoun bug** — "devour **its**" (objective-pronoun property or
-  restructure the sentence).
+- [x] 🆕 `[polish]` **Devour pronoun bug — FIXED + DEPLOYED 2026-07-23.** `.them` was already the
+  correct objective property; the statue's pronoun PROVIDER is what yielded "its". Fix: literal
+  "it" — a statue is an object whatever its muse was, so hardcoded neuter is always right.
 - [ ] 🆕 `[design]` **Universal statue devourability** — audit which statue blueprints slip
   `IsDevourableMass` (pure-Render shrine statuary suspected); broaden detection.
 - [ ] 📜 `[polish]` **HistorySpice.json entries — REQUIRED** — `spice.cooking.recipeNames.ingredients`

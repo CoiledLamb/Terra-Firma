@@ -31,6 +31,12 @@ namespace XRL.World.Parts
 		/// effect picks someone semi-random — ruled acceptable chaos ("random if not spawned from the mutation").</summary>
 		public GameObject Drainer;
 
+		/// <summary>Latched onto something with no life to drink (RULED 2026-07-23: inorganics —
+		/// robots, animated furniture — get attach-but-no-leech). Detection = the engine's own
+		/// LifeDrain.IsValidTarget (IsOrganic gate), chosen over NoBleed: robots bleed oil, so a
+		/// bleed test would misread them as drainable. Decides the ending: gorged burst vs dry crumble.</summary>
+		public bool Starved;
+
 		[NonSerialized]
 		private GameObject PendingVictim;
 
@@ -101,35 +107,43 @@ namespace XRL.World.Parts
 						IComponent<GameObject>.AddPlayerMessage(ParentObject.Does("fasten") + " onto " + victim.t() + "'s " + slot.GetOrdinalName() + "!");
 				}
 			}
+			Starved = !XRL.World.Parts.Mutation.LifeDrain.IsValidTarget(victim);
 			if (latched)
 			{
 				if (!ParentObject.HasPart<Cursed>())
 					ParentObject.AddPart(new Cursed { RevealInDescription = true });
 				RoundsLeft = duration;
 				Drainer = drainer;
-				Helpers.VerifyLog("DRAIN", $"LATCHED onto {victim.Blueprint} for {duration} rounds; drainer={drainer?.Blueprint ?? "none (native random fallback)"}, Cursed applied");
+				Helpers.VerifyLog("DRAIN", $"LATCHED onto {victim.Blueprint} for {duration} rounds; drainer={drainer?.Blueprint ?? "none (native random fallback)"}, Cursed applied{(Starved ? "; STARVED (inorganic, no leech)" : "")}");
 			}
 			else
 			{
-				Helpers.VerifyLog("DRAIN", $"no slot accepted the latch on {victim.Blueprint}; stone restored, drain still applies");
+				Helpers.VerifyLog("DRAIN", $"no slot accepted the latch on {victim.Blueprint}; stone restored{(Starved ? "" : ", drain still applies")}");
 				if (home != null && ParentObject.CurrentCell == null && ParentObject.Equipped == null && ParentObject.InInventory == null)
 					home.AddObject(ParentObject); // no slot took it: back where it was
 			}
-			// the drain runs either way -- latched or merely struck, the stone has tasted
-			victim.ApplyEffect(new LifeDrain(duration, 10, DrainDie, drainer, false), drainer ?? ParentObject);
+			// the drain runs either way -- latched or merely struck, the stone has tasted -- UNLESS
+			// there is nothing in the victim to drink (attach-but-no-leech ruling): the stone still
+			// rides out its rounds and withers dry at the end
+			if (!Starved)
+				victim.ApplyEffect(new LifeDrain(duration, 10, DrainDie, drainer, false), drainer ?? ParentObject);
 		}
 
 		private void Unlatch(bool crumble)
 		{
-			Helpers.VerifyLog("DRAIN", crumble ? "unlatch: duration spent -> crumbles away, sated" : "unlatch: came off early (death/dismemberment) -> curse lifts, stone survives as loot");
+			Helpers.VerifyLog("DRAIN", crumble ? $"unlatch: duration spent -> {(Starved ? "dry crumble (starved)" : "gorged burst")}" : "unlatch: came off early (death/dismemberment) -> curse lifts, stone survives as loot");
 			RoundsLeft = 0;
 			Drainer = null;
 			if (ParentObject.HasPart<Cursed>())
 				ParentObject.RemovePart<Cursed>();
 			if (crumble)
 			{
+				// distinct endings (RULED 2026-07-23, phrases from the user's own ruling): a fed stone
+				// goes out gorged; one latched to lifeless stone withers dry. Both DRAFT for the text pass.
 				if (IComponent<GameObject>.Visible(ParentObject))
-					IComponent<GameObject>.AddPlayerMessage(ParentObject.Does("crumble") + " away, sated.");
+					IComponent<GameObject>.AddPlayerMessage(Starved
+						? ParentObject.Does("wither") + " and crumble away, dry and unfed."
+						: ParentObject.Does("burst") + " like a blood balloon, finally sated.");
 				ParentObject.Destroy(null, Silent: true);
 			}
 		}
