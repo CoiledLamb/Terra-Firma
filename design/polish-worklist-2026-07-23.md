@@ -301,6 +301,8 @@ house rule set mid-session: FLAG mid-session, fix in the post-session batch):**
   (honoring Calcify's own contiguity rule); occupied cells skipped by the placer, partial lines
   accepted. `[verify]` wish Calcify onto a creature, hurt it, watch it wall you off (unlocks the
   existing NPC-caster appendix item).
+- [ ] 🆕 `[design]` **Gemstones default-equip to thrown slots (user flag)** — they're first-class
+  ammo now; recon the engine's default-slot pick at build. Details in TODO.md.
 - [ ] 🆕 `[bug]` **Calcify text says walls have "0 DV" — reality is −10** (base wall DV, never
   overridden; AV 0 is intended and stated, the HP pool is the defense). Fix text or override at
   the batch; details + lean in TODO.md.
