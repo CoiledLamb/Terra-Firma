@@ -279,9 +279,12 @@ house rule set mid-session: FLAG mid-session, fix in the post-session batch):**
   `ReplaceThrownWeaponEvent.Check` when it vacates the slot.
 - [ ] 🆕 `[design]` Strange→FugueClones miss-dud (flag-lite) · 🆕 `[bug?]` isolated NRE after a
   torpor detonation (watch) · 🆕 `[bug?]` gyrestone null-cell post-throw (watch).
-- [ ] 🆕 `[bug]` **Baboons never scavenge ([SCAV] silent all session)** — recon done (Thrown
-  Weapon slot exists; prime suspect = MoveTo gate vs AIThrowAndScoot's scoot loop); sparse
-  gate diagnostics DEPLOYED, experiment protocol in TODO.md; fix post-verdict.
+- [ ] 🆕 `[bug]` **Baboons never scavenge ([SCAV] silent all session)** — experiment resolved it:
+  the fetch preconditions are nearly unreachable (5-10 pocket stones each; throw-once base
+  cadence per AIThrowAndScoot decomp — Flee only, nothing re-readies). **SCAV FIXING PASS (user
+  flag): extend StoneScavenger to re-ready from pockets when the slot empties (PerformReequip in
+  the pocket-ammo branch) — "keep the thrower throwing"** — plus whatever the dry-fetch verdict
+  demands; details in TODO.md.
 - [ ] 🆕 `[design]` **Caromcobble StepChance 25 → higher? (user flag: "could be higher")** —
   re-opens a sweep-ratified number; the peel never breaks so the proc rate is pure zoning
   strength. One XML dial, rule at the batch.
