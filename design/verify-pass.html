@@ -44,6 +44,14 @@
   .badge.LOG  { color: var(--log);  border: 1px solid var(--log); }
   .badge.EYES { color: var(--eyes); border: 1px solid var(--eyes); }
   .badge.EARS { color: var(--ears); border: 1px solid var(--ears); }
+  .vchip { display: inline-block; font-size: 10.5px; font-weight: 700; border-radius: 4px;
+           padding: 1px 7px; margin-left: 8px; vertical-align: 1px; }
+  .vchip.pass    { color: #fff; background: var(--accent); }
+  .vchip.partial { color: #1c1c1c; background: var(--eyes); }
+  .vchip.fail    { color: #fff; background: #c0392b; }
+  .vnote { font-size: 13px; margin-top: 3px; color: var(--accent); }
+  .vnote.partial { color: var(--eyes); }
+  .vnote.fail { color: #c0392b; }
   .tag { font-family: Consolas, monospace; font-size: 12px; color: var(--log); }
   .foot { color: var(--dim); font-size: 12.5px; margin-top: 26px; }
   .foot button { background:none; border:1px solid var(--border); color: var(--dim); border-radius: 4px;
@@ -53,7 +61,9 @@
 <body>
 <div class="wrap">
   <h1>Terra Firma — next-boot verify pass</h1>
-  <div class="sub">Compiled 2026-07-24 from TODO.md + the polish worklist. Checkboxes persist in this browser (localStorage).
+  <div class="sub">Compiled 2026-07-24 from TODO.md + the polish worklist. Checkboxes persist in this browser (localStorage);
+  <b>green/amber verdict chips are written into this file by Claude from live log evidence</b> — reload (F5) to pull the latest.
+  <span id="lastupd"></span><br>
   <span class="badge LOG">LOG</span> = a <span class="tag">[TF-VERIFY]</span> line proves it &nbsp;
   <span class="badge EYES">EYES</span> = watch the screen &nbsp; <span class="badge EARS">EARS</span> = listen.</div>
 
@@ -161,6 +171,17 @@ const ITEMS = [
 ["fis-sound","Cross-cutting","EARS",null,"Multi-fall sound stack","If per-cell slams read as noise, flag it — the fallback ruling is cast-slam-only."]
 ];
 
+// ===VERDICTS-START=== (machine-maintained: Claude writes log-evidence verdicts here as the
+// watcher confirms items; do not hand-edit inside the markers. status: pass|partial|fail)
+const LAST_UPDATED = "2026-07-24 16:3x — session 2 (Karuukat)";
+const VERDICTS = {
+  "setup-watch":  {status:"partial", note:"TF-VERIFY flowing all session; sole MODERROR each boot is the DISABLED workshop mod Bit Helper's broken manifest (scan noise, not ours). Full-session zero-frame check stays open."},
+  "lith-spore":   {status:"pass", note:"Save permutation 0321 rolled and stamped across all four fungal rocks at zone build. Within-run consistency accrues as you meet them."},
+  "rock-decay":   {status:"pass", note:"13 carried rocks crumbled to pebbles at staggered rolled expiries (1014-1266 of 1000-2500) — no message wall, the stagger redesign working."},
+  "calc-npc":     {status:"partial", note:"LOG HALF CONFIRMED: NPC Humanoid walled off its threat twice — perpendicular picker, 4 cells at Lv1, zone-default Shale. Placement eyeball is yours."}
+};
+// ===VERDICTS-END===
+
 const KEY = "tf-verify-2026-07-24";
 let state = {};
 try { state = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { state = {}; }
@@ -171,11 +192,15 @@ const filters = ["All", "LOG", "EYES/EARS", "Remaining", ...groups];
 
 function save() { localStorage.setItem(KEY, JSON.stringify(state)); }
 
+function isDone(id) {
+  return !!state[id] || (VERDICTS[id] && VERDICTS[id].status === "pass");
+}
+
 function visible(it) {
   const [id, group, badge] = it;
   if (filter === "LOG" && badge !== "LOG") return false;
   if (filter === "EYES/EARS" && badge === "LOG") return false;
-  if (filter === "Remaining" && state[id]) return false;
+  if (filter === "Remaining" && isDone(id)) return false;
   if (groups.includes(filter) && group !== filter) return false;
   return true;
 }
@@ -193,20 +218,24 @@ function render() {
       list.appendChild(h);
       lastGroup = group;
     }
+    const v = VERDICTS[id];
     const row = document.createElement("div");
-    row.className = "item" + (state[id] ? " done" : "");
+    row.className = "item" + (isDone(id) ? " done" : "");
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.checked = !!state[id];
     cb.onchange = () => { state[id] = cb.checked; if (!cb.checked) delete state[id]; save(); render(); };
     const body = document.createElement("div");
     const tagStr = badge === "LOG" && tag && tag !== "—" ? ' <span class="tag">[' + tag + ']</span>' : "";
-    body.innerHTML = '<div class="t">' + title + ' <span class="badge ' + badge + '">' + badge + '</span>' + tagStr + '</div>' +
-                     '<div class="d">' + desc + '</div>';
+    const vchip = v ? ' <span class="vchip ' + v.status + '">' +
+        (v.status === "pass" ? "✔ LOG-CONFIRMED" : v.status === "partial" ? "◐ PARTIAL" : "✘ FAILED") + '</span>' : "";
+    const vnote = v ? '<div class="vnote ' + v.status + '">' + v.note + '</div>' : "";
+    body.innerHTML = '<div class="t">' + title + ' <span class="badge ' + badge + '">' + badge + '</span>' + tagStr + vchip + '</div>' +
+                     '<div class="d">' + desc + '</div>' + vnote;
     row.appendChild(cb); row.appendChild(body);
     list.appendChild(row);
   }
-  const done = ITEMS.filter(i => state[i[0]]).length;
+  const done = ITEMS.filter(i => isDone(i[0])).length;
   document.getElementById("fill").style.width = (100 * done / ITEMS.length) + "%";
   document.getElementById("count").textContent = done + " / " + ITEMS.length;
   const fdiv = document.getElementById("filters");
@@ -218,6 +247,8 @@ function render() {
     b.onclick = () => { filter = f; render(); };
     fdiv.appendChild(b);
   }
+  document.getElementById("lastupd").textContent = "Verdicts last written: " + LAST_UPDATED + " · " +
+    Object.keys(VERDICTS).length + " item(s) with log evidence.";
 }
 render();
 </script>

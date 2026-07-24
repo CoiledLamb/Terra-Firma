@@ -337,8 +337,11 @@ three of four closed, BUILT + DEPLOYED:**
 
 **→ Interactive checklist for the next boot: `design/verify-pass.html`** (built 2026-07-24 at user
 request — 70 items grouped by mutation, LOG/EYES/EARS badges with the [TF-VERIFY] tag each LOG
-item proves out, checkbox state persists in-browser). The prose list below remains the record;
-the HTML is the play-session tool.
+item proves out, checkbox state persists in-browser). **Upgraded same day (user request): the file
+carries a machine-maintained `VERDICTS` block between `===VERDICTS-START/END===` markers — Claude
+writes pass/partial/fail verdicts with log-evidence notes there as the watcher confirms items;
+user checkboxes stay in localStorage and the page renders the union.** The prose list below
+remains the record; the HTML is the play-session tool.
 
 Kitchen round (gyrestone mill safe, Inspired dish name, cooked domains firing, boulder 5–6,
 picker bans, bespoke eats: thunderclap/self-arc/siphonyx/hexstone-tether) · staged-fix smoke test
