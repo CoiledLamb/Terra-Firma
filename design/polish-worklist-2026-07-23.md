@@ -262,6 +262,15 @@ three of four closed, BUILT + DEPLOYED:**
 
 ## Pass 6 — Calcify
 
+- [ ] 🆕 `[design]` **Fugue-clone walls outlive the clone (user flag 2026-07-24, verify session 2)** —
+  recon done, `ExistenceSupport`-on-`FugueCopy`-caster build shape ready in TODO.md; awaiting ruling.
+- [x] 🆕 `[bug]` **Boar Vessel picked fights — FIXED + DEPLOYED 2026-07-24** ("passive like
+  ercolano"): `Brain Passive="true"` (the engine's defensive-engagement flag; the NoCombat tag
+  was never a brain mechanism). Active next restart.
+- [x] 🆕 `[verify]` **NPC calcifier CONFIRMED LIVE 2026-07-24** (log: Humanoid walled off its
+  threat twice, perpendicular picker chose 4 cells at Lv1, zone-default Shale material) — the
+  2026-07-23 batch's log half is proven; placement eyeball rides the session.
+
 - [x] 📜 `[design]` **NPC-caster gap — RULED batch-now + BUILT + DEPLOYED 2026-07-23** ("let's
   knock calcify off the list"). AI advertises on DEFENSIVE + RETREAT channels only — never
   offensive, since calcified stone is opaque both ways and Force Wall's owner-shoots-through
