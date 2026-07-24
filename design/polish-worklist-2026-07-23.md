@@ -170,12 +170,17 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
 
 ## Pass 4 — Stoneshaper
 
-- [ ] 🆕 `[design]` **Muse-weapon naming** — "gravelly cherubic foot"? Options: simple prefix /
-  adjective surgery (strip mechanical/metal/chrome…) / verbatim.
-- [ ] 🆕 `[design]` **Fungal growths in the muse copy** — fickle-gill statue weapons: keep or filter
-  infection-derived natural equipment.
-- [ ] 🆕 `[design]` **Pre-Lv10 no-second-statue friction** — confirm-as-intended vs extend the swap
-  down (DeanimateStatue path exists; cost: lifetime-as-cooldown stops gating low levels).
+- [x] 🆕 `[design]` **Muse-weapon naming — RESOLVED VERBATIM 2026-07-23** (user in-game check post
+  muse-copy fix: "seem fine on a cursory glance"). The "stone " prefix idea stays pocketed if a
+  future statue's features grate.
+- [x] 🆕 `[design]` **Fungal growths in the muse copy — RULED KEEP 2026-07-23** ("carved as the muse
+  appeared, gills and all"); leans the Pass 1 stone-creatures-catch-infections flag toward keep too.
+- [x] 🆕 `[design]` **Pre-Lv10 no-second-statue friction — RULED EXTEND + BUILT + DEPLOYED
+  2026-07-23** ("cooldown gates it most of the time anyways"): casting now swaps at ANY level —
+  prompt guards every living statue, old one de-animates into the lootable container, normal
+  cooldown applies. Lifetime-as-cooldown display RETIRED with its three normalization branches;
+  accepted cost: the ability card no longer counts down statue lifetime (flag at text pass if it
+  grates). `[verify]` low-level recast prompts + swaps; expiry/kill no longer touch the cooldown.
 - [ ] 📜 `[design]` **Taunt balance watch** — your note at revival: "hopefully not too strong."
 - [ ] 📜 `[text]` **Stoneshaper text pass** + Ctesiphus "phosphorescent" description quirk.
 - [x] 📜 *(housekeeping)* **DONE 2026-07-23** — the four ruled-and-built checkboxes closed (natural-

@@ -137,12 +137,9 @@ namespace XRL.World.Parts.Mutation
 				return base.HandleEvent(E);
 			if (CurStatue != null)
 			{
-				if (StatueLifetimeRemaining != INFINITE_DURATION_PLACEHOLDER)
-				{
-					E.Actor.Fail("A statue is still accompanying you.");
-					return false;
-				}
-				// permanent statues may be swapped -- but never by accident; they can carry levels and gear
+				// ANY living statue may be swapped (RULED 2026-07-23, extending the Lv10 path down:
+				// "cooldown gates it most of the time anyways") -- but never by accident; permanent
+				// ones especially can carry levels and gear
 				if (E.Actor.IsPlayer() && Popup.ShowYesNo("Carving a new statue will return " + CurStatue.t() +
 					" to lifeless stone. Anything worn or carried will be entombed within, recoverable by hand. Proceed?") == DialogResult.No)
 					return false;
@@ -255,10 +252,10 @@ namespace XRL.World.Parts.Mutation
 
 			ApplyStatueBuffs(E.Actor, creature, statue, Level, wallProps);
 
-			// commit point: only now does an existing permanent statue get released
+			// commit point: only now does an existing statue (any lifetime, swap-down ruling 2026-07-23) get released
 			if (CurStatue != null)
 			{
-				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", "SWAP: prior permanent statue de-animated (gear entombed) before the new carve");
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", "SWAP: prior statue de-animated (gear entombed) before the new carve");
 				XDidY(CurStatue, "return", "wearily to earth", Source: CurStatue, ColorAsBadFor: ParentObject);
 				DeanimateStatue(CurStatue);
 			}
@@ -278,22 +275,23 @@ namespace XRL.World.Parts.Mutation
 			XDidYToZ(E.Actor, $"create a sculpture of", creature, EndMark: "!", ColorAsGoodFor: E.Actor, Source: E.Actor);
 			//MessageQueue.AddPlayerMessage($"done!");
 
-			// temporary statues leverage the cooldown system to show lifetime remaining (see EndTurnEvent);
-			// permanent statues just take the normal cooldown, after which they may be swapped
+			// every carve takes the same cooldown; recasting after it swaps the living statue out
+			// (lifetime-as-cooldown display retired with the swap-down ruling, 2026-07-23)
 			CooldownMyActivatedAbility(ActivatedAbilityID, BASE_COOLDOWN);
 			return base.HandleEvent(E);
 		}
 
 		public override bool HandleEvent(EndTurnEvent E)
 		{
+			// lifetime-as-cooldown RETIRED with the swap-down ruling (2026-07-23): every carve takes
+			// the normal BASE_COOLDOWN at cast time, and lifetime ticks silently here. Cost accepted
+			// at the ruling: the ability card no longer counts down the statue's remaining turns.
+			// The old scheme's three cooldown-normalization branches (permanent destroyed / natural
+			// expiry / killed early) existed only to clear the pinned display -- all retired with it.
 			if (StatueLifetimeRemaining == INFINITE_DURATION_PLACEHOLDER)
 			{
 				if (CurStatue == null)
-				{
-					// permanent statue was destroyed; make the ability rhythm normal again
-					CooldownMyActivatedAbility(ActivatedAbilityID, BASE_COOLDOWN);
-					StatueLifetimeRemaining = 0;
-				}
+					StatueLifetimeRemaining = 0; // permanent statue destroyed; nothing to normalize anymore
 			}
 			else if (CurStatue != null)
 			{
@@ -304,18 +302,12 @@ namespace XRL.World.Parts.Mutation
 					XDidY(CurStatue, "return", "wearily to earth", Source: CurStatue, ColorAsBadFor: ParentObject);
 					DeanimateStatue(CurStatue);
 					CurStatue = null;
-					CooldownMyActivatedAbility(ActivatedAbilityID, BASE_COOLDOWN);
 				}
-				else
-					CooldownMyActivatedAbility(ActivatedAbilityID, StatueLifetimeRemaining);
 			}
 			else if (StatueLifetimeRemaining > 0)
 			{
-				// the statue was destroyed before its time -- without this, the lifetime-display cooldown
-				// (potentially hundreds of turns) would linger; reset to the normal cooldown instead
-				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", $"killed-statue cooldown reset: statue died with {StatueLifetimeRemaining} turns left -> normal cooldown restored");
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", $"statue died with {StatueLifetimeRemaining} turns of lifetime left");
 				StatueLifetimeRemaining = 0;
-				CooldownMyActivatedAbility(ActivatedAbilityID, BASE_COOLDOWN);
 			}
 			return base.HandleEvent(E);
 		}
