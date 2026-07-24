@@ -69,8 +69,14 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
   in TODO drawing board); 3x3 native patch vs 1-tile subclass at build.
 - [ ] 🆕 `[design]` **Deep stones want heft** — bigger rock, higher damage, weight back up (e.g. 5),
   size/description reading larger, crush optionally up.
-- [ ] 🆕 `[design]` **Pool-volume audit** — brine geode's `SaltyWaterPuddle` is 500 drams (renders
-  "pool"); audit SlimePuddle + deep-stone pools; user floated step = splash vs break = full spill.
+- [ ] 🆕 `[design]` **Pool-volume audit — AUDITED 2026-07-23, decision package ready.** Findings:
+  SaltyWater/Slime/Acid/Salt puddles all spawn at a flat 500 drams (hence "pool" renders — one
+  pebble births a water source; a waterskin holds 32); but base `OilPuddle` already ships
+  `StartVolume="10d10"` (10–100 drams, renders puddle) and the deep byproduct patches use 15–20.
+  **The engine's own fix pattern is StartVolume.** Proposal to rule: mod child puddles (pure XML)
+  with StartVolume dice — your floated step=splash vs break=full-spill maps to two dice (e.g.
+  ~2d10 step, ~10d10 throw), and the pour-into-container park item should draw from the same
+  per-rock dram budget. Numbers yours.
 - [x] 🆕 `[design]` **Aegischist thrown = impassable cage — BUILT + DEPLOYED 2026-07-23.** Hits cage
   the victim (bubble-shard ring, shared `PlaceForceRing`); misses keep the wall line. Both recon
   questions answered by decomp: `Unwalkable` forcefields reject EVERYONE (no owner-pass leak —
@@ -124,9 +130,13 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
   Oboroqoru, Keresh, all six Stilt shrine statues — pure Render+Physics). Detection broadened via
   blueprint descent (the Rubble/BaseBoulder idiom); gold Eater statues ride along — universal
   means universal. `[verify]` a famished lithovore can devour a Stilt shrine statue.
-- [ ] 📜 `[polish]` **HistorySpice.json entries — REQUIRED** — `spice.cooking.recipeNames.ingredients`
-  for the ~30 `Ground_*` powders (+ StoneMeal + rock flour); phrase lists in your voice; verify the
-  mod-side spice merge path first. Carbide Chef is in `kitchenrock` for live preview.
+- [ ] 📜 `[polish]` **HistorySpice.json entries — REQUIRED; merge path VERIFIED 2026-07-23, fully
+  de-risked.** Decomp ground truth: the engine natively merges any mod file named
+  `historyspice.json` (JSON union merge, `HistoricSpice.Init`); the recipe-namer's lookup key is
+  the **`AggregatedIngredient` tag value** — already set on every powder ("BrineGeode",
+  "Mullstone", "Healstone"…); entry shape = `adj`/`adj1`/`adj2`/`noun`/`nounPlural` phrase lists.
+  All that remains is the writing itself (~33 keys) — a pure phrase-drafting sitting, zero
+  technical risk. Carbide Chef is in `kitchenrock` for live preview.
 - [ ] 📜 `[design]` **Eat-pass 2 worklist** — mutation-grant eats (sludgabbro→Slime Glands,
   urchinite→Quills, galvena→Electrical Generation), ash's true choke, fungal eat matching the
   lottery's own infection, drainstone inner latch, gemstone eats (earmark: transmute-enemy-into-
