@@ -182,6 +182,10 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
   accepted cost: the ability card no longer counts down statue lifetime (flag at text pass if it
   grates). `[verify]` low-level recast prompts + swaps; expiry/kill no longer touch the cooldown.
 - [ ] 📜 `[design]` **Taunt balance watch** — your note at revival: "hopefully not too strong."
+- [ ] 🆕 `[design]` **Lifetime-as-cooldown retirement — REVIEW WATCH (user flag, 2026-07-23):** the
+  swap-down build removed the pinned cooldown display + its three normalization branches; watch
+  for unexpected side effects (cooldown oddities after statue death/expiry, save/load of mid-life
+  statues, anything that read `StatueLifetimeRemaining` assuming the old rhythm).
 - [ ] 📜 `[text]` **Stoneshaper text pass** + Ctesiphus "phosphorescent" description quirk.
 - [x] 📜 *(housekeeping)* **DONE 2026-07-23** — the four ruled-and-built checkboxes closed (natural-
   weapons ruling, Lv10 permanence, container-statue spec, Distraction revival) and the
