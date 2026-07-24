@@ -179,7 +179,7 @@ three of four closed, BUILT + DEPLOYED:**
   pot-gamble, electric-no-Minor wart, redundant pairs, eaten/cooked unification, grenade-in-pot,
   grind fork); stone-soup named recipe (park unless wanted).
 - [x] 📜 `[ratify]` **Round-dial sweep — RUN 2026-07-24, mostly resolved.** RATIFIED: mumbles 25%
-  secrets ("okay ratio"), roiling innards name (language flyover owed at the text pass), quill 1d4,
+  secrets ("okay ratio"), quill 1d4,
   lovesick nearest-visible + self-love-when-alone ("exactly as expected"), vitriolite/pulsestone
   warns (Qud-standard, acid-container precedent), soupstone 5000 / temps ±150 / devour-as-full-meal.
   CHANGED + BUILT + DEPLOYED: siphonyx eat → new `StoneSiphon` effect (drain goes NOWHERE, flat
@@ -188,6 +188,13 @@ three of four closed, BUILT + DEPLOYED:**
   shivshale bleed 1→1d2, stalactite 1→1d8 · millstone grinding now REQUIRES the mill to be
   powered/turning ("The millstone is still." DRAFT; pestle = the unpowered fallback; user lean,
   vetoable at verify).
+- [ ] 🆕 `[text]` **"Roiling innards" MUST CHANGE (user, 2026-07-24 — deferred but committed):**
+  the name squicked prospective players; wanted = evocative, not grossout — shift register from
+  anatomy to GEOLOGY (the stone is still doing stone things). Candidates on the table:
+  **outgassing** (Claude rec — the real term for gas escaping rock, deadpan-Qud), **gas pocket**
+  (miner's term), **fumarole** (you are briefly a volcanic vent). Vent message "Gas roils out of
+  you." acceptable under any name; details text already clean. One rename touches DisplayName +
+  comments; do at the text pass or sooner.
 - [ ] 📜 `[ratify]` **Sweep residue (the escapees):** 🔁 **galvena arc dice/range — SKIPPED BY THE
   USER A SECOND TIME** (13-for-14 again; the stone is dodging ratification) · thunderclap eat —
   FLAGGED FOR REVISIT (user cooled on it now that dazestone is the canon daze rock; consider a new
