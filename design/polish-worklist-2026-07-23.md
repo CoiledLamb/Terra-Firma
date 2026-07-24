@@ -89,6 +89,12 @@ three of four closed, BUILT + DEPLOYED:**
   pour-into-container park item now has its dram budget: 4d8. Deep lava/convalessence patches
   (15–20) untouched — elemental residue, not held liquid. `[verify]` a brine geode splash renders
   "puddle," not "pool."
+- [x] 🆕 `[design]` **Liquid rocks spill on destruction — RULED + BUILT + DEPLOYED 2026-07-24**
+  (emerged from the user's "does breaking make a puddle?" question): a liquid rock destroyed by
+  incidental damage releases its puddle where it dies ("X breaks open, spilling what it held."
+  DRAFT). Deliberately silent on: obliteration (whorl devoured it), decay (dulls dry), and
+  use-path breaks (the payload already puddled — suppressed against double-spills).
+  `[verify]` burn a brine geode in a fire → puddle; throw-break → exactly ONE puddle.
 - [x] 🆕 `[design]` **Aegischist thrown = impassable cage — BUILT + DEPLOYED 2026-07-23.** Hits cage
   the victim (bubble-shard ring, shared `PlaceForceRing`); misses keep the wall line. Both recon
   questions answered by decomp: `Unwalkable` forcefields reject EVERYONE (no owner-pass leak —
