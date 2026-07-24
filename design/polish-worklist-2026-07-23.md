@@ -152,9 +152,9 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
   down (DeanimateStatue path exists; cost: lifetime-as-cooldown stops gating low levels).
 - [ ] 📜 `[design]` **Taunt balance watch** — your note at revival: "hopefully not too strong."
 - [ ] 📜 `[text]` **Stoneshaper text pass** + Ctesiphus "phosphorescent" description quirk.
-- [ ] 📜 *(housekeeping)* Close the four ruled-and-built checkboxes still showing open (natural-
-  weapons ruling, Lv10 permanence, container-statue spec, Distraction revival) — and the
-  contradictory line-168 "user ruling needed" note that line-170 already answered.
+- [x] 📜 *(housekeeping)* **DONE 2026-07-23** — the four ruled-and-built checkboxes closed (natural-
+  weapons ruling, Lv10 permanence, container-statue spec, Distraction revival) and the
+  contradictory "user ruling needed" note struck (answered by the Lv10-permanence ruling).
 
 ## Pass 5 — Gorgon's Gaze
 
@@ -181,14 +181,14 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
 - [ ] 📜 `[polish]` **Statue Maker item description** — "placeholder description >:)".
 - [ ] 🆕 `[polish]` **Strip `[TF-VERIFY]` instrumentation before release** — kill switch
   `Helpers.VERIFY_WATCH`, or delete the call sites (now ~15 files after the session's additions).
-- [ ] 📜 `[release]` **git init** (fresh, no fork linkage; no Co-Authored-By).
+- [x] 📜 `[release]` **git init — DONE 2026-07-23** (fresh repo, no fork linkage, no trailer; history live since `b4ed68e`).
 - [ ] 📜 `[release]` **Workshop publishing plan + credits.**
 - [ ] 📜 `[design]` **Stale `Cleo_TerraFirma_Ephemeral Stone` blueprint** — deletion recommended,
   awaiting your ruling.
-- [ ] 📜 *(housekeeping)* Reconcile stale TODO state: "NEXT UP: first boot" (superseded), "Fissure
-  still DISABLED" status line (Phase D shipped), "v1.5 batch NOT deployed" hold (later waves say
-  deployed), Lithovore/stabilizer deployment holds (overtaken by events), duplicate whorl-typo/
-  placement entries from this compile.
+- [x] 📜 *(housekeeping)* **Reconcile stale TODO state — DONE 2026-07-23** (first-boot/DISABLED/
+  deploy-hold lines corrected, deploy states verified against the Mods folder; the "duplicate
+  whorl entries" turned out to be compile-side only, nothing to dedupe). Stoneshaper's four
+  ruled-and-built boxes closed the same sweep.
 
 ## Side content (committed / parked workstreams — rule when you get there)
 
