@@ -173,7 +173,7 @@ const ITEMS = [
 
 // ===VERDICTS-START=== (machine-maintained: Claude writes log-evidence verdicts here as the
 // watcher confirms items; do not hand-edit inside the markers. status: pass|partial|fail)
-const LAST_UPDATED = "2026-07-24 ~17:45 — session 2 (Karuukat)";
+const LAST_UPDATED = "2026-07-24 ~18:15 — session 3 (Karuukat, post-restart: diagnostics batch live)";
 const VERDICTS = {
   "rock-streak":  {status:"partial", note:"NPC thrower CONFIRMED (test Humanoid flew multiple flights: aimed auto-hit, bounce d20+Agi vs DV with visible flinches/hits, 0/1/2-bounce chains, single-use spend every time); accuracy lend+return clean under repetition (leak fix holding). Remaining: whorl vs incoming flight, both render modes, save/load. Auto-equip fix awaits restart."},
   "eb-reabsorb":  {status:"pass", note:"Repeated live: unequipped sculpted stones reabsorbed with charge refunded (now N) + whorl sync following the reserve each time."},
@@ -181,7 +181,7 @@ const VERDICTS = {
   "rock-strange": {status:"partial", note:"5 throws, 5 distinct real outcomes (teleport mimic ON the victim, torpor detonation, luminous mimic, fugue-clones, plus a miss-roll) — zero payloadless fizzles, the curated pool working. Note: a mimicked FugueClones on a MISS has no victim to clone (quietly nothing — acceptable miss-dud, or curate mimic-on-miss; flagged in TODO)."},
   "rock-puddle":  {status:"partial", note:"SPAWN MACHINERY CONFIRMED: BrinePuddle (soupstone hit) and SlimePuddle (sludgabbro miss-path, fires-at-landing rail working) both spawned live. The 'renders as puddle not pool' eyeball is yours."},
   "setup-watch":  {status:"partial", note:"TF-VERIFY flowing all session; sole MODERROR each boot is the DISABLED workshop mod Bit Helper's broken manifest (scan noise, not ours). Full-session zero-frame check stays open."},
-  "lith-spore":   {status:"pass", note:"Save permutation 0321 rolled and stamped across all four fungal rocks at zone build. Within-run consistency accrues as you meet them."},
+  "lith-spore":   {status:"fail", note:"DOWNGRADED FROM PASS: the mechanism fires and is consistent within a session (0321 stamped all pre-restart, 2031 all post-restart) — but that's the bug: SAME SAVE, different permutation after reload. The per-save persistence the ruling requires is missing; flagged for the post-session batch."},
   "rock-decay":   {status:"pass", note:"13 carried rocks crumbled to pebbles at staggered rolled expiries (1014-1266 of 1000-2500) — no message wall, the stagger redesign working."},
   "calc-npc":     {status:"partial", note:"LOG HALF CONFIRMED: NPC Humanoid walled off its threat twice — perpendicular picker, 4 cells at Lv1, zone-default Shale. Placement eyeball is yours."}
 };
