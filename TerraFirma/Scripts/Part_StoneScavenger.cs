@@ -25,6 +25,19 @@ namespace XRL.World.Parts
 		[NonSerialized]
 		private int DiagTick;
 
+		/// <summary>State-transition trail (experiment round 2, user: "we might need better hooks
+		/// here so you can verify what's actually happening"): log ONLY when the observed state
+		/// changes -- armed blueprint, pocket-stone count, or MoveTo-goal presence. Catches the
+		/// events the sparse snapshots miss (the throw that empties the slot, the pickup that
+		/// fills it, the moment pockets hit zero) at a handful of lines per fight, and makes the
+		/// baboons' otherwise-invisible base-stone throws show up as armed->EMPTY transitions.</summary>
+		[NonSerialized]
+		private string LastSlotState;
+		[NonSerialized]
+		private int LastPocketCount = -1;
+		[NonSerialized]
+		private bool LastHadMoveGoal;
+
 		public override bool SameAs(IPart p)
 		{
 			return p is Cleo_TerraFirma_StoneScavenger o && o.Radius == Radius && base.SameAs(p);
@@ -67,6 +80,23 @@ namespace XRL.World.Parts
 			if (who == null || who.IsPlayerControlled() || who.Brain == null || who.CurrentCell == null)
 				return;
 			bool diag = ++DiagTick % 50 == 1;
+			// transition trail: fires only on state CHANGES (cheap; a few lines per fight)
+			BodyPart diagSlot = who.GetFirstBodyPart("Thrown Weapon");
+			string slotState = diagSlot == null ? "NO-SLOT" : (diagSlot.Equipped?.Blueprint ?? "EMPTY");
+			int pocketCount = 0;
+			List<GameObject> diagPack = who.Inventory?.GetObjectsDirect();
+			if (diagPack != null)
+				foreach (GameObject item in diagPack)
+					if (item.HasTag("Cleo_TerraFirma_IsAnyStone"))
+						pocketCount += item.Count;
+			bool hasMoveGoal = who.Brain.HasGoal("MoveTo");
+			if (slotState != LastSlotState || pocketCount != LastPocketCount || hasMoveGoal != LastHadMoveGoal)
+			{
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint} STATE: slot {LastSlotState ?? "?"}->{slotState}, pockets {LastPocketCount}->{pocketCount}, moveGoal {LastHadMoveGoal}->{hasMoveGoal}");
+				LastSlotState = slotState;
+				LastPocketCount = pocketCount;
+				LastHadMoveGoal = hasMoveGoal;
+			}
 			if (who.Brain.HasGoal("MoveTo"))
 			{
 				if (diag)
