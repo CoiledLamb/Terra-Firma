@@ -29,7 +29,8 @@ namespace XRL.World.Parts
 	/// verify: a ProjectileMovingEvent handler that DISPLACES the stone mid-flight ends the flight
 	/// with the stone restored to the thrower's context (the disc's own early-return behavior --
 	/// reads as "it found its way back", accept or revisit); non-displacing interceptions strike
-	/// (HitOverride) or just end the flight, then the stone is spent as normal. All numbers DRAFT.
+	/// (HitOverride) or just end the flight, then the stone is spent as normal. Bounces RULED 2 flat;
+	/// Range 6 RATIFIED 2026-07-24.
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_StreakFlightPart : IPart

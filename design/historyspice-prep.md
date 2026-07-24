@@ -11,6 +11,10 @@ key is the `AggregatedIngredient` tag value; entry shape = `adj` / `adj1` / `adj
 Shared keys (deliberate merges): **FungalRock** (all four fungal grounds — no lottery tell in
 dish names), **GlowingRock** (both twins — the gamble survives into the pot).
 
+Sitting mandate (user, 2026-07-24, from the per-rock blessing): "i was looking forwards to the
+history spice for each rock feeling a bit unique" — write for per-rock distinctiveness; the two
+shared keys above stay the only merges.
+
 | Group | Keys |
 |---|---|
 | Liquids & food | BrineGeode · SaltChunk · Sludgabbro · Oilstone · Mullstone |

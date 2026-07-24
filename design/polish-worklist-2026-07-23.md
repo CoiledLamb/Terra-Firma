@@ -195,20 +195,24 @@ three of four closed, BUILT + DEPLOYED:**
   shivshale bleed 1→1d2, stalactite 1→1d8 · millstone grinding now REQUIRES the mill to be
   powered/turning ("The millstone is still." DRAFT; pestle = the unpowered fallback; user lean,
   vetoable at verify).
-- [ ] 🆕 `[text]` **"Roiling innards" MUST CHANGE (user, 2026-07-24 — deferred but committed):**
+- [ ] 🆕 `[text]` **"Roiling innards" — status updated 2026-07-24, second ruling: "undecided -
+  roiling innards fine for now but talk has to be had before release."** No longer must-change —
+  must-DISCUSS; the conversation is now a release-gate item (see Cross-cutting). Original flag
+  (earlier 2026-07-24 — the name squicked prospective players):
   the name squicked prospective players; wanted = evocative, not grossout — shift register from
   anatomy to GEOLOGY (the stone is still doing stone things). Candidates on the table:
   **outgassing** (Claude rec — the real term for gas escaping rock, deadpan-Qud), **gas pocket**
   (miner's term), **fumarole** (you are briefly a volcanic vent). Vent message "Gas roils out of
   you." acceptable under any name; details text already clean. One rename touches DisplayName +
   comments; do at the text pass or sooner.
-- [ ] 📜 `[ratify]` **Sweep residue (the escapees):** 🔁 **galvena arc dice/range — SKIPPED BY THE
-  USER A SECOND TIME** (13-for-14 again; the stone is dodging ratification) · thunderclap eat —
-  FLAGGED FOR REVISIT (user cooled on it now that dazestone is the canon daze rock; consider a new
-  streakschorl eat at eat-pass 2) · static-bubble + aegis self-cage — deferred to their OWN pass
-  (user) · per-rock powders — explanation DELIVERED 2026-07-24
-  (`design/per-rock-powders-explainer.md`), ruling pending · streakschorl leg
-  range 6 — elaboration delivered, ruling pending.
+- [ ] 📜 `[ratify]` **Sweep residue — THREE OF FIVE CLOSED 2026-07-24:** ✅ **galvena arc 1d4/range 5
+  — RATIFIED at last** ("galvena arc is fine"; the third asking landed) · ✅ **streakschorl leg
+  range 6 — RATIFIED** ("streakschorl leg range fine") · ✅ **per-rock powders — BLESSED** ("fine
+  by me! i was looking forwards to the history spice for each rock feeling a bit unique" — the
+  blessing's rider: per-rock uniqueness in spice entries is WANTED; keep shared keys to the two
+  no-tell cases). Still open: thunderclap eat — FLAGGED FOR REVISIT (user cooled on it now that
+  dazestone is the canon daze rock; consider a new streakschorl eat at eat-pass 2) · static-bubble
+  + aegis self-cage — deferred to their OWN pass (user).
 - [ ] 📜 `[design]` **Accepted deviations — revisit only if they grate** — banned learned recipes
   still nourish; gas immunity is full-type not partial; pantry rules text stays commented out
   (grenade idiom); pestle-in-inventory mystery (moot since rock-side grinding).
@@ -282,8 +286,14 @@ three of four closed, BUILT + DEPLOYED:**
   `Helpers.VERIFY_WATCH`, or delete the call sites (now ~15 files after the session's additions).
 - [x] 📜 `[release]` **git init — DONE 2026-07-23** (fresh repo, no fork linkage, no trailer; history live since `b4ed68e`).
 - [ ] 📜 `[release]` **Workshop publishing plan + credits.**
-- [ ] 📜 `[design]` **Stale `Cleo_TerraFirma_Ephemeral Stone` blueprint** — deletion recommended,
-  awaiting your ruling.
+- [x] 📜 `[design]` **Stale `Cleo_TerraFirma_Ephemeral Stone` blueprint — RULED remove 2026-07-24
+  ("you can remove, that's fine") and found ALREADY RESOLVED:** it never survived the 2026-07-21
+  companion merge — verified absent from repo and deployed mod; sole copy is in the
+  `_mods_backup` archive, left as archive. Nothing to build.
+- [ ] 🆕 `[release]` **"Roiling innards" rename talk — RELEASE GATE (user 2026-07-24: "undecided -
+  roiling innards fine for now but talk has to be had before release").** The name ships nowhere
+  until the talk happens; candidates stand (outgassing [Claude rec] / gas pocket / fumarole).
+  Canonical entry with full context lives in Pass 3 below.
 - [x] 📜 *(housekeeping)* **Reconcile stale TODO state — DONE 2026-07-23** (first-boot/DISABLED/
   deploy-hold lines corrected, deploy states verified against the Mods folder; the "duplicate
   whorl entries" turned out to be compile-side only, nothing to dedupe). Stoneshaper's four

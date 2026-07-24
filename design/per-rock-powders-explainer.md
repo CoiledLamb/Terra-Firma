@@ -1,4 +1,9 @@
-# Per-rock powders — the owed explanation (written 2026-07-24, ruling pending)
+# Per-rock powders — the owed explanation (written 2026-07-24)
+
+> **RULED same day — BLESSED as built:** "fine by me! i was looking forwards to the history
+> spice for each rock feeling a bit unique." Rider recorded in TODO.md: per-rock uniqueness in
+> spice entries is a wanted feature — keep shared keys to the two deliberate no-tell cases.
+> This doc stays as the rationale record.
 
 Context: at ruling round 7 (2026-07-22) you ruled the powder split with "i lean the latter,"
 and your word was **per-domain**. What got built is **per-ROCK**: 36 `Cleo_TerraFirma_Ground_*`

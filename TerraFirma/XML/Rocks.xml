@@ -410,7 +410,7 @@
 		     eaten raw = the charge exits through you and arcs at the nearest visible creature within 5
 		     (RULED 2026-07-22, indiscriminate by design - companions included; its own thrown dice; the
 		     eater takes nothing; nobody around = a harmless crackle). Electrical Generation grant still
-		     deferred to eat-pass 2 - stacks on top of the arc if kept. DRAFT dice. -->
+		     deferred to eat-pass 2 - stacks on top of the arc if kept. Dice 1d4 + range 5 RATIFIED 2026-07-24. -->
 		<tag Name="Cleo_TerraFirma_EatenArc" Value="1d4" />
 		<tag Name="Cleo_TerraFirma_EatenArcVoltage" Value="1d4" />
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
