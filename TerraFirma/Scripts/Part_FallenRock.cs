@@ -657,9 +657,15 @@ namespace XRL.World.Parts
 					}
 					break;
 				}
-				case "Strange": // strange rock: it was some other rock's trouble all along; detail = rock table (default: the full pool)
+				case "Strange": // strange rock: it was some other rock's trouble all along; detail = rock
+				                // table (default: the CURATED pool -- audit RULED 2026-07-24, "everything
+				                // it does should actually happen, no null": payload/grenade rocks only,
+				                // creatures/terrain/generics cut). The surrogate is PLACED at the target
+				                // cell before firing -- this repairs the old dud mimics (lodestone's pulse
+				                // epicenter, crack's pull-down, drainstone's latch all need a real cell) --
+				                // then cleaned up, unless it latched onto someone.
 				{
-					string table = detail.IsNullOrEmpty() ? "Cleo_TerraFirma_FissureRocksAny" : detail; // full 9-tier spread (realignment 2026-07-23)
+					string table = detail.IsNullOrEmpty() ? "Cleo_TerraFirma_StrangeRocksPool" : detail;
 					string rolled = null;
 					for (int tries = 0; tries < 6 && rolled == null; tries++)
 					{
@@ -672,33 +678,25 @@ namespace XRL.World.Parts
 					GameObject other = GameObject.Create(rolled);
 					IGrenade grenade = other.GetFirstPartDescendedFrom<IGrenade>();
 					Cleo_TerraFirma_FallenRockPart otherPart = other.GetPart<Cleo_TerraFirma_FallenRockPart>();
-					Helpers.VerifyLog("ROCK", $"STRANGE rolled {rolled} -> {(grenade != null ? "detonates" : otherPart != null && !otherPart.Payload.IsNullOrEmpty() && otherPart.Payload != "Strange" ? "mimics payload " + otherPart.Payload : "simply appears")}");
+					bool mimics = grenade == null && otherPart != null && !otherPart.Payload.IsNullOrEmpty() && otherPart.Payload != "Strange";
+					Helpers.VerifyLog("ROCK", $"STRANGE rolled {rolled} -> {(grenade != null ? "detonates" : mimics ? "mimics payload " + otherPart.Payload : "PAYLOADLESS (curated pool should not contain this) -> fizzle")}");
 					if (grenade != null)
 					{
 						grenade.Detonate(C, Owner, victim, Indirect: true); // detonation consumes it
 					}
-					else if (otherPart != null && !otherPart.Payload.IsNullOrEmpty() && otherPart.Payload != "Strange")
+					else if (mimics)
 					{
+						C.AddObject(other); // place-then-fire: the payload runs from a real cell
 						otherPart.Owner = Owner;
 						otherPart.FirePayload(victim, C, Reduced);
-						other.Obliterate();
+						// the surrogate's work is done -- unless it force-equipped itself (drainstone
+						// latch), in which case it rides the victim to its natural end
+						if (GameObject.Validate(other) && other.Equipped == null)
+							other.Obliterate();
 					}
 					else
 					{
-						// no payload to mimic: the rolled thing itself appears (pebbles, a stalagmite, an ape...);
-						// creatures and solids won't share a cell with a combatant -- sidestep or fizzle
-						bool needsRoom = other.Brain != null || (other.Physics != null && other.Physics.Solid);
-						Cell home = C;
-						if (needsRoom && home.HasObjectWithPart("Combat"))
-						{
-							List<Cell> openAdj = home.GetLocalAdjacentCells();
-							openAdj?.RemoveAll((Cell x) => x.IsSolid() || x.HasObjectWithPart("Combat"));
-							home = (openAdj != null && openAdj.Count > 0) ? openAdj[Stat.Random(0, openAdj.Count - 1)] : null;
-						}
-						if (home == null)
-							other.Obliterate();
-						else
-							home.AddObject(other);
+						other.Obliterate(); // defensive: nothing in the curated pool should land here
 					}
 					break;
 				}
@@ -847,10 +845,10 @@ namespace XRL.World.Parts
 				case "Latch": // drainstone: fastens onto the victim and drinks; amount = rounds (step = half via Reduced)
 					if (GameObject.Validate(ref victim) && ParentObject.GetPart<Cleo_TerraFirma_DrainLatch>() is Cleo_TerraFirma_DrainLatch latch)
 					{
-						if (Reduced)
-							latch.Latch(victim, Math.Max(1, amount), source); // stepped: the stone is at rest, latch now
+						if (Reduced || ParentObject.CurrentCell != null)
+							latch.Latch(victim, Math.Max(1, amount), source); // at rest (stepped, or a PLACED strange surrogate): latch now
 						else
-							latch.RequestLatch(victim, Math.Max(1, amount), source); // mid-flight: defer until the engine finishes the throw
+							latch.RequestLatch(victim, Math.Max(1, amount), source); // mid-flight (no cell yet): defer until the engine finishes the throw
 					}
 					break;
 				case "TempAlly": // lovestone thrown: a hostile act of sudden devotion; amount = rounds

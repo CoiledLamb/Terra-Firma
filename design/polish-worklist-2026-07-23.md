@@ -53,16 +53,23 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
   BUILT + DEPLOYED, level text renders the new value automatically.
 - [ ] 📜 `[polish]` **Multi-fall sound stack** — if per-cell slams are too loud, keep only the cast slam.
 
-**Strange rock (one-at-a-time bundle, user-held):**
-- [ ] 🆕 `[design]` **Band placement** — ~29% of Lv1 casts produce one; move to Band2New or cut
-  band-1 weight to ~2. *(2026-07-23: ABSORBED by the 9-tier restructure if it lands — every
-  placement gets re-decided there; revives as-written only if the restructure is vetoed.)*
-- [ ] 📜 `[design]` **Audit 1: mimic fix** — place-then-fire repairs the three dud mimics
-  (lodestone/thrown-drainstone/crack) vs a curated strange-specific table.
-- [ ] 📜 `[design]` **Audit 2: deep reach** — keep the ~5% band-4 trickle in strange's pool or cut it.
-- [ ] 📜 `[design]` **Audit 3: deep sting** — mimicked deep effects currently cost the thrower nothing.
-- [ ] 📜 `[design]` **Audit 4: wild spawns** — strange-spawned creatures arrive unallied
-  (ape neutral, statuette baboon-troop). Keep wild / ally / cut creatures from the pool.
+**Strange rock — AUDIT RUN 2026-07-24 ("everything it does should actually happen, no null"),
+three of four closed, BUILT + DEPLOYED:**
+- [x] 🆕 `[design]` **Band placement** — RESOLVED by the restructure (strange seasons the generics
+  of tiers 2–8 at weight 5; its own roll pool is now separate, below).
+- [x] 📜 `[design]` **Audit 1: mimic fix — BOTH remedies taken.** New curated
+  `StrangeRocksPool` (payload/grenade rocks only; CUT: creatures, terrain, generics, streakschorl
+  payloadless, caromcobble whose bounce can't fire in mimicry, strange itself) AND place-then-fire
+  (the surrogate lands in a real cell before its payload runs) — which REPAIRS lodestone's pulse,
+  crack's pull-down, and drainstone's latch into the pool; a latched strange-drainstone even
+  survives on the victim instead of being cleaned up. The Latch channel itself got smarter:
+  at-rest stones latch immediately, only true mid-flight throws defer.
+- [x] 📜 `[design]` **Audit 2: deep reach — KEPT**, deep four at half weight in the curated pool.
+- [ ] 📜 `[design]` **Audit 3: deep sting** — mimicked deep effects still cost the thrower nothing
+  (unaddressed by the audit ruling; the sting lives on the real stones only). Rule or accept.
+- [x] 📜 `[design]` **Audit 4: wild spawns — CUT** ("cutting the weirder spawns"), no creatures in
+  the pool. `[verify]` a dozen strange throws: every one visibly does something (gas, detonation,
+  latch, floor opening, pulse); Lithovore strange-eat still resolves (same pool, fewer wasted rolls).
 
 **Rock-catalog design calls:**
 - [ ] 🆕 `[design]` **Chasm → visible pit** — user LEANING yes, not locked ("a lot of moving

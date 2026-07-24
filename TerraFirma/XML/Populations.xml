@@ -281,18 +281,64 @@
 			</group>
 		</group>
 	</population>
-	<!-- Strange rock's mimic + the Lithovore strange-eat roll the whole spread -->
-	<population Name="Cleo_TerraFirma_FissureRocksAny">
+	<!-- Strange rock's mimic + the Lithovore strange-eat: the CURATED pool (audit RULED 2026-07-24,
+	     "everything it does should actually happen, no null"). Payload and grenade rocks only.
+	     EXCLUDED, on purpose: creatures (ape, statuette, all three geysers), terrain and generics
+	     (pebbles, generic, rubble, crumbled walls, walls, chasm, stalagmite), the payloadless
+	     flight rock (streakschorl), the caromcobble (its payload is a post-throw bounce that
+	     cannot fire in mimicry), and strange itself (no mirrors). Deep four ride at half weight
+	     (the audit-2 trickle, kept). All weights DRAFT. -->
+	<population Name="Cleo_TerraFirma_StrangeRocksPool">
 		<group Name="Rocks" Style="pickone">
-			<table Weight="10" Name="Cleo_TerraFirma_FissureTier1" />
-			<table Weight="10" Name="Cleo_TerraFirma_FissureTier2" />
-			<table Weight="10" Name="Cleo_TerraFirma_FissureTier3" />
-			<table Weight="10" Name="Cleo_TerraFirma_FissureTier4" />
-			<table Weight="10" Name="Cleo_TerraFirma_FissureTier5" />
-			<table Weight="10" Name="Cleo_TerraFirma_FissureTier6" />
-			<table Weight="10" Name="Cleo_TerraFirma_FissureTier7" />
-			<table Weight="10" Name="Cleo_TerraFirma_FissureTier8" />
-			<table Weight="10" Name="Cleo_TerraFirma_FissureTier9" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Soupstone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Sludgestone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Oilstone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Salt" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Pointy" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Healstone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Dazestone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Crack" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Whorlstone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Torpor" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Scary" />
+			<group Name="Fungal" Weight="10" Style="pickone">
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Fungal" />
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_FungalLuminous" />
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_FungalWax" />
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_FungalMumbles" />
+			</group>
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_CompressedAsh" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_ShatteredStalactite" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Rusty" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Bola" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Spiderweb" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Spiny" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Volatile" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Mullstone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Voltaic" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Scorching" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Icy" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Melting" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Shunting" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Vantabsidian" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Hexstone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Pulsestone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Ajistone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Lodestone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Drainstone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Blurring" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Lovestone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Shieldstone" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Drifting" />
+			<group Name="Glowing" Weight="10" Style="pickone">
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_GlowingRadioactive" />
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_GlowingPhosphorescent" />
+			</group>
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Gyrestone" />
+			<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_DeepVoltaic" />
+			<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_DeepScorching" />
+			<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_DeepIcy" />
+			<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_DeepMelting" />
 		</group>
 	</population>
 
