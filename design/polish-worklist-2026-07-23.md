@@ -279,6 +279,9 @@ house rule set mid-session: FLAG mid-session, fix in the post-session batch):**
   `ReplaceThrownWeaponEvent.Check` when it vacates the slot.
 - [ ] 🆕 `[design]` Strange→FugueClones miss-dud (flag-lite) · 🆕 `[bug?]` isolated NRE after a
   torpor detonation (watch) · 🆕 `[bug?]` gyrestone null-cell post-throw (watch).
+- [ ] 🆕 `[bug]` **Baboons never scavenge ([SCAV] silent all session)** — recon done (Thrown
+  Weapon slot exists; prime suspect = MoveTo gate vs AIThrowAndScoot's scoot loop); sparse
+  gate diagnostics DEPLOYED, experiment protocol in TODO.md; fix post-verdict.
 
 - [x] 📜 `[design]` **NPC-caster gap — RULED batch-now + BUILT + DEPLOYED 2026-07-23** ("let's
   knock calcify off the list"). AI advertises on DEFENSIVE + RETREAT channels only — never

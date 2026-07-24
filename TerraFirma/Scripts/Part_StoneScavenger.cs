@@ -18,6 +18,13 @@ namespace XRL.World.Parts
 		/// <summary>How far afield the creature notices a loose stone (Chebyshev).</summary>
 		public int Radius = 8;
 
+		/// <summary>Sparse gate diagnostics for the scavenger experiment (user flag 2026-07-24:
+		/// "baboons don't appear to scavenge for rocks"): one snapshot every 50th tick per
+		/// creature names which early-return gate is starving the behavior, without flooding
+		/// a log that sees this part every turn on every baboon.</summary>
+		[NonSerialized]
+		private int DiagTick;
+
 		public override bool SameAs(IPart p)
 		{
 			return p is Cleo_TerraFirma_StoneScavenger o && o.Radius == Radius && base.SameAs(p);
@@ -59,18 +66,31 @@ namespace XRL.World.Parts
 			GameObject who = ParentObject;
 			if (who == null || who.IsPlayerControlled() || who.Brain == null || who.CurrentCell == null)
 				return;
+			bool diag = ++DiagTick % 50 == 1;
 			if (who.Brain.HasGoal("MoveTo"))
+			{
+				if (diag)
+					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint} gate: MoveTo goal active (scoot loop suspect) -> skipped");
 				return; // already going somewhere on purpose (possibly ours)
+			}
 			BodyPart slot = who.GetFirstBodyPart("Thrown Weapon");
 			if (slot == null || slot.Equipped != null)
+			{
+				if (diag)
+					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint} gate: {(slot == null ? "NO Thrown Weapon body part" : "slot already armed with " + slot.Equipped.Blueprint)} -> skipped");
 				return; // no slot, or armed already
+			}
 			List<GameObject> pack = who.Inventory?.GetObjectsDirect();
 			if (pack != null)
 			{
 				foreach (GameObject item in pack)
 				{
 					if (item.HasTag("Cleo_TerraFirma_IsAnyStone"))
+					{
+						if (diag)
+							Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint} gate: still has pocket ammo ({item.Blueprint}) -> skipped");
 						return; // still carrying ammo; the brain readies it on its own
+					}
 				}
 			}
 			// nearest loose stone, own cell included
@@ -95,7 +115,11 @@ namespace XRL.World.Parts
 				}
 			}
 			if (best == null)
+			{
+				if (diag)
+					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint} gate: all clear but NO loose stone within {Radius} -> nothing to fetch");
 				return;
+			}
 			// priority rule (user, 2026-07-22): an enemy as close as the stone -- or closer -- wins the
 			// baboon's attention; only a stone strictly nearer than every threat is worth the detour
 			GameObject target = who.Brain.Target;
