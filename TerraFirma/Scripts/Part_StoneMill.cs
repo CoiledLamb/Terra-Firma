@@ -143,7 +143,7 @@ namespace XRL.World.Parts
 		{
 			if (ParentObject == null || E.Actor == null)
 				return base.HandleEvent(E);
-			if ((ParentObject.Blueprint == "Pestle" || !RequiresPestle) && HasGrindableStone(E.Actor))
+			if ((ParentObject.Blueprint == "Pestle" || (!RequiresPestle && HostMillTurning())) && HasGrindableStone(E.Actor))
 			{
 				E.AddAction("GrindStones", "grind stones", GRIND_COMMAND, null, 'g', FireOnActor: false);
 			}
@@ -154,10 +154,25 @@ namespace XRL.World.Parts
 			return base.HandleEvent(E);
 		}
 
+		/// <summary>Millstone power gate (RULED lean 2026-07-24, vetoable): the base Mill part is
+		/// mechanically POWERED, and the ruling leans into that -- a dead millstone doesn't turn.
+		/// The pestle remains the unpowered fallback anywhere. Non-mill homes are unaffected.</summary>
+		private bool HostMillTurning()
+		{
+			if (ParentObject?.GetPart<Mill>() is Mill mill)
+				return mill.IsReady(UseCharge: false, IgnoreCharge: false, IgnoreLiquid: false, IgnoreBootSequence: false, IgnoreBreakage: false, IgnoreRust: false, IgnoreEMP: false, IgnoreRealityStabilization: false, IgnoreSubject: false, IgnoreLocallyDefinedFailure: false, 1, null, UseChargeIfUnpowered: false, 0L);
+			return true;
+		}
+
 		public override bool HandleEvent(InventoryActionEvent E)
 		{
 			if (E.Command == GRIND_COMMAND && E.Actor != null)
 			{
+				if (!RequiresPestle && !HostMillTurning())
+				{
+					E.Actor.Fail("The millstone is still."); // DRAFT
+					return false;
+				}
 				// the pestle IS the tool; the millstone replaces it; the campfire only hosts the menu
 				bool needPestle = RequiresPestle && ParentObject?.Blueprint != "Pestle";
 				RunGrindMenu(E.Actor, needPestle);

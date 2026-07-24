@@ -1,4 +1,5 @@
 using System;
+using Cleo.TerraFirma.Scripts;
 using XRL.Messages;
 using XRL.Rules;
 using XRL.UI;
@@ -303,11 +304,11 @@ namespace XRL.World.Parts.Mutation
 			{
 				if (int.TryParse(tag, out int drainRounds))
 				{
-					// the drainstone's own LifeDrain call shape (Part_DrainLatch), drainer null =
-					// the native random-drainer fallback: something, somewhere, gets fed (ruled chaos).
-					// Fully qualified: XRL.World.Parts.Mutation.LifeDrain (a mutation) shadows the
-					// effect inside this file's namespace.
-					actor.ApplyEffect(new XRL.World.Effects.LifeDrain(Math.Max(1, drainRounds), 10, "1d3", null, false));
+					// RE-RULED 2026-07-24 (supersedes the LifeDrain/random-drainer version): the
+					// drain goes NOWHERE -- flat 2/round pooled inside the stone, then everything
+					// bursts back into the eater when the effect runs its full course. Early
+					// removal returns nothing.
+					actor.ApplyEffect(new XRL.World.Effects.Cleo_TerraFirma_StoneSiphon(Math.Max(1, drainRounds), 2));
 				}
 			}
 
@@ -343,15 +344,24 @@ namespace XRL.World.Parts.Mutation
 				}
 			}
 
-			// eaten quill burst (urchinite): you are the urchin -- neighbors are sprayed, you are not
+			// eaten quill burst (urchinite): you are the urchin -- neighbors are sprayed; the eater is
+			// USUALLY spared, but one quill in ten finds the way down wrong (10% self-prick, RULED
+			// 2026-07-24: "give it a small chance to prick the eater when they gobble it raw")
 			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenQuillBurst")) && actor.CurrentCell != null)
 			{
 				System.Collections.Generic.List<Cell> sprayed = actor.CurrentCell.GetLocalAdjacentCells();
 				sprayed.Add(actor.CurrentCell);
 				foreach (Cell c2 in sprayed)
-					foreach (GameObject o in c2.Objects)
+					// snapshot: TakeDamage can kill mid-loop, mutating the live object list under the
+					// enumerator (the geyser-urchinite MODERROR class, fixed the same way here)
+					foreach (GameObject o in new System.Collections.Generic.List<GameObject>(c2.Objects))
 						if (o != actor && o.HasPart("Combat") && o.PhaseMatches(actor))
 							o.TakeDamage(tag.RollCached(), "from a burst of stone quills!", "Stabbing", null, null, Attacker: actor, Owner: actor, Source: source);
+				if (Stat.Random(1, 100) <= 10)
+				{
+					Helpers.VerifyLog("LITH", "urchinite self-prick (the 10%)");
+					actor.TakeDamage(tag.RollCached(), "from a quill pricking on the way down!", "Stabbing", null, null, Attacker: null, Owner: null, Source: source);
+				}
 			}
 
 			// eaten lovesick (lovestone): you fall for the next thing you see -- the nearest visible
@@ -412,21 +422,29 @@ namespace XRL.World.Parts.Mutation
 			}
 
 			// eaten fugue clone (blurring rock): one temporal copy of the eater, serving the eater
-			// (the thrown semantics collapse: you are both victim and thrower)
+			// (the thrown semantics collapse: you are both victim and thrower). RULED 2026-07-24:
+			// a low chance (10%) of a SECOND copy -- sometimes the blur doubles.
 			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenFugueClone")) && actor.CurrentCell != null)
 			{
 				if (int.TryParse(tag, out int cloneDuration))
 				{
 					System.Collections.Generic.List<Cell> spots = actor.CurrentCell.GetLocalAdjacentCells();
 					spots.RemoveAll((Cell x) => x.IsSolid() || x.HasObjectWithPart("Combat"));
-					if (spots.Count > 0)
+					int copies = Stat.Random(1, 100) <= 10 ? 2 : 1;
+					for (int i = 0; i < copies && spots.Count > 0; i++)
 					{
-						Cell home = spots[Stat.Random(0, spots.Count - 1)];
+						int idx = Stat.Random(0, spots.Count - 1);
+						Cell home = spots[idx];
+						spots.RemoveAt(idx);
 						GameObject clone = TemporalFugue.CreateFugueCopyOf(actor, actor, home, source,
 							IsRealityDistortionBased: true, cloneDuration, HostileCopyChance: 100,
 							Context: "Cleo_TerraFirma_LithovoreEat");
-						if (clone != null && clone.Brain != null)
+						if (clone == null)
+							break;
+						if (clone.Brain != null)
 							clone.Brain.SetAlliedLeader<XRL.World.AI.AllySummon>(actor, 0, Silent: true);
+						if (i == 1)
+							Helpers.VerifyLog("LITH", "blurring eat: the 10% SECOND clone appeared");
 					}
 				}
 			}

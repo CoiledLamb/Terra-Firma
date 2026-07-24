@@ -150,15 +150,22 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
   signature action; Minor-vs-full tiering lever; six flags on the pass-1 assignment (twins'
   pot-gamble, electric-no-Minor wart, redundant pairs, eaten/cooked unification, grenade-in-pot,
   grind fork); stone-soup named recipe (park unless wanted).
-- [ ] 📜 `[ratify]` **Round-dial sweep** — mumbles 25% secrets, GasBelly name "roiling innards" +
-  density 30, siphonyx 7 rounds, quill 1d4, clone duration 10, lovesick nearest-visible reading
-  (+ self-love-when-alone keep?), static force bubble (vs following) **+ RULE TOGETHER (user
-  2026-07-23): self-cage passage — keep the shards' everyone-blocked prison (Claude lean: "doesn't
-  ask which side of the wall you meant to be on"; vibro cuts you out — EB synergy) vs AllowPassage
-  for the enclosed (needs one CanPass fall-through decomp check at build if chosen)**, galvena arc dice/range,
-  thunderclap dice, streakschorl leg range +6, warns on vitriolite/pulsestone (vetoable),
-  unpowered millstone grinding, per-rock powders (vs your "per-domain" word), Lithovore pass-1
-  magnitudes (soupstone 5000, temps ±150, harm dice, devour 2000 energy).
+- [x] 📜 `[ratify]` **Round-dial sweep — RUN 2026-07-24, mostly resolved.** RATIFIED: mumbles 25%
+  secrets ("okay ratio"), roiling innards name (language flyover owed at the text pass), quill 1d4,
+  lovesick nearest-visible + self-love-when-alone ("exactly as expected"), vitriolite/pulsestone
+  warns (Qud-standard, acid-container precedent), soupstone 5000 / temps ±150 / devour-as-full-meal.
+  CHANGED + BUILT + DEPLOYED: siphonyx eat → new `StoneSiphon` effect (drain goes NOWHERE, flat
+  2/round for 7, full heal-burst at natural expiry; early removal returns nothing) · urchinite eat
+  10% self-prick (+ snapshot-loop fix, geyser-MODERROR class) · blurring eat 10% second clone ·
+  shivshale bleed 1→1d2, stalactite 1→1d8 · millstone grinding now REQUIRES the mill to be
+  powered/turning ("The millstone is still." DRAFT; pestle = the unpowered fallback; user lean,
+  vetoable at verify).
+- [ ] 📜 `[ratify]` **Sweep residue (the escapees):** 🔁 **galvena arc dice/range — SKIPPED BY THE
+  USER A SECOND TIME** (13-for-14 again; the stone is dodging ratification) · thunderclap eat —
+  FLAGGED FOR REVISIT (user cooled on it now that dazestone is the canon daze rock; consider a new
+  streakschorl eat at eat-pass 2) · static-bubble + aegis self-cage — deferred to their OWN pass
+  (user) · per-rock powders — explanation owed in another pass before ruling · streakschorl leg
+  range 6 — elaboration delivered, ruling pending.
 - [ ] 📜 `[design]` **Accepted deviations — revisit only if they grate** — banned learned recipes
   still nourish; gas immunity is full-type not partial; pantry rules text stays commented out
   (grenade idiom); pestle-in-inventory mystery (moot since rock-side grinding).

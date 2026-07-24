@@ -130,7 +130,7 @@
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Bleed" PayloadDetail="1" />
 		<!-- Lithovore pass: NO cooking domain (lean-layer ruling: no weak agility exists base-side); eating a shiv is inadvisable (DRAFT dice) -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
-		<tag Name="Cleo_TerraFirma_EatenBleed" Value="1" /> <!-- nuance ruling 2026-07-22: internal bleeding (the engine's own Internal flag); was flat EatenHarm 1d4 -->
+		<tag Name="Cleo_TerraFirma_EatenBleed" Value="1d2" /> <!-- RATIFIED 1d2 (sweep 2026-07-24, was 1); internal bleeding (the engine's own Internal flag) -->
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d6" />
 	</object>
 
@@ -272,7 +272,7 @@
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="0" Payload="Effect" PayloadDetail="ShatteredArmor" PayloadAmount="100" PayloadOnThrowHit="true" DullAfter="0" />
 		<!-- Lithovore pass: NO cooking domain (it's a weapon, not food); swallowing a spear tip goes as expected (DRAFT dice) -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
-		<tag Name="Cleo_TerraFirma_EatenBleed" Value="1d2" /> <!-- nuance ruling 2026-07-22: internal bleeding; was flat EatenHarm 1d6 -->
+		<tag Name="Cleo_TerraFirma_EatenBleed" Value="1d8" /> <!-- RATIFIED 1d8 (sweep 2026-07-24, was 1d2; swallowing a spear tip goes as expected, emphatically) -->
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d6" />
 	</object>
 
@@ -814,7 +814,7 @@
 		<!-- Lithovore pass: HP domain (jerky family - the life-drinker feeds you); eaten raw = it drinks
 		     on the way down (DRAFT dice; a true inner latch is eat-pass 2 work) -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
-		<tag Name="Cleo_TerraFirma_EatenDrain" Value="7" /> <!-- nuance ruling 2026-07-22: it drinks on the way down (LifeDrain 1d3/round, drainer = the native random fallback: something, somewhere, gets fed); was flat EatenHarm 3d3 -->
+		<tag Name="Cleo_TerraFirma_EatenDrain" Value="7" /> <!-- RE-RULED 2026-07-24: the drain goes NOWHERE (StoneSiphon effect, flat 2/round pooled in the stone) and bursts back as healing at natural expiry; supersedes the LifeDrain random-drainer version -->
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d6" />
 	</object>
 
