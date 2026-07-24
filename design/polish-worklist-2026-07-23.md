@@ -40,18 +40,21 @@ number/text awaiting blessing · `[polish]`/`[text]` writing or cleanup work · 
 
 ## Pass 2 — Fissure + the Rock Catalog *(the thickest folder)*
 
-**Geometry / cast:**
-- [ ] 🆕 `[design]` **Depth QUANTITY buff** — spill-chance scaling proposal (20%+5%/step → 50% at
-  cap), optional +1 fall per 2 steps, optional quality-cap extension +6/Z40 → +8/Z50.
-- [ ] 📜 `[design]` **Prime falls scale with the fall bump?** — primes deliberately didn't grow when
-  fills did ("filler grows, jackpots don't") — explicit "flag if it should."
+**Geometry / cast — SUPERSEDED 2026-07-23 by the 9-tier Burgeoning realignment (see TODO.md
+"DRAWING BOARD" section; PARKED on the user's tier-2/3 filler-rock think):**
+- [~] 🆕 `[design]` **Depth QUANTITY buff — RULED 2026-07-23, build held with the restructure:**
+  spill scaling (a) YES (20%+5%/step, freeze at 50%); +falls (b) HELD as future dial; quality cap
+  (c) +8 reached at Z50, flat below (old "engine floor Z=50" decomp claim struck — wrong).
+- [x] 📜 `[design]` **Prime falls scale?** — ABSORBED by the restructure (moot under the
+  Burgeoning ±spread; primes' own fate is an open restructure ruling).
 - [ ] 📜 `[ratify]` **Carried-over v1 numbers** — cooldown 105−5×Lv floor 40, cost 3 MP — never
   explicitly signed.
 - [ ] 📜 `[polish]` **Multi-fall sound stack** — if per-cell slams are too loud, keep only the cast slam.
 
 **Strange rock (one-at-a-time bundle, user-held):**
 - [ ] 🆕 `[design]` **Band placement** — ~29% of Lv1 casts produce one; move to Band2New or cut
-  band-1 weight to ~2.
+  band-1 weight to ~2. *(2026-07-23: ABSORBED by the 9-tier restructure if it lands — every
+  placement gets re-decided there; revives as-written only if the restructure is vetoed.)*
 - [ ] 📜 `[design]` **Audit 1: mimic fix** — place-then-fire repairs the three dud mimics
   (lodestone/thrown-drainstone/crack) vs a curated strange-specific table.
 - [ ] 📜 `[design]` **Audit 2: deep reach** — keep the ~5% band-4 trickle in strange's pool or cut it.
