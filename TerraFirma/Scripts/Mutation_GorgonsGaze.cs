@@ -154,7 +154,12 @@ namespace XRL.World.Parts.Mutation
 		#region Helpers
 		public static int GetSaveDifficulty(int Lv)
 		{
-			return 8 + (Lv * 2);
+			// REBALANCED 2026-07-23 (was 8 + 2×Lv; riders vetoed, formula-only change): the old
+			// curve cliffed -- 26% statue vs contemporaries at Lv1 jumping to 91%+ by Lv4, with
+			// boss-tier trivialized by Lv7. Flattening to 11 + Lv opens stronger (Lv1 secures
+			// kills: ~70% trash / ~56% equals) and rises smoothly (equals 56/83/97/99; the real
+			// difficulty curve lives in the boss column: 16/40/70/83). Sim: scratchpad gaze_curves.py.
+			return 11 + Lv;
 		}
 
 		public static int GetRange(int Lv) => 80; // "sight", matching Sunder Mind — if you can see it, you can stone it

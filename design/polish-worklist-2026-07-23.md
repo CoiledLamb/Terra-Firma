@@ -184,9 +184,17 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
 
 ## Pass 5 — Gorgon's Gaze
 
-- [ ] 📜 `[design]` **Damage-breaks-gaze held lever** — testing has happened (the channel is
-  escapable but sticky); rule keep-or-add the damage break.
-- [ ] 📜 `[design]` **Per-tick LOS-break dial** — NPC-channel question, explicitly unruled.
+- [x] 📜 `[design]` **Damage-breaks-gaze held lever — RULED KEEP no-break 2026-07-23** (it's the
+  low-level survival mechanism: tank hits while channeling; a damage break would worsen exactly
+  the low-level weakness the user flagged).
+- [x] 📜 `[design]` **Per-tick LOS-break dial — RULED PARK 2026-07-23** with the creatures/quarriers
+  workstream (only matters for wild gorgon channels).
+- [x] 🆕 `[design]` **Save-DC curve REBALANCED + DEPLOYED 2026-07-23** (user find: low-level kill
+  security + the 26%→91% Lv1→4 cliff). Formula `8 + 2×Lv` → **`11 + Lv`** (one-line change; riders
+  — mark 4→2 fails, AV swap — VETOED, mark unchanged). Simmed (gaze_curves.py): vs equals
+  56/83/97/99 by Lv1/4/7/10 (was 26/91/100/100); trash at Lv1 ~70%; boss-tier 16/40/70/83 becomes
+  the true difficulty curve (was saturating at 99% by Lv7). `[verify]` show-save-rolls: opening DC
+  = 12+Lv+WIL in the log.
 - [ ] 📜 `[text]` **Gaze text already house-voice** — confirm no residue at the text pass.
 
 ## Pass 6 — Calcify
