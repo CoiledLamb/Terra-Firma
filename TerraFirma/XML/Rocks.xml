@@ -847,7 +847,10 @@
 	<object Name="Cleo_TerraFirma_Rock_DeepVoltaic" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="deep galvena" Tile="Items/sw_smallstone.bmp" ColorString="&amp;W" DetailColor="C" />
 		<part Name="Description" Short="Veins of metal braid denser in the deep strata, and the charge they carry has had ages to build. It does not wait to be asked." /> <!-- DRAFT -->
-		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
+		<!-- HEFT (RULED 2026-07-24, "deep stones want heft"): weight back to 5, real dice, heavier
+		     crush; weight over 1 also makes the deep four FULL meals via size-scaled satiety -->
+		<part Name="Physics" Weight="5" />
+		<part Name="ThrownWeapon" Damage="2d4" Penetration="6" />
 		<part Name="DischargeOnHit" ChargeUse="0" Voltage="2d4" DamageRange="2d6" />
 		<!-- thrown = strong arc (native part above) + a lingering surge field where it lands (hit or miss);
 		     stepped = a single hard jolt. The sting rides SelfHarm. -->
@@ -858,17 +861,18 @@
 		<tag Name="Cleo_TerraFirma_EatenHarm" Value="2d3" />
 		<tag Name="Cleo_TerraFirma_EatenHarmType" Value="Electric" />
 		<tag Name="Cleo_TerraFirma_EatenSpawn" Value="Cleo_TerraFirma_SurgeField" />
-		<tag Name="Cleo_TerraFirma_CrushDamage" Value="3d6" />
+		<tag Name="Cleo_TerraFirma_CrushDamage" Value="4d6" />
 	</object>
 
 	<object Name="Cleo_TerraFirma_Rock_DeepScorching" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="deep pyroclase" Tile="Items/sw_smallstone.bmp" ColorString="&amp;R" DetailColor="r" />
 		<part Name="Description" Short="A knuckle of the world's own furnace, still deciding whether to cool." /> <!-- DRAFT -->
-		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
+		<!-- HEFT (RULED 2026-07-24): weight 5 rides the Physics line below -->
+		<part Name="ThrownWeapon" Damage="2d4" Penetration="6" />
 		<!-- base temperature 500: radiates heat into neighboring floor cells where it lies and smart AI
 		     natively avoids anything over 200 (decompiled Physics); flame threshold pushed out of reach
 		     so it doesn't combust itself. It cools toward ambient over time - "came down glowing". -->
-		<part Name="Physics" Temperature="500" FlameTemperature="99999" VaporTemperature="999999" />
+		<part Name="Physics" Weight="5" Temperature="500" FlameTemperature="99999" VaporTemperature="999999" />
 		<!-- part above the grenade: sting + lava residue must fire before detonation destroys the rock -->
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Temperature" PayloadAmount="900" Byproduct="SmallLavaPuddle" ByproductOnThrow="1d2+1" ByproductOnStep="1d2" SelfHarm="1d3" SelfHarmType="Heat" />
 		<!-- Lithovore pass: full heat (deep = full domain); eaten = internal burn + the thermal grenade goes
@@ -878,15 +882,16 @@
 		<tag Name="Cleo_TerraFirma_EatenHarmType" Value="Heat" />
 		<tag Name="Cleo_TerraFirma_EatenDetonate" />
 		<part Name="ThermalGrenade" TemperatureDelta="900" />
-		<tag Name="Cleo_TerraFirma_CrushDamage" Value="3d6" />
+		<tag Name="Cleo_TerraFirma_CrushDamage" Value="4d6" />
 	</object>
 
 	<object Name="Cleo_TerraFirma_Rock_DeepIcy" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="deep frostspar" Tile="Items/sw_smallstone.bmp" ColorString="&amp;C" DetailColor="B" />
 		<part Name="Description" Short="Winter under pressure, condensed until it aches. The cold gets into the hand that holds it." /> <!-- DRAFT -->
-		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
+		<!-- HEFT (RULED 2026-07-24): weight 5 rides the Physics line below -->
+		<part Name="ThrownWeapon" Damage="2d4" Penetration="6" />
 		<!-- freeze/brittle thresholds pushed out of reach: a frozen item can't be picked up -->
-		<part Name="Physics" Temperature="-250" FreezeTemperature="-9999" BrittleTemperature="-99999" />
+		<part Name="Physics" Weight="5" Temperature="-250" FreezeTemperature="-9999" BrittleTemperature="-99999" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Temperature" PayloadAmount="-800" Byproduct="SmallConvalessencePuddle" ByproductOnThrow="1d2+1" ByproductOnStep="1d2" SelfHarm="1d3" SelfHarmType="Cold" />
 		<!-- Lithovore pass: full cold (deep = full domain); eaten = the freeze from within. DRAFT dice. -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
@@ -894,13 +899,15 @@
 		<tag Name="Cleo_TerraFirma_EatenHarmType" Value="Cold" />
 		<tag Name="Cleo_TerraFirma_EatenDetonate" />
 		<part Name="ThermalGrenade" TemperatureDelta="-800" />
-		<tag Name="Cleo_TerraFirma_CrushDamage" Value="3d6" />
+		<tag Name="Cleo_TerraFirma_CrushDamage" Value="4d6" />
 	</object>
 
 	<object Name="Cleo_TerraFirma_Rock_DeepMelting" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="deep vitriolite" Tile="Items/sw_smallstone.bmp" ColorString="&amp;G" DetailColor="g" />
 		<part Name="Description" Short="A stone dissolving itself out of spite. Everything it touches is invited." /> <!-- DRAFT -->
-		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
+		<!-- HEFT (RULED 2026-07-24): weight back to 5, real dice, heavier crush -->
+		<part Name="Physics" Weight="5" />
+		<part Name="ThrownWeapon" Damage="2d4" Penetration="6" />
 		<!-- thrown = corrosive gas (grenade) + 3-5 acid pools + cracks armor and breaks a random piece of
 		     the victim's gear (BreakGear channel); stepped (50%) = the same at half crack duration + 1-3
 		     pools. Part above the grenade, same ordering rule as above. -->
@@ -912,7 +919,7 @@
 		<tag Name="Cleo_TerraFirma_EatenHarmType" Value="Acid" />
 		<tag Name="Cleo_TerraFirma_EatenDetonate" />
 		<part Name="GasGrenade" GasObject="AcidGas" Density="80" />
-		<tag Name="Cleo_TerraFirma_CrushDamage" Value="3d6" />
+		<tag Name="Cleo_TerraFirma_CrushDamage" Value="4d6" />
 	</object>
 
 	<!-- deep galvena's afterglow: residual lightning that arcs at whoever is near for a few turns,

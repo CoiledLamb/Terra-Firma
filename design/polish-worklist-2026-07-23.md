@@ -65,8 +65,9 @@ three of four closed, BUILT + DEPLOYED:**
   survives on the victim instead of being cleaned up. The Latch channel itself got smarter:
   at-rest stones latch immediately, only true mid-flight throws defer.
 - [x] 📜 `[design]` **Audit 2: deep reach — KEPT**, deep four at half weight in the curated pool.
-- [ ] 📜 `[design]` **Audit 3: deep sting** — mimicked deep effects still cost the thrower nothing
-  (unaddressed by the audit ruling; the sting lives on the real stones only). Rule or accept.
+- [x] 📜 `[design]` **Audit 3: deep sting — BLESSED FREE 2026-07-24** ("blessing it here"): mimicked
+  deep effects cost the thrower nothing; the bite-back lives on the real stones only. The strange
+  bundle is CLOSED.
 - [x] 📜 `[design]` **Audit 4: wild spawns — CUT** ("cutting the weirder spawns"), no creatures in
   the pool. `[verify]` a dozen strange throws: every one visibly does something (gas, detonation,
   latch, floor opening, pulse); Lithovore strange-eat still resolves (same pool, fewer wasted rolls).
@@ -75,8 +76,11 @@ three of four closed, BUILT + DEPLOYED:**
 - [ ] 🆕 `[design]` **Chasm → visible pit** — user LEANING yes, not locked ("a lot of moving
   parts"). If adopted, holes must show the terrain below (PitMaterial/DropPit recipe reconned,
   in TODO drawing board); 3x3 native patch vs 1-tile subclass at build.
-- [ ] 🆕 `[design]` **Deep stones want heft** — bigger rock, higher damage, weight back up (e.g. 5),
-  size/description reading larger, crush optionally up.
+- [x] 🆕 `[design]` **Deep stones want heft — BUILT + DEPLOYED 2026-07-24** (numbers DRAFT for
+  veto): weight 1→5 (the flag's own number; knock-on: deep four now eat as FULL meals via
+  size-scaled satiety — fitting), thrown 1d3/pen4 → 2d4/pen6, crush 3d6→4d6. Descriptions
+  reading larger = owed at the text pass (noted). `[verify]` heft feels right in hand + the
+  full-meal eat.
 - [ ] 🆕 `[design]` **Pool-volume audit — AUDITED 2026-07-23, decision package ready.** Findings:
   SaltyWater/Slime/Acid/Salt puddles all spawn at a flat 500 drams (hence "pool" renders — one
   pebble births a water source; a waterskin holds 32); but base `OilPuddle` already ships
