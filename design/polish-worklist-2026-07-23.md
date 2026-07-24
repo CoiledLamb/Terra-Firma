@@ -64,6 +64,9 @@ stun-gas rock parked) — remaining before build: adopt-architecture, primes/sea
   (ape neutral, statuette baboon-troop). Keep wild / ally / cut creatures from the pool.
 
 **Rock-catalog design calls:**
+- [ ] 🆕 `[design]` **Chasm → visible pit** — RULED-direction 2026-07-23: holes must show the
+  terrain below (PitMaterial/DropPit recipe reconned, in TODO drawing board). At build: 3x3
+  native patch vs 1-tile PitMaterial subclass.
 - [ ] 🆕 `[design]` **Deep stones want heft** — bigger rock, higher damage, weight back up (e.g. 5),
   size/description reading larger, crush optionally up.
 - [ ] 🆕 `[design]` **Pool-volume audit** — brine geode's `SaltyWaterPuddle` is 500 drams (renders
