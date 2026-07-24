@@ -1,0 +1,601 @@
+<title>Fissure Pentacles — Terra Firma</title>
+<style>
+  /* Committed single-theme: a Qud terminal is a dark place. Deliberate. */
+  :root { color-scheme: dark; }
+  html { background: #10150f; }
+  body {
+    margin: 0; padding: 0;
+    background: #10150f;
+    color: #d8d2c2;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+  .mono { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
+
+  /* ---------- header ---------- */
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: #27a457; margin: 0 0 10px;
+  }
+  h1 {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: clamp(28px, 4.6vw, 44px); font-weight: 700;
+    margin: 0 0 8px; letter-spacing: -.01em; text-wrap: balance; color: #ece7d8;
+  }
+  .lede { max-width: 62ch; color: #98a08e; margin: 0 0 6px; font-size: 15px; }
+  .lede b { color: #d8d2c2; font-weight: 600; }
+  .provenance {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 11.5px; color: #6b7565; margin: 10px 0 0;
+  }
+
+  /* ---------- legend ---------- */
+  .legend {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 28px;
+    margin: 30px 0 8px; padding: 22px 24px;
+    background: #161d18; border: 1px solid #263029; border-radius: 6px;
+  }
+  .legend svg { flex: 0 0 auto; }
+  .axis-defs { flex: 1 1 300px; min-width: 260px; }
+  .axis-defs dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; }
+  .axis-defs dt {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 12px; letter-spacing: .14em; color: #ece7d8; white-space: nowrap; padding-top: 1px;
+  }
+  .axis-defs dt::before { content: "◆ "; color: #27a457; }
+  .axis-defs dd { margin: 0; font-size: 13px; color: #98a08e; }
+
+  /* ---------- controls ---------- */
+  .controls {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px;
+    margin: 22px 0 6px;
+  }
+  .controls .label {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #6b7565;
+    margin-right: 4px;
+  }
+  .chip {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 12.5px; color: #98a08e;
+    background: none; border: 1px solid #263029; border-radius: 4px;
+    padding: 5px 12px; cursor: pointer;
+  }
+  .chip:hover { color: #d8d2c2; border-color: #3a4a3e; }
+  .chip[aria-pressed="true"] { color: #10150f; background: #27a457; border-color: #27a457; font-weight: 700; }
+  .chip:focus-visible, .card:focus-visible, summary:focus-visible {
+    outline: 2px solid #27a457; outline-offset: 2px;
+  }
+
+  /* ---------- sections & grid ---------- */
+  .band-head {
+    display: flex; align-items: baseline; gap: 14px;
+    margin: 36px 0 4px; border-bottom: 1px solid #263029; padding-bottom: 8px;
+  }
+  .band-head h2 {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 16px; letter-spacing: .08em; margin: 0; color: #ece7d8; font-weight: 700;
+  }
+  .band-head .sub { font-size: 13px; color: #6b7565; }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+    gap: 14px; margin-top: 14px;
+  }
+
+  /* ---------- cards ---------- */
+  .card {
+    background: #161d18; border: 1px solid #263029; border-radius: 6px;
+    padding: 12px 12px 10px; cursor: default; position: relative;
+  }
+  .card:hover, .card:focus-visible { border-color: #35573f; }
+  .card h3 {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 13.5px; font-weight: 700; margin: 0; line-height: 1.25;
+  }
+  .card .sub {
+    font-size: 11px; color: #6b7565; display: block; min-height: 15px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .card svg { display: block; margin: 6px auto 2px; }
+  .cardfoot {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 10.5px; color: #6b7565; font-variant-numeric: tabular-nums;
+  }
+  .cardfoot .sum { color: #98a08e; }
+  .cardfoot .sortval { color: #ece7d8; font-weight: 700; }
+
+  /* ---------- tooltip ---------- */
+  #tip {
+    position: fixed; z-index: 10; max-width: 340px; pointer-events: none;
+    background: #0c110d; border: 1px solid #35573f; border-radius: 6px;
+    padding: 12px 14px; box-shadow: 0 8px 28px rgba(0,0,0,.55);
+    font-size: 12.5px; display: none;
+  }
+  #tip.show { display: block; }
+  #tip .t-name { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+  #tip .t-note { color: #98a08e; font-style: italic; margin-bottom: 8px; }
+  #tip table { border-collapse: collapse; width: 100%; }
+  #tip td { padding: 2.5px 0; vertical-align: top; }
+  #tip td.a {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 10.5px; letter-spacing: .1em; color: #ece7d8; white-space: nowrap; padding-right: 10px;
+  }
+  #tip td.p { padding-right: 10px; }
+  #tip td.r { color: #98a08e; }
+  .pip { display: inline-block; width: 7px; height: 7px; margin-right: 2px; border-radius: 1px; background: #263029; }
+  .pip.on { background: #27a457; }
+
+  /* ---------- living falls ---------- */
+  .living { margin-top: 14px; display: grid; gap: 10px; }
+  .living .row {
+    display: flex; gap: 14px; align-items: baseline;
+    background: #161d18; border: 1px solid #263029; border-radius: 6px; padding: 10px 14px;
+  }
+  .living .row b { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 13px; white-space: nowrap; }
+  .living .row span { color: #98a08e; font-size: 13px; }
+
+  /* ---------- table view ---------- */
+  details { margin-top: 40px; border-top: 1px solid #263029; padding-top: 16px; }
+  summary {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 13px; letter-spacing: .1em; color: #98a08e; cursor: pointer;
+  }
+  .tablewrap { overflow-x: auto; margin-top: 14px; }
+  .tablewrap table {
+    border-collapse: collapse; width: 100%; min-width: 640px;
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 12px; font-variant-numeric: tabular-nums;
+  }
+  .tablewrap th {
+    text-align: left; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: #6b7565; border-bottom: 1px solid #263029; padding: 6px 10px 6px 0; font-weight: 600;
+  }
+  .tablewrap th.n, .tablewrap td.n { text-align: right; }
+  .tablewrap td { border-bottom: 1px solid #1c231e; padding: 5px 10px 5px 0; color: #d8d2c2; }
+  .tablewrap td.n { color: #98a08e; }
+  .tablewrap td.tot { color: #ece7d8; font-weight: 700; }
+
+  footer.colophon {
+    margin-top: 48px; border-top: 1px solid #263029; padding-top: 14px;
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 11.5px; color: #6b7565; max-width: 74ch;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .card { transition: border-color .15s ease; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Terra Firma · Fissure Spec v2 · the ceiling census</p>
+    <h1>Fissure Pentacles</h1>
+    <p class="lede">Every stone the ceiling sheds, scored <b>0–5</b> on five axes: underfoot, in
+    flight, down a Lithovore's gullet, through the mill, and how far it strays from
+    <i>&ldquo;a rock that hurts.&rdquo;</i> Hover any pentacle for the per-axis reasoning.</p>
+    <p class="lede">Remember the house rules: rocks don't discriminate, and if the effect is
+    positive — <b>throw it at yourself</b>.</p>
+    <p class="provenance">scores are editorial, read from Rocks.xml + fissure-rock-list.md as of 2026-07-24 · many dice still DRAFT · 46 pocket stones + 6 terrain falls</p>
+  </header>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="controls" role="toolbar" aria-label="Sort stones">
+    <span class="label">Rank by</span>
+    <button class="chip" data-sort="band" aria-pressed="true">Band order</button>
+    <button class="chip" data-sort="0" aria-pressed="false">Stepped on</button>
+    <button class="chip" data-sort="1" aria-pressed="false">Thrown</button>
+    <button class="chip" data-sort="2" aria-pressed="false">Eaten raw</button>
+    <button class="chip" data-sort="3" aria-pressed="false">Cooked</button>
+    <button class="chip" data-sort="4" aria-pressed="false">Novelty</button>
+    <button class="chip" data-sort="sum" aria-pressed="false">Total</button>
+  </div>
+
+  <main id="app" aria-live="polite"></main>
+
+  <section aria-label="Living falls">
+    <div class="band-head"><h2>The falls that walk away</h2><span class="sub">creatures, not stones — the pentacle doesn't apply</span></div>
+    <div class="living">
+      <div class="row"><b style="color:#b1c9c3">baboon statuette</b><span>falls alive and allied; fights at range with real fissure stones and scavenges your spent ones off the floor. Expires into the rep-granting figurine.</span></div>
+      <div class="row"><b style="color:#cfc041">ape statue</b><span>albino-ape muscle in stone, +2 AV, acid-weak, no XP. Crumbles back to devourable rubble on its own schedule.</span></div>
+      <div class="row"><b style="color:#77bfcf">the omnigeysers</b><span>spitting → spewing → heaving: emplacements that shoot the very tables on this page at your enemies, paying HP per shot until they collapse.</span></div>
+    </div>
+  </section>
+
+  <details>
+    <summary>Table view — all 52, sortable axes as columns</summary>
+    <div class="tablewrap" id="tablewrap"></div>
+  </details>
+
+  <footer class="colophon">
+    STEP scores potency of the underfoot effect regardless of who benefits (a healstone
+    trap is a gift; a chasm is not). COOKED reads the Ground_* twin's mill domain —
+    grind-first, per the 2026-07-22 ruling. Crush dice shown per card are the
+    falling-impact channel, which is its own sixth story.
+  </footer>
+</div>
+
+<div id="tip" role="tooltip"></div>
+
+<script>
+// ---------- data ----------
+// scores: [step, throw, eaten raw, cooked, novelty]; why: one reason per axis.
+// qc: Qud ColorString letter for the name tint. crush: falling-impact dice.
+const AXES = ["STEP","THROW","EATEN","COOKED","NOVEL"];
+const QUD = { r:"#a64a2e", R:"#d74200", w:"#98875f", W:"#cfc041", c:"#40a4b9", C:"#77bfcf",
+  g:"#00b303", G:"#00c420", b:"#4a90ff", B:"#0096ff", m:"#b154cf", M:"#da5bd6",
+  y:"#b1c9c3", Y:"#ffffff", k:"#4a8a88", K:"#4a8a88" };
+
+const ROCKS = [
+// ---- Band I ----
+{band:1, name:"pebbles", sub:"the dull state itself", qc:"w", crush:"1",
+ s:[0,1,1,0,1], why:["no step payload — pebbles are what other rocks crumble into",
+ "1 damage, pen 1 — insult ammo","a plain half-snack","no domain; mills to rock flour",
+ "the deliberate baseline"], note:"Largely decorative. Every carried rock decays toward this."},
+{band:1, name:"fallen rock", sub:"the generic", qc:"y", crush:"2d6",
+ s:[0,2,1,0,0], why:["no step payload","1d3, pen 4 — an honest rock",
+ "a plain half-snack","no domain; rock flour","a fist of the ceiling, nothing more"],
+ note:"The control group. Everything below is measured against it."},
+{band:1, name:"brine geode", sub:"was: soupstone", qc:"c", crush:"2d4",
+ s:[2,1,3,3,2], why:["50% brine puddle underfoot","1d2 + a splash of salty water",
+ "a half-drink of brine locked in stone","thirst domain (pickles precedent)",
+ "a rock that remembers the sea"], note:"Hydration infrastructure that falls from the ceiling."},
+{band:1, name:"sludgabbro", sub:"was: sludgestone", qc:"g", crush:"2d4",
+ s:[2,2,1,2,2], why:["50% slime puddle — slip hazard","slime splash under the target",
+ "eaten: a pool of slime at your own feet","slime-spitting domain",
+ "terrain warfare in pocket form"], note:"Floor control disguised as a snack."},
+{band:1, name:"healstone", sub:"filler trio, 9-tier realignment", qc:"W", crush:"2d4",
+ s:[3,4,3,4,3], why:["25% half-heal for whoever steps — a friendly trap",
+ "2d4 heal, thrown at yourself; always breaks","heal-over-time (owed to eat-pass 2)",
+ "regen domain — healing food","poster child for 'positive: throw at yourself'"],
+ note:"A consumable by design; HoldChance 0, it never survives the kindness."},
+{band:1, name:"dazestone", sub:"filler trio", qc:"B", crush:"2d4",
+ s:[2,2,1,0,1], why:["25% daze underfoot","Dazed 6 rounds on hit","dazes the eater — why",
+ "domain still OPEN; flour meanwhile","a straightforward stun pebble"],
+ note:"The ring in it never quite stops."},
+{band:1, name:"oilstone", sub:"filler trio", qc:"K", crush:"2d4",
+ s:[3,2,1,3,2], why:["50% oil slick — slippery AND combustible 90",
+ "oil splash: a pre-soak for fire plans","a swallow of crude (owed to eat-pass 2)",
+ "heat domain (tentative)","exists to combo with pyroclase"],
+ note:"Sets the table. Something else lights the candle."},
+{band:1, name:"shivshale", sub:"was: pointy rock", qc:"Y", crush:"2d6",
+ s:[2,3,0,0,1], why:["25% bleed on barefoot traffic","1d4 pen 5 + stacking bleed",
+ "internal bleeding, 1d2 — inadvisable","no domain; you don't cook a shiv",
+ "a knife pretending to be a rock"], note:"Its point has never once been dulled by use."},
+{band:1, name:"chunk of salt", sub:"throw at yourself", qc:"Y", crush:"2d4",
+ s:[2,4,3,3,4], why:["50% salt puddle — harvestable","a full drink quenches the target's thirst",
+ "always tasty, plus the locked-in water","reliable tastyMinor",
+ "hydration by ballistics"], note:"The thirsty earth kept a little water inside."},
+{band:1, name:"strange rock", sub:"the lottery", qc:"M", crush:"2d4",
+ s:[3,4,2,5,5], why:["25% roll on the ENTIRE pool","becomes any rock in the catalog, decided mid-air",
+ "eats as a random rock that actually does something","the 36-domain union — wildcard ingredient",
+ "the meta-mimic; band 'any'"], note:"No two people describe it the same way. Neither do the same two people."},
+
+// ---- Band II ----
+{band:2, name:"vertigneiss", sub:"was: whorlstone", qc:"b", crush:"2d4",
+ s:[3,3,2,3,2], why:["25% confusion gas underfoot","a confusion cloud — solid crowd control",
+ "brief confusion, then you vent gas 50–250 turns (burp family)","confusion-breath domain",
+ "founder of the burp family"], note:"The eye keeps missing the middle."},
+{band:2, name:"lullabaster", sub:"was: torpor stone", qc:"w", crush:"2d4",
+ s:[3,4,1,3,2], why:["25% sleep gas underfoot","a sleeping crowd is a solved crowd",
+ "you nap — mid-fight, fatal","sleep-breath domain","sleep pools in its shadow"],
+ note:"Heavy stone, heavier air."},
+{band:2, name:"caromcobble", sub:"the rubber rock", qc:"w", crush:"2d4",
+ s:[3,2,2,2,5], why:["25% Prone — a permanent banana peel; it NEVER breaks",
+ "never lands where you aimed, ever; 2 random ricochet legs at 1d4",
+ "an involuntary, harmless hop","rubber domain (rubbergum parity)",
+ "the joke is intended, and eternal"], note:"A stone that never agreed to stop."},
+{band:2, name:"quarrelquartz", sub:"was: volatile rock", qc:"r", crush:"2d6",
+ s:[3,4,0,0,1], why:["25% detonation underfoot","a free HE grenade (1200 force)",
+ "it detonates. In you.","grenades don't mill","a grenade in a rock costume"],
+ note:"An argument sealed inside, waiting on the last word."},
+{band:2, name:"sporolith & kin", sub:"mycolite · blightchert · capstone", qc:"w", crush:"2d4",
+ s:[2,3,2,4,4], why:["25% spore puff at the stepper","fungal infection warfare, four flavors",
+ "a random infection incubates — occasionally a build unlocks","fungus domain; the lottery restamps per save",
+ "four disguises, shuffled every save"], note:"The rind of mold does more holding than the stone does."},
+{band:2, name:"shattered stalactite", sub:"cave-weighted 3:1", qc:"w", crush:"2d6",
+ s:[0,4,0,0,2], why:["inert underfoot — it already fell","1d6 pen 6 ShortBlades + ShatteredArmor −1 AV",
+ "swallowing a spear tip goes as expected: 1d8","no domain — it's a weapon, not food",
+ "weapon-grade ceiling"], note:"Honed by the fall. Weight 5; a spear stays a spear."},
+{band:2, name:"gossamarl", sub:"was: spiderweb stone", qc:"Y", crush:"2d4",
+ s:[2,3,2,4,3], why:["25% Stuck underfoot","webs burst + the target is entangled; one use",
+ "webs spill out around you — improvised cover","the bespoke Web domain: spinnerets in a stew",
+ "earned a cooking domain of its own"], note:"The strands remember their business."},
+{band:2, name:"oxidian", sub:"was: rusty rock", qc:"r", crush:"2d4",
+ s:[2,3,1,0,2], why:["25% rusting attack underfoot","Rusted gear — cruel vs the armored, nothing vs beasts",
+ "plain, faintly ferrous","no mill domain","gear warfare, band-2 edition"],
+ note:"What it touches, it teaches to decay."},
+{band:2, name:"grimslate", sub:"was: scary rock", qc:"K", crush:"2d4",
+ s:[2,3,1,3,2], why:["25% lesser fear underfoot","Terrified — formations shatter",
+ "the fear rock scares your gut; honest","fear domain (lah petals precedent)",
+ "dread as a pocketable"], note:"Nothing written on it, which is somehow worse."},
+{band:2, name:"tanglelith", sub:"was: bola rock", qc:"w", crush:"2d4",
+ s:[2,3,1,2,2], why:["25% Prone stumble","Stuck 20 rounds — held fast where it found you",
+ "plain","minor stability domain","cords that never learned to let go"],
+ note:"The bola, mineralized."},
+{band:2, name:"urchinite", sub:"was: spiny rock", qc:"m", crush:"2d4",
+ s:[3,3,3,3,3], why:["a 1d4 quill burst at the stepper","2d4 quills, area, on the throw",
+ "YOU are the urchin — the burst spares the eater","reflect domain (spine-fruit jam)",
+ "symmetrical spite: it works every direction"], note:"Packed too tight to stay together forever. The all-rounder."},
+{band:2, name:"compressed ash", sub:"osseous", qc:"K", crush:"2d4",
+ s:[2,3,0,0,2], why:["25% small ash cloud","osseous ash: smokescreen plus asphyxiation",
+ "choking, 1d3","no domain — armor was ruled too strong for its band",
+ "utility smoke off the shelf"], note:"Old fires pressed to a brick."},
+
+// ---- Band III ----
+{band:3, name:"galvena", sub:"was: voltaic rock", qc:"W", crush:"2d6",
+ s:[2,3,4,4,3], why:["25% jolt underfoot","1d4 discharge that arcs between creatures",
+ "the charge exits through you at the nearest creature — free lightning, eater unharmed",
+ "full electric domain","eating as a ranged attack"], note:"Older metals, still carrying."},
+{band:3, name:"pyroclase", sub:"was: scorching rock", qc:"R", crush:"2d6",
+ s:[3,4,2,2,1], why:["+400° underfoot","+400° on the burst — things catch fire",
+ "a warm swallow (+150)","heatMinor","the honest fire rock"],
+ note:"Came down glowing; has not forgiven the fall."},
+{band:3, name:"frostspar", sub:"was: icy rock", qc:"C", crush:"2d6",
+ s:[3,4,2,2,1], why:["−350° underfoot","−350° — freezing is a hard stop",
+ "a chilled swallow (−150)","coldMinor","the honest ice rock"],
+ note:"Winter, stored under pressure."},
+{band:3, name:"hushmica", sub:"was: pulsestone", qc:"c", crush:"2d6",
+ s:[2,4,0,4,2], why:["20% EMP r2 underfoot","EMP burst — robots stop being a problem",
+ "its grenade goes off in you; your gear, your problem","artifacts domain — prized eating",
+ "a metal rock with a machine grudge"], note:"Frequencies machines find upsetting."},
+{band:3, name:"conchalk", sub:"was: warped ajistone", qc:"m", crush:"2d6",
+ s:[3,3,2,5,4], why:["25% random gas underfoot","a random gas blueprint, rolled at emit time",
+ "a random cloud around you, plus a different gas per burp",
+ "EIGHT breath domains; one picked fresh per cook","chaos in a shell"],
+ note:"Whatever air it swallowed last comes out changed."},
+{band:3, name:"vantabsidian", sub:"portable night", qc:"K", crush:"2d6",
+ s:[2,3,1,4,3], why:["inert underfoot — but it unlights r5 wherever it lies",
+ "Blind 20 on hit, and the darkness travels with it","blind 50 turns; a long dark",
+ "darkness domain (Vanta Petals')","a field generator that skips stones"],
+ note:"Looking at it feels like a held breath."},
+{band:3, name:"vitriolite", sub:"was: melting rock", qc:"g", crush:"2d6",
+ s:[3,3,1,2,1], why:["50% acid puddle underfoot","acid splash on the hit",
+ "1d3 acid and a pool at your feet","acidMinor","the honest acid rock"],
+ note:"Losing an argument with itself."},
+{band:3, name:"farflint", sub:"was: shunting rock", qc:"B", crush:"2d6",
+ s:[3,4,3,4,3], why:["25% the stepper is 4–8 tiles elsewhere","the target teleports 8–16 tiles — melee threat deleted",
+ "an emergency exit, snack-sized","teleport domain (yondercane precedent)",
+ "was somewhere else a moment ago"], note:"Whatever it strikes goes to find out where."},
+{band:3, name:"streakschorl", sub:"was: hypersonic rock", qc:"C", crush:"2d6",
+ s:[0,5,3,3,5], why:["ANY step breaks it — 100%","auto-hit seeking flight, bounces to 2 more hostiles, vibro",
+ "a thunderclap: adjacent creatures Dazed, you're spared","minor quickness — speed is the identity",
+ "the geomagnetic disc's feral cousin"], note:"Still ringing from a speed it once knew. Single use; no return leg."},
+{band:3, name:"glowing rock", sub:"the gamble — radioactive twin", qc:"G", crush:"2d6",
+ s:[3,4,2,1,5], why:["25% Mutating underfoot","poison cloud + Mutating 100 on the throw",
+ "poison AND the mutation gamble — mutants only","selfPoison domain: the meal poisons its eater",
+ "half of the mod's best identification gamble"],
+ note:"Identical name, sprite, and description as its twin. Throwing one is the only test."},
+{band:3, name:"glowing rock", sub:"the gamble — phosphorescent twin", qc:"G", crush:"2d6",
+ s:[2,2,3,3,5], why:["25% Luminous — the stepper glows","the target is lit r3; nothing hides while marked",
+ "a tasty, harmless lightbulb snack","tastyMinor","the other half of the gamble; zero tells"],
+ note:"The benign twin. It offers no opinion on what the light is."},
+{band:3, name:"mullstone", sub:"second thoughts, at length", qc:"y", crush:"2d6",
+ s:[3,5,4,3,4], why:["25% one ability locked","ALL abilities on 10-round cooldown — espers silenced",
+ "refreshes one of YOUR cooldowns — the inversion survives","willpower domain",
+ "cooldown warfare, both directions"], note:"Invites second thoughts about everything you know how to do."},
+{band:3, name:"lattice euclase", sub:"was: lattice hexstone", qc:"B", crush:"2d6",
+ s:[3,4,1,3,3], why:["25% normality gas underfoot","normality — reality-benders hard-countered",
+ "tethered 50 turns while its gas bursts in you","normality-breath domain",
+ "right angles, enforced"], note:"Reality straightens up around it, embarrassed."},
+{band:3, name:"dotagate", sub:"was: lovestone", qc:"R", crush:"2d6",
+ s:[2,4,1,3,4], why:["25% Lovesick underfoot","sudden devotion to the thrower, ~50 rounds (a hostile act)",
+ "you fall for the next thing you see","love domain (congealed love)",
+ "weaponized affection"], note:"Warm to the touch, and pleased about something."},
+{band:3, name:"aegischist", sub:"was: shieldstone", qc:"C", crush:"2d6",
+ s:[3,3,4,4,3], why:["force closes around the stepper — protection, delivered underfoot",
+ "a line of force walls at the landing cell","a force bubble around you ~12 rounds — the panic button",
+ "big armor domain","a stone that refuses on your behalf"], note:"Defense in every direction it can be used."},
+{band:3, name:"phasalt", sub:"was: drifting rock", qc:"y", crush:"2d6",
+ s:[2,4,3,4,3], why:["25% the stepper phases out 30","phase an enemy out of the fight — or yourself out of danger",
+ "phased 5–10 turns; walk through one wall","phase domain (phase silk)",
+ "mostly elsewhere; holdable with concentration"], note:"Omniphase. It can be held, with concentration."},
+{band:3, name:"myriad gyrestone", sub:"the chaos crown", qc:"m", crush:"2d6",
+ s:[4,5,2,4,5], why:["TWO vortexes open at the stepper","a space-time vortex swallows the target to a random zone",
+ "a vortex opens at your cell. You knew what this was.","spacetime domain — but grinding releases 3 vortices first",
+ "nothing else deletes a problem this thoroughly"], note:"Sometimes the argument spills out."},
+{band:3, name:"siphonyx", sub:"was: drainstone", qc:"r", crush:"2d6",
+ s:[3,4,2,4,4], why:["25% latch at half duration","latches 15 rounds, Cursed, drains 1d3/round to the thrower",
+ "drains you, then bursts back as healing at expiry","HP domain (the jerky family)",
+ "cursed equipment as ammunition"], note:"It knows what it wants. Crumbles when sated."},
+{band:3, name:"lodestone", sub:"magnetic", qc:"K", crush:"2d6",
+ s:[3,4,1,0,4], why:["pulse r3 — worn metal rips free of the stepper","r6: gear off everyone, robots dragged in — yours too",
+ "the pulse centers on YOU; your own gear rips free","no domain",
+ "'rocks don't discriminate,' illustrated"], note:"Everything metal is owed to it, and it collects."},
+{band:3, name:"manymarble", sub:"was: blurring rock", qc:"y", crush:"2d6",
+ s:[3,5,4,3,5], why:["one fugue copy of the stepper, set against them","2 copies of the victim — serving YOU",
+ "a copy of you, serving you, 10 rounds","minor cloning (cloning draught)",
+ "outnumber them with themselves"], note:"Its edges refuse to commit. Hexstone counters it."},
+
+// ---- Band IV ----
+{band:4, name:"deep galvena", sub:"the T2 rule: it bites", qc:"W", crush:"4d6",
+ s:[4,5,2,4,3], why:["a single hard jolt (1d6, r4)","2d4 pen 6, a strong arc, and a lingering surge field; stings you 1d3",
+ "2d3 electric, then a surge field crackles out of you","full electric domain",
+ "ammunition that resents its wielder"], note:"The charge has had ages to build. Weight 5: a full meal."},
+{band:4, name:"deep pyroclase", sub:"base temperature 500°", qc:"R", crush:"4d6",
+ s:[4,5,1,4,3], why:["+900° underfoot","+900° plus lava-patch byproducts; stings you 1d3",
+ "2d3 heat and a thermal grenade in you","full heat domain",
+ "smart AI avoids the tile it merely lies in"], note:"Area denial at rest. A knuckle of the world's own furnace."},
+{band:4, name:"deep frostspar", sub:"base temperature −250°", qc:"C", crush:"4d6",
+ s:[4,5,1,4,3], why:["−800° underfoot","−800° plus convalessence patches — the freeze pays dividends; stings you 1d3",
+ "the freeze, from within","full cold domain","its byproduct is a healing liquid"],
+ note:"Winter condensed until it aches."},
+{band:4, name:"deep vitriolite", sub:"gear-breaker", qc:"G", crush:"4d6",
+ s:[4,5,1,4,3], why:["50%: gear-break AND acid underfoot","corrosive gas + 3–5 acid pools + breaks a worn piece; stings you 1d3",
+ "the burn plus corrosive gas from within","full acid domain",
+ "the only rock that un-equips your enemy"], note:"Everything it touches is invited to dissolve."},
+
+// ---- Terrain falls ----
+{band:5, name:"cracked floor", sub:"terrain — falls only", qc:"K", crush:"—",
+ s:[4,0,0,0,4], why:["15% the floor stops being your problem and becomes the next floor's",
+ "terrain; not throwable","terrain; not edible","terrain; not millable",
+ "dormant stairs that keep the mine asymmetry"], note:"Wide enough to have opinions about weight."},
+{band:5, name:"chasm", sub:"terrain — falls only", qc:"y", crush:"swallows",
+ s:[5,0,0,0,3], why:["always open; swallows creatures AND their loot",
+ "terrain","terrain","terrain","the overt counterpart to the crack"],
+ note:"Below is only more below."},
+{band:5, name:"rubble", sub:"terrain — falls only", qc:"y", crush:"3d6",
+ s:[1,0,2,0,1], why:["blocks the way; the 3d6 happens on landing, not stepping",
+ "can't be thrown, per base game","a famished-only mouthful for a Lithovore",
+ "not millable","broken past any use, blocking all the same"],
+ note:"The inert crush ladder, rung two."},
+{band:5, name:"crumbled wall", sub:"terrain — falls only", qc:"Y", crush:"5d6",
+ s:[1,0,2,0,1], why:["partial cover; crush 5d6 on landing","terrain",
+ "famished-only Lithovore fare","not millable","the midpoint of the ladder"],
+ note:"Too broken to stand, too stubborn to lie flat."},
+{band:5, name:"fallen wall", sub:"terrain — falls only", qc:"y", crush:"8d8 +15%☠",
+ s:[1,0,2,0,2], why:["a full wall now stands there","terrain",
+ "famished-only Lithovore fare","not millable","the instakill chance lives here"],
+ note:"Load-bearing for nothing."},
+{band:5, name:"stalagmite", sub:"terrain — falls only", qc:"w", crush:"3d6",
+ s:[0,0,0,0,3], why:["inert; it IS the floor's tooth","one hit breaks it into a shattered stalactite",
+ "solid terrain; not even a Lithovore's","not millable",
+ "a weapon piñata: HP 1, AV 0, hands over the goods"],
+ note:"Grown drip by patient drip, snapped loose all at once."}
+];
+
+const BANDS = {
+  1:{t:"Band I — the shallow shed", s:"mutation Lv 1–3 · pebbles to lotteries"},
+  2:{t:"Band II — the working stones", s:"mutation Lv 4–6 · gas, glue, and grudges"},
+  3:{t:"Band III — the deep talk", s:"mutation Lv 7+ · physics gets negotiable"},
+  4:{t:"Band IV — the deep stones", s:"effective level 10+ · every one bites its wielder"},
+  5:{t:"Terrain — what can't be pocketed", s:"falls-only · never in the throwable tables"}
+};
+
+// ---------- pentagon svg ----------
+const STAR = "#27a457";
+function pt(i, v, R){ const a = (-90 + i*72) * Math.PI/180; const r = v/5*R;
+  return [ (Math.cos(a)*r).toFixed(2), (Math.sin(a)*r).toFixed(2) ]; }
+function ringPts(k, R){ return [0,1,2,3,4].map(i => pt(i, k, R).join(",")).join(" "); }
+
+function pentagon(scores, R, hi){
+  const w = R*2 + 18, h = R*2 + 14;
+  let s = `<svg width="${w}" height="${h}" viewBox="${-w/2} ${-h/2+2} ${w} ${h}" role="img" aria-label="scores ${scores.join(", ")} of 5">`;
+  for (let k=1; k<=5; k++)
+    s += `<polygon points="${ringPts(k,R)}" fill="none" stroke="${k===5?"#2e3a31":"#1e2620"}" stroke-width="1"/>`;
+  for (let i=0; i<5; i++){ const [x,y] = pt(i,5,R);
+    s += `<line x1="0" y1="0" x2="${x}" y2="${y}" stroke="${hi===i?"#3a4a3e":"#1e2620"}" stroke-width="${hi===i?1.5:1}"/>`; }
+  const poly = scores.map((v,i)=>pt(i,v,R).join(",")).join(" ");
+  s += `<polygon points="${poly}" fill="${STAR}" fill-opacity=".28" stroke="${STAR}" stroke-width="2" stroke-linejoin="round"/>`;
+  scores.forEach((v,i)=>{ if (v>0){ const [x,y]=pt(i,v,R);
+    s += `<circle cx="${x}" cy="${y}" r="${hi===i?4:2.4}" fill="${hi===i?"#ece7d8":STAR}"/>`; }});
+  return s + "</svg>";
+}
+
+// ---------- legend ----------
+(function(){
+  const R = 62, w = R*2+120, h = R*2+46;
+  const L = ["STEP","THROW","EATEN RAW","COOKED","NOVELTY"];
+  let s = `<svg width="${w}" height="${h}" viewBox="${-w/2} ${-h/2} ${w} ${h}" role="img" aria-label="axis legend pentagon">`;
+  for (let k=1;k<=5;k++) s += `<polygon points="${ringPts(k,R)}" fill="none" stroke="${k===5?"#2e3a31":"#1e2620"}"/>`;
+  for (let i=0;i<5;i++){ const [x,y]=pt(i,5,R);
+    s += `<line x1="0" y1="0" x2="${x}" y2="${y}" stroke="#1e2620"/>`; }
+  // example star: chunk of salt
+  const ex=[2,4,3,3,4], poly = ex.map((v,i)=>pt(i,v,R).join(",")).join(" ");
+  s += `<polygon points="${poly}" fill="${STAR}" fill-opacity=".28" stroke="${STAR}" stroke-width="2" stroke-linejoin="round"/>`;
+  ex.forEach((v,i)=>{const [x,y]=pt(i,v,R); s+=`<circle cx="${x}" cy="${y}" r="2.6" fill="${STAR}"/>`;});
+  // ring numbers up the top spoke
+  for (let k=1;k<=5;k++){ const [x,y]=pt(0,k,R);
+    s += `<text x="${+x+6}" y="${+y+3}" font-size="8" fill="#6b7565" font-family="Consolas,monospace">${k}</text>`; }
+  const anch = ["middle","start","start","end","end"];
+  L.forEach((t,i)=>{ const [x,y]=pt(i,5.9,R);
+    s += `<text x="${x}" y="${+y+(i===0?-2:4)}" font-size="10.5" letter-spacing="1.5" fill="#ece7d8" text-anchor="${anch[i]}" font-family="Consolas,monospace">${t}</text>`; });
+  s += "</svg>";
+  document.getElementById("legend").innerHTML = s + `
+    <div class="axis-defs"><dl>
+      <dt>STEP</dt><dd>potency underfoot — trap value, whoever it blesses or ruins</dd>
+      <dt>THROW</dt><dd>potency in flight — damage, control, or a gift to yourself</dd>
+      <dt>EATEN RAW</dt><dd>worth to a Lithovore's gullet, straight off the floor</dd>
+      <dt>COOKED</dt><dd>worth at the mill — the Ground_ twin's cooking domain</dd>
+      <dt>NOVELTY</dt><dd>distance from &ldquo;a rock that hurts&rdquo;</dd>
+    </dl><p style="margin:10px 0 0;font-size:12px;color:#6b7565">shown: chunk of salt — hydration by ballistics</p></div>`;
+})();
+
+// ---------- cards ----------
+const sum = d => d.s.reduce((a,b)=>a+b,0);
+function nameColor(d){ return QUD[d.qc] || "#d8d2c2"; }
+
+function card(d, idx, hi){
+  const showVal = hi != null ? `<span class="sortval">${hi==="sum"? "Σ "+sum(d) : AXES[hi]+" "+d.s[hi]}</span>` : `<span class="sum">Σ ${sum(d)}</span>`;
+  return `<article class="card" tabindex="0" data-idx="${idx}" aria-label="${d.name}, total ${sum(d)} of 25">
+    <h3 style="color:${nameColor(d)}">${d.name}</h3>
+    <span class="sub">${d.sub}</span>
+    ${pentagon(d.s, 52, typeof hi === "number" ? hi : -1)}
+    <div class="cardfoot"><span>crush ${d.crush}</span>${showVal}</div>
+  </article>`;
+}
+
+const app = document.getElementById("app");
+function renderBands(){
+  let h = "";
+  for (const b of [1,2,3,4,5]){
+    h += `<section><div class="band-head"><h2>${BANDS[b].t}</h2><span class="sub">${BANDS[b].s}</span></div><div class="grid">`;
+    ROCKS.forEach((d,i)=>{ if (d.band===b) h += card(d,i,null); });
+    h += `</div></section>`;
+  }
+  app.innerHTML = h;
+}
+function renderSorted(key){
+  const order = ROCKS.map((d,i)=>i).sort((a,b)=>{
+    const va = key==="sum" ? sum(ROCKS[a]) : ROCKS[a].s[key];
+    const vb = key==="sum" ? sum(ROCKS[b]) : ROCKS[b].s[key];
+    return vb - va || sum(ROCKS[b]) - sum(ROCKS[a]);
+  });
+  const label = key==="sum" ? "total, best first" : "ranked by " + AXES[key].toLowerCase();
+  let h = `<section><div class="band-head"><h2>All 52 — ${label}</h2><span class="sub">terrain included; ties break on total</span></div><div class="grid">`;
+  order.forEach(i => h += card(ROCKS[i], i, key));
+  h += `</div></section>`;
+  app.innerHTML = h;
+}
+
+// ---------- sort chips ----------
+document.querySelectorAll(".chip").forEach(ch => ch.addEventListener("click", () => {
+  document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed","false"));
+  ch.setAttribute("aria-pressed","true");
+  const k = ch.dataset.sort;
+  if (k === "band") renderBands();
+  else renderSorted(k === "sum" ? "sum" : +k);
+}));
+
+// ---------- tooltip ----------
+const tip = document.getElementById("tip");
+function pips(v){ let s=""; for (let i=0;i<5;i++) s += `<span class="pip${i<v?" on":""}"></span>`; return s; }
+function showTip(cardEl){
+  const d = ROCKS[+cardEl.dataset.idx];
+  tip.innerHTML = `<div class="t-name" style="color:${nameColor(d)}">${d.name} <span style="color:#6b7565;font-weight:400">· ${d.band===5?"terrain":"band "+["I","II","III","IV"][d.band-1]}</span></div>
+    <div class="t-note">${d.note}</div>
+    <table>${d.s.map((v,i)=>`<tr><td class="a">${AXES[i]}</td><td class="p">${pips(v)}</td><td class="r">${d.why[i]}</td></tr>`).join("")}</table>`;
+  const r = cardEl.getBoundingClientRect();
+  tip.classList.add("show");
+  const tw = tip.offsetWidth, th = tip.offsetHeight;
+  let x = Math.min(Math.max(8, r.left), innerWidth - tw - 8);
+  let y = r.top - th - 8; if (y < 8) y = r.bottom + 8;
+  y = Math.max(8, Math.min(y, innerHeight - th - 8));
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function hideTip(){ tip.classList.remove("show"); }
+app.addEventListener("mouseover", e => { const c = e.target.closest(".card"); if (c) showTip(c); });
+app.addEventListener("mouseout",  e => { if (!e.relatedTarget || !e.relatedTarget.closest(".card")) hideTip(); });
+app.addEventListener("focusin",   e => { const c = e.target.closest(".card"); if (c) showTip(c); });
+app.addEventListener("focusout",  hideTip);
+addEventListener("scroll", hideTip, {passive:true});
+
+// ---------- table view ----------
+(function(){
+  let h = `<table><thead><tr><th>stone</th><th>band</th>`
+    + AXES.map(a=>`<th class="n">${a.toLowerCase()}</th>`).join("")
+    + `<th class="n">total</th><th class="n">crush</th></tr></thead><tbody>`;
+  const byTotal = [...ROCKS].sort((a,b)=>sum(b)-sum(a));
+  for (const d of byTotal){
+    h += `<tr><td style="color:${nameColor(d)}">${d.name}</td><td class="n">${d.band===5?"terrain":d.band}</td>`
+      + d.s.map(v=>`<td class="n">${v}</td>`).join("")
+      + `<td class="n tot">${sum(d)}</td><td class="n">${d.crush}</td></tr>`;
+  }
+  document.getElementById("tablewrap").innerHTML = h + "</tbody></table>";
+})();
+
+renderBands();
+</script>
