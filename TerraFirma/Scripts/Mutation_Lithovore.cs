@@ -268,25 +268,39 @@ namespace XRL.World.Parts.Mutation
 		private void FireEatChannels(GameObject actor, GameObject source)
 		{
 			string tag;
+			// verify instrumentation: one line per channel that actually fires, so the log-watch
+			// can confirm every bespoke eat without eyeballing each message
+			void LogChannel(string channel, string detail = null) =>
+				Helpers.VerifyLog("LITH", $"eaten channel {channel} ({source.Blueprint}){(string.IsNullOrEmpty(detail) ? "" : ": " + detail)}");
 
 			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenWater")))
 			{
 				if (int.TryParse(tag, out int amount))
+				{
+					LogChannel("Water", $"+{amount}");
 					actor.FireEvent(Event.New("AddWater", "Amount", amount));
+				}
 			}
 
 			if (source.HasTag("Cleo_TerraFirma_EatenTasty"))
+			{
+				LogChannel("Tasty");
 				ApplyRandomTasty(actor);
+			}
 
 			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenTemperature")))
 			{
 				if (int.TryParse(tag, out int delta) && actor.Physics != null)
+				{
+					LogChannel("Temperature", $"delta {delta}");
 					actor.Physics.Temperature += delta;
+				}
 			}
 
 			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenHarm")))
 			{
 				string type = source.GetTag("Cleo_TerraFirma_EatenHarmType", "Physical");
+				LogChannel("Harm", $"{tag} {type}");
 				actor.TakeDamage(Math.Max(1, tag.RollCached()),
 					"from " + source.an() + " settling poorly!", type,
 					null, null, Attacker: null, Owner: null, Source: source);
@@ -297,6 +311,7 @@ namespace XRL.World.Parts.Mutation
 			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenBleed")))
 			{
 				// the engine's own internal-bleeding flag, made for exactly this
+				LogChannel("Bleed", $"internal {tag}");
 				actor.ApplyEffect(new Bleeding(tag, 20, null, true, Internal: true));
 			}
 
@@ -308,6 +323,7 @@ namespace XRL.World.Parts.Mutation
 					// drain goes NOWHERE -- 1d3/round pooled inside the stone, then everything
 					// bursts back into the eater when the effect runs its full course. Early
 					// removal returns nothing.
+					LogChannel("Drain", $"siphon {drainRounds} rounds");
 					actor.ApplyEffect(new XRL.World.Effects.Cleo_TerraFirma_StoneSiphon(Math.Max(1, drainRounds), "1d3"));
 				}
 			}
@@ -315,13 +331,17 @@ namespace XRL.World.Parts.Mutation
 			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenSpew")))
 			{
 				// the burp family settles in for a while (50-250 turns ruled); "Random" = conchalk
+				LogChannel("Spew", $"gas belly {tag}");
 				actor.ApplyEffect(new Cleo_TerraFirma_GasBelly(Stat.Random(50, 250), tag));
 			}
 
 			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenMagnetPulse")))
 			{
 				if (int.TryParse(tag, out int radius) && actor.CurrentCell != null)
+				{
+					LogChannel("MagnetPulse", $"radius {radius}");
 					MagneticPulse.EmitMagneticPulse(actor, Math.Max(1, radius));
+				}
 			}
 
 			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenSpawn")))
@@ -332,6 +352,7 @@ namespace XRL.World.Parts.Mutation
 				Cell cell = actor.CurrentCell;
 				if (cell != null)
 				{
+					LogChannel("Spawn", $"{count}x {tag}");
 					cell.AddObject(GameObject.Create(tag));
 					System.Collections.Generic.List<Cell> open = cell.GetLocalAdjacentCells();
 					open.RemoveAll((Cell x) => x.IsSolid());
@@ -349,6 +370,7 @@ namespace XRL.World.Parts.Mutation
 			// 2026-07-24: "give it a small chance to prick the eater when they gobble it raw")
 			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenQuillBurst")) && actor.CurrentCell != null)
 			{
+				LogChannel("QuillBurst", tag);
 				System.Collections.Generic.List<Cell> sprayed = actor.CurrentCell.GetLocalAdjacentCells();
 				sprayed.Add(actor.CurrentCell);
 				foreach (Cell c2 in sprayed)
@@ -383,6 +405,7 @@ namespace XRL.World.Parts.Mutation
 							beloved = o;
 						}
 					}
+					LogChannel("Lovesick", beloved != null ? $"beloved={beloved.Blueprint} at d={best}" : "nothing in sight - SELF-love");
 					actor.ApplyEffect(new Lovesick(Math.Max(1, rounds), beloved ?? actor));
 				}
 			}
@@ -391,11 +414,16 @@ namespace XRL.World.Parts.Mutation
 			// shard blueprint carries its own Temporary duration)
 			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenForceBubble")) && actor.CurrentCell != null)
 			{
+				int shards = 0;
 				foreach (Cell bc in actor.CurrentCell.GetLocalAdjacentCells())
 				{
 					if (!bc.IsSolid() && bc.GetCombatTarget(actor, IgnoreFlight: true, IgnoreAttackable: false, IgnorePhase: false, 0, null, null, null, null, null, AllowInanimate: false) == null)
+					{
 						bc.AddObject(GameObject.Create(tag));
+						shards++;
+					}
 				}
+				LogChannel("ForceBubble", $"{shards} shard(s) placed");
 			}
 
 			// eaten random gas (ajistone): the aji conch's roll, centered on your own unfortunate cell
@@ -406,6 +434,7 @@ namespace XRL.World.Parts.Mutation
 					string gasBp = PopulationManager.GenerateOne("DynamicObjectsTable:AjiConch")?.Blueprint;
 					if (!string.IsNullOrEmpty(gasBp))
 					{
+						LogChannel("RandomGas", $"{gasBp} density {density}");
 						GameObjectBlueprint gbp = GameObjectFactory.Factory.GetBlueprint(gasBp);
 						GameObject gasObj = GameObject.Create(gasBp);
 						Gas gas = gasObj.GetPart<Gas>();
@@ -431,6 +460,7 @@ namespace XRL.World.Parts.Mutation
 					System.Collections.Generic.List<Cell> spots = actor.CurrentCell.GetLocalAdjacentCells();
 					spots.RemoveAll((Cell x) => x.IsSolid() || x.HasObjectWithPart("Combat"));
 					int copies = Stat.Random(1, 100) <= 10 ? 2 : 1;
+					LogChannel("FugueClone", $"{copies} planned, {spots.Count} open cell(s), duration {cloneDuration}");
 					for (int i = 0; i < copies && spots.Count > 0; i++)
 					{
 						int idx = Stat.Random(0, spots.Count - 1);
@@ -469,6 +499,7 @@ namespace XRL.World.Parts.Mutation
 						mark = o;
 					}
 				}
+				LogChannel("Arc", mark != null ? $"strikes {mark.Blueprint} at d={nearest} (voltage {voltage})" : "no target within range - harmless crackle");
 				if (mark != null)
 					mark.Discharge(null, Math.Max(1, voltage.RollCached()), 0, tag, null, actor, source, mark);
 				else if (actor.IsPlayer())
@@ -485,10 +516,14 @@ namespace XRL.World.Parts.Mutation
 					spots.RemoveAll((Cell x) => x.IsSolid() || x.HasObjectWithPart("Combat"));
 					if (spots.Count > 0)
 					{
-						actor.DirectMoveTo(spots[Stat.Random(0, spots.Count - 1)], 0, Forced: true, IgnoreCombat: true);
+						Cell dest = spots[Stat.Random(0, spots.Count - 1)];
+						LogChannel("Hop", $"to ({dest.X},{dest.Y}), radius {hopRadius}");
+						actor.DirectMoveTo(dest, 0, Forced: true, IgnoreCombat: true);
 						if (actor.IsPlayer())
 							MessageQueue.AddPlayerMessage("You bounce."); // DRAFT
 					}
+					else
+						LogChannel("Hop", "no open cell - hop fizzled");
 				}
 			}
 
@@ -496,12 +531,17 @@ namespace XRL.World.Parts.Mutation
 			// of displaced air; neighbors are dazed, the eater is spared (quill-burst loop shape)
 			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenThunderclap")) && actor.CurrentCell != null)
 			{
+				int dazedCount = 0;
 				System.Collections.Generic.List<Cell> clapped = actor.CurrentCell.GetLocalAdjacentCells();
 				clapped.Add(actor.CurrentCell);
 				foreach (Cell c2 in clapped)
 					foreach (GameObject o in c2.Objects)
 						if (o != actor && o.HasPart("Combat") && o.PhaseMatches(actor))
+						{
 							o.ApplyEffect(new Dazed(Math.Max(1, tag.RollCached())));
+							dazedCount++;
+						}
+				LogChannel("Thunderclap", $"{dazedCount} neighbor(s) dazed ({tag}), eater spared");
 				if (actor.IsPlayer())
 					MessageQueue.AddPlayerMessage("The stone's speed leaves you all at once."); // DRAFT
 			}
@@ -510,6 +550,7 @@ namespace XRL.World.Parts.Mutation
 			if (source.HasTag("Cleo_TerraFirma_EatenDetonate") && actor.CurrentCell != null)
 			{
 				IGrenade grenade = source.GetFirstPartDescendedFrom<IGrenade>();
+				LogChannel("Detonate", grenade != null ? grenade.GetType().Name + " bursts in the eater" : "NO grenade part found - nothing to detonate");
 				grenade?.Detonate(actor.CurrentCell, actor, actor, Indirect: true);
 			}
 		}

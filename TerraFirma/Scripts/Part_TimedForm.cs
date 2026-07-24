@@ -40,7 +40,7 @@ namespace XRL.World.Parts
 				return;
 			GameObject self = ParentObject;
 			Cell cell = self.CurrentCell;
-			Helpers.VerifyLog("FORM", $"{self.Blueprint} lifespan spent -> {(ReplacementBlueprint.IsNullOrEmpty() ? "nothing" : ReplacementBlueprint)}");
+			Helpers.VerifyLog("FORM", $"{self.Blueprint} lifespan spent -> {(ReplacementBlueprint.IsNullOrEmpty() ? "nothing" : ReplacementBlueprint)}; spilling {self.Inventory?.GetObjectsDirect()?.Count ?? 0} carried item(s)");
 			if (IComponent<GameObject>.Visible(self))
 				IComponent<GameObject>.AddPlayerMessage(self.Does(ExpireVerb) + " " + ExpireRest);
 			if (cell != null)

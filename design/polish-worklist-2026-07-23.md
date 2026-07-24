@@ -283,7 +283,11 @@ three of four closed, BUILT + DEPLOYED:**
   needs a fresh angle, placeholder still ships.
 - [ ] 📜 `[polish]` **Statue Maker item description** — "placeholder description >:)".
 - [ ] 🆕 `[polish]` **Strip `[TF-VERIFY]` instrumentation before release** — kill switch
-  `Helpers.VERIFY_WATCH`, or delete the call sites (now ~15 files after the session's additions).
+  `Helpers.VERIFY_WATCH`, or delete the call sites (now ~19 files after the 2026-07-24
+  coverage audit: user asked "make sure everything has new TF verifies" — gaps closed with a
+  new `GRIND` tag on Part_StoneMill (grinds + the power-gate refusal), per-channel `LITH`
+  "eaten channel" lines across all 18 Lithovore eat channels, spill counts on `FORM` expiry,
+  and a `SHAPE` no-body-fail line; everything still routes through the one kill switch).
 - [x] 📜 `[release]` **git init — DONE 2026-07-23** (fresh repo, no fork linkage, no trailer; history live since `b4ed68e`).
 - [ ] 📜 `[release]` **Workshop publishing plan + credits.**
 - [x] 📜 `[design]` **Stale `Cleo_TerraFirma_Ephemeral Stone` blueprint — RULED remove 2026-07-24
@@ -321,6 +325,11 @@ three of four closed, BUILT + DEPLOYED:**
   🆕 modular disable options (per-mutation off switches + a stones-off switch; recon notes in TODO).
 
 ## Appendix — remaining verify items (testing leftovers, not polish)
+
+**→ Interactive checklist for the next boot: `design/verify-pass.html`** (built 2026-07-24 at user
+request — 70 items grouped by mutation, LOG/EYES/EARS badges with the [TF-VERIFY] tag each LOG
+item proves out, checkbox state persists in-browser). The prose list below remains the record;
+the HTML is the play-session tool.
 
 Kitchen round (gyrestone mill safe, Inspired dish name, cooked domains firing, boulder 5–6,
 picker bans, bespoke eats: thunderclap/self-arc/siphonyx/hexstone-tether) · staged-fix smoke test

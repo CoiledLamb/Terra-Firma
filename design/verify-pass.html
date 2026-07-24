@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terra Firma — next-boot verify pass</title>
+<style>
+  :root {
+    --bg: #16181d; --panel: #1e2128; --text: #d7dae0; --dim: #8a8f99;
+    --accent: #3fb97f; --accent-dim: #2a5c44; --log: #5aa7e0; --eyes: #d9a441; --ears: #c07ad1;
+    --border: #2c3038; --done: #4b5058;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --bg:#f5f4f0; --panel:#ffffff; --text:#23262b; --dim:#6d7278; --accent:#1d8a56;
+            --accent-dim:#bfe6d3; --log:#2b6cb0; --eyes:#9c6b10; --ears:#8b3fa8; --border:#d8d5cd; --done:#a8aab0; }
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font: 15px/1.45 "Segoe UI", system-ui, sans-serif; margin: 0; padding: 24px; }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--dim); font-size: 13px; margin-bottom: 14px; }
+  .warnbox { background: var(--panel); border: 1px solid var(--eyes); border-left: 5px solid var(--eyes);
+             border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 14px; }
+  .barrow { display:flex; align-items:center; gap:12px; margin-bottom: 6px; position: sticky; top: 0;
+            background: var(--bg); padding: 8px 0; z-index: 5; }
+  .bar { flex:1; height: 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 7px; overflow: hidden; }
+  .bar > div { height: 100%; background: var(--accent); width: 0%; transition: width .25s; }
+  .count { font-variant-numeric: tabular-nums; color: var(--dim); font-size: 13px; white-space: nowrap; }
+  .filters { display:flex; flex-wrap:wrap; gap:6px; margin: 10px 0 18px; }
+  .filters button { background: var(--panel); color: var(--text); border: 1px solid var(--border);
+                    border-radius: 14px; padding: 3px 12px; font-size: 12.5px; cursor: pointer; }
+  .filters button.active { border-color: var(--accent); color: var(--accent); }
+  h2 { font-size: 16px; margin: 26px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .item { display: flex; gap: 10px; background: var(--panel); border: 1px solid var(--border);
+          border-radius: 6px; padding: 9px 12px; margin-bottom: 7px; }
+  .item.done { opacity: .55; }
+  .item.done .t { text-decoration: line-through; color: var(--done); }
+  .item input { margin-top: 3px; accent-color: var(--accent); width: 16px; height: 16px; flex: none; cursor: pointer; }
+  .t { font-weight: 600; }
+  .d { color: var(--dim); font-size: 13.5px; margin-top: 2px; }
+  .d b { color: var(--text); font-weight: 600; }
+  .badge { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: .04em;
+           border-radius: 4px; padding: 1px 7px; margin-left: 8px; vertical-align: 1px; }
+  .badge.LOG  { color: var(--log);  border: 1px solid var(--log); }
+  .badge.EYES { color: var(--eyes); border: 1px solid var(--eyes); }
+  .badge.EARS { color: var(--ears); border: 1px solid var(--ears); }
+  .tag { font-family: Consolas, monospace; font-size: 12px; color: var(--log); }
+  .foot { color: var(--dim); font-size: 12.5px; margin-top: 26px; }
+  .foot button { background:none; border:1px solid var(--border); color: var(--dim); border-radius: 4px;
+                 padding: 2px 10px; cursor: pointer; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Terra Firma — next-boot verify pass</h1>
+  <div class="sub">Compiled 2026-07-24 from TODO.md + the polish worklist. Checkboxes persist in this browser (localStorage).
+  <span class="badge LOG">LOG</span> = a <span class="tag">[TF-VERIFY]</span> line proves it &nbsp;
+  <span class="badge EYES">EYES</span> = watch the screen &nbsp; <span class="badge EARS">EARS</span> = listen.</div>
+
+  <div class="warnbox"><b>Before anything: FRESH CHARACTER REQUIRED.</b> The blueprint renames orphaned old saves
+  (and retire the stale +100 throw-accuracy wish). Turn on the <b>show-save-rolls</b> debug option and start the
+  log watcher (<span class="tag">watch-player-log.ps1</span>) before playing.</div>
+
+  <div class="barrow"><div class="bar"><div id="fill"></div></div><span class="count" id="count"></span></div>
+  <div class="filters" id="filters"></div>
+  <div id="list"></div>
+
+  <div class="foot">
+    Storage key <span class="tag">tf-verify-2026-07-24</span> ·
+    <button onclick="if(confirm('Clear all checks?')){localStorage.removeItem(KEY);state={};render();}">reset all checks</button>
+  </div>
+</div>
+<script>
+const ITEMS = [
+// ---- Session setup ----
+["setup-stonecarver","Session setup","EYES",null,"Stonecarver chargen end-to-end","Calling appears with +2 Willpower; gear spawns including chisel + mallet; tile renders."],
+["setup-pet","Session setup","EYES",null,"Boar Vessel starting pet","Selectable at chargen; produces water; pet responses fire; NoCombat holds."],
+["setup-urchin","Session setup","EYES",null,"Burrowing Urchin","Spawns and wall-walks (wish it in). Note: is it in any encounter table, or blueprint-only?"],
+["setup-watch","Session setup","LOG","—","Watcher running","[TF-VERIFY] lines flowing in Player.log from the session start; zero MODERROR / MODWARN frames all session."],
+
+// ---- Fissure & the catalog ----
+["fis-tier","Fissure & catalog","LOG","FIS","Tier spread + seam batching","Cast at several levels: cast line shows eff/depth/falls/spill/seam; ~half the falls are the seam stone and stack in the pack."],
+["fis-depth","Fissure & catalog","LOG","FIS","Depth scaling","Deep casts: spill% climbs (+5/step, caps 50%); eff caps at +8 by Z50."],
+["fis-crush","Fissure & catalog","LOG","FIS","Crush math + wall instakill","Crush lines show dice + proximity bonus; wall lands the 15% CRUSH INSTAKILL line eventually."],
+["fis-npc","Fissure & catalog","LOG","FIS","NPC Fissure caster","Wish one in: it casts, and its living falls ally to IT (unlocks dead-gorgon + stunned-caster tests too)."],
+["trio-heal","Fissure & catalog","LOG","ROCK","Healstone","Throw at yourself → heal line + ALWAYS breaks (consumable). A discarded one heals whoever steps on it."],
+["trio-daze","Fissure & catalog","LOG","ROCK","Dazestone","Hit → chance of Dazed via the payload line; step → reduced version. (Strange rock can mimic it — Effect channel.)"],
+["trio-oil","Fissure & catalog","LOG","ROCK","Oilstone","Splash on shatter, oil puddle on step; the puddle slips and BURNS."],
+["deep-heft","Fissure & catalog","EYES",null,"Deep four heft","Weight 5 in hand; thrown 2d4/pen6; crush 4d6; eating one is a FULL meal now."],
+["rock-strange","Fissure & catalog","LOG","ROCK","Strange rock ×12","A dozen throws: EVERY one visibly does something (gas, detonation, latch, floor opening, pulse). The STRANGE line names each roll; no 'PAYLOADLESS fizzle' should ever appear."],
+["rock-onepuddle","Fissure & catalog","LOG","ROCK","Death-spill: exactly ONE puddle","Throw-break a liquid rock: one puddle only (use-path spill suppressed against doubles)."],
+["rock-burn","Fissure & catalog","LOG","ROCK","Spill on destruction","Burn a brine geode in a fire → 'death spill' line + puddle where it died."],
+["rock-puddle","Fissure & catalog","EYES",null,"Puddle renders","Mod puddles (brine/slime/oil/salt/acid) render as 'puddle', not 'pool' (4d8 drams)."],
+["rock-carom","Fissure & catalog","LOG","ROCK","Caromcobble pratfall","Walk an enemy over it: 25% prone, rock survives every time (HoldChance 100 — the permanent banana peel)."],
+["rock-farflint","Fissure & catalog","LOG","ROCK","Farflint step shunt","Step proc at 25%; shunt distance halved (4–8 tiles)."],
+["rock-crack","Fissure & catalog","LOG","ROCK","Crack walk-over","Pull-down fires on walkers; StoneStep-tagged creatures pass over safely (stonestep line)."],
+["rock-drain","Fissure & catalog","LOG","DRAIN","Drainstone endings","Latch flesh → drain + 'gorged burst' at expiry. Latch a robot → attach-but-no-leech, 'dry crumble'."],
+["rock-aegis","Fissure & catalog","LOG","ROCK","Aegischist cage","Thrown hit → force ring closes, victim CANNOT slip out (12 rounds). Miss → wall line at the landing cell."],
+["rock-streak","Fissure & catalog","LOG","STRK","Streakschorl leftovers","Whorl vs incoming flight; NPC thrower; both render modes animate; save/load clean. (Core flight already confirmed.)"],
+["rock-decay","Fissure & catalog","LOG","ROCK","Hoard decay staggers","Carried rocks crumble to pebbles at rolled 1000–2500 — expiries staggered, not a message wall."],
+["rock-mull","Fissure & catalog","LOG","ROCK","Mullstone: exactly one refresh","Eat with 2+ abilities cooling → ONE refreshes with the 'suddenly feel ready' message."],
+
+// ---- Earthen Barrage & Gravel Whorl ----
+["eb-outcomes","Earthen Barrage & whorl","LOG","GVW","Outcome scale 50/30/20","Over a fight, deflects split three ways: devour / swat / ricochet lines."],
+["eb-feed","Earthen Barrage & whorl","LOG","GVW","Devoured plain stone feeds","Enemy-thrown plain stone devoured → charge count ticks up (capped) + 'The whorl thickens.'"],
+["eb-danger","Earthen Barrage & whorl","LOG","GVW","Dangerous devours","Quarrelquartz → detonates ON the defender, kill blamed on the THROWER; gyrestone → vortices in your lap; arrow → simply gone."],
+["eb-grenade","Earthen Barrage & whorl","LOG","GVW","Base-game grenade devour","Can an enemy grenade even reach the outcome scale (they usually target cells)? If devoured, it must explode."],
+["eb-ricochet","Earthen Barrage & whorl","EYES",null,"Ricochet trace VFX","Staggered gravel blips read as travel + endpoint dust puff; hits/flinches/landings resolve, incl. friendly fire and return-to-sender."],
+["eb-deflectplace","Earthen Barrage & whorl","LOG","GVW","Deflected item placement","Deflected thrown rock rests where the message says and SURVIVES (fragility skipped); javelins land at the outcome's cell too."],
+["eb-beam","Earthen Barrage & whorl","LOG","GVW","Resonant beam scatter","Hostile Lase: beams sometimes scatter (refract sound, random direction, can hit bystanders). Laser PISTOL shots resolve through the outcome scale ONLY — watch for double messages. Normal-mode whorl never scatters. Survives save/load."],
+["eb-resonant","Earthen Barrage & whorl","LOG","EB","Resonant numbers","Retune-in-place at net-zero charge; vs snapjaw ≈ 1 pen ~10 dmg (the ÷ display); DV +2/+4 while resonant."],
+["eb-icon","Earthen Barrage & whorl","EYES",null,"Attune Stones icon","Bespoke icon renders on the ability bar (flip Foreground/Detail if the emphasis reads inverted)."],
+["eb-option","Earthen Barrage & whorl","EYES",null,"Options entry visible","'Take Stones starts toggled on' (default Yes) appears in the Terra Firma options category."],
+["eb-reabsorb","Earthen Barrage & whorl","LOG","EB","Pocketed stone reabsorbs","Unequip a sculpted stone → next turn it returns to the earth, charge refunded (crumbles if reserve full); thrown stones still spend normally."],
+["eb-sounds","Earthen Barrage & whorl","EARS",null,"Cosmetic scaling sounds","Distinct throw vs impact sounds at Lv 1 / 5 / 10 + the daze visual (newest, least-tested cosmetic code)."],
+
+// ---- Gorgon's Gaze ----
+["gaze-dc","Gorgon's Gaze","LOG","GAZE","Opening DC","With show-save-rolls on: opening difficulty matches the new 11+Lv curve (+ your WIL mod; tracker arithmetic says the roll line reads 12+Lv+WIL with the first +1)."],
+["gaze-mark","Gorgon's Gaze","LOG","GAZE","Stone-mark exit","Escape after 4+ fails → partially petrified: −20 MS, −10 QN, +2 AV, 500 rounds."],
+["gaze-dead","Gorgon's Gaze","LOG","GAZE","Dead-gorgon release","Kill an NPC gorgon mid-channel → DEAD-GORGON RELEASE line, victim un-sticks (needs the NPC caster wish)."],
+["gaze-stun","Gorgon's Gaze","LOG","GAZE","Stunned caster","Stun a gazing gorgon: do tick lines keep coming (bug) or does the channel break? Sunder Mind breaks; ours is untested."],
+
+// ---- Stoneshaper ----
+["shape-swap","Stoneshaper","LOG","SHAPE","Swap-down at any level","Low-level recast prompts, then SWAP line: old statue de-animates into a lootable container; normal cooldown."],
+["shape-cd","Stoneshaper","LOG","SHAPE","Cooldown after statue death/expiry","Statue killed or expired: cooldown untouched (lifetime-as-cooldown retired). Watch for oddities — this is the flagged side-effect review."],
+["shape-ivory","Stoneshaper","LOG","SHAPE","No-body clean fail","Target a Young Ivory → 'no body plan' prompt, re-prompt, NO cooldown or wall spent (new no-body log line proves the path)."],
+["shape-muse","Stoneshaper","LOG","SHAPE","Weird-anatomy muse weapons","Odd bodies arm sensible stone weapons (muse weapon lines name them)."],
+["shape-step","Stoneshaper","LOG","ROCK","Statues vs floor stones","Carved statues currently SET OFF payload rocks underfoot — observe for the StoneStep roster conversation (ape/statuette/statue rule together)."],
+
+// ---- Lithovore & kitchen ----
+["lith-channels","Lithovore & kitchen","LOG","LITH","Eaten-channel sweep (NEW logs)","Every bespoke eat now logs 'eaten channel X'. Sweep: water, tasty, harm, bleed, siphon, spew, magnet pulse, spawn, quills, lovesick, bubble, random gas, clone, arc, hop, thunderclap, detonate."],
+["lith-arc","Lithovore & kitchen","LOG","LITH","Galvena arc (ratified 1d4 / r5)","Arc line names the NEAREST visible target — companions included; alone = 'harmless crackle'. Native lightning render draws."],
+["lith-clap","Lithovore & kitchen","LOG","LITH","Streakschorl thunderclap","Neighbors dazed 1d2+1, count in the log, eater spared. (Concept flagged for revisit — gather feel-data now.)"],
+["lith-hop","Lithovore & kitchen","LOG","LITH","Caromcobble hop","Involuntary hop to a random open cell within 2; destination in the log; 'You bounce.'"],
+["lith-siphon","Lithovore & kitchen","LOG","LITH","Siphonyx StoneSiphon","Drain per round pools NOWHERE, full heal-burst at natural expiry; early removal returns nothing."],
+["lith-belly","Lithovore & kitchen","LOG","BELLY","Gas belly + immunity","Vents every ~8 turns; you are immune to your CURRENT product (ambient clouds too); conchalk's protection rotates per vent."],
+["lith-spore","Lithovore & kitchen","LOG","SPORE","Fungal lottery permutation","Per-save shuffle line; the four fungal rocks map consistently within this run."],
+["lith-devour","Lithovore & kitchen","LOG","LITH","Universal statue devour","Famished: devour a Stilt shrine statue (blueprint-descent detection — universal means universal)."],
+["grind-mill","Lithovore & kitchen","LOG","GRIND","Millstone power gate (NEW logs)","A turning mill grinds pestle-free; a DEAD mill refuses: 'The millstone is still.' + refusal line. VETO POINT: should mills need power at all?"],
+["grind-pestle","Lithovore & kitchen","LOG","GRIND","Pestle grinding anywhere","Campfire menu + rock-side 'grind with your pestle' both work; grind line shows source → servings (2–3/rock, 5–6/boulder)."],
+["grind-names","Lithovore & kitchen","EYES",null,"Per-rock powder names","Ground galvena reads 'ground galvena' (not stamped stone meal); fungal grounds keep neutral labels; glowing-twin grounds indistinguishable."],
+["kitchen-domains","Lithovore & kitchen","EYES",null,"Cooked domains fire","Web (gossamarl), spacetime (gyrestone → vortex action), rubber (caromcobble), fungal cold-tell (hoarshroom roll); Inspired dish naming keys off real blueprints (ugly phrases = the unwritten HistorySpice, not a bug)."],
+
+// ---- Calcify & Geomancy ----
+["calc-npc","Calcify & Geomancy","LOG","CALC","NPC calcifier walls you off","Wish Calcify onto a creature, hurt it → defensive/retreat cast: perpendicular wall line across your approach."],
+["calc-look","Calcify & Geomancy","EYES",null,"Calcify AV-on-look + fallback","Wall AV reads right on look; zone with no default wall uses the sandstone fallback blueprint."],
+["geo-scan","Calcify & Geomancy","LOG","GEO","Gemstone scan + save/load","Reveal lines show radius/turns/scan; save/load with reveals active stays clean."],
+
+// ---- Creatures & timers ----
+["form-ape","Creatures & timers","LOG","FORM","Ape statue lifespan","At 500–1000 turns it crumbles to devourable rubble (FORM line)."],
+["form-baboon","Creatures & timers","LOG","FORM","Statuette → figurine + spill","Stiffens into the figurine item; the FORM line now COUNTS the spilled pocket stones; figurine grants baboon rep (AddsRep 200 DRAFT)."],
+["scav-first","Creatures & timers","LOG","SCAV","[SCAV] first fire","Has NEVER fired: watch a baboon statuette actually fetch loose stones (detour/stoop lines)."],
+["surge-first","Creatures & timers","LOG","SURGE","[SURGE] first fire","Has NEVER fired: deep galvena's lingering field arcs someone (~4 turns then gone)."],
+["baboon-pockets","Creatures & timers","EYES",null,"Baboon pocket counts","Hulking baboon carries 2–3 stones; Quartz baboon 0."],
+["geyser-text","Creatures & timers","EYES",null,"Geyser rules text — THE OBSERVATION","Write down VERBATIM what the spitting geyser's look-text says. Suspects narrowed to MentalShield or the creature chassis — NOT the fabricate chain."],
+["geyser-ff","Creatures & timers","LOG","GEYSER","Allied geyser watch item","One confirmed player hit (urchinite, quills). If it recurs with clear firing lines, the target-selection audit triggers."],
+
+// ---- Cross-cutting ----
+["save-gauntlet","Cross-cutting","LOG","—","Full-chaos save/load gauntlet","Save/load mid-gaze, with whorl active (beam-scatter registration is the one serialization unknown), latched drainstone, live surge field, mid-life statue — all resume clean, no MODERROR."],
+["sounds-pass","Cross-cutting","EARS",null,"Sound-pass listen-through","Statue rock-creature VO (idle/hurt/death/punch), Calcify cast slam, de-animation crumble, gaze escape stages, attune gemstone tick."],
+["fis-sound","Cross-cutting","EARS",null,"Multi-fall sound stack","If per-cell slams read as noise, flag it — the fallback ruling is cast-slam-only."]
+];
+
+const KEY = "tf-verify-2026-07-24";
+let state = {};
+try { state = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { state = {}; }
+let filter = "All";
+
+const groups = [...new Set(ITEMS.map(i => i[1]))];
+const filters = ["All", "LOG", "EYES/EARS", "Remaining", ...groups];
+
+function save() { localStorage.setItem(KEY, JSON.stringify(state)); }
+
+function visible(it) {
+  const [id, group, badge] = it;
+  if (filter === "LOG" && badge !== "LOG") return false;
+  if (filter === "EYES/EARS" && badge === "LOG") return false;
+  if (filter === "Remaining" && state[id]) return false;
+  if (groups.includes(filter) && group !== filter) return false;
+  return true;
+}
+
+function render() {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+  let lastGroup = null;
+  for (const it of ITEMS) {
+    if (!visible(it)) continue;
+    const [id, group, badge, tag, title, desc] = it;
+    if (group !== lastGroup) {
+      const h = document.createElement("h2");
+      h.textContent = group;
+      list.appendChild(h);
+      lastGroup = group;
+    }
+    const row = document.createElement("div");
+    row.className = "item" + (state[id] ? " done" : "");
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = !!state[id];
+    cb.onchange = () => { state[id] = cb.checked; if (!cb.checked) delete state[id]; save(); render(); };
+    const body = document.createElement("div");
+    const tagStr = badge === "LOG" && tag && tag !== "—" ? ' <span class="tag">[' + tag + ']</span>' : "";
+    body.innerHTML = '<div class="t">' + title + ' <span class="badge ' + badge + '">' + badge + '</span>' + tagStr + '</div>' +
+                     '<div class="d">' + desc + '</div>';
+    row.appendChild(cb); row.appendChild(body);
+    list.appendChild(row);
+  }
+  const done = ITEMS.filter(i => state[i[0]]).length;
+  document.getElementById("fill").style.width = (100 * done / ITEMS.length) + "%";
+  document.getElementById("count").textContent = done + " / " + ITEMS.length;
+  const fdiv = document.getElementById("filters");
+  fdiv.innerHTML = "";
+  for (const f of filters) {
+    const b = document.createElement("button");
+    b.textContent = f;
+    b.className = f === filter ? "active" : "";
+    b.onclick = () => { filter = f; render(); };
+    fdiv.appendChild(b);
+  }
+}
+render();
+</script>
+</body>
+</html>

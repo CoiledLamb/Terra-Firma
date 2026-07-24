@@ -159,6 +159,7 @@ namespace XRL.World.Parts.Mutation
 			{
 				// plants and other anatomy-less creatures (Young Ivory et al.) have nothing to render in stone;
 				// without this check the Body.Rebuild in ApplyStatueBuffs throws and the cast dies silently
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", $"no-body fail: {creature.Blueprint} refused cleanly (no cooldown, no wall spent), re-prompting");
 				E.Actor.Fail(creature.T() + creature.GetVerb("have") + " no body plan for you to carve.");
 				goto targetSelection;
 			}

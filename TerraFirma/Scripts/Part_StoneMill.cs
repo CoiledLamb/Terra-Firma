@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cleo.TerraFirma.Scripts;
 using ConsoleLib.Console;
 using XRL.Language;
 using XRL.Rules;
@@ -170,6 +171,7 @@ namespace XRL.World.Parts
 			{
 				if (!RequiresPestle && !HostMillTurning())
 				{
+					Helpers.VerifyLog("GRIND", $"millstone refused {E.Actor.Blueprint}: not powered/turning (the power-gate lean working)");
 					E.Actor.Fail("The millstone is still."); // DRAFT
 					return false;
 				}
@@ -287,6 +289,7 @@ namespace XRL.World.Parts
 				if (i < count - 1 && !GameObject.Validate(rock))
 					break; // stack died early somehow -- bail gracefully (live-fire showed Destroy never detonates, but the guard is free)
 			}
+			Helpers.VerifyLog("GRIND", $"{actor.Blueprint} ground {count}x {sourceBlueprint} -> {made} serving(s) of {lastPowder?.Blueprint ?? "nothing"}{(boulder ? " (boulder rate 5-6)" : "")}");
 			actor.PlayWorldSound("sfx_damage_stone");
 			if (actor.IsPlayer() && made > 0)
 			{
