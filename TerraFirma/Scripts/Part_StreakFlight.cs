@@ -115,6 +115,9 @@ namespace XRL.World.Parts
 				// spent at flight's end -- without this the lend leaks permanently (live-fire find
 				// 2026-07-23: only ONE lend line across three flights = the property stuck).
 				ParentObject.GetPart<Cleo_TerraFirma_FallenRockPart>()?.ReturnLentAccuracy();
+				// capture the slot BEFORE the split/flight: the hijack bypasses the engine's throw
+				// completion, so we must fire its replacement flow ourselves after the stone is spent
+				XRL.World.Anatomy.BodyPart thrownSlot = ParentObject.EquippedOn();
 				ParentObject.SplitFromStack(); // fly (and spend) exactly one from a stack
 				thrower.UseEnergy(1000, "Physical Skill Throwing Item");
 				List<GameObject> victims = Event.NewGameObjectList();
@@ -143,6 +146,15 @@ namespace XRL.World.Parts
 				}
 				Helpers.VerifyLog("STRK", $"FLIGHT: {thrower.Blueprint} throws at {victims[0].Blueprint}; {victims.Count - 1} bounce target(s) [{string.Join(", ", victims.Skip(1).Select(v => v.Blueprint))}], legRange={legRange}");
 				DoFlight(thrower, legs, victims, E.GetIntParameter("Phase"), E);
+				// the flight spent the stone outside the engine's throw path, so no one fired the
+				// replacement flow -- the next streakschorl in the bag never re-equipped and EB's
+				// auto-sculpt never re-armed (user live-fire find 2026-07-24). Fire it ourselves,
+				// but only when the slot really was vacated (fallback throws keep the normal path).
+				if (thrownSlot != null && (!GameObject.Validate(ParentObject) || ParentObject.EquippedOn() != thrownSlot))
+				{
+					Helpers.VerifyLog("STRK", $"flight spent the stone -> firing ReplaceThrownWeapon for {thrower.Blueprint}'s {thrownSlot.GetOrdinalName()}");
+					ReplaceThrownWeaponEvent.Check(thrower, ParentObject, thrownSlot);
+				}
 				return false;
 			}
 			return base.FireEvent(E);

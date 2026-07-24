@@ -271,6 +271,15 @@ three of four closed, BUILT + DEPLOYED:**
   threat twice, perpendicular picker chose 4 cells at Lv1, zone-default Shale material) — the
   2026-07-23 batch's log half is proven; placement eyeball rides the session.
 
+**Verify session 2 flag docket (2026-07-24, full entries in TODO.md § Verify session 2 findings;
+house rule set mid-session: FLAG mid-session, fix in the post-session batch):**
+- [ ] 🆕 `[bug]` **Thrown drainstone latch vanishes** — 4 payload fires, zero attachments;
+  diagnostics deployed, one throw next restart names the broken link.
+- [x] 🆕 `[bug]` **Streakschorl auto-equip** — FIXED + DEPLOYED (pre-rule): flight now fires
+  `ReplaceThrownWeaponEvent.Check` when it vacates the slot.
+- [ ] 🆕 `[design]` Strange→FugueClones miss-dud (flag-lite) · 🆕 `[bug?]` isolated NRE after a
+  torpor detonation (watch) · 🆕 `[bug?]` gyrestone null-cell post-throw (watch).
+
 - [x] 📜 `[design]` **NPC-caster gap — RULED batch-now + BUILT + DEPLOYED 2026-07-23** ("let's
   knock calcify off the list"). AI advertises on DEFENSIVE + RETREAT channels only — never
   offensive, since calcified stone is opaque both ways and Force Wall's owner-shoots-through

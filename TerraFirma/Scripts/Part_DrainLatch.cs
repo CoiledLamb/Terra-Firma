@@ -60,6 +60,7 @@ namespace XRL.World.Parts
 		/// <summary>Queue a latch for after the engine finishes resolving the throw.</summary>
 		public void RequestLatch(GameObject victim, int duration, GameObject drainer)
 		{
+			Helpers.VerifyLog("DRAIN", $"latch QUEUED for {victim?.Blueprint ?? "?"} ({duration} rounds), awaiting AfterThrown");
 			PendingVictim = victim;
 			PendingDuration = duration;
 			PendingDrainer = drainer;
@@ -67,6 +68,7 @@ namespace XRL.World.Parts
 
 		public override bool HandleEvent(AfterThrownEvent E)
 		{
+			Helpers.VerifyLog("DRAIN", $"AfterThrown reached DrainLatch: pending={(PendingVictim == null ? "NONE" : PendingVictim.Blueprint)}");
 			GameObject victim = PendingVictim;
 			PendingVictim = null;
 			if (GameObject.Validate(ref victim))
@@ -78,7 +80,10 @@ namespace XRL.World.Parts
 		public void Latch(GameObject victim, int duration, GameObject drainer)
 		{
 			if (RoundsLeft > 0 || !GameObject.Validate(ref victim) || victim.Body == null)
+			{
+				Helpers.VerifyLog("DRAIN", $"latch DECLINED at entry: roundsLeft={RoundsLeft}, victimValid={GameObject.Validate(ref victim)}, hasBody={victim?.Body != null}");
 				return;
+			}
 			GameObject.Validate(ref drainer);
 			ParentObject.SplitFromStack();
 			// candidate slots: reroll natural-weapon slots (claws and fists stay; masking a fist-only

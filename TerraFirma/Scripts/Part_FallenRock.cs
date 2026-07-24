@@ -882,11 +882,14 @@ namespace XRL.World.Parts
 				case "Latch": // drainstone: fastens onto the victim and drinks; amount = rounds (step = half via Reduced)
 					if (GameObject.Validate(ref victim) && ParentObject.GetPart<Cleo_TerraFirma_DrainLatch>() is Cleo_TerraFirma_DrainLatch latch)
 					{
+						Helpers.VerifyLog("DRAIN", $"latch dispatch: reduced={Reduced}, stoneCell={(ParentObject.CurrentCell == null ? "null" : "set")} -> {(Reduced || ParentObject.CurrentCell != null ? "IMMEDIATE" : "DEFERRED")}");
 						if (Reduced || ParentObject.CurrentCell != null)
 							latch.Latch(victim, Math.Max(1, amount), source); // at rest (stepped, or a PLACED strange surrogate): latch now
 						else
 							latch.RequestLatch(victim, Math.Max(1, amount), source); // mid-flight (no cell yet): defer until the engine finishes the throw
 					}
+					else
+						Helpers.VerifyLog("DRAIN", $"latch dispatch FAILED guard: victimValid={GameObject.Validate(ref victim)}, partPresent={ParentObject.GetPart<Cleo_TerraFirma_DrainLatch>() != null}");
 					break;
 				case "TempAlly": // lovestone thrown: a hostile act of sudden devotion; amount = rounds
 					if (GameObject.Validate(ref victim) && GameObject.Validate(ref source) && victim.Brain != null)
