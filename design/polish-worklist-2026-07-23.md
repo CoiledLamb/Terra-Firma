@@ -204,7 +204,8 @@ stun-gas rock parked) — remaining before build: adopt-architecture, primes/sea
   form verifies (it has).
 - [ ] 📜 **Parked design budget** — ceiling creatures (your shortlist), wall-growth harvestables,
   stonecarver static content (the lithovore's restaurant), lore items/books, wall kick, Geomancy
-  consumable, transmute-gemstone concept, throw-augmenting late-game items.
+  consumable, transmute-gemstone concept, throw-augmenting late-game items; 🆕 geode family
+  (beyond brine geode), 🆕 pour-into-container on the liquid rocks (ties to the pool-volume audit).
 
 ## Appendix — remaining verify items (testing leftovers, not polish)
 
