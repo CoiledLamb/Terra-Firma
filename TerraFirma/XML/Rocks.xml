@@ -61,11 +61,33 @@
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="3d6" />
 	</object>
 
+	<!-- ============ Rock-scale puddles (pool-volume ruling 2026-07-24: "a rock could hold no
+	     more than 16 drams, so 2d8") ============
+	     The base puddles spawn at a flat 500 drams and render as "pool of X" (a water source
+	     from a pebble); base OilPuddle's own StartVolume idiom is the fix pattern. These children
+	     override spawn volume only; everything else inherits. The pour-into-container park item
+	     draws from the same 2d8 budget. -->
+	<object Name="Cleo_TerraFirma_BrinePuddle" Inherits="SaltyWaterPuddle">
+		<part Name="LiquidVolume" StartVolume="2d8" />
+	</object>
+	<object Name="Cleo_TerraFirma_SlimePuddle" Inherits="SlimePuddle">
+		<part Name="LiquidVolume" StartVolume="2d8" />
+	</object>
+	<object Name="Cleo_TerraFirma_OilPuddle" Inherits="OilPuddle">
+		<part Name="LiquidVolume" StartVolume="2d8" />
+	</object>
+	<object Name="Cleo_TerraFirma_SaltPuddle" Inherits="SaltPuddle">
+		<part Name="LiquidVolume" StartVolume="2d8" />
+	</object>
+	<object Name="Cleo_TerraFirma_AcidPuddle" Inherits="AcidPuddle">
+		<part Name="LiquidVolume" StartVolume="2d8" />
+	</object>
+
 	<object Name="Cleo_TerraFirma_Rock_Soupstone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="brine geode" Tile="Items/sw_smallstone.bmp" ColorString="&amp;c" DetailColor="Y" /> <!-- was "soupstone"; rename pass 2 (2026-07-22) -->
 		<part Name="Description" Short="A porous stone sweating brine. The sea it remembers is long gone." />
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="Liquid" PayloadDetail="SaltyWaterPuddle" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="Liquid" PayloadDetail="Cleo_TerraFirma_BrinePuddle" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass (RULED 2026-07-22): thirst domain (pickles precedent, user-given); eaten raw = a half-drink of brine (DRAFT amount) -->
 		<tag Name="Cleo_TerraFirma_EatenWater" Value="5000" />
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
@@ -76,9 +98,9 @@
 		<part Name="Render" DisplayName="sludgabbro" Tile="Items/sw_smallstone.bmp" ColorString="&amp;g" DetailColor="w" /> <!-- was "sludgestone"; rename pass 2 (2026-07-22) -->
 		<part Name="Description" Short="Slick films of ooze pearl across this stone and never quite dry." />
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="Liquid" PayloadDetail="SlimePuddle" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="Liquid" PayloadDetail="Cleo_TerraFirma_SlimePuddle" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass: slime domain (base slime liquid precedent, user-given); eaten raw (RULED round 6) = a pool of slime at your feet -->
-		<tag Name="Cleo_TerraFirma_EatenSpawn" Value="SlimePuddle" />
+		<tag Name="Cleo_TerraFirma_EatenSpawn" Value="Cleo_TerraFirma_SlimePuddle" />
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
@@ -118,7 +140,7 @@
 		     LiquidOil verified: Combustibility 90, FlameTemperature 250, natively slippery.
 		     OilPuddle is 500-dram like SaltyWaterPuddle: rides the pool-volume audit with its
 		     siblings. Eaten = drink-oil event, owed to eat-pass 2. -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="Liquid" PayloadDetail="OilPuddle" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="Liquid" PayloadDetail="Cleo_TerraFirma_OilPuddle" PayloadOnThrowHit="true" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
 
@@ -139,7 +161,7 @@
 		<part Name="Description" Short="A cloudy crystal chipped from a brine seam. The thirsty earth kept a little water locked inside." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<!-- asymmetric: thrown = quench the target's thirst (one drink); underfoot = salt puddle -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="Water" PayloadAmount="10000" PayloadOnThrowHit="true" StepPayload="Liquid" StepPayloadDetail="SaltPuddle" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="Water" PayloadAmount="10000" PayloadOnThrowHit="true" StepPayload="Liquid" StepPayloadDetail="Cleo_TerraFirma_SaltPuddle" />
 		<!-- Lithovore pass: tastyMinor (RULED "always tasty"; base salt liquid is already tastyMinor - precedent-perfect) -->
 		<tag Name="Cleo_TerraFirma_EatenTasty" />
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
@@ -469,13 +491,13 @@
 		<part Name="Description" Short="A stone losing an argument with itself. What it sheds eats the floor." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- acid splash both ways (gear-damage half CUT, user ruling 2026-07-22) -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="Liquid" PayloadDetail="AcidPuddle" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="Liquid" PayloadDetail="Cleo_TerraFirma_AcidPuddle" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass: acidMinor (T1 = Minor tiering lever); eaten raw (RULED round 6) = it hurts and
 		     sheds a pool at your feet. Warn added for consistency with shivshale's harm-warn (vetoable). -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
 		<tag Name="Cleo_TerraFirma_EatenHarm" Value="1d3" />
 		<tag Name="Cleo_TerraFirma_EatenHarmType" Value="Acid" />
-		<tag Name="Cleo_TerraFirma_EatenSpawn" Value="AcidPuddle" />
+		<tag Name="Cleo_TerraFirma_EatenSpawn" Value="Cleo_TerraFirma_AcidPuddle" />
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d6" />
 	</object>
@@ -549,14 +571,14 @@
 		<part Name="Render" DisplayName="stone bite" ColorString="&amp;y" DetailColor="K" />
 	</object>
 
-	<!-- baboon figurine (#21) â€” CREATURE-FIRST redesign (user rulings 2026-07-22): a knee-high stone
+	<!-- baboon figurine (#21) Ã¢â‚¬â€ CREATURE-FIRST redesign (user rulings 2026-07-22): a knee-high stone
 	     baboon that falls alive and allied (DropRock brain-branch), fights at RANGE with real fissure
 	     stones (standard baboon loadout + pocket line; AIThrowAndScoot inherited from BaseBaboon is
-	     the whole skirmish AI), and scavenges spent stones off the floor (StoneScavenger â€” it picks
+	     the whole skirmish AI), and scavenges spent stones off the floor (StoneScavenger Ã¢â‚¬â€ it picks
 	     up your fissure fallout and throws it back for you). Baboon base stats per ruling (L5/HP5/AV2:
-	     small, weak, dies if cornered); the identity is the ARM â€” range/accuracy via actor properties,
+	     small, weak, dies if cornered); the identity is the ARM Ã¢â‚¬â€ range/accuracy via actor properties,
 	     not Strength (weak arm, uncanny aim; both Claude numbers). PERMANENT (ruled). Pickup, carrying,
-	     inventory activation, and rep are the auxiliary pocket-form pass â€” deliberately NOT built yet. -->
+	     inventory activation, and rep are the auxiliary pocket-form pass Ã¢â‚¬â€ deliberately NOT built yet. -->
 	<object Name="Cleo_TerraFirma_Rock_BaboonFigurine" Inherits="BaseBaboon">
 		<!-- "statuette" not "figurine" (user ruling 2026-07-22): base-game Figurines are inert trade
 		     goods and this is anything but. Internal blueprint name unchanged, house pattern. -->
@@ -911,7 +933,7 @@
 		<!-- thrown = corrosive gas (grenade) + 3-5 acid pools + cracks armor and breaks a random piece of
 		     the victim's gear (BreakGear channel); stepped (50%) = the same at half crack duration + 1-3
 		     pools. Part above the grenade, same ordering rule as above. -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="BreakGear" PayloadAmount="100" PayloadOnThrowHit="true" Byproduct="AcidPuddle" ByproductOnThrow="1d3+2" ByproductOnStep="1d3" SelfHarm="1d3" SelfHarmType="Acid" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="BreakGear" PayloadAmount="100" PayloadOnThrowHit="true" Byproduct="Cleo_TerraFirma_AcidPuddle" ByproductOnThrow="1d3+2" ByproductOnStep="1d3" SelfHarm="1d3" SelfHarmType="Acid" />
 		<!-- Lithovore pass: full acid (deep = full domain); eaten = the burn + corrosive gas from within
 		     (its own grenade at the eater's cell). DRAFT dice. -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />

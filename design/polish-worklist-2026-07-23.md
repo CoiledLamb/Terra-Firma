@@ -73,22 +73,22 @@ three of four closed, BUILT + DEPLOYED:**
   latch, floor opening, pulse); Lithovore strange-eat still resolves (same pool, fewer wasted rolls).
 
 **Rock-catalog design calls:**
-- [ ] 🆕 `[design]` **Chasm → visible pit** — user LEANING yes, not locked ("a lot of moving
-  parts"). If adopted, holes must show the terrain below (PitMaterial/DropPit recipe reconned,
-  in TODO drawing board); 3x3 native patch vs 1-tile subclass at build.
+- [x] 🆕 `[design]` **Chasm → visible pit — SPLIT RULED 2026-07-24: chasm CUT** (out of the tier-9
+  table, blueprint dormant) **+ BUILT + DEPLOYED; pits stay unlocked** ("too spicy to lock in
+  now") — the visible-pit successor gets its own future pass, PitMaterial/DropPit recon banked
+  in the TODO drawing board.
 - [x] 🆕 `[design]` **Deep stones want heft — BUILT + DEPLOYED 2026-07-24** (numbers DRAFT for
   veto): weight 1→5 (the flag's own number; knock-on: deep four now eat as FULL meals via
   size-scaled satiety — fitting), thrown 1d3/pen4 → 2d4/pen6, crush 3d6→4d6. Descriptions
   reading larger = owed at the text pass (noted). `[verify]` heft feels right in hand + the
   full-meal eat.
-- [ ] 🆕 `[design]` **Pool-volume audit — AUDITED 2026-07-23, decision package ready.** Findings:
-  SaltyWater/Slime/Acid/Salt puddles all spawn at a flat 500 drams (hence "pool" renders — one
-  pebble births a water source; a waterskin holds 32); but base `OilPuddle` already ships
-  `StartVolume="10d10"` (10–100 drams, renders puddle) and the deep byproduct patches use 15–20.
-  **The engine's own fix pattern is StartVolume.** Proposal to rule: mod child puddles (pure XML)
-  with StartVolume dice — your floated step=splash vs break=full-spill maps to two dice (e.g.
-  ~2d10 step, ~10d10 throw), and the pour-into-container park item should draw from the same
-  per-rock dram budget. Numbers yours.
+- [x] 🆕 `[design]` **Pool-volume audit — RULED + BUILT + DEPLOYED 2026-07-24:** "a rock could hold
+  no more than 16 drams, so 2d8." Five mod child puddles (Brine/Slime/Oil/Salt/Acid, StartVolume
+  2d8) replace the flat-500 base spawns across all eight references — thrown splashes, step
+  puddles, sludgabbro/vitriolite eaten-spawns, and deep vitriolite's byproduct pools. The
+  pour-into-container park item now has its dram budget: 2d8. Deep lava/convalessence patches
+  (15–20) untouched — elemental residue, not held liquid. `[verify]` a brine geode splash renders
+  "puddle," not "pool."
 - [x] 🆕 `[design]` **Aegischist thrown = impassable cage — BUILT + DEPLOYED 2026-07-23.** Hits cage
   the victim (bubble-shard ring, shared `PlaceForceRing`); misses keep the wall line. Both recon
   questions answered by decomp: `Unwalkable` forcefields reject EVERYONE (no owner-pass leak —
@@ -105,11 +105,14 @@ three of four closed, BUILT + DEPLOYED:**
 - [x] 🆕 `[design]` **Caromcobble trip-on-step — BUILT + DEPLOYED 2026-07-23** (StepChance 25 +
   Prone via the StepPayload override; HoldChance 100 = a permanent banana peel, intended).
   Numbers ride the ratify pile. `[verify]` walk an enemy over it → 25% prone, rock survives.
-- [ ] 🆕 `[design]` **StoneStep coverage** — three candidates, decide together: ape statue (the
-  acid-bane A/B evidence), Stoneshaper statues (C# — runtime creation path), future stonefrog.
+- [ ] 🆕 `[design]` **StoneStep coverage — DEFERRED 2026-07-24 by design** ("there may be more
+  creatures and i want them all to have this conversation in tandem"): the whole stone-creature
+  roster rules together when it's fuller. Candidates so far: ape statue, Stoneshaper statues
+  (C# carve path), stonefrog, whatever quarriers adds.
 - [ ] 🆕 `[design]` **Stone creatures catch fungal infections** — keep (stone grows gills) vs immunize.
 - [ ] 🆕 `[design]` **Allied geyser hit the player once** — watch item; audit target selection if it recurs.
-- [ ] 📜 `[design]` **Mutating no-ops silently on robots/purestock** — "(acceptable?)" needs an answer.
+- [x] 📜 `[design]` **Mutating no-ops silently on robots/purestock — ACCEPTED 2026-07-24** ("that's
+  fine"); the engine gate stands, the radioactive twin simply wastes its lottery on the unmutable.
 
 **Rock-catalog ratifications — SWEEP RUN 2026-07-24, everything ratified except two revisions:**
 - [x] 📜 `[ratify]` RATIFIED: HoldChance 25 · AcidResistance −50 · omnigeyser stats · figurine

@@ -275,8 +275,10 @@
 				<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_DeepMelting" />
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Wall" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Chasm" />
+				<!-- chasm CUT from play (ruling 2026-07-24: "chasms should get cut but pits are too
+				     spicy to lock in now"); blueprint stays dormant, and the visible-pit successor
+				     is its own future pass -->
+				<object Weight="20" Blueprint="Cleo_TerraFirma_Rock_Wall" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier8" />
 			</group>
 		</group>
