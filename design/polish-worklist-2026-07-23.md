@@ -82,11 +82,11 @@ three of four closed, BUILT + DEPLOYED:**
   size-scaled satiety — fitting), thrown 1d3/pen4 → 2d4/pen6, crush 3d6→4d6. Descriptions
   reading larger = owed at the text pass (noted). `[verify]` heft feels right in hand + the
   full-meal eat.
-- [x] 🆕 `[design]` **Pool-volume audit — RULED + BUILT + DEPLOYED 2026-07-24:** "a rock could hold
-  no more than 16 drams, so 2d8." Five mod child puddles (Brine/Slime/Oil/Salt/Acid, StartVolume
-  2d8) replace the flat-500 base spawns across all eight references — thrown splashes, step
+- [x] 🆕 `[design]` **Pool-volume audit — RULED + BUILT + DEPLOYED 2026-07-24** (revised same day
+  2d8 → **4d8**, 4–32 drams). Five mod child puddles (Brine/Slime/Oil/Salt/Acid, StartVolume
+  4d8) replace the flat-500 base spawns across all eight references — thrown splashes, step
   puddles, sludgabbro/vitriolite eaten-spawns, and deep vitriolite's byproduct pools. The
-  pour-into-container park item now has its dram budget: 2d8. Deep lava/convalessence patches
+  pour-into-container park item now has its dram budget: 4d8. Deep lava/convalessence patches
   (15–20) untouched — elemental residue, not held liquid. `[verify]` a brine geode splash renders
   "puddle," not "pool."
 - [x] 🆕 `[design]` **Aegischist thrown = impassable cage — BUILT + DEPLOYED 2026-07-23.** Hits cage

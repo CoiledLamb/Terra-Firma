@@ -61,26 +61,26 @@
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="3d6" />
 	</object>
 
-	<!-- ============ Rock-scale puddles (pool-volume ruling 2026-07-24: "a rock could hold no
-	     more than 16 drams, so 2d8") ============
+	<!-- ============ Rock-scale puddles (pool-volume ruling 2026-07-24; revised same day from
+	     2d8 to 4d8, so 4-32 drams) ============
 	     The base puddles spawn at a flat 500 drams and render as "pool of X" (a water source
 	     from a pebble); base OilPuddle's own StartVolume idiom is the fix pattern. These children
 	     override spawn volume only; everything else inherits. The pour-into-container park item
 	     draws from the same 2d8 budget. -->
 	<object Name="Cleo_TerraFirma_BrinePuddle" Inherits="SaltyWaterPuddle">
-		<part Name="LiquidVolume" StartVolume="2d8" />
+		<part Name="LiquidVolume" StartVolume="4d8" />
 	</object>
 	<object Name="Cleo_TerraFirma_SlimePuddle" Inherits="SlimePuddle">
-		<part Name="LiquidVolume" StartVolume="2d8" />
+		<part Name="LiquidVolume" StartVolume="4d8" />
 	</object>
 	<object Name="Cleo_TerraFirma_OilPuddle" Inherits="OilPuddle">
-		<part Name="LiquidVolume" StartVolume="2d8" />
+		<part Name="LiquidVolume" StartVolume="4d8" />
 	</object>
 	<object Name="Cleo_TerraFirma_SaltPuddle" Inherits="SaltPuddle">
-		<part Name="LiquidVolume" StartVolume="2d8" />
+		<part Name="LiquidVolume" StartVolume="4d8" />
 	</object>
 	<object Name="Cleo_TerraFirma_AcidPuddle" Inherits="AcidPuddle">
-		<part Name="LiquidVolume" StartVolume="2d8" />
+		<part Name="LiquidVolume" StartVolume="4d8" />
 	</object>
 
 	<object Name="Cleo_TerraFirma_Rock_Soupstone" Inherits="Cleo_TerraFirma_BaseFallenRock">
