@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <objects>
-  <object Name="TerraFirma_BoarVessel" Inherits="BaseAnimal">
+  <object Name="Cleo_TerraFirma_BoarVessel" Inherits="BaseAnimal">
     <part Name="Body" Anatomy="Pottery" />
     <part Name="Render" DisplayName="Boar Vessel" Tile="boar vessel.png" RenderString="b" ColorString="&amp;w" DetailColor="B" />
     <part Name="Description" Short="A roughly shaped piece of earth meant to resemble the common sow, mud still wet after decades of drying. Though the hands of whoever first worked this are unknown, their living record remains in this constant companion."></part>

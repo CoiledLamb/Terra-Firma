@@ -310,7 +310,7 @@
 
 	<!-- ============ v2 wave, band 2 (built 2026-07-22) ============ -->
 
-	<object Name="Cleo_TerraFirma_Rock_Oxidian" Inherits="Cleo_TerraFirma_BaseFallenRock">
+	<object Name="Cleo_TerraFirma_Rock_Rusty" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="oxidian" Tile="Items/sw_smallstone.bmp" ColorString="&amp;r" DetailColor="w" />
 		<part Name="Description" Short="A stone bled through with old iron. What it touches, it teaches to decay." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
@@ -318,7 +318,7 @@
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
 
-	<object Name="Cleo_TerraFirma_Rock_Grimslate" Inherits="Cleo_TerraFirma_BaseFallenRock">
+	<object Name="Cleo_TerraFirma_Rock_Scary" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="grimslate" Tile="Items/sw_smallstone.bmp" ColorString="&amp;K" DetailColor="r" />
 		<part Name="Description" Short="A dark tablet with nothing written on it, which is somehow worse." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
@@ -330,7 +330,7 @@
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
 
-	<object Name="Cleo_TerraFirma_Rock_Tanglelith" Inherits="Cleo_TerraFirma_BaseFallenRock">
+	<object Name="Cleo_TerraFirma_Rock_Bola" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="tanglelith" Tile="Items/sw_smallstone.bmp" ColorString="&amp;w" DetailColor="g" />
 		<part Name="Description" Short="Veins of some clinging mineral wrap this stone like cords that never learned to let go." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
@@ -342,7 +342,7 @@
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
 
-	<object Name="Cleo_TerraFirma_Rock_Urchinite" Inherits="Cleo_TerraFirma_BaseFallenRock">
+	<object Name="Cleo_TerraFirma_Rock_Spiny" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="urchinite" Tile="Items/sw_smallstone.bmp" ColorString="&amp;m" DetailColor="Y" />
 		<part Name="Description" Short="A knot of stone spines packed too tight to stay together forever." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d4" Penetration="5" />
@@ -531,14 +531,14 @@
 		<part Name="Render" DisplayName="stone bite" ColorString="&amp;y" DetailColor="K" />
 	</object>
 
-	<!-- baboon figurine (#21) — CREATURE-FIRST redesign (user rulings 2026-07-22): a knee-high stone
+	<!-- baboon figurine (#21) â€” CREATURE-FIRST redesign (user rulings 2026-07-22): a knee-high stone
 	     baboon that falls alive and allied (DropRock brain-branch), fights at RANGE with real fissure
 	     stones (standard baboon loadout + pocket line; AIThrowAndScoot inherited from BaseBaboon is
-	     the whole skirmish AI), and scavenges spent stones off the floor (StoneScavenger — it picks
+	     the whole skirmish AI), and scavenges spent stones off the floor (StoneScavenger â€” it picks
 	     up your fissure fallout and throws it back for you). Baboon base stats per ruling (L5/HP5/AV2:
-	     small, weak, dies if cornered); the identity is the ARM — range/accuracy via actor properties,
+	     small, weak, dies if cornered); the identity is the ARM â€” range/accuracy via actor properties,
 	     not Strength (weak arm, uncanny aim; both Claude numbers). PERMANENT (ruled). Pickup, carrying,
-	     inventory activation, and rep are the auxiliary pocket-form pass — deliberately NOT built yet. -->
+	     inventory activation, and rep are the auxiliary pocket-form pass â€” deliberately NOT built yet. -->
 	<object Name="Cleo_TerraFirma_Rock_BaboonFigurine" Inherits="BaseBaboon">
 		<!-- "statuette" not "figurine" (user ruling 2026-07-22): base-game Figurines are inert trade
 		     goods and this is anything but. Internal blueprint name unchanged, house pattern. -->
@@ -707,7 +707,7 @@
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d6" />
 	</object>
 
-	<object Name="Cleo_TerraFirma_Rock_Phasalt" Inherits="Cleo_TerraFirma_BaseFallenRock">
+	<object Name="Cleo_TerraFirma_Rock_Drifting" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="phasalt" Tile="Items/sw_smallstone.bmp" ColorString="&amp;y" DetailColor="K" />
 		<part Name="Description" Short="A stone that is mostly elsewhere. It can be held, with concentration." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
@@ -1013,7 +1013,7 @@
 		<part Name="Render" DisplayName="ground capstone" ColorString="&amp;m" DetailColor="w" />
 		<part Name="Cleo_TerraFirma_FungalLottery" Slot="3" />
 	</object>
-	<object Name="Cleo_TerraFirma_Ground_Grimslate" Inherits="Cleo_TerraFirma_BaseGroundRock">
+	<object Name="Cleo_TerraFirma_Ground_Scary" Inherits="Cleo_TerraFirma_BaseGroundRock">
 		<part Name="Render" DisplayName="ground grimslate" ColorString="&amp;K" DetailColor="r" />
 		<part Name="PreparedCookingIngredient" type="fear" charges="1" />
 		<tag Name="AggregatedIngredient" Value="Grimslate" />
@@ -1033,7 +1033,7 @@
 		<part Name="PreparedCookingIngredient" type="Cleo_TerraFirma_Web" charges="1" />
 		<tag Name="AggregatedIngredient" Value="Gossamarl" />
 	</object>
-	<object Name="Cleo_TerraFirma_Ground_Urchinite" Inherits="Cleo_TerraFirma_BaseGroundRock">
+	<object Name="Cleo_TerraFirma_Ground_Spiny" Inherits="Cleo_TerraFirma_BaseGroundRock">
 		<part Name="Render" DisplayName="ground urchinite" ColorString="&amp;m" DetailColor="Y" />
 		<part Name="PreparedCookingIngredient" type="reflect" charges="1" />
 		<tag Name="AggregatedIngredient" Value="Urchinite" />
@@ -1134,7 +1134,7 @@
 		<part Name="PreparedCookingIngredient" type="armor" charges="1" />
 		<tag Name="AggregatedIngredient" Value="Aegischist" />
 	</object>
-	<object Name="Cleo_TerraFirma_Ground_Phasalt" Inherits="Cleo_TerraFirma_BaseGroundRock">
+	<object Name="Cleo_TerraFirma_Ground_Drifting" Inherits="Cleo_TerraFirma_BaseGroundRock">
 		<part Name="Render" DisplayName="ground phasalt" ColorString="&amp;y" DetailColor="K" />
 		<part Name="PreparedCookingIngredient" type="phase" charges="1" />
 		<tag Name="AggregatedIngredient" Value="Phasalt" />
@@ -1178,7 +1178,7 @@
 		<part Name="PreparedCookingIngredient" type="acid" charges="1" />
 		<tag Name="AggregatedIngredient" Value="DeepVitriolite" />
 	</object>
-	<object Name="Cleo_TerraFirma_Ground_Tanglelith" Inherits="Cleo_TerraFirma_BaseGroundRock">
+	<object Name="Cleo_TerraFirma_Ground_Bola" Inherits="Cleo_TerraFirma_BaseGroundRock">
 		<part Name="Render" DisplayName="ground tanglelith" ColorString="&amp;w" DetailColor="g" />
 		<part Name="PreparedCookingIngredient" type="stabilityMinor" charges="1" />
 		<tag Name="AggregatedIngredient" Value="Tanglelith" />

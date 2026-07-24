@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <populations>
 	<!-- ====== Fissure Spec v2 rock bands (2026-07-22): what the ceiling sheds, per tier.
 	     Bands nest (2 contains 1 at weight 60, 3 contains 2) so the power curve blends.
@@ -22,10 +22,10 @@
 			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_CompressedAsh" />
 			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Spiderweb" />
 			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_ShatteredStalactite" />
-			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Oxidian" />
-			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Grimslate" />
-			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Tanglelith" />
-			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Urchinite" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Rusty" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Scary" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Bola" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Spiny" />
 		</group>
 	</population>
 	<population Name="Cleo_TerraFirma_ThrowableRocksBand3">
@@ -47,7 +47,7 @@
 			<object Weight="7" Blueprint="Cleo_TerraFirma_Rock_Hexstone" />
 			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Lovestone" />
 			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Shieldstone" />
-			<object Weight="7" Blueprint="Cleo_TerraFirma_Rock_Phasalt" />
+			<object Weight="7" Blueprint="Cleo_TerraFirma_Rock_Drifting" />
 			<object Weight="4" Blueprint="Cleo_TerraFirma_Rock_Gyrestone" />
 			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Drainstone" />
 			<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Lodestone" />
@@ -149,7 +149,7 @@
 				     the mutation substitutes every stalactite roll with a stalagmite at fall time -->
 				<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_ShatteredStalactite" />
 				<object Weight="3" Blueprint="Cleo_TerraFirma_Rock_Stalagmite" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Oxidian" />
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Rusty" />
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Generic" />
@@ -165,7 +165,7 @@
 			<group Name="Headliners" Weight="75" Style="pickone">
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Whorlstone" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Torpor" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Grimslate" />
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Scary" />
 				<group Name="Fungal" Weight="10" Style="pickone">
 					<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Fungal" />
 					<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_FungalLuminous" />
@@ -185,9 +185,9 @@
 	<population Name="Cleo_TerraFirma_FissureTier5">
 		<group Name="Rocks" Style="pickone">
 			<group Name="Headliners" Weight="75" Style="pickone">
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Tanglelith" />
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Bola" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Spiderweb" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Urchinite" />
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Spiny" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Rubber" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_CompressedAsh" />
 				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_BaboonFigurine" />
@@ -261,7 +261,7 @@
 			<group Name="Headliners" Weight="75" Style="pickone">
 				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Blurring" />
 				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Lovestone" />
-				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Phasalt" />
+				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Drifting" />
 				<group Name="Glowing" Weight="8" Style="pickone">
 					<!-- the twins ride one slot at even odds: the gamble is 50/50 by design -->
 					<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_GlowingRadioactive" />
