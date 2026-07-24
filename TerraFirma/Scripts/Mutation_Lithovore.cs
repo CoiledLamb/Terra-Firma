@@ -158,10 +158,20 @@ namespace XRL.World.Parts.Mutation
 			{
 				return true;
 			}
+			GameObjectBlueprint bp = obj.GetBlueprint();
+			if (bp == null)
+				return false;
+			// Blueprint descent catches what the part checks miss (audit 2026-07-23): the base
+			// "Statue" blueprint family carries NO Statue part at all -- the Eater statues,
+			// Oboroqoru, Keresh, and the Six Day Stilt shrine statuary are pure Render + Physics,
+			// which is why shrine statues slipped devourability in play. Descent covers the whole
+			// family and any future children (the gold Eater statues ride along: universal means
+			// universal, and a lithovore does not ask what the statue is plated with).
+			if (bp.DescendsFrom("Statue") || bp.DescendsFrom("Random Statue"))
+				return true;
 			// Rubble and boulders (ruling 2026-07-22): famished-only mouthfuls. Rubble covers the
 			// mod's own rubble + crumbled walls by inheritance; BaseBoulder covers the whole base family.
-			GameObjectBlueprint bp = obj.GetBlueprint();
-			return bp != null && (bp.DescendsFrom("Rubble") || bp.DescendsFrom("BaseBoulder"));
+			return bp.DescendsFrom("Rubble") || bp.DescendsFrom("BaseBoulder");
 		}
 
 		private bool IsFamished()

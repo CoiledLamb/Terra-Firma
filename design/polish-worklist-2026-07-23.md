@@ -119,8 +119,11 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
 - [x] 🆕 `[polish]` **Devour pronoun bug — FIXED + DEPLOYED 2026-07-23.** `.them` was already the
   correct objective property; the statue's pronoun PROVIDER is what yielded "its". Fix: literal
   "it" — a statue is an object whatever its muse was, so hardcoded neuter is always right.
-- [ ] 🆕 `[design]` **Universal statue devourability** — audit which statue blueprints slip
-  `IsDevourableMass` (pure-Render shrine statuary suspected); broaden detection.
+- [x] 🆕 `[design]` **Universal statue devourability — AUDITED + FIXED + DEPLOYED 2026-07-23.**
+  Suspicion confirmed: the base "Statue" blueprint family carries NO Statue part (Eater statues,
+  Oboroqoru, Keresh, all six Stilt shrine statues — pure Render+Physics). Detection broadened via
+  blueprint descent (the Rubble/BaseBoulder idiom); gold Eater statues ride along — universal
+  means universal. `[verify]` a famished lithovore can devour a Stilt shrine statue.
 - [ ] 📜 `[polish]` **HistorySpice.json entries — REQUIRED** — `spice.cooking.recipeNames.ingredients`
   for the ~30 `Ground_*` powders (+ StoneMeal + rock flour); phrase lists in your voice; verify the
   mod-side spice merge path first. Carbide Chef is in `kitchenrock` for live preview.
@@ -139,7 +142,10 @@ live; mullstone→T6; pits deferred; full record + sim + verify checklist in TOD
   grind fork); stone-soup named recipe (park unless wanted).
 - [ ] 📜 `[ratify]` **Round-dial sweep** — mumbles 25% secrets, GasBelly name "roiling innards" +
   density 30, siphonyx 7 rounds, quill 1d4, clone duration 10, lovesick nearest-visible reading
-  (+ self-love-when-alone keep?), static force bubble (vs following), galvena arc dice/range,
+  (+ self-love-when-alone keep?), static force bubble (vs following) **+ RULE TOGETHER (user
+  2026-07-23): self-cage passage — keep the shards' everyone-blocked prison (Claude lean: "doesn't
+  ask which side of the wall you meant to be on"; vibro cuts you out — EB synergy) vs AllowPassage
+  for the enclosed (needs one CanPass fall-through decomp check at build if chosen)**, galvena arc dice/range,
   thunderclap dice, streakschorl leg range +6, warns on vitriolite/pulsestone (vetoable),
   unpowered millstone grinding, per-rock powders (vs your "per-domain" word), Lithovore pass-1
   magnitudes (soupstone 5000, temps ±150, harm dice, devour 2000 energy).
