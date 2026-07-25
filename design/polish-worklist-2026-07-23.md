@@ -287,7 +287,10 @@ house rule set mid-session: FLAG mid-session, fix in the post-session batch):**
   cadence per AIThrowAndScoot decomp — Flee only, nothing re-readies). **SCAV FIXING PASS (user
   flag): extend StoneScavenger to re-ready from pockets when the slot empties (PerformReequip in
   the pocket-ammo branch) — "keep the thrower throwing"** — plus whatever the dry-fetch verdict
-  demands; details in TODO.md.
+  demands; details in TODO.md. **ESCALATED by the user's vanilla control run: baboons throw MORE
+  without the mod — the mod REGRESSES throw cadence below baseline. Hypotheses (mixed-inventory
+  re-ready failure / global stone merges changing AI scoring / the scavenger part itself) +
+  differential experiments recorded in TODO.md; the pass must restore ≥vanilla cadence.**
 - [ ] 🆕 `[design]` **Caromcobble StepChance 25 → higher? (user flag: "could be higher")** —
   re-opens a sweep-ratified number; the peel never breaks so the proc rate is pure zoning
   strength. One XML dial, rule at the batch.
