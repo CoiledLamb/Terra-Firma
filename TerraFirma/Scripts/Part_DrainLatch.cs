@@ -70,9 +70,14 @@ namespace XRL.World.Parts
 		{
 			Helpers.VerifyLog("DRAIN", $"AfterThrown reached DrainLatch: pending={(PendingVictim == null ? "NONE" : PendingVictim.Blueprint)}");
 			GameObject victim = PendingVictim;
+			bool hadPending = victim != null; // Validate(ref) nulls invalid refs; remember we had one
 			PendingVictim = null;
 			if (GameObject.Validate(ref victim))
 				Latch(victim, PendingDuration, PendingDrainer);
+			else if (hadPending)
+				// the one formerly-silent link (user-diagnosed 2026-07-24: throw damage one-shot the
+				// victim before the deferred latch could validate them; correct behavior, now spoken)
+				Helpers.VerifyLog("DRAIN", "pending victim died before the latch could take hold; stone rests as loot");
 			return base.HandleEvent(E);
 		}
 

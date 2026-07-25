@@ -159,12 +159,13 @@
 	<object Name="Pestle" Load="Merge">
 		<part Name="Cleo_TerraFirma_StoneMill" />
 	</object>
-	<!-- the base Millstone (Joppa's mill, which already grinds glands into pastes) grinds stones
-	     with no pestle in hand; the furniture IS the tool (user ruling 2026-07-22). Note: the
-	     native Mill part is mechanically powered; our menu deliberately does not require power
-	     (stones are hand-turned work), flagged for veto at verify. -->
+	<!-- HOPPER RULING (user 2026-07-24, supersedes the menu-grind merge): stones dropped into the
+	     millstone's inventory are ground by its own powered process, one per turn, products
+	     accumulating for collection - the Joppa mill's native vinewafer workflow extended to
+	     rocks. The menu grind on the mill is GONE ("menu probably goes"); pestle and campfire
+	     homes unchanged. A dead mill simply doesn't grind its hopper. -->
 	<object Name="Millstone" Load="Merge">
-		<part Name="Cleo_TerraFirma_StoneMill" RequiresPestle="false" />
+		<part Name="Cleo_TerraFirma_StoneHopper" />
 	</object>
 	<object Name="Baboon" Load="Merge">
 		<part Name="Cleo_TerraFirma_StoneScavenger" />

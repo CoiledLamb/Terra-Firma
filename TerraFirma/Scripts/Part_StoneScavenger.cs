@@ -117,9 +117,19 @@ namespace XRL.World.Parts
 				{
 					if (item.HasTag("Cleo_TerraFirma_IsAnyStone"))
 					{
-						if (diag)
-							Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint} gate: still has pocket ammo ({item.Blueprint}) -> skipped");
-						return; // still carrying ammo; the brain readies it on its own
+						// SCAV PASS (user-ruled 2026-07-24): the brain does NOT reliably ready pocket
+						// stones on its own -- vanilla-control testing showed the mod REGRESSING throw
+						// cadence, with baboons wandering slot-empty on full pockets. Force the re-ready
+						// directly (CommandEquipObject sidesteps whatever starves the brain's own pick);
+						// "keep the thrower throwing."
+						bool readied = who.FireEvent(Event.New("CommandEquipObject", "Object", item, "BodyPart", slot));
+						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint} pocket re-ready: {item.Blueprint} {(readied ? "readied into the thrown slot" : "REFUSED by CommandEquipObject")}");
+						if (readied)
+						{
+							E.PreventAction = true; // readying costs the action, like the stoop
+							who.UseEnergy(1000, "Equip");
+						}
+						return;
 					}
 				}
 			}

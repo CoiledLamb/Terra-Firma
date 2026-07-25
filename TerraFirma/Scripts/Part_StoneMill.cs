@@ -140,11 +140,16 @@ namespace XRL.World.Parts
 		// pestle home (the manual anywhere-action), millstone home (no pestle needed), and -- the
 		// ergonomic front door -- STONE home: every IsAnyStone item offers "grind" directly when a
 		// pestle is carried (merged onto BaseStone; interacting with the rock is the natural gesture)
+		// HOPPER RULING (user 2026-07-24: "menu probably goes"): the millstone home no longer offers
+		// a menu grind at all -- stones go INTO the mill's inventory and Cleo_TerraFirma_StoneHopper
+		// grinds them via the mill's own powered process. Pestle (anywhere) + campfire (cooking
+		// menu) + rock-side actions unchanged; HostMillTurning and the still-mill refusal left with
+		// the menu they gated.
 		public override bool HandleEvent(GetInventoryActionsEvent E)
 		{
 			if (ParentObject == null || E.Actor == null)
 				return base.HandleEvent(E);
-			if ((ParentObject.Blueprint == "Pestle" || (!RequiresPestle && HostMillTurning())) && HasGrindableStone(E.Actor))
+			if (ParentObject.Blueprint == "Pestle" && HasGrindableStone(E.Actor))
 			{
 				E.AddAction("GrindStones", "grind stones", GRIND_COMMAND, null, 'g', FireOnActor: false);
 			}
@@ -155,28 +160,12 @@ namespace XRL.World.Parts
 			return base.HandleEvent(E);
 		}
 
-		/// <summary>Millstone power gate (RULED lean 2026-07-24, vetoable): the base Mill part is
-		/// mechanically POWERED, and the ruling leans into that -- a dead millstone doesn't turn.
-		/// The pestle remains the unpowered fallback anywhere. Non-mill homes are unaffected.</summary>
-		private bool HostMillTurning()
-		{
-			if (ParentObject?.GetPart<Mill>() is Mill mill)
-				return mill.IsReady(UseCharge: false, IgnoreCharge: false, IgnoreLiquid: false, IgnoreBootSequence: false, IgnoreBreakage: false, IgnoreRust: false, IgnoreEMP: false, IgnoreRealityStabilization: false, IgnoreSubject: false, IgnoreLocallyDefinedFailure: false, 1, null, UseChargeIfUnpowered: false, 0L);
-			return true;
-		}
-
 		public override bool HandleEvent(InventoryActionEvent E)
 		{
 			if (E.Command == GRIND_COMMAND && E.Actor != null)
 			{
-				if (!RequiresPestle && !HostMillTurning())
-				{
-					Helpers.VerifyLog("GRIND", $"millstone refused {E.Actor.Blueprint}: not powered/turning (the power-gate lean working)");
-					E.Actor.Fail("The millstone is still."); // DRAFT
-					return false;
-				}
-				// the pestle IS the tool; the millstone replaces it; the campfire only hosts the menu
-				bool needPestle = RequiresPestle && ParentObject?.Blueprint != "Pestle";
+				// the pestle IS the tool; the campfire only hosts the menu
+				bool needPestle = ParentObject?.Blueprint != "Pestle";
 				RunGrindMenu(E.Actor, needPestle);
 				return false;
 			}
@@ -299,7 +288,7 @@ namespace XRL.World.Parts
 			}
 		}
 
-		private static GameObject MakePowder(string sourceBlueprint, string sourceName, string sourceType)
+		internal static GameObject MakePowder(string sourceBlueprint, string sourceName, string sourceType) // internal: the StoneHopper reuses the same powder recipe
 		{
 			// per-rock powder blueprints (RULED 2026-07-22, the "split" pole of the naming wart):
 			// Cleo_TerraFirma_Rock_X grinds into Cleo_TerraFirma_Ground_X -- a real blueprint with a

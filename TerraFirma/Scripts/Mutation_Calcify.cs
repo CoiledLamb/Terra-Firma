@@ -26,7 +26,7 @@ namespace XRL.World.Parts.Mutation
 			return "Creates a contiguous line of permanent walls in empty tiles starting adjacent to you\n" +
 				"Number created: {{rules|" + GetWallsCreated(Level) + "}}\n" +
 				"Hit points per wall: {{rules|" + GetWallHp(Level) + "}}\n" +
-				"Created walls have {{rules|0}} AV and {{rules|0}} DV";
+				"Created walls have {{rules|0}} AV and {{rules|-10}} DV"; // DV corrected to reality (user find 2026-07-24: walls keep the universal wall -10; the old "0 DV" was never true). Lean (b) text-follows-reality, DRAFT - flip to a DV override at creation if vetoed.
 		}
 
 		public override bool Mutate(GameObject GO, int Level = 1)

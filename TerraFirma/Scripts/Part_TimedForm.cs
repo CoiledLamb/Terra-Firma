@@ -56,6 +56,11 @@ namespace XRL.World.Parts
 				if (!ReplacementBlueprint.IsNullOrEmpty())
 					cell.AddObject(GameObject.Create(ReplacementBlueprint));
 			}
+			// expiry is a transformation, not a death (user flag 2026-07-24: the companion-death
+			// popup fired right after "stiffens back into a lifeless figurine"). The engine gate is
+			// HasTagOrProperty (decomp-verified), so stamping the property here silences the popup
+			// for THIS obliteration only -- a statuette killed in combat still gets its mourning.
+			self.SetStringProperty("NoFollowerDeathPopup", "1");
 			self.Obliterate();
 		}
 	}

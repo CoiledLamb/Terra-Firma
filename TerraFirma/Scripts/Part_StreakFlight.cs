@@ -115,9 +115,10 @@ namespace XRL.World.Parts
 				// spent at flight's end -- without this the lend leaks permanently (live-fire find
 				// 2026-07-23: only ONE lend line across three flights = the property stuck).
 				ParentObject.GetPart<Cleo_TerraFirma_FallenRockPart>()?.ReturnLentAccuracy();
-				// capture the slot BEFORE the split/flight: the hijack bypasses the engine's throw
-				// completion, so we must fire its replacement flow ourselves after the stone is spent
+				// capture the slot AND blueprint BEFORE the split/flight: the hijack bypasses the
+				// engine's throw completion, so we run its replacement flow ourselves afterwards
 				XRL.World.Anatomy.BodyPart thrownSlot = ParentObject.EquippedOn();
+				string thrownBlueprint = ParentObject.Blueprint;
 				ParentObject.SplitFromStack(); // fly (and spend) exactly one from a stack
 				thrower.UseEnergy(1000, "Physical Skill Throwing Item");
 				List<GameObject> victims = Event.NewGameObjectList();
@@ -146,14 +147,35 @@ namespace XRL.World.Parts
 				}
 				Helpers.VerifyLog("STRK", $"FLIGHT: {thrower.Blueprint} throws at {victims[0].Blueprint}; {victims.Count - 1} bounce target(s) [{string.Join(", ", victims.Skip(1).Select(v => v.Blueprint))}], legRange={legRange}");
 				DoFlight(thrower, legs, victims, E.GetIntParameter("Phase"), E);
-				// the flight spent the stone outside the engine's throw path, so no one fired the
-				// replacement flow -- the next streakschorl in the bag never re-equipped and EB's
-				// auto-sculpt never re-armed (user live-fire find 2026-07-24). Fire it ourselves,
-				// but only when the slot really was vacated (fallback throws keep the normal path).
+				// the flight spent the stone outside the engine's throw path, so no one ran the
+				// replacement flow (user find 2026-07-24; first fix FAILED same day -- Check() only
+				// notifies HANDLERS, while the actual find-in-bag-and-equip lives in the engine's
+				// protected EquipReplacementThrownWeapon AROUND that call). Replicate the whole
+				// wrapper here, mirrored from the decompiled engine loop: Check first (a handler
+				// returning false, e.g. EB's auto-sculpt, owns the slot), then search the bag for
+				// a same-blueprint stone and command-equip it into the vacated slot.
 				if (thrownSlot != null && (!GameObject.Validate(ParentObject) || ParentObject.EquippedOn() != thrownSlot))
 				{
-					Helpers.VerifyLog("STRK", $"flight spent the stone -> firing ReplaceThrownWeapon for {thrower.Blueprint}'s {thrownSlot.GetOrdinalName()}");
-					ReplaceThrownWeaponEvent.Check(thrower, ParentObject, thrownSlot);
+					Helpers.VerifyLog("STRK", $"flight spent the stone -> running replacement flow for {thrower.Blueprint}'s {thrownSlot.GetOrdinalName()}");
+					if (ReplaceThrownWeaponEvent.Check(thrower, ParentObject, thrownSlot) && thrownSlot.Equipped == null)
+					{
+						GameObject next = null;
+						List<GameObject> bag = thrower.Inventory?.GetObjectsDirect();
+						if (bag != null)
+							foreach (GameObject item in bag)
+								if (item.Blueprint == thrownBlueprint && (thrower.IsPlayer() || !item.HasPropertyOrTag("NoAIEquip")) && !item.IsBroken() && !item.IsRusted() && !item.HasTag("HiddenInInventory"))
+								{
+									next = item;
+									break;
+								}
+						if (next != null)
+						{
+							bool equipped = thrower.FireEvent(Event.New("CommandEquipObject", "Object", next, "BodyPart", thrownSlot));
+							Helpers.VerifyLog("STRK", $"bag re-equip: next {thrownBlueprint} {(equipped ? "readied into the slot" : "REFUSED by CommandEquipObject")}");
+						}
+						else
+							Helpers.VerifyLog("STRK", $"bag re-equip: no spare {thrownBlueprint} in the bag");
+					}
 				}
 				return false;
 			}

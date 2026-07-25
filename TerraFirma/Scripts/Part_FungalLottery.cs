@@ -106,7 +106,12 @@ namespace XRL.World.Parts
 			if (game == null || Slot < 0 || Slot >= GASES.Length)
 				return;
 			string perm = game.GetStringGameState(STATE_KEY);
-			if (perm.IsNullOrEmpty() || perm.Length < GASES.Length)
+			// cross-reload diagnosis (bug caught 2026-07-24: four different permutations across one
+			// save's boots despite the SetStringGameState persistence below -- somewhere the stored
+			// state comes back empty after a load). The log now distinguishes ROLLED-FRESH from
+			// LOADED so the next session names the broken link before we redesign the storage.
+			bool rolledFresh = perm.IsNullOrEmpty() || perm.Length < GASES.Length;
+			if (rolledFresh)
 			{
 				List<int> pool = new List<int> { 0, 1, 2, 3 };
 				StringBuilder sb = new StringBuilder();
@@ -120,7 +125,7 @@ namespace XRL.World.Parts
 				game.SetStringGameState(STATE_KEY, perm);
 			}
 			string gas = GASES[perm[Slot] - '0'];
-			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SPORE", $"lottery: save permutation={perm}, {ParentObject.Blueprint} (slot {Slot}) carries {gas}");
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SPORE", $"lottery: save permutation={perm} ({(rolledFresh ? "ROLLED FRESH - stored state was empty" : "loaded from game state")}), {ParentObject.Blueprint} (slot {Slot}) carries {gas}");
 			GasGrenade grenade = ParentObject.GetPart<GasGrenade>();
 			if (grenade != null)
 				grenade.GasObject = gas;

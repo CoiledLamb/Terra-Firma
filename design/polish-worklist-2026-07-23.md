@@ -372,6 +372,15 @@ house rule set mid-session: FLAG mid-session, fix in the post-session batch):**
   (beyond brine geode), 🆕 pour-into-container on the liquid rocks (ties to the pool-volume audit),
   🆕 modular disable options (per-mutation off switches + a stones-off switch; recon notes in TODO).
 
+**→ POST-SESSION BUILD BATCH BUILT + DEPLOYED 2026-07-24** (full record in TODO.md § the batch
+block): streakschorl re-equip re-fix · fungal-lottery rolled-vs-loaded diagnostic · SCAV pocket
+re-ready (forced equip, refusals logged) · millstone HOPPER (menu grind removed per ruling) ·
+statuette death-popup suppression · Calcify DV text −10 (DRAFT) · drainstone victim-died log ·
+healstone double-fire RETRACTED (two interleaved throws, no bug). All verified next boot by the
+standing instrumentation. Still awaiting rulings, not built: caromcobble StepChance number ·
+seam squad-drops · phasalt wall-phasing · gemstone thrown-slot · deflection VFX sitting ·
+resonant verb set (text pass).
+
 ## Appendix — remaining verify items (testing leftovers, not polish)
 
 **→ Interactive checklist for the next boot: `design/verify-pass.html`** (built 2026-07-24 at user
