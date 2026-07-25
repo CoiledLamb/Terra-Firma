@@ -198,9 +198,9 @@ namespace Cleo.TerraFirma.Scripts
 		}
 
 		/// <summary>Caromcobble trip statistics: 40 forced crossings of the peel in one wish
-		/// (ObjectEnteredCellEvent fires synchronously per entry). StepChance 25 -> ~10 expected
-		/// trips; accept 3-22 (binomial tails under 0.05%). HoldChance 100 -> the peel NEVER
-		/// breaks. Whenever the StepChance re-ruling lands, re-run against the new band.</summary>
+		/// (ObjectEnteredCellEvent fires synchronously per entry). StepChance 50 (re-ruled
+		/// 2026-07-25, was 25) -> ~20 expected trips; accept 9-31 (binomial tails under 0.05%).
+		/// HoldChance 100 -> the peel NEVER breaks.</summary>
 		[WishCommand(Command = "tfcarom")]
 		public static void CaromSync()
 		{
@@ -231,8 +231,8 @@ namespace Cleo.TerraFirma.Scripts
 				victim.DirectMoveTo(open[1], 0, Forced: true, IgnoreCombat: true);
 			}
 			bool alive = GameObject.Validate(rock) && rock.CurrentCell == open[0];
-			Report("carom", alive && procs >= 3 && procs <= 22,
-				$"40 forced crossings: {procs} trip(s) (StepChance 25 -> expect ~10, accept 3-22), peel {(alive ? "intact through every proc (HoldChance 100)" : "BROKE OR MOVED")}");
+			Report("carom", alive && procs >= 9 && procs <= 31,
+				$"40 forced crossings: {procs} trip(s) (StepChance 50 -> expect ~20, accept 9-31), peel {(alive ? "intact through every proc (HoldChance 100)" : "BROKE OR MOVED")}");
 			if (GameObject.Validate(rock)) rock.Obliterate();
 			if (GameObject.Validate(victim)) victim.Obliterate();
 		}
