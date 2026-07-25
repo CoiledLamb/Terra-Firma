@@ -423,6 +423,8 @@ findings):**
   verifies; both failures were harness bugs (phantom starved-turn sampling, retry stacking),
   diagnosed from the log and fixed + redeployed same evening (active next restart). Full run
   record in TODO.md § the harness.** Next: re-run all three post-restart, then rule on Tier 2.
+  **Ledger live (user request): `design/harness-verified.md`** — every harness-proven fact with
+  its assertion, limits, and re-run wish; the where-to-look list if verified behavior goes funny.
 - [x] 📜 `[release]` **git init — DONE 2026-07-23** (fresh repo, no fork linkage, no trailer; history live since `b4ed68e`).
 - [ ] 📜 `[release]` **Workshop publishing plan + credits.**
 - [x] 📜 `[design]` **Stale `Cleo_TerraFirma_Ephemeral Stone` blueprint — RULED remove 2026-07-24

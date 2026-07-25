@@ -894,6 +894,12 @@ obligation (Cross-cutting entry updated).**
   mid-scenario save/load aborts as INCONCLUSIVE (live state is deliberately non-serialized)
   instead of asserting against reloaded ghosts.
 
+**→ THE LEDGER: `design/harness-verified.md`** (user request 2026-07-24: "keep a tab on anything
+solved that way so if things go funny in the future, we know where to look") — one entry per
+harness-proven fact with the exact assertion, the explicit NOT-covered limits, and the re-run
+wish. If a listed behavior goes funny later: re-run the wish first; a flipped verdict localizes
+the regression, an unchanged PASS points elsewhere. Maintain on every run that proves something.
+
 ### First live run — 2026-07-24, same evening (user: "i got pass, pass, fail, but on retrying 1, only fail")
 **Verdict: the harness works.** Two scenario PASSes closed real batch verifies on first contact;
 the two failures were both HARNESS bugs, both diagnosed from the log in minutes, both fixed +
