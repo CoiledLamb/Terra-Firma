@@ -1203,7 +1203,13 @@ baseline actually blocks a decision, not before.**
   watcher; the give-up line appears at most once per wedge.
 - [ ] `[verify]` **The lottery save-quit-reload experiment** (above) — user's hands, 30 seconds;
   saves WERE observed being written this session, so the next boot's first SPORE line may
-  already answer it.
+  already answer it. **Tool BUILT + DEPLOYED 2026-07-25 (user request: "make a wish that
+  prints the current spore seed to chat"): `tfspore` — a PURE READ of the stored permutation,
+  printed to chat + watcher; never rolls, never writes, so it can't contaminate the
+  experiment. EMPTY = no fungal rock minted yet this boot. New protocol: mint a fungal rock
+  (or tfstrange until one rolls) → `tfspore` → note the number → Save and Quit → reload the
+  same save → `tfspore` again BEFORE minting anything → same number = code innocent, close;
+  EMPTY or different = SetStringGameState is not surviving the boot, design real storage.**
 - [ ] `[design]` Round 4 candidates: `tfeat` (18 Lithovore channels); Stoneshaper weird-anatomy
   sweep; Gorgon DC curve; Tier 2 hands-off boot cycle (marker file → auto-load test save → run
   batch → write results → quit) — which is also what unlocks the fungal-lottery reload check

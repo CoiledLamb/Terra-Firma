@@ -169,7 +169,9 @@ findings):**
   SetStringGameState round-trip comes back empty post-load (same save, different permutations
   across boots). Diagnostic BUILT + DEPLOYED 2026-07-24 (batch item 2): SPORE line now says
   ROLLED-FRESH vs loaded-from-game-state. `[verify]` reload the save → the line names the broken
-  link; then design the real fix.
+  link; then design the real fix. **`tfspore` peek wish BUILT + DEPLOYED 2026-07-25 (user
+  request): pure read of the stored permutation to chat — never rolls, never writes. Refined
+  experiment protocol in the TODO entry.**
 - [ ] 🆕 `[design]` **Dazestone intervention pass (user: "flag this for needing intervention")** —
   weakest headliner (survey 6): (a) split-channel stun-gas cooking only, or (b) the honest shunt
   (stun payload, band 2, CC trio with vertigneiss/lullabaster). User acknowledged both.

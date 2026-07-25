@@ -56,9 +56,44 @@ namespace Cleo.TerraFirma.Scripts
 		[WishCommand(Command = "tfverify")]
 		public static void Help()
 		{
-			MessageQueue.AddPlayerMessage("TF harness -- instant: tfstreak, tfstrange, tfcarom, tfcrack, tfspill, tfpuddle, tfdevour + tfeat (lithovore only). Turn-driven: tfquick (5t), tfhopper (5t), tfform (5t), tfdull (5t), tfshape (Stoneshaper, 3t), tffis (NPC caster, 20t), tfdrain (25t), tfscav (30t, you are the target). tfbatch = everything, ~100 turns standing still.", "W");
+			MessageQueue.AddPlayerMessage("TF harness -- instant: tfstreak, tfstrange, tfcarom, tfcrack, tfspill, tfpuddle, tfdevour + tfeat (lithovore only). Turn-driven: tfquick (5t), tfhopper (5t), tfform (5t), tfdull (5t), tfshape (Stoneshaper, 3t), tffis (NPC caster, 20t), tfdrain (25t), tfscav (30t, you are the target). tfbatch = everything, ~100 turns standing still. Peek: tfspore (lottery state, pure read).", "W");
 			if (!Helpers.VERIFY_WATCH)
 				MessageQueue.AddPlayerMessage("VERIFY_WATCH is OFF -- the harness is disabled.", "R");
+		}
+
+		/// <summary>Fungal-lottery state peek (user request 2026-07-25, for the save-quit-reload
+		/// experiment): a PURE READ of the stored permutation -- prints to chat and the watcher,
+		/// never rolls, never writes, so it cannot contaminate the experiment. EMPTY is itself an
+		/// answer: no fungal rock has been minted this boot (creation is what rolls the lottery).</summary>
+		[WishCommand(Command = "tfspore")]
+		public static void SporePeek()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			XRLGame game = The.Game;
+			if (game == null)
+			{
+				MessageQueue.AddPlayerMessage("tfspore: no game loaded.", "R");
+				return;
+			}
+			string perm = game.GetStringGameState(Cleo_TerraFirma_FungalLottery.STATE_KEY);
+			if (perm.IsNullOrEmpty())
+			{
+				MessageQueue.AddPlayerMessage("SPORE state: EMPTY -- no permutation stored (no fungal rock minted yet this boot; this read did NOT roll one).", "W");
+				Helpers.VerifyLog("SPORE", "peek (tfspore): stored state EMPTY (pure read, no roll)");
+				return;
+			}
+			var decode = new System.Text.StringBuilder();
+			for (int i = 0; i < perm.Length && i < Cleo_TerraFirma_FungalLottery.GASES.Length; i++)
+			{
+				int g = perm[i] - '0';
+				if (g < 0 || g >= Cleo_TerraFirma_FungalLottery.GASES.Length)
+					continue;
+				if (decode.Length > 0)
+					decode.Append(", ");
+				decode.Append($"slot {i} -> {Cleo_TerraFirma_FungalLottery.GASES[g]}");
+			}
+			MessageQueue.AddPlayerMessage($"SPORE state: permutation={perm} ({decode})", "W");
+			Helpers.VerifyLog("SPORE", $"peek (tfspore): stored permutation={perm} (pure read)");
 		}
 
 		/// <summary>The full sweep (round 3 shape): six synchronous scenarios now, then the

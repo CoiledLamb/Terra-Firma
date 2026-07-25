@@ -15,9 +15,11 @@ namespace XRL.World.Parts
 	[Serializable]
 	public class Cleo_TerraFirma_FungalLottery : IPart
 	{
-		private const string STATE_KEY = "Cleo_TerraFirma_FungalLottery";
+		// internal (was private) so the harness's tfspore pure-read wish can peek without
+		// duplicating the key or the decode table (2026-07-25)
+		internal const string STATE_KEY = "Cleo_TerraFirma_FungalLottery";
 
-		private static readonly string[] GASES =
+		internal static readonly string[] GASES =
 		{
 			"FungalSporeGasPuff",
 			"FungalSporeGasLuminous",
