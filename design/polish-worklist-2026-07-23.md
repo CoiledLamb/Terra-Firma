@@ -437,7 +437,12 @@ findings):**
   restart. Figurine-identification flag came out of the same run (TODO, next batch).**
   **SECOND RUN: ALL GREEN — tfform PASS ×2, full tfbatch chain ×5 hands-free, scav v2 counted
   0 starved/87 turns, zero mod errors. Seven mod facts leddered; `tfbatch` is the standing
-  one-wish regression sweep. Round 3 (tfeat / Tier 2 boot cycle) awaits a ruling.**
+  one-wish regression sweep.**
+  **ROUND 3 BUILT + DEPLOYED same night (user: "build as many as you think will be useful"):
+  tfquick (pockets/rep/heal/cage + ape) · tfcarom · tfcrack · tfspill (instant, forced-crossing
+  tech) · tfdull · tfdrain (full lifecycle) — ~10 new asserts, tfbatch now ~75 turns. NOTE:
+  quick.rep is an INTENTIONAL RED — recon suspects figurine AddsRep never applies to a carried
+  trinket (`WorksOnCarrier` unset; fix is one attribute, next batch). UNTESTED — next restart.**
 - [x] 📜 `[release]` **git init — DONE 2026-07-23** (fresh repo, no fork linkage, no trailer; history live since `b4ed68e`).
 - [ ] 📜 `[release]` **Workshop publishing plan + credits.**
 - [x] 📜 `[design]` **Stale `Cleo_TerraFirma_Ephemeral Stone` blueprint — RULED remove 2026-07-24

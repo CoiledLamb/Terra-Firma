@@ -980,9 +980,45 @@ scenario earns reconsideration). Built:
   clean success: 5 standing scenarios, 7 mod facts leddered, 4 harness bugs found-and-fixed by
   its own runs, 2 flags (figurine ID, farflint) resolved from its sessions' logs.**
 
+### Round 3 — BUILT + DEPLOYED 2026-07-24 night (user: "just build as many of these as you think will be useful"; compiles clean, UNTESTED, next restart)
+Six new scenarios + a key discovery-by-recon. The forced-crossing trick (`DirectMoveTo` forced
+entries fire `ObjectEnteredCellEvent` synchronously) makes step-proc statistics INSTANT — no
+turn pump — so four of the six are synchronous:
+- **`tfquick`** — the quick shelf: baboon pocket counts (Hulking ≥1 / Quartz 0) · figurine
+  rep-on-take · healstone step-heal + ConsumedOnStep (step path avoids the throw-damage
+  confound) · aegischist cage ring (≥5 forcefield segments) · + ape-statue → rubble via a
+  5-turn driver. **`quick.rep` is EXPECTED TO FAIL — a red test documenting a suspected real
+  bug found during recon:** `AddsRep` is equipper-only by default (decomp: the TakenEvent
+  carry path is gated on `WorksOnCarrier`, which our figurine XML never sets) — so the
+  DRAFT AddsRep 200 likely NEVER applies to a carried trinket. Delta 0 in the run = confirmed;
+  fix = `WorksOnCarrier="true"` on the part, one attribute, next batch. Delta 200 = the engine
+  has a path recon missed, assert flips green, no fix needed.
+- **`tfcarom`** (instant) — 40 forced crossings of the peel: trips in the 3–22 band
+  (StepChance 25 binomial), peel intact through every proc (HoldChance 100). Re-run target for
+  the pending StepChance re-ruling: rule the number, adjust the band, re-run.
+- **`tfcrack`** (instant) — forced crossings until the 15% FallThrough procs (60 tries, miss
+  odds ~0.006%); asserts the victim actually changed zones.
+- **`tfspill`** (instant) — brine geode destroyed by damage (not obliteration) spills 4–32
+  drams; asserts the puddle and its volume.
+- **`tfdull`** (5 turns) — the anti-hoarding clock, never verified end-to-end (nobody carries a
+  rock 1000 turns on purpose): DullAfter wound to 2, asserts crumble-to-pebbles in the bag.
+- **`tfdrain`** (25 turns) — the full drainstone lifecycle in one scenario: player-path latch +
+  LifeDrain on flesh · starved attach on a Scrapbot (no leech, IsOrganic gate) · the one-shot
+  path (1-HP victim dies to the throw, corpse can't latch, stone loose as loot) · then both
+  endings ride the pump: gorged burst (stone gone, drain over, HP down) vs dry crumble (robot
+  HP untouched, stone gone).
+- **`tfbatch` regrown**: 6 synchronous (streak, strange, quick-shelf, carom, crack, spill) +
+  5 chained turn-driven (hopper → form → quickape → dull → drain → scav), ~75 turns total.
+- SKIPPED this round (recorded reasons): `tffissure` tier-spread (zone chaos + cooldown
+  wrangling; tier system already has a live partial) · `tfeat` + Stoneshaper anatomy sweep +
+  Gorgon DC curve = round 4 candidates.
+
 ### Open / next
-- [ ] `[design]` Round 3 candidates: `tfeat` (18 Lithovore channels, the big one); drainstone
-  one-shot line scenario; Tier 2 hands-off boot cycle (marker file → auto-load test save → run
+- [ ] `[verify]` **Round 3 first live run next restart** — 10 new assert lines; watch
+  especially quick.rep (the intentional red), drain.endings (the longest chain), and carom's
+  statistical band. Ledger on PASS.
+- [ ] `[design]` Round 4 candidates: `tfeat` (18 Lithovore channels); Stoneshaper weird-anatomy
+  sweep; Gorgon DC curve; Tier 2 hands-off boot cycle (marker file → auto-load test save → run
   batch → write results → quit) — which is also what unlocks the fungal-lottery reload check
   and the scav-vs-vanilla control baseline.
 - [ ] `[release]` Harness strip rides the existing `[TF-VERIFY]`/VERIFY_WATCH strip item.

@@ -41,17 +41,28 @@ namespace Cleo.TerraFirma.Scripts
 		private const string STRANGE_POOL = "Cleo_TerraFirma_StrangeRocksPool";
 		private const string STATUETTE_BP = "Cleo_TerraFirma_Rock_BaboonFigurine";
 		private const string FIGURINE_ITEM_BP = "Cleo_TerraFirma_BaboonFigurineItem";
+		private const string APE_BP = "Cleo_TerraFirma_Rock_ApeStatue";
+		private const string RUBBLE_BP = "Cleo_TerraFirma_Rock_Rubble";
+		private const string PEBBLES_BP = "Cleo_TerraFirma_Rock_Pebbles";
+		private const string HEALSTONE_BP = "Cleo_TerraFirma_Rock_Healstone";
+		private const string AEGISCHIST_BP = "Cleo_TerraFirma_Rock_Shieldstone"; // display: aegischist
+		private const string DRAINSTONE_BP = "Cleo_TerraFirma_Rock_Drainstone";
+		private const string CAROM_BP = "Cleo_TerraFirma_Rock_Rubber";           // display: caromcobble
+		private const string CRACK_BP = "Cleo_TerraFirma_Rock_Crack";
+		private const string GEODE_BP = "Cleo_TerraFirma_Rock_Soupstone";        // display: brine geode
+		private const string GENERIC_BP = "Cleo_TerraFirma_Rock_Generic";
+		private const string ROBOT_BP = "Scrapbot";
 
 		[WishCommand(Command = "tfverify")]
 		public static void Help()
 		{
-			MessageQueue.AddPlayerMessage("TF harness: 'tfstreak' (re-equip, instant) - 'tfstrange' (pool purity, instant) - 'tfhopper' (mill grind, 5 turns) - 'tfform' (statuette expiry, 5 turns) - 'tfscav' (baboon cadence, 30 turns, you are the target) - 'tfbatch' (all five, ~40 turns).", "W");
+			MessageQueue.AddPlayerMessage("TF harness -- instant: tfstreak, tfstrange, tfcarom, tfcrack, tfspill. Turn-driven: tfquick (4 asserts + ape, 5t), tfhopper (5t), tfform (5t), tfdull (5t), tfdrain (25t), tfscav (30t, you are the target). tfbatch = everything, ~75 turns standing still.", "W");
 			if (!Helpers.VERIFY_WATCH)
 				MessageQueue.AddPlayerMessage("VERIFY_WATCH is OFF -- the harness is disabled.", "R");
 		}
 
-		/// <summary>Round 2 (2026-07-24): everything in sequence. The synchronous pair runs now;
-		/// the turn-driven three chain through the driver's queue: hopper -> form -> scav.</summary>
+		/// <summary>The full sweep (round 3 shape): six synchronous scenarios now, then the
+		/// turn-driven five chained through the driver's queue (~75 turns standing still).</summary>
 		[WishCommand(Command = "tfbatch")]
 		public static void Batch()
 		{
@@ -59,7 +70,380 @@ namespace Cleo.TerraFirma.Scripts
 			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
 			Streak();
 			Strange();
-			SetupHopper(The.Player, "form,scav");
+			QuickSync();
+			CaromSync();
+			CrackSync();
+			SpillSync();
+			SetupHopper(The.Player, "form,quickape,dull,drain,scav");
+		}
+
+		// ---------------------------------------------------------------- round 3, synchronous
+
+		/// <summary>The quick shelf: baboon pocket counts, figurine rep-on-take, healstone
+		/// step-heal + ConsumedOnStep, aegischist cage. Four asserts, one wish, no turns.
+		/// (The ape-statue -> rubble half rides the turn-driven 'quickape' scenario.)</summary>
+		[WishCommand(Command = "tfquick")]
+		public static void Quick()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
+			QuickSync();
+			SetupQuickApe(The.Player, "");
+		}
+
+		internal static void QuickSync()
+		{
+			GameObject ply = The.Player;
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+
+			// pockets: the merge reaches Hulking by inheritance but NOT Quartz (inherits BaseBaboon)
+			GameObject hulk = GameObject.Create("Hulking Baboon");
+			GameObject quartz = GameObject.Create("Quartz Baboon");
+			int hulkRocks = CountModRocks(hulk);
+			int quartzRocks = CountModRocks(quartz);
+			Report("quick.pockets", hulkRocks >= 1 && quartzRocks == 0,
+				$"Hulking Baboon spawns with {hulkRocks} mod rock(s) (want >=1), Quartz Baboon with {quartzRocks} (want 0 -- outside the merge)");
+			hulk?.Obliterate();
+			quartz?.Obliterate();
+
+			// figurine rep: INTENT is +200 while carried (AddsRep). Suspicion from recon: the part
+			// defaults to equipper-only (WorksOnCarrier unset in our XML) -- delta 0 confirms it.
+			int repBefore = The.Game.PlayerReputation.Get("Baboons");
+			GameObject fig = GameObject.Create(FIGURINE_ITEM_BP);
+			origin.AddObject(fig);
+			ply.TakeObject(fig, NoStack: false, Silent: true, EnergyCost: 0);
+			int repAfter = The.Game.PlayerReputation.Get("Baboons");
+			fig.Obliterate();
+			int repFinal = The.Game.PlayerReputation.Get("Baboons");
+			int delta = repAfter - repBefore;
+			Report("quick.rep", delta == 200,
+				$"figurine take: Baboons rep {repBefore}->{repAfter} (delta {delta}, INTENT +200 carried), after removal {repFinal}" +
+				(delta == 0 ? " -- AddsRep never applied: the WorksOnCarrier suspicion is CONFIRMED (part is equipper-only without it)" : ""));
+
+			// healstone via the step path (no throw-damage confound): wounded patient forced over
+			// the stone until the 25% proc lands; heal must raise HP and ConsumedOnStep must eat the stone
+			List<Cell> open = origin.GetLocalAdjacentCells();
+			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
+			if (open.Count >= 2)
+			{
+				GameObject patient = GameObject.Create(BABOON_BP);
+				patient.SetIntProperty(SPAWN_MARK, 1);
+				patient.GetStat("Hitpoints").BaseValue = 60;
+				patient.GetStat("Hitpoints").Penalty += 25;
+				open[0].AddObject(patient);
+				GameObject healstone = GameObject.Create(HEALSTONE_BP);
+				open[1].AddObject(healstone);
+				int hpBefore = patient.GetStat("Hitpoints").Value;
+				int entries = ForceEntries(patient, open[0], open[1], 30, () => !GameObject.Validate(healstone));
+				int hpAfter = GameObject.Validate(patient) ? patient.GetStat("Hitpoints").Value : -1;
+				bool consumed = !GameObject.Validate(healstone);
+				Report("quick.heal", consumed && hpAfter > hpBefore,
+					$"step-proc after {entries} crossing(s): HP {hpBefore}->{hpAfter} (want risen), stone {(consumed ? "consumed (ConsumedOnStep)" : "STILL THERE")}");
+				if (GameObject.Validate(healstone)) healstone.Obliterate();
+				if (GameObject.Validate(patient)) patient.Obliterate();
+			}
+			else
+				Report("quick.heal", false, "SETUP FAIL - need two open adjacent cells");
+
+			// aegischist cage: thrown hit rings the victim in forcefield
+			Cell lane = FindLane(origin, 3);
+			if (lane != null)
+			{
+				GameObject victim = GameObject.Create(BABOON_BP);
+				victim.SetIntProperty(SPAWN_MARK, 1);
+				victim.GetStat("Hitpoints").BaseValue = 100;
+				lane.AddObject(victim);
+				ThrowAt(ply, AEGISCHIST_BP, victim);
+				int ring = 0;
+				List<GameObject> segments = new List<GameObject>();
+				Cell vc = victim.CurrentCell;
+				if (vc != null)
+					foreach (Cell adj in vc.GetLocalAdjacentCells())
+						foreach (GameObject obj in adj.Objects)
+							if (obj.HasPart("Forcefield")) { ring++; segments.Add(obj); }
+				Report("quick.cage", GameObject.Validate(victim) && ring >= 5,
+					$"{ring} forcefield segment(s) ring the victim (want >=5 of 8; partial-vs-obstacles accepted; duration 12 not waited out)");
+				foreach (GameObject seg in segments) seg.Obliterate();
+				if (GameObject.Validate(victim)) victim.Obliterate();
+			}
+			else
+				Report("quick.cage", false, "SETUP FAIL - no open 3-cell lane");
+		}
+
+		/// <summary>Caromcobble trip statistics: 40 forced crossings of the peel in one wish
+		/// (ObjectEnteredCellEvent fires synchronously per entry). StepChance 25 -> ~10 expected
+		/// trips; accept 3-22 (binomial tails under 0.05%). HoldChance 100 -> the peel NEVER
+		/// breaks. Whenever the StepChance re-ruling lands, re-run against the new band.</summary>
+		[WishCommand(Command = "tfcarom")]
+		public static void CaromSync()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			GameObject ply = The.Player;
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+			List<Cell> open = origin.GetLocalAdjacentCells();
+			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
+			if (open.Count < 2) { Report("carom", false, "SETUP FAIL - need two open adjacent cells"); return; }
+			GameObject rock = GameObject.Create(CAROM_BP);
+			rock.SetIntProperty(SPAWN_MARK, 1);
+			open[0].AddObject(rock);
+			GameObject victim = GameObject.Create(BABOON_BP);
+			victim.SetIntProperty(SPAWN_MARK, 1);
+			victim.GetStat("Hitpoints").BaseValue = 100;
+			open[1].AddObject(victim);
+			int procs = 0;
+			for (int i = 0; i < 40 && GameObject.Validate(victim); i++)
+			{
+				victim.DirectMoveTo(open[0], 0, Forced: true, IgnoreCombat: true);
+				if (victim.HasEffect(typeof(XRL.World.Effects.Prone)))
+				{
+					procs++;
+					victim.RemoveEffect<XRL.World.Effects.Prone>();
+				}
+				victim.DirectMoveTo(open[1], 0, Forced: true, IgnoreCombat: true);
+			}
+			bool alive = GameObject.Validate(rock) && rock.CurrentCell == open[0];
+			Report("carom", alive && procs >= 3 && procs <= 22,
+				$"40 forced crossings: {procs} trip(s) (StepChance 25 -> expect ~10, accept 3-22), peel {(alive ? "intact through every proc (HoldChance 100)" : "BROKE OR MOVED")}");
+			if (GameObject.Validate(rock)) rock.Obliterate();
+			if (GameObject.Validate(victim)) victim.Obliterate();
+		}
+
+		/// <summary>Crack pull-down: force a victim over the cracked floor until the 15% proc
+		/// drops it to the zone below (60 crossings: miss odds ~0.006%).</summary>
+		[WishCommand(Command = "tfcrack")]
+		public static void CrackSync()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			GameObject ply = The.Player;
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+			List<Cell> open = origin.GetLocalAdjacentCells();
+			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
+			if (open.Count < 2) { Report("crack", false, "SETUP FAIL - need two open adjacent cells"); return; }
+			GameObject crack = GameObject.Create(CRACK_BP);
+			crack.SetIntProperty(SPAWN_MARK, 1);
+			open[0].AddObject(crack);
+			GameObject victim = GameObject.Create(BABOON_BP);
+			victim.SetIntProperty(SPAWN_MARK, 1);
+			victim.GetStat("Hitpoints").BaseValue = 100; // survives the landing
+			open[1].AddObject(victim);
+			Zone startZone = victim.CurrentZone;
+			int n = 0;
+			bool fell = false;
+			for (; n < 60 && GameObject.Validate(victim); n++)
+			{
+				victim.DirectMoveTo(open[0], 0, Forced: true, IgnoreCombat: true);
+				if (victim.CurrentZone != startZone) { fell = true; break; }
+				victim.DirectMoveTo(open[1], 0, Forced: true, IgnoreCombat: true);
+			}
+			Report("crack", fell, fell
+				? $"victim fell through to {victim.CurrentZone?.ZoneID ?? "the zone below"} after {n + 1} crossing(s) (StepChance 15)"
+				: $"victim NEVER fell in 60 crossings (miss odds ~0.006% -- the FallThrough payload looks dead)");
+			if (GameObject.Validate(victim)) victim.Obliterate();
+			if (GameObject.Validate(crack)) crack.Obliterate();
+		}
+
+		/// <summary>Liquid-rock destruction spill (RULED 2026-07-24): a brine geode killed by
+		/// incidental damage releases its pool -- assert one puddle, 4-32 drams (the 4d8 audit).</summary>
+		[WishCommand(Command = "tfspill")]
+		public static void SpillSync()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			GameObject ply = The.Player;
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+			List<Cell> open = origin.GetLocalAdjacentCells();
+			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
+			if (open.Count < 1) { Report("spill", false, "SETUP FAIL - no open adjacent cell"); return; }
+			GameObject geode = GameObject.Create(GEODE_BP);
+			open[0].AddObject(geode);
+			geode.Destroy(null, Silent: true); // destruction, not obliteration: the spill path
+			GameObject puddle = null;
+			int drams = 0;
+			foreach (GameObject obj in open[0].Objects)
+				if (obj.LiquidVolume != null) { puddle = obj; drams = obj.LiquidVolume.Volume; break; }
+			Report("spill", puddle != null && drams >= 4 && drams <= 32,
+				$"destruction spilled {(puddle == null ? "NO puddle" : drams + " dram(s)")} (want 4-32 per the 4d8 pool-volume audit)");
+			if (puddle != null && GameObject.Validate(puddle)) puddle.Obliterate();
+		}
+
+		// ---------------------------------------------------------------- round 3, turn-driven setups
+
+		internal static void SetupQuickApe(GameObject ply, string queue)
+		{
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+			List<Cell> open = origin.GetLocalAdjacentCells();
+			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
+			if (open.Count < 1) { Report("quick.ape", false, "SETUP FAIL - no open adjacent cell"); RunNext(queue, ply); return; }
+			GameObject ape = GameObject.Create(APE_BP);
+			Cleo_TerraFirma_TimedForm timed = ape?.GetPart<Cleo_TerraFirma_TimedForm>();
+			if (timed == null) { Report("quick.ape", false, "SETUP FAIL - ape statue spawn or TimedForm missing"); RunNext(queue, ply); return; }
+			ape.SetIntProperty(SPAWN_MARK, 1);
+			timed.TurnsLeft = 2;
+			open[0].AddObject(ape);
+			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "quickape", TurnsRemaining = 5, TurnsTotal = 5, Queue = queue };
+			driver.InitQuickApe(ape, CountInZone(ply.CurrentZone, RUBBLE_BP));
+			ply.AddPart(driver);
+			MessageQueue.AddPlayerMessage("Harness: ape-statue expiry running -- 5 turns.", "W");
+		}
+
+		[WishCommand(Command = "tfdull")]
+		public static void Dull()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
+			SetupDull(The.Player, "");
+		}
+
+		/// <summary>The anti-hoarding clock, never before verified end-to-end (nobody carries a
+		/// rock 1000 turns on purpose): wind DullAfter to 2, carry it, assert crumble-to-pebbles.</summary>
+		internal static void SetupDull(GameObject ply, string queue)
+		{
+			if (ply?.CurrentCell == null)
+				return;
+			GameObject rock = GameObject.Create(GENERIC_BP);
+			Cleo_TerraFirma_FallenRockPart frp = rock?.GetPart<Cleo_TerraFirma_FallenRockPart>();
+			if (frp == null) { Report("dull", false, "SETUP FAIL - generic rock or FallenRockPart missing"); RunNext(queue, ply); return; }
+			frp.DullAfter = 2;
+			frp.DullAfterMax = 2; // the expiry roll (first carried turn) collapses to exactly 2
+			ply.ReceiveObject(rock);
+			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "dull", TurnsRemaining = 5, TurnsTotal = 5, Queue = queue };
+			driver.InitDull(rock, CountInBag(ply, PEBBLES_BP));
+			ply.AddPart(driver);
+			MessageQueue.AddPlayerMessage("Harness: dull-clock scenario running -- 5 turns carrying a doomed rock.", "W");
+		}
+
+		[WishCommand(Command = "tfdrain")]
+		public static void Drain()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
+			SetupDrain(The.Player, "");
+		}
+
+		/// <summary>The drainstone lifecycle: player-path latch on flesh (LifeDrain applied),
+		/// starved attach on a robot (no leech), the one-shot corpse-can't-latch path, then 25
+		/// turns for the two endings -- gorged burst vs dry crumble.</summary>
+		internal static void SetupDrain(GameObject ply, string queue)
+		{
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+			Cell laneA = FindLane(origin, 3);
+			if (laneA == null) { Report("drain", false, "SETUP FAIL - no open lane"); RunNext(queue, ply); return; }
+
+			// flesh: latch + LifeDrain, buffed to survive the full 15 rounds for the gorged burst
+			GameObject fleshy = GameObject.Create(BABOON_BP);
+			fleshy.SetIntProperty(SPAWN_MARK, 1);
+			fleshy.GetStat("Hitpoints").BaseValue = 100;
+			laneA.AddObject(fleshy);
+			GameObject stoneA = ThrowAt(ply, DRAINSTONE_BP, fleshy);
+			bool latchedA = GameObject.Validate(stoneA) && stoneA.Equipped == fleshy;
+			bool draining = GameObject.Validate(fleshy) && fleshy.HasEffect(typeof(XRL.World.Effects.LifeDrain));
+			Report("drain.latch", latchedA && draining,
+				$"thrown latch on flesh: stone {(latchedA ? "riding the victim" : "NOT attached")}, LifeDrain {(draining ? "applied" : "MISSING")}");
+
+			// robot: attach-but-no-leech (IsOrganic gate)
+			GameObject robot = GameObject.Create(ROBOT_BP);
+			robot.SetIntProperty(SPAWN_MARK, 1);
+			robot.GetStat("Hitpoints").BaseValue = 100;
+			Cell laneB = FindLane(origin, 2) ?? laneA.GetLocalAdjacentCells().Find(c => !c.IsSolid() && !c.HasObjectWithPart("Combat"));
+			if (laneB == null) { Report("drain.robot", false, "SETUP FAIL - nowhere to stand the robot"); }
+			else
+			{
+				laneB.AddObject(robot);
+				GameObject stoneR = ThrowAt(ply, DRAINSTONE_BP, robot);
+				bool latchedR = GameObject.Validate(stoneR) && stoneR.Equipped == robot;
+				bool dryR = GameObject.Validate(robot) && !robot.HasEffect(typeof(XRL.World.Effects.LifeDrain));
+				Report("drain.robot", latchedR && dryR,
+					$"thrown latch on a {ROBOT_BP}: stone {(latchedR ? "attached" : "NOT attached")}, LifeDrain {(dryR ? "correctly withheld (inorganic)" : "APPLIED TO A ROBOT")}");
+				if (latchedA)
+				{
+					Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "drain", TurnsRemaining = 25, TurnsTotal = 25, Queue = queue };
+					driver.InitDrain(fleshy, stoneA, robot, stoneR,
+						GameObject.Validate(fleshy) ? fleshy.GetStat("Hitpoints").Value : 0,
+						GameObject.Validate(robot) ? robot.GetStat("Hitpoints").Value : 0);
+					ply.AddPart(driver);
+					MessageQueue.AddPlayerMessage("Harness: drain endings running -- 25 turns while two stones ride out their latches.", "W");
+					// one-shot check rides the same setup, before the driver turns start
+				}
+			}
+
+			// one-shot: a 1-HP victim dies to the throw itself; a corpse can't be latched
+			Cell laneC = FindLane(origin, 3);
+			if (laneC != null)
+			{
+				GameObject frail = GameObject.Create(BABOON_BP);
+				frail.SetIntProperty(SPAWN_MARK, 1);
+				frail.GetStat("Hitpoints").BaseValue = 1;
+				laneC.AddObject(frail);
+				GameObject stoneB = ThrowAt(ply, DRAINSTONE_BP, frail);
+				bool dead = !GameObject.Validate(frail) || frail.GetStat("Hitpoints").Value <= 0;
+				bool loose = GameObject.Validate(stoneB) && stoneB.Equipped == null && stoneB.InInventory == null;
+				Report("drain.oneshot", dead && loose,
+					$"1-HP victim: {(dead ? "killed by the throw" : "SURVIVED (assert void)")}, stone {(loose ? "loose as loot, unlatched" : "NOT loose")}");
+				if (GameObject.Validate(stoneB)) stoneB.Obliterate();
+			}
+
+			if (!latchedA)
+				RunNext(queue, ply);
+		}
+
+		/// <summary>Slot-normalized player-path throw: force-equip a fresh stone and PerformThrow
+		/// it at the victim. Returns the stone (often spent/broken afterwards).</summary>
+		internal static GameObject ThrowAt(GameObject ply, string blueprint, GameObject victim)
+		{
+			BodyPart slot = ply.GetFirstBodyPart("Thrown Weapon");
+			if (slot == null || victim?.CurrentCell == null)
+				return null;
+			if (slot.Equipped != null)
+				slot.ForceUnequip(Silent: true);
+			GameObject stone = GameObject.Create(blueprint);
+			if (stone == null)
+				return null;
+			ply.ForceEquipObject(stone, slot, Silent: true);
+			if (slot.Equipped != stone)
+				return null;
+			bool suppressed = Popup.Suppress;
+			Popup.Suppress = true;
+			try { ply.PerformThrow(stone, victim.CurrentCell, victim); }
+			finally { Popup.Suppress = suppressed; }
+			return stone;
+		}
+
+		/// <summary>Force a creature back and forth across a cell (DirectMoveTo, forced) --
+		/// ObjectEnteredCellEvent fires synchronously per entry, so step-proc statistics need no
+		/// turn pump. Stops early when stop() returns true. Returns entries performed.</summary>
+		internal static int ForceEntries(GameObject victim, Cell offCell, Cell onCell, int max, Func<bool> stop)
+		{
+			int n = 0;
+			for (; n < max && GameObject.Validate(victim); n++)
+			{
+				victim.DirectMoveTo(onCell, 0, Forced: true, IgnoreCombat: true);
+				if (stop())
+					return n + 1;
+				victim.DirectMoveTo(offCell, 0, Forced: true, IgnoreCombat: true);
+			}
+			return n;
+		}
+
+		internal static int CountModRocks(GameObject who)
+		{
+			int n = 0;
+			List<GameObject> pack = who?.Inventory?.GetObjectsDirect();
+			if (pack != null)
+				foreach (GameObject item in pack)
+					if (item.Blueprint != null && item.Blueprint.StartsWith("Cleo_TerraFirma_Rock_"))
+						n += item.Count;
+			return n;
 		}
 
 		/// <summary>The strange-rock audit invariant ("everything it does should actually happen,
@@ -238,6 +622,9 @@ namespace Cleo.TerraFirma.Scripts
 				case "hopper": SetupHopper(ply, rest); break;
 				case "form": SetupForm(ply, rest); break;
 				case "scav": SetupScav(ply, rest); break;
+				case "quickape": SetupQuickApe(ply, rest); break;
+				case "dull": SetupDull(ply, rest); break;
+				case "drain": SetupDrain(ply, rest); break;
 			}
 		}
 
@@ -394,6 +781,16 @@ namespace XRL.World.Parts
 		[NonSerialized] private bool LoggedReadiness;
 		[NonSerialized] private GameObject FormCreature;
 		[NonSerialized] private int FigurineBaseline;
+		[NonSerialized] private GameObject ApeCreature;
+		[NonSerialized] private int RubbleBaseline;
+		[NonSerialized] private GameObject DullRock;
+		[NonSerialized] private int PebblesBaseline;
+		[NonSerialized] private GameObject DrainFleshy;
+		[NonSerialized] private GameObject DrainStoneA;
+		[NonSerialized] private GameObject DrainRobot;
+		[NonSerialized] private GameObject DrainStoneR;
+		[NonSerialized] private int FleshyHpAtLatch;
+		[NonSerialized] private int RobotHpAtLatch;
 
 		public void InitHopper(GameObject millLive, GameObject millDead, int stonesEach)
 		{
@@ -412,6 +809,31 @@ namespace XRL.World.Parts
 		{
 			FormCreature = creature;
 			FigurineBaseline = figurineBaseline;
+			LiveSetup = true;
+		}
+
+		public void InitQuickApe(GameObject ape, int rubbleBaseline)
+		{
+			ApeCreature = ape;
+			RubbleBaseline = rubbleBaseline;
+			LiveSetup = true;
+		}
+
+		public void InitDull(GameObject rock, int pebblesBaseline)
+		{
+			DullRock = rock;
+			PebblesBaseline = pebblesBaseline;
+			LiveSetup = true;
+		}
+
+		public void InitDrain(GameObject fleshy, GameObject stoneA, GameObject robot, GameObject stoneR, int fleshyHp, int robotHp)
+		{
+			DrainFleshy = fleshy;
+			DrainStoneA = stoneA;
+			DrainRobot = robot;
+			DrainStoneR = stoneR;
+			FleshyHpAtLatch = fleshyHp;
+			RobotHpAtLatch = robotHp;
 			LiveSetup = true;
 		}
 
@@ -470,8 +892,48 @@ namespace XRL.World.Parts
 				FinishScav(owner);
 			else if (Scenario == "form")
 				FinishForm(owner);
+			else if (Scenario == "quickape")
+				FinishQuickApe(owner);
+			else if (Scenario == "dull")
+				FinishDull(owner);
+			else if (Scenario == "drain")
+				FinishDrain();
 			Cleo.TerraFirma.Scripts.TestHarnessWishes.SweepSpawns(owner.CurrentZone);
 			Cleo.TerraFirma.Scripts.TestHarnessWishes.RunNext(Queue, owner);
+		}
+
+		private void FinishQuickApe(GameObject owner)
+		{
+			bool gone = !GameObject.Validate(ApeCreature);
+			int rubbleNow = Cleo.TerraFirma.Scripts.TestHarnessWishes.CountInZone(owner.CurrentZone, "Cleo_TerraFirma_Rock_Rubble");
+			int delta = rubbleNow - RubbleBaseline;
+			Cleo.TerraFirma.Scripts.TestHarnessWishes.Report("quick.ape", gone && delta >= 1,
+				$"ape statue {(gone ? "crumbled and gone" : "STILL STANDING")} after {TurnsTotal} turns; rubble {RubbleBaseline}->{rubbleNow} (want +1, devourable per the ruling)");
+		}
+
+		private void FinishDull(GameObject owner)
+		{
+			bool goneFromBag = !GameObject.Validate(DullRock) || DullRock.InInventory != owner;
+			int pebblesNow = Cleo.TerraFirma.Scripts.TestHarnessWishes.CountInBag(owner, "Cleo_TerraFirma_Rock_Pebbles");
+			int delta = pebblesNow - PebblesBaseline;
+			Cleo.TerraFirma.Scripts.TestHarnessWishes.Report("dull", goneFromBag && delta >= 1,
+				$"carried rock (clock wound to 2) {(goneFromBag ? "went dull and gone" : "STILL IN THE BAG")} after {TurnsTotal} turns; pebbles {PebblesBaseline}->{pebblesNow} (want >=+1, payload lost with the dull)");
+		}
+
+		private void FinishDrain()
+		{
+			bool fleshyAlive = GameObject.Validate(DrainFleshy);
+			int fleshyHp = fleshyAlive ? DrainFleshy.GetStat("Hitpoints").Value : -1;
+			bool drained = fleshyAlive && fleshyHp < FleshyHpAtLatch;
+			bool drainOver = fleshyAlive && !DrainFleshy.HasEffect(typeof(XRL.World.Effects.LifeDrain));
+			bool burstA = !GameObject.Validate(DrainStoneA);
+			bool robotAlive = GameObject.Validate(DrainRobot);
+			int robotHp = robotAlive ? DrainRobot.GetStat("Hitpoints").Value : -1;
+			bool robotUntouched = robotAlive && robotHp == RobotHpAtLatch;
+			bool crumbledR = !GameObject.Validate(DrainStoneR);
+			bool pass = drained && drainOver && burstA && robotUntouched && crumbledR;
+			Cleo.TerraFirma.Scripts.TestHarnessWishes.Report("drain.endings", pass,
+				$"after {TurnsTotal} turns -- flesh: HP {FleshyHpAtLatch}->{fleshyHp} ({(drained ? "drained" : "NOT drained")}), LifeDrain {(drainOver ? "expired" : "still ticking")}, stone {(burstA ? "gone (gorged burst)" : "STILL ATTACHED")}; robot: HP {RobotHpAtLatch}->{robotHp} ({(robotUntouched ? "untouched" : "CHANGED")}), stone {(crumbledR ? "gone (dry crumble)" : "STILL ATTACHED")}");
 		}
 
 		private void FinishForm(GameObject owner)
