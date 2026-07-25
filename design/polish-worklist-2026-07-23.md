@@ -425,6 +425,9 @@ findings):**
   record in TODO.md § the harness.** Next: re-run all three post-restart, then rule on Tier 2.
   **Ledger live (user request): `design/harness-verified.md`** — every harness-proven fact with
   its assertion, limits, and re-run wish; the where-to-look list if verified behavior goes funny.
+  **Round 2 BUILT + DEPLOYED same evening (user-picked; tfsurge SKIPPED — organic testing
+  preferred): `tfstrange` (pool purity, instant) · `tfform` (statuette expiry, 5 turns) ·
+  `tfbatch` (all five chained, ~40 turns). UNTESTED — first run next restart; record in TODO.md.**
 - [x] 📜 `[release]` **git init — DONE 2026-07-23** (fresh repo, no fork linkage, no trailer; history live since `b4ed68e`).
 - [ ] 📜 `[release]` **Workshop publishing plan + credits.**
 - [x] 📜 `[design]` **Stale `Cleo_TerraFirma_Ephemeral Stone` blueprint — RULED remove 2026-07-24

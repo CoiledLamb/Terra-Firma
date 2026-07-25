@@ -925,11 +925,36 @@ redeployed same evening (fixes active next restart):
   went stale ("could not equip"). Fix: normalize the slot (`BodyPart.ForceUnequip`) then equip
   by `ForceEquipObject` — never transits the bag (both APIs decomp-verified).
 
+### Round 2 — BUILT + DEPLOYED 2026-07-24, later the same evening (compiles clean; UNTESTED — activates next restart)
+User picked the round: "the only one i don't know if is actually necessary is tfsurge because i
+swear it's triggered already. we could just test it in less manufactured conditions and get an
+actual outcome i feel like" — **tfsurge SKIPPED, SURGE stays an organic appendix item** (note:
+zero [SURGE] lines in the two surviving Unity logs, but those only cover the last two boots —
+the user's sighting may predate them; if organic play keeps coming up empty, the manufactured
+scenario earns reconsideration). Built:
+- **`tfstrange`** (synchronous) — the strange audit invariant as a standing assertion: 50 pool
+  rolls, every blueprint must detonate or mimic (creature-free, never strange itself, no
+  payloadless fizzles); prototypes created in memory + obliterated, zero zone side effects.
+  This is the invariant most likely to rot when future rocks join the catalog. The live
+  "visibly does something" fire-through stays an eyeball item.
+- **`tfform`** (5 turns) — statuette expiry mechanics: TimedForm clock wound to 2 (`TurnsLeft`
+  public, set pre-first-tick so the 500-1000 roll never runs), asserts statuette GONE +
+  figurine-item zone-count +1 + pocket-stone spill counted beside it; figurine cleaned up on
+  pass. The popup ABSENCE stays the user's eyeball (the property stamp is pre-obliteration,
+  unobservable after the fact).
+- **`tfbatch`** — all five: streak + strange synchronously, then hopper → form → scav chained
+  through a driver `Queue` field (~40 turns standing still; driver removes itself BEFORE
+  chaining so two drivers never coexist; a mid-chain save/load abort drops the queue too).
+- Refactor: wishes are now thin wrappers over `Setup*(ply, queue)` internals; setup failures
+  chain onward instead of stranding the queue.
+
 ### Open / next
-- [ ] `[design]` If the PoC proves out: scenario batch 2 (fungal-lottery reload check is Tier 2
-  territory — needs save/load cycling; drainstone one-shot line; statuette expiry popup gate is
-  EYES-half but the property stamp is assertable), a `tfbatch` runner, and the Tier 2 hands-off
-  boot cycle (marker file → auto-load test save → run batch → write results → quit).
+- [ ] `[verify]` **Round 2 first live run next restart:** tfstrange + tfform + tfbatch (and the
+  round-1 re-runs riding tfbatch). Ledger entries on PASS.
+- [ ] `[design]` Round 3 candidates: `tfeat` (18 Lithovore channels, the big one); drainstone
+  one-shot line scenario; Tier 2 hands-off boot cycle (marker file → auto-load test save → run
+  batch → write results → quit) — which is also what unlocks the fungal-lottery reload check
+  and the scav-vs-vanilla control baseline.
 - [ ] `[release]` Harness strip rides the existing `[TF-VERIFY]`/VERIFY_WATCH strip item.
 
 ---

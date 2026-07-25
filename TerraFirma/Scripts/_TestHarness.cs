@@ -37,13 +37,64 @@ namespace Cleo.TerraFirma.Scripts
 		private const string SCAV_AMMO_BP = "Cleo_TerraFirma_Rock_Generic";
 		private const string BABOON_BP = "Baboon";
 		private const string SPAWN_MARK = "TFHarnessSpawn";
+		private const string STRANGE_BP = "Cleo_TerraFirma_Rock_Strange";
+		private const string STRANGE_POOL = "Cleo_TerraFirma_StrangeRocksPool";
+		private const string STATUETTE_BP = "Cleo_TerraFirma_Rock_BaboonFigurine";
+		private const string FIGURINE_ITEM_BP = "Cleo_TerraFirma_BaboonFigurineItem";
 
 		[WishCommand(Command = "tfverify")]
 		public static void Help()
 		{
-			MessageQueue.AddPlayerMessage("TF harness: 'tfstreak' (re-equip, instant), 'tfhopper' (mill grind, 5 turns), 'tfscav' (baboon cadence, 30 turns -- you stand still while they pelt you).", "W");
+			MessageQueue.AddPlayerMessage("TF harness: 'tfstreak' (re-equip, instant) - 'tfstrange' (pool purity, instant) - 'tfhopper' (mill grind, 5 turns) - 'tfform' (statuette expiry, 5 turns) - 'tfscav' (baboon cadence, 30 turns, you are the target) - 'tfbatch' (all five, ~40 turns).", "W");
 			if (!Helpers.VERIFY_WATCH)
 				MessageQueue.AddPlayerMessage("VERIFY_WATCH is OFF -- the harness is disabled.", "R");
+		}
+
+		/// <summary>Round 2 (2026-07-24): everything in sequence. The synchronous pair runs now;
+		/// the turn-driven three chain through the driver's queue: hopper -> form -> scav.</summary>
+		[WishCommand(Command = "tfbatch")]
+		public static void Batch()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
+			Streak();
+			Strange();
+			SetupHopper(The.Player, "form,scav");
+		}
+
+		/// <summary>The strange-rock audit invariant ("everything it does should actually happen,
+		/// no null" -- RULED 2026-07-24) as a standing assertion: 50 pool rolls, every rolled
+		/// blueprint must be a creature-free grenade-carrier or payload-mimic, never strange
+		/// itself. This is the invariant most likely to rot silently when future rocks join the
+		/// catalog. Prototypes are created in memory and obliterated -- no zone side effects; the
+		/// live fire-through/"visibly does something" half stays an eyeball item.</summary>
+		[WishCommand(Command = "tfstrange")]
+		public static void Strange()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			const int ROLLS = 50;
+			int nulls = 0;
+			List<string> bad = new List<string>();
+			HashSet<string> seen = new HashSet<string>();
+			for (int i = 0; i < ROLLS; i++)
+			{
+				string rolled = PopulationManager.RollOneFrom(STRANGE_POOL)?.Blueprint;
+				if (rolled == null) { nulls++; continue; }
+				seen.Add(rolled);
+				if (rolled == STRANGE_BP) { bad.Add(rolled + " (itself)"); continue; }
+				GameObject proto = GameObject.Create(rolled);
+				if (proto == null) { bad.Add(rolled + " (no such blueprint)"); continue; }
+				bool creature = proto.Brain != null;
+				bool grenade = proto.GetFirstPartDescendedFrom<IGrenade>() != null;
+				Cleo_TerraFirma_FallenRockPart frp = proto.GetPart<Cleo_TerraFirma_FallenRockPart>();
+				bool mimic = frp != null && !frp.Payload.IsNullOrEmpty() && frp.Payload != "Strange";
+				if (creature || (!grenade && !mimic))
+					bad.Add(rolled + (creature ? " (creature)" : " (payloadless fizzle)"));
+				proto.Obliterate();
+			}
+			bool pass = bad.Count == 0 && nulls == 0;
+			Report("strange", pass,
+				$"{ROLLS} pool rolls, {seen.Count} distinct blueprints, {nulls} null roll(s), {bad.Count} bad: {(bad.Count > 0 ? string.Join("; ", bad) : "none")} (every roll must detonate or mimic, never fizzle)");
 		}
 
 		// ---------------------------------------------------------------- streak (synchronous)
@@ -118,24 +169,76 @@ namespace Cleo.TerraFirma.Scripts
 		public static void Hopper()
 		{
 			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			GameObject ply = The.Player;
+			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
+			SetupHopper(The.Player, "");
+		}
+
+		internal static void SetupHopper(GameObject ply, string queue)
+		{
 			Cell origin = ply?.CurrentCell;
 			if (origin == null)
 				return;
-			if (ply.HasPart<Cleo_TerraFirma_TestDriver>()) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
-
 			List<Cell> open = origin.GetLocalAdjacentCells();
 			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
-			if (open.Count < 2) { Report("hopper", false, "SETUP FAIL - need two open adjacent cells for the mills"); return; }
+			if (open.Count < 2) { Report("hopper", false, "SETUP FAIL - need two open adjacent cells for the mills"); RunNext(queue, ply); return; }
 
 			GameObject millLive = SpawnMill(open[0], powered: true);
 			GameObject millDead = SpawnMill(open[1], powered: false);
-			if (millLive == null || millDead == null) { Report("hopper", false, "SETUP FAIL - Millstone spawn or Mill part missing"); return; }
+			if (millLive == null || millDead == null) { Report("hopper", false, "SETUP FAIL - Millstone spawn or Mill part missing"); RunNext(queue, ply); return; }
 
-			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "hopper", TurnsRemaining = 5, TurnsTotal = 5 };
+			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "hopper", TurnsRemaining = 5, TurnsTotal = 5, Queue = queue };
 			driver.InitHopper(millLive, millDead, stonesEach: 2);
 			ply.AddPart(driver);
 			MessageQueue.AddPlayerMessage("Harness: hopper scenario running -- standing still for 5 turns while the mills work.", "W");
+		}
+
+		/// <summary>Statuette expiry mechanics (batch item 5's assertable half): a spawned
+		/// statuette with its TimedForm clock wound to 2 must, within 5 turns, be GONE and
+		/// replaced by a rep-granting figurine item with its pocket stones spilled beside it.
+		/// The popup ABSENCE stays the user's eyeball -- the property stamp is pre-obliteration
+		/// and unobservable after the fact.</summary>
+		[WishCommand(Command = "tfform")]
+		public static void Form()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
+			SetupForm(The.Player, "");
+		}
+
+		internal static void SetupForm(GameObject ply, string queue)
+		{
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+			List<Cell> open = origin.GetLocalAdjacentCells();
+			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
+			if (open.Count < 1) { Report("form", false, "SETUP FAIL - no open adjacent cell for the statuette"); RunNext(queue, ply); return; }
+			GameObject statuette = GameObject.Create(STATUETTE_BP);
+			Cleo_TerraFirma_TimedForm timed = statuette?.GetPart<Cleo_TerraFirma_TimedForm>();
+			if (timed == null) { Report("form", false, "SETUP FAIL - statuette spawn or TimedForm part missing"); RunNext(queue, ply); return; }
+			statuette.SetIntProperty(SPAWN_MARK, 1);
+			timed.TurnsLeft = 2; // wind the clock: set BEFORE the first tick so the 500-1000 roll never runs
+			open[0].AddObject(statuette);
+			int baseline = CountInZone(ply.CurrentZone, FIGURINE_ITEM_BP);
+			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "form", TurnsRemaining = 5, TurnsTotal = 5, Queue = queue };
+			driver.InitForm(statuette, baseline);
+			ply.AddPart(driver);
+			MessageQueue.AddPlayerMessage("Harness: form scenario running -- 5 turns while the statuette's clock runs out.", "W");
+		}
+
+		internal static void RunNext(string queue, GameObject ply)
+		{
+			if (queue.IsNullOrEmpty() || ply == null)
+				return;
+			int comma = queue.IndexOf(',');
+			string next = comma < 0 ? queue : queue.Substring(0, comma);
+			string rest = comma < 0 ? "" : queue.Substring(comma + 1);
+			switch (next)
+			{
+				case "hopper": SetupHopper(ply, rest); break;
+				case "form": SetupForm(ply, rest); break;
+				case "scav": SetupScav(ply, rest); break;
+			}
 		}
 
 		private static GameObject SpawnMill(Cell where, bool powered)
@@ -164,11 +267,15 @@ namespace Cleo.TerraFirma.Scripts
 		public static void Scav()
 		{
 			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			GameObject ply = The.Player;
+			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
+			SetupScav(The.Player, "");
+		}
+
+		internal static void SetupScav(GameObject ply, string queue)
+		{
 			Cell origin = ply?.CurrentCell;
 			if (origin == null)
 				return;
-			if (ply.HasPart<Cleo_TerraFirma_TestDriver>()) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
 
 			List<Cell> ring = origin.GetLocalAdjacentCells(6);
 			ring.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat") || c.DistanceTo(origin) < 4);
@@ -189,9 +296,9 @@ namespace Cleo.TerraFirma.Scripts
 				ring[i].AddObject(baboon);
 				spawned++;
 			}
-			if (spawned == 0) { Report("scav", false, "SETUP FAIL - no open cells at distance 4-6 for baboons"); return; }
+			if (spawned == 0) { Report("scav", false, "SETUP FAIL - no open cells at distance 4-6 for baboons"); RunNext(queue, ply); return; }
 
-			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "scav", TurnsRemaining = 30, TurnsTotal = 30 };
+			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "scav", TurnsRemaining = 30, TurnsTotal = 30, Queue = queue };
 			driver.InitScav();
 			ply.AddPart(driver);
 			MessageQueue.AddPlayerMessage($"Harness: scav scenario running -- {spawned} armed baboon(s), 30 turns, you are the target dummy. Hold still.", "W");
@@ -219,6 +326,16 @@ namespace Cleo.TerraFirma.Scripts
 					return walk;
 			}
 			return null;
+		}
+
+		internal static int CountInZone(Zone zone, string blueprint)
+		{
+			int n = 0;
+			if (zone != null)
+				foreach (GameObject obj in zone.GetObjects())
+					if (obj.Blueprint == blueprint)
+						n += obj.Count;
+			return n;
 		}
 
 		internal static int CountInBag(GameObject who, string blueprint)
@@ -266,11 +383,17 @@ namespace XRL.World.Parts
 		public int TurnsRemaining;
 		public int TurnsTotal;
 
+		/// <summary>Comma-separated scenarios to run after this one (tfbatch chaining). A lost-state
+		/// abort drops the queue too -- a chain shouldn't outlive the save/load that broke it.</summary>
+		public string Queue = "";
+
 		[NonSerialized] private bool LiveSetup;
 		[NonSerialized] private GameObject MillLive;
 		[NonSerialized] private GameObject MillDead;
 		[NonSerialized] private int StonesEach;
 		[NonSerialized] private bool LoggedReadiness;
+		[NonSerialized] private GameObject FormCreature;
+		[NonSerialized] private int FigurineBaseline;
 
 		public void InitHopper(GameObject millLive, GameObject millDead, int stonesEach)
 		{
@@ -282,6 +405,13 @@ namespace XRL.World.Parts
 
 		public void InitScav()
 		{
+			LiveSetup = true;
+		}
+
+		public void InitForm(GameObject creature, int figurineBaseline)
+		{
+			FormCreature = creature;
+			FigurineBaseline = figurineBaseline;
 			LiveSetup = true;
 		}
 
@@ -312,8 +442,10 @@ namespace XRL.World.Parts
 				E.PreventAction = true;
 				if (TurnsRemaining <= 0)
 				{
-					Finish();
+					// remove FIRST: Finish may chain the queue's next scenario, whose setup
+					// attaches a fresh driver -- two drivers must never coexist on the player
 					ParentObject.RemovePart(this);
+					Finish();
 				}
 			}
 			return base.HandleEvent(E);
@@ -332,7 +464,40 @@ namespace XRL.World.Parts
 				FinishHopper();
 			else if (Scenario == "scav")
 				FinishScav();
+			else if (Scenario == "form")
+				FinishForm();
 			Cleo.TerraFirma.Scripts.TestHarnessWishes.SweepSpawns(ParentObject.CurrentZone);
+			Cleo.TerraFirma.Scripts.TestHarnessWishes.RunNext(Queue, ParentObject);
+		}
+
+		private void FinishForm()
+		{
+			bool gone = !GameObject.Validate(FormCreature);
+			Zone zone = ParentObject.CurrentZone;
+			int figurinesNow = Cleo.TerraFirma.Scripts.TestHarnessWishes.CountInZone(zone, "Cleo_TerraFirma_BaboonFigurineItem");
+			int delta = figurinesNow - FigurineBaseline;
+			// find the freshest figurine to report the spill beside it, then clean up the delta
+			int spilled = 0;
+			GameObject cleanupTarget = null;
+			if (zone != null && delta > 0)
+			{
+				foreach (GameObject obj in zone.GetObjects())
+				{
+					if (obj.Blueprint == "Cleo_TerraFirma_BaboonFigurineItem")
+						cleanupTarget = obj; // the last one found; with delta 1 (the normal case) it IS ours
+				}
+				if (cleanupTarget?.CurrentCell != null)
+				{
+					foreach (GameObject obj in cleanupTarget.CurrentCell.Objects)
+						if (obj.HasTag("Cleo_TerraFirma_IsAnyStone") && obj.InInventory == null && obj.Equipped == null)
+							spilled += obj.Count;
+				}
+			}
+			bool pass = gone && delta > 0;
+			Cleo.TerraFirma.Scripts.TestHarnessWishes.Report("form", pass,
+				$"statuette {(gone ? "expired and gone" : "STILL ALIVE")} after {TurnsTotal} turns; figurine items {FigurineBaseline}->{figurinesNow} (want +1); {spilled} loose pocket stone(s) beside the figurine");
+			if (pass && cleanupTarget != null && GameObject.Validate(cleanupTarget))
+				cleanupTarget.Obliterate(); // spilled pebbles stay as litter -- acceptable
 		}
 
 		private void FinishHopper()
