@@ -1142,6 +1142,21 @@ note 3210 → menu Save and Quit → reload the same save → mint a fungal rock
   casters need a Calcify-pattern AI handler — added to the creatures workstream's owed list
   (EB / Stoneshaper / Gorgon / Fissure).**
 
+### TIER 1 DECLARED COMPLETE — 2026-07-25 (user assessment: "is there anything left worth using
+### the harness on?" → the two last cheap adds built, the rest is standing guard)
+The closing adds, BUILT + DEPLOYED (next restart): **eat.mullstone** (staged refresh — exactly
+one ability left cooling via the public Cooldown setter, eat, assert refreshed; every cooldown
+snapshot-restored, net-neutral) and **drain.steplatch** (the last drain footnote: at-rest
+drainstone latches IMMEDIATELY on its step proc, forced-crossing tech). Deliberately NOT built,
+with reasons recorded: Gorgon DC statistics (build the day the formula changes), whorl-split /
+eb-beam statistics (passed live; flaky AI arrangements for no new information), the remaining
+eat skips (design calls). **The harness's standing duties from here: tfbatch after every build
+batch (the ledger protocol) · the queued red-flips (quick.rep on the figurine fix, sludgestone
+re-assert, tfcarom on the StepChance re-ruling, tffis when the AI handler lands) · pool-purity
++ eat rows for every future rock · the tffis pattern for every future NPC caster. The next
+capability jump is TIER 2 (boot cycle) — start it when the lottery verdict or the vanilla
+baseline actually blocks a decision, not before.**
+
 ### Open / next
 - [x] `[verify]` **The human carve — DONE 2026-07-25 (log-confirmed same session):** a normal-UI
   cast carved a wild Bat muse from a zone Shale wall (bite + wings armed) — the picker shell

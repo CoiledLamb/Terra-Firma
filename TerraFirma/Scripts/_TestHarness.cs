@@ -652,6 +652,41 @@ namespace Cleo.TerraFirma.Scripts
 					rock.Obliterate(); // a refused eat should not litter the pack
 			}
 
+			// mullstone refresh (the last cheap skip, staged): exactly one ability left cooling,
+			// eat -> it must refresh to 0; every cooldown snapshot-restored after (net-neutral)
+			int totalRows = rows.GetLength(0);
+			ActivatedAbilities abilities = ply.ActivatedAbilities;
+			if (abilities?.AbilityByGuid != null && abilities.AbilityByGuid.Count > 0)
+			{
+				totalRows++;
+				Dictionary<Guid, int> snapshot = new Dictionary<Guid, int>();
+				foreach (KeyValuePair<Guid, ActivatedAbilityEntry> kv in abilities.AbilityByGuid)
+					snapshot[kv.Key] = kv.Value.Cooldown;
+				ActivatedAbilityEntry staged = null;
+				foreach (ActivatedAbilityEntry entry in abilities.AbilityByGuid.Values)
+				{
+					if (staged == null) { staged = entry; entry.Cooldown = 500; }
+					else if (entry.Cooldown > 0) entry.Cooldown = 0;
+				}
+				GameObject mull = GameObject.Create("Cleo_TerraFirma_Rock_Mullstone");
+				ply.ReceiveObject(mull);
+				bool sup = Popup.Suppress;
+				Popup.Suppress = true;
+				try { InventoryActionEvent.Check(ply, ply, mull, "Cleo_TerraFirma_EatStone"); }
+				finally { Popup.Suppress = sup; }
+				bool refreshed = staged != null && staged.Cooldown <= 0;
+				Helpers.VerifyLog("AUTO", $"eat.mullstone (staged refresh): {(refreshed ? "PASS" : "FAIL")} - the one cooling ability {(refreshed ? "refreshed to ready" : "still cooling: " + (staged?.Cooldown ?? -1))}");
+				if (refreshed) passCount++;
+				else fails.Add("mullstone refresh");
+				foreach (KeyValuePair<Guid, int> kv in snapshot)
+					if (abilities.AbilityByGuid.TryGetValue(kv.Key, out ActivatedAbilityEntry restoreEntry))
+						restoreEntry.Cooldown = kv.Value;
+				if (GameObject.Validate(mull) && mull.InInventory == ply)
+					mull.Obliterate();
+			}
+			else
+				Helpers.VerifyLog("AUTO", "eat.mullstone (staged refresh): SKIP - no activated abilities on this character");
+
 			// the test must not feed, hurt, or relocate you on net
 			stomach.HungerLevel = hungerBefore;
 			stomach.CookingCounter = cookBefore;
@@ -661,7 +696,7 @@ namespace Cleo.TerraFirma.Scripts
 			if (neighbor != null && GameObject.Validate(neighbor))
 				neighbor.Obliterate();
 			Report("eat", fails.Count == 0,
-				$"{passCount}/{rows.GetLength(0)} eaten channels asserted{(fails.Count > 0 ? "; FAILS: " + string.Join(", ", fails) : "")}; skipped by design: detonate pair, fungal twins, mullstone, deep four. Player state restored.");
+				$"{passCount}/{totalRows} eaten channels asserted{(fails.Count > 0 ? "; FAILS: " + string.Join(", ", fails) : "")}; skipped by design: detonate pair, fungal twins, deep four. Player state restored (cooldowns included).");
 		}
 
 		private static int CountAround(GameObject who, string blueprint)
@@ -856,6 +891,31 @@ namespace Cleo.TerraFirma.Scripts
 					$"1-HP victim: {(dead ? "killed by the throw" : "SURVIVED (assert void)")}, stone {(loose ? "loose as loot, unlatched" : "NOT loose")}");
 				if (GameObject.Validate(stoneB)) stoneB.Obliterate();
 			}
+
+			// step-path latch (the last drain footnote): an at-rest drainstone underfoot latches
+			// IMMEDIATELY on its 25% step proc -- the smarter Latch channel's other half
+			List<Cell> stepOpen = origin.GetLocalAdjacentCells();
+			stepOpen.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
+			if (stepOpen.Count >= 2)
+			{
+				GameObject stepVictim = GameObject.Create(BABOON_BP);
+				stepVictim.SetIntProperty(SPAWN_MARK, 1);
+				stepVictim.GetStat("Hitpoints").BaseValue = 100;
+				stepOpen[0].AddObject(stepVictim);
+				GameObject stepStone = GameObject.Create(DRAINSTONE_BP);
+				stepStone.SetIntProperty(SPAWN_MARK, 1);
+				stepOpen[1].AddObject(stepStone);
+				int crossings = ForceEntries(stepVictim, stepOpen[0], stepOpen[1], 30,
+					() => GameObject.Validate(stepStone) && stepStone.Equipped == stepVictim);
+				bool latchedStep = GameObject.Validate(stepStone) && stepStone.Equipped == stepVictim;
+				bool drainingStep = GameObject.Validate(stepVictim) && stepVictim.HasEffect(typeof(XRL.World.Effects.LifeDrain));
+				Report("drain.steplatch", latchedStep && drainingStep,
+					$"at-rest step latch after {crossings} crossing(s) (StepChance 25, IMMEDIATE channel): stone {(latchedStep ? "riding the stepper" : "NOT attached")}, LifeDrain {(drainingStep ? "applied (half duration, step rules)" : "MISSING")}");
+				if (GameObject.Validate(stepVictim)) stepVictim.Obliterate();
+				if (GameObject.Validate(stepStone)) stepStone.Obliterate();
+			}
+			else
+				Report("drain.steplatch", false, "SETUP SKIP - no room for the step lane");
 
 			if (!latchedA)
 				RunNext(queue, ply);

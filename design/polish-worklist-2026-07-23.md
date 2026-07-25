@@ -465,6 +465,11 @@ findings):**
   dry-fetch WEDGE flagged (real mod observation). ROUND 5 BUILT + DEPLOYED: tfeat (17-rock
   eaten-channel sweep, 13 state-asserted, player fully restored) · tffis (first NPC-caster
   scenario — either outcome answers fis-npc). UNTESTED — next restart.**
+  **ROUND 5 RUN: tfeat 16/17 (sludgestone = pool-merge artifact, fixed) · tffis ANSWERED
+  fis-npc (no AI advertisement; handler joins the creatures owed-list). TIER 1 DECLARED
+  COMPLETE 2026-07-25 with two closing adds (eat.mullstone staged refresh, drain.steplatch);
+  the harness graduates to standing regression duty — tfbatch after every build batch, red-flips
+  as fixes land, pool-purity + eat rows for future rocks. Tier 2 waits for a blocking need.**
 - [x] 📜 `[release]` **git init — DONE 2026-07-23** (fresh repo, no fork linkage, no trailer; history live since `b4ed68e`).
 - [ ] 📜 `[release]` **Workshop publishing plan + credits.**
 - [x] 📜 `[design]` **Stale `Cleo_TerraFirma_Ephemeral Stone` blueprint — RULED remove 2026-07-24
