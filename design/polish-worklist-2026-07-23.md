@@ -148,7 +148,10 @@ three of four closed, BUILT + DEPLOYED:**
 - [ ] 📜 `[design]` **PARKED CONVERSATION (user, 2026-07-24): hold rate / fragility / natural
   expiry as one system** — "interested in a conversation about hold rate, fragility, and natural
   expiry at a certain point, but that can wait." The dials: HoldChance 25, DullAfter 1000–2500,
-  TimedForm 500–1000, healstone HoldChance 0, caromcobble 100.
+  TimedForm 500–1000, healstone HoldChance 0, caromcobble 100. **Step-half LEAN on file
+  (2026-07-24, out of the farflint flag; NOT a ruling — "i'm honestly not sure"): ConsumedOnStep
+  as the baseline for step-destroyed stones, possibly 100% step-breaks. Seeds + exemption
+  problems (caromcobble's peel, phosphorescent's glow-mark) in the TODO farflint entry.**
 - [ ] 🆕 `[design]` **Stale +100 throw accuracy on the playtest character** — keep the god-arm or
   strip via one-line wish next session.
 

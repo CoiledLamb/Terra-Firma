@@ -476,6 +476,18 @@ Sign-offs: spec table numbers approved; all 4 fungal infections in the pool; glo
   survival grates, for a rulings batch: (a) keep as-is · (b) `ConsumedOnStep="true"` (the field
   exists) · (c) flavor-fit third way — on a step-proc the stone shunts ITSELF elsewhere too ("a
   stone that was somewhere else a moment ago"), zoning both ways. No change made.
+  **USER LEAN RECORDED 2026-07-24 (explicitly NOT a ruling — "i'm honestly not sure. it's a
+  design conversation thing"):** "consumed on step is a great baseline for stones that get
+  destroyed when walked over" + considering step-breaks at 100% "rather than being sturdy."
+  Folds into the PARKED hold-rate/fragility/expiry conversation (worklist Pass 2) — the step
+  half of that triad now has a lean on file. Conversation seeds, Claude 2026-07-24: (1) the
+  live system already breaks 3 of 4 step-procs (HoldChance 25 = 25% SURVIVE) — the real question
+  isn't sturdiness, it's whether the "lucky stone keeps holding on" whimsy survives at 0%; (2) a
+  100% baseline needs immediate exemptions — caromcobble's permanent peel IS its identity
+  (HoldChance 100 intended), and phosphorescent's glow-mark step-proc becomes single-use zoning;
+  (3) step-fragility and throw-fragility share one HoldChance today — a 100%-step rule wants
+  either ConsumedOnStep stamped on the base blueprint (one attribute, whole catalog, exempt by
+  override) or a separate StepHoldChance dial (C#-small).
 
 ### POST-SESSION BUILD BATCH — BUILT + DEPLOYED 2026-07-24 (after the verify marathon wrapped; active next launch)
 Eight pieces, all from the day's flags (details live in each flag's own entry):
