@@ -197,6 +197,9 @@ findings):**
   for Calcify): bless or gate.
 - [ ] 🆕 `[ratify]` **Batch DRAFT numbers:** hopper throughput 1/turn · Calcify "−10 DV" lean (b) ·
   figurine AddsRep Baboons 200.
+- [ ] 🆕 `[bug]` **Baboon figurine needs identification (user flag, harness session:
+  "unintended")** — inherited from base Trinket's `Examiner Complexity="1"` (root cause + one-line
+  fix shape in TODO.md); next batch, and sweep other Trinket-inheriting mod items while there.
 - [x] 🆕 `[bug?]` **Farflint step-shunt survives the proc (user flag, harness session) —
   LOG-RESOLVED, WORKING AS DESIGNED:** the proc logged the full chain ending `fragility (step):
   HOLDS` — one legitimate 25% hold (house HoldChance 25, rolled fresh per use). Optional dials
@@ -427,7 +430,10 @@ findings):**
   its assertion, limits, and re-run wish; the where-to-look list if verified behavior goes funny.
   **Round 2 BUILT + DEPLOYED same evening (user-picked; tfsurge SKIPPED — organic testing
   preferred): `tfstrange` (pool purity, instant) · `tfform` (statuette expiry, 5 turns) ·
-  `tfbatch` (all five chained, ~40 turns). UNTESTED — first run next restart; record in TODO.md.**
+  `tfbatch` (all five chained, ~40 turns). FIRST RUN same night: strange PASS ×2 (pool purity
+  now leddered) + streak/hopper re-PASS; tfform no-verdict + chain death = one harness NRE
+  (RemovePart nulls ParentObject), FIXED + REDEPLOYED — form verdict + full chain owed next
+  restart. Figurine-identification flag came out of the same run (TODO, next batch).**
 - [x] 📜 `[release]` **git init — DONE 2026-07-23** (fresh repo, no fork linkage, no trailer; history live since `b4ed68e`).
 - [ ] 📜 `[release]` **Workshop publishing plan + credits.**
 - [x] 📜 `[design]` **Stale `Cleo_TerraFirma_Ephemeral Stone` blueprint — RULED remove 2026-07-24

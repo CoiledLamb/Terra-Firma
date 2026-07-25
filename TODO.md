@@ -489,6 +489,15 @@ Sign-offs: spec table numbers approved; all 4 fungal infections in the pool; glo
   either ConsumedOnStep stamped on the base blueprint (one attribute, whole catalog, exempt by
   override) or a separate StepHoldChance dial (C#-small).
 
+- [ ] `[bug]` **Baboon figurine needs identification (user flag 2026-07-24 night: "baboon
+  figurine needed to be identified (unintended)").** Root cause found same minute: the item
+  inherits base `Trinket`, which carries `<part Name="Examiner" Unknown="UnknownOddTrinket"
+  Complexity="1" />` (Items.xml:11811) — tech-item identify behavior on a carved rock. Fix for
+  the next batch: override `<part Name="Examiner" Complexity="0" />` on
+  `Cleo_TerraFirma_BaboonFigurineItem` (a knee-high stone baboon is self-evident). One XML line.
+  Recon note: check the APE STATUE's rubble + any other Trinket-inheriting mod items for the
+  same inherited wart while in there.
+
 ### POST-SESSION BUILD BATCH — BUILT + DEPLOYED 2026-07-24 (after the verify marathon wrapped; active next launch)
 Eight pieces, all from the day's flags (details live in each flag's own entry):
 1. **Streakschorl re-equip RE-FIX** — replicates the engine's protected wrapper: Check() first (handlers may own the slot), then same-blueprint bag search + `CommandEquipObject` into the vacated slot, with readied/refused/no-spare logging. ~~`[verify]` throw last held streakschorl with spares → next lands in hand.~~ **VERIFIED 2026-07-24 evening — harness tfstreak PASS, direct engine-state assertion on the player path (§ Automated verification harness).**
@@ -948,9 +957,24 @@ scenario earns reconsideration). Built:
 - Refactor: wishes are now thin wrappers over `Setup*(ply, queue)` internals; setup failures
   chain onward instead of stranding the queue.
 
+### Round 2 first live run — 2026-07-24, same night (user: "strange and hopper both green though"; tfform "didn't return a pass")
+- [x] **tfstrange PASS twice** (standalone + in-batch: 50 rolls each, 32/28 distinct blueprints,
+  zero nulls, zero bad) — **the strange-pool purity invariant is now harness-verified**; ledger
+  entry added. Streak + hopper re-PASSed under harness v2 (the retry fix held in-batch).
+- [x] **tfform NO-VERDICT + batch chain death = ONE harness bug, root-caused from the log in
+  minutes: `RemovePart` NULLS `ParentObject`.** Round 2's remove-before-finish reordering (the
+  double-driver guard) broke every finisher that read ParentObject: three identical NREs — two
+  tfform runs (died at `FinishForm`'s zone read, AFTER the FORM expiry line proved the mod's
+  own chain fired: spill + figurine replacement) and one at hopper's post-verdict sweep, which
+  is exactly where the batch chain died (form/scav never set up in-batch; the later FORM line
+  was the user's manual retry). Round 1 never hit it because the old ordering finished first.
+  **FIXED + DEPLOYED same night: capture the owner before removal, pass it through
+  Finish/FinishForm/FinishScav/sweep/chain.** tfform's assert itself remains UNRUN — no verdict
+  exists either way on the statuette scenario; next restart answers it.
+- [ ] `[verify]` **Next restart: tfform + tfbatch full chain** (form verdict + scav-in-chain are
+  the two things no run has yet produced). Ledger on PASS.
+
 ### Open / next
-- [ ] `[verify]` **Round 2 first live run next restart:** tfstrange + tfform + tfbatch (and the
-  round-1 re-runs riding tfbatch). Ledger entries on PASS.
 - [ ] `[design]` Round 3 candidates: `tfeat` (18 Lithovore channels, the big one); drainstone
   one-shot line scenario; Tier 2 hands-off boot cycle (marker file → auto-load test save → run
   batch → write results → quit) — which is also what unlocks the fungal-lottery reload check

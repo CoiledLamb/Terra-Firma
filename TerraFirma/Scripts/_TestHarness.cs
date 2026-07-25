@@ -443,9 +443,13 @@ namespace XRL.World.Parts
 				if (TurnsRemaining <= 0)
 				{
 					// remove FIRST: Finish may chain the queue's next scenario, whose setup
-					// attaches a fresh driver -- two drivers must never coexist on the player
-					ParentObject.RemovePart(this);
-					Finish();
+					// attaches a fresh driver -- two drivers must never coexist on the player.
+					// But RemovePart NULLS ParentObject (first live run of round 2: three NREs,
+					// one per finisher that read it, chain dead at hopper) -- capture the owner
+					// before removal and pass it through.
+					GameObject owner = ParentObject;
+					owner.RemovePart(this);
+					Finish(owner);
 				}
 			}
 			return base.HandleEvent(E);
@@ -458,22 +462,22 @@ namespace XRL.World.Parts
 			return false;
 		}
 
-		private void Finish()
+		private void Finish(GameObject owner)
 		{
 			if (Scenario == "hopper")
 				FinishHopper();
 			else if (Scenario == "scav")
-				FinishScav();
+				FinishScav(owner);
 			else if (Scenario == "form")
-				FinishForm();
-			Cleo.TerraFirma.Scripts.TestHarnessWishes.SweepSpawns(ParentObject.CurrentZone);
-			Cleo.TerraFirma.Scripts.TestHarnessWishes.RunNext(Queue, ParentObject);
+				FinishForm(owner);
+			Cleo.TerraFirma.Scripts.TestHarnessWishes.SweepSpawns(owner.CurrentZone);
+			Cleo.TerraFirma.Scripts.TestHarnessWishes.RunNext(Queue, owner);
 		}
 
-		private void FinishForm()
+		private void FinishForm(GameObject owner)
 		{
 			bool gone = !GameObject.Validate(FormCreature);
-			Zone zone = ParentObject.CurrentZone;
+			Zone zone = owner.CurrentZone;
 			int figurinesNow = Cleo.TerraFirma.Scripts.TestHarnessWishes.CountInZone(zone, "Cleo_TerraFirma_BaboonFigurineItem");
 			int delta = figurinesNow - FigurineBaseline;
 			// find the freshest figurine to report the spill beside it, then clean up the delta
@@ -525,13 +529,13 @@ namespace XRL.World.Parts
 			}
 		}
 
-		private void FinishScav()
+		private void FinishScav(GameObject owner)
 		{
 			int throws = 0;
 			int starved = 0;
 			int baboonTurns = 0;
 			int survivors = 0;
-			Zone zone = ParentObject.CurrentZone;
+			Zone zone = owner.CurrentZone;
 			if (zone != null)
 			{
 				foreach (GameObject obj in zone.GetObjects())

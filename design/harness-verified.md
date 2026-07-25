@@ -52,6 +52,29 @@ ledger entries (log inference is not proof).
 - **Re-run:** `tfscav` (30 turns; run on a character that can absorb the pelting; v2 counter
   counts starvation only when emptiness survives a full turn).
 
+## 2026-07-24 night — round 2 first run
+
+### `tfstrange` PASS ×2 — strange-pool purity (the audit invariant as a standing assertion)
+- **Proven:** 100 rolls total across two runs (50 + 50; 32 and 28 distinct blueprints), zero
+  null rolls, zero bad: every rolled blueprint is creature-free and either grenade-carrying or
+  payload-mimicking, never strange itself, never a payloadless fizzle — the 2026-07-24 audit
+  ruling ("everything it does should actually happen, no null") holds at the pool level.
+  **This is the re-run to reach for whenever a new rock joins the catalog or the pool table.**
+- **Not covered:** live fire-through (place-then-fire at a real victim — the "visibly does
+  something" eyeball), pool WEIGHTS (deep-four-at-half-weight is not asserted, only membership),
+  Lithovore strange-eat path.
+- **Re-run:** `tfstrange` (instant, zero zone side effects).
+
+### Round-1 re-confirmations (same run)
+`tfstreak` and `tfhopper` re-PASSed under harness v2 in-batch — the round-1 ledger entries stand,
+now with the v2 slot-normalization setup exercised on a fresh save.
+
+### NOT yet leddered: `tfform`
+Two runs ended in the harness's own finisher NRE (RemovePart nulls ParentObject — fixed same
+night) BEFORE the assertion ran. The `[FORM]` log lines did show the mod's expiry chain firing
+(lifespan spent → spill → figurine replacement), but that is log evidence, not the assertion —
+no ledger entry until the assert itself passes. Next restart answers it.
+
 ---
 
 *Add new entries at the tail. If a scenario's assertion changes shape (harness edits), note the
