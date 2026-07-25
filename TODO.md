@@ -504,7 +504,7 @@ Eight pieces, all from the day's flags (details live in each flag's own entry):
 2. **Fungal lottery diagnostic** — the SPORE line now says ROLLED-FRESH vs loaded-from-game-state (persistence was already designed in via SetStringGameState and fails silently; this names the broken link). `[verify]` reload the save: if the line says ROLLED FRESH again, GetStringGameState is returning empty post-load.
 3. **SCAV pocket re-ready** — slot empty + pocket stone → forced `CommandEquipObject` as a **FREE action (user ruling, same evening: "don't worry about action costs for equipping thrown weapons, it's actually a free action")**, REFUSED outcomes logged (the H1 smoking-gun detector). `[verify]` baboons re-arm every throw with no lost turn; cadence ≥ vanilla; watch for REFUSED spam naming the regression. **RE-READY VERIFIED 2026-07-24 evening (harness tfscav): every slot->EMPTY answered same-turn by the free re-ready, ZERO REFUSED across 118 baboon-turns — H1 refuted in-arena; dry-fetch loop also ran live. Cadence 0.29 throws/baboon-turn measured; only the ≥vanilla baseline comparison remains open.**
 4. **Millstone HOPPER** — new `Part_StoneHopper` on the Millstone merge (menu grind removed per ruling): powered mill grinds one hopper stone per turn into servings (2-3/rock, 5-6/boulder, shared MakePowder recipe), products accumulate in the mill. Throughput 1/turn DRAFT. `[verify]` drop rocks in Joppa's mill → powders appear while the wheel turns; dead mill grinds nothing. **MECHANISM VERIFIED 2026-07-24 evening (harness tfhopper PASS: powered 2 stones -> 5 powders, dead mill inert); Joppa's river-powered mill still owed the world-wiring eyeball.**
-5. **Statuette popup suppression** — TimedForm stamps `NoFollowerDeathPopup` (property, engine gate is HasTagOrProperty, decomp-verified) just before its own Obliterate: expiry keeps the stiffens line, loses the "died" popup; combat deaths still mourn. `[verify]` next expiry shows no companion-death popup.
+5. **Statuette popup suppression** — TimedForm stamps `NoFollowerDeathPopup` (property, engine gate is HasTagOrProperty, decomp-verified) just before its own Obliterate: expiry keeps the stiffens line, loses the "died" popup; combat deaths still mourn. `[verify]` next expiry shows no companion-death popup. **Expiry MECHANICS verified 2026-07-24 night (harness tfform PASS ×2: gone + figurine + spill asserted); the popup half specifically still needs an ORGANIC follower-statuette expiry — the harness statuette is no one's companion, so the popup gate never arms in-scenario.**
 6. **Calcify DV text** — "0 DV" → "−10 DV" (lean (b) text-follows-reality, DRAFT; flip to a creation-time DV override if vetoed).
 7. **Drainstone victim-died log** — the last silent link in the latch chain now speaks ("pending victim died before the latch could take hold").
 8. **Healstone "double-fire" RETRACTED** — batch review showed two interleaved throws, not one double-firing (use-path always-break logs no resolve line by design); no code change needed, entry corrected.
@@ -971,8 +971,14 @@ scenario earns reconsideration). Built:
   **FIXED + DEPLOYED same night: capture the owner before removal, pass it through
   Finish/FinishForm/FinishScav/sweep/chain.** tfform's assert itself remains UNRUN — no verdict
   exists either way on the statuette scenario; next restart answers it.
-- [ ] `[verify]` **Next restart: tfform + tfbatch full chain** (form verdict + scav-in-chain are
-  the two things no run has yet produced). Ledger on PASS.
+- [x] `[verify]` **Next restart: tfform + tfbatch full chain — ALL GREEN 2026-07-24 night
+  (user: "all green from tests!"):** tfform PASS ×2 (expiry mechanics asserted: gone + figurine
+  +1 + spill counted; ledger entry with the follower-popup limit noted — the wish statuette is
+  no one's companion, so the popup half stays an organic eyeball), full tfbatch chain PASS ×5
+  hands-free, scav v2 counted **0 starved / 87 baboon-turns** (round 1's log reading is now an
+  assertion) with cadence stable 0.31 vs 0.29. Zero mod errors. **The harness experiment is a
+  clean success: 5 standing scenarios, 7 mod facts leddered, 4 harness bugs found-and-fixed by
+  its own runs, 2 flags (figurine ID, farflint) resolved from its sessions' logs.**
 
 ### Open / next
 - [ ] `[design]` Round 3 candidates: `tfeat` (18 Lithovore channels, the big one); drainstone

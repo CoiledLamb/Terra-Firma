@@ -69,11 +69,32 @@ ledger entries (log inference is not proof).
 `tfstreak` and `tfhopper` re-PASSed under harness v2 in-batch — the round-1 ledger entries stand,
 now with the v2 slot-normalization setup exercised on a fresh save.
 
-### NOT yet leddered: `tfform`
-Two runs ended in the harness's own finisher NRE (RemovePart nulls ParentObject — fixed same
-night) BEFORE the assertion ran. The `[FORM]` log lines did show the mod's expiry chain firing
-(lifespan spent → spill → figurine replacement), but that is log evidence, not the assertion —
-no ledger entry until the assert itself passes. Next restart answers it.
+## 2026-07-24 night — round 2 second run ("all green from tests!")
+
+### `tfform` PASS ×2 — statuette expiry mechanics (batch item 5's assertable half)
+- **Proven:** a statuette whose TimedForm clock runs out is GONE within the window and replaced
+  by exactly one `Cleo_TerraFirma_BaboonFigurineItem`, with its pocket stones spilled loose
+  beside it (5 and 10 counted across the two runs — count varies with the statuette's rolled
+  inventory). Asserted by zone-count delta + creature invalidation, two independent runs.
+- **Not covered:** the death-POPUP suppression half — and note the structural limit: the
+  harness statuette is wish-spawned, NOT a player follower, so the companion-death popup (and
+  its suppression) is never exercised by this scenario at all. That half belongs to an organic
+  follower-statuette expiry, user eyeball, as sheeted. Also not covered: ape-statue → rubble
+  (same part, different blueprint wiring).
+- **Re-run:** `tfform` (5 turns).
+
+### `tfscav` v2 PASS — starvation counter, fixed definition
+- **Proven:** with starvation counted only when emptiness survives a full turn, 87 baboon-turns
+  produced **0 starved turns** — the round-1 "every EMPTY heals same-turn" log reading is now a
+  counted assertion, not an interpretation. Cadence 0.31 throws/baboon-turn (0.29 in round 1 —
+  stable across runs; the metric is trustworthy as a future regression baseline).
+- **Still not covered:** the ≥vanilla comparison (unchanged — needs a mod-disabled boot).
+- **Re-run:** `tfscav` (30 turns).
+
+### Infrastructure: `tfbatch` chain proven
+Full five-scenario chain ran hands-free (streak → strange → hopper → form → scav), zero mod
+errors. `tfbatch` is now the standing one-wish regression sweep for everything in this ledger.
+(tfstrange third PASS: 30 distinct blueprints; streak + hopper re-confirmed again in-chain.)
 
 ---
 

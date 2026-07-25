@@ -145,6 +145,7 @@ three of four closed, BUILT + DEPLOYED:**
   item 5):** `Part_TimedForm` stamps `NoFollowerDeathPopup` (property; engine gate is
   HasTagOrProperty, decomp-verified) pre-Obliterate — expiry keeps the stiffens line, loses the
   "Your companion ... died." popup; combat deaths still mourn. `[verify]` next expiry: no popup.
+  **Mechanics half VERIFIED (harness tfform ×2); popup half needs an ORGANIC follower expiry.**
 - [ ] 📜 `[design]` **PARKED CONVERSATION (user, 2026-07-24): hold rate / fragility / natural
   expiry as one system** — "interested in a conversation about hold rate, fragility, and natural
   expiry at a certain point, but that can wait." The dials: HoldChance 25, DullAfter 1000–2500,
@@ -434,6 +435,9 @@ findings):**
   now leddered) + streak/hopper re-PASS; tfform no-verdict + chain death = one harness NRE
   (RemovePart nulls ParentObject), FIXED + REDEPLOYED — form verdict + full chain owed next
   restart. Figurine-identification flag came out of the same run (TODO, next batch).**
+  **SECOND RUN: ALL GREEN — tfform PASS ×2, full tfbatch chain ×5 hands-free, scav v2 counted
+  0 starved/87 turns, zero mod errors. Seven mod facts leddered; `tfbatch` is the standing
+  one-wish regression sweep. Round 3 (tfeat / Tier 2 boot cycle) awaits a ruling.**
 - [x] 📜 `[release]` **git init — DONE 2026-07-23** (fresh repo, no fork linkage, no trailer; history live since `b4ed68e`).
 - [ ] 📜 `[release]` **Workshop publishing plan + credits.**
 - [x] 📜 `[design]` **Stale `Cleo_TerraFirma_Ephemeral Stone` blueprint — RULED remove 2026-07-24
