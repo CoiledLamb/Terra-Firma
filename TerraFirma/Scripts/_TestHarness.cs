@@ -52,11 +52,12 @@ namespace Cleo.TerraFirma.Scripts
 		private const string GEODE_BP = "Cleo_TerraFirma_Rock_Soupstone";        // display: brine geode
 		private const string GENERIC_BP = "Cleo_TerraFirma_Rock_Generic";
 		private const string ROBOT_BP = "Scrapbot";
+		private const string DAZE_BP = "Cleo_TerraFirma_Rock_Dazestone";
 
 		[WishCommand(Command = "tfverify")]
 		public static void Help()
 		{
-			MessageQueue.AddPlayerMessage("TF harness -- instant: tfstreak, tfstrange, tfcarom, tfcrack, tfspill, tfpuddle, tfdevour + tfeat (lithovore only). Turn-driven: tfquick (5t), tfhopper (5t), tfform (5t), tfdull (5t), tfshape (Stoneshaper, 3t), tffis (NPC caster, 20t), tfdrain (25t), tfscav (30t, you are the target). tfbatch = everything, ~100 turns standing still. Peek: tfspore (lottery state, pure read).", "W");
+			MessageQueue.AddPlayerMessage("TF harness -- instant: tfstreak, tfstrange, tfcarom, tfcrack, tfspill, tfpuddle, tfmine (discharge law + party gate), tfdevour + tfeat (lithovore only). Turn-driven: tfquick (5t), tfhopper (5t), tfform (5t), tfshape (Stoneshaper, 3t), tffis (NPC caster, 20t), tfdrain (25t), tfscav (30t, you are the target). tfbatch = everything, ~95 turns standing still. Peek: tfspore (lottery state, pure read). Retired: tfdull (clock cut 2026-07-25).", "W");
 			if (!Helpers.VERIFY_WATCH)
 				MessageQueue.AddPlayerMessage("VERIFY_WATCH is OFF -- the harness is disabled.", "R");
 		}
@@ -110,9 +111,10 @@ namespace Cleo.TerraFirma.Scripts
 			CrackSync();
 			SpillSync();
 			PuddleSync();
+			MineSync();
 			DevourSync();
 			EatSync();
-			SetupHopper(The.Player, "form,quickape,dull,drain,shape,fis,scav");
+			SetupHopper(The.Player, "form,quickape,drain,shape,fis,scav"); // dull retired 2026-07-25 (clock cut)
 		}
 
 		// ---------------------------------------------------------------- round 3, synchronous
@@ -270,6 +272,58 @@ namespace Cleo.TerraFirma.Scripts
 				$"40 forced crossings: {procs} trip(s) (StepChance 50 -> expect ~20, accept 9-31), peel {(alive ? "intact through every proc (HoldChance 100)" : "BROKE OR MOVED")}");
 			if (GameObject.Validate(rock)) rock.Obliterate();
 			if (GameObject.Validate(victim)) victim.Obliterate();
+		}
+
+		/// <summary>Discharge law + party gate in one wish (fragility system RULED 2026-07-25):
+		/// a player-owned dazestone must NOT trigger on an allied baboon crossing it (party gate),
+		/// then must fire on a non-party baboon's FIRST crossing (StepChance 100) and be consumed
+		/// by its own discharge (HoldChance 0).</summary>
+		[WishCommand(Command = "tfmine")]
+		public static void MineSync()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			GameObject ply = The.Player;
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+			List<Cell> open = origin.GetLocalAdjacentCells();
+			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
+			if (open.Count < 2) { Report("mine", false, "SETUP FAIL - need two open adjacent cells"); return; }
+			GameObject rock = GameObject.Create(DAZE_BP);
+			rock.SetIntProperty(SPAWN_MARK, 1);
+			Cleo_TerraFirma_FallenRockPart part = rock.GetPart<Cleo_TerraFirma_FallenRockPart>();
+			if (part == null) { Report("mine", false, "SETUP FAIL - dazestone has no FallenRockPart"); rock.Obliterate(); return; }
+			part.Owner = ply;
+			open[0].AddObject(rock);
+			// half 1: an ALLIED crossing must pass over safely (party gate)
+			GameObject friendly = GameObject.Create(BABOON_BP);
+			friendly.SetIntProperty(SPAWN_MARK, 1);
+			friendly.GetStat("Hitpoints").BaseValue = 100;
+			open[1].AddObject(friendly);
+			friendly.Brain?.SetAlliedLeader<XRL.World.AI.AllySummon>(ply, 0, Silent: true);
+			friendly.DirectMoveTo(open[0], 0, Forced: true, IgnoreCombat: true);
+			bool allyTripped = friendly.HasEffect(typeof(XRL.World.Effects.Dazed));
+			bool intactAfterAlly = GameObject.Validate(rock) && rock.CurrentCell == open[0];
+			friendly.DirectMoveTo(open[1], 0, Forced: true, IgnoreCombat: true);
+			Report("mine.party", intactAfterAlly && !allyTripped,
+				$"allied crossing: stone {(intactAfterAlly ? "intact" : "GONE (gate failed)")}, ally {(allyTripped ? "DAZED (gate failed)" : "unharmed")} -- owner-party gate");
+			if (GameObject.Validate(friendly)) friendly.Obliterate();
+			// half 2: a non-party crossing must fire FIRST STEP and consume the stone
+			bool fired = false, consumed = false;
+			if (GameObject.Validate(rock))
+			{
+				GameObject stranger = GameObject.Create(BABOON_BP);
+				stranger.SetIntProperty(SPAWN_MARK, 1);
+				stranger.GetStat("Hitpoints").BaseValue = 100;
+				open[1].AddObject(stranger);
+				stranger.DirectMoveTo(open[0], 0, Forced: true, IgnoreCombat: true);
+				fired = stranger.HasEffect(typeof(XRL.World.Effects.Dazed));
+				consumed = !GameObject.Validate(rock);
+				if (GameObject.Validate(stranger)) stranger.Obliterate();
+			}
+			Report("mine.discharge", fired && consumed,
+				$"stranger crossing: payload {(fired ? "fired first step (StepChance 100)" : "did NOT fire")}, stone {(consumed ? "consumed by its own discharge (HoldChance 0)" : "SURVIVED (discharge law violated)")}");
+			if (GameObject.Validate(rock)) rock.Obliterate();
 		}
 
 		/// <summary>Crack pull-down: force a victim over the cracked floor until the 15% proc
@@ -833,8 +887,11 @@ namespace Cleo.TerraFirma.Scripts
 		public static void Dull()
 		{
 			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
-			SetupDull(The.Player, "");
+			// RETIRED 2026-07-25 (fragility ruling: the dull clock is CUT -- "a stone keeps until
+			// it goes off"). The scenario's PASS stands in the ledger as history; the code path it
+			// proved is dormant (DullAfter 0 mod-wide). SetupDull kept below in case the clock ever
+			// returns as a longer fuse.
+			MessageQueue.AddPlayerMessage("tfdull RETIRED: the dull clock was cut 2026-07-25 (a stone keeps until it goes off). Ledger entry stands as history.", "W");
 		}
 
 		/// <summary>The anti-hoarding clock, never before verified end-to-end (nobody carries a

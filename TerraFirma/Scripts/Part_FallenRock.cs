@@ -38,18 +38,18 @@ namespace XRL.World.Parts
 		/// <summary>Chance in 100 that the rock survives a use — a completed throw, or a triggered step payload.
 		/// Rolled fresh every use, so a lucky stone can keep holding on indefinitely (user ruling 2026-07-22).
 		/// Grenade-carrying rocks consume themselves on throw regardless; ConsumedOnStep overrides on step.</summary>
-		public int HoldChance = 25;
+		public int HoldChance; // discharge law (RULED 2026-07-25): 0 -- a fired payload consumes the stone; zoners (caromcobble/crack) override to 100
 
 		/// <summary>Turns of being carried (inventory or equipped) before the rock goes dull — crumbles
 		/// into pebbles, payload and potency lost (anti-hoarding ruling 2026-07-22; product re-ruled
 		/// pebbles + clock re-ruled 1000-2500 same day, verification session). 0 = never.
 		/// Floor rocks never age: what lies in the world stays part of the world.</summary>
-		public int DullAfter = 1000;
+		public int DullAfter; // dull clock CUT (RULED 2026-07-25, "a stone keeps until it goes off"); 0 = never, the code path stays for a future longer fuse
 
 		/// <summary>Upper bound of the dull clock: each rock rolls its actual expiry once, between
 		/// DullAfter and this, on its first carried turn — hoards stagger instead of expiring as one
 		/// message wall. 0 = fixed at DullAfter.</summary>
-		public int DullAfterMax = 2500;
+		public int DullAfterMax;
 
 		/// <summary>The rolled expiry for THIS rock (0 = not yet rolled). Deliberately not in SameAs
 		/// (same stacking fuzz as HeldTurns: merges share the receiving stack's roll).</summary>
@@ -183,7 +183,8 @@ namespace XRL.World.Parts
 				ID != AfterThrownEvent.ID &&
 				ID != GetInventoryActionsAlwaysEvent.ID &&
 				ID != BeforeDestroyObjectEvent.ID &&
-				ID != PooledEvent<GetThrowProfileEvent>.ID)
+				ID != PooledEvent<GetThrowProfileEvent>.ID &&
+				ID != TakenEvent.ID)
 				return ID == PooledEvent<InterruptAutowalkEvent>.ID;
 			return true;
 		}
@@ -296,6 +297,9 @@ namespace XRL.World.Parts
 		public override bool HandleEvent(AfterThrownEvent E)
 		{
 			ReturnLentAccuracy();
+			// ownership follows possession (party gate, 2026-07-25): the thrower owns what they threw
+			if (E.Actor != null)
+				Owner = E.Actor;
 			// whorl-deflected throw (RULED 2026-07-23): restore the outcome's placement BEFORE any
 			// landing-cell logic (miss payloads, deferred pulses fire from the right cell), and the
 			// stone skips its own fragility below -- a deflection is the whorl's use, not the thrower's
@@ -336,12 +340,15 @@ namespace XRL.World.Parts
 				if (GameObject.Validate(ParentObject) && ParentObject.CurrentCell != null)
 					DoRicochet(E.Actor);
 			}
-			// every throw risks the stone: it breaks unless it holds; grenade-carriers consume themselves
-			// instead; whorl-deflected throws don't roll at all (the ruling above)
-			if (!deflected && GameObject.Validate(ParentObject) && ParentObject.GetFirstPartDescendedFrom<IGrenade>() == null)
+			// discharge law (RULED 2026-07-25): the throw spends the stone only if its payload went
+			// off (hit, or the miss rail above) -- payloadless ammo and step-only stones land intact
+			// and recoverable. Grenade-carriers consume themselves in detonation; whorl-deflected
+			// throws don't roll at all (the ruling above).
+			if (!deflected && GameObject.Validate(ParentObject) && ParentObject.GetFirstPartDescendedFrom<IGrenade>() == null
+				&& PayloadOnThrowHit && !Payload.IsNullOrEmpty())
 			{
 				bool holds = HoldChance.in100();
-				Helpers.VerifyLog("ROCK", $"fragility (throw): {ParentObject.Blueprint} {(holds ? $"HOLDS (chance {HoldChance})" : $"BREAKS (chance {HoldChance})")}");
+				Helpers.VerifyLog("ROCK", $"fragility (throw): {ParentObject.Blueprint} {(holds ? $"HOLDS (chance {HoldChance})" : $"BREAKS (chance {HoldChance})")} (discharge law)");
 				if (!holds)
 				{
 					SuppressDeathSpill = true; // the throw's payload already released this use
@@ -427,10 +434,39 @@ namespace XRL.World.Parts
 		{
 			if (actor == null || StepChance <= 0)
 				return false;
+			// party gate (RULED 2026-07-25): the owner's own field is home ground -- nothing to
+			// avoid, no autowalk interrupt; other people's stones stay dangerous
+			if (IsSafeStepper(actor))
+				return false;
 			if (actor.IsPlayerControlled())
 				return true;
 			// mirror of the mine's owner courtesy: the owner's non-enemies see the danger, enemies don't
 			return GameObject.Validate(ref Owner) && !actor.IsHostileTowards(Owner);
+		}
+
+		/// <summary>The party gate (RULED 2026-07-25, rung b of the ladder: "b makes sense"): true
+		/// when the stepper is the stone's owner or shares the owner's ultimate leader. Ownership
+		/// follows possession (stamped on take and on throw) plus the Fissure caster's stamp at
+		/// DropRock; unowned stones bite everyone (recorded residue of retiring StoneStep).</summary>
+		private bool IsSafeStepper(GameObject stepper)
+		{
+			GameObject owner = Owner;
+			if (!GameObject.Validate(ref owner) || stepper == null)
+				return false;
+			if (stepper == owner)
+				return true;
+			GameObject stepperHead = stepper.Brain?.GetFinalLeader() ?? stepper;
+			GameObject ownerHead = owner.Brain?.GetFinalLeader() ?? owner;
+			return stepperHead == ownerHead || stepperHead == owner || ownerHead == stepper;
+		}
+
+		/// <summary>Ownership follows possession (party gate, 2026-07-25): whoever carries the stone
+		/// owns it, and their party walks it safely once it is back on the ground.</summary>
+		public override bool HandleEvent(TakenEvent E)
+		{
+			if (E.Actor != null)
+				Owner = E.Actor;
+			return base.HandleEvent(E);
 		}
 
 		public override bool HandleEvent(GetNavigationWeightEvent E)
@@ -472,30 +508,37 @@ namespace XRL.World.Parts
 		public override bool HandleEvent(ObjectEnteredCellEvent E)
 		{
 			GameObject stepper = E.Object;
-			// stone knows stone (user ruling 2026-07-22): creatures tagged StoneStep -- the mod's
-			// stone-bodied animals -- never set off or break stones they pass over
-			if (StepChance > 0 && stepper != null && stepper.HasTag("Cleo_TerraFirma_StoneStep"))
-			{
-				Helpers.VerifyLog("ROCK", $"stonestep: {stepper.Blueprint} passes over {ParentObject.Blueprint} without waking it");
-				return base.HandleEvent(E);
-			}
+			// (StoneStep tag RETIRED 2026-07-25: seam-born creatures land allied, so the party gate
+			// below covers them -- "no carveout just for baboons, no conversation about apes")
 			if (StepChance > 0 && GameObject.Validate(ref stepper) && stepper != ParentObject &&
-				stepper.IsCombatObject() && stepper.PhaseAndFlightMatches(ParentObject) &&
-				StepChance.in100())
+				stepper.IsCombatObject() && stepper.PhaseAndFlightMatches(ParentObject))
 			{
-				Helpers.VerifyLog("ROCK", $"STEP trigger: {stepper.Blueprint} set off {ParentObject.Blueprint} (StepChance {StepChance})");
-				Cell here = ParentObject.CurrentCell; // captured: the payload may consume the rock
-				FirePayload(stepper, here, Reduced: true);
-				SpawnByproducts(here, ByproductOnStep);
-				// a triggered rock breaks unless it holds (ConsumedOnStep rocks are already gone)
-				if (!ConsumedOnStep && GameObject.Validate(ParentObject))
+				// party gate (RULED 2026-07-25): never triggers on its owner or the owner's party --
+				// the caster stands safe in their own fissure field
+				if (IsSafeStepper(stepper))
 				{
-					bool holds = HoldChance.in100();
-					Helpers.VerifyLog("ROCK", $"fragility (step): {ParentObject.Blueprint} {(holds ? "HOLDS" : "BREAKS")}");
-					if (!holds)
+					Helpers.VerifyLog("ROCK", $"party gate: {stepper.Blueprint} passes over {ParentObject.Blueprint} (owner's own)");
+					return base.HandleEvent(E);
+				}
+				if (StepChance.in100())
+				{
+					Helpers.VerifyLog("ROCK", $"STEP trigger: {stepper.Blueprint} set off {ParentObject.Blueprint} (StepChance {StepChance})");
+					Cell here = ParentObject.CurrentCell; // captured: the payload may consume the rock
+					FirePayload(stepper, here, Reduced: true);
+					SpawnByproducts(here, ByproductOnStep);
+					// discharge law (RULED 2026-07-25): only a fired payload consumes the stone --
+					// nothing discharged, nothing to lose (ammo is just rock). HoldChance survives
+					// solely as the zoner override (caromcobble/crack 100).
+					string effPayload = !StepPayload.IsNullOrEmpty() ? StepPayload : Payload;
+					if (!ConsumedOnStep && !effPayload.IsNullOrEmpty() && GameObject.Validate(ParentObject))
 					{
-						SuppressDeathSpill = true; // the step payload already released this use
-						ParentObject.Destroy(null, Silent: true);
+						bool holds = HoldChance.in100();
+						Helpers.VerifyLog("ROCK", $"fragility (step): {ParentObject.Blueprint} {(holds ? "HOLDS" : "BREAKS")} (discharge law, HoldChance {HoldChance})");
+						if (!holds)
+						{
+							SuppressDeathSpill = true; // the step payload already released this use
+							ParentObject.Destroy(null, Silent: true);
+						}
 					}
 				}
 			}

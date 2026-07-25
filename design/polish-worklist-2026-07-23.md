@@ -148,8 +148,9 @@ three of four closed, BUILT + DEPLOYED:**
   HasTagOrProperty, decomp-verified) pre-Obliterate — expiry keeps the stiffens line, loses the
   "Your companion ... died." popup; combat deaths still mourn. `[verify]` next expiry: no popup.
   **Mechanics half VERIFIED (harness tfform ×2); popup half needs an ORGANIC follower expiry.**
-- [ ] 📜 `[design]` **~~PARKED~~ CONVERSATION HELD — FULL SYSTEM RULED 2026-07-25, BUILD OWED
-  (box closes when the batch ships): discharge consumes 100% (no lucky roll) · spenders
+- [x] 📜 `[design]` **~~PARKED~~ CONVERSATION HELD — FULL SYSTEM RULED + BUILT + DEPLOYED
+  2026-07-25 ("ship it"; build record in the TODO entry; `tfmine` asserts the party gate +
+  discharge law next restart; 100% trigger feel check owed at a real play session): discharge consumes 100% (no lucky roll) · spenders
   trigger 100% on step, never on owner/party (rung b) · zoners keep rates (carom 50,
   crack 15) · ammo (payloadless) never spends · DULL CUT (weight is the cap, Burgeoning
   precedent) · StoneStep retired (party coverage does the work; roster conversation may

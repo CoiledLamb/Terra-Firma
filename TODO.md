@@ -536,6 +536,26 @@ Sign-offs: spec table numbers approved; all 4 fungal infections in the pool; glo
     jump the mod has made — the one leg that wants a REAL PLAY SESSION before final ratify.
   **Player-facing law, one breath: "A stone keeps until it goes off. It always goes off
   underfoot — unless it's yours. When it goes off, it's gone."**
+  **BUILT + DEPLOYED 2026-07-25, same sitting ("ship it"). The batch:** base part line →
+  `HoldChance 0, DullAfter 0` + 39 spender StepChance swept to 100 (script-verified; skips:
+  carom 50, crack 15, tanglelith 25 awaiting redesign, streak already 100, stalactite/
+  vantabsidian 0 = throw-only) · fragility now rolls ONLY when a payload discharged (step:
+  effective payload non-empty; throw: PayloadOnThrowHit + payload non-empty — payloadless
+  ammo and step-only stones land intact) · party gate on step trigger + ShouldAvoid (owner's
+  field is home ground: no trigger, no avoidance, no autowalk interrupt) via
+  `Brain.GetFinalLeader()` (compiles, API confirmed) · **ownership follows possession**
+  (TakenEvent + AfterThrown stamp Owner; DropRock stamps the Fissure caster) · StoneStep tag
+  + check removed · scavenger reach-fetch (detours to a standable cell BESIDE the stone,
+  takes at d<=1; wedge backstop kept as insurance; occupied-cell exclusion dropped — reach
+  makes those fetchable) · harness: **`tfmine` NEW** (party gate + first-step fire + consumption,
+  in tfbatch), tfdull RETIRED (wish reports the cut), chain now 6 turn-driven. Build notes:
+  compile clean after 2 real errors (TakenEvent is not pooled — `TakenEvent.ID`; local name
+  collision in DropRock); the `--`-in-XML-comment curse struck TWICE in the new comments
+  (strikes 8-9; both caught by strict parse, clean file redeployed). Known residues recorded
+  above (unowned stones bite everyone; stone stacking keeps one Owner — SameAs excludes it).
+  `[verify]` next restart: tfbatch — mine.party + mine.discharge new-green, quick.rep flip
+  still pending from the figurine fix, carom on the 9-31 band; then the PLAY-SESSION feel
+  check on 100% triggers before final ratify.
 
 - [x] `[bug]` **Baboon figurine, TWO confirmed defects for one batch entry (both 2026-07-24
   night, both one-attribute XML fixes on `Cleo_TerraFirma_BaboonFigurineItem`):**

@@ -20,12 +20,15 @@
 		     (was: full). Stalactite/boulders/statues unchanged. -->
 		<part Name="Physics" Weight="1" Category="Thrown Weapons" />
 		<part Name="Commerce" Value="1" />
-		<!-- every rock risks itself per use (throw or triggered step): HoldChance in 100 to survive,
-		     rolled fresh each time. Carried rocks go dull (crumble to PEBBLES, product re-ruled
-		     2026-07-22 verification session) at a per-rock expiry rolled between DullAfter and
-		     DullAfterMax (1000-2500 re-ruled same session, was flat 500; per-rock rolls stagger hoards);
-		     floor rocks never age. Children's part lines merge over this one. -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" HoldChance="25" DullAfter="1000" DullAfterMax="2500" />
+		<!-- THE DISCHARGE LAW (fragility system RULED 2026-07-25, supersedes HoldChance-25 and the
+		     dull clock): a stone keeps until it goes off; it always goes off underfoot (spenders
+		     carry StepChance 100) unless the stepper is its owner or the owner's party; when it
+		     goes off (step or throw) it is gone (HoldChance 0). Payloadless ammo never spends.
+		     Zoners (caromcobble 50, crack 15) keep per-crossing RATES and HoldChance 100;
+		     permanence is their identity. Dull clock CUT same ruling (weight is the carry cap,
+		     Burgeoning the precedent; DullAfter 0 = never, the code path stays for a future longer
+		     fuse). Children's part lines merge over this one. -->
+		<part Name="Cleo_TerraFirma_FallenRockPart" HoldChance="0" DullAfter="0" />
 		<tag Name="BaseObject" Value="*noinherit" />
 		<tag Name="ExcludeFromDynamicEncounters" />
 		<tag Name="Tier" Value="1" />
@@ -37,8 +40,6 @@
 		<part Name="Render" DisplayName="pebbles" Tile="Items/sw_smallstone.bmp" ColorString="&amp;w" DetailColor="Y" />
 		<part Name="Description" Short="Smooth spall from the world's slow grinding, come down at last." />
 		<part Name="Physics" Weight="0" /> <!-- user asked 0.1; engine Weight is an int, so 0 is the nearest (powder precedent) -->
-		<part Name="ThrownWeapon" Damage="1" Penetration="1" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" DullAfter="0" /> <!-- nothing to lose: pebbles ARE the dull state -->
 		<tag Name="Gender" Value="plural" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="1" />
 	</object>
@@ -48,7 +49,6 @@
 		<part Name="Render" DisplayName="fallen rock" Tile="Items/sw_smallboulder.bmp" ColorString="&amp;y" DetailColor="Y" />
 		<part Name="Description" Short="A fist of the ceiling, freshly parted from it." />
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" DullAfter="0" /> <!-- the dull target state itself -->
 
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d6" />
 	</object>
@@ -87,7 +87,7 @@
 		<part Name="Render" DisplayName="brine geode" Tile="Items/sw_smallstone.bmp" ColorString="&amp;c" DetailColor="Y" /> <!-- was "soupstone"; rename pass 2 (2026-07-22) -->
 		<part Name="Description" Short="A porous stone sweating brine. The sea it remembers is long gone." />
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="Liquid" PayloadDetail="Cleo_TerraFirma_BrinePuddle" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Liquid" PayloadDetail="Cleo_TerraFirma_BrinePuddle" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass (RULED 2026-07-22): thirst domain (pickles precedent, user-given); eaten raw = a half-drink of brine (DRAFT amount) -->
 		<tag Name="Cleo_TerraFirma_EatenWater" Value="5000" />
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
@@ -98,7 +98,7 @@
 		<part Name="Render" DisplayName="sludgabbro" Tile="Items/sw_smallstone.bmp" ColorString="&amp;g" DetailColor="w" /> <!-- was "sludgestone"; rename pass 2 (2026-07-22) -->
 		<part Name="Description" Short="Slick films of ooze pearl across this stone and never quite dry." />
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="Liquid" PayloadDetail="Cleo_TerraFirma_SlimePuddle" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Liquid" PayloadDetail="Cleo_TerraFirma_SlimePuddle" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass: slime domain (base slime liquid precedent, user-given); eaten raw (RULED round 6) = a pool of slime at your feet -->
 		<tag Name="Cleo_TerraFirma_EatenSpawn" Value="Cleo_TerraFirma_SlimePuddle" />
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
@@ -116,7 +116,7 @@
 		     or the stepper, then ALWAYS breaks - HoldChance 0 never survives a throw, ConsumedOnStep
 		     covers step. Heal die 2d4 DRAFT, step procs half. Eaten = healing-over-time, owed to
 		     eat-pass 2. -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Heal" PayloadDetail="2d4" PayloadOnThrowHit="true" ConsumedOnStep="true" HoldChance="0" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Heal" PayloadDetail="2d4" PayloadOnThrowHit="true" ConsumedOnStep="true" HoldChance="0" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
 
@@ -128,7 +128,7 @@
 		     would be invisible to strange rock's mimic. Duration 6 rounds DRAFT, step = half.
 		     No ground twin yet - cooking domain OPEN (user), grinds to flour meanwhile (shivshale
 		     precedent). Eaten = dazes the eater, owed to eat-pass 2. -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Effect" PayloadDetail="Dazed" PayloadAmount="6" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Effect" PayloadDetail="Dazed" PayloadAmount="6" PayloadOnThrowHit="true" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
 
@@ -140,7 +140,7 @@
 		     LiquidOil verified: Combustibility 90, FlameTemperature 250, natively slippery.
 		     OilPuddle is 500-dram like SaltyWaterPuddle: rides the pool-volume audit with its
 		     siblings. Eaten = drink-oil event, owed to eat-pass 2. -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="Liquid" PayloadDetail="Cleo_TerraFirma_OilPuddle" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Liquid" PayloadDetail="Cleo_TerraFirma_OilPuddle" PayloadOnThrowHit="true" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
 
@@ -149,7 +149,7 @@
 		<part Name="Description" Short="Stone drawn to an argument. Its point has never once been dulled by use." />
 		<part Name="ThrownWeapon" Damage="1d4" Penetration="5" />
 		<part Name="BleedingOnHit" Amount="1d2" SaveTarget="16" Stack="true" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Bleed" PayloadDetail="1" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Bleed" PayloadDetail="1" />
 		<!-- Lithovore pass: NO cooking domain (lean-layer ruling: no weak agility exists base-side); eating a shiv is inadvisable (DRAFT dice) -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
 		<tag Name="Cleo_TerraFirma_EatenBleed" Value="1d2" /> <!-- RATIFIED 1d2 (sweep 2026-07-24, was 1); internal bleeding (the engine's own Internal flag) -->
@@ -161,7 +161,7 @@
 		<part Name="Description" Short="A cloudy crystal chipped from a brine seam. The thirsty earth kept a little water locked inside." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<!-- asymmetric: thrown = quench the target's thirst (one drink); underfoot = salt puddle -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="Water" PayloadAmount="10000" PayloadOnThrowHit="true" StepPayload="Liquid" StepPayloadDetail="Cleo_TerraFirma_SaltPuddle" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Water" PayloadAmount="10000" PayloadOnThrowHit="true" StepPayload="Liquid" StepPayloadDetail="Cleo_TerraFirma_SaltPuddle" />
 		<!-- Lithovore pass: tastyMinor (RULED "always tasty"; base salt liquid is already tastyMinor - precedent-perfect) -->
 		<tag Name="Cleo_TerraFirma_EatenTasty" />
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
@@ -174,7 +174,7 @@
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- meta-roll: mimics a random entry from the FULL pool (band 3 table nests everything) each throw/step;
 		     band "any" per catalog, so it lives in the band-1 table and every level can draw the lottery -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Strange" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Strange" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass (RE-RULED round 4, then grind-first): the rock-domain union list lives on
 		     Ground_Strange now. MAINTENANCE RULE (moved there with it): when a rock gains or changes
 		     a domain, update Ground_Strange's list. Eaten raw = eats AS a rolled rock that actually
@@ -199,7 +199,7 @@
 		<part Name="Description" Short="Bands of blue mineral whorl in toward a middle that the eye keeps missing." />
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<part Name="GasGrenade" GasObject="ConfusionGas" Density="80" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Gas" PayloadDetail="ConfusionGas" PayloadAmount="80" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Gas" PayloadDetail="ConfusionGas" PayloadAmount="80" />
 		<!-- Lithovore pass: burp family (girsh gland paste precedent); eaten raw = brief confusion (base part defaults) -->
 		<part Name="ConfuseOnEat" />
 		<tag Name="Cleo_TerraFirma_EatenSpew" Value="ConfusionGas" /> <!-- burp family (ruling 2026-07-22): settles in, vents for 50-250 turns -->
@@ -212,7 +212,7 @@
 		<part Name="Description" Short="A heavy stone wrapped in heavier air. Sleep pools in its shadow." />
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<part Name="GasGrenade" GasObject="SleepGas" Density="80" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Gas" PayloadDetail="SleepGas" PayloadAmount="80" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Gas" PayloadDetail="SleepGas" PayloadAmount="80" />
 		<!-- Lithovore pass: burp family; eaten raw = a nap (Asleep has a default ctor, EffectOnEat-compatible; DRAFT duration) -->
 		<part Name="EffectOnEat" Effect="Asleep" Duration="1d6+2" />
 		<tag Name="Cleo_TerraFirma_EatenSpew" Value="SleepGas" /> <!-- burp family: the nap, then the long settling -->
@@ -246,7 +246,7 @@
 		<part Name="Description" Short="A stone with an argument sealed inside, waiting on the last word." />
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="HEGrenade" Force="1200" Damage="1d6" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Explosion" PayloadDetail="1d6" PayloadAmount="1200" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Explosion" PayloadDetail="1d6" PayloadAmount="1200" />
 		<!-- Lithovore pass: NO cooking domain. It detonates. In you. (EatenDetonate fires the HEGrenade at the eater's cell) -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
 		<tag Name="Cleo_TerraFirma_EatenDetonate" />
@@ -258,7 +258,7 @@
 		<part Name="Description" Short="A rind of mold holds this stone together more than the stone does. Its spores wait on any excuse." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<part Name="GasGrenade" GasObject="FungalSporeGasPuff" Density="80" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Gas" PayloadDetail="FungalSporeGasPuff" PayloadAmount="80" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Gas" PayloadDetail="FungalSporeGasPuff" PayloadAmount="80" />
 		<!-- the lottery (user ruling 2026-07-22): which fungal rock carries which infection is shuffled
 		     per save; the four names deliberately say nothing about it. Gas attrs above are fallback. -->
 		<!-- Lithovore pass: CUISINE TELLS (user ruling 2026-07-22) now live entirely on the
@@ -291,9 +291,8 @@
 		<part Name="Render" DisplayName="shattered stalactite" Tile="Items/sw_stalag1.bmp" ColorString="&amp;w" DetailColor="r" />
 		<part Name="Description" Short="A spear of ceiling-grown stone, snapped at the root and honed by the fall." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d6" Penetration="6" Attributes="ShortBlades" />
-		<!-- "cracked on penetration": the engine's ShatteredArmor, -1 AV for the duration; inert underfoot per catalog.
-		     DullAfter 0 (user ruling 2026-07-22 verification session): a stone spear doesn't crumble into a round pebble -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="0" Payload="Effect" PayloadDetail="ShatteredArmor" PayloadAmount="100" PayloadOnThrowHit="true" DullAfter="0" />
+		<!-- "cracked on penetration": the engine's ShatteredArmor, -1 AV for the duration; inert underfoot per catalog. -->
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="0" Payload="Effect" PayloadDetail="ShatteredArmor" PayloadAmount="100" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass: NO cooking domain (it's a weapon, not food); swallowing a spear tip goes as expected (DRAFT dice) -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
 		<tag Name="Cleo_TerraFirma_EatenBleed" Value="1d8" /> <!-- RATIFIED 1d8 (sweep 2026-07-24, was 1d2; swallowing a spear tip goes as expected, emphatically) -->
@@ -323,7 +322,7 @@
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<!-- part order matters: our part spawns the webs first, then StickyOnHit entangles the target and
 		     spends the stone (one-use, user ruling 2026-07-22). Step: chance of Stuck, stone survives. -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="SpawnObject" PayloadDetail="Web" PayloadAmount="3" PayloadOnThrowHit="true" StepPayload="Effect" StepPayloadDetail="Stuck" StepPayloadAmount="12" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="SpawnObject" PayloadDetail="Web" PayloadAmount="3" PayloadOnThrowHit="true" StepPayload="Effect" StepPayloadDetail="Stuck" StepPayloadAmount="12" />
 		<part Name="StickyOnHit" />
 		<!-- Lithovore pass, re-RULED round 8: the bespoke Web domain (Spinnerets grant + on-stuck
 		     trigger + webs-erupt action), "great pull"; stabilityMinor passed on to tanglelith.
@@ -340,7 +339,7 @@
 		<part Name="Render" DisplayName="oxidian" Tile="Items/sw_smallstone.bmp" ColorString="&amp;r" DetailColor="w" />
 		<part Name="Description" Short="A stone bled through with old iron. What it touches, it teaches to decay." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="RustGear" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="RustGear" PayloadOnThrowHit="true" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
 
@@ -348,7 +347,7 @@
 		<part Name="Render" DisplayName="grimslate" Tile="Items/sw_smallstone.bmp" ColorString="&amp;K" DetailColor="r" />
 		<part Name="Description" Short="A dark tablet with nothing written on it, which is somehow worse." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Effect" PayloadDetail="Terrified" PayloadAmount="20" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Effect" PayloadDetail="Terrified" PayloadAmount="20" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass: fear domain (lah petals precedent); eaten raw = Dreadroot's own FearOnEat (defaults 1d8/2d4 -
 		     snack-grade next to the tuber's 3d8/4d6). The fear rock scares your gut; honest. -->
 		<part Name="FearOnEat" />
@@ -372,7 +371,7 @@
 		<part Name="Render" DisplayName="urchinite" Tile="Items/sw_smallstone.bmp" ColorString="&amp;m" DetailColor="Y" />
 		<part Name="Description" Short="A knot of stone spines packed too tight to stay together forever." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d4" Penetration="5" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="QuillBurst" PayloadDetail="2d4" PayloadOnThrowHit="true" StepPayload="QuillBurst" StepPayloadDetail="1d4" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="QuillBurst" PayloadDetail="2d4" PayloadOnThrowHit="true" StepPayload="QuillBurst" StepPayloadDetail="1d4" />
 		<!-- Lithovore pass: damage-reflection domain (spine fruit jam precedent); eaten raw (RULED round 6) = you are the urchin: quill burst around you, sparing you (die is a DRAFT) -->
 		<tag Name="Cleo_TerraFirma_EatenQuillBurst" Value="1d4" />
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
@@ -384,7 +383,7 @@
 		<part Name="Description" Short="Old fires pressed to a brick by the patient weight of the ceiling. It crumbles at the edges into breathless gray." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<part Name="GasGrenade" GasObject="MiasmaticAsh" Density="80" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Gas" PayloadDetail="MiasmaticAsh" PayloadAmount="80" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Gas" PayloadDetail="MiasmaticAsh" PayloadAmount="80" />
 		<!-- Lithovore pass: NO cooking domain (lean-layer ruling: no weak armor exists; full armor RULED too
 		     strong for its band). Eaten raw = choking (DRAFT dice; a real Asphyxiating tick is eat-pass 2 work) -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
@@ -407,7 +406,7 @@
 		<part Name="Description" Short="Veins of copper and older metals braid through this stone. They still carry a charge." />
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="DischargeOnHit" ChargeUse="0" Voltage="1d4" DamageRange="1d4" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Discharge" PayloadDetail="1d4" PayloadAmount="3" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Discharge" PayloadDetail="1d4" PayloadAmount="3" />
 		<!-- Lithovore pass: full electric (RULED: "electric needs a major, not a minor" - no Minor exists);
 		     eaten raw = the charge exits through you and arcs at the nearest visible creature within 5
 		     (RULED 2026-07-22, indiscriminate by design - companions included; its own thrown dice; the
@@ -424,7 +423,7 @@
 		<part Name="Description" Short="It came down glowing and has not forgiven the fall." />
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="ThermalGrenade" TemperatureDelta="400" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Temperature" PayloadAmount="400" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Temperature" PayloadAmount="400" />
 		<!-- Lithovore pass: heatMinor (T1 = Minor tiering lever, pending ratification); eaten raw = a warm
 		     swallow (EatenTemperature channel; base TemperatureOnEat is hardcoded +100, useless for the cold twin) -->
 		<tag Name="Cleo_TerraFirma_EatenTemperature" Value="150" />
@@ -437,7 +436,7 @@
 		<part Name="Description" Short="Cold seeps from this stone as though winter were stored in it under pressure." />
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="ThermalGrenade" TemperatureDelta="-350" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Temperature" PayloadAmount="-350" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Temperature" PayloadAmount="-350" />
 		<!-- Lithovore pass: coldMinor (T1 = Minor tiering lever); eaten raw = a chilled swallow -->
 		<tag Name="Cleo_TerraFirma_EatenTemperature" Value="-150" />
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
@@ -450,7 +449,7 @@
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="Metal" />
 		<part Name="EMPGrenade" Radius="2" Duration="2d4" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="20" Payload="EMP" PayloadDetail="1d4" PayloadAmount="2" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="EMP" PayloadDetail="1d4" PayloadAmount="2" />
 		<!-- Lithovore pass: artifacts domain (RULED); eaten raw (RULED round 6) = its EMP grenade goes off
 		     in you; your own gear, your problem. Warn added (gear-harm parity with lodestone; vetoable). -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
@@ -463,7 +462,7 @@
 		<part Name="Render" DisplayName="conchalk" Tile="Items/sw_smallstone.bmp" ColorString="&amp;m" DetailColor="M" /> <!-- was "warped ajistone"; rename pass 2 (2026-07-22) -->
 		<part Name="Description" Short="A stone warped around a hollow that whistles when it moves. Whatever air it swallowed last comes out changed." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="RandomGas" PayloadAmount="80" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="RandomGas" PayloadAmount="80" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass (RULED): a random gas-breath domain per cook - the comma list picks one
 		     random unused option each time (engine-verified). Eaten raw = plain for now (random-burp
 		     deferred to eat-pass 2). -->
@@ -493,7 +492,7 @@
 		<part Name="Description" Short="A stone losing an argument with itself. What it sheds eats the floor." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- acid splash both ways (gear-damage half CUT, user ruling 2026-07-22) -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="Liquid" PayloadDetail="Cleo_TerraFirma_AcidPuddle" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Liquid" PayloadDetail="Cleo_TerraFirma_AcidPuddle" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass: acidMinor (T1 = Minor tiering lever); eaten raw (RULED round 6) = it hurts and
 		     sheds a pool at your feet. Warn added for consistency with shivshale's harm-warn (vetoable). -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
@@ -512,7 +511,7 @@
 		     no-step-effect catalog ruling): stepping on it shunts you too. Reduced halves the
 		     amount, so step = lands 4-8 tiles away vs the thrown 8-16. StepChance 25 = the house
 		     potent-rock rate (Claude number, flag to ratify). -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Teleport" PayloadAmount="16" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Teleport" PayloadAmount="16" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass: teleport domain (yondercane precedent); eaten raw = you go to find out where (base part) -->
 		<part Name="TeleportOnEat" />
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
@@ -588,9 +587,10 @@
 	<object Name="Cleo_TerraFirma_Rock_BaboonFigurine" Inherits="BaseBaboon">
 		<!-- "statuette" not "figurine" (user ruling 2026-07-22): base-game Figurines are inert trade
 		     goods and this is anything but. Internal blueprint name unchanged, house pattern. -->
-		<!-- stone knows stone (user ruling 2026-07-22): never sets off / breaks stones it passes over.
-		     RULED for the statuette; the ape statue is a maybe (user: "more strongly baboon than ape") -->
-		<tag Name="Cleo_TerraFirma_StoneStep" />
+		<!-- StoneStep tag RETIRED 2026-07-25 (fragility ruling): seam-born creatures land allied to
+		     the caster, so the owner-party gate covers them ("no carveout just for baboons"). The
+		     deferred stone-creature roster conversation may resurrect the tag for WILD stone
+		     creatures (stonefrog etc.) if party status ever isn't enough. -->
 		<part Name="Render" DisplayName="baboon statuette" Tile="Assets_Content_Textures_Creatures_sw_baboon.bmp" RenderString="a" ColorString="&amp;y" DetailColor="K" />
 		<part Name="Description" Short="A baboon no taller than a knee, carved by patient hands and impatient to be moving. It sizes up everything as either a threat or a throw." /> <!-- DRAFT -->
 		<part Name="Brain" Hostile="false" />
@@ -702,7 +702,7 @@
 		<part Name="Description" Short="A stone that invites second thoughts, at length, about everything you know how to do." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- thrown = every ability locked 10 rounds; stepped = one random ability, 5 -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="AbilityLock" PayloadAmount="10" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="AbilityLock" PayloadAmount="10" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass: willpower domain (mashed lag precedent); eaten raw = the inversion survives -
 		     the ability-locker unlocks exactly ONE cooling-down ability (RULED 2026-07-23, supersedes
 		     the base 25%/ability part: felt like a no-op; 100% overcorrects) -->
@@ -717,7 +717,7 @@
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- anchor-on-hold rider from the catalog DROPPED: no native anchor effect exists (recon 2026-07-22); gas-only -->
 		<part Name="GasGrenade" GasObject="NormalityGas" Density="80" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Gas" PayloadDetail="NormalityGas" PayloadAmount="80" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Gas" PayloadDetail="NormalityGas" PayloadAmount="80" />
 		<!-- Lithovore pass: burp family (nullbeard gland paste precedent); eaten raw (RULED round 6) =
 		     tethered by normality 50 turns (native RealityStabilized; parameterless-ctor Strength
 		     semantics VERIFY at boot) + its own gas grenade bursts in you -->
@@ -734,7 +734,7 @@
 		<part Name="Description" Short="Warm to the touch, and pleased about something. Best hurled at strangers." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- thrown = sudden devotion to the thrower, ~50 rounds (a hostile act); stepped = Lovesick -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="TempAlly" PayloadAmount="50" PayloadOnThrowHit="true" StepPayload="Effect" StepPayloadDetail="Lovesick" StepPayloadAmount="50" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="TempAlly" PayloadAmount="50" PayloadOnThrowHit="true" StepPayload="Effect" StepPayloadDetail="Lovesick" StepPayloadAmount="50" />
 		<!-- Lithovore pass: love domain (congealed love precedent); eaten raw (RULED round 6) = Lovesick.
 		     The beloved = nearest visible creature (you fall for the next thing you see; DRAFT reading,
 		     flagged; nothing in sight = yourself) -->
@@ -748,7 +748,7 @@
 		<part Name="Description" Short="A stone that refuses on your behalf." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- thrown = short line of force at the landing cell; stepped = force closes around the stepper -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="ForceWall" PayloadDetail="Cleo_TerraFirma_ForceWallShard" PayloadOnThrowHit="true" StepPayload="ForceBubble" StepPayloadDetail="Cleo_TerraFirma_ForceBubbleShard" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="ForceWall" PayloadDetail="Cleo_TerraFirma_ForceWallShard" PayloadOnThrowHit="true" StepPayload="ForceBubble" StepPayloadDetail="Cleo_TerraFirma_ForceBubbleShard" />
 		<!-- Lithovore pass: armor domain, RULED "big armor"; eaten raw (RULED round 6) = force closes
 		     around you (shard blueprint's own Temporary 12 ~ the "10 or so" ruled; static, does not
 		     follow; the undecided half shipped simple, flagged) -->
@@ -762,7 +762,7 @@
 		<part Name="Description" Short="A stone that is mostly elsewhere. It can be held, with concentration." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="OmniphaseObject" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Effect" PayloadDetail="Phased" PayloadAmount="30" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Effect" PayloadDetail="Phased" PayloadAmount="30" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass: phase domain (phase silk precedent); eaten raw (RULED round 6) = phased out 5-10 turns -->
 		<part Name="EffectOnEat" Effect="Phased" Duration="1d6+4" />
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
@@ -774,7 +774,7 @@
 		<part Name="Description" Short="Countless small spirals argue over which way this stone turns. Sometimes the argument spills out." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- vortexes send what they swallow to random zones: gloriously chaotic on both ends, as designed -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="20" Payload="SpawnObject" PayloadDetail="Space-Time Vortex" PayloadAmount="1" PayloadOnThrowHit="true" StepPayload="SpawnObject" StepPayloadDetail="Space-Time Vortex" StepPayloadAmount="2" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="SpawnObject" PayloadDetail="Space-Time Vortex" PayloadAmount="1" PayloadOnThrowHit="true" StepPayload="SpawnObject" StepPayloadDetail="Space-Time Vortex" StepPayloadAmount="2" />
 		<!-- Lithovore pass, re-RULED round 8: the bespoke Spacetime domain (teleport units borrowed,
 		     vortex-opens action is the identity); farflint keeps teleport, the pair dissolves.
 		     Eaten raw (round 6) = a vortex opens at your cell. You knew what this was. -->
@@ -798,7 +798,7 @@
 		<part Name="StairsDown" Connected="false" PullDown="false" PullMessage="The floor gives way!" />
 		<part Name="StairHighlight" bEnabled="false" />
 		<removepart Name="Interesting" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="15" Payload="FallThrough" HoldChance="100" DullAfter="0" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="15" Payload="FallThrough" HoldChance="100" />
 		<tag Name="NoAutowalk" />
 		<tag Name="IgnoreForStairConnections" />
 		<tag Name="ExcludeFromDynamicEncounters" />
@@ -823,7 +823,7 @@
 		<!-- the engine's own MagneticPulse (decompiled): drags loose metal + robots to the stone, rips
 		     non-chest worn metal off everyone in radius toward it. Rocks don't discriminate: your gear
 		     too. Thrown radius 6, step 3 (Reduced halves). Pulse defers to landing when thrown. -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="MagnetPulse" PayloadAmount="6" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="MagnetPulse" PayloadAmount="6" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass: NO cooking domain; eaten raw = the pulse fires centered on the EATER (your own gear rips free) -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
 		<tag Name="Cleo_TerraFirma_EatenMagnetPulse" Value="3" />
@@ -837,7 +837,7 @@
 		<!-- fugue copies of the victim SERVE THE THROWER (ruling 2026-07-22: outnumber them with
 		     themselves; enemy hits you = clones of you that want you dead). Thrown 2 copies/20 rounds,
 		     step 1 copy/10 rounds via override. Reality-distortion based: hexstone counters it. -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="20" Payload="FugueClones" PayloadDetail="20" PayloadAmount="2" PayloadOnThrowHit="true" StepPayload="FugueClones" StepPayloadDetail="10" StepPayloadAmount="1" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="FugueClones" PayloadDetail="20" PayloadAmount="2" PayloadOnThrowHit="true" StepPayload="FugueClones" StepPayloadDetail="10" StepPayloadAmount="1" />
 		<!-- Lithovore pass: cloningMinor (cloning draught precedent); eaten raw (RULED round 6) = one
 		     temporal fugue copy of you, serving you (duration 10 is a DRAFT, step-grade) -->
 		<tag Name="Cleo_TerraFirma_EatenFugueClone" Value="10" />
@@ -857,7 +857,7 @@
 		     native LifeDrain feeds the thrower; step 25% = same latch at half duration (Reduced halves
 		     PayloadAmount), drainer = owner, unowned = native random-drainer fallback (ruled).
 		     HoldChance 100: this stone's consumption model is the crumble-when-sated, not the break roll. -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Latch" PayloadAmount="15" PayloadOnThrowHit="true" HoldChance="100" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Latch" PayloadAmount="15" PayloadOnThrowHit="true" HoldChance="100" />
 		<part Name="Cleo_TerraFirma_DrainLatch" DrainDie="1d3" />
 		<!-- Lithovore pass: HP domain (jerky family - the life-drinker feeds you); eaten raw = it drinks
 		     on the way down (DRAFT dice; a true inner latch is eat-pass 2 work) -->
@@ -882,7 +882,7 @@
 		<part Name="DischargeOnHit" ChargeUse="0" Voltage="2d4" DamageRange="2d6" />
 		<!-- thrown = strong arc (native part above) + a lingering surge field where it lands (hit or miss);
 		     stepped = a single hard jolt. The sting rides SelfHarm. -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="SpawnObject" PayloadDetail="Cleo_TerraFirma_SurgeField" PayloadAmount="1" PayloadOnThrowHit="true" StepPayload="Discharge" StepPayloadDetail="1d6" StepPayloadAmount="4" SelfHarm="1d3" SelfHarmType="Electric" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="SpawnObject" PayloadDetail="Cleo_TerraFirma_SurgeField" PayloadAmount="1" PayloadOnThrowHit="true" StepPayload="Discharge" StepPayloadDetail="1d6" StepPayloadAmount="4" SelfHarm="1d3" SelfHarmType="Electric" />
 		<!-- Lithovore pass: full electric (deep = full domain, tiering lever); eaten = internal jolt +
 		     a surge field crackles out of you (no grenade to detonate; the pulse rides EatenSpawn). DRAFT dice. -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
@@ -902,7 +902,7 @@
 		     so it doesn't combust itself. It cools toward ambient over time - "came down glowing". -->
 		<part Name="Physics" Weight="5" Temperature="500" FlameTemperature="99999" VaporTemperature="999999" />
 		<!-- part above the grenade: sting + lava residue must fire before detonation destroys the rock -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Temperature" PayloadAmount="900" Byproduct="SmallLavaPuddle" ByproductOnThrow="1d2+1" ByproductOnStep="1d2" SelfHarm="1d3" SelfHarmType="Heat" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Temperature" PayloadAmount="900" Byproduct="SmallLavaPuddle" ByproductOnThrow="1d2+1" ByproductOnStep="1d2" SelfHarm="1d3" SelfHarmType="Heat" />
 		<!-- Lithovore pass: full heat (deep = full domain); eaten = internal burn + the thermal grenade goes
 		     off in you (the RULED elemental pulse). DRAFT dice. -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
@@ -920,7 +920,7 @@
 		<part Name="ThrownWeapon" Damage="2d4" Penetration="6" />
 		<!-- freeze/brittle thresholds pushed out of reach: a frozen item can't be picked up -->
 		<part Name="Physics" Weight="5" Temperature="-250" FreezeTemperature="-9999" BrittleTemperature="-99999" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Temperature" PayloadAmount="-800" Byproduct="SmallConvalessencePuddle" ByproductOnThrow="1d2+1" ByproductOnStep="1d2" SelfHarm="1d3" SelfHarmType="Cold" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Temperature" PayloadAmount="-800" Byproduct="SmallConvalessencePuddle" ByproductOnThrow="1d2+1" ByproductOnStep="1d2" SelfHarm="1d3" SelfHarmType="Cold" />
 		<!-- Lithovore pass: full cold (deep = full domain); eaten = the freeze from within. DRAFT dice. -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
 		<tag Name="Cleo_TerraFirma_EatenHarm" Value="2d3" />
@@ -939,7 +939,7 @@
 		<!-- thrown = corrosive gas (grenade) + 3-5 acid pools + cracks armor and breaks a random piece of
 		     the victim's gear (BreakGear channel); stepped (50%) = the same at half crack duration + 1-3
 		     pools. Part above the grenade, same ordering rule as above. -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="50" Payload="BreakGear" PayloadAmount="100" PayloadOnThrowHit="true" Byproduct="Cleo_TerraFirma_AcidPuddle" ByproductOnThrow="1d3+2" ByproductOnStep="1d3" SelfHarm="1d3" SelfHarmType="Acid" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="BreakGear" PayloadAmount="100" PayloadOnThrowHit="true" Byproduct="Cleo_TerraFirma_AcidPuddle" ByproductOnThrow="1d3+2" ByproductOnStep="1d3" SelfHarm="1d3" SelfHarmType="Acid" />
 		<!-- Lithovore pass: full acid (deep = full domain); eaten = the burn + corrosive gas from within
 		     (its own grenade at the eater's cell). DRAFT dice. -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
@@ -983,7 +983,7 @@
 		<part Name="LightSource" Lit="true" Radius="3" />
 		<!-- part order matters: Mutating must land BEFORE the grenade detonates and consumes the rock
 		     (live-fire bug 2026-07-22: reversed order ate the effect) -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Effect" PayloadDetail="Mutating" PayloadAmount="100" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Effect" PayloadDetail="Mutating" PayloadAmount="100" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass (RULED, "the gamble cooks"): selfPoison domain (brown sludge - the meal poisons you);
 		     eaten raw = poison + Mutating. BOTH twins carry identical DangerousToEat: the warn prompt is no tell. -->
 		<part Name="PoisonOnEat" Damage="1d3" Duration="20" Strength="25" />
@@ -998,7 +998,7 @@
 		<part Name="Description" Short="A stone lit from within by a steady green light. It offers no opinion on what the light is." /> <!-- DRAFT; MUST stay identical on both twins -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="LightSource" Lit="true" Radius="3" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Effect" PayloadDetail="Luminous" PayloadAmount="300" PayloadOnThrowHit="true" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Effect" PayloadDetail="Luminous" PayloadAmount="300" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass (RULED, the benign twin): tastyMinor - one twin makes the meal tasty, the other
 		     poisons it, and the name/sprite/warn prompt are identical. Eaten raw = the lightbulb snack. -->
 		<part Name="EffectOnEat" Effect="Luminous" Duration="300" />

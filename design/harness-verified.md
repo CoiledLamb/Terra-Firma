@@ -279,5 +279,24 @@ point, 0.28/turn.)*
 
 ---
 
+## 2026-07-25 — SYSTEM DELTA: the discharge law (fragility system ruled + built)
+
+The fragility system was redesigned wholesale (record: TODO § the farflint entry tail). Ledger
+consequences:
+- **`tfdull` RETIRED WITH HONORS** — the dull clock is CUT (DullAfter 0 mod-wide); the PASS above
+  stands as history of a mechanism that is now dormant, not broken. The wish reports the
+  retirement. If the clock ever returns as a longer fuse, the scenario resurrects with it.
+- **Step-proc scenarios changed ground truth:** spender StepChance is now 100 (first crossing
+  fires) and discharge always consumes. `quick.heal` and `drain.steplatch` assert the same claims
+  on easier terms (their loops score on crossing 1). `tfcarom` and `tfcrack` are UNAFFECTED
+  (zoners keep rates: 50 band 9-31, and 15).
+- **`tfmine` NEW, UNRUN** — party gate (allied crossing: no trigger, stone intact) + discharge law
+  (stranger crossing: fires first step, stone consumed). Gets its ledger entry when it first runs.
+- Throw fragility now rolls only when a payload discharged — payloadless ammo and step-only
+  stones land intact; a cadence side-effect worth remembering: scav-fetched generic ammo no
+  longer evaporates at 75% per throw.
+
+---
+
 *Add new entries at the tail. If a scenario's assertion changes shape (harness edits), note the
 version delta here — a PASS from a weaker assertion doesn't inherit the stronger claim.*

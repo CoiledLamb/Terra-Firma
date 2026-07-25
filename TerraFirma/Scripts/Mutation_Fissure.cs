@@ -335,6 +335,10 @@ namespace XRL.World.Parts.Mutation
 				blueprint = STALAGMITE_BLUEPRINT;
 			Helpers.VerifyLog("FIS", $"{FallKind} fall @({C.X},{C.Y}) d={ChebyshevDistance(origin, C)}: {blueprint}{(surfaceSwap ? " (surface: stalactite->stalagmite)" : "")}");
 			GameObject rock = GameObject.Create(blueprint);
+			// the shaker owns the field (party gate, RULED 2026-07-25): fissure-born stones stamp
+			// their caster so the collapse never mines its own summoner's party
+			if (rock.GetPart<Cleo_TerraFirma_FallenRockPart>() is Cleo_TerraFirma_FallenRockPart casterStamp)
+				casterStamp.Owner = ParentObject;
 			SmokePuff(C);
 			C.PlayWorldSound(SLAM_SOUND);
 			// crush whatever is beneath

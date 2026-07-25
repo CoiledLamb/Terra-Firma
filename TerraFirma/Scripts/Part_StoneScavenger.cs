@@ -38,12 +38,11 @@ namespace XRL.World.Parts
 		[NonSerialized]
 		private bool LastHadMoveGoal;
 
-		/// <summary>Dry-fetch WEDGE fix, half 2 (RULED 2026-07-25, "completely agree"): the harness
-		/// watched a pockets-empty baboon oscillate "detours to loose stone at d=1" forever — stoop
-		/// only fires at d=0, so a stone it never actually stands on loops the detour. Backstop:
-		/// after 3 pushes at the SAME target cell without reaching it, give up fetching for a
-		/// while. (Half 1 is the occupied-cell exclusion in the scan below.) Hints only — reset
-		/// on load by design.</summary>
+		/// <summary>Dry-fetch WEDGE backstop (RULED 2026-07-25, "completely agree"; the same-day
+		/// reach-fetch ruling then dissolved the wedge's root cause — the baboon now takes from
+		/// arm's length instead of needing to stand on the stone). Kept as insurance: after 3
+		/// detour pushes at the SAME stone without reaching it, give up fetching for a while.
+		/// Hints only — reset on load by design.</summary>
 		[NonSerialized]
 		private Cell LastDetourTarget;
 		[NonSerialized]
@@ -151,7 +150,11 @@ namespace XRL.World.Parts
 				FetchRest--;
 				return;
 			}
-			// nearest loose stone, own cell included
+			// nearest loose stone, own cell included. REACH-FETCH (RULED 2026-07-25: "fetch should
+			// check *adjacent* tiles, rather than tiles underneath"): the baboon takes from arm's
+			// length and never steps ON a stone -- so under the discharge law a fetch can't set one
+			// off. Supersedes the stoop-at-d=0 shape AND the same-morning occupied-cell exclusion
+			// (a stone in an unstandable cell is fetchable from beside it now).
 			Cell here = who.CurrentCell;
 			Cell best = null;
 			int bestDist = Radius + 1;
@@ -164,11 +167,6 @@ namespace XRL.World.Parts
 			{
 				foreach (Cell c in here.GetLocalAdjacentCells(Radius))
 				{
-					// WEDGE fix, half 1 (RULED 2026-07-25): a stone in a cell the baboon cannot
-					// stand in (wall, another creature) can never be stooped for -- stoop fires
-					// only at d=0 -- so it is not a fetch target at all
-					if (c.IsSolid() || c.HasObjectWithPart("Combat"))
-						continue;
 					int dist = Math.Max(Math.Abs(c.X - here.X), Math.Abs(c.Y - here.Y));
 					if (dist < bestDist && CellHasLooseStone(c))
 					{
@@ -191,18 +189,18 @@ namespace XRL.World.Parts
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint}: enemy {target.Blueprint} (d={who.DistanceTo(target)}) outranks stone at d={bestDist} -> attacks instead");
 				return;
 			}
-			if (bestDist == 0)
+			if (bestDist <= 1)
 			{
-				// underfoot: stoop for it (costs the turn), then let the brain ready it
+				// within arm's reach (own cell included): take it without entering its cell
 				LastDetourTarget = null;
 				DetourTries = 0;
-				foreach (GameObject obj in here.Objects)
+				foreach (GameObject obj in best.Objects)
 				{
 					if (IsLooseStone(obj))
 					{
 						if (who.TakeObject(obj, NoStack: false, Silent: false, EnergyCost: 1000))
 						{
-							Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint}: stooped for {obj.Blueprint} underfoot (turn spent)");
+							Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint}: reached for {obj.Blueprint} at d={bestDist} (turn spent)");
 							who.Brain.PerformReequip();
 							E.PreventAction = true;
 						}
@@ -211,9 +209,23 @@ namespace XRL.World.Parts
 				}
 				return;
 			}
-			// WEDGE fix, half 2: three pushes at the same cell without ever standing on it means
-			// the detour is not working (pathing refuses, or something keeps re-occupying it) --
-			// stop chasing that stone and rest the fetch behavior briefly
+			// detour target = a standable cell BESIDE the stone (never the stone's own cell)
+			Cell stand = null;
+			int standDist = int.MaxValue;
+			foreach (Cell c in best.GetLocalAdjacentCells())
+			{
+				if (c.IsSolid() || c.HasObjectWithPart("Combat"))
+					continue;
+				int d = Math.Max(Math.Abs(c.X - here.X), Math.Abs(c.Y - here.Y));
+				if (d < standDist)
+				{
+					stand = c;
+					standDist = d;
+				}
+			}
+			// WEDGE backstop: three pushes at the same stone without ever reaching it (or a stone
+			// with no standable side at all) means the detour is not working -- stop chasing it
+			// and rest the fetch behavior briefly
 			if (best == LastDetourTarget)
 				DetourTries++;
 			else
@@ -221,16 +233,16 @@ namespace XRL.World.Parts
 				LastDetourTarget = best;
 				DetourTries = 1;
 			}
-			if (DetourTries > 3)
+			if (stand == null || DetourTries > 3)
 			{
-				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint}: gave up on stone at d={bestDist} after 3 failed detours -> fetch rests 20 turns");
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint}: gave up on stone at d={bestDist} ({(stand == null ? "no standable side" : "3 failed detours")}) -> fetch rests 20 turns");
 				FetchRest = 20;
 				LastDetourTarget = null;
 				DetourTries = 0;
 				return;
 			}
-			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint}: detours to loose stone at d={bestDist}");
-			who.Brain.PushGoal(new MoveTo(best, careful: false, overridesCombat: true));
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint}: detours to stand beside loose stone at d={bestDist}");
+			who.Brain.PushGoal(new MoveTo(stand, careful: false, overridesCombat: true));
 		}
 	}
 }
