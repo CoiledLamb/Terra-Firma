@@ -492,7 +492,9 @@ findings):**
   MissileWeapon) · **Visor** (binned, revive later) · **accuracy-stacking ceiling** ruling.
 - [ ] 📜 **Quarriers** — how stone leaves Qud (dromad ride-alongs / mole-beast), mole-beast
   weirdness axis, drover's design gap, faction name + display text, mutation-to-type assignment
-  (commits EB/Stoneshaper/Gorgon AI handlers; keep pack NPCs sub-Lv10), 3x3 lump tech (rpm chunk
+  (commits EB/Stoneshaper/Gorgon AI handlers — **+ Fissure, harness-proven 2026-07-25 to have
+  NO AI advertisement (tffis, zero casts): wild Fissure casters need the Calcify-pattern
+  handler**; keep pack NPCs sub-Lv10), 3x3 lump tech (rpm chunk
   vs C# painter), camp commit/cut, malformed cragmensch (commit, name, placement, band), Stilt
   merchant identity, non-expiring merchant stones mechanism.
 - [ ] 📜 **Stonefrog** — six calls queued (disguise depth, numbers, MentalShield, corpse-rock,

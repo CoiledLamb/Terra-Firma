@@ -237,6 +237,30 @@ point, 0.28/turn.)*
   only at d=0, so a stone in an unreachable/occupied cell loops the detour forever. Recorded
   as a SCAV polish flag in TODO.
 
+## 2026-07-25 — round 5 first run
+
+### `tfeat` — 16 of 17 eaten channels asserted in one wish
+- **Proven (per-channel state asserts, player fully restored after):** water +5000 (brine
+  geode) · internal bleed ×2 (pointy 1d2, stalactite 1d8) · choke harm + acid harm · hop
+  displacement · teleport displacement · thunderclap dazed the neighbor and spared the eater ·
+  3 webs (2 counted off-cell, own-cell placement varies) · gas-belly onset (ConfusionGas) ·
+  temperature +150/−150 · plus tasty/arc/quills/strange consumed with their LITH channel lines
+  firing. The Voltaic arc even struck the neighbor at d=1 with correct voltage.
+- **The sludgestone "FAIL" was a harness artifact:** the channel fired ("Spawn: 1x SlimePuddle")
+  but liquid POOLS MERGE — the slime vanished into melting's unswept acid puddle and the object
+  count never moved. Pre-sweep fix deployed; the row re-asserts next run.
+- **Not covered (deliberate skips, recorded):** detonate pair, fungal twins, mullstone refresh,
+  deep four.
+- **Re-run:** `tfeat` (instant, lithovore only).
+
+### `tffis` — fis-npc ANSWERED: Fissure has no AI advertisement
+- **Proven (by a clean zero):** a Hulking Baboon with Fissure L5, hostile-locked, cast NOTHING
+  in 20 turns (the +1 loose stone was a thrown pocket rock). Wild Fissure casters need an AI
+  handler built — the Calcify NPC-caster pattern (AI ability advertisement + cell picking) —
+  which joins the creatures workstream's existing "AI handlers owed" list (EB / Stoneshaper /
+  Gorgon / now Fissure).
+- **Re-run:** `tffis` — flips to a real cast test the day the handler exists.
+
 ---
 
 *Add new entries at the tail. If a scenario's assertion changes shape (harness edits), note the

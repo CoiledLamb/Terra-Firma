@@ -1129,6 +1129,19 @@ note 3210 → menu Save and Quit → reload the same save → mint a fungal rock
   closes a question.**
 - `tfbatch`: 9 synchronous + 7 chained (~100 turns).
 
+### Round 5 first run — 2026-07-25 (user screenshots: eat 16/17, fis "FAIL" = the answer)
+- [x] **tfeat 16/17 asserted** — every channel fired with correct magnitudes (the LITH lines
+  read like a spec sheet: +5000 water, 1d2/1d8 internal, 1d3 Physical/Acid, hop to radius 2,
+  1 neighbor dazed + eater spared, 3x Web, ConfusionGas belly, ±150 temperature, arc struck
+  the neighbor at d=1). **The sludgestone "fail" was a harness artifact: liquid POOLS MERGE**
+  — the slime vanished into melting's unswept acid puddle; pre-sweep fix DEPLOYED, row
+  re-asserts next run. Ledger entry written.
+- [x] **tffis: fis-npc ANSWERED — Fissure has NO AI advertisement.** Zero casts in 20 turns
+  from a hostile-locked Fissure L5 creature (+1 stone = a thrown pocket rock). The sheet
+  item's premise was false; sheet verdict set DEFERRED with the finding. **Wild Fissure
+  casters need a Calcify-pattern AI handler — added to the creatures workstream's owed list
+  (EB / Stoneshaper / Gorgon / Fissure).**
+
 ### Open / next
 - [x] `[verify]` **The human carve — DONE 2026-07-25 (log-confirmed same session):** a normal-UI
   cast carved a wild Bat muse from a zone Shale wall (bite + wings armed) — the picker shell

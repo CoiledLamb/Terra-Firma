@@ -578,6 +578,8 @@ namespace Cleo.TerraFirma.Scripts
 				int waterBefore = stomach.Water;
 				int tempBefore = ply.Physics?.Temperature ?? 25;
 				Cell cellBefore = ply.CurrentCell;
+				if (kind == "spawnliquid")
+					SweepPuddlesAround(ply); // pools MERGE: a leftover puddle absorbs the spawn and the object count never moves (live find: sludgestone's slime vanished into melting's acid)
 				int liquidsBefore = CountPuddlesAround(ply);
 				int websBefore = CountAround(ply, "Web");
 				bool suppressed = Popup.Suppress;
