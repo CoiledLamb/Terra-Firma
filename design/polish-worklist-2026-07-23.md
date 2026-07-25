@@ -34,7 +34,10 @@ number/text awaiting blessing · `[polish]`/`[text]` writing or cleanup work · 
   `UITile` at `Abilities.xml:35` repointed, cyan C/c mapping kept). Single sprite for now — user may
   double back with a second state; if so, adopt the Take Stones two-line `State="ToggleOn"` idiom.
   `[verify]` icon renders on the ability bar next boot (flip to `Foreground="c" Detail="C"` if the
-  bright/dark emphasis reads inverted).
+  bright/dark emphasis reads inverted). **Icon verify MARKED OFF for this pass (user 2026-07-24:
+  "i might need to edit attune stone later so mark it off now but keep it on the flag for next
+  verify [pass] after we modify it") — carry-forward: re-verify the icon in the NEXT verify pass
+  once the planned attune-stone edit lands.**
 - [x] 🆕 `[ratify]` **GasBelly cadence drift — RATIFIED AS OBSERVED 2026-07-23** (SpewEvery=8 stays;
   "1 turn only roughly equates to 1 turn" is accepted base-game physics; no text promises a number).
 
