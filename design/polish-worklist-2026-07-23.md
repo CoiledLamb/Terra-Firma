@@ -309,6 +309,9 @@ house rule set mid-session: FLAG mid-session, fix in the post-session batch):**
   existing NPC-caster appendix item).
 - [ ] 🆕 `[design]` **Gemstones default-equip to thrown slots (user flag)** — they're first-class
   ammo now; recon the engine's default-slot pick at build. Details in TODO.md.
+- [ ] 🆕 `[polish]` **Whorl deflection VFX (user flag): refract/scatter needs a visible light-track
+  (NEW), stone ricochet wants a clearer carom (escalated from parked)** — one VFX sitting;
+  details in TODO.md.
 - [ ] 🆕 `[bug]` **Calcify text says walls have "0 DV" — reality is −10** (base wall DV, never
   overridden; AV 0 is intended and stated, the HP pool is the defense). Fix text or override at
   the batch; details + lean in TODO.md.
