@@ -1114,8 +1114,10 @@ session's save-provenance is unconfirmed, so the EXPLICIT experiment still decid
 note 3210 → menu Save and Quit → reload the same save → mint a fungal rock → compare.
 
 ### Open / next
-- [ ] `[verify]` **The human carve** — one normal-UI Stoneshaper cast (pickers → statue → swap
-  prompt): the CarveFrom seam relocated the core; the shell needs one eyeball pass.
+- [x] `[verify]` **The human carve — DONE 2026-07-25 (log-confirmed same session):** a normal-UI
+  cast carved a wild Bat muse from a zone Shale wall (bite + wings armed) — the picker shell
+  routes through the relocated CarveFrom correctly. Visual quirks, if any, are the user's to
+  flag; the seam's regression risk is refuted.
 - [ ] `[verify]` **quick.cage on the retries build** — the last non-intentional red.
 - [ ] `[verify]` **The lottery save-quit-reload experiment** (above) — user's hands, 30 seconds;
   saves WERE observed being written this session, so the next boot's first SPORE line may
