@@ -38,6 +38,19 @@ namespace XRL.World.Parts
 		[NonSerialized]
 		private bool LastHadMoveGoal;
 
+		/// <summary>Dry-fetch WEDGE fix, half 2 (RULED 2026-07-25, "completely agree"): the harness
+		/// watched a pockets-empty baboon oscillate "detours to loose stone at d=1" forever — stoop
+		/// only fires at d=0, so a stone it never actually stands on loops the detour. Backstop:
+		/// after 3 pushes at the SAME target cell without reaching it, give up fetching for a
+		/// while. (Half 1 is the occupied-cell exclusion in the scan below.) Hints only — reset
+		/// on load by design.</summary>
+		[NonSerialized]
+		private Cell LastDetourTarget;
+		[NonSerialized]
+		private int DetourTries;
+		[NonSerialized]
+		private int FetchRest;
+
 		public override bool SameAs(IPart p)
 		{
 			return p is Cleo_TerraFirma_StoneScavenger o && o.Radius == Radius && base.SameAs(p);
@@ -131,6 +144,13 @@ namespace XRL.World.Parts
 					}
 				}
 			}
+			// give-up backstop cooling off: no fetch scanning while it rests (pocket re-ready
+			// above is unaffected -- only the detour loop rests)
+			if (FetchRest > 0)
+			{
+				FetchRest--;
+				return;
+			}
 			// nearest loose stone, own cell included
 			Cell here = who.CurrentCell;
 			Cell best = null;
@@ -144,6 +164,11 @@ namespace XRL.World.Parts
 			{
 				foreach (Cell c in here.GetLocalAdjacentCells(Radius))
 				{
+					// WEDGE fix, half 1 (RULED 2026-07-25): a stone in a cell the baboon cannot
+					// stand in (wall, another creature) can never be stooped for -- stoop fires
+					// only at d=0 -- so it is not a fetch target at all
+					if (c.IsSolid() || c.HasObjectWithPart("Combat"))
+						continue;
 					int dist = Math.Max(Math.Abs(c.X - here.X), Math.Abs(c.Y - here.Y));
 					if (dist < bestDist && CellHasLooseStone(c))
 					{
@@ -169,6 +194,8 @@ namespace XRL.World.Parts
 			if (bestDist == 0)
 			{
 				// underfoot: stoop for it (costs the turn), then let the brain ready it
+				LastDetourTarget = null;
+				DetourTries = 0;
 				foreach (GameObject obj in here.Objects)
 				{
 					if (IsLooseStone(obj))
@@ -182,6 +209,24 @@ namespace XRL.World.Parts
 						return;
 					}
 				}
+				return;
+			}
+			// WEDGE fix, half 2: three pushes at the same cell without ever standing on it means
+			// the detour is not working (pathing refuses, or something keeps re-occupying it) --
+			// stop chasing that stone and rest the fetch behavior briefly
+			if (best == LastDetourTarget)
+				DetourTries++;
+			else
+			{
+				LastDetourTarget = best;
+				DetourTries = 1;
+			}
+			if (DetourTries > 3)
+			{
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint}: gave up on stone at d={bestDist} after 3 failed detours -> fetch rests 20 turns");
+				FetchRest = 20;
+				LastDetourTarget = null;
+				DetourTries = 0;
 				return;
 			}
 			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint}: detours to loose stone at d={bestDist}");
