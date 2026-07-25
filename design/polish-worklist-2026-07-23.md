@@ -165,7 +165,10 @@ three of four closed, BUILT + DEPLOYED:**
 **2026-07-24 late flags — pentacle-survey docket + verify-session-2 leftovers (indexed at the
 same-day post-handoff reconcile; full entries in TODO.md § Weak-rock flags and § Verify session 2
 findings):**
-- [ ] 🆕 `[bug]` **Fungal lottery persistence FAILS (sheet verdict: fail, downgraded from pass)** —
+- [x] 🆕 `[bug]` **Fungal lottery persistence — CLOSED 2026-07-25, NOT A BUG (user: "all 3 tests
+  gave back 3201, looks good"): the tfspore experiment held one permutation across mint →
+  save-quit → reload; the cross-boot reshuffles were unsaved harness sessions. Storage design
+  was correct all along; sheet verdict flips back to pass.** Original flag (kept for record):
   SetStringGameState round-trip comes back empty post-load (same save, different permutations
   across boots). Diagnostic BUILT + DEPLOYED 2026-07-24 (batch item 2): SPORE line now says
   ROLLED-FRESH vs loaded-from-game-state. `[verify]` reload the save → the line names the broken

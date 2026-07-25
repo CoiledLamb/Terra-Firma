@@ -261,6 +261,22 @@ point, 0.28/turn.)*
   Gorgon / now Fissure).
 - **Re-run:** `tffis` — flips to a real cast test the day the handler exists.
 
+## 2026-07-25 — the tfspore experiment (user-run, three pure reads)
+
+### `tfspore` PASS — fungal lottery permutation SURVIVES save-quit-reload
+- **Proven (user: "all 3 tests gave back 3201, looks good"):** the stored permutation read
+  3201 on all three pure reads — after minting, after menu Save and Quit + reload of the same
+  save, and again before anything else was minted. `SetStringGameState` round-trips a real
+  save correctly; the fungal lottery's per-save contract ("random per run, consistent within
+  the run") holds. The 2026-07-24 cross-boot reshuffles are attributed to harness-iteration
+  sessions ending WITHOUT saving — a legitimate loss of unsaved state, not a bug.
+- **Not covered:** crash/killed-window boots (unsaved state is expected to lose the write —
+  that's the attributed cause, not an open question), multi-save interleaving (two saves
+  alternating in one boot), and the permutation's behavior on a NEW game in the same boot
+  (fresh roll expected by design, unasserted).
+- **Re-run:** `tfspore` (instant, pure read — never rolls, never writes; EMPTY before the
+  boot's first fungal-rock creation is normal).
+
 ---
 
 *Add new entries at the tail. If a scenario's assertion changes shape (harness edits), note the
