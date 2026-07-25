@@ -456,6 +456,10 @@ findings):**
   (deployed). Drainstone-robot downgraded to "probably missed twice." SAME WINDOW: fungal
   lottery localized — persists in-session, dies across boots; the save-quit-reload experiment
   (TODO § harness) decides engine-bug vs unsaved-sessions BEFORE any storage redesign.**
+  **ROUND 4 BUILT + DEPLOYED (later still): tfshape (first Stoneshaper coverage — carve /
+  ivory clean-fail / swap-down / the shape-cd retirement watch; required extracting the carve
+  core into a CarveFrom seam, behavior moved verbatim, ONE HUMAN UI-CARVE OWED) · tfpuddle
+  (one-puddle suppression) · tfdevour (famished EaterStatue, descent detection). UNTESTED.**
 - [x] 📜 `[release]` **git init — DONE 2026-07-23** (fresh repo, no fork linkage, no trailer; history live since `b4ed68e`).
 - [ ] 📜 `[release]` **Workshop publishing plan + credits.**
 - [x] 📜 `[design]` **Stale `Cleo_TerraFirma_Ephemeral Stone` blueprint — RULED remove 2026-07-24

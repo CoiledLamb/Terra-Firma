@@ -56,7 +56,7 @@ namespace Cleo.TerraFirma.Scripts
 		[WishCommand(Command = "tfverify")]
 		public static void Help()
 		{
-			MessageQueue.AddPlayerMessage("TF harness -- instant: tfstreak, tfstrange, tfcarom, tfcrack, tfspill. Turn-driven: tfquick (4 asserts + ape, 5t), tfhopper (5t), tfform (5t), tfdull (5t), tfdrain (25t), tfscav (30t, you are the target). tfbatch = everything, ~75 turns standing still.", "W");
+			MessageQueue.AddPlayerMessage("TF harness -- instant: tfstreak, tfstrange, tfcarom, tfcrack, tfspill, tfpuddle, tfdevour (lithovore only). Turn-driven: tfquick (5t), tfhopper (5t), tfform (5t), tfdull (5t), tfshape (Stoneshaper, 3t), tfdrain (25t), tfscav (30t, you are the target). tfbatch = everything, ~80 turns standing still.", "W");
 			if (!Helpers.VERIFY_WATCH)
 				MessageQueue.AddPlayerMessage("VERIFY_WATCH is OFF -- the harness is disabled.", "R");
 		}
@@ -74,7 +74,9 @@ namespace Cleo.TerraFirma.Scripts
 			CaromSync();
 			CrackSync();
 			SpillSync();
-			SetupHopper(The.Player, "form,quickape,dull,drain,scav");
+			PuddleSync();
+			DevourSync();
+			SetupHopper(The.Player, "form,quickape,dull,drain,shape,scav");
 		}
 
 		// ---------------------------------------------------------------- round 3, synchronous
@@ -293,6 +295,212 @@ namespace Cleo.TerraFirma.Scripts
 			Report("spill", puddle != null && drams >= 4 && drams <= 32,
 				$"destruction spilled {(puddle == null ? "NO puddle" : drams + " dram(s)")} (want 4-32 per the 4d8 pool-volume audit)");
 			if (puddle != null && GameObject.Validate(puddle)) puddle.Obliterate();
+		}
+
+		// ---------------------------------------------------------------- round 4, synchronous
+
+		/// <summary>rock-onepuddle: a liquid rock that BREAKS on the use-path must leave exactly
+		/// ONE puddle (the hit-payload's), the death-spill suppressed against doubles. Retries
+		/// until a throw both connects and breaks; pre-cleans between attempts.</summary>
+		[WishCommand(Command = "tfpuddle")]
+		public static void PuddleSync()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			GameObject ply = The.Player;
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+			Cell lane = FindLane(origin, 3);
+			if (lane == null) { Report("puddle", false, "SETUP FAIL - no open lane"); return; }
+			GameObject victim = GameObject.Create(BABOON_BP);
+			victim.SetIntProperty(SPAWN_MARK, 1);
+			victim.GetStat("Hitpoints").BaseValue = 150;
+			lane.AddObject(victim);
+			bool scored = false;
+			int puddles = -1;
+			int attempts = 0;
+			for (int i = 1; i <= 6 && GameObject.Validate(victim); i++)
+			{
+				attempts = i;
+				SweepPuddlesAround(victim); // pre-clean: prior attempts' splashes
+				GameObject stone = ThrowAt(ply, GEODE_BP, victim);
+				if (stone == null)
+					break;
+				if (!GameObject.Validate(stone))
+				{
+					puddles = CountPuddlesAround(victim);
+					if (puddles == 0)
+						continue; // the breaking throw MISSED (splash landed elsewhere) -- doesn't test the suppression; retry
+					scored = true;
+					break;
+				}
+				stone.Obliterate(); // survived (25%): clear it and retry
+			}
+			Report("puddle", scored && puddles == 1, scored
+				? $"use-path break scored on throw {attempts}: {puddles} puddle object(s) at the impact (want exactly 1 -- death-spill suppressed against doubles)"
+				: $"no scoring break in {attempts} throw(s) (break odds 75%/throw; misses excluded) -- INCONCLUSIVE, re-run");
+			SweepPuddlesAround(victim);
+			if (GameObject.Validate(victim)) victim.Obliterate();
+		}
+
+		private static int CountPuddlesAround(GameObject who)
+		{
+			int n = 0;
+			Cell c = who?.CurrentCell;
+			if (c == null)
+				return 0;
+			foreach (GameObject obj in c.Objects)
+				if (obj.LiquidVolume != null) n++;
+			foreach (Cell adj in c.GetLocalAdjacentCells())
+				foreach (GameObject obj in adj.Objects)
+					if (obj.LiquidVolume != null) n++;
+			return n;
+		}
+
+		private static void SweepPuddlesAround(GameObject who)
+		{
+			Cell c = who?.CurrentCell;
+			if (c == null)
+				return;
+			List<GameObject> doomed = new List<GameObject>();
+			foreach (GameObject obj in c.Objects)
+				if (obj.LiquidVolume != null) doomed.Add(obj);
+			foreach (Cell adj in c.GetLocalAdjacentCells())
+				foreach (GameObject obj in adj.Objects)
+					if (obj.LiquidVolume != null) doomed.Add(obj);
+			foreach (GameObject obj in doomed)
+				obj.Obliterate();
+		}
+
+		/// <summary>lith-devour: the universal statue-devourability audit's descent detection,
+		/// eaten live — a famished lithovore devours an EaterStatue (base Statue family, no
+		/// Statue part, exactly the blueprint-descent case). Requires a lithovore character;
+		/// hunger is forced to famished for the bite and restored after.</summary>
+		[WishCommand(Command = "tfdevour")]
+		public static void DevourSync()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			GameObject ply = The.Player;
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+			if (ply.GetPart<XRL.World.Parts.Mutation.Cleo_TerraFirma_Lithovore>() == null)
+			{
+				Report("devour", false, "SETUP SKIP - needs a lithovore character (the defect part is absent)");
+				return;
+			}
+			Stomach stomach = ply.GetPart<Stomach>();
+			if (stomach == null) { Report("devour", false, "SETUP FAIL - no Stomach part"); return; }
+			List<Cell> open = origin.GetLocalAdjacentCells();
+			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
+			if (open.Count < 1) { Report("devour", false, "SETUP FAIL - no open adjacent cell"); return; }
+			GameObject statue = GameObject.Create("EaterStatue");
+			statue.SetIntProperty(SPAWN_MARK, 1);
+			open[0].AddObject(statue);
+			int hungerBefore = stomach.HungerLevel;
+			stomach.HungerLevel = 2; // famished: the devour gate
+			bool checkResult;
+			bool suppressed = Popup.Suppress;
+			Popup.Suppress = true;
+			try { checkResult = InventoryActionEvent.Check(ply, ply, statue, "Cleo_TerraFirma_DevourStatue"); }
+			finally { Popup.Suppress = suppressed; }
+			bool gone = !GameObject.Validate(statue);
+			stomach.HungerLevel = hungerBefore; // the devour cleared it; the test should not feed you
+			Report("devour", gone,
+				$"famished devour of an EaterStatue (base Statue family, blueprint-descent detection): action check={checkResult}, statue {(gone ? "devoured whole" : "STILL STANDS")}; hunger restored to pre-test");
+			if (!gone && GameObject.Validate(statue))
+				statue.Obliterate();
+		}
+
+		[WishCommand(Command = "tfshape")]
+		public static void Shape()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
+			SetupShape(The.Player, "");
+		}
+
+		/// <summary>Stoneshaper core, driven through the extracted CarveFrom seam (the UI pickers
+		/// stay human): carve #1 asserts statue + CurStatue tracking; a Young Ivory attempt
+		/// asserts the clean no-body fail (no cooldown, wall intact); carve #2 asserts the
+		/// swap-down commit; then the statue is destroyed and a 3-turn watch asserts the
+		/// cooldown only TICKS -- no reset, no zero-out (the shape-cd retirement watch).</summary>
+		internal static void SetupShape(GameObject ply, string queue)
+		{
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+			XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper shaper = ply.GetPart<XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper>();
+			if (shaper == null) { Report("shape", false, "SETUP SKIP - needs a Stoneshaper (rockwineverytime character)"); RunNext(queue, ply); return; }
+			List<Cell> open = new List<Cell>(origin.GetLocalAdjacentCells(2));
+			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
+			if (open.Count < 5) { Report("shape", false, "SETUP FAIL - need five open cells within 2"); RunNext(queue, ply); return; }
+
+			// wall 1 + muse A -> carve #1
+			GameObject wall1 = GameObject.Create("Sandstone");
+			open[0].AddObject(wall1);
+			if (wall1.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>() == null)
+			{
+				Report("shape", false, "SETUP FAIL - spawned Sandstone lacks StoneshaperWallProperties (merge gap?)");
+				wall1.Obliterate();
+				RunNext(queue, ply);
+				return;
+			}
+			GameObject museA = GameObject.Create(BABOON_BP);
+			museA.SetIntProperty(SPAWN_MARK, 1);
+			open[1].AddObject(museA);
+			GameObject statueA;
+			bool suppressed = Popup.Suppress;
+			Popup.Suppress = true;
+			try { statueA = shaper.CarveFrom(ply, museA, open[0]); }
+			finally { Popup.Suppress = suppressed; }
+			bool carvedA = statueA != null && GameObject.Validate(statueA) && shaper.CurStatue == statueA;
+			if (statueA != null) statueA.SetIntProperty(SPAWN_MARK, 1);
+			Report("shape.carve", carvedA, $"carve #1 (Baboon muse, spawned Sandstone wall): statue {(carvedA ? "stands and is tracked as CurStatue" : "FAILED")}");
+			ActivatedAbilityEntry entry = ply.ActivatedAbilities?.GetAbility(shaper.ActivatedAbilityID);
+			int cdAfterCarve = entry?.Cooldown ?? -1;
+
+			// Young Ivory -> clean no-body fail: null statue, wall untouched, cooldown not re-taken
+			GameObject wall2 = GameObject.Create("Sandstone");
+			open[2].AddObject(wall2);
+			GameObject ivory = GameObject.Create("Young Ivory");
+			ivory.SetIntProperty(SPAWN_MARK, 1);
+			open[3].AddObject(ivory);
+			GameObject statueNull;
+			suppressed = Popup.Suppress;
+			Popup.Suppress = true;
+			try { statueNull = shaper.CarveFrom(ply, ivory, open[2]); }
+			finally { Popup.Suppress = suppressed; }
+			bool wallIntact = GameObject.Validate(wall2) && wall2.CurrentCell == open[2];
+			int cdAfterIvory = entry?.Cooldown ?? -1;
+			Report("shape.ivory", statueNull == null && wallIntact && shaper.CurStatue == statueA && cdAfterIvory <= cdAfterCarve,
+				$"Young Ivory attempt: statue={(statueNull == null ? "refused (no body plan)" : "CARVED?!")}, wall {(wallIntact ? "intact" : "SPENT")}, cooldown {cdAfterCarve}->{cdAfterIvory} (must not re-take)");
+
+			// muse B (robot anatomy) -> swap-down commit
+			GameObject museB = GameObject.Create(ROBOT_BP);
+			museB.SetIntProperty(SPAWN_MARK, 1);
+			open[4].AddObject(museB);
+			GameObject statueB;
+			suppressed = Popup.Suppress;
+			Popup.Suppress = true;
+			try { statueB = shaper.CarveFrom(ply, museB, open[2]); }
+			finally { Popup.Suppress = suppressed; }
+			bool swapped = statueB != null && GameObject.Validate(statueB) && shaper.CurStatue == statueB && statueB != statueA;
+			if (statueB != null) statueB.SetIntProperty(SPAWN_MARK, 1);
+			Report("shape.swap", swapped, $"carve #2 (Scrapbot muse): {(swapped ? "swap-down committed -- new statue tracked, prior returned to stone (gear entombed)" : "SWAP FAILED")}");
+
+			if (!swapped || entry == null)
+			{
+				RunNext(queue, ply);
+				return;
+			}
+			// the shape-cd watch: destroy the statue, then 3 turns -- the cooldown may only TICK
+			int cdBeforeKill = entry.Cooldown;
+			statueB.Destroy(null, Silent: true);
+			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "shape", TurnsRemaining = 3, TurnsTotal = 3, Queue = queue };
+			driver.InitShape(entry, cdBeforeKill);
+			ply.AddPart(driver);
+			MessageQueue.AddPlayerMessage("Harness: shape cooldown-watch running -- 3 turns after the statue's destruction.", "W");
 		}
 
 		// ---------------------------------------------------------------- round 3, turn-driven setups
@@ -708,6 +916,7 @@ namespace Cleo.TerraFirma.Scripts
 				case "quickape": SetupQuickApe(ply, rest); break;
 				case "dull": SetupDull(ply, rest); break;
 				case "drain": SetupDrain(ply, rest); break;
+				case "shape": SetupShape(ply, rest); break;
 			}
 		}
 
@@ -874,6 +1083,8 @@ namespace XRL.World.Parts
 		[NonSerialized] private GameObject DrainStoneR;
 		[NonSerialized] private int FleshyHpAtLatch;
 		[NonSerialized] private int RobotHpAtLatch;
+		[NonSerialized] private ActivatedAbilityEntry ShapeEntry;
+		[NonSerialized] private int ShapeCdBeforeKill;
 
 		public void InitHopper(GameObject millLive, GameObject millDead, int stonesEach)
 		{
@@ -917,6 +1128,13 @@ namespace XRL.World.Parts
 			DrainStoneR = stoneR;
 			FleshyHpAtLatch = fleshyHp;
 			RobotHpAtLatch = robotHp;
+			LiveSetup = true;
+		}
+
+		public void InitShape(ActivatedAbilityEntry entry, int cdBeforeKill)
+		{
+			ShapeEntry = entry;
+			ShapeCdBeforeKill = cdBeforeKill;
 			LiveSetup = true;
 		}
 
@@ -981,8 +1199,21 @@ namespace XRL.World.Parts
 				FinishDull(owner);
 			else if (Scenario == "drain")
 				FinishDrain();
+			else if (Scenario == "shape")
+				FinishShape();
 			Cleo.TerraFirma.Scripts.TestHarnessWishes.SweepSpawns(owner.CurrentZone);
 			Cleo.TerraFirma.Scripts.TestHarnessWishes.RunNext(Queue, owner);
+		}
+
+		private void FinishShape()
+		{
+			int cdNow = ShapeEntry?.Cooldown ?? -1;
+			// the retirement watch: after the statue's death the cooldown may only TICK DOWN --
+			// a jump UP is a reset to BASE (the retired display logic resurfacing), a plunge
+			// far below the tick rate is a zero-out. Band: 3 turns of ticking, generous margin.
+			bool pass = ShapeEntry != null && cdNow <= ShapeCdBeforeKill && cdNow >= ShapeCdBeforeKill - 40;
+			Cleo.TerraFirma.Scripts.TestHarnessWishes.Report("shape.cd", pass,
+				$"cooldown {ShapeCdBeforeKill}->{cdNow} across {TurnsTotal} turns after the statue's destruction (must only tick: no reset upward, no zero-out; shape-cd retirement watch)");
 		}
 
 		private void FinishQuickApe(GameObject owner)

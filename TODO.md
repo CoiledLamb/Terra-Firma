@@ -1082,9 +1082,32 @@ fully closed; four ledger entries added. Cage found a THIRD miss mode: an **agil
 connect roll survives even perfect accuracy** (decomp: the 1d-Agility gate atop the hit branch)
 — the lend kills scatter, not the connect; cage now RETRIES up to 4 throws (deployed).
 
+### Round 4 — BUILT + DEPLOYED 2026-07-24 late night (user: "let's try em"; compiles clean, UNTESTED, next restart)
+- **`tfshape`** (3-turn tail) — Stoneshaper's first harness coverage, four asserts: carve #1
+  (statue stands, CurStatue tracked) · Young Ivory clean no-body fail (statue null, wall
+  INTACT, cooldown not re-taken) · swap-down commit (carve #2, prior de-animated) · the
+  **shape-cd retirement watch**: statue destroyed, 3 turns, cooldown may only TICK (a jump up
+  = the retired reset logic resurfacing; a plunge = zero-out).
+  **REQUIRED A MOD REFACTOR — the testability seam:** `Mutation_Stoneshaper.HandleEvent`'s
+  interactive pickers (PickDestinationCell + goto re-prompts) cannot be wish-driven, so the
+  carve core was EXTRACTED VERBATIM into `internal CarveFrom(actor, creature, wallCell)` —
+  the handler now validates via UI then delegates. Behavior moved, not changed; still, the
+  mutation's core was relocated, so **one human sanity-carve through the normal UI next
+  session is owed** (pickers → statue → swap prompt all still route through the same core).
+- **`tfpuddle`** (instant) — rock-onepuddle: a use-path break must leave exactly ONE puddle
+  (death-spill suppressed against doubles); retries until a throw both connects and breaks,
+  miss-breaks excluded, pre-cleans between attempts.
+- **`tfdevour`** (instant, lithovore-only) — lith-devour: famished devour of an EaterStatue
+  (base Statue family = the blueprint-descent case); hunger forced to famished for the bite
+  and RESTORED after (the test should not feed you). SKIPs with a message on non-lithovores.
+- `tfbatch` now: 8 synchronous + 6 chained (hopper → form → quickape → dull → drain → shape →
+  scav), ~80 turns.
+
 ### Open / next
-- [ ] `[verify]` **Next restart: tfquick** — cage on retries is the LAST red that isn't the
-  intentional quick.rep. Then the harness board is: all green + one red awaiting its batch fix.
+- [ ] `[verify]` **Next restart:** tfbatch sweeps everything — watch quick.cage (retries build),
+  shape.* (first Stoneshaper coverage ever), puddle, devour; quick.rep stays the standing red
+  until its batch fix. **Plus one HUMAN item: a normal-UI carve** (the CarveFrom seam moved the
+  mutation's core — the UI shell needs one eyeball pass).
 - [ ] `[verify]` **The lottery save-quit-reload experiment** (above) — user's hands, 30 seconds;
   saves WERE observed being written this session, so the next boot's first SPORE line may
   already answer it.

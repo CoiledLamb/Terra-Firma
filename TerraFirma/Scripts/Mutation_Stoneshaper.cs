@@ -219,7 +219,34 @@ namespace XRL.World.Parts.Mutation
 				}
 			}
 
-			Lovesick lovesick = E.Actor.GetEffect<Lovesick>();
+			return CarveFrom(E.Actor, creature, targetWallCell) != null && base.HandleEvent(E);
+		}
+
+		/// <summary>The carve core, extracted 2026-07-24 for the test harness: the UI shell above
+		/// gathers muse + wall through interactive pickers (which a wish cannot drive); this does
+		/// everything after — body/wall re-validation, the lovesick substitution, statue creation
+		/// + buffs, the swap commit, wall consumption, placement, and the cooldown. Returns the
+		/// statue, or null on any clean fail (no cooldown taken, no wall spent). Behavior is the
+		/// handler's own, moved verbatim.</summary>
+		internal GameObject CarveFrom(GameObject actor, GameObject creature, Cell targetWallCell)
+		{
+			if (creature == null || creature.Body == null)
+			{
+				// defensive twin of the handler's early check: the harness enters here directly
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", $"no-body fail: {creature?.Blueprint ?? "?"} refused cleanly (no cooldown, no wall spent)");
+				if (creature != null)
+					actor.Fail(creature.T() + creature.GetVerb("have") + " no body plan for you to carve.");
+				return null;
+			}
+			List<GameObject> walls = targetWallCell.GetWalls();
+			if (walls.Count == 0)
+				return null;
+			GameObject refWall = walls.First();
+			Cleo_TerraFirma_StoneshaperWallProperties wallProps = refWall.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>();
+			if (wallProps == null)
+				return null;
+
+			Lovesick lovesick = actor.GetEffect<Lovesick>();
 			GameObject target = creature;
 			if (lovesick != null)
 			{
@@ -228,7 +255,7 @@ namespace XRL.World.Parts.Mutation
 					creature = target; // the beloved can't be rendered in stone; carve what was actually asked for
 			}
 			else if (target.HasPart<Lovely>())
-				E.Actor.ApplyEffect(new Lovesick(Stat.Random(3000, 3600), target));
+				actor.ApplyEffect(new Lovesick(Stat.Random(3000, 3600), target));
 
 			string descriptor = "rough";
 			if (Level >= 3)
@@ -246,12 +273,12 @@ namespace XRL.World.Parts.Mutation
 			if (statue == null)
 			{
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", $"statue creation FAILED (null) for muse {creature?.Blueprint ?? "?"}");
-				E.Actor.Fail("The stone refuses to take shape.");
-				return false;
+				actor.Fail("The stone refuses to take shape.");
+				return null;
 			}
 			AnimateObject.Animate(statue);
 
-			ApplyStatueBuffs(E.Actor, creature, statue, Level, wallProps);
+			ApplyStatueBuffs(actor, creature, statue, Level, wallProps);
 
 			// commit point: only now does an existing statue (any lifetime, swap-down ruling 2026-07-23) get released
 			if (CurStatue != null)
@@ -264,22 +291,19 @@ namespace XRL.World.Parts.Mutation
 			StatueLifetimeRemaining = GetDuration(Level);
 			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", $"carved: muse={creature.Blueprint}, wall={refWall?.Blueprint ?? "?"}, Lv{Level}, lifetime={(StatueLifetimeRemaining == INFINITE_DURATION_PLACEHOLDER ? "PERMANENT" : StatueLifetimeRemaining.ToString() + " turns")}");
 
-			//MessageQueue.AddPlayerMessage($"clearing walls in target cell...");
 			walls.ForEach(x => x.Obliterate());
-			//MessageQueue.AddPlayerMessage($"adding statue to world...");
 			targetWallCell.AddObject(statue, true, Silent: true);
 			statue.Splatter($"&{statue.GetForegroundColor()}*");
 			PlayWorldSound("Sounds/Throw/sfx_throwing_stone_small_impact", 1f, Combat: true, SourceCell: targetWallCell);
 
-			if (lovesick != null && E.Actor.IsPlayer())
+			if (lovesick != null && actor.IsPlayer())
 				Popup.Show($"You attempt to picture {target.the} {target.DisplayName} in your mind, but all you can think about is {lovesick.Beauty.the} {lovesick.Beauty.DisplayName}…!");
-			XDidYToZ(E.Actor, $"create a sculpture of", creature, EndMark: "!", ColorAsGoodFor: E.Actor, Source: E.Actor);
-			//MessageQueue.AddPlayerMessage($"done!");
+			XDidYToZ(actor, $"create a sculpture of", creature, EndMark: "!", ColorAsGoodFor: actor, Source: actor);
 
 			// every carve takes the same cooldown; recasting after it swaps the living statue out
 			// (lifetime-as-cooldown display retired with the swap-down ruling, 2026-07-23)
 			CooldownMyActivatedAbility(ActivatedAbilityID, BASE_COOLDOWN);
-			return base.HandleEvent(E);
+			return statue;
 		}
 
 		public override bool HandleEvent(EndTurnEvent E)
