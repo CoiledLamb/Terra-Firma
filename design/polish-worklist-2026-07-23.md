@@ -204,8 +204,8 @@ findings):**
   1).** Fix #1 (fire `ReplaceThrownWeaponEvent.Check` on vacate) FAILED user testing — Check()
   notifies handlers only; the engine's find-in-bag-and-equip lives in a protected wrapper, now
   replicated: Check() first, then same-blueprint bag search + `CommandEquipObject` into the
-  vacated slot, with readied/refused/no-spare logging. `[verify]` fly the last held streakschorl
-  with spares in the bag → next lands in hand; STRK "bag re-equip: ... readied".
+  vacated slot, with readied/refused/no-spare logging. **VERIFIED 2026-07-24 evening — harness
+  tfstreak PASS: player-path flight, slot re-armed from the bag, direct engine-state assertion.**
 - [ ] 🆕 `[design]` Strange→FugueClones miss-dud (flag-lite) · 🆕 `[bug?]` isolated NRE after a
   torpor detonation (watch) · 🆕 `[bug?]` gyrestone null-cell post-throw (watch).
 - [ ] 🆕 `[bug]` **Baboons never scavenge ([SCAV] silent all session)** — experiment resolved it:
@@ -219,8 +219,10 @@ findings):**
   differential experiments recorded in TODO.md; the pass must restore ≥vanilla cadence.**
   **PASS BUILT + DEPLOYED 2026-07-24 (batch item 3):** slot-empty + pocket stone → forced
   `CommandEquipObject` as a FREE action (user ruling: thrown-weapon equips cost nothing);
-  REFUSED outcomes logged (the H1 smoking-gun detector). `[verify]` next boot: baboons re-arm
-  every throw, cadence ≥ vanilla, watch for REFUSED spam naming the regression.
+  REFUSED outcomes logged (the H1 smoking-gun detector). **RE-READY VERIFIED 2026-07-24 evening
+  (harness tfscav): zero REFUSED across 118 baboon-turns, every empty slot re-readied same turn,
+  dry-fetch loop ran live; cadence measured 0.29 throws/baboon-turn. Only the ≥vanilla baseline
+  comparison remains open (needs a mod-disabled control boot — Tier 2 territory).**
 - [ ] 🆕 `[design]` **Caromcobble StepChance 25 → higher? (user flag: "could be higher")** —
   re-opens a sweep-ratified number; the peel never breaks so the proc rate is pure zoning
   strength. One XML dial, rule at the batch.
@@ -249,9 +251,10 @@ findings):**
   goes") + BUILT + DEPLOYED 2026-07-24 (batch item 4, ahead of the kitchen pass):** new
   `Part_StoneHopper` on the Millstone merge, menu grind REMOVED; powered mill grinds one
   hopper stone/turn (throughput 1/turn DRAFT) into shared-recipe servings that accumulate in
-  the mill; pestle/campfire homes unchanged. `[verify]` rocks into Joppa's mill → powders
-  while the wheel turns; dead mill grinds nothing; GRIND "hopper:" lines. *(Moved from the
-  Pass 6 docket at the 2026-07-24 reconcile.)*
+  the mill; pestle/campfire homes unchanged. **MECHANISM VERIFIED 2026-07-24 evening (harness
+  tfhopper PASS: powered mill 2 stones -> 5 powders in 5 turns, dead mill inert).** `[verify]`
+  residue: Joppa's river-powered mill world-wiring eyeball. *(Moved from the Pass 6 docket at
+  the 2026-07-24 reconcile.)*
 - [ ] 📜 `[polish]` **HistorySpice.json entries — REQUIRED; merge path VERIFIED 2026-07-23, fully
   de-risked.** Decomp ground truth: the engine natively merges any mod file named
   `historyspice.json` (JSON union merge, `HistoricSpice.Init`); the recipe-namer's lookup key is
@@ -408,9 +411,11 @@ findings):**
   out"; full record in TODO.md § Automated verification harness).** Wish-driven in-game scenario
   runner, player-path actions through the real pipeline, asserts on engine state directly:
   `tfstreak` (re-equip, instant) · `tfhopper` (mill grind, 5 turns) · `tfscav` (baboon cadence +
-  starvation detector, 30 turns). Results = `[TF-VERIFY] [AUTO]` PASS/FAIL lines. `[verify]`
-  first live run of all three next boot — the harness itself is the experiment; Tier 2 (hands-off
-  boot cycle) only if the PoC proves out.
+  starvation detector, 30 turns). Results = `[TF-VERIFY] [AUTO]` PASS/FAIL lines. **FIRST LIVE
+  RUN same evening: the harness works — tfstreak + tfhopper PASSed and closed their batch
+  verifies; both failures were harness bugs (phantom starved-turn sampling, retry stacking),
+  diagnosed from the log and fixed + redeployed same evening (active next restart). Full run
+  record in TODO.md § the harness.** Next: re-run all three post-restart, then rule on Tier 2.
 - [x] 📜 `[release]` **git init — DONE 2026-07-23** (fresh repo, no fork linkage, no trailer; history live since `b4ed68e`).
 - [ ] 📜 `[release]` **Workshop publishing plan + credits.**
 - [x] 📜 `[design]` **Stale `Cleo_TerraFirma_Ephemeral Stone` blueprint — RULED remove 2026-07-24

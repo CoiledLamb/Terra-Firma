@@ -67,11 +67,19 @@ namespace Cleo.TerraFirma.Scripts
 			Cell target = FindLane(origin, 3);
 			if (target == null) { Report("streak", false, "SETUP FAIL - no open 3-cell lane from the player"); return; }
 
+			// normalize the slot: a previous run's re-equipped stone (or the player's own thrown
+			// weapon) otherwise absorbs the new stone by stacking and the equip silently no-ops --
+			// the first live run's retry failure (2026-07-24), found in five minutes by the harness
+			// doing exactly what it was built for
+			if (slot.Equipped != null)
+				slot.ForceUnequip(Silent: true);
+
 			GameObject first = GameObject.Create(STREAK_BP);
 			if (first == null) { Report("streak", false, "SETUP FAIL - could not create " + STREAK_BP); return; }
-			ply.ReceiveObject(first);
-			ply.FireEvent(Event.New("CommandEquipObject", "Object", first, "BodyPart", slot));
-			if (slot.Equipped != first) { Report("streak", false, "SETUP FAIL - could not equip the streakschorl into the thrown slot"); return; }
+			// ForceEquipObject, NOT inventory-then-equip: passing through the bag stacks the new
+			// stone onto any leftover streakschorls and the ref we hold goes stale
+			ply.ForceEquipObject(first, slot, Silent: true);
+			if (slot.Equipped != first) { Report("streak", false, "SETUP FAIL - could not equip the streakschorl into the thrown slot (even force-equip refused)"); return; }
 			for (int i = 0; i < 2; i++)
 				ply.ReceiveObject(GameObject.Create(STREAK_BP)); // spares AFTER the equip: separate bag stack
 			int bagBefore = CountInBag(ply, STREAK_BP);
@@ -412,7 +420,12 @@ namespace XRL.World.Parts
 			int curCount = cur?.Count ?? 0;
 			if (Sampled && LastEquipped != null && (cur != LastEquipped || curCount < LastCount))
 				Throws++; // at most one throw per creature-turn
-			if (cur == null && PocketedStones() > 0)
+			// starved = EMPTY on TWO consecutive samples with stones pocketed. A single EMPTY
+			// blip is the throw itself: this sample runs before the scavenger's same-turn free
+			// re-ready (first live run 2026-07-24: 8 "starved" turns, every one a phantom -- the
+			// log showed each slot->EMPTY answered by "pocket re-ready ... (free action)" within
+			// the same turn, zero REFUSED). Only emptiness that SURVIVES a whole turn is a lost turn.
+			if (Sampled && cur == null && LastEquipped == null && PocketedStones() > 0)
 				StarvedTurns++;
 			LastEquipped = cur;
 			LastCount = curCount;
