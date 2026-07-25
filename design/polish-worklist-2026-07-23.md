@@ -134,12 +134,59 @@ three of four closed, BUILT + DEPLOYED:**
   `Part_TimedForm` (pocket stones spill on expiry). The pocket-form pass still owes item→creature.**
   `[verify]` ape crumbles to rubble at expiry; statuette stiffens to figurine + spills stones;
   figurine grants baboon rep.
+- [x] 🆕 `[bug]` **Statuette expiry death-popup — SUPPRESSED, BUILT + DEPLOYED 2026-07-24 (batch
+  item 5):** `Part_TimedForm` stamps `NoFollowerDeathPopup` (property; engine gate is
+  HasTagOrProperty, decomp-verified) pre-Obliterate — expiry keeps the stiffens line, loses the
+  "Your companion ... died." popup; combat deaths still mourn. `[verify]` next expiry: no popup.
 - [ ] 📜 `[design]` **PARKED CONVERSATION (user, 2026-07-24): hold rate / fragility / natural
   expiry as one system** — "interested in a conversation about hold rate, fragility, and natural
   expiry at a certain point, but that can wait." The dials: HoldChance 25, DullAfter 1000–2500,
   TimedForm 500–1000, healstone HoldChance 0, caromcobble 100.
 - [ ] 🆕 `[design]` **Stale +100 throw accuracy on the playtest character** — keep the god-arm or
   strip via one-line wish next session.
+
+**2026-07-24 late flags — pentacle-survey docket + verify-session-2 leftovers (indexed at the
+same-day post-handoff reconcile; full entries in TODO.md § Weak-rock flags and § Verify session 2
+findings):**
+- [ ] 🆕 `[bug]` **Fungal lottery persistence FAILS (sheet verdict: fail, downgraded from pass)** —
+  SetStringGameState round-trip comes back empty post-load (same save, different permutations
+  across boots). Diagnostic BUILT + DEPLOYED 2026-07-24 (batch item 2): SPORE line now says
+  ROLLED-FRESH vs loaded-from-game-state. `[verify]` reload the save → the line names the broken
+  link; then design the real fix.
+- [ ] 🆕 `[design]` **Dazestone intervention pass (user: "flag this for needing intervention")** —
+  weakest headliner (survey 6): (a) split-channel stun-gas cooking only, or (b) the honest shunt
+  (stun payload, band 2, CC trio with vertigneiss/lullabaster). User acknowledged both.
+- [ ] 🆕 `[design]` **Vitriolite minor gear break (user: "a great addition")** — restore the CUT
+  etch at T1 scale: 25–50% (DRAFT) on throw-hit applies ShatteredArmor; full BreakGear stays
+  deep-only. XML-only; next cooking-rocks sitting.
+- [ ] 🆕 `[design]` **Oxidian eaten-channel angle (user: "a potential design angle")** — proposed:
+  eaten raw = natural weapons rust for N turns; mill stays empty ON PURPOSE (gear-warfare
+  doesn't cook, named as a rule). Examine at the next rocks sitting.
+- [ ] 🆕 `[design]` **Compressed ash, both dead channels — DIRECTION RULED 2026-07-24 (user):**
+  eaten = cut the choke, `EatenSpew MiasmaticAsh` (burp family); cooking = build the bespoke
+  `armorMinor` domain (ash as aegischist's T1 shadow). Claude drafts at build, user veto.
+- [ ] 🆕 `[design]` **Tanglelith tar redesign (rename candidate: pitchstone) + pitching fliers
+  down** — persistent flammable sticky ground patch (floor-pair with oilstone) + on-hit
+  force-lands flyers then Stuck. C#-small; fall API + re-takeoff gate verify at build.
+- [ ] 🆕 `[design]` **Gossamarl one-use burst — examine** whether it should survive throws (the
+  destroy is `StickyOnHit`'s own quirk, not a design intent); if tanglelith takes the reusable
+  ground-control niche, one-use burst may become exactly right by contrast.
+- [ ] 🆕 `[design]` **Quarrelquartz/gyrestone at the mill** — reopen the mill-hazard layer for real
+  (port the whorl's tear-apart recipe: quarrelquartz detonates, gyrestone vents 3 vortices) or
+  stand by the safe-mill ruling and strike the stale Rocks.xml comment.
+- [ ] 🆕 `[text]` **Name rewrite flags: strange rock · dazestone · oilstone · glowing twins ·
+  healstone** — twins keep ONE shared name stamped twice (no-tells identity); dazestone renames
+  AFTER its intervention resolves; REOPENS the pass-1 "stay bland on purpose" ruling for strange
+  + the twins. House morpheme rules + spent-ledger apply; slate rounds, user-curated.
+- [ ] 🆕 `[design]` **Seam squad-drops scale** — nine living baboons in one Fissure cast (machinery
+  flawless; scale is the question): jackpot comedy vs exclude creatures vs cap living falls.
+- [ ] 🆕 `[design]` **Phasalt vs walls** — log claims Phased applies to walls, game shows nothing
+  (user tested, 8 throws): confirm the no-op + gate the payload, or make walk-through-walls
+  real; either way stop the log overpromising.
+- [ ] 🆕 `[design]` **Healstone wall-repair synergy** — healstones repair walls (mason's medkit
+  for Calcify): bless or gate.
+- [ ] 🆕 `[ratify]` **Batch DRAFT numbers:** hopper throughput 1/turn · Calcify "−10 DV" lean (b) ·
+  figurine AddsRep Baboons 200.
 
 **Geysers (their own mini-pass):**
 - [ ] 📜 `[design]` **Body plan + stats** — Turret anatomy vs custom Bodies.xml vent/maw; strip the
@@ -276,8 +323,12 @@ three of four closed, BUILT + DEPLOYED:**
 
 **Verify session 2 flag docket (2026-07-24, full entries in TODO.md § Verify session 2 findings;
 house rule set mid-session: FLAG mid-session, fix in the post-session batch):**
-- [ ] 🆕 `[bug]` **Thrown drainstone latch vanishes** — 4 payload fires, zero attachments;
-  diagnostics deployed, one throw next restart names the broken link.
+- [x] 🆕 `[bug]` **Thrown drainstone latch vanishes — SOLVED 2026-07-24, NOT A BUG (user
+  diagnosis: the throw's own penetration one-shot the 5-HP baboons, and a dead pending victim
+  fails Validate silently — corpses can't be latched; the stone survives as loot, correct).**
+  The chain ran clean end-to-end live the same day. Residual polish BUILT + DEPLOYED in the
+  batch: the "pending victim died before the latch could take hold" log line. `[verify]`
+  one-shot a victim with a drainstone throw → the new line speaks.
 - [x] 🆕 `[bug]` **Streakschorl auto-equip** — FIXED + DEPLOYED (pre-rule): flight now fires
   `ReplaceThrownWeaponEvent.Check` when it vacates the slot.
 - [ ] 🆕 `[design]` Strange→FugueClones miss-dud (flag-lite) · 🆕 `[bug?]` isolated NRE after a
@@ -291,13 +342,19 @@ house rule set mid-session: FLAG mid-session, fix in the post-session batch):**
   without the mod — the mod REGRESSES throw cadence below baseline. Hypotheses (mixed-inventory
   re-ready failure / global stone merges changing AI scoring / the scavenger part itself) +
   differential experiments recorded in TODO.md; the pass must restore ≥vanilla cadence.**
+  **PASS BUILT + DEPLOYED 2026-07-24 (batch item 3):** slot-empty + pocket stone → forced
+  `CommandEquipObject` as a FREE action (user ruling: thrown-weapon equips cost nothing);
+  REFUSED outcomes logged (the H1 smoking-gun detector). `[verify]` next boot: baboons re-arm
+  every throw, cadence ≥ vanilla, watch for REFUSED spam naming the regression.
 - [ ] 🆕 `[design]` **Caromcobble StepChance 25 → higher? (user flag: "could be higher")** —
   re-opens a sweep-ratified number; the peel never breaks so the proc rate is pure zoning
   strength. One XML dial, rule at the batch.
-- [ ] 🆕 `[design]` **Millstone → HOPPER model — RULED (user: "sounds great - menu probably
-  goes")**: mill home becomes hopper-only (stones into its inventory, native powered grind);
-  the mill's menu grind is removed; pestle/campfire homes unchanged. Build at the kitchen
-  pass; shape in TODO.md.
+- [x] 🆕 `[design]` **Millstone → HOPPER model — RULED (user: "sounds great - menu probably
+  goes") + BUILT + DEPLOYED 2026-07-24 (batch item 4, ahead of the kitchen pass):** new
+  `Part_StoneHopper` on the Millstone merge, menu grind REMOVED; powered mill grinds one
+  hopper stone/turn (throughput 1/turn DRAFT) into shared-recipe servings that accumulate in
+  the mill; pestle/campfire homes unchanged. `[verify]` rocks into Joppa's mill → powders
+  while the wheel turns; dead mill grinds nothing; GRIND "hopper:" lines.
 
 - [x] 📜 `[design]` **NPC-caster gap — RULED batch-now + BUILT + DEPLOYED 2026-07-23** ("let's
   knock calcify off the list"). AI advertises on DEFENSIVE + RETREAT channels only — never
@@ -315,9 +372,11 @@ house rule set mid-session: FLAG mid-session, fix in the post-session batch):**
 - [ ] 🆕 `[text]` **Resonant deflection messages want their own verb set (user flag: "different
   language around what happens to the laser than the base form")** — mass grinds, resonance
   refracts; branch the outcome verbs on Resonant at the text pass. Details in TODO.md.
-- [ ] 🆕 `[bug]` **Calcify text says walls have "0 DV" — reality is −10** (base wall DV, never
-  overridden; AV 0 is intended and stated, the HP pool is the defense). Fix text or override at
-  the batch; details + lean in TODO.md.
+- [x] 🆕 `[bug]` **Calcify text says walls have "0 DV" — reality is −10** (base wall DV, never
+  overridden; AV 0 is intended and stated, the HP pool is the defense). **BUILT + DEPLOYED
+  2026-07-24 (batch item 6): text now reads "−10 DV" — lean (b) text-follows-reality, DRAFT;
+  veto window open (flip to a creation-time DV override if vetoed).** `[verify]` level text
+  reads −10 DV.
 - [ ] 📜 `[text]` **Calcify text pass.**
 
 ## Pass 7 — Geomancy
@@ -370,7 +429,9 @@ house rule set mid-session: FLAG mid-session, fix in the post-session batch):**
   stonecarver static content (the lithovore's restaurant), lore items/books, wall kick, Geomancy
   consumable, transmute-gemstone concept, throw-augmenting late-game items; 🆕 geode family
   (beyond brine geode), 🆕 pour-into-container on the liquid rocks (ties to the pool-volume audit),
-  🆕 modular disable options (per-mutation off switches + a stones-off switch; recon notes in TODO).
+  🆕 modular disable options (per-mutation off switches + a stones-off switch; recon notes in TODO),
+  🆕 holographic rock (user concept 2026-07-24, PARKED for the next rock pass — the rock that
+  isn't there, Int checks on both ends; full sketch + open forks in TODO.md § Holographic rock).
 
 **→ POST-SESSION BUILD BATCH BUILT + DEPLOYED 2026-07-24** (full record in TODO.md § the batch
 block): streakschorl re-equip re-fix · fungal-lottery rolled-vs-loaded diagnostic · SCAV pocket
