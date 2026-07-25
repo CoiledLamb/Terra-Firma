@@ -1118,7 +1118,18 @@ note 3210 → menu Save and Quit → reload the same save → mint a fungal rock
   cast carved a wild Bat muse from a zone Shale wall (bite + wings armed) — the picker shell
   routes through the relocated CarveFrom correctly. Visual quirks, if any, are the user's to
   flag; the seam's regression risk is refuted.
-- [ ] `[verify]` **quick.cage on the retries build** — the last non-intentional red.
+- [x] `[verify]` **quick.cage on the retries build — PASS 2026-07-25 (8/8 first throw); sheet
+  rock-aegis CLOSED.** Full-batch sweep the same session: shape suite re-passed in-chain;
+  streak's "FAIL" was the EB auto-sculpt VETO branch working as designed (the Check-first
+  contract's other arm, previously uncovered — assert now accepts both paths, labeled);
+  drain.endings robot-HP demoted to report-only (bystanders mauled the Scrapbot 97→20 during
+  the wait — live arenas bruise robots; the crumble is the claim); scav 0-throws-in-118 traced
+  to no target acquisition — baboons now hostile-locked at spawn. All deployed, next restart.
+- [ ] `[bug?]` **SCAV dry-fetch WEDGE (harness observation, two windows running): a
+  pockets-empty baboon oscillated "detours to loose stone at d=1" indefinitely** — stoop fires
+  only at d=0 (underfoot), so a loose stone in a cell the baboon can't or won't enter loops
+  the detour forever. Polish shapes for the batch: reach-stoop at d=1, or give up a target
+  after N failed detours, or exclude occupied cells from CellHasLooseStone. SCAV polish flag.
 - [ ] `[verify]` **The lottery save-quit-reload experiment** (above) — user's hands, 30 seconds;
   saves WERE observed being written this session, so the next boot's first SPORE line may
   already answer it.

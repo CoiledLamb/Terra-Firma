@@ -211,6 +211,32 @@ point, 0.28/turn.)*
 - **Not covered:** living-statue devour (Stoneshaper statue as the meal), boulder-from-pack path.
 - **Re-run:** `tfdevour` (instant; lithovore only).
 
+## 2026-07-25 — the full-batch sweep (14 scenarios, live arena)
+
+### `quick.cage` PASS — aegischist cage closed
+- **Proven:** 8/8 forcefield segments around the intended victim, first throw, retries build.
+  Sheet item rock-aegis CLOSED.
+
+### `streak` — the EB auto-sculpt veto branch, observed live (assert taught to accept it)
+- **Proven (by the run that "failed"):** on an Earthen Barrage character with Take Stones on,
+  the replacement flow's Check() was VETOED by EB's auto-sculpt — a sculpted stone armed the
+  slot (charges 3→2), bag untouched. That is the Check-first contract's OTHER branch, the one
+  the round-1 ledger entry listed as not covered. The assert now passes EITHER path and labels
+  which ran.
+- **Re-run:** `tfstreak` (label says which branch you're on).
+
+### Arena lessons codified (harness v6)
+- **drain.endings robot HP is now report-only** — live-arena bystanders mauled the Scrapbot
+  97→20 during one wait (LifeDrain still never applied; dry crumble still on schedule). The
+  ending's assertable claim is the crumble, and only that is asserted.
+- **scav baboons are hostile-locked at spawn** (`Brain.Target = player`) — one live run
+  produced 0 throws in 118 turns because engagement never started; target acquisition is
+  arena-dependent unless forced.
+- **OPEN WATCH (real mod observation, 2 windows running): the dry-fetch loop can WEDGE** — a
+  pockets-empty baboon oscillated "detours to loose stone at d=1" indefinitely; stoop fires
+  only at d=0, so a stone in an unreachable/occupied cell loops the detour forever. Recorded
+  as a SCAV polish flag in TODO.
+
 ---
 
 *Add new entries at the tail. If a scenario's assertion changes shape (harness edits), note the

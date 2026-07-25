@@ -827,10 +827,18 @@ namespace Cleo.TerraFirma.Scripts
 
 			GameObject after = slot.Equipped;
 			int bagAfter = CountInBag(ply, STREAK_BP);
-			bool pass = after != null && after.Blueprint == STREAK_BP && after != first;
+			// two legal outcomes (live find 2026-07-25): on an Earthen Barrage character with
+			// Take Stones on, the replacement flow's Check() is VETOED by EB's auto-sculpt --
+			// the handler owns the slot and equips a sculpted stone instead. That is the
+			// designed interaction (the re-fix's own Check-first contract), not a failure.
+			bool bagPath = after != null && after.Blueprint == STREAK_BP && after != first;
+			bool sculptPath = after != null && after.Blueprint == "Cleo_TerraFirma_EphemeralStone" && bagAfter == bagBefore;
+			bool pass = bagPath || sculptPath;
 			Report("streak", pass,
 				$"slot after flight = {(after == null ? "EMPTY" : after.Blueprint + " x" + after.Count)}, bag {bagBefore}->{bagAfter}" +
-				(pass ? " (re-equipped from bag, player path)" : " (expected a spare readied from the bag)"));
+				(bagPath ? " (re-equipped from bag, player path)"
+				: sculptPath ? " (EB auto-sculpt vetoed the bag re-equip and armed a sculpted stone -- the Check-first contract's OTHER branch, working as designed)"
+				: " (expected a bag spare OR an EB sculpted stone)"));
 			if (GameObject.Validate(baboon))
 				baboon.Obliterate(); // survivors don't get to hold a grudge
 		}
@@ -973,6 +981,10 @@ namespace Cleo.TerraFirma.Scripts
 				}
 				baboon.AddPart(new Cleo_TerraFirma_TestThrowCounter());
 				ring[i].AddObject(baboon);
+				// hostile-lock onto the player: a live run produced 0 throws in 118 turns because
+				// the baboons never acquired ANY target -- engagement is arena-dependent unless forced
+				if (baboon.Brain != null)
+					baboon.Brain.Target = ply; // direct target assignment; faction hostility does the rest
 				spawned++;
 			}
 			if (spawned == 0) { Report("scav", false, "SETUP FAIL - no open cells at distance 4-6 for baboons"); RunNext(queue, ply); return; }
@@ -1243,15 +1255,16 @@ namespace XRL.World.Parts
 			bool burstA = !GameObject.Validate(DrainStoneA);
 			bool robotAlive = GameObject.Validate(DrainRobot);
 			int robotHp = robotAlive ? DrainRobot.GetStat("Hitpoints").Value : -1;
-			// >= not ==: robots REGENERATE the throw's own scratch over 25 turns (98->100 in the
-			// first live run) -- upward movement proves no-drain rather than violating it
-			bool robotUntouched = robotAlive && robotHp >= RobotHpAtLatch;
+			// robot HP is REPORTED, not asserted (two live lessons: robots regenerate the throw's
+			// scratch, and live-arena bystanders can maul them during the wait -- 97->20 once).
+			// The no-leech claim was already asserted at latch time (drain.robot); the ending's
+			// claim is only that the stone dry-crumbles on schedule.
 			bool crumbledR = !GameObject.Validate(DrainStoneR);
-			bool pass = drained && drainOver && burstA && robotUntouched && crumbledR;
+			bool pass = drained && drainOver && burstA && crumbledR;
 			string stoneAState = burstA ? "gone (gorged burst)" : DrainStoneA?.Equipped != null ? "STILL ATTACHED" : "still exists, unattached";
 			string stoneRState = crumbledR ? "gone (dry crumble)" : DrainStoneR?.Equipped != null ? "STILL ATTACHED" : "still exists, unattached (latch never took?)";
 			Cleo.TerraFirma.Scripts.TestHarnessWishes.Report("drain.endings", pass,
-				$"after {TurnsTotal} turns -- flesh: HP {FleshyHpAtLatch}->{fleshyHp} ({(drained ? "drained" : "NOT drained")}), LifeDrain {(drainOver ? "expired" : "still ticking")}, stone {stoneAState}; robot: HP {RobotHpAtLatch}->{robotHp} ({(robotUntouched ? "untouched" : "CHANGED")}), stone {stoneRState}");
+				$"after {TurnsTotal} turns -- flesh: HP {FleshyHpAtLatch}->{fleshyHp} ({(drained ? "drained" : "NOT drained")}), LifeDrain {(drainOver ? "expired" : "still ticking")}, stone {stoneAState}; robot: stone {stoneRState}, HP {RobotHpAtLatch}->{robotHp} (reported only -- bystanders/regen may move it)");
 		}
 
 		private void FinishForm(GameObject owner)
