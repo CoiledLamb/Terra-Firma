@@ -56,7 +56,7 @@ namespace Cleo.TerraFirma.Scripts
 		[WishCommand(Command = "tfverify")]
 		public static void Help()
 		{
-			MessageQueue.AddPlayerMessage("TF harness -- instant: tfstreak, tfstrange, tfcarom, tfcrack, tfspill, tfpuddle, tfdevour (lithovore only). Turn-driven: tfquick (5t), tfhopper (5t), tfform (5t), tfdull (5t), tfshape (Stoneshaper, 3t), tfdrain (25t), tfscav (30t, you are the target). tfbatch = everything, ~80 turns standing still.", "W");
+			MessageQueue.AddPlayerMessage("TF harness -- instant: tfstreak, tfstrange, tfcarom, tfcrack, tfspill, tfpuddle, tfdevour + tfeat (lithovore only). Turn-driven: tfquick (5t), tfhopper (5t), tfform (5t), tfdull (5t), tfshape (Stoneshaper, 3t), tffis (NPC caster, 20t), tfdrain (25t), tfscav (30t, you are the target). tfbatch = everything, ~100 turns standing still.", "W");
 			if (!Helpers.VERIFY_WATCH)
 				MessageQueue.AddPlayerMessage("VERIFY_WATCH is OFF -- the harness is disabled.", "R");
 		}
@@ -76,7 +76,8 @@ namespace Cleo.TerraFirma.Scripts
 			SpillSync();
 			PuddleSync();
 			DevourSync();
-			SetupHopper(The.Player, "form,quickape,dull,drain,shape,scav");
+			EatSync();
+			SetupHopper(The.Player, "form,quickape,dull,drain,shape,fis,scav");
 		}
 
 		// ---------------------------------------------------------------- round 3, synchronous
@@ -503,6 +504,237 @@ namespace Cleo.TerraFirma.Scripts
 			MessageQueue.AddPlayerMessage("Harness: shape cooldown-watch running -- 3 turns after the statue's destruction.", "W");
 		}
 
+		// ---------------------------------------------------------------- round 5
+
+		/// <summary>The eaten-channel sweep (lithovore only): one representative rock per cheap
+		/// channel, eaten via the mutation's own command, with per-channel state asserts where
+		/// the state is readable and consume-only where it isn't. Deliberately SKIPPED: the
+		/// EatenDetonate pair (a live grenade in your gut), the fungal twins (a real infection
+		/// on the player), mullstone (needs a staged cooling ability), and the deep four
+		/// (bite-back + full meal, live-verified in the kitchen round). Everything the test
+		/// does to the player is restored: hunger, HP, position, temperature normalizes.</summary>
+		[WishCommand(Command = "tfeat")]
+		public static void EatSync()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			GameObject ply = The.Player;
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+			if (ply.GetPart<XRL.World.Parts.Mutation.Cleo_TerraFirma_Lithovore>() == null)
+			{
+				Report("eat", false, "SETUP SKIP - needs a lithovore character");
+				return;
+			}
+			Stomach stomach = ply.GetPart<Stomach>();
+			if (stomach == null) { Report("eat", false, "SETUP FAIL - no Stomach part"); return; }
+			List<Cell> open = origin.GetLocalAdjacentCells();
+			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
+			GameObject neighbor = null;
+			if (open.Count > 0)
+			{
+				neighbor = GameObject.Create(BABOON_BP); // the thunderclap's ear
+				neighbor.SetIntProperty(SPAWN_MARK, 1);
+				neighbor.GetStat("Hitpoints").BaseValue = 100;
+				open[0].AddObject(neighbor);
+			}
+
+			int hungerBefore = stomach.HungerLevel;
+			int cookBefore = stomach.CookingCounter;
+			int penaltyBefore = ply.GetStat("Hitpoints").Penalty;
+			Cell home = origin;
+
+			string[,] rows = {
+				{ GEODE_BP, "water", "brine geode" },
+				{ "Cleo_TerraFirma_Rock_Salt", "consume", "chunk of salt (tasty)" },
+				{ "Cleo_TerraFirma_Rock_Pointy", "bleed", "pointy rock" },
+				{ "Cleo_TerraFirma_Rock_ShatteredStalactite", "bleed", "shattered stalactite" },
+				{ "Cleo_TerraFirma_Rock_CompressedAsh", "harm", "compressed ash (choke)" },
+				{ "Cleo_TerraFirma_Rock_Melting", "harm", "sludgabbro-acid (melting)" },
+				{ CAROM_BP, "moved", "caromcobble (hop)" },
+				{ "Cleo_TerraFirma_Rock_Shunting", "moved", "farflint (teleport)" },
+				{ STREAK_BP, "daze", "streakschorl (thunderclap)" },
+				{ "Cleo_TerraFirma_Rock_Sludgestone", "spawnliquid", "sludgestone" },
+				{ "Cleo_TerraFirma_Rock_Spiderweb", "webs", "gossamarl (3 webs)" },
+				{ "Cleo_TerraFirma_Rock_Whorlstone", "belly", "vertigneiss (gas belly)" },
+				{ "Cleo_TerraFirma_Rock_Scorching", "hot", "pyroclase" },
+				{ "Cleo_TerraFirma_Rock_Icy", "cold", "rimeholm" },
+				{ "Cleo_TerraFirma_Rock_Voltaic", "consume", "galvena (self-arc/crackle)" },
+				{ "Cleo_TerraFirma_Rock_Spiny", "consume", "urchinite (quill burst)" },
+				{ STRANGE_BP, "consume", "strange rock (mimic eat)" },
+			};
+
+			int passCount = 0;
+			List<string> fails = new List<string>();
+			for (int i = 0; i < rows.GetLength(0); i++)
+			{
+				string bp = rows[i, 0];
+				string kind = rows[i, 1];
+				string label = rows[i, 2];
+				GameObject rock = GameObject.Create(bp);
+				if (rock == null) { fails.Add(label + " (no blueprint)"); continue; }
+				ply.ReceiveObject(rock);
+				int hpBefore = ply.GetStat("Hitpoints").Value;
+				int waterBefore = stomach.Water;
+				int tempBefore = ply.Physics?.Temperature ?? 25;
+				Cell cellBefore = ply.CurrentCell;
+				int liquidsBefore = CountPuddlesAround(ply);
+				int websBefore = CountAround(ply, "Web");
+				bool suppressed = Popup.Suppress;
+				Popup.Suppress = true;
+				try { InventoryActionEvent.Check(ply, ply, rock, "Cleo_TerraFirma_EatStone"); }
+				finally { Popup.Suppress = suppressed; }
+				bool consumed = !GameObject.Validate(rock) || rock.InInventory != ply;
+				bool pass;
+				string detail;
+				switch (kind)
+				{
+					case "water":
+						pass = consumed && stomach.Water > waterBefore;
+						detail = $"water {waterBefore}->{stomach.Water}";
+						break;
+					case "bleed":
+						pass = consumed && ply.HasEffect(typeof(XRL.World.Effects.Bleeding));
+						detail = "internal bleeding " + (pass ? "applied" : "MISSING");
+						ply.RemoveEffect<XRL.World.Effects.Bleeding>();
+						break;
+					case "harm":
+						pass = consumed && ply.GetStat("Hitpoints").Value < hpBefore;
+						detail = $"HP {hpBefore}->{ply.GetStat("Hitpoints").Value}";
+						break;
+					case "moved":
+						pass = consumed && ply.CurrentCell != cellBefore;
+						detail = pass ? "displaced" : "did not move";
+						if (ply.CurrentCell != home)
+							ply.DirectMoveTo(home, 0, Forced: true, IgnoreCombat: true);
+						break;
+					case "daze":
+						pass = consumed && neighbor != null && GameObject.Validate(neighbor) && neighbor.HasEffect(typeof(XRL.World.Effects.Dazed)) && !ply.HasEffect(typeof(XRL.World.Effects.Dazed));
+						detail = "neighbor " + (pass ? "dazed, eater spared" : "NOT dazed (or eater dazed)");
+						if (neighbor != null && GameObject.Validate(neighbor))
+							neighbor.RemoveEffect<XRL.World.Effects.Dazed>();
+						break;
+					case "spawnliquid":
+						pass = consumed && CountPuddlesAround(ply) > liquidsBefore;
+						detail = "puddle " + (pass ? "spawned" : "MISSING");
+						SweepPuddlesAround(ply);
+						break;
+					case "webs":
+						int websNow = CountAround(ply, "Web");
+						pass = consumed && websNow - websBefore >= 2;
+						detail = $"webs +{websNow - websBefore} (want >=2 of 3; own-cell placement varies)";
+						SweepAround(ply, "Web");
+						break;
+					case "belly":
+						pass = consumed && ply.HasEffect(typeof(XRL.World.Effects.Cleo_TerraFirma_GasBelly));
+						detail = "gas belly " + (pass ? "settled in" : "MISSING");
+						ply.RemoveEffect<XRL.World.Effects.Cleo_TerraFirma_GasBelly>();
+						break;
+					case "hot":
+						pass = consumed && (ply.Physics?.Temperature ?? 25) > tempBefore;
+						detail = $"temperature {tempBefore}->{ply.Physics?.Temperature}";
+						break;
+					case "cold":
+						pass = consumed && (ply.Physics?.Temperature ?? 25) < tempBefore;
+						detail = $"temperature {tempBefore}->{ply.Physics?.Temperature}";
+						break;
+					default: // consume
+						pass = consumed;
+						detail = consumed ? "consumed (effect is log/eyeball-grade)" : "NOT consumed";
+						break;
+				}
+				Helpers.VerifyLog("AUTO", $"eat.{label}: {(pass ? "PASS" : "FAIL")} - {detail}");
+				if (pass) passCount++;
+				else fails.Add(label);
+				if (GameObject.Validate(rock) && rock.InInventory == ply)
+					rock.Obliterate(); // a refused eat should not litter the pack
+			}
+
+			// the test must not feed, hurt, or relocate you on net
+			stomach.HungerLevel = hungerBefore;
+			stomach.CookingCounter = cookBefore;
+			ply.GetStat("Hitpoints").Penalty = penaltyBefore;
+			if (ply.CurrentCell != home)
+				ply.DirectMoveTo(home, 0, Forced: true, IgnoreCombat: true);
+			if (neighbor != null && GameObject.Validate(neighbor))
+				neighbor.Obliterate();
+			Report("eat", fails.Count == 0,
+				$"{passCount}/{rows.GetLength(0)} eaten channels asserted{(fails.Count > 0 ? "; FAILS: " + string.Join(", ", fails) : "")}; skipped by design: detonate pair, fungal twins, mullstone, deep four. Player state restored.");
+		}
+
+		private static int CountAround(GameObject who, string blueprint)
+		{
+			int n = 0;
+			Cell c = who?.CurrentCell;
+			if (c == null)
+				return 0;
+			foreach (GameObject obj in c.Objects)
+				if (obj.Blueprint == blueprint) n++;
+			foreach (Cell adj in c.GetLocalAdjacentCells())
+				foreach (GameObject obj in adj.Objects)
+					if (obj.Blueprint == blueprint) n++;
+			return n;
+		}
+
+		private static void SweepAround(GameObject who, string blueprint)
+		{
+			Cell c = who?.CurrentCell;
+			if (c == null)
+				return;
+			List<GameObject> doomed = new List<GameObject>();
+			foreach (GameObject obj in c.Objects)
+				if (obj.Blueprint == blueprint) doomed.Add(obj);
+			foreach (Cell adj in c.GetLocalAdjacentCells())
+				foreach (GameObject obj in adj.Objects)
+					if (obj.Blueprint == blueprint) doomed.Add(obj);
+			foreach (GameObject obj in doomed)
+				obj.Obliterate();
+		}
+
+		[WishCommand(Command = "tffis")]
+		public static void Fis()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
+			SetupFis(The.Player, "");
+		}
+
+		/// <summary>fis-npc: the first NPC-caster scenario — a Hulking Baboon granted Fissure L5,
+		/// hostile-locked, 20 turns to cast. PASS = the zone gained loose fissure stones (a cast
+		/// happened); living-fall allegiance is REPORTED (seam-dependent). A 0-cast result is
+		/// itself the fis-npc answer: no AI advertisement.</summary>
+		internal static void SetupFis(GameObject ply, string queue)
+		{
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+			List<Cell> ring = origin.GetLocalAdjacentCells(6);
+			ring.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat") || c.DistanceTo(origin) < 4);
+			if (ring.Count == 0) { Report("fis", false, "SETUP FAIL - no open cell at distance 4-6"); RunNext(queue, ply); return; }
+			GameObject caster = GameObject.Create("Hulking Baboon");
+			caster.SetIntProperty(SPAWN_MARK, 1);
+			caster.GetStat("Hitpoints").BaseValue = 150;
+			Mutations mutations = caster.RequirePart<Mutations>();
+			mutations.AddMutation(new XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure(), 5);
+			ring[0].AddObject(caster);
+			if (caster.Brain != null)
+				caster.Brain.Target = ply;
+			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "fis", TurnsRemaining = 20, TurnsTotal = 20, Queue = queue };
+			driver.InitFis(caster, CountLooseFissureRocks(ply.CurrentZone));
+			ply.AddPart(driver);
+			MessageQueue.AddPlayerMessage("Harness: NPC Fissure caster running -- 20 turns; expect falling rocks.", "W");
+		}
+
+		internal static int CountLooseFissureRocks(Zone zone)
+		{
+			int n = 0;
+			if (zone != null)
+				foreach (GameObject obj in zone.GetObjects())
+					if (obj.GetPart<Cleo_TerraFirma_FallenRockPart>() != null && obj.CurrentCell != null && obj.InInventory == null && obj.Equipped == null)
+						n += obj.Count;
+			return n;
+		}
+
 		// ---------------------------------------------------------------- round 3, turn-driven setups
 
 		internal static void SetupQuickApe(GameObject ply, string queue)
@@ -925,6 +1157,7 @@ namespace Cleo.TerraFirma.Scripts
 				case "dull": SetupDull(ply, rest); break;
 				case "drain": SetupDrain(ply, rest); break;
 				case "shape": SetupShape(ply, rest); break;
+				case "fis": SetupFis(ply, rest); break;
 			}
 		}
 
@@ -1097,6 +1330,8 @@ namespace XRL.World.Parts
 		[NonSerialized] private int RobotHpAtLatch;
 		[NonSerialized] private ActivatedAbilityEntry ShapeEntry;
 		[NonSerialized] private int ShapeCdBeforeKill;
+		[NonSerialized] private GameObject FisCaster;
+		[NonSerialized] private int FisRocksBaseline;
 
 		public void InitHopper(GameObject millLive, GameObject millDead, int stonesEach)
 		{
@@ -1147,6 +1382,13 @@ namespace XRL.World.Parts
 		{
 			ShapeEntry = entry;
 			ShapeCdBeforeKill = cdBeforeKill;
+			LiveSetup = true;
+		}
+
+		public void InitFis(GameObject caster, int rocksBaseline)
+		{
+			FisCaster = caster;
+			FisRocksBaseline = rocksBaseline;
 			LiveSetup = true;
 		}
 
@@ -1213,8 +1455,26 @@ namespace XRL.World.Parts
 				FinishDrain();
 			else if (Scenario == "shape")
 				FinishShape();
+			else if (Scenario == "fis")
+				FinishFis(owner);
 			Cleo.TerraFirma.Scripts.TestHarnessWishes.SweepSpawns(owner.CurrentZone);
 			Cleo.TerraFirma.Scripts.TestHarnessWishes.RunNext(Queue, owner);
+		}
+
+		private void FinishFis(GameObject owner)
+		{
+			bool casterAlive = GameObject.Validate(FisCaster);
+			int rocksNow = Cleo.TerraFirma.Scripts.TestHarnessWishes.CountLooseFissureRocks(owner.CurrentZone);
+			int delta = rocksNow - FisRocksBaseline;
+			int allies = 0;
+			Zone zone = owner.CurrentZone;
+			if (zone != null && casterAlive)
+				foreach (GameObject obj in zone.GetObjects())
+					if (obj != FisCaster && obj.Brain != null && obj.Brain.PartyLeader == FisCaster)
+						allies++;
+			bool pass = casterAlive && delta >= 3;
+			Cleo.TerraFirma.Scripts.TestHarnessWishes.Report("fis", pass,
+				$"NPC Fissure caster over {TurnsTotal} turns: loose fissure stones {FisRocksBaseline}->{rocksNow} (+{delta}, want >=3 = a cast happened), {allies} living fall(s) allied to the caster (seam-dependent, reported only). A zero here answers fis-npc: no AI advertisement on the mutation.");
 		}
 
 		private void FinishShape()

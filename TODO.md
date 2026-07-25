@@ -1113,6 +1113,22 @@ boot's first fungal access rolled fresh AGAIN (3210, then 11 clean loads) — bu
 session's save-provenance is unconfirmed, so the EXPLICIT experiment still decides:
 note 3210 → menu Save and Quit → reload the same save → mint a fungal rock → compare.
 
+### Round 5 — BUILT + DEPLOYED 2026-07-25 (user: "let's grab the next pass"; compiles clean, UNTESTED, next restart)
+- **`tfeat`** (instant, lithovore only) — the eaten-channel sweep: 17 representative rocks
+  eaten through the mutation's own `Cleo_TerraFirma_EatStone` command, 13 with real state
+  asserts (water/bleed/harm/hop/teleport/thunderclap-neighbor/slime/webs/gas-belly/hot/cold)
+  and 4 consume-only. Everything restored: hunger, cooking counter, HP penalty, position;
+  effects removed; spawns swept. SKIPPED BY DESIGN (each a deliberate call, recorded): the
+  EatenDetonate pair (a live grenade in your gut), the fungal twins (a real infection on the
+  player), mullstone (needs a staged cooling ability), the deep four (bite-back + full meal,
+  live-verified in the kitchen round).
+- **`tffis`** (20-turn driver) — the first NPC-caster scenario: Hulking Baboon granted Fissure
+  L5 via RequirePart<Mutations>, hostile-locked; PASS = the zone gained ≥3 loose fissure
+  stones (a cast happened); living-fall allegiance reported (seam-dependent). **A zero-cast
+  result is itself the fis-npc ANSWER (no AI advertisement on the mutation) — either outcome
+  closes a question.**
+- `tfbatch`: 9 synchronous + 7 chained (~100 turns).
+
 ### Open / next
 - [x] `[verify]` **The human carve — DONE 2026-07-25 (log-confirmed same session):** a normal-UI
   cast carved a wild Bat muse from a zone Shale wall (bite + wings armed) — the picker shell

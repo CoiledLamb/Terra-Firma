@@ -460,6 +460,11 @@ findings):**
   ivory clean-fail / swap-down / the shape-cd retirement watch; required extracting the carve
   core into a CarveFrom seam, behavior moved verbatim, ONE HUMAN UI-CARVE OWED) · tfpuddle
   (one-puddle suppression) · tfdevour (famished EaterStatue, descent detection). UNTESTED.**
+  **ROUND 4 RUN: 7/7 + the human carve confirmed (Bat/Shale via the UI shell); cage closed
+  8/8 (rock-aegis done); streak taught the EB auto-sculpt veto branch; arena-hardening; SCAV
+  dry-fetch WEDGE flagged (real mod observation). ROUND 5 BUILT + DEPLOYED: tfeat (17-rock
+  eaten-channel sweep, 13 state-asserted, player fully restored) · tffis (first NPC-caster
+  scenario — either outcome answers fis-npc). UNTESTED — next restart.**
 - [x] 📜 `[release]` **git init — DONE 2026-07-23** (fresh repo, no fork linkage, no trailer; history live since `b4ed68e`).
 - [ ] 📜 `[release]` **Workshop publishing plan + credits.**
 - [x] 📜 `[design]` **Stale `Cleo_TerraFirma_Ephemeral Stone` blueprint — RULED remove 2026-07-24
