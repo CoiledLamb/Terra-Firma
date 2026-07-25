@@ -40,6 +40,13 @@ number/text awaiting blessing · `[polish]`/`[text]` writing or cleanup work · 
   once the planned attune-stone edit lands.**
 - [x] 🆕 `[ratify]` **GasBelly cadence drift — RATIFIED AS OBSERVED 2026-07-23** (SpewEvery=8 stays;
   "1 turn only roughly equates to 1 turn" is accepted base-game physics; no text promises a number).
+- [ ] 🆕 `[polish]` **Whorl deflection VFX (user flag 2026-07-24): refract/scatter needs a visible
+  light-track (NEW), stone ricochet wants a clearer carom (escalated from parked)** — one VFX
+  sitting; details in TODO.md. *(Moved from the Pass 6 docket at the 2026-07-24 reconcile.)*
+- [ ] 🆕 `[text]` **Resonant deflection messages want their own verb set (user flag: "different
+  language around what happens to the laser than the base form")** — mass grinds, resonance
+  refracts; branch the nine XDidY outcome verbs on Resonant at the text pass. Details in TODO.md.
+  *(Moved from the Pass 6 docket at the 2026-07-24 reconcile.)*
 
 ## Pass 2 — Fissure + the Rock Catalog *(the thickest folder)*
 
@@ -187,6 +194,36 @@ findings):**
   for Calcify): bless or gate.
 - [ ] 🆕 `[ratify]` **Batch DRAFT numbers:** hopper throughput 1/turn · Calcify "−10 DV" lean (b) ·
   figurine AddsRep Baboons 200.
+- [x] 🆕 `[bug]` **Thrown drainstone latch vanishes — SOLVED 2026-07-24, NOT A BUG (user
+  diagnosis: the throw's own penetration one-shot the 5-HP baboons, and a dead pending victim
+  fails Validate silently — corpses can't be latched; the stone survives as loot, correct).**
+  The chain ran clean end-to-end live the same day. Residual polish BUILT + DEPLOYED in the
+  batch: the "pending victim died before the latch could take hold" log line. `[verify]`
+  one-shot a victim with a drainstone throw → the new line speaks.
+- [x] 🆕 `[bug]` **Streakschorl auto-equip — RE-FIX #2 BUILT + DEPLOYED 2026-07-24 (batch item
+  1).** Fix #1 (fire `ReplaceThrownWeaponEvent.Check` on vacate) FAILED user testing — Check()
+  notifies handlers only; the engine's find-in-bag-and-equip lives in a protected wrapper, now
+  replicated: Check() first, then same-blueprint bag search + `CommandEquipObject` into the
+  vacated slot, with readied/refused/no-spare logging. `[verify]` fly the last held streakschorl
+  with spares in the bag → next lands in hand; STRK "bag re-equip: ... readied".
+- [ ] 🆕 `[design]` Strange→FugueClones miss-dud (flag-lite) · 🆕 `[bug?]` isolated NRE after a
+  torpor detonation (watch) · 🆕 `[bug?]` gyrestone null-cell post-throw (watch).
+- [ ] 🆕 `[bug]` **Baboons never scavenge ([SCAV] silent all session)** — experiment resolved it:
+  the fetch preconditions are nearly unreachable (5-10 pocket stones each; throw-once base
+  cadence per AIThrowAndScoot decomp — Flee only, nothing re-readies). **SCAV FIXING PASS (user
+  flag): extend StoneScavenger to re-ready from pockets when the slot empties (PerformReequip in
+  the pocket-ammo branch) — "keep the thrower throwing"** — plus whatever the dry-fetch verdict
+  demands; details in TODO.md. **ESCALATED by the user's vanilla control run: baboons throw MORE
+  without the mod — the mod REGRESSES throw cadence below baseline. Hypotheses (mixed-inventory
+  re-ready failure / global stone merges changing AI scoring / the scavenger part itself) +
+  differential experiments recorded in TODO.md; the pass must restore ≥vanilla cadence.**
+  **PASS BUILT + DEPLOYED 2026-07-24 (batch item 3):** slot-empty + pocket stone → forced
+  `CommandEquipObject` as a FREE action (user ruling: thrown-weapon equips cost nothing);
+  REFUSED outcomes logged (the H1 smoking-gun detector). `[verify]` next boot: baboons re-arm
+  every throw, cadence ≥ vanilla, watch for REFUSED spam naming the regression.
+- [ ] 🆕 `[design]` **Caromcobble StepChance 25 → higher? (user flag: "could be higher")** —
+  re-opens a sweep-ratified number; the peel never breaks so the proc rate is pure zoning
+  strength. One XML dial, rule at the batch.
 
 **Geysers (their own mini-pass):**
 - [ ] 📜 `[design]` **Body plan + stats** — Turret anatomy vs custom Bodies.xml vent/maw; strip the
@@ -208,6 +245,13 @@ findings):**
   Oboroqoru, Keresh, all six Stilt shrine statues — pure Render+Physics). Detection broadened via
   blueprint descent (the Rubble/BaseBoulder idiom); gold Eater statues ride along — universal
   means universal. `[verify]` a famished lithovore can devour a Stilt shrine statue.
+- [x] 🆕 `[design]` **Millstone → HOPPER model — RULED (user: "sounds great - menu probably
+  goes") + BUILT + DEPLOYED 2026-07-24 (batch item 4, ahead of the kitchen pass):** new
+  `Part_StoneHopper` on the Millstone merge, menu grind REMOVED; powered mill grinds one
+  hopper stone/turn (throughput 1/turn DRAFT) into shared-recipe servings that accumulate in
+  the mill; pestle/campfire homes unchanged. `[verify]` rocks into Joppa's mill → powders
+  while the wheel turns; dead mill grinds nothing; GRIND "hopper:" lines. *(Moved from the
+  Pass 6 docket at the 2026-07-24 reconcile.)*
 - [ ] 📜 `[polish]` **HistorySpice.json entries — REQUIRED; merge path VERIFIED 2026-07-23, fully
   de-risked.** Decomp ground truth: the engine natively merges any mod file named
   `historyspice.json` (JSON union merge, `HistoricSpice.Init`); the recipe-namer's lookup key is
@@ -314,47 +358,15 @@ findings):**
 
 - [ ] 🆕 `[design]` **Fugue-clone walls outlive the clone (user flag 2026-07-24, verify session 2)** —
   recon done, `ExistenceSupport`-on-`FugueCopy`-caster build shape ready in TODO.md; awaiting ruling.
-- [x] 🆕 `[bug]` **Boar Vessel picked fights — FIXED + DEPLOYED 2026-07-24** ("passive like
-  ercolano"): `Brain Passive="true"` (the engine's defensive-engagement flag; the NoCombat tag
-  was never a brain mechanism). Active next restart.
 - [x] 🆕 `[verify]` **NPC calcifier CONFIRMED LIVE 2026-07-24** (log: Humanoid walled off its
   threat twice, perpendicular picker chose 4 cells at Lv1, zone-default Shale material) — the
   2026-07-23 batch's log half is proven; placement eyeball rides the session.
 
-**Verify session 2 flag docket (2026-07-24, full entries in TODO.md § Verify session 2 findings;
-house rule set mid-session: FLAG mid-session, fix in the post-session batch):**
-- [x] 🆕 `[bug]` **Thrown drainstone latch vanishes — SOLVED 2026-07-24, NOT A BUG (user
-  diagnosis: the throw's own penetration one-shot the 5-HP baboons, and a dead pending victim
-  fails Validate silently — corpses can't be latched; the stone survives as loot, correct).**
-  The chain ran clean end-to-end live the same day. Residual polish BUILT + DEPLOYED in the
-  batch: the "pending victim died before the latch could take hold" log line. `[verify]`
-  one-shot a victim with a drainstone throw → the new line speaks.
-- [x] 🆕 `[bug]` **Streakschorl auto-equip** — FIXED + DEPLOYED (pre-rule): flight now fires
-  `ReplaceThrownWeaponEvent.Check` when it vacates the slot.
-- [ ] 🆕 `[design]` Strange→FugueClones miss-dud (flag-lite) · 🆕 `[bug?]` isolated NRE after a
-  torpor detonation (watch) · 🆕 `[bug?]` gyrestone null-cell post-throw (watch).
-- [ ] 🆕 `[bug]` **Baboons never scavenge ([SCAV] silent all session)** — experiment resolved it:
-  the fetch preconditions are nearly unreachable (5-10 pocket stones each; throw-once base
-  cadence per AIThrowAndScoot decomp — Flee only, nothing re-readies). **SCAV FIXING PASS (user
-  flag): extend StoneScavenger to re-ready from pockets when the slot empties (PerformReequip in
-  the pocket-ammo branch) — "keep the thrower throwing"** — plus whatever the dry-fetch verdict
-  demands; details in TODO.md. **ESCALATED by the user's vanilla control run: baboons throw MORE
-  without the mod — the mod REGRESSES throw cadence below baseline. Hypotheses (mixed-inventory
-  re-ready failure / global stone merges changing AI scoring / the scavenger part itself) +
-  differential experiments recorded in TODO.md; the pass must restore ≥vanilla cadence.**
-  **PASS BUILT + DEPLOYED 2026-07-24 (batch item 3):** slot-empty + pocket stone → forced
-  `CommandEquipObject` as a FREE action (user ruling: thrown-weapon equips cost nothing);
-  REFUSED outcomes logged (the H1 smoking-gun detector). `[verify]` next boot: baboons re-arm
-  every throw, cadence ≥ vanilla, watch for REFUSED spam naming the regression.
-- [ ] 🆕 `[design]` **Caromcobble StepChance 25 → higher? (user flag: "could be higher")** —
-  re-opens a sweep-ratified number; the peel never breaks so the proc rate is pure zoning
-  strength. One XML dial, rule at the batch.
-- [x] 🆕 `[design]` **Millstone → HOPPER model — RULED (user: "sounds great - menu probably
-  goes") + BUILT + DEPLOYED 2026-07-24 (batch item 4, ahead of the kitchen pass):** new
-  `Part_StoneHopper` on the Millstone merge, menu grind REMOVED; powered mill grinds one
-  hopper stone/turn (throughput 1/turn DRAFT) into shared-recipe servings that accumulate in
-  the mill; pestle/campfire homes unchanged. `[verify]` rocks into Joppa's mill → powders
-  while the wheel turns; dead mill grinds nothing; GRIND "hopper:" lines.
+- [x] 📜 *(housekeeping)* **Verify-session-2 flag docket DISSOLVED at the 2026-07-24 reconcile
+  (user: Calcify was "carrying a lot of work that belongs to other groups")** — the docket lived
+  here as session provenance, not subject matter; its entries now sit in their proper passes
+  (rocks → Pass 2, hopper → Pass 3, gemstone slot → Pass 7, whorl VFX/verbs → Pass 1, Boar
+  Vessel → Cross-cutting).
 
 - [x] 📜 `[design]` **NPC-caster gap — RULED batch-now + BUILT + DEPLOYED 2026-07-23** ("let's
   knock calcify off the list"). AI advertises on DEFENSIVE + RETREAT channels only — never
@@ -364,14 +376,6 @@ house rule set mid-session: FLAG mid-session, fix in the post-session batch):**
   (honoring Calcify's own contiguity rule); occupied cells skipped by the placer, partial lines
   accepted. `[verify]` wish Calcify onto a creature, hurt it, watch it wall you off (unlocks the
   existing NPC-caster appendix item).
-- [ ] 🆕 `[design]` **Gemstones default-equip to thrown slots (user flag)** — they're first-class
-  ammo now; recon the engine's default-slot pick at build. Details in TODO.md.
-- [ ] 🆕 `[polish]` **Whorl deflection VFX (user flag): refract/scatter needs a visible light-track
-  (NEW), stone ricochet wants a clearer carom (escalated from parked)** — one VFX sitting;
-  details in TODO.md.
-- [ ] 🆕 `[text]` **Resonant deflection messages want their own verb set (user flag: "different
-  language around what happens to the laser than the base form")** — mass grinds, resonance
-  refracts; branch the outcome verbs on Resonant at the text pass. Details in TODO.md.
 - [x] 🆕 `[bug]` **Calcify text says walls have "0 DV" — reality is −10** (base wall DV, never
   overridden; AV 0 is intended and stated, the HP pool is the defense). **BUILT + DEPLOYED
   2026-07-24 (batch item 6): text now reads "−10 DV" — lean (b) text-follows-reality, DRAFT;
@@ -383,6 +387,9 @@ house rule set mid-session: FLAG mid-session, fix in the post-session batch):**
 
 - [ ] 📜 `[text]` **Geomancy text pass.** *(Mechanically closed this session — reveals, mask fix,
   EB-pebble synergy all confirmed; only gemstone-scan + save/load verify remain.)*
+- [ ] 🆕 `[design]` **Gemstones default-equip to thrown slots (user flag)** — they're first-class
+  ammo now; recon the engine's default-slot pick at build. Details in TODO.md. *(Moved from the
+  Pass 6 docket at the 2026-07-24 reconcile.)*
 
 ## Cross-cutting / release logistics
 
@@ -401,6 +408,10 @@ house rule set mid-session: FLAG mid-session, fix in the post-session batch):**
   ("you can remove, that's fine") and found ALREADY RESOLVED:** it never survived the 2026-07-21
   companion merge — verified absent from repo and deployed mod; sole copy is in the
   `_mods_backup` archive, left as archive. Nothing to build.
+- [x] 🆕 `[bug]` **Boar Vessel picked fights — FIXED + DEPLOYED 2026-07-24** ("passive like
+  ercolano"): `Brain Passive="true"` (the engine's defensive-engagement flag; the NoCombat tag
+  was never a brain mechanism). Active next restart. *(Calling-pet polish — moved from the Pass 6
+  docket at the 2026-07-24 reconcile; no better lane exists until a chargen/calling pass opens.)*
 - [ ] 🆕 `[release]` **"Roiling innards" rename talk — RELEASE GATE (user 2026-07-24: "undecided -
   roiling innards fine for now but talk has to be had before release").** The name ships nowhere
   until the talk happens; candidates stand (outgassing [Claude rec] / gas pocket / fumarole).
