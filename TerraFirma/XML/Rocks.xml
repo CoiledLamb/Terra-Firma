@@ -530,7 +530,11 @@
 		<part Name="Description" Short="A baboon no taller than a knee, carved by patient hands. It holds very still, the way stone remembers to." /> <!-- DRAFT -->
 		<part Name="Physics" Weight="5" />
 		<part Name="Commerce" Value="30" />
-		<part Name="AddsRep" Faction="Baboons" Value="200" />
+		<!-- WorksOnCarrier: without it AddsRep is equipper-only and a trinket is never equipped
+		     (harness quick.rep, delta 0). Examiner override: base Trinket demands identification;
+		     a carved baboon is self-evident (user flag 2026-07-24). -->
+		<part Name="AddsRep" Faction="Baboons" Value="200" WorksOnCarrier="true" />
+		<part Name="Examiner" Complexity="0" />
 		<tag Name="ExcludeFromDynamicEncounters" />
 	</object>
 

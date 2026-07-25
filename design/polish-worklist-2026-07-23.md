@@ -200,10 +200,12 @@ findings):**
   for Calcify): bless or gate.
 - [ ] 🆕 `[ratify]` **Batch DRAFT numbers:** hopper throughput 1/turn · Calcify "−10 DV" lean (b) ·
   figurine AddsRep Baboons 200.
-- [ ] 🆕 `[bug]` **Baboon figurine, TWO defects, one batch entry (details in TODO.md):**
+- [x] 🆕 `[bug]` **Baboon figurine, TWO defects, one batch entry (details in TODO.md):**
   (1) needs identification (user flag; base Trinket's `Examiner Complexity="1"` inherited);
   (2) **AddsRep 200 INERT — harness-confirmed** (quick.rep delta 0; `WorksOnCarrier` unset =
   equipper-only). Both one-attribute XML fixes; the standing red quick.rep assert verifies (2).
+  **BOTH BUILT + DEPLOYED 2026-07-25; Trinket-wart sweep clean (figurine was the only
+  inheritor; Statue Maker's Complexity 3 intentional). `[verify]` quick.rep flips green.**
 - [x] 🆕 `[bug?]` **Farflint step-shunt survives the proc (user flag, harness session) —
   LOG-RESOLVED, WORKING AS DESIGNED:** the proc logged the full chain ending `fragility (step):
   HOLDS` — one legitimate 25% hold (house HoldChance 25, rolled fresh per use). Optional dials

@@ -489,7 +489,7 @@ Sign-offs: spec table numbers approved; all 4 fungal infections in the pool; glo
   either ConsumedOnStep stamped on the base blueprint (one attribute, whole catalog, exempt by
   override) or a separate StepHoldChance dial (C#-small).
 
-- [ ] `[bug]` **Baboon figurine, TWO confirmed defects for one batch entry (both 2026-07-24
+- [x] `[bug]` **Baboon figurine, TWO confirmed defects for one batch entry (both 2026-07-24
   night, both one-attribute XML fixes on `Cleo_TerraFirma_BaboonFigurineItem`):**
   (1) **Needs identification (user flag: "unintended")** — inherits base `Trinket`'s
   `<part Name="Examiner" Unknown="UnknownOddTrinket" Complexity="1" />` (Items.xml:11811);
@@ -499,6 +499,11 @@ Sign-offs: spec table numbers approved; all 4 fungal infections in the pool; glo
   figurine's entire rep half has never functioned. Fix = add the attribute; the standing red
   quick.rep assert flips green as the verification.
   Recon note: sweep other Trinket-inheriting mod items for the same two inherited warts.
+  **BOTH FIXES BUILT + DEPLOYED 2026-07-25** (`Examiner Complexity="0"` override +
+  `WorksOnCarrier="true"` on the AddsRep part, Rocks.xml; XML strict-parsed, active next
+  restart). **Sweep DONE, clean:** the figurine is the mod's only Trinket inheritor and only
+  AddsRep carrier; the Statue Maker's `Examiner Complexity="3"` is intentional (tinkerable
+  artifact, bits 0013). `[verify]` next tfbatch: quick.rep flips GREEN (rep −300→−100 on take).
 
 ### POST-SESSION BUILD BATCH — BUILT + DEPLOYED 2026-07-24 (after the verify marathon wrapped; active next launch)
 Eight pieces, all from the day's flags (details live in each flag's own entry):
