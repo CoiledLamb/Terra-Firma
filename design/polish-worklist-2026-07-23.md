@@ -155,6 +155,10 @@ three of four closed, BUILT + DEPLOYED:**
   (2026-07-24, out of the farflint flag; NOT a ruling — "i'm honestly not sure"): ConsumedOnStep
   as the baseline for step-destroyed stones, possibly 100% step-breaks. Seeds + exemption
   problems (caromcobble's peel, phosphorescent's glow-mark) in the TODO farflint entry.**
+  **Lean SHARPENED 2026-07-25 (still not a ruling; "not urgent to answer now, but it will be
+  important soonish"): "if a payload goes off, the stone should be destroyed" — converging on
+  the discharge principle (consumed by discharging; persistent-zoning stones keep holds).
+  Farflint dials stay as-is meanwhile. Full record in the TODO farflint entry tail.**
 - [ ] 🆕 `[design]` **Stale +100 throw accuracy on the playtest character** — keep the god-arm or
   strip via one-line wish next session.
 
@@ -191,15 +195,17 @@ findings):**
   healstone** — twins keep ONE shared name stamped twice (no-tells identity); dazestone renames
   AFTER its intervention resolves; REOPENS the pass-1 "stay bland on purpose" ruling for strange
   + the twins. House morpheme rules + spent-ledger apply; slate rounds, user-curated.
-- [ ] 🆕 `[design]` **Seam squad-drops scale** — nine living baboons in one Fissure cast (machinery
-  flawless; scale is the question): jackpot comedy vs exclude creatures vs cap living falls.
-- [ ] 🆕 `[design]` **Phasalt vs walls** — log claims Phased applies to walls, game shows nothing
-  (user tested, 8 throws): confirm the no-op + gate the payload, or make walk-through-walls
-  real; either way stop the log overpromising.
-- [ ] 🆕 `[design]` **Healstone wall-repair synergy** — healstones repair walls (mason's medkit
-  for Calcify): bless or gate.
-- [ ] 🆕 `[ratify]` **Batch DRAFT numbers:** hopper throughput 1/turn · Calcify "−10 DV" lean (b) ·
-  figurine AddsRep Baboons 200.
+- [x] 🆕 `[design]` **Seam squad-drops scale — RULED CAP + BUILT + DEPLOYED 2026-07-25** (user:
+  "capping somewhere like, 3-5 and then letting the rest of the seam roll something of that
+  tier is fair"): per-cast living cap rolled 3-5 (DRAFT reading of the range); capped rolls
+  re-roll the tier table for inert stone. Full record in TODO.md.
+- [x] 🆕 `[design]` **Phasalt vs walls — RULED gate + honest log, BUILT + DEPLOYED 2026-07-25**
+  ("agree"): Phased withheld from non-combat victims, log says so. Real walk-through-walls
+  parked in the design budget as a SLIM POTENTIAL (their words).
+- [x] 🆕 `[design]` **Healstone wall-repair synergy — BLESSED 2026-07-25 ("i'm fine with it")**:
+  the mason's medkit stands, no gate, no code.
+- [x] 🆕 `[ratify]` **Batch DRAFT numbers — ALL RATIFIED 2026-07-25 ("all fine!"):** hopper
+  throughput 1/turn · Calcify "−10 DV" lean (b) · figurine AddsRep Baboons 200.
 - [x] 🆕 `[bug]` **Baboon figurine, TWO defects, one batch entry (details in TODO.md):**
   (1) needs identification (user flag; base Trinket's `Examiner Complexity="1"` inherited);
   (2) **AddsRep 200 INERT — harness-confirmed** (quick.rep delta 0; `WorksOnCarrier` unset =
@@ -239,9 +245,13 @@ findings):**
   (harness tfscav): zero REFUSED across 118 baboon-turns, every empty slot re-readied same turn,
   dry-fetch loop ran live; cadence measured 0.29 throws/baboon-turn. Only the ≥vanilla baseline
   comparison remains open (needs a mod-disabled control boot — Tier 2 territory).**
-- [ ] 🆕 `[design]` **Caromcobble StepChance 25 → higher? (user flag: "could be higher")** —
+  **Dry-fetch WEDGE (harness observation 2026-07-25) RULED + BUILT + DEPLOYED same day
+  ("completely agree"): unstandable cells excluded from the fetch scan + give-up after 3
+  failed detours at one cell (fetch rests 20 turns). Full record in TODO.md § the harness.**
+- [x] 🆕 `[design]` **Caromcobble StepChance 25 → higher? (user flag: "could be higher")** —
   re-opens a sweep-ratified number; the peel never breaks so the proc rate is pure zoning
-  strength. One XML dial, rule at the batch.
+  strength. One XML dial, rule at the batch. **RULED 50 + BUILT + DEPLOYED 2026-07-25
+  ("50 was my leaning also"); tfcarom band moved to 9-31 before any re-run.**
 
 **Geysers (their own mini-pass):**
 - [ ] 📜 `[design]` **Body plan + stats** — Turret anatomy vs custom Bodies.xml vent/maw; strip the
@@ -406,9 +416,12 @@ findings):**
 
 - [ ] 📜 `[text]` **Geomancy text pass.** *(Mechanically closed this session — reveals, mask fix,
   EB-pebble synergy all confirmed; only gemstone-scan + save/load verify remain.)*
-- [ ] 🆕 `[design]` **Gemstones default-equip to thrown slots (user flag)** — they're first-class
+- [x] 🆕 `[design]` **Gemstones default-equip to thrown slots (user flag)** — they're first-class
   ammo now; recon the engine's default-slot pick at build. Details in TODO.md. *(Moved from the
-  Pass 6 docket at the 2026-07-24 reconcile.)*
+  Pass 6 docket at the 2026-07-24 reconcile.)* **RULED + BUILT + DEPLOYED 2026-07-25 ("i think
+  that's a good idea"): Gemstone merge gains `ThrownWeapon Damage="1d2"` (Small Stone parity,
+  DRAFT) — the part is what routes default equip to the thrown slot. Watch: creatures can now
+  throw held gems. `[verify]` equip a rough gemstone → thrown slot.**
 
 ## Cross-cutting / release logistics
 
@@ -501,7 +514,9 @@ findings):**
   weirdness axis, drover's design gap, faction name + display text, mutation-to-type assignment
   (commits EB/Stoneshaper/Gorgon AI handlers — **+ Fissure, harness-proven 2026-07-25 to have
   NO AI advertisement (tffis, zero casts): wild Fissure casters need the Calcify-pattern
-  handler**; keep pack NPCs sub-Lv10), 3x3 lump tech (rpm chunk
+  handler. RULED PARK-WITH-WORKSTREAM 2026-07-25 ("park with workstream") — all four handlers
+  build in one sitting; fis-npc + dead-gorgon/stunned-caster sheet items wait on it**;
+  keep pack NPCs sub-Lv10), 3x3 lump tech (rpm chunk
   vs C# painter), camp commit/cut, malformed cragmensch (commit, name, placement, band), Stilt
   merchant identity, non-expiring merchant stones mechanism.
 - [ ] 📜 **Stonefrog** — six calls queued (disguise depth, numbers, MentalShield, corpse-rock,
@@ -514,7 +529,9 @@ findings):**
   (beyond brine geode), 🆕 pour-into-container on the liquid rocks (ties to the pool-volume audit),
   🆕 modular disable options (per-mutation off switches + a stones-off switch; recon notes in TODO),
   🆕 holographic rock (user concept 2026-07-24, PARKED for the next rock pass — the rock that
-  isn't there, Int checks on both ends; full sketch + open forks in TODO.md § Holographic rock).
+  isn't there, Int checks on both ends; full sketch + open forks in TODO.md § Holographic rock),
+  🆕 phasalt REAL wall-phasing (SLIM POTENTIAL, user 2026-07-25 — successor to the gated no-op;
+  entry in TODO.md § Pending design budget).
 
 **→ POST-SESSION BUILD BATCH BUILT + DEPLOYED 2026-07-24** (full record in TODO.md § the batch
 block): streakschorl re-equip re-fix · fungal-lottery rolled-vs-loaded diagnostic · SCAV pocket
