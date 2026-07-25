@@ -402,6 +402,15 @@ findings):**
   new `GRIND` tag on Part_StoneMill (grinds + the power-gate refusal), per-channel `LITH`
   "eaten channel" lines across all 18 Lithovore eat channels, spill counts on `FORM` expiry,
   and a `SHAPE` no-body-fail line; everything still routes through the one kill switch).
+  **The test harness (`_TestHarness.cs`, 2026-07-24) rides the same switch and the same strip.**
+- [ ] 🆕 `[polish]` **Automated verification harness — Tier 1 PoC BUILT + DEPLOYED 2026-07-24
+  (user-blessed: "i'm pro building this but mostly because i'm curious if it will actually work
+  out"; full record in TODO.md § Automated verification harness).** Wish-driven in-game scenario
+  runner, player-path actions through the real pipeline, asserts on engine state directly:
+  `tfstreak` (re-equip, instant) · `tfhopper` (mill grind, 5 turns) · `tfscav` (baboon cadence +
+  starvation detector, 30 turns). Results = `[TF-VERIFY] [AUTO]` PASS/FAIL lines. `[verify]`
+  first live run of all three next boot — the harness itself is the experiment; Tier 2 (hands-off
+  boot cycle) only if the PoC proves out.
 - [x] 📜 `[release]` **git init — DONE 2026-07-23** (fresh repo, no fork linkage, no trailer; history live since `b4ed68e`).
 - [ ] 📜 `[release]` **Workshop publishing plan + credits.**
 - [x] 📜 `[design]` **Stale `Cleo_TerraFirma_Ephemeral Stone` blueprint — RULED remove 2026-07-24

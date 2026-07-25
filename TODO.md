@@ -777,6 +777,18 @@ Two committed concepts (user, ruled): **(1)** quarrier packs in the canyons carr
 - [ ] `[design]` Stilt merchant: one of the stonecarvers or independent?
 - [ ] `[design]` Non-expiring merchant stones: (a) child-blueprint family `DullAfter="0"` (pure XML, doubles blueprints, won't stack with found rocks) vs (b) small C# part on the merchant zeroing DullAfter on stock (same blueprints, stacks — wart: stack merges share the receiving clock). Unruled. Assumption awaiting confirmation: fragility (HoldChance 25) stays on merchant stock.
 
+### Lore session 2026-07-24 (chat leanings — nothing ruled unless marked)
+- **Stonecarvers are MUTANTS, not True Kin — user, firm.** Wrinkle to reconcile: the shipped Stonecarver *calling* is True Kin chargen by engine convention. Options floated: calling = a Qud-sider apprenticed to the guild as it passed through, or rename the calling (e.g. Quarryhand). OPEN.
+- **Homeland: no hard canon assignment — user ("touchy," not strictly opposed).** Claude pitch, awaiting ruling: the carvers never name their home (diaspora identity — ask a carver where home is and they tap the nearest wall). Dial open: full mystery vs speculation-allowed (unreliable in-world scholars may guess — Sunderlies among the guesses, framed as hearsay per the *Across Moghra'yi* idiom) vs invented homeland.
+- **Creed draft (pitched, user "mostly fine"):** stone remembers; carving is waking, not making; Qud's stone is *awake* (the pilgrimage reason); the mutations are the stone answering. Spent-stone rites unify `DullAfter` + the "You return the stone to the earth" reabsorb text as one belief.
+- **Geode lottery — user likes (had considered it independently).** Sealed geodes as mystery grab-bags in Stilt-merchant stock; crack → population table roll (mundane rock / brine / gemstone / rare **viewing stone** jackpot).
+- **Camp — leaning commit, built manually.** User: base procgen too flimsy to hook; consistent with the ruled "no procedural-village surface." Tech: static chunk skeleton + population tables + placement hints (SixDayTents idiom) — fixed bones, rolled furnishings. Strange-mood tableau (one mason stood "listening" at a raw block, camp working around them) floated as the set-piece.
+  - **Quarried-pocket camps — user earnestly loves the direction (2026-07-24).** Camps are carved INTO canyon wall mass off the reachable corridor, not stamped on floor: painter finds corridor (reachability set — `DesertCanyonZoneGlobals-Reachable` precedent), picks a thick-wall mouth, carves a rounded pocket, dresses it by role (fixed anchors + marker rolls). Connectivity by construction (only removes wall), no stair-stomping, no seams — the camp IS a quarry; pocket walls in matching/tool-marked material (Calcify material-matching precedent); boundary-eye steles flank the mouth. Two painter behaviors: **carve** (camp, Unfinished One someday) and **drape** (cairns/lumps/clutter — markers resolve to nothing on wall cells). Settles chunk-vs-painter in the painter's favor for lumps too. Build-time checks: canyon wall blueprint names, sandbox reachability API, no-thick-wall fallback = spawn nothing. **NEXT: user drawing fragment illustrations, then ideating blueprints.**
+- **Cairn tableaus — user expanded and likes.** Weighted family of small hint/table-driven tableaus: **graves** (bones + flowers), **gathering spots** (graffiti + wine pitchers), **musing spots** (markov text carved into stone + half-formed statues; markov inscription object is feasible off LibraryCorpus, mod-corpus later). Shares placement tech with the 3x3 lumps (same chunk-vs-painter decision — painter case strengthens). Escalation ladder if committed: cairn → musing spot → the Unfinished One (half-carved colossus POI, Claude pitch, unruled).
+- **Viewing stones — user likes.** Intact = valuable trade curio (merchant / camp / rare geode roll). **"Cracked viewing stone" (user's item): Fissure flavor drop** — "something so close to being beautiful, barely valuable as a result of the fall." Fissure only ever yields the cracked one — the mutation ruins what the culture treasures. Fossils flagged as a missed spot: curio family + fossil-theology book page ("a stone that carved itself") candidates.
+- **Mason's marks — user unsure on integration; three tiers floated:** (a) description flavor only; (b) **legendary-stamp (Claude lean)** — lumps spawned with an overseer carry his generated name in their description; the temptation loop gains a signature; (c) Engraved/Painted-mod spice piggyback (most engine archaeology, least added meaning).
+- **Doctrine questions parked for ruling:** consent-to-be-carved (organizes the conversation-text layer; makes Gorgon's Gaze culturally transgressive — takes without asking what the mason must request), funerary practice (carve the dead / never carve the dead / the devout are eaten), lithovore sacrament-vs-sacrilege schism (feeds the "lithovore's restaurant" static content).
+
 ### Engine recon (2026-07-22, decompiled + XML ground truth)
 - Canyon spawns: `DesertCanyon` cells → `DesertCanyonPerSector` (pack roll: `Nothing` w8400 vs `SnapjawParty1` w1500) and `DesertCanyonZoneGlobals-Reachable`; deep-cave variants exist (`DesertCanyonCavePopulation` etc.). Mod merges weighted entries — pure XML.
 - Pack idiom: party population table, `pickeach` with Chance/Number per role (`SnapjawParty1` is the template).
@@ -809,6 +821,63 @@ Nice-to-haves, only if time/energy allows after the core mutations are solid. No
 - **Flavor items + worldbuilding** — books, relics, lore hooks tying the mutations into Qud.
 - **Wall kick** — as an item, skill, or mutation; form undecided.
 - **Retrofitting mutations onto one-time-use items** — won't fit most of them, but Geomancy is a good candidate (a consumable "throw this stone, reveal the area" item).
+
+---
+
+## Automated verification harness  ← NEW WORKSTREAM (user-blessed 2026-07-24: "i'm pro building this but mostly because i'm curious if it will actually work out")
+
+**Tier 1 proof-of-concept BUILT + DEPLOYED 2026-07-24 (compiles clean; UNTESTED — first live run
+next boot).** `Scripts/_TestHarness.cs`: wish-driven in-game scenario runner that drives
+PLAYER-path actions through the real engine pipeline and asserts on ENGINE STATE directly (the
+answer to "log inference is not proof" — an in-code assertion of slot/inventory state IS the
+direct evidence). Results land as `[TF-VERIFY] [AUTO] SCENARIO x: PASS/FAIL - detail` lines plus
+in-game messages. Rides the `Helpers.VERIFY_WATCH` kill switch — **joins the strip-before-release
+obligation (Cross-cutting entry updated).**
+
+### Decomp-verified foundations (all 2026-07-24, game 2.0.211.50)
+- **Player-path throws**: `GameObject.PerformThrow` is public and fires `BeforeThrown` internally
+  (GameObject.cs:15333) — a direct call IS the full player pipeline. On the streakschorl hijack
+  path (handler returns false) PerformThrow exits BEFORE the engine's own protected
+  `EquipReplacementThrownWeapon` (15340 vs 15344), so the mod's replicated flow is provably the
+  only re-equip in play — the scenario tests exactly the re-fix.
+- **Turn pump**: the Paralyzed idiom — `BeginTakeActionEvent` + `E.PreventAction = true` on a
+  player-attached part; the engine zeroes the actor's energy itself (ActionManager.cs:743-746).
+  World runs at full AI while the player provably does nothing; immune to AutoAct
+  hostile-interrupts, no UI involvement.
+- **Popups**: `XRL.UI.Popup.Suppress` (static bool) around scenario actions.
+- **Force-powering a wish-spawned mill**: `Mill : IPoweredPart`, so `ChargeUse = 0` = trivially
+  powered, unpayable ChargeUse = guaranteed dead — both hopper branches forced without a power grid.
+- **Stack trap dodged (memory note "slot-stack remainders mimic bag re-equips")**: streak setup
+  equips ONE stone BEFORE granting spares — three-at-once would merge into an equipped stack and
+  the flight's stack-split would fake the pass.
+
+### PoC scenarios (the current batch's riskiest items)
+- `tfstreak` — synchronous: spawns a baboon on a 3-cell lane, equips 1 streakschorl + 2 bag
+  spares, `PerformThrow`, asserts the slot re-armed with a DIFFERENT streakschorl object.
+- `tfhopper` — 5 turns: two spawned mills (force-live/force-dead), 2 salt rocks each; asserts
+  live mill = 0 stones + ≥4 powders, dead mill = 2 stones + 0 powders. Tick-1 line logs both
+  mills' `IsReady` so a force-power failure names itself as a harness artifact, not a mod bug.
+- `tfscav` — 30 turns: 4 spawned baboons (3 Generic stones each) vs the standing player;
+  per-baboon counter parts sample the thrown slot every baboon-turn ((ref,count) shrink/swap =
+  throw, cap 1/turn; slot EMPTY + stones pocketed = STARVED turn — the cadence regression's
+  in-code H1 signature). PASS = 0 starved + >0 throws; cadence REPORTED not asserted (≥vanilla
+  still needs the user's control-run baseline). NOTE: the player eats 30 turns of baboon
+  throws — run on a character that can shrug it off.
+- `tfverify` — help + kill-switch status.
+- Housekeeping: spawns stamped `TFHarnessSpawn=1`, swept (Obliterate) at scenario finish;
+  mid-scenario save/load aborts as INCONCLUSIVE (live state is deliberately non-serialized)
+  instead of asserting against reloaded ghosts.
+
+### Open / next
+- [ ] `[verify]` **First live run of all three scenarios next boot** — the harness itself is the
+  experiment ("will it actually work out"); expected failure modes to watch: Mill.IsReady gates
+  beyond charge (liquid/subject) refusing the force-powered mill, CommandEquipObject cost
+  semantics on the player differing from NPCs, BeginTakeActionEvent ordering vs the SCAV part.
+- [ ] `[design]` If the PoC proves out: scenario batch 2 (fungal-lottery reload check is Tier 2
+  territory — needs save/load cycling; drainstone one-shot line; statuette expiry popup gate is
+  EYES-half but the property stamp is assertable), a `tfbatch` runner, and the Tier 2 hands-off
+  boot cycle (marker file → auto-load test save → run batch → write results → quit).
+- [ ] `[release]` Harness strip rides the existing `[TF-VERIFY]`/VERIFY_WATCH strip item.
 
 ---
 
