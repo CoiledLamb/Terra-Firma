@@ -467,6 +467,16 @@ Sign-offs: spec table numbers approved; all 4 fungal infections in the pool; glo
 - [ ] **Scavenger experiment interim (2026-07-24, snapshots across two windows):** dominant gate is "**slot already armed**" — and not just pockets: plain wild Baboons are armed with MOD rocks they picked up themselves (pebbles/generic/pointy/salt/drifting across the population), so rocks flow into baboon hands fine without our part. Second gate: "still has pocket ammo (Small Stone)" (Hulking, correct stand-down). MoveTo/scoot gate: seen ONCE — not the starver. **Emerging picture: the fetch is a rare-tail behavior because baboons are almost never both unarmed AND empty — the user-visible "they don't scavenge" is mostly the armed steady-state. The decisive observation still owed: one baboon throwing itself completely dry, then the gate lines around it.** (Bonus sighting: a Hulking Baboon stepped on drifting rock and got Phased 15 — the reduced step proc working on NPCs.)
 - **Confirmations banked this session (sheet updated):** NPC calcifier walls (log half) · fungal lottery consistency (same permutation re-stamped) · caromcobble full throw loop · staggered hoard decay (17+ crumbles, all in band) · geyser table variety + deep-stone sting/holdburn self-nicks (incl. an NPC burning holding deep vitriolite) · all three liquid-rock puddle children spawned (brine/slime/oil) incl. the miss-fires-at-landing rail · shattered-stalactite etch · farflint shunt on the victim · gyrestone vortex (with the null-cell flag-lite above).
 
+- [x] `[bug?]` **Farflint step-shunt "doesn't consume the stone" (user flag 2026-07-24 late
+  evening, harness session: "farflint shunt on step works, but doesn't consume the stone?") —
+  LOG-RESOLVED same minute: WORKING AS DESIGNED.** The observed proc ran the full chain: STEP
+  trigger → Teleport fired (reduced, amt 8) → `fragility (step): HOLDS` — a single legitimate
+  25% hold roll (farflint rides the house default HoldChance 25; "rolled fresh every use, so a
+  lucky stone can keep holding on indefinitely", user ruling 2026-07-22). Optional dials if the
+  survival grates, for a rulings batch: (a) keep as-is · (b) `ConsumedOnStep="true"` (the field
+  exists) · (c) flavor-fit third way — on a step-proc the stone shunts ITSELF elsewhere too ("a
+  stone that was somewhere else a moment ago"), zoning both ways. No change made.
+
 ### POST-SESSION BUILD BATCH — BUILT + DEPLOYED 2026-07-24 (after the verify marathon wrapped; active next launch)
 Eight pieces, all from the day's flags (details live in each flag's own entry):
 1. **Streakschorl re-equip RE-FIX** — replicates the engine's protected wrapper: Check() first (handlers may own the slot), then same-blueprint bag search + `CommandEquipObject` into the vacated slot, with readied/refused/no-spare logging. ~~`[verify]` throw last held streakschorl with spares → next lands in hand.~~ **VERIFIED 2026-07-24 evening — harness tfstreak PASS, direct engine-state assertion on the player path (§ Automated verification harness).**

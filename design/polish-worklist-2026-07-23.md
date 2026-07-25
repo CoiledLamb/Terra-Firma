@@ -194,6 +194,10 @@ findings):**
   for Calcify): bless or gate.
 - [ ] 🆕 `[ratify]` **Batch DRAFT numbers:** hopper throughput 1/turn · Calcify "−10 DV" lean (b) ·
   figurine AddsRep Baboons 200.
+- [x] 🆕 `[bug?]` **Farflint step-shunt survives the proc (user flag, harness session) —
+  LOG-RESOLVED, WORKING AS DESIGNED:** the proc logged the full chain ending `fragility (step):
+  HOLDS` — one legitimate 25% hold (house HoldChance 25, rolled fresh per use). Optional dials
+  recorded in TODO.md if survival grates: as-is / ConsumedOnStep / the stone shunts itself too.
 - [x] 🆕 `[bug]` **Thrown drainstone latch vanishes — SOLVED 2026-07-24, NOT A BUG (user
   diagnosis: the throw's own penetration one-shot the 5-HP baboons, and a dead pending victim
   fails Validate silently — corpses can't be latched; the stone survives as loot, correct).**
