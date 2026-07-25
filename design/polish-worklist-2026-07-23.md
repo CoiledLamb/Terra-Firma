@@ -148,8 +148,15 @@ three of four closed, BUILT + DEPLOYED:**
   HasTagOrProperty, decomp-verified) pre-Obliterate — expiry keeps the stiffens line, loses the
   "Your companion ... died." popup; combat deaths still mourn. `[verify]` next expiry: no popup.
   **Mechanics half VERIFIED (harness tfform ×2); popup half needs an ORGANIC follower expiry.**
-- [ ] 📜 `[design]` **PARKED CONVERSATION (user, 2026-07-24): hold rate / fragility / natural
-  expiry as one system** — "interested in a conversation about hold rate, fragility, and natural
+- [ ] 📜 `[design]` **~~PARKED~~ CONVERSATION HELD — FULL SYSTEM RULED 2026-07-25, BUILD OWED
+  (box closes when the batch ships): discharge consumes 100% (no lucky roll) · spenders
+  trigger 100% on step, never on owner/party (rung b) · zoners keep rates (carom 50,
+  crack 15) · ammo (payloadless) never spends · DULL CUT (weight is the cap, Burgeoning
+  precedent) · StoneStep retired (party coverage does the work; roster conversation may
+  resurrect it) · reach-fetch/harvest · glowing twins = spenders · tanglelith waits for its
+  redesign. Full ruling block with user's words in the TODO farflint entry tail. Balance
+  watch: the 100% trigger jump wants a real play session before final ratify.** Original
+  entry: (user, 2026-07-24): hold rate / fragility / natural expiry as one system — "interested in a conversation about hold rate, fragility, and natural
   expiry at a certain point, but that can wait." The dials: HoldChance 25, DullAfter 1000–2500,
   TimedForm 500–1000, healstone HoldChance 0, caromcobble 100. **Step-half LEAN on file
   (2026-07-24, out of the farflint flag; NOT a ruling — "i'm honestly not sure"): ConsumedOnStep

@@ -498,6 +498,44 @@ Sign-offs: spec table numbers approved; all 4 fungal infections in the pool; glo
   their holds — the discharge/zoning distinction replaces any exemption list. Open fork:
   whether any discharge stone keeps a lucky-survivor roll on purpose. The sitting is owed
   SOONISH (their word), covering step chance + dulling period + fragile chance as one system.
+  **THE SITTING HAPPENED — FULL SYSTEM RULED 2026-07-25 (the fragility conversation, same
+  day; BUILD OWED, one batch). The rulings, each with the user's words:**
+  - **Discharge consumes, 100%, no lucky roll** ("if a payload goes off, the stone should be
+    destroyed" + "agree with all your leanings": the whimsy funeral is clean — no
+    treasured-survivor exception; the zoners carry the charm now).
+  - **Spenders trigger at 100% on step** (root complaint: "the annoying thing about step
+    chance is... it feels really inconsistent and unclear in practice" — chance-per-crossing
+    is illegible on one-charge stones; streakschorl's StepChance 100 + ConsumedOnStep was the
+    in-catalog prototype). **Zoners keep their rates** (carom 50 per the morning ruling,
+    crack 15) — rates are legible on permanent objects.
+  - **Stones never trigger on their owner or the owner's party** (ruling (b) of the ladder,
+    "b makes sense"; answers "the only problem(?) with this is that fissure is shaped around
+    the player" — the caster would otherwise stand in a self-minefield every cast). BUILD
+    NOTE: verify DropRock stamps Owner on fallen rocks; thrown/step Owner threading exists.
+  - **StoneStep RETIRED as an individual inclusion** (user: "we could kill the stonestep part
+    as an individual inclusion... since all creatures that spawn from seam (right now) are
+    friendly, they would already inherit it. so no carveout just for baboons, no conversation
+    about apes needing it in the future"). Recorded residue: UNOWNED stones now bite
+    everyone including allied stone creatures (rare; accepted); wild stone creatures
+    (stonefrog, quarriers) reopen the question at the deferred StoneStep-roster conversation,
+    which now asks "does the fuller roster need the tag back, or is party always enough?"
+  - **DULL CUT** ("maybe not even necessary in the long run (burgeoning gives unlimited
+    cooking ingredients)... since they have weight, it's not like you want to carry an
+    unlimited amount of them" + agreed lean): DullAfter → 0 mod-wide; discharge-consumption
+    solved hoarding better; weight is the cap; Burgeoning is the precedent. Fallback if
+    immortal hoards grate in play: return as a much longer fuse. tfdull retires to the
+    ledger as history. (TimedForm creature lifespans are a DIFFERENT system — untouched.)
+  - **Glowing twins are SPENDERS** (spend into the 300-turn Luminous mark, webs-rock
+    pattern; the mark is the residue, the stone is the vessel).
+  - **Fetch/harvest by REACH** ("fetch should check *adjacent* tiles, rather than tiles
+    underneath"): baboons detour to a cell BESIDE the stone and reach — supersedes the
+    morning wedge fix's stoop-at-d=0 shape (give-up backstop stays as insurance); players
+    use the base game's get-nearby (VERIFY at build that it reaches adjacent).
+  - **Tanglelith classified at its own redesign** (likely zoner; sits out this batch).
+  - **Balance watch carried forward:** liquids 50→100 and house 25→100 is the largest zoning
+    jump the mod has made — the one leg that wants a REAL PLAY SESSION before final ratify.
+  **Player-facing law, one breath: "A stone keeps until it goes off. It always goes off
+  underfoot — unless it's yours. When it goes off, it's gone."**
 
 - [x] `[bug]` **Baboon figurine, TWO confirmed defects for one batch entry (both 2026-07-24
   night, both one-attribute XML fixes on `Cleo_TerraFirma_BaboonFigurineItem`):**
