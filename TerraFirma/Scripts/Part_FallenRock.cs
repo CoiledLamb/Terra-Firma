@@ -663,7 +663,16 @@ namespace XRL.World.Parts
 					else if (detail == "Dazed")
 						fx = new Dazed(Math.Max(1, amount)); // dazestone: Effect channel on purpose, so strange's mimic sees it
 					else if (detail == "Phased")
-						fx = new Phased(Math.Max(1, amount));
+					{
+						// phasalt vs walls (RULED 2026-07-25, gate + honest log): Phased on a
+						// non-combat solid manifests nothing in-engine (user tested, 8 throws) --
+						// withhold it rather than log a phase that never happens. Real
+						// walk-through-walls is parked in the design budget as a slim potential.
+						if (!victim.IsCombatObject())
+							Helpers.VerifyLog("ROCK", $"payload Phased: {victim.Blueprint} is not a combatant (wall?) -> withheld (no observable effect on walls)");
+						else
+							fx = new Phased(Math.Max(1, amount));
+					}
 					else if (detail == "Lovesick")
 						fx = new Lovesick(Math.Max(1, amount), source ?? ParentObject);
 					if (fx != null)
