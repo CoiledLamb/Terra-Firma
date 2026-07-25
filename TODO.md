@@ -1103,11 +1103,20 @@ connect roll survives even perfect accuracy** (decomp: the 1d-Agility gate atop 
 - `tfbatch` now: 8 synchronous + 6 chained (hopper → form → quickape → dull → drain → shape →
   scav), ~80 turns.
 
+### Round 4 first run — 2026-07-24/25 boundary: 7 for 7 on the new scenarios
+**shape.carve, shape.ivory (wall intact, cooldown untouched), shape.swap, shape.cd (1200→1171,
+pure tick — the retirement watch is a measurement now), puddle (first throw), devour (EaterStatue
+whole, hunger restored) — all PASS**; the SETUP SKIPs behaved (shape skipped a non-Stoneshaper,
+devour a non-lithovore, both later re-run green on the right character). Sheet: shape-cd →
+pass, shape-ivory strengthened, lith-devour + rock-onepuddle written. **LOTTERY NOTE:** this
+boot's first fungal access rolled fresh AGAIN (3210, then 11 clean loads) — but the previous
+session's save-provenance is unconfirmed, so the EXPLICIT experiment still decides:
+note 3210 → menu Save and Quit → reload the same save → mint a fungal rock → compare.
+
 ### Open / next
-- [ ] `[verify]` **Next restart:** tfbatch sweeps everything — watch quick.cage (retries build),
-  shape.* (first Stoneshaper coverage ever), puddle, devour; quick.rep stays the standing red
-  until its batch fix. **Plus one HUMAN item: a normal-UI carve** (the CarveFrom seam moved the
-  mutation's core — the UI shell needs one eyeball pass).
+- [ ] `[verify]` **The human carve** — one normal-UI Stoneshaper cast (pickers → statue → swap
+  prompt): the CarveFrom seam relocated the core; the shell needs one eyeball pass.
+- [ ] `[verify]` **quick.cage on the retries build** — the last non-intentional red.
 - [ ] `[verify]` **The lottery save-quit-reload experiment** (above) — user's hands, 30 seconds;
   saves WERE observed being written this session, so the next boot's first SPORE line may
   already answer it.

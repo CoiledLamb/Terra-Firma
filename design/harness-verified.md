@@ -180,6 +180,37 @@ connect roll.
 *(Also this run: form, quick.ape, hopper, streak, strange re-greens; scav's third stable cadence
 point, 0.28/turn.)*
 
+## 2026-07-24/25 boundary — round 4 first run
+
+### `tfshape` — four-for-four on Stoneshaper's first harness coverage
+- **Proven (via the CarveFrom seam — behavior moved verbatim from the UI handler):**
+  · carve #1: statue stands, tracked as CurStatue (Baboon muse from a spawned Sandstone wall);
+  · Young Ivory: refused with no body plan, **wall INTACT, cooldown 1200→1200 untouched** — the
+    clean-fail contract asserted on the checklist's own poster child;
+  · swap-down: carve #2 committed, prior statue de-animated (gear entombed), CurStatue swapped;
+  · **the shape-cd retirement watch: cooldown 1200→1171 segments across 3 turns after the
+    statue's destruction — pure ticking, no reset, no zero-out.** The flagged review-watch is
+    now a measurement instead of vigilance. Bonus: muse-weapon lines armed sensibly across body
+    plans (Baboon vicious bite, Scrapbot scrap saws) and the killed-statue bookkeeping fired.
+- **Not covered:** the interactive UI shell (pickers → swap prompt) — ONE HUMAN CARVE still
+  owed since the seam extraction relocated the core; natural expiry (already confirmed live).
+- **Re-run:** `tfshape` (3-turn tail; needs a Stoneshaper character).
+
+### `tfpuddle` PASS — the one-puddle suppression
+- **Proven:** a use-path break left exactly ONE puddle at the impact — hit-payload splash kept,
+  death-spill suppressed against doubles. Scored on the first throw.
+- **Not covered:** other liquid rocks' use-paths (same channel), the obliteration/decay
+  no-spill paths.
+- **Re-run:** `tfpuddle` (instant).
+
+### `tfdevour` PASS — universal statue devourability, descent case
+- **Proven:** a famished lithovore devoured an EaterStatue whole (base Statue family, NO Statue
+  part — the exact blueprint-descent detection the audit built); hunger forced for the bite and
+  restored after. Note: the InventoryActionEvent Check RETURNS false while the devour succeeds
+  (the handler consumes the event) — the assert reads engine state, not the return.
+- **Not covered:** living-statue devour (Stoneshaper statue as the meal), boulder-from-pack path.
+- **Re-run:** `tfdevour` (instant; lithovore only).
+
 ---
 
 *Add new entries at the tail. If a scenario's assertion changes shape (harness edits), note the
