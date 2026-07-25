@@ -448,6 +448,12 @@ findings):**
   ledger facts; quick.rep red CONFIRMED the inert AddsRep; drainstone-vs-robot latch never
   attaches (real bug candidate, victim-named diagnostics deployed); cage 3/8 was harness
   terrain, open-spot picker deployed. Next restart: tfdrain + tfquick re-run.**
+  **MISS SAGA SOLVED (late night): every remaining throw failure was a plain MISS — only
+  streakschorl is NeverMiss, the catalog throws honestly, and the playtest god-arm had masked
+  the whole layer all along. Harness bug #5 fixed via the mod's own accuracy-lend idiom
+  (deployed). Drainstone-robot downgraded to "probably missed twice." SAME WINDOW: fungal
+  lottery localized — persists in-session, dies across boots; the save-quit-reload experiment
+  (TODO § harness) decides engine-bug vs unsaved-sessions BEFORE any storage redesign.**
 - [x] 📜 `[release]` **git init — DONE 2026-07-23** (fresh repo, no fork linkage, no trailer; history live since `b4ed68e`).
 - [ ] 📜 `[release]` **Workshop publishing plan + credits.**
 - [x] 📜 `[design]` **Stale `Cleo_TerraFirma_Ephemeral Stone` blueprint — RULED remove 2026-07-24

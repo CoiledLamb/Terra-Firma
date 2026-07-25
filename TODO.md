@@ -503,7 +503,7 @@ Sign-offs: spec table numbers approved; all 4 fungal infections in the pool; glo
 ### POST-SESSION BUILD BATCH — BUILT + DEPLOYED 2026-07-24 (after the verify marathon wrapped; active next launch)
 Eight pieces, all from the day's flags (details live in each flag's own entry):
 1. **Streakschorl re-equip RE-FIX** — replicates the engine's protected wrapper: Check() first (handlers may own the slot), then same-blueprint bag search + `CommandEquipObject` into the vacated slot, with readied/refused/no-spare logging. ~~`[verify]` throw last held streakschorl with spares → next lands in hand.~~ **VERIFIED 2026-07-24 evening — harness tfstreak PASS, direct engine-state assertion on the player path (§ Automated verification harness).**
-2. **Fungal lottery diagnostic** — the SPORE line now says ROLLED-FRESH vs loaded-from-game-state (persistence was already designed in via SetStringGameState and fails silently; this names the broken link). `[verify]` reload the save: if the line says ROLLED FRESH again, GetStringGameState is returning empty post-load.
+2. **Fungal lottery diagnostic** — the SPORE line now says ROLLED-FRESH vs loaded-from-game-state (persistence was already designed in via SetStringGameState and fails silently; this names the broken link). `[verify]` reload the save: if the line says ROLLED FRESH again, GetStringGameState is returning empty post-load. **DIAGNOSTIC PAID OFF 2026-07-24 late night: first access each boot = empty, all later same-session accesses = loaded — persistence works in-session, dies across boots. Down to two suspects (engine state not persisting vs sessions ending unsaved during harness iteration); the save-quit-reload experiment in § the harness decides. No redesign until it runs.**
 3. **SCAV pocket re-ready** — slot empty + pocket stone → forced `CommandEquipObject` as a **FREE action (user ruling, same evening: "don't worry about action costs for equipping thrown weapons, it's actually a free action")**, REFUSED outcomes logged (the H1 smoking-gun detector). `[verify]` baboons re-arm every throw with no lost turn; cadence ≥ vanilla; watch for REFUSED spam naming the regression. **RE-READY VERIFIED 2026-07-24 evening (harness tfscav): every slot->EMPTY answered same-turn by the free re-ready, ZERO REFUSED across 118 baboon-turns — H1 refuted in-arena; dry-fetch loop also ran live. Cadence 0.29 throws/baboon-turn measured; only the ≥vanilla baseline comparison remains open.**
 4. **Millstone HOPPER** — new `Part_StoneHopper` on the Millstone merge (menu grind removed per ruling): powered mill grinds one hopper stone per turn into servings (2-3/rock, 5-6/boulder, shared MakePowder recipe), products accumulate in the mill. Throughput 1/turn DRAFT. `[verify]` drop rocks in Joppa's mill → powders appear while the wheel turns; dead mill grinds nothing. **MECHANISM VERIFIED 2026-07-24 evening (harness tfhopper PASS: powered 2 stones -> 5 powders, dead mill inert); Joppa's river-powered mill still owed the world-wiring eyeball.**
 5. **Statuette popup suppression** — TimedForm stamps `NoFollowerDeathPopup` (property, engine gate is HasTagOrProperty, decomp-verified) just before its own Obliterate: expiry keeps the stiffens line, loses the "died" popup; combat deaths still mourn. `[verify]` next expiry shows no companion-death popup. **Expiry MECHANICS verified 2026-07-24 night (harness tfform PASS ×2: gone + figurine + spill asserted); the popup half specifically still needs an ORGANIC follower-statuette expiry — the harness statuette is no one's companion, so the popup gate never arms in-scenario.**
@@ -1039,9 +1039,42 @@ cadence point: 0.28/turn). The reds, dissected:
   at a cramped lane-end. Harness FIXED: open-spot target (≥7 open sides) + per-cell blockage
   reporting; threshold raised to ≥7. Re-run decides whether there is a real placement gap.
 
+### The miss saga — SOLVED 2026-07-24 late night (watcher window + decomp; user hypothesis "it's just not penetrating?" ruled out honorably)
+The watcher caught a repeat batch run on the old build and the cage throw's own lines told it:
+"throw resolved: at rest; hit-payload fired=False -> miss: payload fires at the landing cell."
+**ALL the round-3 throw failures (cage 3/8, drain flesh-in-batch, drain robot both runs) were
+plain MISSES.** The chain of facts, each decomp- or XML-verified:
+- The user's penetration theory was reasonable but the engine clears it: `WeaponThrowHit` fires
+  on any CONNECTED hit regardless of penetrations (GameObject.cs:15612 — zero pens still
+  delivers the Defender), so a hit-no-pen robot would still latch. The robot never connected.
+- **Only streakschorl is NeverMiss** (one blueprint, Rocks.xml:633) — the catalog throws
+  honestly: AimVariance scatter + the engine's fall-one-short distance variance. Misses firing
+  the payload at the landing cell is WORKING AS DESIGNED mod-side.
+- The verify marathons never surfaced this because **the playtest god-arm (+100
+  CloseThrowRangeAccuracyBonus) masked the whole layer** (GameObject.cs:15389: the property
+  zeroes AimVariance AND skips the fall-short branch) — the stale-accuracy cleanup item just
+  earned its keep as an accidental test-fixture confound.
+- **Harness bug #5, FIXED + DEPLOYED: ThrowAt assumed guaranteed hits.** Now it uses the mod's
+  own streakschorl lend idiom — stamp the accuracy property for the throw, return it after
+  (mirrors `ReturnLentAccuracy`, RemoveIfZero and all). Deterministic hits, no god-arm needed.
+- Residual: drainstone-vs-robot is DOWNGRADED from bug-candidate to "probably just missed
+  twice"; next tfdrain (lend + victim-named diagnostics) closes it either way.
+
+### Fungal lottery — diagnosis SHARPENED 2026-07-24 late night (same watcher window)
+Three SPORE lines in one boot: first fungal-rock creation "ROLLED FRESH - stored state was
+empty" (rolled 1203, stored), next two "loaded from game state" (1203, 1203). So persistence
+works ALL SESSION; the stored key is gone at the NEXT boot's first access. Exactly two suspects
+left, and tonight's data cannot split them: **(a)** `SetStringGameState` genuinely not surviving
+save/quit/load, or **(b)** the harness-iteration sessions END WITHOUT SAVING (quit-without-save /
+killed window loses the write legitimately — the code would be innocent). **The 30-second
+decider, user's hands:** note the permutation, SAVE AND QUIT properly, reload, mint any fungal
+rock (a tfstrange roll usually does it), compare. Same = (b), close the bug; different = (a),
+design real storage. Do this BEFORE any redesign.
+
 ### Open / next
-- [ ] `[verify]` **Next restart: tfdrain (the diagnostics run) + tfquick (cage on the open-spot
-  picker).** Everything else is green and leddered.
+- [ ] `[verify]` **Next restart: tfdrain + tfquick on the lend build** (expect drain.latch,
+  drain.robot, drain.endings, quick.cage all green; the victim-named dispatch lines confirm).
+- [ ] `[verify]` **The lottery save-quit-reload experiment** (above) — user's hands, 30 seconds.
 - [ ] `[design]` Round 4 candidates: `tfeat` (18 Lithovore channels); Stoneshaper weird-anatomy
   sweep; Gorgon DC curve; Tier 2 hands-off boot cycle (marker file → auto-load test save → run
   batch → write results → quit) — which is also what unlocks the fungal-lottery reload check

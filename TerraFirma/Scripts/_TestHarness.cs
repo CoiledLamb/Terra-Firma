@@ -424,11 +424,28 @@ namespace Cleo.TerraFirma.Scripts
 			if (slot.Equipped != stone)
 				return null;
 			int hpBefore = victim.GetStat("Hitpoints")?.Value ?? -1;
+			// harness bug #5 (2026-07-24 night run): asserts assumed guaranteed hits, but only
+			// streakschorl is NeverMiss -- the catalog throws honestly (AimVariance + the engine's
+			// fall-one-short), and the verify marathons never saw a miss only because of the
+			// playtest god-arm. Deterministic hits via the mod's own lend idiom: stamp the
+			// close-range accuracy property for this throw (zeroes AimVariance AND skips the
+			// fall-short branch, GameObject.cs:15389), return it after.
+			bool lent = false;
+			if (!ply.HasIntProperty("CloseThrowRangeAccuracyBonus") && !ply.HasIntProperty("CloseThrowRangeAccuracySkillBonus"))
+			{
+				ply.ModIntProperty("CloseThrowRangeAccuracyBonus", 100);
+				lent = true;
+			}
 			bool performed;
 			bool suppressed = Popup.Suppress;
 			Popup.Suppress = true;
 			try { performed = ply.PerformThrow(stone, victim.CurrentCell, victim); }
-			finally { Popup.Suppress = suppressed; }
+			finally
+			{
+				Popup.Suppress = suppressed;
+				if (lent)
+					ply.ModIntProperty("CloseThrowRangeAccuracyBonus", -100, RemoveIfZero: true);
+			}
 			int hpAfter = GameObject.Validate(victim) ? (victim.GetStat("Hitpoints")?.Value ?? -1) : -1;
 			string where = !GameObject.Validate(stone) ? "destroyed"
 				: stone.Equipped != null ? "equipped on " + stone.Equipped.Blueprint
