@@ -116,8 +116,10 @@ three of four closed, BUILT + DEPLOYED:**
   attach-but-no-leech on inorganics (detection = the engine's own `LifeDrain.IsValidTarget`
   IsOrganic gate — better than NoBleed, robots bleed oil), rides out its rounds, then distinct
   endings: gorged "bursts like a blood balloon, finally sated" vs starved "withers and crumbles
-  away, dry and unfed" (both DRAFT, phrases from the ruling). `[verify]` latch a robot → no drain,
-  dry crumble; latch flesh → drain + burst.
+  away, dry and unfed" (both DRAFT, phrases from the ruling). ~~`[verify]` latch a robot → no drain,
+  dry crumble; latch flesh → drain + burst.~~ **FULLY VERIFIED 2026-07-24 late night (harness
+  tfdrain, lend build): robot latched STARVED with LifeDrain withheld, dry crumble on schedule;
+  flesh latched, drained, gorged burst. All four lifecycle paths in the ledger.**
 - [x] 🆕 `[design]` **Caromcobble trip-on-step — BUILT + DEPLOYED 2026-07-23** (StepChance 25 +
   Prone via the StepPayload override; HoldChance 100 = a permanent banana peel, intended).
   Numbers ride the ratify pile. `[verify]` walk an enemy over it → 25% prone, rock survives.

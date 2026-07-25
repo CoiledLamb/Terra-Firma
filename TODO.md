@@ -1071,10 +1071,23 @@ decider, user's hands:** note the permutation, SAVE AND QUIT properly, reload, m
 rock (a tfstrange roll usually does it), compare. Same = (b), close the bug; different = (a),
 design real storage. Do this BEFORE any redesign.
 
+### Lend-build run — 2026-07-24 late night: THE DRAINSTONE LIFECYCLE CLOSES
+tfdrain on the lend build: **drain.latch PASS · drain.robot PASS ("LATCHED onto Scrapbot …
+STARVED (inorganic, no leech)" — the ruled attach-but-no-leech executed for the FIRST TIME
+EVER) · drain.oneshot PASS · both endings fired on schedule (gorged burst + dry crumble).**
+The endings composite red was harness bug #7 (over-strict assert: the Scrapbot REGENERATED the
+throw's 2 scratch damage 98→100, proving no-drain; fixed to >=). The robot-latch bug candidate
+is CLOSED — misses all along. The drainstone-vs-inorganics `[verify]` line (worklist Pass 2) is
+fully closed; four ledger entries added. Cage found a THIRD miss mode: an **agility-based
+connect roll survives even perfect accuracy** (decomp: the 1d-Agility gate atop the hit branch)
+— the lend kills scatter, not the connect; cage now RETRIES up to 4 throws (deployed).
+
 ### Open / next
-- [ ] `[verify]` **Next restart: tfdrain + tfquick on the lend build** (expect drain.latch,
-  drain.robot, drain.endings, quick.cage all green; the victim-named dispatch lines confirm).
-- [ ] `[verify]` **The lottery save-quit-reload experiment** (above) — user's hands, 30 seconds.
+- [ ] `[verify]` **Next restart: tfquick** — cage on retries is the LAST red that isn't the
+  intentional quick.rep. Then the harness board is: all green + one red awaiting its batch fix.
+- [ ] `[verify]` **The lottery save-quit-reload experiment** (above) — user's hands, 30 seconds;
+  saves WERE observed being written this session, so the next boot's first SPORE line may
+  already answer it.
 - [ ] `[design]` Round 4 candidates: `tfeat` (18 Lithovore channels); Stoneshaper weird-anatomy
   sweep; Gorgon DC curve; Tier 2 hands-off boot cycle (marker file → auto-load test save → run
   batch → write results → quit) — which is also what unlocks the fungal-lottery reload check

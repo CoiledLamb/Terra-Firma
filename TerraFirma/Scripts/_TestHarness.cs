@@ -150,34 +150,48 @@ namespace Cleo.TerraFirma.Scripts
 			// aegischist cage: thrown hit rings the victim in forcefield. Round-3 run rang 3/8 at a
 			// cramped lane-end -- ambiguous between mod behavior and harness terrain; now the target
 			// stands in the open (>=7 open sides) and blocked sides are reported per-cell.
-			Cell spot = FindOpenSpot(origin, 7);
+			Cell spot = FindLaneOpenEnd(origin, 3, 7);
 			if (spot != null)
 			{
 				GameObject victim = GameObject.Create(BABOON_BP);
 				victim.SetIntProperty(SPAWN_MARK, 1);
 				victim.GetStat("Hitpoints").BaseValue = 100;
 				spot.AddObject(victim);
-				ThrowAt(ply, AEGISCHIST_BP, victim);
+				// up to 4 throws: even at perfect accuracy the engine keeps an agility-based
+				// connect roll (harness find, third distinct miss mode 2026-07-24 -- the lend
+				// kills scatter, not the connect); a whiff drops its ring at the landing cell
+				// and expires on its own in 12 rounds
 				int ring = 0;
 				int blocked = 0;
+				int attempts = 0;
 				List<GameObject> segments = new List<GameObject>();
-				Cell vc = victim.CurrentCell;
-				if (vc != null)
-					foreach (Cell adj in vc.GetLocalAdjacentCells())
-					{
-						bool found = false;
-						foreach (GameObject obj in adj.Objects)
-							if (obj.HasPart("Forcefield")) { ring++; segments.Add(obj); found = true; }
-						if (!found && (adj.IsSolid() || adj.HasObjectWithPart("Combat")))
-							blocked++;
-					}
+				for (int attempt = 1; attempt <= 4 && GameObject.Validate(victim); attempt++)
+				{
+					attempts = attempt;
+					ThrowAt(ply, AEGISCHIST_BP, victim);
+					ring = 0;
+					blocked = 0;
+					segments.Clear();
+					Cell vc = victim.CurrentCell;
+					if (vc != null)
+						foreach (Cell adj in vc.GetLocalAdjacentCells())
+						{
+							bool found = false;
+							foreach (GameObject obj in adj.Objects)
+								if (obj.HasPart("Forcefield")) { ring++; segments.Add(obj); found = true; }
+							if (!found && (adj.IsSolid() || adj.HasObjectWithPart("Combat")))
+								blocked++;
+						}
+					if (ring >= 7)
+						break;
+				}
 				Report("quick.cage", GameObject.Validate(victim) && ring >= 7,
-					$"{ring} forcefield segment(s) ring the victim, {blocked} side(s) blocked by terrain (open-spot target: want >=7 of 8; duration 12 not waited out)");
+					$"{ring} forcefield segment(s) ring the victim after {attempts} throw(s), {blocked} side(s) blocked (want >=7 of 8; whiff rings expire on their own)");
 				foreach (GameObject seg in segments) seg.Obliterate();
 				if (GameObject.Validate(victim)) victim.Obliterate();
 			}
 			else
-				Report("quick.cage", false, "SETUP FAIL - no open-surrounded cell within 5");
+				Report("quick.cage", false, "SETUP FAIL - no clear lane ending in an open-surrounded cell");
 		}
 
 		/// <summary>Caromcobble trip statistics: 40 forced crossings of the peel in one wish
@@ -456,20 +470,34 @@ namespace Cleo.TerraFirma.Scripts
 			return stone;
 		}
 
-		/// <summary>A cell at distance 2-5 with at least minOpenNeighbors open sides -- for
-		/// scenarios (cage) where the assert needs room around the target, not just a lane.</summary>
-		internal static Cell FindOpenSpot(Cell origin, int minOpenNeighbors)
+		/// <summary>A straight clear lane whose END cell also has at least minOpenNeighbors open
+		/// sides. Harness bug #6 (2026-07-24, caught by the throwat diagnostic): the cage throw
+		/// connected with a TinkerTurret INTERPOSED on the flight path -- the target's
+		/// surroundings were open but the line to it wasn't. Throw targets need both.</summary>
+		internal static Cell FindLaneOpenEnd(Cell origin, int length, int minOpenNeighbors)
 		{
-			foreach (Cell c in origin.GetLocalAdjacentCells(5))
+			string[] dirs = { "E", "W", "N", "S", "NE", "NW", "SE", "SW" };
+			foreach (string dir in dirs)
 			{
-				if (c.DistanceTo(origin) < 2 || c.IsSolid() || c.HasObjectWithPart("Combat"))
+				Cell walk = origin;
+				bool clear = true;
+				for (int step = 0; step < length; step++)
+				{
+					walk = walk.GetCellFromDirection(dir);
+					if (walk == null || walk.IsSolid() || walk.HasObjectWithPart("Combat"))
+					{
+						clear = false;
+						break;
+					}
+				}
+				if (!clear)
 					continue;
 				int openSides = 0;
-				foreach (Cell adj in c.GetLocalAdjacentCells())
+				foreach (Cell adj in walk.GetLocalAdjacentCells())
 					if (!adj.IsSolid() && !adj.HasObjectWithPart("Combat"))
 						openSides++;
 				if (openSides >= minOpenNeighbors)
-					return c;
+					return walk;
 			}
 			return null;
 		}
@@ -984,7 +1012,9 @@ namespace XRL.World.Parts
 			bool burstA = !GameObject.Validate(DrainStoneA);
 			bool robotAlive = GameObject.Validate(DrainRobot);
 			int robotHp = robotAlive ? DrainRobot.GetStat("Hitpoints").Value : -1;
-			bool robotUntouched = robotAlive && robotHp == RobotHpAtLatch;
+			// >= not ==: robots REGENERATE the throw's own scratch over 25 turns (98->100 in the
+			// first live run) -- upward movement proves no-drain rather than violating it
+			bool robotUntouched = robotAlive && robotHp >= RobotHpAtLatch;
 			bool crumbledR = !GameObject.Validate(DrainStoneR);
 			bool pass = drained && drainOver && burstA && robotUntouched && crumbledR;
 			string stoneAState = burstA ? "gone (gorged burst)" : DrainStoneA?.Equipped != null ? "STILL ATTACHED" : "still exists, unattached";

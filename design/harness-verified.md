@@ -149,6 +149,33 @@ errors. `tfbatch` is now the standing one-wish regression sweep for everything i
   investigation with upgraded diagnostics; the dry-crumble ending remains unverified. The batch
   run's silent flesh dispatch likewise.
 - **Re-run:** `tfdrain` (25 turns).
+- **SUPERSEDED same night by the lend-build run — see the full-lifecycle entry below.**
+
+## 2026-07-24 late night — the lend-build run (drainstone lifecycle complete)
+
+### `tfdrain` — the WHOLE drainstone lifecycle, all four paths verified
+- **Proven (direct assertions + the named-victim dispatch lines):**
+  · flesh latch: stone riding the victim, LifeDrain applied (drain.latch PASS, 2nd confirmation);
+  · **robot latch: "LATCHED onto Scrapbot … STARVED (inorganic, no leech)" — the ruled
+    attach-but-no-leech EXECUTED for the first time ever**; stone attached, LifeDrain correctly
+    withheld (drain.robot PASS);
+  · one-shot: corpse can't latch, stone loose as loot (3rd confirmation, throwat HP 1→−1);
+  · **both endings fired on schedule: gorged burst (flesh: drained 98→90, LifeDrain expired,
+    stone gone) and dry crumble (robot: never drained, stone gone).** The composite FAILed only
+    on an over-strict harness assert — the Scrapbot REGENERATED the throw's 2 scratch damage
+    (98→100), which proves no-drain; assert fixed to >= baseline.
+- **The robot-latch "bug" is CLOSED: it was throw misses all along** (the miss saga). Worklist
+  item "Drainstone vs inorganics" `[verify]` line is fully closed by this run.
+- **Not covered:** the step-proc latch path (at-rest immediate channel via a real step), latch
+  on the player, save/load of a latched stone (Tier 2).
+- **Re-run:** `tfdrain` (25 turns; composite goes green from the next run on).
+
+### Engine fact worth its own line (third distinct miss mode)
+Even with perfect accuracy (the lend property), the engine keeps an **agility-based connect
+roll** on thrown attacks — the cage whiffed once with zero scatter and no interposer. Harness
+throws that need a guaranteed connect must RETRY (cage now throws up to 4). This also refines
+the never-miss ledger note: the mod's NeverMiss + lend kills scatter and fall-short, not the
+connect roll.
 
 *(Also this run: form, quick.ape, hopper, streak, strange re-greens; scav's third stable cadence
 point, 0.28/turn.)*
