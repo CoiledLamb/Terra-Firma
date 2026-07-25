@@ -10,6 +10,12 @@
 		<tag Name="Cleo_TerraFirma_IsGemstone" />
 		<part Name="Cleo_TerraFirma_GeomancyStonePart" />
 		<part Name="Cleo_TerraFirma_StoneMill" /> <!-- gemstones grind too (to flour; wasteful comedy, accepted) -->
+		<!-- RULED 2026-07-25 (user: "we would have to add the behavior for them to be thrown
+		     slot, but i think that's a good idea"): gemstones are first-class Geomancy ammo, so
+		     default equip should pick the Thrown Weapon slot - which the engine does for any
+		     ThrownWeapon-part item. Damage 1d2 = Small Stone parity, DRAFT for ratify. Watch
+		     item: creatures holding gems can now ready and throw them. -->
+		<part Name="ThrownWeapon" Damage="1d2" />
 	</object>
 	<object Name="BaseSedimentaryRock" Load="Merge">
 		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" />
