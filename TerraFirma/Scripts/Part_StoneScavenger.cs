@@ -122,13 +122,11 @@ namespace XRL.World.Parts
 						// cadence, with baboons wandering slot-empty on full pockets. Force the re-ready
 						// directly (CommandEquipObject sidesteps whatever starves the brain's own pick);
 						// "keep the thrower throwing."
+						// free action (user ruling 2026-07-24: "don't worry about action costs for
+						// equipping thrown weapons, it's actually a free action") -- the baboon
+						// re-readies and still acts this turn, matching base thrown-slot behavior
 						bool readied = who.FireEvent(Event.New("CommandEquipObject", "Object", item, "BodyPart", slot));
-						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint} pocket re-ready: {item.Blueprint} {(readied ? "readied into the thrown slot" : "REFUSED by CommandEquipObject")}");
-						if (readied)
-						{
-							E.PreventAction = true; // readying costs the action, like the stoop
-							who.UseEnergy(1000, "Equip");
-						}
+						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"{who.Blueprint} pocket re-ready: {item.Blueprint} {(readied ? "readied into the thrown slot (free action)" : "REFUSED by CommandEquipObject")}");
 						return;
 					}
 				}
