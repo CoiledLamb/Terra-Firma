@@ -489,14 +489,16 @@ Sign-offs: spec table numbers approved; all 4 fungal infections in the pool; glo
   either ConsumedOnStep stamped on the base blueprint (one attribute, whole catalog, exempt by
   override) or a separate StepHoldChance dial (C#-small).
 
-- [ ] `[bug]` **Baboon figurine needs identification (user flag 2026-07-24 night: "baboon
-  figurine needed to be identified (unintended)").** Root cause found same minute: the item
-  inherits base `Trinket`, which carries `<part Name="Examiner" Unknown="UnknownOddTrinket"
-  Complexity="1" />` (Items.xml:11811) — tech-item identify behavior on a carved rock. Fix for
-  the next batch: override `<part Name="Examiner" Complexity="0" />` on
-  `Cleo_TerraFirma_BaboonFigurineItem` (a knee-high stone baboon is self-evident). One XML line.
-  Recon note: check the APE STATUE's rubble + any other Trinket-inheriting mod items for the
-  same inherited wart while in there.
+- [ ] `[bug]` **Baboon figurine, TWO confirmed defects for one batch entry (both 2026-07-24
+  night, both one-attribute XML fixes on `Cleo_TerraFirma_BaboonFigurineItem`):**
+  (1) **Needs identification (user flag: "unintended")** — inherits base `Trinket`'s
+  `<part Name="Examiner" Unknown="UnknownOddTrinket" Complexity="1" />` (Items.xml:11811);
+  fix = override `Complexity="0"` (a knee-high stone baboon is self-evident).
+  (2) **AddsRep 200 is INERT — harness-CONFIRMED (quick.rep: rep −300→−300 on take, delta 0):**
+  `AddsRep` is equipper-only unless `WorksOnCarrier="true"`, which the part never sets; the
+  figurine's entire rep half has never functioned. Fix = add the attribute; the standing red
+  quick.rep assert flips green as the verification.
+  Recon note: sweep other Trinket-inheriting mod items for the same two inherited warts.
 
 ### POST-SESSION BUILD BATCH — BUILT + DEPLOYED 2026-07-24 (after the verify marathon wrapped; active next launch)
 Eight pieces, all from the day's flags (details live in each flag's own entry):
@@ -1013,10 +1015,33 @@ turn pump — so four of the six are synchronous:
   wrangling; tier system already has a live partial) · `tfeat` + Stoneshaper anatomy sweep +
   Gorgon DC curve = round 4 candidates.
 
+### Round 3 first live run — 2026-07-24 night (user: "only one that didn't pass is tfdrain")
+**13 PASS lines** — carom (13/40 trips, peel intact), crack (fell crossing 9), spill (14 drams),
+dull, quick.pockets (Hulking 3 / Quartz 0), quick.heal (+ConsumedOnStep proven), drain.oneshot
+(now asserted), plus form/quick.ape/hopper/streak/strange/scav re-greens (scav's third stable
+cadence point: 0.28/turn). The reds, dissected:
+- [x] **quick.rep FAIL = the intentional red, SUSPICION CONFIRMED:** rep −300 → −300, delta 0 —
+  **AddsRep on the carried figurine is INERT** (equipper-only without `WorksOnCarrier`). The
+  figurine batch flag below now carries BOTH fixes. The red test flips green post-fix.
+- [x] **drain.latch/endings, flesh half = actually PROVEN in the standalone run** (the batch
+  re-run muddied the user's summary): line-381 PASS (latched + LifeDrain applied, direct
+  assertion) and the endings measured HP 97→56, LifeDrain expired, gorged burst on schedule.
+- [ ] `[bug?]` **Drainstone vs ROBOT: the latch NEVER attaches (both runs, deterministic)** —
+  dispatch guard fired victimless (`victimValid=False` on a live 100-HP Scrapbot), so the ruled
+  attach-but-no-leech → dry-crumble ending went unexercised, not just unverified. Prime suspect:
+  the victimless at-rest/landing dispatch path (a miss or a stale ref), not the organic gate.
+  **Diagnostics DEPLOYED** (dispatch lines now name the victim; ThrowAt logs perform-result +
+  victim HP delta + stone destination): one tfdrain next restart names the path.
+- [ ] `[bug?]` **Batch-run anomaly: the flesh throw produced NO dispatch at all in-chain**
+  (standalone worked) — same deployed diagnostics cover it; if it recurs in-batch only, suspect
+  arena state left by prior scenarios.
+- [ ] **quick.cage 3/8 ring = AMBIGUOUS (harness terrain vs mod behavior)** — the victim stood
+  at a cramped lane-end. Harness FIXED: open-spot target (≥7 open sides) + per-cell blockage
+  reporting; threshold raised to ≥7. Re-run decides whether there is a real placement gap.
+
 ### Open / next
-- [ ] `[verify]` **Round 3 first live run next restart** — 10 new assert lines; watch
-  especially quick.rep (the intentional red), drain.endings (the longest chain), and carom's
-  statistical band. Ledger on PASS.
+- [ ] `[verify]` **Next restart: tfdrain (the diagnostics run) + tfquick (cage on the open-spot
+  picker).** Everything else is green and leddered.
 - [ ] `[design]` Round 4 candidates: `tfeat` (18 Lithovore channels); Stoneshaper weird-anatomy
   sweep; Gorgon DC curve; Tier 2 hands-off boot cycle (marker file → auto-load test save → run
   batch → write results → quit) — which is also what unlocks the fungal-lottery reload check

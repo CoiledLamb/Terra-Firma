@@ -198,9 +198,10 @@ findings):**
   for Calcify): bless or gate.
 - [ ] 🆕 `[ratify]` **Batch DRAFT numbers:** hopper throughput 1/turn · Calcify "−10 DV" lean (b) ·
   figurine AddsRep Baboons 200.
-- [ ] 🆕 `[bug]` **Baboon figurine needs identification (user flag, harness session:
-  "unintended")** — inherited from base Trinket's `Examiner Complexity="1"` (root cause + one-line
-  fix shape in TODO.md); next batch, and sweep other Trinket-inheriting mod items while there.
+- [ ] 🆕 `[bug]` **Baboon figurine, TWO defects, one batch entry (details in TODO.md):**
+  (1) needs identification (user flag; base Trinket's `Examiner Complexity="1"` inherited);
+  (2) **AddsRep 200 INERT — harness-confirmed** (quick.rep delta 0; `WorksOnCarrier` unset =
+  equipper-only). Both one-attribute XML fixes; the standing red quick.rep assert verifies (2).
 - [x] 🆕 `[bug?]` **Farflint step-shunt survives the proc (user flag, harness session) —
   LOG-RESOLVED, WORKING AS DESIGNED:** the proc logged the full chain ending `fragility (step):
   HOLDS` — one legitimate 25% hold (house HoldChance 25, rolled fresh per use). Optional dials
@@ -443,6 +444,10 @@ findings):**
   tech) · tfdull · tfdrain (full lifecycle) — ~10 new asserts, tfbatch now ~75 turns. NOTE:
   quick.rep is an INTENTIONAL RED — recon suspects figurine AddsRep never applies to a carried
   trinket (`WorksOnCarrier` unset; fix is one attribute, next batch). UNTESTED — next restart.**
+  **ROUND 3 RUN: 13 PASS (carom/crack/spill/dull/pockets/heal/ape/oneshot + re-greens), 7 new
+  ledger facts; quick.rep red CONFIRMED the inert AddsRep; drainstone-vs-robot latch never
+  attaches (real bug candidate, victim-named diagnostics deployed); cage 3/8 was harness
+  terrain, open-spot picker deployed. Next restart: tfdrain + tfquick re-run.**
 - [x] 📜 `[release]` **git init — DONE 2026-07-23** (fresh repo, no fork linkage, no trailer; history live since `b4ed68e`).
 - [ ] 📜 `[release]` **Workshop publishing plan + credits.**
 - [x] 📜 `[design]` **Stale `Cleo_TerraFirma_Ephemeral Stone` blueprint — RULED remove 2026-07-24

@@ -96,6 +96,63 @@ Full five-scenario chain ran hands-free (streak → strange → hopper → form 
 errors. `tfbatch` is now the standing one-wish regression sweep for everything in this ledger.
 (tfstrange third PASS: 30 distinct blueprints; streak + hopper re-confirmed again in-chain.)
 
+## 2026-07-24 night — round 3 first run
+
+### `tfcarom` PASS — caromcobble trip statistics + unbreakability
+- **Proven:** 40 forced crossings → 13 trips (inside the 3–22 band for StepChance 25) and the
+  peel survived every proc (HoldChance 100 — it is genuinely the permanent banana peel).
+- **Not covered:** organic pathing (creatures may route around; crossings were forced), throw
+  behavior (separate ricochet channel). **Re-run after the pending StepChance re-ruling** with
+  the band adjusted to the new number.
+- **Re-run:** `tfcarom` (instant).
+
+### `tfcrack` PASS — FallThrough pull-down
+- **Proven:** a creature crossing the cracked floor fell to the zone below on crossing 9
+  (StepChance 15); the victim genuinely changed zones (JoppaWorld.11.22.1.2.**11**).
+- **Not covered:** fall damage on landing, the chasm variant (CUT from tier 9, blueprint dormant).
+- **Re-run:** `tfcrack` (instant).
+
+### `tfspill` PASS — liquid-rock destruction spill
+- **Proven:** a brine geode destroyed by damage (not obliteration) spilled 14 drams — inside
+  the 4–32 band of the 4d8 pool-volume audit.
+- **Not covered:** the "puddle not pool" RENDER (eyeball), the no-spill paths (obliteration,
+  decay, use-path suppression), other liquid rocks.
+- **Re-run:** `tfspill` (instant).
+
+### `tfdull` PASS — the anti-hoarding clock, first end-to-end verification ever
+- **Proven:** a carried rock with its dull clock wound to 2 crumbled out of the bag on schedule,
+  leaving pebbles (+1), payload lost with the dull.
+- **Not covered:** the 1000–2500 staggered-roll distribution (only the collapsed clock), floor
+  rocks never aging (unasserted), save/load of a mid-clock rock (Tier 2).
+- **Re-run:** `tfdull` (5 turns).
+
+### `tfquick` shelf — pockets PASS · heal PASS · ape PASS (rep = verified bug, below; cage pending)
+- **Proven:** Hulking Baboon spawns carrying mod rocks (3), Quartz Baboon carries none (merge
+  inheritance boundary honored) · healstone step-proc healed a wounded creature (35→38) and
+  `ConsumedOnStep` ate the stone · ape statue expired to devourable rubble (+1) on schedule.
+- **Not covered:** heal's throw path and self-throw UX (popup), exact pocket dice (2–3 spec —
+  only ≥1 asserted).
+- **Re-run:** `tfquick`.
+
+### `quick.rep` — VERIFIED BUG (a fact, recorded as one): figurine AddsRep is inert
+- **Proven (by assertion, delta 0):** taking the figurine changes Baboons rep not at all —
+  `AddsRep` without `WorksOnCarrier` is equipper-only, and the figurine is never equipped. The
+  rep half of the figurine has never functioned. Fix queued (one attribute); this standing red
+  flips green as the fix's verification.
+
+### `tfdrain` — oneshot PASS; flesh lifecycle proven; robot half OPEN
+- **Proven:** the one-shot path (1-HP victim dies to the throw → corpse can't latch → stone
+  rests as loot) is now a direct assertion, not a log reading. Flesh lifecycle (standalone run):
+  latch + LifeDrain asserted at setup; drain measured (97→56), LifeDrain expired, gorged burst
+  on schedule — composite verdict FAILed only on the robot half.
+- **OPEN, not leddered:** the robot latch never attaches (victimless dispatch, both runs) — under
+  investigation with upgraded diagnostics; the dry-crumble ending remains unverified. The batch
+  run's silent flesh dispatch likewise.
+- **Re-run:** `tfdrain` (25 turns).
+
+*(Also this run: form, quick.ape, hopper, streak, strange re-greens; scav's third stable cadence
+point, 0.28/turn.)*
+
 ---
 
 *Add new entries at the tail. If a scenario's assertion changes shape (harness edits), note the

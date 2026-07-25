@@ -147,29 +147,37 @@ namespace Cleo.TerraFirma.Scripts
 			else
 				Report("quick.heal", false, "SETUP FAIL - need two open adjacent cells");
 
-			// aegischist cage: thrown hit rings the victim in forcefield
-			Cell lane = FindLane(origin, 3);
-			if (lane != null)
+			// aegischist cage: thrown hit rings the victim in forcefield. Round-3 run rang 3/8 at a
+			// cramped lane-end -- ambiguous between mod behavior and harness terrain; now the target
+			// stands in the open (>=7 open sides) and blocked sides are reported per-cell.
+			Cell spot = FindOpenSpot(origin, 7);
+			if (spot != null)
 			{
 				GameObject victim = GameObject.Create(BABOON_BP);
 				victim.SetIntProperty(SPAWN_MARK, 1);
 				victim.GetStat("Hitpoints").BaseValue = 100;
-				lane.AddObject(victim);
+				spot.AddObject(victim);
 				ThrowAt(ply, AEGISCHIST_BP, victim);
 				int ring = 0;
+				int blocked = 0;
 				List<GameObject> segments = new List<GameObject>();
 				Cell vc = victim.CurrentCell;
 				if (vc != null)
 					foreach (Cell adj in vc.GetLocalAdjacentCells())
+					{
+						bool found = false;
 						foreach (GameObject obj in adj.Objects)
-							if (obj.HasPart("Forcefield")) { ring++; segments.Add(obj); }
-				Report("quick.cage", GameObject.Validate(victim) && ring >= 5,
-					$"{ring} forcefield segment(s) ring the victim (want >=5 of 8; partial-vs-obstacles accepted; duration 12 not waited out)");
+							if (obj.HasPart("Forcefield")) { ring++; segments.Add(obj); found = true; }
+						if (!found && (adj.IsSolid() || adj.HasObjectWithPart("Combat")))
+							blocked++;
+					}
+				Report("quick.cage", GameObject.Validate(victim) && ring >= 7,
+					$"{ring} forcefield segment(s) ring the victim, {blocked} side(s) blocked by terrain (open-spot target: want >=7 of 8; duration 12 not waited out)");
 				foreach (GameObject seg in segments) seg.Obliterate();
 				if (GameObject.Validate(victim)) victim.Obliterate();
 			}
 			else
-				Report("quick.cage", false, "SETUP FAIL - no open 3-cell lane");
+				Report("quick.cage", false, "SETUP FAIL - no open-surrounded cell within 5");
 		}
 
 		/// <summary>Caromcobble trip statistics: 40 forced crossings of the peel in one wish
@@ -398,7 +406,10 @@ namespace Cleo.TerraFirma.Scripts
 		}
 
 		/// <summary>Slot-normalized player-path throw: force-equip a fresh stone and PerformThrow
-		/// it at the victim. Returns the stone (often spent/broken afterwards).</summary>
+		/// it at the victim. Returns the stone (often spent/broken afterwards). Logs a diagnostic
+		/// line either way -- the round-3 drain anomalies (guard fail on a live robot; a batch
+		/// throw with no dispatch at all) were unreadable without perform-result + victim HP delta
+		/// + where the stone ended up.</summary>
 		internal static GameObject ThrowAt(GameObject ply, string blueprint, GameObject victim)
 		{
 			BodyPart slot = ply.GetFirstBodyPart("Thrown Weapon");
@@ -412,11 +423,38 @@ namespace Cleo.TerraFirma.Scripts
 			ply.ForceEquipObject(stone, slot, Silent: true);
 			if (slot.Equipped != stone)
 				return null;
+			int hpBefore = victim.GetStat("Hitpoints")?.Value ?? -1;
+			bool performed;
 			bool suppressed = Popup.Suppress;
 			Popup.Suppress = true;
-			try { ply.PerformThrow(stone, victim.CurrentCell, victim); }
+			try { performed = ply.PerformThrow(stone, victim.CurrentCell, victim); }
 			finally { Popup.Suppress = suppressed; }
+			int hpAfter = GameObject.Validate(victim) ? (victim.GetStat("Hitpoints")?.Value ?? -1) : -1;
+			string where = !GameObject.Validate(stone) ? "destroyed"
+				: stone.Equipped != null ? "equipped on " + stone.Equipped.Blueprint
+				: stone.CurrentCell != null ? "loose at " + stone.CurrentCell.X + "," + stone.CurrentCell.Y
+				: stone.InInventory != null ? "in " + stone.InInventory.Blueprint + "'s inventory"
+				: "in limbo";
+			Helpers.VerifyLog("AUTO", $"throwat: {blueprint} at {victim.Blueprint} -> perform={performed}, victim HP {hpBefore}->{hpAfter}, stone {where}");
 			return stone;
+		}
+
+		/// <summary>A cell at distance 2-5 with at least minOpenNeighbors open sides -- for
+		/// scenarios (cage) where the assert needs room around the target, not just a lane.</summary>
+		internal static Cell FindOpenSpot(Cell origin, int minOpenNeighbors)
+		{
+			foreach (Cell c in origin.GetLocalAdjacentCells(5))
+			{
+				if (c.DistanceTo(origin) < 2 || c.IsSolid() || c.HasObjectWithPart("Combat"))
+					continue;
+				int openSides = 0;
+				foreach (Cell adj in c.GetLocalAdjacentCells())
+					if (!adj.IsSolid() && !adj.HasObjectWithPart("Combat"))
+						openSides++;
+				if (openSides >= minOpenNeighbors)
+					return c;
+			}
+			return null;
 		}
 
 		/// <summary>Force a creature back and forth across a cell (DirectMoveTo, forced) --
@@ -932,8 +970,10 @@ namespace XRL.World.Parts
 			bool robotUntouched = robotAlive && robotHp == RobotHpAtLatch;
 			bool crumbledR = !GameObject.Validate(DrainStoneR);
 			bool pass = drained && drainOver && burstA && robotUntouched && crumbledR;
+			string stoneAState = burstA ? "gone (gorged burst)" : DrainStoneA?.Equipped != null ? "STILL ATTACHED" : "still exists, unattached";
+			string stoneRState = crumbledR ? "gone (dry crumble)" : DrainStoneR?.Equipped != null ? "STILL ATTACHED" : "still exists, unattached (latch never took?)";
 			Cleo.TerraFirma.Scripts.TestHarnessWishes.Report("drain.endings", pass,
-				$"after {TurnsTotal} turns -- flesh: HP {FleshyHpAtLatch}->{fleshyHp} ({(drained ? "drained" : "NOT drained")}), LifeDrain {(drainOver ? "expired" : "still ticking")}, stone {(burstA ? "gone (gorged burst)" : "STILL ATTACHED")}; robot: HP {RobotHpAtLatch}->{robotHp} ({(robotUntouched ? "untouched" : "CHANGED")}), stone {(crumbledR ? "gone (dry crumble)" : "STILL ATTACHED")}");
+				$"after {TurnsTotal} turns -- flesh: HP {FleshyHpAtLatch}->{fleshyHp} ({(drained ? "drained" : "NOT drained")}), LifeDrain {(drainOver ? "expired" : "still ticking")}, stone {stoneAState}; robot: HP {RobotHpAtLatch}->{robotHp} ({(robotUntouched ? "untouched" : "CHANGED")}), stone {stoneRState}");
 		}
 
 		private void FinishForm(GameObject owner)
