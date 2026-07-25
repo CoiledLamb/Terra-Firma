@@ -192,15 +192,40 @@ namespace XRL.World.Parts.Mutation
 			// Same-stone falls also stack in the pack: the batching is quality-of-life, not power.
 			string seam = RollRockBlueprint(effectiveLevel);
 			Helpers.VerifyLog("FIS", $"cast by {ParentObject.Blueprint} Lv{Level} at Z={ParentObject.CurrentZone?.Z}: eff={effectiveLevel} (depth+{GetDepthBonus(ParentObject)}), radius={radius}, falls={falls}, spill={spillChance}%, seam={seam ?? "none"}");
+			// living-fall cap (RULED 2026-07-25, user: "capping somewhere like, 3-5 and then
+			// letting the rest of the seam roll something of that tier is fair" -- answers the
+			// nine-baboon jackpot cast): each collapse sheds at most a handful of living things;
+			// once the cap is hit, further living rolls re-roll the tier table for inert stone.
+			// The cap itself is rolled 3-5 per cast (Claude reading of the range, DRAFT).
+			int livingCap = Stat.Random(3, 5);
+			int livingFalls = 0;
+			string PickCapped()
+			{
+				string bp = PickFallBlueprint(seam, effectiveLevel);
+				if (!IsLivingBlueprint(bp))
+					return bp;
+				if (livingFalls < livingCap)
+				{
+					livingFalls++;
+					return bp;
+				}
+				string was = bp;
+				for (int tries = 0; tries < 8 && IsLivingBlueprint(bp); tries++)
+					bp = RollRockBlueprint(effectiveLevel);
+				if (IsLivingBlueprint(bp))
+					bp = DEBRIS_BLUEPRINT; // the tier table would not stop rolling flesh; stone it is
+				Helpers.VerifyLog("FIS", $"living cap {livingCap} reached: {was} re-rolled to {bp}");
+				return bp;
+			}
 			for (int i = 0; i < falls; i++)
 			{
 				Cell landing = TakeWeightedCell(area, origin, radius);
-				DropRock(landing, PickFallBlueprint(seam, effectiveLevel), origin, radius, "fall");
+				DropRock(landing, PickCapped(), origin, radius, "fall");
 				if (spillChance.in100())
 				{
 					Cell echo = PickSpillCell(origin, landing);
 					if (echo != null)
-						DropRock(echo, PickFallBlueprint(seam, effectiveLevel), origin, radius, "spill"); // one echo, never chained
+						DropRock(echo, PickCapped(), origin, radius, "spill"); // one echo, never chained
 				}
 			}
 			return base.HandleEvent(E);
@@ -286,6 +311,15 @@ namespace XRL.World.Parts.Mutation
 			if (seam != null && SEAM_CHANCE.in100())
 				return seam;
 			return RollRockBlueprint(effLevel);
+		}
+
+		/// <summary>A blueprint that would land ALIVE (DropRock's brain-branch) — the living-fall cap counts these.</summary>
+		private static bool IsLivingBlueprint(string bp)
+		{
+			if (bp == null)
+				return false;
+			GameObjectBlueprint def = GameObjectFactory.Factory.GetBlueprintIfExists(bp);
+			return def != null && def.HasPart("Brain");
 		}
 
 		/// <summary>One rock (<paramref name="Blueprint"/>, pre-rolled by the seam/tier machinery) falls into <paramref name="C"/>: smoke, crush, then the rock itself (or debris, if something solid failed to kill what it landed on).</summary>
