@@ -974,6 +974,14 @@ User concept: preserving rocks requires carrying a **mortar and pestle**. Ruling
 
 ## Quarriers in the wild (side-content workstream 3 — ACTIVE 2026-07-22)
 
+**IN SCOPE FOR 1.0 — RULED 2026-07-26 (the release-scope conversation): "unfortunately i'd
+like to fit quarriers in the 1.0 release, it's just going to be tricky to implement, i
+think."** Quarriers is a release pillar, not a post-1.0 headline; sub-scope within the
+workstream (which pieces can trail to 1.1) still open. **Art bar RULED same exchange:
+"i'm fine reusing tiles and items for the quarriers. some things will need their own
+sprites, but i'm gradually ticking away at those"** — reuse is the 1.0 default, bespoke
+sprites land as the user produces them (see design/asset-debt-tracker.md).
+
 Two committed concepts (user, ruled): **(1)** quarrier packs in the canyons carrying 3x3 lumps of rock they've carved free from the walls; **(2)** a Stilt bazaar merchant selling non-expiring fissure stones as a random tent spawn — cheap, one-use utility grenades to stock up on.
 
 **Lore direction (user, ruled):** the stonecarvers came from outside Qud (why they're a mod, not basegame). No established holds — at most a small temporary camp they stop at on pilgrimages through Qud, drawn by its rich canyons and deep caves full of varied stone. They bring their culture, their mutations (the mod's seven), and a new lens on the game. Consequence: no procedural-village surface; everything is zone-build-time content that reaches existing saves in unvisited zones.
