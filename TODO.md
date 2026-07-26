@@ -123,7 +123,9 @@ design claims only — delegated code/plumbing decisions need no ratification ce
   its text but not the user's intent — intended behavior UNSTATED; capture it at the fix
   sitting before touching code. Text knock-on: the voice-comparison page's EB draft line
   ("While attuned, your whorl deflects light instead of matter and grants +2 or +4 DV in
-  place of AV") describes CURRENT behavior — re-draft it after the fix lands.
+  place of AV") describes CURRENT behavior — re-draft it after the fix lands. *(Same
+  sitting, later: "i'll worry about that later" — no urgency implied by SOONISH; user
+  paces this one.)*
 
 ### Text pass
 - [x] `[polish]` ~~Restyle to base-game voice~~ — done: level text rewritten house-style (live Willpower-scaled regen number shown, like LM does), whorl documented, Abilities.xml updated with `MaxCharges`/`DeflectFull` stats.
