@@ -116,6 +116,14 @@ design claims only — delegated code/plumbing decisions need no ratification ce
   - Implementation notes: melee half = `VibroWeapon ChargeUse="0"` (precedent: the mod's statue fist); thrown half = `Vorpal` attribute on `ThrownWeapon` (what the engine's ÷ penetration display keys off) — **verify the thrown path in-game**. Daze rider unchanged in both modes.
   - **Division of labor:** cleanest shape is a second blueprint (`Cleo_TerraFirma_EphemeralStoneResonant` inheriting the base stone: cyan Render colors, VibroWeapon/Vorpal, flavor description) — **user offered to own the XML**; C# side picks the blueprint by toggle state and handles the in-place retune.
   - Ties into "throw-augmenting items" (design budget) as the broader late-game answer; Chrome Pyramids stay out of reach by design. **(Provenance audit 2026-07-26: "out of reach by design" is a CLAUDE READING off eb_sim.py, UNRULED — no ruling exists that Pyramids must stay unreachable.)**
+- [ ] `[design]` **Resonant whorl DV swap — FLAGGED FOR FIX SOONISH (user 2026-07-26, mid
+  voice-sitting): "i realized this last bit is not doing the thing i wanted in the mutation
+  itself, even though the description is accurate."** The +2/+4-DV-in-place-of-AV behavior
+  (RULED 2026-07-23, "DV is less valuable than AV so you need more to compensate") matches
+  its text but not the user's intent — intended behavior UNSTATED; capture it at the fix
+  sitting before touching code. Text knock-on: the voice-comparison page's EB draft line
+  ("While attuned, your whorl deflects light instead of matter and grants +2 or +4 DV in
+  place of AV") describes CURRENT behavior — re-draft it after the fix lands.
 
 ### Text pass
 - [x] `[polish]` ~~Restyle to base-game voice~~ — done: level text rewritten house-style (live Willpower-scaled regen number shown, like LM does), whorl documented, Abilities.xml updated with `MaxCharges`/`DeflectFull` stats.
