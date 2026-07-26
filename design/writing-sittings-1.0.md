@@ -8,6 +8,15 @@ text debt clears at sign-off, not at generation.** Claude drafts raw material on
 asked. Trackers stay the source of truth — this sheet is an index; tick here AND close the
 home entry.
 
+**Priority order (user, 2026-07-26): "quarrier faction name + text > mutation
+descriptions > burp family status > rock and status descriptions."** Mapped to the
+sittings: **1st** faction name + display text (Sitting A's faction item, pulling
+Sitting E's voice work forward with it) → **2nd** the mutation text sweep (Sitting C)
+→ **3rd** the roiling-innards/burp-family status name + details (Sitting A's
+release-gate talk + the GasBelly strings) → **4th** rock descriptions (Sitting B) and
+the scattered status-effect texts (OxidizedLimbs, StoneSiphon, Enamored, etc. — sweep
+them with Sitting B). Sittings D/F fall in behind unless something re-prioritizes them.
+
 ## Sitting A — Names & the release-gate talk (rulings, not prose)
 
 - [ ] **"Roiling innards" talk — RELEASE GATE (user 2026-07-24: "talk has to be had
