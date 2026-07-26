@@ -350,7 +350,7 @@ While attuned, your whorl deflects light instead of matter and grants +2 or +4 D
 </div>
 
 <div class="card">
-  <h3>Stoneshaper <span class="chip w">imperative opener; missing cooldown</span></h3>
+  <h3>Stoneshaper <span class="chip g">worked 2026-07-26 — renditions line cut, attack stats split, closer rewritten literal; sign-off pending</span></h3>
   <div class="duo">
     <div class="q mod"><span class="tag">Terra Firma</span>
       <p>"You animate earth to fight for you."</p>
@@ -374,20 +374,25 @@ Cooldown: {{rules|N}} rounds"</p>
     <p>"You gaze first at a creature, then at a wall, and carve an animate statue of the creature from the wall.
 The statue inherits the creature's body plan and physique (Strength, Agility, Toughness).
 It does not inherit mutations, skills, or equipment.
-The statue fights with stone renditions of the creature's natural weapons.
 Nearby enemies must make a Willpower save (difficulty {{rules|N}}) or direct their attacks at the statue.
 Can target {{rules|stone}} walls
 Statue hit points: {{rules|N}}
 Statue AV: {{rules|N}}
-Statue attack: {{rules|N}} damage with {{rules|+N}} to-hit
+Statue damage increment: {{rules|N}}
+Statue to-hit bonus: +{{rules|N}}
 The statue lasts for {{rules|N}} rounds.
-Expired and released statues return to lifeless stone where they stand, entombing anything worn or carried.
+When a statue expires or is released, it becomes an inanimate statue. Anything it wore or carried can be looted from it.
 Cooldown: 120 rounds"</p>
     <p class="small">Imperative → "You gaze…" (Stone Gaze's own shape); the inheritance mega-line
     splits in three with attribute names unwrapped; Cooldown 120 (the code's BASE_COOLDOWN) lands
     last, bare per the flat-constant convention. The wall-type wrap stays — it scales with level,
     which is exactly what rules-wrap is for. The Lv10 "until destroyed" branch keeps its
-    conditional shape unchanged.</p>
+    conditional shape unchanged. <b>Sitting rulings 2026-07-26:</b> the "stone renditions"
+    natural-weapons line CUT entirely (user — the cosmetic weapon copying goes undocumented,
+    discoverable in play); the attack line split into "Statue damage increment:" /
+    "Statue to-hit bonus:" per Horns (user: "fine"); the closing line rewritten literal per
+    user ("the entire last line is flowery prose") — "When a statue expires or is released, it
+    becomes an inanimate statue. Anything it wore or carried can be looted from it."</p>
   </div>
 </div>
 
