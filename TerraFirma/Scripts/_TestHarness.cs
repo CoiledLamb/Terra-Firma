@@ -52,7 +52,7 @@ namespace Cleo.TerraFirma.Scripts
 		private const string GEODE_BP = "Cleo_TerraFirma_Rock_Soupstone";        // display: brine geode
 		private const string GENERIC_BP = "Cleo_TerraFirma_Rock_Generic";
 		private const string ROBOT_BP = "Scrapbot";
-		private const string DAZE_BP = "Cleo_TerraFirma_Rock_Dazestone";
+		private const string SCARY_BP = "Cleo_TerraFirma_Rock_Scary"; // display: grimslate (tfmine's test mine; was dazestone until its 2026-07-25 cut)
 		private const string TANGLE_BP = "Cleo_TerraFirma_Rock_Bola";      // display: tanglelith (name pending mini-slate)
 		private const string TAR_PATCH_BP = "Cleo_TerraFirma_TarPatch";
 		private const string MOTH_BP = "Glowmoth";
@@ -350,9 +350,9 @@ namespace Cleo.TerraFirma.Scripts
 		}
 
 		/// <summary>Discharge law + party gate in one wish (fragility system RULED 2026-07-25):
-		/// a player-owned dazestone must NOT trigger on an allied baboon crossing it (party gate),
+		/// a player-owned grimslate must NOT trigger on an allied baboon crossing it (party gate),
 		/// then must fire on a non-party baboon's FIRST crossing (StepChance 100) and be consumed
-		/// by its own discharge (HoldChance 0).</summary>
+		/// by its own discharge (HoldChance 0). (Test mine was dazestone until its cut.)</summary>
 		[WishCommand(Command = "tfmine")]
 		public static void MineSync()
 		{
@@ -364,10 +364,10 @@ namespace Cleo.TerraFirma.Scripts
 			List<Cell> open = origin.GetLocalAdjacentCells();
 			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
 			if (open.Count < 2) { Report("mine", false, "SETUP FAIL - need two open adjacent cells"); return; }
-			GameObject rock = GameObject.Create(DAZE_BP);
+			GameObject rock = GameObject.Create(SCARY_BP);
 			rock.SetIntProperty(SPAWN_MARK, 1);
 			Cleo_TerraFirma_FallenRockPart part = rock.GetPart<Cleo_TerraFirma_FallenRockPart>();
-			if (part == null) { Report("mine", false, "SETUP FAIL - dazestone has no FallenRockPart"); rock.Obliterate(); return; }
+			if (part == null) { Report("mine", false, "SETUP FAIL - grimslate has no FallenRockPart"); rock.Obliterate(); return; }
 			part.Owner = ply;
 			open[0].AddObject(rock);
 			// half 1: an ALLIED crossing must pass over safely (party gate)
@@ -377,11 +377,11 @@ namespace Cleo.TerraFirma.Scripts
 			open[1].AddObject(friendly);
 			friendly.Brain?.SetAlliedLeader<XRL.World.AI.AllySummon>(ply, 0, Silent: true);
 			friendly.DirectMoveTo(open[0], 0, Forced: true, IgnoreCombat: true);
-			bool allyTripped = friendly.HasEffect(typeof(XRL.World.Effects.Dazed));
+			bool allyTripped = friendly.HasEffect(typeof(XRL.World.Effects.Terrified));
 			bool intactAfterAlly = GameObject.Validate(rock) && rock.CurrentCell == open[0];
 			friendly.DirectMoveTo(open[1], 0, Forced: true, IgnoreCombat: true);
 			Report("mine.party", intactAfterAlly && !allyTripped,
-				$"allied crossing: stone {(intactAfterAlly ? "intact" : "GONE (gate failed)")}, ally {(allyTripped ? "DAZED (gate failed)" : "unharmed")} -- owner-party gate");
+				$"allied crossing: stone {(intactAfterAlly ? "intact" : "GONE (gate failed)")}, ally {(allyTripped ? "TERRIFIED (gate failed)" : "unharmed")} -- owner-party gate");
 			if (GameObject.Validate(friendly)) friendly.Obliterate();
 			// half 2: a non-party crossing must fire FIRST STEP and consume the stone
 			bool fired = false, consumed = false;
@@ -392,7 +392,7 @@ namespace Cleo.TerraFirma.Scripts
 				stranger.GetStat("Hitpoints").BaseValue = 100;
 				open[1].AddObject(stranger);
 				stranger.DirectMoveTo(open[0], 0, Forced: true, IgnoreCombat: true);
-				fired = stranger.HasEffect(typeof(XRL.World.Effects.Dazed));
+				fired = stranger.HasEffect(typeof(XRL.World.Effects.Terrified));
 				consumed = !GameObject.Validate(rock);
 				if (GameObject.Validate(stranger)) stranger.Obliterate();
 			}

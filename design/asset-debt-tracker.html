@@ -1,0 +1,220 @@
+﻿<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terra Firma -Asset Report (generated)</title><style>
+:root{--bg:#faf9f7;--surface:#fff;--ink:#1f2430;--ink2:#5b6272;--ink3:#8a90a0;--line:#e6e4df;--ok:#1f5c33;--okbg:#e3efe6;--warn:#7a2727;--warnbg:#f6e3e3;--info:#274f80;--infobg:#e3ecf7}
+@media (prefers-color-scheme:dark){:root{--bg:#14161c;--surface:#1d2028;--ink:#e8e9ee;--ink2:#aab0bf;--ink3:#7c8291;--line:#2c303b;--ok:#9fd4ae;--okbg:#1e3a28;--warn:#e3a1a1;--warnbg:#452222;--info:#a9c8ef;--infobg:#203752}}
+*{box-sizing:border-box}body{margin:0;padding:24px;background:var(--bg);color:var(--ink);font:14px/1.5 "Segoe UI",system-ui,sans-serif}
+h1{font-size:20px;margin:0 0 4px}.sub{color:var(--ink2);margin-bottom:20px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:24px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px}.tile .n{font-size:26px;font-weight:650}.tile .l{color:var(--ink2);font-size:12px}
+section{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px;overflow-x:auto}
+h2{font-size:14px;margin:0 0 10px}table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;color:var(--ink3);font-weight:600;padding:4px 10px 6px 0;border-bottom:1px solid var(--line)}td{padding:5px 10px 5px 0;border-bottom:1px solid var(--line);vertical-align:top}tr:last-child td{border-bottom:none}
+.chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11.5px;font-weight:600;white-space:nowrap}.ok{background:var(--okbg);color:var(--ok)}.warn{background:var(--warnbg);color:var(--warn)}.info{background:var(--infobg);color:var(--info)}
+.foot{color:var(--ink3);font-size:12px;margin-top:8px}</style></head><body>
+<h1>Terra Firma -asset report</h1>
+<div class="sub">Generated 2026-07-25 23:37 by scanning the mod source and deployed folder. Nothing on this page is hand-maintained; rerun <b>design\generate-asset-report.ps1</b> to refresh. Design/ideation lives in asset-debt-tracker.md and TODO.md, not here.</div>
+<div class="tiles">
+<div class="tile"><div class="n">16</div><div class="l">mod sprites on disk</div></div>
+<div class="tile"><div class="n">16</div><div class="l">wired to blueprints/code</div></div>
+<div class="tile"><div class="n">0</div><div class="l">referenced but MISSING</div></div>
+<div class="tile"><div class="n">0</div><div class="l">drawn but unwired</div></div>
+<div class="tile"><div class="n">129</div><div class="l">Cleo_* blueprints</div></div>
+<div class="tile"><div class="n">0</div><div class="l">source&harr;deploy drift files</div></div>
+<div class="tile"><div class="n">18</div><div class="l">sprites still TO DRAW</div></div>
+</div>
+<section><h2>Sprite queue -what still needs drawing (from sprites-needed.json; status auto-derived: drop the file in Textures and this flips on the next run)</h2><table><tr><th>Planned file</th><th>For</th><th>Source</th><th>Status</th></tr>
+<tr><td>hewer.png</td><td>NPC roster - hewer (Fissure)</td><td>ruled</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>mason.png</td><td>NPC roster - mason (Stoneshaper)</td><td>ruled</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>outrider.png</td><td>NPC roster - outrider (EB)</td><td>ruled</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>drover.png</td><td>NPC roster - drover (beast-tender)</td><td>ruled</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>provisioner.png</td><td>NPC roster - provisioner (trade)</td><td>ruled</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>overseer.png</td><td>NPC roster - overseer (legendary)</td><td>ruled</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>molebeast.png</td><td>mole-beast (beast of burden)</td><td>ruled</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>firedish.png</td><td>communal - carved fire dish</td><td>user jam</td><td><span class="chip ok">done (drawn + wired)</span></td></tr>
+<tr><td>quarrybricks1.png</td><td>block yard / dressing</td><td>user jam</td><td><span class="chip ok">done (drawn + wired)</span></td></tr>
+<tr><td>quarrybricks2.png</td><td>block yard / dressing</td><td>user jam</td><td><span class="chip ok">done (drawn + wired)</span></td></tr>
+<tr><td>quarrybricks3.png</td><td>block yard / dressing</td><td>user jam</td><td><span class="chip ok">done (drawn + wired)</span></td></tr>
+<tr><td>toolrack.png</td><td>workshop - tool rack (no base low-tech rack)</td><td>user jam</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>minerallick.png</td><td>sty - mineral lick</td><td>proposed (Claude)</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>lithophone.png</td><td>communal - lithophone</td><td>proposed (Claude)</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>eyestele.png</td><td>stele variant (boundary/memorial/musing)</td><td>liked</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>viewingstone.png</td><td>viewing stone (trade curio)</td><td>liked</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>crackedviewingstone.png</td><td>cracked viewing stone (Fissure drop)</td><td>liked (user&#39;s item)</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>sealedgeode.png</td><td>sealed geode (Stilt lottery)</td><td>liked</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>fossil.png</td><td>fossil curio</td><td>liked</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>mossbox.png</td><td>moss box</td><td>idea (user notes)</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>cragmensch_malformed.png</td><td>malformed cragmensch (VAR, if committed)</td><td>idea</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>quarrystack.png</td><td>quarried stone stack (LOW WALL, not furniture) - exterior yard rows with lanes, per user photo ref of palletized piles</td><td>user 2026-07-25</td><td><span class="chip warn">TO DRAW</span></td></tr>
+</table></section>
+<section><h2>Missing sprites -referenced by the mod, no file on disk</h2><table><tr><th>Expected file</th><th>Referenced in</th></tr>
+<tr><td colspan="2"><span class="chip ok">none -every reference resolves</span></td></tr>
+</table></section>
+<section><h2>Wired sprites -file exists and something uses it</h2><table><tr><th>Sprite</th><th>Present</th><th>Referenced in</th></tr>
+<tr><td>abilities/abil_attunestone.png</td><td><span class="chip ok">src+deploy</span></td><td>Abilities.xml</td></tr>
+<tr><td>abilities/abil_calcify.png</td><td><span class="chip ok">src+deploy</span></td><td>Abilities.xml, Mutations.xml</td></tr>
+<tr><td>abilities/abil_earthenbarrage.png</td><td><span class="chip ok">src+deploy</span></td><td>Mutations.xml</td></tr>
+<tr><td>abilities/abil_fissure.png</td><td><span class="chip ok">src+deploy</span></td><td>Abilities.xml, Mutations.xml</td></tr>
+<tr><td>abilities/abil_geomancy.png</td><td><span class="chip ok">src+deploy</span></td><td>Mutations.xml</td></tr>
+<tr><td>abilities/abil_gorgonsgaze.png</td><td><span class="chip ok">src+deploy</span></td><td>Abilities.xml, Mutations.xml</td></tr>
+<tr><td>abilities/abil_stoneshaper.png</td><td><span class="chip ok">src+deploy</span></td><td>Abilities.xml, Mutations.xml</td></tr>
+<tr><td>abilities/abil_takestones_off.png</td><td><span class="chip ok">src+deploy</span></td><td>Abilities.xml</td></tr>
+<tr><td>abilities/abil_takestones_on.png</td><td><span class="chip ok">src+deploy</span></td><td>Abilities.xml</td></tr>
+<tr><td>blunted_chisel.png</td><td><span class="chip ok">src+deploy</span></td><td>ObjectBlueprints.xml</td></tr>
+<tr><td>boar vessel.png</td><td><span class="chip ok">src+deploy</span></td><td>Pets.xml</td></tr>
+<tr><td>firedish.png</td><td><span class="chip ok">src+deploy</span></td><td>ObjectBlueprints.xml</td></tr>
+<tr><td>quarrybricks1.png</td><td><span class="chip ok">src+deploy</span></td><td>ObjectBlueprints.xml</td></tr>
+<tr><td>quarrybricks2.png</td><td><span class="chip ok">src+deploy</span></td><td>ObjectBlueprints.xml</td></tr>
+<tr><td>quarrybricks3.png</td><td><span class="chip ok">src+deploy</span></td><td>ObjectBlueprints.xml</td></tr>
+<tr><td>stonecarver.png</td><td><span class="chip ok">src+deploy</span></td><td>Callings.xml</td></tr>
+</table></section>
+<section><h2>Unwired sprites -drawn, nothing references them yet</h2><table><tr><th>Sprite</th><th>Present</th></tr>
+<tr><td colspan="2"><span class="chip ok">none</span></td></tr>
+</table></section>
+<section><h2>Source &harr; deploy drift</h2><table><tr><th>File</th><th>State</th></tr>
+<tr><td colspan="2"><span class="chip ok">in sync</span></td></tr>
+</table></section>
+<section><h2>Rooms (from rooms.json -the one hand-curated input)</h2><table><tr><th>Room</th><th>Source</th><th>Status</th><th>Needs</th></tr>
+<tr><td>communal (hookah corner)</td><td>user jam</td><td>slice built — tfpaint v2 (15-cell pocket, 3 tinted blocks, hookah, 2 cushions, fire dish)</td><td>firedish.png; coziness sign-off</td></tr>
+<tr><td>feeding sty</td><td>user jam</td><td>not started</td><td>mineral lick sprite; feed/dung reuse checks</td></tr>
+<tr><td>overseer tent</td><td>user jam</td><td>not started</td><td>no new sprites (tent/chest/statues reuse)</td></tr>
+<tr><td>open-air workshop</td><td>user jam</td><td>not started</td><td>tool rack variant sprite</td></tr>
+<tr><td>block yard</td><td>user jam</td><td>split ruling 2026-07-25: loose blocks INSIDE (work-in-progress, existing furniture) + stack rows OUTSIDE the mouth (staged inventory, low-wall blueprint, lanes between rows - camp signage + tier-1 of the theft ladder; marked blocks deep inside = tier 2)</td><td>quarrystack.png (low-wall tile)</td></tr>
+<tr><td>sleeping niches (small camp)</td><td>committed 2026-07-25</td><td>built - tfsleep wish (3 alcoves, bedroll + figurine roll, puncture guard)</td><td>coziness critique</td></tr>
+<tr><td>divot tunnels (connective tissue)</td><td>user 2026-07-25</td><td>built - tftunnel / tfwarren wishes (L-spine, divots every 3rd cell)</td><td>layout critique</td></tr>
+<tr><td>shrine niche</td><td>proposed (Claude)</td><td>not committed</td><td>stele variant; viewing stone sprite</td></tr>
+<tr><td>mill-pantry</td><td>proposed (Claude)</td><td>not committed</td><td>no new sprites (Millstone/powders reuse)</td></tr>
+</table></section>
+<section><h2>Cleo_* blueprint inventory (129)</h2><table><tr><th>Blueprint</th><th>File</th></tr>
+<tr><td>Cleo_TerraFirma_AcidPuddle</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Aculei</td><td>ObjectBlueprints.xml</td></tr>
+<tr><td>Cleo_TerraFirma_BaboonFigurineItem</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_BaseFallenRock</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_BaseGroundRock</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Blunted Chisel</td><td>ObjectBlueprints.xml</td></tr>
+<tr><td>Cleo_TerraFirma_BoarVessel</td><td>Pets.xml</td></tr>
+<tr><td>Cleo_TerraFirma_BrinePuddle</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Burrowing Urchin</td><td>Creatures.xml</td></tr>
+<tr><td>Cleo_TerraFirma_EphemeralStone</td><td>Objects.xml</td></tr>
+<tr><td>Cleo_TerraFirma_EphemeralStoneResonant</td><td>Objects.xml</td></tr>
+<tr><td>Cleo_TerraFirma_FireDish</td><td>ObjectBlueprints.xml</td></tr>
+<tr><td>Cleo_TerraFirma_ForceBubbleShard</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_ForceWallShard</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Ajistone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Blurring</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Bola</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_DeepIcy</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_DeepMelting</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_DeepScorching</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_DeepVoltaic</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Drainstone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Drifting</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Fungal</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_FungalLuminous</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_FungalMumbles</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_FungalWax</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_GlowingPhosphorescent</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_GlowingRadioactive</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Gyrestone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Healstone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Hexstone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Hypersonic</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Icy</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Lovestone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Melting</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Mullstone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Oilstone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Pulsestone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Rubber</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Salt</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Scary</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Scorching</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Shieldstone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Shunting</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Sludgestone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Soupstone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Spiderweb</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Spiny</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Strange</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Torpor</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Vantabsidian</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Voltaic</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_Whorlstone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_OilPuddle</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_QuarriedBlock</td><td>ObjectBlueprints.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Ajistone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_ApeStatue</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_BaboonFigurine</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Blurring</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Bola</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Chasm</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_CompressedAsh</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Crack</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_CrumbledWall</td><td>Rocks.xml</td></tr>
+<!-- Rock_Dazestone row removed: CUT 2026-07-25 (blueprint dormant, no sprite owed) -->
+<tr><td>Cleo_TerraFirma_Rock_DeepIcy</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_DeepMelting</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_DeepScorching</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_DeepVoltaic</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Drainstone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Drifting</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Fungal</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_FungalLuminous</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_FungalMumbles</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_FungalWax</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Generic</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_GlowingPhosphorescent</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_GlowingRadioactive</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Gyrestone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Healstone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Hexstone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Hypersonic</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Icy</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Lodestone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Lovestone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Melting</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Mullstone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Oilstone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Omnigeyser1</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Omnigeyser2</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Omnigeyser3</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Pebbles</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Pointy</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Pulsestone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Rubber</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Rubble</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Rusty</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Salt</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Scary</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Scorching</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_ShatteredStalactite</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Shieldstone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Shunting</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Sludgestone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Soupstone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Spiderweb</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Spiny</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Stalagmite</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Strange</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Torpor</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Vantabsidian</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Volatile</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Voltaic</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Wall</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Whorlstone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_SaltPuddle</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_SlimePuddle</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Splintered Mallet</td><td>ObjectBlueprints.xml</td></tr>
+<tr><td>Cleo_TerraFirma_StabilizerBands</td><td>Objects.xml</td></tr>
+<tr><td>Cleo_TerraFirma_StatueMaker</td><td>Objects.xml</td></tr>
+<tr><td>Cleo_TerraFirma_StoneApeFist</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_StoneBaboonBite</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_StoneMeal</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_StoneshaperStatue</td><td>Objects.xml</td></tr>
+<tr><td>Cleo_TerraFirma_StoneshaperStatueNaturalWeapon</td><td>Objects.xml</td></tr>
+<tr><td>Cleo_TerraFirma_SurgeField</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Urchin Spine</td><td>ObjectBlueprints.xml</td></tr>
+<tr><td>Cleo_TerraFirma_WallCalcify</td><td>Objects.xml</td></tr>
+</table></section>
+<div class="foot">15 base-game tile references (Items/â€¦, Creatures/â€¦) ignored -they resolve from game assets.</div>
+</body></html>
+

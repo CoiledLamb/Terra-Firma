@@ -130,7 +130,11 @@
 			<group Name="Headliners" Weight="75" Style="pickone">
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Sludgestone" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Crack" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Dazestone" />
+				<!-- dazestone CUT + grimslate down from tier 4 (RULED 2026-07-25, the intervention
+				     pass resolved by subtraction: "we could potentially just cut dazestone and move
+				     grimslate down" / "let's just go for that then"). Daze returns to being EB's
+				     verb; terror is tier 2's CC lesson now (confusion/sleep stay the tier-4 rungs). -->
+				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Scary" />
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Pebbles" />
@@ -165,7 +169,7 @@
 			<group Name="Headliners" Weight="75" Style="pickone">
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Whorlstone" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Torpor" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Scary" />
+				<!-- grimslate moved down to tier 2 (the dazestone cut-and-swap, 2026-07-25) -->
 				<group Name="Fungal" Weight="10" Style="pickone">
 					<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Fungal" />
 					<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_FungalLuminous" />
@@ -207,6 +211,13 @@
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Volatile" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Mullstone" />
 				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Omnigeyser1" />
+				<!-- the glowing twins moved DOWN from tier 9 (RULED 2026-07-25: "they're really not
+				     that dangerous, and it pads out the roster more"); the 50/50 no-tells gamble
+				     rides one slot as always -->
+				<group Name="Glowing" Weight="8" Style="pickone">
+					<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_GlowingRadioactive" />
+					<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_GlowingPhosphorescent" />
+				</group>
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="20" Blueprint="Cleo_TerraFirma_Rock_CrumbledWall" />
@@ -262,11 +273,7 @@
 				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Blurring" />
 				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Lovestone" />
 				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Drifting" />
-				<group Name="Glowing" Weight="8" Style="pickone">
-					<!-- the twins ride one slot at even odds: the gamble is 50/50 by design -->
-					<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_GlowingRadioactive" />
-					<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_GlowingPhosphorescent" />
-				</group>
+				<!-- glowing twins moved down to tier 6 (RULED 2026-07-25, roster padding) -->
 				<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Gyrestone" />
 				<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Omnigeyser3" />
 				<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_DeepVoltaic" />
@@ -298,7 +305,7 @@
 			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Salt" />
 			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Pointy" />
 			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Healstone" />
-			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Dazestone" />
+			<!-- dazestone CUT 2026-07-25 (tier-2 cut-and-swap); blueprint dormant, out of the pool -->
 			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Crack" />
 			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Whorlstone" />
 			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Torpor" />

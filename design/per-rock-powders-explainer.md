@@ -36,8 +36,8 @@ individual twins.
 
 36 XML objects and a standing maintenance rule (new cookable rock = new `Ground_` twin + spice
 key). The mill finds twins automatically by the `_Rock_` → `_Ground_` name convention, so the
-cost is purely authorship, not plumbing. Dazestone deliberately has no twin yet (cooking domain
-OPEN — the Rocks.xml comment records it); it joins when its intervention pass resolves.
+cost is purely authorship, not plumbing. (Dazestone never got a twin and never will — CUT
+2026-07-25, its intervention pass resolved by subtraction.)
 
 ## The ruling asked
 

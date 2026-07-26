@@ -183,9 +183,11 @@ findings):**
   link; then design the real fix. **`tfspore` peek wish BUILT + DEPLOYED 2026-07-25 (user
   request): pure read of the stored permutation to chat — never rolls, never writes. Refined
   experiment protocol in the TODO entry.**
-- [ ] 🆕 `[design]` **Dazestone intervention pass (user: "flag this for needing intervention")** —
-  weakest headliner (survey 6): (a) split-channel stun-gas cooking only, or (b) the honest shunt
-  (stun payload, band 2, CC trio with vertigneiss/lullabaster). User acknowledged both.
+- [x] 🆕 `[design]` **Dazestone intervention — RESOLVED BY SUBTRACTION 2026-07-25: dazestone CUT
+  (blueprint dormant), grimslate down from tier 4 to hold tier 2, glowing twins down tier 9 → 6
+  (same-sitting rider, roster padding). No bald spot (roster verified before ruling); rename
+  slot, cooking hole, sprite debt, and spice edge case all closed with it; daze is EB's verb
+  again. Full record + knock-ons in TODO.** Original: (a) split-channel / (b) stun shunt.
 - [ ] 🆕 `[design]` **Vitriolite minor gear break (user: "a great addition")** — restore the CUT
   etch at T1 scale: 25–50% (DRAFT) on throw-hit applies ShatteredArmor; full BreakGear stays
   deep-only. XML-only; next cooking-rocks sitting.
@@ -206,9 +208,9 @@ findings):**
 - [ ] 🆕 `[design]` **Quarrelquartz/gyrestone at the mill** — reopen the mill-hazard layer for real
   (port the whorl's tear-apart recipe: quarrelquartz detonates, gyrestone vents 3 vortices) or
   stand by the safe-mill ruling and strike the stale Rocks.xml comment.
-- [ ] 🆕 `[text]` **Name rewrite flags: strange rock · dazestone · oilstone · glowing twins ·
-  healstone** — twins keep ONE shared name stamped twice (no-tells identity); dazestone renames
-  AFTER its intervention resolves; REOPENS the pass-1 "stay bland on purpose" ruling for strange
+- [ ] 🆕 `[text]` **Name rewrite flags: strange rock · ~~dazestone~~ (CUT 2026-07-25, slot
+  closed) · oilstone · glowing twins · healstone** — twins keep ONE shared name stamped twice
+  (no-tells identity); REOPENS the pass-1 "stay bland on purpose" ruling for strange
   + the twins. House morpheme rules + spent-ledger apply; slate rounds, user-curated.
 - [x] 🆕 `[design]` **Seam squad-drops scale — RULED CAP + BUILT + DEPLOYED 2026-07-25** (user:
   "capping somewhere like, 3-5 and then letting the rest of the seam roll something of that

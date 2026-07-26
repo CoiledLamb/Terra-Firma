@@ -28,8 +28,8 @@ Not on the list, decide at the sitting:
 - **StoneMeal** (the fallback flour): one blueprint covers every domainless grind — needs either
   an entry under its blueprint name or its own AggregatedIngredient tag. Known cosmetic wart
   recorded in TODO.md (stamped powders name as generic stone meal).
-- **Dazestone**: no ground twin yet by design (cooking domain OPEN; rides the dazestone
-  intervention pass). Key joins when the twin does.
+- **Dazestone**: ~~no ground twin yet by design~~ **CUT 2026-07-25 (intervention resolved by
+  subtraction; blueprint dormant). No key, no twin, edge case closed.**
 - **Compressed ash**: the weak-rock docket's `armorMinor` direction adds `Ground_CompressedAsh`
   — if built, it needs a key + entry too.
 

@@ -120,6 +120,10 @@
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
 
+	<!-- DAZESTONE CUT 2026-07-25 (the intervention pass resolved by subtraction; chasm
+	     precedent, blueprint dormant): out of the tier tables and the strange pool; grimslate
+	     moved down to hold tier 2. Daze returns to being Earthen Barrage's verb exclusively.
+	     Its rename slot, open cooking domain, and sprite debt all closed with the cut. -->
 	<object Name="Cleo_TerraFirma_Rock_Dazestone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="dazestone" Tile="Items/sw_smallstone.bmp" ColorString="&amp;B" DetailColor="W" />
 		<part Name="Description" Short="A stone with a ring in it that never quite stops." /> <!-- DRAFT -->
