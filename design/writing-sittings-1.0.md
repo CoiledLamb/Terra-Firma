@@ -51,6 +51,11 @@ them with Sitting B). Sittings D/F fall in behind unless something re-prioritize
 ## Sitting C — Mutation & ability text sweep (base-game-voice mandate, mod-wide)
 
 Mandate WIDENED 2026-07-23: "as close to base game language as possible" everywhere.
+**Voice-comparison infographic (CLAUDE ANALYSIS 2026-07-26):
+`design/mutation-voice-comparison.html`** — base grammar extracted from all 131 decompiled
+base mutations, conformance matrix + per-mutation scorecards for the mod's seven, and the
+automation split: mechanical fixes Claude can batch-draft vs two register questions that
+need rulings first (Fissure's lyric level text; Lithovore's wryness).
 
 - [ ] **Fissure level text** — final pass owed (draft in place since the rebuild).
 - [ ] **Calcify / Stoneshaper / Geomancy text passes** (worklist Passes 4/6/7).

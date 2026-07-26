@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mutation Voice — Terra Firma vs Base Game</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7; --surface: #fcfcfb;
+    --ink: #0b0b0b; --ink-2: #52514e; --ink-3: #898781;
+    --grid: #e1e0d9; --border: rgba(11,11,11,0.10);
+    --accent: #2a78d6;
+    --good: #0ca30c; --warn: #fab219; --bad: #d03b3b;
+    --good-ink: #006300; --warn-ink: #8a5f00; --bad-ink: #a32e2e;
+    --rules-chip: #dbe9fb; --rules-ink: #1c5cab;
+    --mod-wash: #f3efe7; --base-wash: #edf3ed;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --page: #0d0d0d; --surface: #1a1a19;
+      --ink: #ffffff; --ink-2: #c3c2b7; --ink-3: #898781;
+      --grid: #2c2c2a; --border: rgba(255,255,255,0.10);
+      --accent: #3987e5;
+      --good: #0ca30c; --warn: #fab219; --bad: #e66767;
+      --good-ink: #4cc24c; --warn-ink: #fab219; --bad-ink: #e66767;
+      --rules-chip: #16324f; --rules-ink: #86b6ef;
+      --mod-wash: #26231d; --base-wash: #1e241e;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--page); color: var(--ink);
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 32px 20px 80px; }
+  header h1 { font-size: 26px; margin: 0 0 6px; }
+  .prov {
+    font-size: 13px; color: var(--ink-2); border: 1px solid var(--border);
+    background: var(--surface); border-radius: 8px; padding: 10px 14px; margin: 14px 0 0;
+  }
+  .prov b { color: var(--ink); }
+  h2 { font-size: 19px; margin: 44px 0 4px; }
+  h2 .sub { display: block; font-size: 13px; font-weight: 400; color: var(--ink-3); margin-top: 2px; }
+  /* stat tiles */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-top: 18px; }
+  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .tile .n { font-size: 30px; font-weight: 700; line-height: 1.1; }
+  .tile .l { font-size: 12.5px; color: var(--ink-2); margin-top: 4px; }
+  /* histogram */
+  .chart { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 18px 8px; margin-top: 14px; overflow-x: auto; }
+  .hist { display: flex; align-items: flex-end; gap: 3px; height: 150px; min-width: 620px; padding-top: 26px; }
+  .hcol { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0; position: relative; height: 100%; justify-content: flex-end; }
+  .hbar { width: 100%; max-width: 34px; background: var(--accent); border-radius: 4px 4px 0 0; min-height: 2px; }
+  .hx { font-size: 11px; color: var(--ink-3); margin-top: 5px; }
+  .hmark {
+    position: absolute; top: -2px; left: 50%; transform: translateX(-50%);
+    font-size: 10.5px; color: var(--ink-2); white-space: nowrap; text-align: center; line-height: 1.25;
+  }
+  .hmark::after { content: "▾"; display: block; color: var(--ink-2); font-size: 10px; }
+  .cap { font-size: 12.5px; color: var(--ink-3); margin: 10px 2px 8px; }
+  /* grammar panels */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  .panel h3 { margin: 0 0 8px; font-size: 15px; }
+  .panel ul { margin: 0; padding-left: 18px; }
+  .panel li { margin: 7px 0; font-size: 14px; }
+  .panel li b { font-weight: 600; }
+  .ex { color: var(--ink-2); font-style: italic; }
+  .rules { background: var(--rules-chip); color: var(--rules-ink); border-radius: 4px; padding: 0 4px; font-style: normal; font-size: 0.92em; }
+  /* matrix */
+  .mtx { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-top: 14px; font-size: 13.5px; }
+  .mtx-scroll { overflow-x: auto; margin-top: 14px; }
+  .mtx th, .mtx td { padding: 8px 10px; border-bottom: 1px solid var(--grid); text-align: center; }
+  .mtx th { font-size: 12px; color: var(--ink-2); font-weight: 600; }
+  .mtx th.rowh, .mtx td.rowh { text-align: left; font-weight: 600; color: var(--ink); white-space: nowrap; }
+  .mtx thead th { border-bottom: 1px solid var(--border); vertical-align: bottom; }
+  .ok  { color: var(--good-ink); font-weight: 700; }
+  .mid { color: var(--warn-ink); font-weight: 700; }
+  .no  { color: var(--bad-ink); font-weight: 700; }
+  .na  { color: var(--ink-3); }
+  .legend { font-size: 12.5px; color: var(--ink-2); margin-top: 8px; }
+  .legend span { margin-right: 14px; white-space: nowrap; }
+  /* scorecards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-top: 14px; }
+  .card h3 { margin: 0; font-size: 16px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .chip { font-size: 11.5px; font-weight: 600; border-radius: 20px; padding: 2px 10px; white-space: nowrap; }
+  .chip.g { background: color-mix(in srgb, var(--good) 16%, transparent); color: var(--good-ink); }
+  .chip.w { background: color-mix(in srgb, var(--warn) 20%, transparent); color: var(--warn-ink); }
+  .chip.b { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad-ink); }
+  .duo { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; margin-top: 12px; }
+  @media (max-width: 760px) { .duo { grid-template-columns: 1fr; } }
+  .q { border-radius: 8px; padding: 12px 14px; font-size: 13.5px; }
+  .q.mod { background: var(--mod-wash); }
+  .q.base { background: var(--base-wash); }
+  .q .tag { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); display: block; margin-bottom: 6px; }
+  .q p { margin: 0 0 6px; white-space: pre-wrap; }
+  .q p:last-child { margin-bottom: 0; }
+  .drift { text-decoration: underline dotted var(--bad); text-underline-offset: 3px; }
+  .notes { margin: 10px 0 0; padding-left: 18px; font-size: 13.5px; }
+  .notes li { margin: 5px 0; }
+  .notes .v { font-weight: 700; margin-right: 4px; }
+  .small { font-size: 12.5px; color: var(--ink-3); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Mutation voice: Terra Firma vs the base game</h1>
+  <div class="prov">
+    <b>CLAUDE ANALYSIS 2026-07-26</b> — corpus: all <b>131</b> base mutations with description
+    methods (decompiled 2.0.211.50, <code>GetDescription</code>/<code>GetLevelText</code>) vs the
+    mod's <b>7</b> (Gorgon's Gaze, Earthen Barrage, Stoneshaper, Geomancy, Calcify, Fissure,
+    Lithovore). Basis for "conform": the WIDENED base-game-voice mandate (RULED 2026-07-23,
+    "as close to base game language as possible" mod-wide). Where drift may be deliberate mod
+    signature, it is flagged as a <b>user call</b>, not scored as an error. All rewrites remain
+    DRAFT-until-signoff per the text policy.
+  </div>
+</header>
+
+<div class="tiles">
+  <div class="tile"><div class="n">6–7</div><div class="l">median words in a base flavor line (mode 4–8)</div></div>
+  <div class="tile"><div class="n">0</div><div class="l">em-dashes in the entire base corpus (mod: also 0 ✓)</div></div>
+  <div class="tile"><div class="n">1 vs 5</div><div class="l">semicolons — base corpus vs mod's seven texts</div></div>
+  <div class="tile"><div class="n">~100%</div><div class="l">of activated base mutations end level text on Cooldown (mod: 2 missing)</div></div>
+</div>
+
+<h2>The base grammar
+  <span class="sub">Every base mutation follows the same two-part formula. This is what makes the section automatable.</span>
+</h2>
+<div class="cols">
+  <div class="panel">
+    <h3>Flavor line — <code>GetDescription</code></h3>
+    <ul>
+      <li><b>One declarative sentence,</b> second person, present tense. <span class="ex">"You emit a ray of flame." · "You animate…" ·
+        "Your wounds heal very quickly."</span></li>
+      <li><b>"You/Your" opener</b> is near-universal. Rare sanctioned variants: subject-first
+        (<span class="ex">"Horns jut out of your head."</span>) and the adverbial opener
+        (<span class="ex">"Through sheer force of will, you perform uncanny physical feats."</span> — WillForce).</li>
+      <li><b>4–8 words</b> is the home register; the long tail is earned by spectacle
+        (<span class="ex">SlogGlands, 24 words of sphincter-choked bilge hose</span>).</li>
+      <li><b>No numbers, no stats</b> — for leveled mutations, mechanics live entirely in level text.
+        Defects and non-leveled mutations instead append precise mechanic lines after a blank line
+        (<span class="ex">Carnivorous: "You eat meat exclusively.\n\nYou get no satiation from…"</span>).</li>
+      <li><b>Punctuation is bare:</b> zero em-dashes in 131 mutations, one semicolon, parentheses
+        only for glosses like <span class="ex">"(MA)"</span>.</li>
+    </ul>
+  </div>
+  <div class="panel">
+    <h3>Level text — <code>GetLevelText</code></h3>
+    <ul>
+      <li><b>One fact per line.</b> Mechanism sentence(s) first, then stat lines, then
+        <b>Cooldown last</b>, then a reputation line if any.</li>
+      <li><b>Mechanism sentences</b> are terse: subjectless third person
+        (<span class="ex">"Creates 9 contiguous squares of immobile forcefield."</span>) or
+        "You may / You can…" — never imperative.</li>
+      <li><b>Stat labels from a fixed vocabulary:</b> Range · Area · Damage increment ·
+        Duration · Cone length/angle · Cooldown: N <b>rounds</b>.</li>
+      <li><b><span class="rules">{{rules|…}}</span> wraps scaling values;</b> flat constants
+        usually go bare (<span class="ex">"Cooldown: 10 rounds"</span> · SunderMind's
+        <span class="ex">"Range: sight"</span> is unwrapped).</li>
+      <li><b>No editorializing.</b> The text states what happens; it never explains design intent
+        or adds asides.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Flavor-line length: the mod sits mostly in the base register
+  <span class="sub">Distribution of first-sentence word counts across 113 You-opener base description strings; markers show each Terra Firma flavor line.</span>
+</h2>
+<div class="chart">
+  <div class="hist">
+    <!-- counts: 2:1 3:3 4:19 5:15 6:15 7:12 8:13 9:6 10:1 11:6 12:7 13:6 14:1 15:2 16:2 17:1 18:2 23:1 ; scale: 19 -> 124px -->
+    <div class="hcol"><div class="hbar" style="height:7px"></div><div class="hx">2</div></div>
+    <div class="hcol"><div class="hmark">Lithovore</div><div class="hbar" style="height:20px"></div><div class="hx">3</div></div>
+    <div class="hcol"><div class="hbar" style="height:124px"></div><div class="hx">4</div></div>
+    <div class="hcol"><div class="hbar" style="height:98px"></div><div class="hx">5</div></div>
+    <div class="hcol"><div class="hbar" style="height:98px"></div><div class="hx">6</div></div>
+    <div class="hcol"><div class="hmark">EB · Geomancy ·<br>Stoneshaper</div><div class="hbar" style="height:78px"></div><div class="hx">7</div></div>
+    <div class="hcol"><div class="hmark">Gorgon</div><div class="hbar" style="height:85px"></div><div class="hx">8</div></div>
+    <div class="hcol"><div class="hbar" style="height:39px"></div><div class="hx">9</div></div>
+    <div class="hcol"><div class="hbar" style="height:7px"></div><div class="hx">10</div></div>
+    <div class="hcol"><div class="hbar" style="height:39px"></div><div class="hx">11</div></div>
+    <div class="hcol"><div class="hbar" style="height:46px"></div><div class="hx">12</div></div>
+    <div class="hcol"><div class="hbar" style="height:39px"></div><div class="hx">13</div></div>
+    <div class="hcol"><div class="hmark">Calcify</div><div class="hbar" style="height:7px"></div><div class="hx">14</div></div>
+    <div class="hcol"><div class="hmark">Fissure</div><div class="hbar" style="height:13px"></div><div class="hx">15</div></div>
+    <div class="hcol"><div class="hbar" style="height:13px"></div><div class="hx">16</div></div>
+    <div class="hcol"><div class="hbar" style="height:7px"></div><div class="hx">17</div></div>
+    <div class="hcol"><div class="hbar" style="height:13px"></div><div class="hx">18</div></div>
+    <div class="hcol"><div class="hbar" style="height:7px"></div><div class="hx">23</div></div>
+  </div>
+  <p class="cap">Five of seven mod flavor lines land inside the base mode (3–8 words). Calcify (14) and
+  Fissure (15) sit in the thin tail — legal, but the tail is where base spends spectacle, and
+  neither line is spending it on spectacle.</p>
+</div>
+
+<h2>Conformance matrix
+  <span class="sub">✓ aligned · △ partial drift · ✗ drift · — not applicable. Symbols carry the meaning; color is reinforcement.</span>
+</h2>
+<div class="mtx-scroll">
+<table class="mtx">
+  <thead>
+    <tr>
+      <th class="rowh">Mutation</th>
+      <th>Flavor:<br>opener &amp; length</th>
+      <th>Flavor:<br>no mechanics</th>
+      <th>Level:<br>fact-per-line</th>
+      <th>Level:<br>base stat labels</th>
+      <th>Level:<br>rules-wrap discipline</th>
+      <th>Level:<br>cooldown last</th>
+      <th>Register:<br>no editorializing</th>
+      <th>Punctuation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="rowh">Gorgon's Gaze</td><td class="ok">✓</td><td class="ok">✓</td><td class="mid">△</td><td class="ok">✓</td><td class="mid">△</td><td class="ok">✓</td><td class="ok">✓</td><td class="ok">✓</td></tr>
+    <tr><td class="rowh">Earthen Barrage</td><td class="ok">✓</td><td class="ok">✓</td><td class="no">✗</td><td class="ok">✓</td><td class="ok">✓</td><td class="na">—</td><td class="no">✗</td><td class="no">✗</td></tr>
+    <tr><td class="rowh">Stoneshaper</td><td class="ok">✓</td><td class="ok">✓</td><td class="mid">△</td><td class="ok">✓</td><td class="mid">△</td><td class="no">✗</td><td class="mid">△</td><td class="mid">△</td></tr>
+    <tr><td class="rowh">Geomancy</td><td class="ok">✓</td><td class="ok">✓</td><td class="ok">✓</td><td class="ok">✓</td><td class="mid">△</td><td class="na">—</td><td class="ok">✓</td><td class="ok">✓</td></tr>
+    <tr><td class="rowh">Calcify</td><td class="mid">△</td><td class="ok">✓</td><td class="ok">✓</td><td class="ok">✓</td><td class="mid">△</td><td class="no">✗</td><td class="ok">✓</td><td class="ok">✓</td></tr>
+    <tr><td class="rowh">Fissure</td><td class="ok">✓</td><td class="ok">✓</td><td class="no">✗</td><td class="no">✗</td><td class="ok">✓</td><td class="ok">✓</td><td class="no">✗</td><td class="mid">△</td></tr>
+    <tr><td class="rowh">Lithovore</td><td class="mid">△</td><td class="ok">✓</td><td class="ok">✓</td><td class="no">✗</td><td class="na">—</td><td class="na">—</td><td class="mid">△</td><td class="ok">✓</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="legend">
+  <span><b class="ok">✓ aligned</b> — matches the base formula</span>
+  <span><b class="mid">△ partial</b> — small mechanical fix</span>
+  <span><b class="no">✗ drift</b> — needs a rewrite or a keep-it ruling</span>
+  <span><b class="na">—</b> — dimension doesn't apply (passive / defect)</span>
+</p>
+
+<h2>Per-mutation scorecards
+  <span class="sub">Dotted underlines mark the drifting phrases. Base touchstone = the closest in-house exemplar for that shape.</span>
+</h2>
+
+<div class="card">
+  <h3>Gorgon's Gaze <span class="chip g">closest to house voice</span></h3>
+  <div class="duo">
+    <div class="q mod"><span class="tag">Terra Firma</span>
+      <p>"Your unblinking gaze stops creatures in their tracks."</p>
+      <p>"Taking any action other than passing the turn will break your gaze." …
+"<span class="drift">Targets that escape after {{rules|2}} or more failures are left partially petrified: −40 move speed, −10 Quickness, +2 AV for 200 rounds</span>"
+"Range: <span class="drift">{{rules|sight}}</span>"
+"Cooldown: {{rules|80}} rounds"</p>
+    </div>
+    <div class="q base"><span class="tag">Base touchstone — Sunder Mind</span>
+      <p>"You sunder the mind of an enemy, leaving them reeling in pain."</p>
+      <p>"Taking any action other than passing the turn will break the connection."
+"Range: sight"
+"Cooldown: 175 rounds"</p>
+    </div>
+  </div>
+  <ul class="notes">
+    <li><span class="v ok">✓</span>Deliberately mirrors Sunder Mind's structure line-for-line, and it shows — this is the model the rest can follow.</li>
+    <li><span class="v mid">△</span>The stone-mark line packs four stats and a duration into one line; base grammar wants it split (one fact per line).</li>
+    <li><span class="v mid">△</span>"Range: {{rules|sight}}" — Sunder Mind leaves "sight" unwrapped; rules-wrap is for scaling numbers.</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>Earthen Barrage <span class="chip b">editorial asides in rules text</span></h3>
+  <div class="duo">
+    <div class="q mod"><span class="tag">Terra Firma</span>
+      <p>"You form hefty rocks suitable for throwing."</p>
+      <p>"Penetration bonus: {{rules|+N}} <span class="drift">(attuned stones forgo it; resonance pierces by matching, not force)</span>"
+"<span class="drift">While active, a sculpted stone occupies your thrown weapon slot and is replaced from your reserve when thrown.</span>"
+"…granting {{rules|+2}}<span class="drift">/</span>{{rules|+4}} DV in place of AV"</p>
+    </div>
+    <div class="q base"><span class="tag">Base touchstone — Electrical Generation</span>
+      <p>"You accrue electrical charge that you can use and discharge to deal damage."</p>
+      <p>"Maximum charge: {{C|N}}"
+"Accrue base {{C|N}} charge per turn"
+"EMP causes involuntary discharge (difficulty 18 Willpower save)"</p>
+    </div>
+  </div>
+  <ul class="notes">
+    <li><span class="v ok">✓</span>Flavor line and stat labels ("Damage increment:") are on-formula; the resource-economy structure has a clean base model in Electrical Generation.</li>
+    <li><span class="v no">✗</span>The parenthetical <i>"resonance pierces by matching, not force"</i> is design rationale inside rules text — no base precedent (1 semicolon in the whole base corpus; this text has one in one line).</li>
+    <li><span class="v no">✗</span>Several compound lines carry two or three facts each; base splits them. The whorl/deflect block reads as prose where base would ladder stats.</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>Stoneshaper <span class="chip w">imperative opener; missing cooldown</span></h3>
+  <div class="duo">
+    <div class="q mod"><span class="tag">Terra Firma</span>
+      <p>"You animate earth to fight for you."</p>
+      <p>"<span class="drift">Gaze at a creature, then at a wall, to carve</span> an animate statue of that creature from the wall."
+"The statue inherits the creature's body plan and physique <span class="drift">({{rules|Strength}}, {{rules|Agility}}, {{rules|Toughness}})</span>, but not its mutations, skills, or equipment…"
+"Statue hit points: {{rules|N}}" … <span class="drift">[no Cooldown line]</span></p>
+    </div>
+    <div class="q base"><span class="tag">Base touchstone — Stone Gaze (Lithofex)</span>
+      <p>"You turn things to stone with your gaze."</p>
+      <p>"You can gaze {{rules|N}} squares after a one-turn warmup and turn targets to stone.
+Cooldown: {{rules|N}} rounds"</p>
+    </div>
+  </div>
+  <ul class="notes">
+    <li><span class="v ok">✓</span>Flavor line is the best in the mod — seven words, perfect shape.</li>
+    <li><span class="v mid">△</span>"Gaze at a creature, then at a wall, to carve…" is imperative; base voice is "You gaze… / You may…" (see touchstone). One-clause fix.</li>
+    <li><span class="v mid">△</span>Rules-wrap on attribute <i>names</i> (Strength/Agility/Toughness) — base wraps values, not nouns.</li>
+    <li><span class="v no">✗</span>No Cooldown line despite a real cooldown — base lists it on essentially every activated power.</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>Geomancy <span class="chip g">on-formula</span></h3>
+  <div class="duo">
+    <div class="q mod"><span class="tag">Terra Firma</span>
+      <p>"You sense minute details through earthly vibrations."</p>
+      <p>"Stones you throw reveal the area around their point of impact."
+"Power equals the stone's <span class="drift">{{rules|sell value}}</span> or <span class="drift">{{rules|weight}}</span>, whichever is higher."
+"+{{rules|2}} thrown weapon range"</p>
+    </div>
+    <div class="q base"><span class="tag">Base touchstone — Heightened Hearing</span>
+      <p>"You are possessed of unnaturally acute hearing."</p>
+      <p>"You detect the presence of creatures within a radius of {{rules|N}}."
+"Chance to identify nearby detected creatures"</p>
+    </div>
+  </div>
+  <ul class="notes">
+    <li><span class="v ok">✓</span>Passive-sense structure matches the Heightened family cleanly; "whichever is higher" has direct base precedent (Beguiling's success roll).</li>
+    <li><span class="v mid">△</span>Rules-wrap on words ("sell value", "weight", "full scanning") — base reserves the wrap for numbers. Unwrap and this is done.</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>Calcify <span class="chip w">missing cooldown; hedged verb</span></h3>
+  <div class="duo">
+    <div class="q mod"><span class="tag">Terra Firma</span>
+      <p>"Through intense focus, <span class="drift">you may cause solid walls to appear</span> out of thin air."</p>
+      <p>"Creates a contiguous line of permanent walls in empty tiles starting adjacent to you"
+"Hit points per wall: {{rules|N}}"
+"Created walls have {{rules|0}} AV and {{rules|−10}} DV" <span class="drift">[no Cooldown line]</span></p>
+    </div>
+    <div class="q base"><span class="tag">Base touchstone — Force Wall + WillForce</span>
+      <p>"You generate a wall of force that protects you from your enemies." · "Through sheer force of will, you perform uncanny physical feats."</p>
+      <p>"Creates 9 contiguous squares of immobile forcefield."
+"Duration: {{rules|N}} rounds"
+"Cooldown: 100 rounds"</p>
+    </div>
+  </div>
+  <ul class="notes">
+    <li><span class="v ok">✓</span>The adverbial opener is sanctioned (WillForce does exactly this); "Creates a contiguous line…" is pure Force Wall grammar.</li>
+    <li><span class="v mid">△</span>"you may cause … to appear" hedges twice where base declares once — Force Wall just <i>generates</i>. Candidate shape: "You still the air into stone." register, or plain "You raise a line of solid stone walls." (DRAFT).</li>
+    <li><span class="v no">✗</span>No Cooldown line despite cooldown 90.</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>Fissure <span class="chip b">largest register drift — user call</span></h3>
+  <div class="duo">
+    <div class="q mod"><span class="tag">Terra Firma</span>
+      <p>"You shake the stones of the deep ceiling loose and bring them down around you."</p>
+      <p>"<span class="drift">The earth above you gives way, and its stones come down around you.</span>"
+"{{rules|N}} rocks fall within {{rules|R}} squares of you, <span class="drift">crushing whatever they strike for their heft</span> plus {{rules|L}}."
+"<span class="drift">The ceiling nearest you falls thickest and hardest.</span>"
+"<span class="drift">What falls lies where it fell: take it up and hurl it, or leave it underfoot.</span>"
+"Cooldown: {{rules|N}} rounds"</p>
+    </div>
+    <div class="q base"><span class="tag">Base touchstone — Burgeoning</span>
+      <p>"You cause plants to spontaneously grow in a nearby area, hindering your enemies."</p>
+      <p>"Range: 8"
+"Area: 3x3 + growth into adjacent tiles"
+"Cooldown: {{rules|N}} rounds"
+"More powerful plants summoned"</p>
+    </div>
+  </div>
+  <ul class="notes">
+    <li><span class="v ok">✓</span>Cooldown last, rules-wrap correct, and the flavor line (though long at 15 words) is legal.</li>
+    <li><span class="v no">✗</span>The level text is a prose poem: its first line restates the flavor line (base never repeats), and "falls thickest and hardest" / "What falls lies where it fell:" are lyric register where base states facts.</li>
+    <li><span class="v no">✗</span>Mechanics are cast as flavor — "crushing … for their heft" instead of a "Damage:" label; the decay clock hides inside "Pocketed too long…".</li>
+    <li><span class="v mid">△</span><b>USER CALL:</b> several of these lines document ruled mechanics ("Deeper strata shed stronger stone." shipped with the depth ruling). Conforming keeps every fact but restates them in base grammar; or rule the lyric register a deliberate mod signature and exempt Fissure. The mandate as ruled says conform.</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>Lithovore <span class="chip w">wry where base is precise — user call</span></h3>
+  <div class="duo">
+    <div class="q mod"><span class="tag">Terra Firma</span>
+      <p>"You eat rocks. <span class="drift">Only rocks.</span>"</p>
+      <p>"You can eat stones and gemstones; <span class="drift">other food turns your stomach</span>."
+"<span class="drift">Some stones do you a bit of good on the way down. Others are inadvisable.</span>"
+"When you're famished, you may devour statues."</p>
+    </div>
+    <div class="q base"><span class="tag">Base touchstone — Carnivorous</span>
+      <p>"You eat meat exclusively."</p>
+      <p>"You get no satiation from foods that aren't meat.
+If you eat raw food that isn't meat, there's a 50% chance you become ill for 2 hours.
+You can't cook with plant or fungus ingredients."</p>
+    </div>
+  </div>
+  <ul class="notes">
+    <li><span class="v ok">✓</span>Structure is exactly the defect pattern (flavor line, blank line, mechanic lines); "You can't cook with plant or meat ingredients." is near-verbatim Carnivorous grammar.</li>
+    <li><span class="v mid">△</span>"You eat rocks. Only rocks." — the fragment gag has no base precedent (Carnivorous: one flat sentence). It's also the mod's best-loved line. <b>USER CALL.</b></li>
+    <li><span class="v no">✗</span>"Some stones do you a bit of good… Others are inadvisable." is coy where base quantifies ("50% chance… for 2 hours"). If the vagueness is deliberate discovery design, rule it; otherwise base wants the numbers.</li>
+  </ul>
+</div>
+
+<h2>Automation verdict
+  <span class="sub">The question this page answers: can the mutation-description sitting be automated?</span>
+</h2>
+<div class="cols">
+  <div class="panel">
+    <h3>Yes — mechanically fixable (Claude drafts, low risk)</h3>
+    <ul>
+      <li>Add the two missing <b>Cooldown lines</b> (Calcify, Stoneshaper).</li>
+      <li><b>Split compound lines</b> to fact-per-line (Gorgon's stone-mark line, EB's whorl block, Stoneshaper's inheritance line).</li>
+      <li><b>Unwrap non-numeric rules-wraps</b> (sight, sell value, weight, full scanning, attribute names).</li>
+      <li><b>Delete or relocate editorial asides</b> (EB's resonance parenthetical → the Attune ability's own description if wanted at all).</li>
+      <li>De-hedge Calcify's verb; convert Stoneshaper's imperative to "You gaze…" (one clause each).</li>
+    </ul>
+  </div>
+  <div class="panel">
+    <h3>No — needs a ruling first (register questions)</h3>
+    <ul>
+      <li><b>Fissure's lyric level text:</b> conform to stat grammar (all facts kept) vs exempt as mod signature. The 2026-07-23 mandate says conform.</li>
+      <li><b>Lithovore's wryness:</b> keep "Only rocks." and the coy danger line, or adopt Carnivorous-grade precision.</li>
+      <li><b>Flavor lines generally:</b> they're identity work — automation can propose slates, but these seven sentences are where the user's voice matters most.</li>
+    </ul>
+    <p class="small" style="margin-top:10px">Suggested sitting shape: rule the two register questions first, then Claude drafts the full
+    conformance pass in one batch (every change DRAFT), user reviews against this page's checklist.
+    The formula is regular enough that the checklist — not taste — decides most lines.</p>
+  </div>
+</div>
+
+<p class="small" style="margin-top:36px">Sources: decompiled base 2.0.211.50 <code>XRL.World.Parts.Mutation</code> (131 classes with description methods) ·
+<code>TerraFirma/Scripts/Mutation_*.cs</code> as of 2026-07-26 · counts computed from extracted string literals.
+Companion to <code>design/writing-sittings-1.0.md</code> Sitting C.</p>
+
+</div>
+</body>
+</html>
