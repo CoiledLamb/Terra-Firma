@@ -392,11 +392,22 @@ Cooldown: 120 rounds"</p>
     <li><span class="v ok">✓</span>Passive-sense structure matches the Heightened family cleanly; "whichever is higher" has direct base precedent (Beguiling's success roll).</li>
     <li><span class="v mid">△</span>Rules-wrap on words ("sell value", "weight", "full scanning") — base reserves the wrap for numbers. Unwrap and this is done.</li>
   </ul>
-  <div class="q fix"><span class="tag">Suggested fix — DRAFT (two unwraps; nothing else changes)</span>
-    <p>"Power equals the stone's sell value or weight, whichever is higher.
-Gemstones also apply full scanning to creatures and walls in the revealed area."</p>
-    <p class="small">Only the changed lines shown — the rest of Geomancy's text is already
-    on-formula.</p>
+  <div class="q fix"><span class="tag">Suggested fix — DRAFT, revised on recon at the 2026-07-26 sitting (structural)</span>
+    <p>"You sense minute details through earthly vibrations.
+
+Stones you throw reveal the area around their point of impact.
+Power equals the stone's sell value or weight, whichever is higher.
+Vision radius: 1 tile per 90 power (minimum 3)
+Vision duration: 1 round per 35 power (minimum 7)
+Gemstones also apply full scanning to creatures and walls in the revealed area.
++2 thrown weapon range"</p>
+    <p class="small">Recon found Geomancy is NON-LEVELED (CanLevel() =&gt; false) — and base's
+    settled pattern for those (SlimeGlands, Frost Webs, Kindle, Telepathy) puts everything in
+    the description after the flavor line and leaves level text empty, with NO rules-wraps at
+    all: the wrap marks level-scaling values, and nothing here scales. So: mechanics move into
+    GetDescription, GetLevelText returns "", every wrap goes bare — the original two word-unwraps
+    are subsumed. Wording otherwise untouched. Build note: this is a GetDescription/GetLevelText
+    restructure, not just string edits.</p>
   </div>
 </div>
 
