@@ -669,11 +669,13 @@
 		     range / no flyable line): the rock throws normally, lands intact, and stays step-fragile. -->
 		<part Name="Cleo_TerraFirma_FallenRockPart" NeverMiss="true" StepChance="100" Payload="" ConsumedOnStep="true" />
 		<!-- Lithovore pass: quicknessMinor (cider precedent - speed is the whole identity).
-		     Eaten raw = thunderclap (RULED 2026-07-22, closing round 6's open slot): the stone's
-		     speed leaves you as a crack of displaced air - adjacent creatures are Dazed (EB's own
-		     magnitude), the eater is spared. DRAFT dice. -->
-		<tag Name="Cleo_TerraFirma_EatenThunderclap" Value="1d2+1" />
-		<tag Name="Cleo_TerraFirma_EatenEffect" />
+		     Eaten raw: THUNDERCLAP CUT 2026-07-25 (the revisit conversation; the 2026-07-22
+		     ruling was slot-filling, not deliberation - user: "it's *already* a powerful
+		     throwing tool that's been buffed several times. it becoming a powerful CC tool when
+		     eaten is another layer of strength"). Channel OPEN ON PURPOSE: the power budget is
+		     spent on the throw. Revisit per user "when we have a stronger eaten effect in mind,
+		     or when we're going to do the cooking rocks second pass." The EatenThunderclap code
+		     path in Mutation_Lithovore stays, dormant. -->
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d6" />
 	</object>
 

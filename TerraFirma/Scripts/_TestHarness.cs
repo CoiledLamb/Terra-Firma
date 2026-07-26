@@ -697,7 +697,7 @@ namespace Cleo.TerraFirma.Scripts
 			GameObject neighbor = null;
 			if (open.Count > 0)
 			{
-				neighbor = GameObject.Create(BABOON_BP); // the thunderclap's ear
+				neighbor = GameObject.Create(BABOON_BP); // the galvena arc's target (was also the thunderclap's ear until its 2026-07-25 cut)
 				neighbor.SetIntProperty(SPAWN_MARK, 1);
 				neighbor.GetStat("Hitpoints").BaseValue = 100;
 				open[0].AddObject(neighbor);
@@ -717,7 +717,7 @@ namespace Cleo.TerraFirma.Scripts
 				{ "Cleo_TerraFirma_Rock_Melting", "harm", "sludgabbro-acid (melting)" },
 				{ CAROM_BP, "moved", "caromcobble (hop)" },
 				{ "Cleo_TerraFirma_Rock_Shunting", "moved", "farflint (teleport)" },
-				{ STREAK_BP, "daze", "streakschorl (thunderclap)" },
+				{ STREAK_BP, "consume", "streakschorl (plain snack; thunderclap cut 2026-07-25)" },
 				{ "Cleo_TerraFirma_Rock_Sludgestone", "spawnliquid", "sludgestone" },
 				{ "Cleo_TerraFirma_Rock_Spiderweb", "webs", "gossamarl (3 webs)" },
 				{ "Cleo_TerraFirma_Rock_Whorlstone", "belly", "vertigneiss (gas belly)" },

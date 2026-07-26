@@ -315,7 +315,9 @@ findings):**
   lottery's own infection, drainstone inner latch, gemstone eats (earmark: transmute-enemy-into-
   gemstone), SecretsOnEat shelf. **+ the GAMBLE-FOOD texture (user flag 2026-07-25): rock eats
   are mostly monotone hurt-or-help; base Qud items (witchwood bark, salves) often roll both
-  ways on one item — investigate which rock eats want the either/or gamble.**
+  ways on one item — investigate which rock eats want the either/or gamble.** **+ the
+  streakschorl eat slot (thunderclap CUT 2026-07-25): open on purpose, power budget spent on
+  the throw — refill only "when we have a stronger eaten effect in mind" and keep it SMALL.**
 - [ ] 📜 `[design]` **Pass-2 bespoke cooking parts** — tanglelith major-stability, ash weak-armor
   (+1 AV unit), shivshale weak-agility, oxidian rust domain (needs real design), waxshroom's wax
   definition (blocked on you inventing what eating wax does), shieldstone force-bubble action;
@@ -355,9 +357,11 @@ findings):**
   range 6 — RATIFIED** ("streakschorl leg range fine") · ✅ **per-rock powders — BLESSED** ("fine
   by me! i was looking forwards to the history spice for each rock feeling a bit unique" — the
   blessing's rider: per-rock uniqueness in spice entries is WANTED; keep shared keys to the two
-  no-tell cases). Still open: thunderclap eat — FLAGGED FOR REVISIT (user cooled on it now that
-  dazestone is the canon daze rock; consider a new streakschorl eat at eat-pass 2) · static-bubble
-  + aegis self-cage — deferred to their OWN pass (user).
+  no-tell cases). Still open: ~~thunderclap eat~~ **RULED CUT-FOR-NOW 2026-07-25 (the real conversation: the eat
+  was slot-filled, never deliberated, and streakschorl's power budget is spent on the throw —
+  "another layer of strength" vetoed; plain half-snack now, channel open on purpose, comeback
+  at eat-pass 2 "when we have a stronger eaten effect in mind"; full record in TODO)** ·
+  static-bubble + aegis self-cage — deferred to their OWN pass (user).
 - [ ] 📜 `[design]` **Accepted deviations — revisit only if they grate** — banned learned recipes
   still nourish; gas immunity is full-type not partial; pantry rules text stays commented out
   (grenade idiom); pestle-in-inventory mystery (moot since rock-side grinding).
