@@ -277,7 +277,8 @@ findings):**
 **Geysers (their own mini-pass):**
 - [ ] 📜 `[design]` **Body plan + stats** — Turret anatomy vs custom Bodies.xml vent/maw; strip the
   unneeded melee; ratify draft stats. Fold in: 🆕 `[polish]` **rules text showing** (strip per
-  grenade idiom) and 🆕 `[design]` **visible equip-before-throw feel** (accept vs silence).
+  for-now pantry cut — "grenade idiom" is CLAUDE framing, UNRULED, see TODO's Pantry provenance
+  tag 2026-07-26) and 🆕 `[design]` **visible equip-before-throw feel** (accept vs silence).
 - [ ] 📜 `[polish]` **Placeholder stalagmite tile + Fungus-anatomy naming wart.**
 
 **Text (rides the whole catalog):**
@@ -365,7 +366,8 @@ findings):**
   static-bubble + aegis self-cage — deferred to their OWN pass (user).
 - [ ] 📜 `[design]` **Accepted deviations — revisit only if they grate** — banned learned recipes
   still nourish; gas immunity is full-type not partial; pantry rules text stays commented out
-  (grenade idiom); pestle-in-inventory mystery (moot since rock-side grinding).
+  (for-now cut; "grenade idiom" = CLAUDE framing, UNRULED — TODO Pantry provenance tag
+  2026-07-26); pestle-in-inventory mystery (moot since rock-side grinding).
 - [ ] 📜 `[design]` **Lithovore scope fork residue** — is the edible set all-IsAnyStone (Small
   Stones/EB pebbles as rations) or curated; deep-four eaten pulse numbers; statue-eating detail
   polish (satiation value, whole-vs-bites).
