@@ -95,6 +95,8 @@
   .q { border-radius: 8px; padding: 12px 14px; font-size: 13.5px; }
   .q.mod { background: var(--mod-wash); }
   .q.base { background: var(--base-wash); }
+  .q.fix { background: color-mix(in srgb, var(--accent) 7%, transparent); border: 1px dashed color-mix(in srgb, var(--accent) 45%, transparent); margin-top: 12px; }
+  .q.fix .tag { color: var(--rules-ink); }
   .q .tag { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); display: block; margin-bottom: 6px; }
   .q p { margin: 0 0 6px; white-space: pre-wrap; }
   .q p:last-child { margin-bottom: 0; }
@@ -117,7 +119,10 @@
     Lithovore). Basis for "conform": the WIDENED base-game-voice mandate (RULED 2026-07-23,
     "as close to base game language as possible" mod-wide). Where drift may be deliberate mod
     signature, it is flagged as a <b>user call</b>, not scored as an error. All rewrites remain
-    DRAFT-until-signoff per the text policy.
+    DRAFT-until-signoff per the text policy. <b>Suggested-fix drafts added same day (user request):</b>
+    the dashed blocks in each card. Every line is DRAFT; where a register ruling is open, the fix is
+    offered as Option A / Option B instead of presuming the answer. {{rules|N}} marks values the code
+    computes per level, unchanged; literal numbers are verified constants from current source.
   </div>
 </header>
 
@@ -244,7 +249,7 @@
     <div class="q mod"><span class="tag">Terra Firma</span>
       <p>"Your unblinking gaze stops creatures in their tracks."</p>
       <p>"Taking any action other than passing the turn will break your gaze." …
-"<span class="drift">Targets that escape after {{rules|2}} or more failures are left partially petrified: −40 move speed, −10 Quickness, +2 AV for 200 rounds</span>"
+"<span class="drift">Targets that escape after {{rules|4}} or more failures are left partially petrified: −20 move speed, −10 Quickness, +2 AV for 500 rounds</span>"
 "Range: <span class="drift">{{rules|sight}}</span>"
 "Cooldown: {{rules|80}} rounds"</p>
     </div>
@@ -260,6 +265,14 @@
     <li><span class="v mid">△</span>The stone-mark line packs four stats and a duration into one line; base grammar wants it split (one fact per line).</li>
     <li><span class="v mid">△</span>"Range: {{rules|sight}}" — Sunder Mind leaves "sight" unwrapped; rules-wrap is for scaling numbers.</li>
   </ul>
+  <div class="q fix"><span class="tag">Suggested fix — DRAFT (mechanical only; everything else stands)</span>
+    <p>"Targets that escape after {{rules|4}} or more failures are left partially petrified for 500 rounds.
+Partial petrification: −20 move speed, −10 Quickness, +2 AV
+Range: sight
+Cooldown: 80 rounds"</p>
+    <p class="small">The stone-mark line split in two (effect + its stats); "sight" and the flat cooldown
+    unwrapped per base convention (constants go bare, scaling values wrap).</p>
+  </div>
 </div>
 
 <div class="card">
@@ -283,6 +296,28 @@
     <li><span class="v no">✗</span>The parenthetical <i>"resonance pierces by matching, not force"</i> is design rationale inside rules text — no base precedent (1 semicolon in the whole base corpus; this text has one in one line).</li>
     <li><span class="v no">✗</span>Several compound lines carry two or three facts each; base splits them. The whorl/deflect block reads as prose where base would ladder stats.</li>
   </ul>
+  <div class="q fix"><span class="tag">Suggested fix — DRAFT (full level-text redraft; flavor line stands)</span>
+    <p>"You sculpt a stone every {{rules|N}} rounds, up to a reserve of {{rules|N}}.
+Sculpted stones occupy your thrown weapon slot and are replaced from your reserve when thrown.
+Stones not held as a thrown weapon crumble to dust after {{rules|N}}-{{rules|N}} rounds.
+Damage increment: {{rules|N}}
+Penetration bonus: {{rules|+N}}
+Daze chance on penetrating hit: {{rules|N}}%
+Stones in reserve whorl about you and deflect physical projectiles.
+Lasers and other energy attacks pass through the whorl.
+Deflect chance: {{rules|3}}% per stone in reserve, +{{rules|1}}% per mutation level
++{{rules|1}} AV while 3 or more stones are in reserve
++{{rules|2}} AV while 9 or more stones are in reserve"</p>
+    <p>At level 10+, the resonance block becomes four flat facts:
+"You may attune your stones to {{C|resonance}}.
+Resonant stones penetrate as vibro weapons and forgo the penetration bonus.
+The resonant whorl deflects light instead of matter, granting +{{rules|2}} or +{{rules|4}} DV in place of AV.
+Attuning retunes the stone in your hand at no cost."</p>
+    <p class="small">The parenthetical aside is gone — its one real fact ("attuned stones forgo it")
+    now lives as a plain line inside the resonance block, where the reader needs it; "resonance
+    pierces by matching, not force" is design rationale and leaves rules text entirely. The AV pair
+    and the whorl prose each split to one fact per line; the slash notation becomes "or".</p>
+  </div>
 </div>
 
 <div class="card">
@@ -306,6 +341,25 @@ Cooldown: {{rules|N}} rounds"</p>
     <li><span class="v mid">△</span>Rules-wrap on attribute <i>names</i> (Strength/Agility/Toughness) — base wraps values, not nouns.</li>
     <li><span class="v no">✗</span>No Cooldown line despite a real cooldown — base lists it on essentially every activated power.</li>
   </ul>
+  <div class="q fix"><span class="tag">Suggested fix — DRAFT (de-imperative + split + cooldown; flavor line stands)</span>
+    <p>"You gaze first at a creature, then at a wall, and carve an animate statue of the creature from the wall.
+The statue inherits the creature's body plan and physique (Strength, Agility, Toughness).
+It does not inherit mutations, skills, or equipment.
+The statue fights with stone renditions of the creature's natural weapons.
+Nearby enemies must make a Willpower save (difficulty {{rules|N}}) or direct their attacks at the statue.
+Can target {{rules|stone}} walls
+Statue hit points: {{rules|N}}
+Statue AV: {{rules|N}}
+Statue attack: {{rules|N}} damage with {{rules|+N}} to-hit
+The statue lasts for {{rules|N}} rounds.
+Expired and released statues return to lifeless stone where they stand, entombing anything worn or carried.
+Cooldown: 120 rounds"</p>
+    <p class="small">Imperative → "You gaze…" (Stone Gaze's own shape); the inheritance mega-line
+    splits in three with attribute names unwrapped; Cooldown 120 (the code's BASE_COOLDOWN) lands
+    last, bare per the flat-constant convention. The wall-type wrap stays — it scales with level,
+    which is exactly what rules-wrap is for. The Lv10 "until destroyed" branch keeps its
+    conditional shape unchanged.</p>
+  </div>
 </div>
 
 <div class="card">
@@ -327,6 +381,12 @@ Cooldown: {{rules|N}} rounds"</p>
     <li><span class="v ok">✓</span>Passive-sense structure matches the Heightened family cleanly; "whichever is higher" has direct base precedent (Beguiling's success roll).</li>
     <li><span class="v mid">△</span>Rules-wrap on words ("sell value", "weight", "full scanning") — base reserves the wrap for numbers. Unwrap and this is done.</li>
   </ul>
+  <div class="q fix"><span class="tag">Suggested fix — DRAFT (two unwraps; nothing else changes)</span>
+    <p>"Power equals the stone's sell value or weight, whichever is higher.
+Gemstones also apply full scanning to creatures and walls in the revealed area."</p>
+    <p class="small">Only the changed lines shown — the rest of Geomancy's text is already
+    on-formula.</p>
+  </div>
 </div>
 
 <div class="card">
@@ -350,6 +410,17 @@ Cooldown: {{rules|N}} rounds"</p>
     <li><span class="v mid">△</span>"you may cause … to appear" hedges twice where base declares once — Force Wall just <i>generates</i>. Candidate shape: "You still the air into stone." register, or plain "You raise a line of solid stone walls." (DRAFT).</li>
     <li><span class="v no">✗</span>No Cooldown line despite cooldown 90.</li>
   </ul>
+  <div class="q fix"><span class="tag">Suggested fix — DRAFT (flavor options + cooldown)</span>
+    <p>Flavor, two candidates (pick or veto both):
+A) "You raise solid stone walls out of thin air."
+B) "Through intense focus, you raise solid walls out of thin air."</p>
+    <p>Level text, changed lines only:
+"Created walls have 0 AV and −10 DV
+Cooldown: 90 rounds"</p>
+    <p class="small">A is the plain Force Wall shape (8 words); B keeps your adverbial opener
+    (WillForce precedent) and only de-hedges the verb — "raise" for "may cause … to appear".
+    Constants 0/−10 unwrap; Cooldown 90 lands last, bare.</p>
+  </div>
 </div>
 
 <div class="card">
@@ -377,6 +448,27 @@ Cooldown: {{rules|N}} rounds"</p>
     <li><span class="v no">✗</span>Mechanics are cast as flavor — "crushing … for their heft" instead of a "Damage:" label; the decay clock hides inside "Pocketed too long…".</li>
     <li><span class="v mid">△</span><b>USER CALL:</b> several of these lines document ruled mechanics ("Deeper strata shed stronger stone." shipped with the depth ruling). Conforming keeps every fact but restates them in base grammar; or rule the lyric register a deliberate mod signature and exempt Fissure. The mandate as ruled says conform.</li>
   </ul>
+  <div class="q fix"><span class="tag">Option A — DRAFT: conform (every ruled fact kept, poetry traded for grammar)</span>
+    <p>"{{rules|N}} rocks fall within {{rules|N}} squares of you, crushing what they strike.
+Damage: varies by stone, +{{rules|N}}
+Rocks fall more often and crush harder near you.
+Each collapse favors one seam of stone. About half the falls are that stone.
+The collapse sometimes spreads outward, and spreads farther at depth.
+Deeper strata shed stronger stone.
+Fallen stones persist and can be picked up and thrown.
+Enemies do not avoid fallen stones.
+Stones carried too long crumble to plain rock.
+Cooldown: {{rules|N}} rounds"</p>
+    <p class="small">The duplicate opening line is gone (the flavor line already says it); "for their
+    heft" becomes a Damage label; the semicolon in the seam line splits into two sentences.
+    "Deeper strata shed stronger stone." survives verbatim — it was already base-shaped.</p>
+  </div>
+  <div class="q fix"><span class="tag">Option B — DRAFT: exempt the register, minimal touch</span>
+    <p>Keep the current text, minus its first line ("The earth above you gives way…" — it restates
+    the flavor line, which base never does, whatever the register ruling says). Everything else
+    stands as the mod's signature voice — but this needs the exemption RULED so the mandate's
+    provenance stays clean.</p>
+  </div>
 </div>
 
 <div class="card">
@@ -400,6 +492,21 @@ You can't cook with plant or fungus ingredients."</p>
     <li><span class="v mid">△</span>"You eat rocks. Only rocks." — the fragment gag has no base precedent (Carnivorous: one flat sentence). It's also the mod's best-loved line. <b>USER CALL.</b></li>
     <li><span class="v no">✗</span>"Some stones do you a bit of good… Others are inadvisable." is coy where base quantifies ("50% chance… for 2 hours"). If the vagueness is deliberate discovery design, rule it; otherwise base wants the numbers.</li>
   </ul>
+  <div class="q fix"><span class="tag">Suggested fix — DRAFT (shared body; the flavor line is the ruling)</span>
+    <p>Body, either way:
+"You can eat stones and gemstones. You can't eat anything else.
+Many stones confer an effect when eaten. The dangerous ones warn you first.
+You can't cook with plant or meat ingredients.
+When you're famished, you may devour statues."</p>
+    <p>Flavor line:
+A) "You eat rocks exclusively." — the Carnivorous mirror, full conformance.
+B) "You eat rocks. Only rocks." — keep the gag, RULED as signature.</p>
+    <p class="small">The body redraft fixes the real drift either way: "turns your stomach" becomes
+    the flat refusal it actually is, and the coy danger line becomes the mechanically true fact —
+    dangerous eats DO warn first (the ruled warn-prompt), so precision here costs no discovery.
+    Per-stone numbers stay out: unlike Carnivorous's one 50% rule, Lithovore's effects are
+    per-rock — that detail lives on the rocks, not the defect.</p>
+  </div>
 </div>
 
 <h2>Automation verdict
@@ -423,9 +530,11 @@ You can't cook with plant or fungus ingredients."</p>
       <li><b>Lithovore's wryness:</b> keep "Only rocks." and the coy danger line, or adopt Carnivorous-grade precision.</li>
       <li><b>Flavor lines generally:</b> they're identity work — automation can propose slates, but these seven sentences are where the user's voice matters most.</li>
     </ul>
-    <p class="small" style="margin-top:10px">Suggested sitting shape: rule the two register questions first, then Claude drafts the full
-    conformance pass in one batch (every change DRAFT), user reviews against this page's checklist.
-    The formula is regular enough that the checklist — not taste — decides most lines.</p>
+    <p class="small" style="margin-top:10px">The drafts now live in each card's dashed block, so the
+    sitting collapses to: rule the two register questions (Fissure A/B, Lithovore A/B, plus
+    Calcify's flavor pick), veto or reword any draft lines, and Claude lands the signed-off set in
+    the source in one build. The formula is regular enough that the checklist — not taste — decides
+    most lines.</p>
   </div>
 </div>
 
