@@ -265,13 +265,24 @@
     <li><span class="v mid">△</span>The stone-mark line packs four stats and a duration into one line; base grammar wants it split (one fact per line).</li>
     <li><span class="v mid">△</span>"Range: {{rules|sight}}" — Sunder Mind leaves "sight" unwrapped; rules-wrap is for scaling numbers.</li>
   </ul>
-  <div class="q fix"><span class="tag">Suggested fix — DRAFT (mechanical only; everything else stands)</span>
-    <p>"Targets that escape after {{rules|4}} or more failures are left partially petrified for 500 rounds.
+  <div class="q fix"><span class="tag">Suggested fix — DRAFT, full text (updated with the flat-constant ruling + a semicolon catch)</span>
+    <p>"You transfix an opponent with your unblinking gaze and slowly turn them to stone.
+Taking any action other than passing the turn will break your gaze.
+Each round your target makes a Toughness save. Failures stiffen them, and successes shake off one stage of petrification.
+Save difficulty: {{rules|N}} + your Willpower modifier, +1 per failed save
+Each failure: held in place, −10 Quickness
+First success frees movement, second ends the slowing, third breaks the gaze entirely.
+Targets that fail 10 saves are permanently turned to stone.
+Targets that escape after 4 or more failures are left partially petrified for 500 rounds.
 Partial petrification: −20 move speed, −10 Quickness, +2 AV
 Range: sight
 Cooldown: 80 rounds"</p>
-    <p class="small">The stone-mark line split in two (effect + its stats); "sight" and the flat cooldown
-    unwrapped per base convention (constants go bare, scaling values wrap).</p>
+    <p class="small">Changes from shipped: the stone-mark mega-line splits in two (effect + its
+    stats); the Toughness-save semicolon becomes a period (base's one-semicolon corpus);
+    "sight" unwraps; and per the EB sitting's flat-constant ruling, every bare-constant wrap
+    goes plain (+1 per fail, −10 Quickness, 10 saves, 4 fails, 500 rounds, the partial-petrify
+    stats, Cooldown 80) — only the computed save difficulty keeps its highlight. Flavor line
+    untouched.</p>
   </div>
 </div>
 
