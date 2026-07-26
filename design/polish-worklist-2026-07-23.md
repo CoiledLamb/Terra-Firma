@@ -313,7 +313,9 @@ findings):**
 - [ ] 📜 `[design]` **Eat-pass 2 worklist** — mutation-grant eats (sludgabbro→Slime Glands,
   urchinite→Quills, galvena→Electrical Generation), ash's true choke, fungal eat matching the
   lottery's own infection, drainstone inner latch, gemstone eats (earmark: transmute-enemy-into-
-  gemstone), SecretsOnEat shelf.
+  gemstone), SecretsOnEat shelf. **+ the GAMBLE-FOOD texture (user flag 2026-07-25): rock eats
+  are mostly monotone hurt-or-help; base Qud items (witchwood bark, salves) often roll both
+  ways on one item — investigate which rock eats want the either/or gamble.**
 - [ ] 📜 `[design]` **Pass-2 bespoke cooking parts** — tanglelith major-stability, ash weak-armor
   (+1 AV unit), shivshale weak-agility, oxidian rust domain (needs real design), waxshroom's wax
   definition (blocked on you inventing what eating wax does), shieldstone force-bubble action;
