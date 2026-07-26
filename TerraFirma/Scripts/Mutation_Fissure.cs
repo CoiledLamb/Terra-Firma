@@ -191,6 +191,13 @@ namespace XRL.World.Parts.Mutation
 			// every fall and spill echo coin-flips between the seam stone and a fresh tier roll.
 			// Same-stone falls also stack in the pack: the batching is quality-of-life, not power.
 			string seam = RollRockBlueprint(effectiveLevel);
+			// seam eligibility (RULED 2026-07-25, with the holographic rock): NoSeam-tagged
+			// blueprints never dominate a collapse -- re-roll, and if the table won't cooperate,
+			// this cast simply has no seam
+			for (int tries = 0; tries < 8 && HasNoSeamTag(seam); tries++)
+				seam = RollRockBlueprint(effectiveLevel);
+			if (HasNoSeamTag(seam))
+				seam = null;
 			Helpers.VerifyLog("FIS", $"cast by {ParentObject.Blueprint} Lv{Level} at Z={ParentObject.CurrentZone?.Z}: eff={effectiveLevel} (depth+{GetDepthBonus(ParentObject)}), radius={radius}, falls={falls}, spill={spillChance}%, seam={seam ?? "none"}");
 			// living-fall cap (RULED 2026-07-25, user: "capping somewhere like, 3-5 and then
 			// letting the rest of the seam roll something of that tier is fair" -- answers the
@@ -311,6 +318,15 @@ namespace XRL.World.Parts.Mutation
 			if (seam != null && SEAM_CHANCE.in100())
 				return seam;
 			return RollRockBlueprint(effLevel);
+		}
+
+		/// <summary>NoSeam-tagged blueprints (the holographic rock) never dominate a collapse.</summary>
+		private static bool HasNoSeamTag(string bp)
+		{
+			if (bp == null)
+				return false;
+			GameObjectBlueprint def = GameObjectFactory.Factory.GetBlueprintIfExists(bp);
+			return def != null && def.HasTag("Cleo_TerraFirma_NoSeam");
 		}
 
 		/// <summary>A blueprint that would land ALIVE (DropRock's brain-branch) — the living-fall cap counts these.</summary>

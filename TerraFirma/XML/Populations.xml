@@ -140,6 +140,7 @@
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Pebbles" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Generic" />
 				<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Strange" />
+				<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Holographic" /> <!-- the joke rock rides the shallow generics (RULED 2026-07-25); weight DRAFT -->
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier1" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier3" />
 			</group>
@@ -159,6 +160,7 @@
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Generic" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Rubble" />
 				<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Strange" />
+				<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Holographic" /> <!-- joke rock, shallow only (RULED 2026-07-25); weight DRAFT -->
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier2" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier4" />
 			</group>
@@ -295,8 +297,11 @@
 	     EXCLUDED, on purpose: creatures (ape, statuette, all three geysers), terrain and generics
 	     (pebbles, generic, rubble, crumbled walls, walls, chasm, stalagmite), the payloadless
 	     flight rock (streakschorl), the caromcobble (its payload is a post-throw bounce that
-	     cannot fire in mimicry), and strange itself (no mirrors). Deep four ride at half weight
-	     (the audit-2 trickle, kept). All weights DRAFT. -->
+	     cannot fire in mimicry), strange itself (no mirrors), and the HOLOGRAPHIC ROCK
+	     (2026-07-25: fictionally the lottery rolling a rock that isn't there would be correct,
+	     but its whole payload is a belief gate that can no-op against the brainy; the purity
+	     invariant wins, the joke is mourned). Deep four ride at half weight (the audit-2
+	     trickle, kept). All weights DRAFT. -->
 	<population Name="Cleo_TerraFirma_StrangeRocksPool">
 		<group Name="Rocks" Style="pickone">
 			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Soupstone" />

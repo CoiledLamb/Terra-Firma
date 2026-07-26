@@ -255,6 +255,15 @@ namespace XRL.World.Parts
 
 		private static bool GrindStack(GameObject actor, GameObject rock, int count)
 		{
+			// the holographic rock (2026-07-25): the holder believes, but belief is not substance --
+			// grinding yields nothing, and no turn is spent learning it
+			if (rock.HasPart("Cleo_TerraFirma_HolographicPart"))
+			{
+				Helpers.VerifyLog("GRIND", $"{actor.Blueprint} tried to grind the holographic rock -- nothing to grind");
+				if (actor.IsPlayer())
+					Popup.Show("There is nothing to grind, however hard you believe."); // DRAFT
+				return false;
+			}
 			// MILL LAW (2026-07-25): hand tools refuse armed stones -- no turn spent, the lesson
 			// is the message. Only the millstone can set them off (Part_StoneHopper).
 			if (rock.GetFirstPartDescendedFrom<IGrenade>() != null || !rock.GetTag("Cleo_TerraFirma_GrindSpawn").IsNullOrEmpty())

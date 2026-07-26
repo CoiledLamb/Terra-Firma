@@ -555,8 +555,9 @@ findings):**
   consumable, transmute-gemstone concept, throw-augmenting late-game items; 🆕 geode family
   (beyond brine geode), 🆕 pour-into-container on the liquid rocks (ties to the pool-volume audit),
   🆕 modular disable options (per-mutation off switches + a stones-off switch; recon notes in TODO),
-  🆕 holographic rock (user concept 2026-07-24, PARKED for the next rock pass — the rock that
-  isn't there, Int checks on both ends; full sketch + open forks in TODO.md § Holographic rock),
+  🆕 ~~holographic rock~~ **BUILT + DEPLOYED 2026-07-25** (designed same day at user request —
+  DC 12, sticky belief, tiers 2-3 generics, NoSeam tag, machines don't believe; build watch on
+  the disbelieved-hit cancel; full ruling record in TODO.md § Holographic rock),
   🆕 phasalt REAL wall-phasing (SLIM POTENTIAL, user 2026-07-25 — successor to the gated no-op;
   entry in TODO.md § Pending design budget).
 

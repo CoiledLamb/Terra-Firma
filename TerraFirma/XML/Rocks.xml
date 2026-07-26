@@ -53,6 +53,26 @@
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d6" />
 	</object>
 
+	<!-- THE HOLOGRAPHIC ROCK (user concept 2026-07-24, designed + ruled 2026-07-25): the rock
+	     that isn't there. Belief gates both ends (Part_Holographic: Int DC 12, sticky forever,
+	     machines auto-pass); a believed hit does EXACTLY a generic rock's dice (the mundanity is
+	     the punchline) and collapses the lie. Generics of tiers 2-3 at weight 5 ("it's just a
+	     joke rock, so it's pretty weak... it should also not get picked for seams"); NoSeam tag
+	     enforced at the Fissure seam roll. No CrushDamage tag: a fall that isn't there crushes
+	     no one. Excluded from the strange pool (purity invariant: a belief gate can no-op).
+	     Neither mill nor pestle yields anything (machines don't believe; believers grind at
+	     nothing). Render shimmer = HologramMaterial, the tell for the observant. Name WIP,
+	     queued behind the tanglelith slate; description DRAFT (user's surface). -->
+	<object Name="Cleo_TerraFirma_Rock_Holographic" Inherits="Cleo_TerraFirma_BaseFallenRock">
+		<part Name="Render" DisplayName="holographic rock" Tile="Items/sw_smallboulder.bmp" ColorString="&amp;y" DetailColor="Y" /> <!-- the generic rock's own look, ON PURPOSE -->
+		<part Name="HologramMaterial" />
+		<part Name="Description" Short="A fist of the ceiling, freshly parted from it. Something about it asks you not to look twice." /> <!-- DRAFT -->
+		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="0" />
+		<part Name="Cleo_TerraFirma_HolographicPart" />
+		<tag Name="Cleo_TerraFirma_NoSeam" />
+	</object>
+
 	<object Name="Cleo_TerraFirma_Rock_Rubble" Inherits="Rubble">
 		<part Name="Render" DisplayName="rubble" ColorString="&amp;y" DetailColor="w" />
 		<part Name="Description" Short="A volume of the ceiling lies where it landed, broken past any use but blocking the way all the same." />

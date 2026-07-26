@@ -62,6 +62,10 @@ namespace XRL.World.Parts
 			GameObject rock = null;
 			foreach (GameObject item in hopper)
 			{
+				// the holographic rock (2026-07-25): machines don't believe -- the millstone
+				// turns on nothing, forever; the stone just sits in the hopper
+				if (item.HasPart("Cleo_TerraFirma_HolographicPart"))
+					continue;
 				if (item.HasTag(STONE_TAG))
 				{
 					rock = item;
