@@ -188,15 +188,16 @@ findings):**
   (same-sitting rider, roster padding). No bald spot (roster verified before ruling); rename
   slot, cooking hole, sprite debt, and spice edge case all closed with it; daze is EB's verb
   again. Full record + knock-ons in TODO.** Original: (a) split-channel / (b) stun shunt.
-- [ ] 🆕 `[design]` **Vitriolite minor gear break (user: "a great addition")** — restore the CUT
-  etch at T1 scale: 25–50% (DRAFT) on throw-hit applies ShatteredArmor; full BreakGear stays
-  deep-only. XML-only; next cooking-rocks sitting.
+- [x] 🆕 `[design]` **Vitriolite minor gear break — SIGNED OFF + BUILT + DEPLOYED 2026-07-25**
+  ("easy to sign off on"): generic ThrowRider fields on FallenRockPart; vitriolite rides
+  ShatteredArmor 50%×100t (DRAFT). Full BreakGear stays deep-only. Record in TODO.
 - [ ] 🆕 `[design]` **Oxidian eaten-channel angle (user: "a potential design angle")** — proposed:
   eaten raw = natural weapons rust for N turns; mill stays empty ON PURPOSE (gear-warfare
   doesn't cook, named as a rule). Examine at the next rocks sitting.
-- [ ] 🆕 `[design]` **Compressed ash, both dead channels — DIRECTION RULED 2026-07-24 (user):**
-  eaten = cut the choke, `EatenSpew MiasmaticAsh` (burp family); cooking = build the bespoke
-  `armorMinor` domain (ash as aegischist's T1 shadow). Claude drafts at build, user veto.
+- [x] 🆕 `[design]` **Compressed ash, both dead channels — SIGNED OFF + BUILT + DEPLOYED
+  2026-07-25** ("easy to sign off on"): choke cut, ash burps MiasmaticAsh; the armorMinor
+  domain EXISTS (Ground_CompressedAsh + units-only mapping + UnitAV, +1 AV passive — the
+  draft is the veto surface). Spice key list +1 (CompressedAsh). Record in TODO.
 - [x] 🆕 `[design]` **Tanglelith tar redesign + pitching fliers down — RULED + BUILT + DEPLOYED
   2026-07-25** (spender-into-zone: 3 permanent tar patches, flyers forced down via
   `Flight.Fall`, patches keep catching — engine Sticky with `DestroyOnBreak="false"`, fire is

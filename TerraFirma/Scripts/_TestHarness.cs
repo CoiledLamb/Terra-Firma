@@ -713,7 +713,7 @@ namespace Cleo.TerraFirma.Scripts
 				{ "Cleo_TerraFirma_Rock_Salt", "consume", "chunk of salt (tasty)" },
 				{ "Cleo_TerraFirma_Rock_Pointy", "bleed", "pointy rock" },
 				{ "Cleo_TerraFirma_Rock_ShatteredStalactite", "bleed", "shattered stalactite" },
-				{ "Cleo_TerraFirma_Rock_CompressedAsh", "harm", "compressed ash (choke)" },
+				{ "Cleo_TerraFirma_Rock_CompressedAsh", "belly", "compressed ash (ash belly; choke cut 2026-07-25)" },
 				{ "Cleo_TerraFirma_Rock_Melting", "harm", "sludgabbro-acid (melting)" },
 				{ CAROM_BP, "moved", "caromcobble (hop)" },
 				{ "Cleo_TerraFirma_Rock_Shunting", "moved", "farflint (teleport)" },

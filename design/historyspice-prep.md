@@ -30,8 +30,9 @@ Not on the list, decide at the sitting:
   recorded in TODO.md (stamped powders name as generic stone meal).
 - **Dazestone**: ~~no ground twin yet by design~~ **CUT 2026-07-25 (intervention resolved by
   subtraction; blueprint dormant). No key, no twin, edge case closed.**
-- **Compressed ash**: the weak-rock docket's `armorMinor` direction adds `Ground_CompressedAsh`
-  — if built, it needs a key + entry too.
+- **Compressed ash**: ~~if built~~ **BUILT 2026-07-25** — `Ground_CompressedAsh` is live with
+  key **CompressedAsh** (the armorMinor domain). The key list is now 37; it needs a spice
+  entry at the writing sitting like the rest.
 
 ## Entry shape (base-game example for register)
 

@@ -22,6 +22,38 @@ namespace XRL.World.Effects
 	//
 	// Class shapes mirror decompiled base examples (QuillBurst action, SlimeGlands unit).
 
+	//   Cleo_TerraFirma_ArmorMinor (compressed ash + Ground_CompressedAsh, RULED 2026-07-25) --
+	//     aegischist's T1 shadow: base has no weak-armor domain, so the mod builds it.
+	//     unit  = +1 AV passive (below); units-only mapping, no trigger/action.
+
+	[Serializable]
+	public class Cleo_TerraFirma_CookingDomainArmorMinor_UnitAV : ProceduralCookingEffectUnit
+	{
+		public override string GetDescription()
+		{
+			return "+1 AV";
+		}
+
+		public override string GetTemplatedDescription()
+		{
+			return "+1 AV";
+		}
+
+		public override void Init(GameObject target)
+		{
+		}
+
+		public override void Apply(GameObject Object, Effect parent)
+		{
+			Object.GetStat("AV").Bonus += 1;
+		}
+
+		public override void Remove(GameObject Object, Effect parent)
+		{
+			Object.GetStat("AV").Bonus -= 1;
+		}
+	}
+
 	[Serializable]
 	public class Cleo_TerraFirma_CookingDomainWeb_UnitSpinnerets : ProceduralCookingEffectUnitMutation<Spinnerets>
 	{

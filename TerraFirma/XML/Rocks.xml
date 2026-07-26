@@ -411,10 +411,11 @@
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<part Name="GasGrenade" GasObject="MiasmaticAsh" Density="80" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Gas" PayloadDetail="MiasmaticAsh" PayloadAmount="80" />
-		<!-- Lithovore pass: NO cooking domain (lean-layer ruling: no weak armor exists; full armor RULED too
-		     strong for its band). Eaten raw = choking (DRAFT dice; a real Asphyxiating tick is eat-pass 2 work) -->
-		<tag Name="Cleo_TerraFirma_DangerousToEat" />
-		<tag Name="Cleo_TerraFirma_EatenHarm" Value="1d3" />
+		<!-- Both dead channels REVIVED 2026-07-25 ("easy to sign off on"; direction ruled
+		     2026-07-24): eaten raw = the choke is CUT, ash joins the burp family (you vent
+		     miasmatic ash, the venting this gas rock always deserved); cooking = the bespoke
+		     armorMinor domain on Ground_CompressedAsh below (aegischist's T1 shadow). -->
+		<tag Name="Cleo_TerraFirma_EatenSpew" Value="MiasmaticAsh" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
 
@@ -518,8 +519,11 @@
 		<part Name="Render" DisplayName="vitriolite" Tile="Items/sw_smallstone.bmp" ColorString="&amp;g" DetailColor="G" /> <!-- was "melting rock" -->
 		<part Name="Description" Short="A stone losing an argument with itself. What it sheds eats the floor." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
-		<!-- acid splash both ways (gear-damage half CUT, user ruling 2026-07-22) -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Liquid" PayloadDetail="Cleo_TerraFirma_AcidPuddle" PayloadOnThrowHit="true" />
+		<!-- acid splash both ways; the ETCH restored at T1 scale (RULED 2026-07-25, "easy to sign
+		     off on"): 50% on throw-hit rides ShatteredArmor (the -1 AV crack, 100 turns,
+		     stalactite parity) on top of the splash. Chance/duration DRAFT. Full BreakGear stays
+		     deep-vitriolite-only. -->
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Liquid" PayloadDetail="Cleo_TerraFirma_AcidPuddle" PayloadOnThrowHit="true" ThrowRider="ShatteredArmor" ThrowRiderChance="50" ThrowRiderAmount="100" />
 		<!-- Lithovore pass: acidMinor (T1 = Minor tiering lever); eaten raw (RULED round 6) = it hurts and
 		     sheds a pool at your feet. Warn added for consistency with shivshale's harm-warn (vetoable). -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
@@ -1267,6 +1271,14 @@
 		<part Name="PreparedCookingIngredient" type="stabilityMinor" charges="1" />
 		<tag Name="AggregatedIngredient" Value="Tanglelith" />
 	</object>
+	<!-- ash cooks at last (RULED 2026-07-25): the bespoke armorMinor domain, aegischist's T1
+	     shadow; weak armor built mod-side because base has none (the lean-layer blocker,
+	     resolved by making it ourselves) -->
+	<object Name="Cleo_TerraFirma_Ground_CompressedAsh" Inherits="Cleo_TerraFirma_BaseGroundRock">
+		<part Name="Render" DisplayName="ground compressed ash" ColorString="&amp;K" DetailColor="w" />
+		<part Name="PreparedCookingIngredient" type="Cleo_TerraFirma_ArmorMinor" charges="1" />
+		<tag Name="AggregatedIngredient" Value="CompressedAsh" />
+	</object>
 
 	<!-- The mod's first bespoke cooking domains (RULED 2026-07-22). Mappings are pure XML pointing
 	     at effect classes (ours in CookingDomains_Rocks.cs, plus borrowed base trigger/unit classes;
@@ -1287,6 +1299,15 @@
 		<tag Name="Triggers" Value="CookingDomainTeleport_OnTeleport" />
 		<tag Name="Actions" Value="Cleo_TerraFirma_CookingDomainSpacetime_VortexOpen_ProceduralCookingTriggeredAction" />
 		<tag Name="Description" Value="spacetime-based" />
+		<tag Name="RandomWeight" Value="10" />
+	</object>
+	<!-- armorMinor (RULED 2026-07-25): units-only mapping, a passive +1 AV meal (the base
+	     armor domain's shape one tier down). If the loader demands a trigger/action pair, the
+	     kitchen verify will say so and one gets borrowed. -->
+	<object Name="ProceduralCookingIngredient_Cleo_TerraFirma_ArmorMinor" Inherits="IngredientMapping">
+		<tag Name="CookingDomain" Value="Cleo_TerraFirma_ArmorMinor" />
+		<tag Name="Units" Value="Cleo_TerraFirma_CookingDomainArmorMinor_UnitAV" />
+		<tag Name="Description" Value="minor armor-based" />
 		<tag Name="RandomWeight" Value="10" />
 	</object>
 </objects>
