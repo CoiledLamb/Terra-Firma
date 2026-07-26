@@ -191,9 +191,10 @@ findings):**
 - [x] 🆕 `[design]` **Vitriolite minor gear break — SIGNED OFF + BUILT + DEPLOYED 2026-07-25**
   ("easy to sign off on"): generic ThrowRider fields on FallenRockPart; vitriolite rides
   ShatteredArmor 50%×100t (DRAFT). Full BreakGear stays deep-only. Record in TODO.
-- [ ] 🆕 `[design]` **Oxidian eaten-channel angle (user: "a potential design angle")** — proposed:
-  eaten raw = natural weapons rust for N turns; mill stays empty ON PURPOSE (gear-warfare
-  doesn't cook, named as a rule). Examine at the next rocks sitting.
+- [x] 🆕 `[design]` **Oxidian eaten-channel — RULED + BUILT + DEPLOYED 2026-07-25** ("i'm fine
+  with oxidian getting rust on hit"): OxidizedLimbs effect, RustOnHit 50%×50t DRAFT on natural
+  weapons, user's own description line, tfeat oxidize row. Mill = OPEN SLOT (the "gear-warfare
+  doesn't cook rule" was DEMOTED same day — never concrete; stop citing it). Record in TODO.
 - [x] 🆕 `[design]` **Compressed ash, both dead channels — SIGNED OFF + BUILT + DEPLOYED
   2026-07-25** ("easy to sign off on"): choke cut, ash burps MiasmaticAsh; the armorMinor
   domain EXISTS (Ground_CompressedAsh + units-only mapping + UnitAV, +1 AV passive — the

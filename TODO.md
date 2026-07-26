@@ -627,6 +627,15 @@ Claude ranked the catalog's weak stones on the five-axis survey; user triaged th
   assumed thing that keeps getting locked down further. it's not really something i've ever
   considered concrete?"** — oxidian/lodestone mills are OPEN SLOTS, not principled gaps; a
   bespoke rust-attack cooking domain stays a live candidate. STOP CITING the rule as precedent.
+  **RULED + BUILT + DEPLOYED 2026-07-25 ("i'm fine with oxidian getting rust on hit"):** new
+  `Cleo_TerraFirma_OxidizedLimbs` effect — RustOnHit (chance 50 DRAFT) stamped on the eater's
+  natural weapons for 50 turns (DRAFT), stripped at expiry by re-enumeration (save/load-proof;
+  accepted edge: native-RustOnHit limbs would lose it, no player path exists). **Effect
+  description carries the user's own line: "Layers of oxidized metal flake from your limbs"**
+  (the generic-limbs variant they offered; per-limb `affectedlimb` templating noted as a
+  text-pass upgrade option). Eat message "Your teeth taste of old iron." DRAFT. tfeat gains an
+  `oxidize` row. Mill stays an open slot. `[verify]` tfeat green on the new row; organic: bite
+  something armored, watch the rust lines.
   **PLUS a new flag from the same exchange (record so it isn't lost): the GAMBLE-FOOD texture —
   "a lot of our rocks as food either hurt or help, but to look at a basegame example (witchwood
   bark and salves), qud items frequently have a chance to do either or on the same item. could

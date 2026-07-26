@@ -546,6 +546,16 @@ namespace XRL.World.Parts.Mutation
 					MessageQueue.AddPlayerMessage("The stone's speed leaves you all at once."); // DRAFT
 			}
 
+			// eaten oxidize (oxidian, RULED 2026-07-25): "what it touches, it teaches to decay" --
+			// eating it is being taught; RustOnHit rides the eater's natural weapons for the duration
+			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenOxidize")))
+			{
+				actor.ApplyEffect(new Cleo_TerraFirma_OxidizedLimbs(Math.Max(1, tag.RollCached())));
+				LogChannel("Oxidize", $"RustOnHit lent to natural weapons for {tag} turns");
+				if (actor.IsPlayer())
+					MessageQueue.AddPlayerMessage("Your teeth taste of old iron."); // DRAFT
+			}
+
 			// last: detonation destroys the source (deep four's internal elemental pulse; volatile rock)
 			if (source.HasTag("Cleo_TerraFirma_EatenDetonate") && actor.CurrentCell != null)
 			{

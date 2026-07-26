@@ -344,6 +344,14 @@
 		<part Name="Description" Short="A stone bled through with old iron. What it touches, it teaches to decay." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="RustGear" PayloadOnThrowHit="true" />
+		<!-- Eaten raw (RULED 2026-07-25, the oxidian conversation): the description was the design
+		     all along; eating it is being taught. RustOnHit (the engine's qudzu/girshling machinery)
+		     rides your natural weapons for the duration; the named "oxidized" effect carries
+		     discoverability (user's line: "layers of oxidized metal flake from your limbs").
+		     Duration 50 / chance 50 DRAFT. The MILL stays an OPEN SLOT, not a principled gap
+		     (the gear-warfare-doesn't-cook "rule" was demoted 2026-07-25: never concrete). -->
+		<tag Name="Cleo_TerraFirma_EatenOxidize" Value="50" />
+		<tag Name="Cleo_TerraFirma_EatenEffect" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
 

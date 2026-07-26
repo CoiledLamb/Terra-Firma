@@ -718,6 +718,7 @@ namespace Cleo.TerraFirma.Scripts
 				{ CAROM_BP, "moved", "caromcobble (hop)" },
 				{ "Cleo_TerraFirma_Rock_Shunting", "moved", "farflint (teleport)" },
 				{ STREAK_BP, "consume", "streakschorl (plain snack; thunderclap cut 2026-07-25)" },
+				{ "Cleo_TerraFirma_Rock_Rusty", "oxidize", "oxidian (rusting limbs)" },
 				{ "Cleo_TerraFirma_Rock_Sludgestone", "spawnliquid", "sludgestone" },
 				{ "Cleo_TerraFirma_Rock_Spiderweb", "webs", "gossamarl (3 webs)" },
 				{ "Cleo_TerraFirma_Rock_Whorlstone", "belly", "vertigneiss (gas belly)" },
@@ -795,6 +796,11 @@ namespace Cleo.TerraFirma.Scripts
 						pass = consumed && ply.HasEffect(typeof(XRL.World.Effects.Cleo_TerraFirma_GasBelly));
 						detail = "gas belly " + (pass ? "settled in" : "MISSING");
 						ply.RemoveEffect<XRL.World.Effects.Cleo_TerraFirma_GasBelly>();
+						break;
+					case "oxidize":
+						pass = consumed && ply.HasEffect(typeof(XRL.World.Effects.Cleo_TerraFirma_OxidizedLimbs));
+						detail = "oxidized effect " + (pass ? "applied (RustOnHit rides the natural weapons)" : "MISSING");
+						ply.RemoveEffect<XRL.World.Effects.Cleo_TerraFirma_OxidizedLimbs>(); // Remove() strips the stamped parts
 						break;
 					case "hot":
 						pass = consumed && (ply.Physics?.Temperature ?? 25) > tempBefore;
