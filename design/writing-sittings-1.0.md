@@ -29,7 +29,10 @@ them with Sitting B). Sittings D/F fall in behind unless something re-prioritize
   rules + spent-ledger apply; unpicked slate names open for reuse mining. Home: TODO
   § Weak-rock flags, name-rewrite entry.
 - [ ] **Quarriers faction name + display text** (engine side is a cheap Factions.xml
-  entry; the words are the work). Home: TODO § Quarriers.
+  entry; the words are the work). Home: TODO § Quarriers. **GATED 2026-07-26 (user):
+  "not locking in the faction debt because I want the NPCs to be done first" — despite
+  being priority #1, this waits on the NPC build; mutation descriptions lead the queue
+  meanwhile. Guild-idiom recon + the calling rep/rename flag live in the TODO entry.**
 - [ ] **Mole-beast creature concept** — user: "it'll come with time." Design settles the
   weirdness question; unblocks the drover's meat and any beast text below. No deadline
   pressure recorded, but 1.0 waits on it.
