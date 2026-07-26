@@ -982,6 +982,23 @@ workstream (which pieces can trail to 1.1) still open. **Art bar RULED same exch
 sprites, but i'm gradually ticking away at those"** — reuse is the 1.0 default, bespoke
 sprites land as the user produces them (see design/asset-debt-tracker.md).
 
+**Painter scope RULED 2026-07-26 (same conversation): "ideally we could have the canyon
+painter fully realized in 1.0 with additional items and scenes for flavor added in later
+on."** The painter SYSTEM ships complete in 1.0 — carve + drape, camps, lumps, canyon
+wiring, the recipe primitive working end-to-end; the CONTENT LIBRARY (scene recipes,
+dressing items, tableaus) is open-ended by design and grows post-release.
+
+**1.0-core / trail docket (drafted at the same conversation — core list is CLAUDE
+PROPOSAL endorsed in direction, two scope calls still OPEN):**
+- **CORE 1.0:** packs in canyons with working mutation AI (the four-handler sitting) ·
+  camps via the painter, fully realized · 3x3 lumps · faction entry + neutral reception +
+  water ritual on the overseer · provisioner trade.
+- **TRAIL (post-1.0 flavor, per the painter ruling):** cairn/musing tableaus · geode
+  lottery · dromad ride-alongs · additional scene recipes and dressing items.
+- **OPEN scope calls:** mole-beast depth in 1.0 (full behavioral vs camp-presence-only;
+  the drover's design gap hangs off this) · Stilt merchant in/out of 1.0 (committed
+  concept #2 — trailing it is a real decision, not a default).
+
 Two committed concepts (user, ruled): **(1)** quarrier packs in the canyons carrying 3x3 lumps of rock they've carved free from the walls; **(2)** a Stilt bazaar merchant selling non-expiring fissure stones as a random tent spawn — cheap, one-use utility grenades to stock up on.
 
 **Lore direction (user, ruled):** the stonecarvers came from outside Qud (why they're a mod, not basegame). No established holds — at most a small temporary camp they stop at on pilgrimages through Qud, drawn by its rich canyons and deep caves full of varied stone. They bring their culture, their mutations (the mod's seven), and a new lens on the game. Consequence: no procedural-village surface; everything is zone-build-time content that reaches existing saves in unvisited zones.
