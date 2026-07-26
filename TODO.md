@@ -6,6 +6,13 @@ Working list for finishing the mod. Update as things land.
 
 **How we work (2026-07-21):** each mutation gets **one audit pass** — knock out its small fixes, settle its design questions, restyle its description text (base-game voice, see style notes under Gorgon's Gaze), then mark it ready to verify. In-game verification happens in batches, not per-fix. ~~Fissure is vetoed until every other mutation's audit is complete.~~ **Veto condition met; lifted 2026-07-22 — Fissure is the active workstream.**
 
+**Provenance discipline (2026-07-25, after the "gear-warfare doesn't cook" creep — a Claude
+proposal hardened into a cited "rule" through nothing but repetition):** every design-shaping
+statement in the trackers carries a status tag — **RULED** (date + the user's words) · **LEAN**
+(user's, explicitly not a ruling) · **CLAUDE PROPOSAL, UNRULED**. Citing a rule as precedent
+requires finding its RULED marker; no marker = it's a proposal and gets cited as one. Scope:
+design claims only — delegated code/plumbing decisions need no ratification ceremony.
+
 ## Audit status board
 
 **VERIFICATION SESSION 1 PASSED (2026-07-22).** Mod compiles, loads, and plays live. Findings during the session, all fixed same-day: whorl flicker (sound spam), effect-field serialization MODERROR, Pigskin→PigskinWall rename, `Temporary.Silent` removal, companion gear-table references, PopulationTables group names, whorl decoupled from toggle (ruling). One vanilla-only scare (event-pool overflow in pit generation — no mod frames). User verdict: "everything is working fine." The itemized checklist below stays for a final systematic pre-release pass.
