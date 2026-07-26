@@ -722,6 +722,34 @@ namespace XRL.World.Parts
 						victim.ApplyEffect(fx, Owner);
 					break;
 				}
+				case "Tar": // tanglelith tar redesign (RULED 2026-07-25): amount = patch count -- one at
+				            // the target cell, the rest scattered to open neighbors (web-scatter shape).
+				            // The victim is stuck in the fresh tar, and a FLYING victim is forced down
+				            // first (Flight.Fall -- the petrify effect's own grounding idiom): the throw
+				            // is the anti-air shot; the patches themselves catch only walkers.
+				{
+					string patchBp = detail.IsNullOrEmpty() ? "Cleo_TerraFirma_TarPatch" : detail;
+					int patches = Math.Max(1, amount);
+					C.AddObject(GameObject.Create(patchBp));
+					List<Cell> openAdj = C.GetLocalAdjacentCells();
+					openAdj.RemoveAll((Cell c2) => c2.IsSolid());
+					for (int i = 1; i < patches && openAdj.Count > 0; i++)
+					{
+						int idx = Stat.Random(0, openAdj.Count - 1);
+						openAdj[idx].AddObject(GameObject.Create(patchBp));
+						openAdj.RemoveAt(idx);
+					}
+					if (GameObject.Validate(ref victim))
+					{
+						if (victim.IsFlying)
+						{
+							XRL.World.Capabilities.Flight.Fall(victim);
+							Helpers.VerifyLog("ROCK", $"tar: {victim.Blueprint} forced down out of the air");
+						}
+						victim.ApplyEffect(new Stuck(12, 25, "Entangle Stuck Restraint", ParentObject), Owner); // StickyOnHit's save numbers; duration DRAFT
+					}
+					break;
+				}
 				case "SpawnObject": // spiderweb stone: scatter copies of a blueprint into the cell and open neighbors; amount = count
 				{
 					if (detail.IsNullOrEmpty())

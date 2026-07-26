@@ -53,11 +53,14 @@ namespace Cleo.TerraFirma.Scripts
 		private const string GENERIC_BP = "Cleo_TerraFirma_Rock_Generic";
 		private const string ROBOT_BP = "Scrapbot";
 		private const string DAZE_BP = "Cleo_TerraFirma_Rock_Dazestone";
+		private const string TANGLE_BP = "Cleo_TerraFirma_Rock_Bola";      // display: tanglelith (name pending mini-slate)
+		private const string TAR_PATCH_BP = "Cleo_TerraFirma_TarPatch";
+		private const string MOTH_BP = "Glowmoth";
 
 		[WishCommand(Command = "tfverify")]
 		public static void Help()
 		{
-			MessageQueue.AddPlayerMessage("TF harness -- instant: tfstreak, tfstrange, tfcarom, tfcrack, tfspill, tfpuddle, tfmine (discharge law + party gate), tfdevour + tfeat (lithovore only). Turn-driven: tfquick (5t), tfhopper (5t), tfform (5t), tfshape (Stoneshaper, 3t), tffis (NPC caster, 20t), tfdrain (25t), tfscav (30t, you are the target). tfbatch = everything, ~95 turns standing still. Peek: tfspore (lottery state, pure read). Retired: tfdull (clock cut 2026-07-25).", "W");
+			MessageQueue.AddPlayerMessage("TF harness -- instant: tfstreak, tfstrange, tfcarom, tfcrack, tfspill, tfpuddle, tfmine (discharge law + party gate), tftar (tar redesign), tfdevour + tfeat (lithovore only). Turn-driven: tfquick (5t), tfhopper (5t), tfform (5t), tfshape (Stoneshaper, 3t), tffis (NPC caster, 20t), tfdrain (25t), tfscav (30t, you are the target). tfbatch = everything, ~95 turns standing still. Peek: tfspore (lottery state, pure read). Retired: tfdull (clock cut 2026-07-25).", "W");
 			if (!Helpers.VERIFY_WATCH)
 				MessageQueue.AddPlayerMessage("VERIFY_WATCH is OFF -- the harness is disabled.", "R");
 		}
@@ -112,6 +115,7 @@ namespace Cleo.TerraFirma.Scripts
 			SpillSync();
 			PuddleSync();
 			MineSync();
+			TarSync();
 			DevourSync();
 			EatSync();
 			SetupHopper(The.Player, "form,quickape,drain,shape,fis,scav"); // dull retired 2026-07-25 (clock cut)
@@ -272,6 +276,77 @@ namespace Cleo.TerraFirma.Scripts
 				$"40 forced crossings: {procs} trip(s) (StepChance 50 -> expect ~20, accept 9-31), peel {(alive ? "intact through every proc (HoldChance 100)" : "BROKE OR MOVED")}");
 			if (GameObject.Validate(rock)) rock.Obliterate();
 			if (GameObject.Validate(victim)) victim.Obliterate();
+		}
+
+		/// <summary>Tanglelith tar redesign (RULED 2026-07-25), three asserts in one wish:
+		/// step discharge (patch underfoot + stepper stuck + stone spent) · tar persistence
+		/// (the patch SURVIVES its catches -- the web contrast; stick rolls are save-based, so
+		/// sticks are counted over 6 crossings, not asserted per-crossing) · flyer-downing
+		/// (a thrown hit forces a flying Glowmoth out of the air; conditional on the moth
+		/// actually flying at throw time -- the detail line says which path ran).</summary>
+		[WishCommand(Command = "tftar")]
+		public static void TarSync()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			GameObject ply = The.Player;
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+			Zone zone = origin.ParentZone;
+			List<Cell> open = origin.GetLocalAdjacentCells();
+			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
+			if (open.Count < 2) { Report("tar", false, "SETUP FAIL - need two open adjacent cells"); return; }
+			int patchesBefore = CountInZone(zone, TAR_PATCH_BP);
+			// 1: step discharge -- patch underfoot, stepper stuck, stone spent
+			GameObject rock = GameObject.Create(TANGLE_BP);
+			rock.SetIntProperty(SPAWN_MARK, 1);
+			open[0].AddObject(rock);
+			GameObject walker = GameObject.Create(BABOON_BP);
+			walker.SetIntProperty(SPAWN_MARK, 1);
+			walker.GetStat("Hitpoints").BaseValue = 100;
+			open[1].AddObject(walker);
+			walker.DirectMoveTo(open[0], 0, Forced: true, IgnoreCombat: true);
+			bool stuckOnStep = walker.HasEffect(typeof(XRL.World.Effects.Stuck));
+			bool spent = !GameObject.Validate(rock);
+			int patchesMade = CountInZone(zone, TAR_PATCH_BP) - patchesBefore;
+			Report("tar.step", stuckOnStep && spent && patchesMade >= 1,
+				$"step discharge: stepper {(stuckOnStep ? "STUCK" : "free (want stuck)")}, stone {(spent ? "spent (discharge law)" : "SURVIVED (should be gone)")}, patches +{patchesMade} (want >=1)");
+			// 2: persistence -- the patch keeps catching and survives every catch
+			int sticks = 0;
+			for (int i = 0; i < 6 && GameObject.Validate(walker); i++)
+			{
+				walker.RemoveEffect<XRL.World.Effects.Stuck>();
+				walker.DirectMoveTo(open[1], 0, Forced: true, IgnoreCombat: true);
+				walker.DirectMoveTo(open[0], 0, Forced: true, IgnoreCombat: true);
+				if (walker.HasEffect(typeof(XRL.World.Effects.Stuck)))
+					sticks++;
+			}
+			walker.RemoveEffect<XRL.World.Effects.Stuck>();
+			bool patchAlive = CountInZone(zone, TAR_PATCH_BP) - patchesBefore >= patchesMade;
+			Report("tar.holds", patchAlive && sticks >= 1,
+				$"persistence: {sticks}/6 re-crossings stuck (save-based; want >=1), patch {(patchAlive ? "SURVIVES its catches (tar keeps catching -- the web contrast)" : "GONE (tar must not spend itself)")}");
+			if (GameObject.Validate(walker)) walker.Obliterate();
+			// 3: the anti-air shot -- a thrown hit forces a flyer down into the tar
+			GameObject moth = GameObject.Create(MOTH_BP);
+			moth.SetIntProperty(SPAWN_MARK, 1);
+			open[1].AddObject(moth);
+			bool wasFlying = moth.IsFlying;
+			bool mothStuck = false, downed = false;
+			for (int t = 0; t < 3 && GameObject.Validate(moth) && !mothStuck; t++)
+			{
+				ThrowAt(ply, TANGLE_BP, moth); // retries: the agility connect roll survives perfect accuracy
+				mothStuck = moth.HasEffect(typeof(XRL.World.Effects.Stuck));
+			}
+			downed = wasFlying && GameObject.Validate(moth) && !moth.IsFlying;
+			Report("tar.flyer", mothStuck && (!wasFlying || downed), wasFlying
+				? $"flying Glowmoth: {(downed ? "FORCED DOWN out of the air" : "STILL AIRBORNE (Flight.Fall failed)")}, {(mothStuck ? "stuck in the tar" : "not stuck")}"
+				: $"Glowmoth was NOT flying at throw time -- grounding path unexercised (limit for the ledger); {(mothStuck ? "stuck applied" : "and not stuck either")}");
+			if (GameObject.Validate(moth)) moth.Obliterate();
+			// sweep: tar patches have no inventory and only this mod mints them
+			foreach (Cell c in zone.GetCells())
+				foreach (GameObject o in new List<GameObject>(c.Objects))
+					if (o.Blueprint == TAR_PATCH_BP)
+						o.Obliterate();
 		}
 
 		/// <summary>Discharge law + party gate in one wish (fragility system RULED 2026-07-25):

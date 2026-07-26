@@ -359,12 +359,35 @@
 		<part Name="Render" DisplayName="tanglelith" Tile="Items/sw_smallstone.bmp" ColorString="&amp;w" DetailColor="g" />
 		<part Name="Description" Short="Veins of some clinging mineral wrap this stone like cords that never learned to let go." /> <!-- DRAFT -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
-		<!-- thrown = held fast; underfoot = a stumble -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="25" Payload="Effect" PayloadDetail="Stuck" PayloadAmount="20" PayloadOnThrowHit="true" StepPayload="Effect" StepPayloadDetail="Prone" StepPayloadAmount="1" />
+		<!-- TAR REDESIGN (RULED 2026-07-25, weak-rock docket): the stone is a spender, what it
+		     buys is a ZONE. Thrown = 3 permanent tar patches (impact + scatter) + the victim
+		     stuck in them + a FLYING victim forced down first (the anti-air half); underfoot =
+		     1 patch right there, stepper stuck, stone spent. Patches persist until burned (fire
+		     is the eraser). NAME: incumbent "tanglelith" pending the mini-slate (pitchstone et
+		     al.); patch counts and stick numbers DRAFT. -->
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Tar" PayloadAmount="3" PayloadOnThrowHit="true" StepPayload="Tar" StepPayloadAmount="1" />
 		<!-- Lithovore pass, RULED round 8: inherits stabilityMinor from gossamarl's move to the Web
 		     domain; the musical-chairs resolution of the oldest open row (major stability stays a
 		     pass-2 candidate on the worklist) -->
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
+	</object>
+
+	<!-- The tar itself: the engine's web recipe with DestroyOnBreak="false" (a web is spent
+	     by catching; TAR KEEPS CATCHING, the gossamarl contrast by design). FlameTemperature
+	     100 + HotBurn: readily lit, burns hot; fire is the eraser (and pyroclase the combo
+	     card). No Temporary part: permanent until burned. Render/name DRAFT (sprite owed,
+	     user's surface). -->
+	<object Name="Cleo_TerraFirma_TarPatch" Inherits="InorganicObject">
+		<part Name="Render" DisplayName="spilled tar" RenderString="~" ColorString="&amp;K" DetailColor="k" RenderLayer="3" RenderIfDark="false" />
+		<part Name="Description" Short="A slick of mineral pitch holds the floor, patient as only stone can be." /> <!-- DRAFT -->
+		<part Name="Physics" Solid="false" Takeable="false" Weight="5" Conductivity="5" FreezeTemperature="-9999" BrittleTemperature="-9999" FlameTemperature="100" VaporTemperature="600" />
+		<stat Name="Hitpoints" Value="50" />
+		<part Name="Sticky" DestroyOnBreak="false" />
+		<part Name="MentalShield" />
+		<tag Name="NoEffects" />
+		<tag Name="HotBurn" Value="20" />
+		<tag Name="Breakable" Value="*delete" />
+		<tag Name="ExcludeFromDynamicEncounters" />
 	</object>
 
 	<object Name="Cleo_TerraFirma_Rock_Spiny" Inherits="Cleo_TerraFirma_BaseFallenRock">

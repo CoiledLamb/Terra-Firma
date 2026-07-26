@@ -195,12 +195,14 @@ findings):**
 - [ ] 🆕 `[design]` **Compressed ash, both dead channels — DIRECTION RULED 2026-07-24 (user):**
   eaten = cut the choke, `EatenSpew MiasmaticAsh` (burp family); cooking = build the bespoke
   `armorMinor` domain (ash as aegischist's T1 shadow). Claude drafts at build, user veto.
-- [ ] 🆕 `[design]` **Tanglelith tar redesign (rename candidate: pitchstone) + pitching fliers
-  down** — persistent flammable sticky ground patch (floor-pair with oilstone) + on-hit
-  force-lands flyers then Stuck. C#-small; fall API + re-takeoff gate verify at build.
-- [ ] 🆕 `[design]` **Gossamarl one-use burst — examine** whether it should survive throws (the
-  destroy is `StickyOnHit`'s own quirk, not a design intent); if tanglelith takes the reusable
-  ground-control niche, one-use burst may become exactly right by contrast.
+- [x] 🆕 `[design]` **Tanglelith tar redesign + pitching fliers down — RULED + BUILT + DEPLOYED
+  2026-07-25** (spender-into-zone: 3 permanent tar patches, flyers forced down via
+  `Flight.Fall`, patches keep catching — engine Sticky with `DestroyOnBreak="false"`, fire is
+  the eraser; `tftar` asserts it next restart). **NAME NOT LOCKED — tanglelith incumbent,
+  pitchstone standing, mini-slate delivered 2026-07-25, verdict owed.** Full record in TODO.
+- [x] 🆕 `[design]` **Gossamarl one-use burst — CLOSED AS RESOLVED-BY-SYSTEM 2026-07-25** (rider
+  on the tar ruling): the discharge law made one-use lawful for every spender, and tar took the
+  reusable niche — the web/tar contrast is now designed. Veto reopens.
 - [ ] 🆕 `[design]` **Quarrelquartz/gyrestone at the mill** — reopen the mill-hazard layer for real
   (port the whorl's tear-apart recipe: quarrelquartz detonates, gyrestone vents 3 vortices) or
   stand by the safe-mill ruling and strike the stale Rocks.xml comment.

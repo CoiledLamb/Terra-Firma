@@ -292,6 +292,11 @@ consequences:
   (zoners keep rates: 50 band 9-31, and 15).
 - **`tfmine` NEW, UNRUN** — party gate (allied crossing: no trigger, stone intact) + discharge law
   (stranger crossing: fires first step, stone consumed). Gets its ledger entry when it first runs.
+- **`tftar` NEW, UNRUN** (same day, the tar redesign) — step discharge (patch + stuck + stone
+  spent) · patch survives its catches (sticks counted over 6 save-based crossings, ≥1 wanted) ·
+  flyer-downing (thrown hit forces a flying Glowmoth down; CONDITIONAL — if the moth isn't flying
+  at throw time the grounding path is unexercised and the detail line says so). Ledger entry on
+  first run.
 - Throw fragility now rolls only when a payload discharged — payloadless ammo and step-only
   stones land intact; a cadence side-effect worth remembering: scav-fetched generic ammo no
   longer evaporates at 75% per throw.
