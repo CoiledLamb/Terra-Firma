@@ -40,6 +40,14 @@ namespace XRL.World.Parts
 		/// Grenade-carrying rocks consume themselves on throw regardless; ConsumedOnStep overrides on step.</summary>
 		public int HoldChance; // discharge law (RULED 2026-07-25): 0 -- a fired payload consumes the stone; zoners (caromcobble/crack) override to 100
 
+		/// <summary>Optional throw-hit RIDER (vitriolite etch, RULED 2026-07-25 "easy to sign off
+		/// on"): an effect applied on top of the main payload when a throw connects, at
+		/// ThrowRiderChance in 100. Vocabulary starts at ShatteredArmor (the etch) and grows on
+		/// demand. Throw-only by design -- the step path never rides.</summary>
+		public string ThrowRider;
+		public int ThrowRiderChance;
+		public int ThrowRiderAmount;
+
 		/// <summary>Turns of being carried (inventory or equipped) before the rock goes dull — crumbles
 		/// into pebbles, payload and potency lost (anti-hoarding ruling 2026-07-22; product re-ruled
 		/// pebbles + clock re-ruled 1000-2500 same day, verification session). 0 = never.
@@ -138,6 +146,9 @@ namespace XRL.World.Parts
 				&& o.PayloadAmount == PayloadAmount
 				&& o.ConsumedOnStep == ConsumedOnStep
 				&& o.HoldChance == HoldChance
+				&& o.ThrowRider == ThrowRider
+				&& o.ThrowRiderChance == ThrowRiderChance
+				&& o.ThrowRiderAmount == ThrowRiderAmount
 				&& o.DullAfter == DullAfter
 				&& o.DullAfterMax == DullAfterMax
 				&& o.PayloadOnThrowHit == PayloadOnThrowHit
@@ -565,6 +576,15 @@ namespace XRL.World.Parts
 				{
 					FiredOnHit = true;
 					FirePayload(target, target.CurrentCell, Reduced: false, E.GetGameObjectParameter("Attacker"));
+				}
+				// throw-hit rider (vitriolite etch): rides on top of the payload, never replaces it
+				if (valid && !ThrowRider.IsNullOrEmpty() && ThrowRiderChance.in100())
+				{
+					if (ThrowRider == "ShatteredArmor" && GameObject.Validate(ref target))
+					{
+						target.ApplyEffect(new ShatteredArmor(1, Math.Max(1, ThrowRiderAmount), Owner), Owner);
+						Helpers.VerifyLog("ROCK", $"etch rider: {ParentObject.Blueprint} cracked {target.Blueprint}'s armor (chance {ThrowRiderChance})");
+					}
 				}
 			}
 			return base.FireEvent(E);
