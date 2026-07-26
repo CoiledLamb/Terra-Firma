@@ -995,9 +995,16 @@ PROPOSAL endorsed in direction, two scope calls still OPEN):**
   water ritual on the overseer · provisioner trade.
 - **TRAIL (post-1.0 flavor, per the painter ruling):** cairn/musing tableaus · geode
   lottery · dromad ride-alongs · additional scene recipes and dressing items.
-- **OPEN scope calls:** mole-beast depth in 1.0 (full behavioral vs camp-presence-only;
-  the drover's design gap hangs off this) · Stilt merchant in/out of 1.0 (committed
-  concept #2 — trailing it is a real decision, not a default).
+- **Both scope calls RESOLVED 2026-07-26 (same conversation):** **Mole-beast — IN 1.0,
+  blocked on the user's creature concept, not on scope:** "the mole beast's design
+  *settles* the weirdness question right. i have to come up with a creature for it and i
+  just haven't yet. it's annoying but it'll come with time." No depth fork exists —
+  whatever creature the user invents IS the design; nothing to build until it lands.
+  **Stilt merchant — IN 1.0:** "easy inclusion i think - it's just provisioner with a
+  tent attached" — implementation shape ruled in the same breath: reuse the provisioner
+  blueprint + a StiltTents table entry (the SixDayTents recipe already recon'd below).
+- **Writing sittings sheet (user OK'd 2026-07-26): `design/writing-sittings-1.0.md`** —
+  every user-owed text debt under the sign-off policy, consolidated for burn-down.
 
 Two committed concepts (user, ruled): **(1)** quarrier packs in the canyons carrying 3x3 lumps of rock they've carved free from the walls; **(2)** a Stilt bazaar merchant selling non-expiring fissure stones as a random tent spawn — cheap, one-use utility grenades to stock up on.
 
