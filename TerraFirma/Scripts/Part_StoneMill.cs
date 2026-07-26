@@ -29,11 +29,13 @@ namespace XRL.World.Parts
 	/// .SameAs compares type and description postfix (decompiled).
 	///
 	/// Numbers (signed 2026-07-22): 2-3 servings per rock, 5-6 per boulder, 1000 energy per grind.
-	/// Milling is SAFE and silent (re-ruled 2026-07-22 verification session, supersedes the warn
-	/// ruling): no hazard warnings, and no gyrestone vortex release -- live-fire showed Destroy
-	/// never detonates grenade rocks, so the warnings were a bluff; the user cut the whole hazard
-	/// layer rather than make it real. (The Gravel Whorl's tear-apart of dangerous stones is a
-	/// separate system and unaffected.)
+	/// MILL LAW (RULED 2026-07-25, reverses the 2026-07-22 safe-mill cut -- the bluff is real
+	/// now): grinding captures a stone's potency into flour; ARMED stones (grenade carriers +
+	/// GrindSpawn) cannot be captured. HAND TOOLS (pestle, campfire, this part's menu) REFUSE
+	/// them outright -- only the millstone has the violence to set them off, and it does
+	/// (Part_StoneHopper: destructive reactions forfeit powder, gas/thermal/EMP releases
+	/// coexist with it). The mouth (EatenDetonate) and the Gravel Whorl's tear-apart already
+	/// honored this law; the mill was the missing third station.
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_StoneMill : IPart
@@ -246,20 +248,26 @@ namespace XRL.World.Parts
 						continue;
 					count = asked.Value;
 				}
-				GrindStack(actor, rock, count);
-				actor.UseEnergy(1000, "Grind Stones");
+				if (GrindStack(actor, rock, count))
+					actor.UseEnergy(1000, "Grind Stones");
 			}
 		}
 
-		private static void GrindStack(GameObject actor, GameObject rock, int count)
+		private static bool GrindStack(GameObject actor, GameObject rock, int count)
 		{
+			// MILL LAW (2026-07-25): hand tools refuse armed stones -- no turn spent, the lesson
+			// is the message. Only the millstone can set them off (Part_StoneHopper).
+			if (rock.GetFirstPartDescendedFrom<IGrenade>() != null || !rock.GetTag("Cleo_TerraFirma_GrindSpawn").IsNullOrEmpty())
+			{
+				Helpers.VerifyLog("GRIND", $"{actor.Blueprint} refused hand-grind of ARMED {rock.Blueprint} (mill-only)");
+				if (actor.IsPlayer())
+					Popup.Show(rock.Does("are") + " too volatile to grind by hand. A millstone might manage it."); // DRAFT
+				return false;
+			}
 			// read the source's identity before anything is destroyed
 			string sourceBlueprint = rock.Blueprint ?? "";
 			string sourceName = rock.Render?.DisplayName ?? "stone";
 			string sourceType = rock.GetPart<PreparedCookingIngredient>()?.type;
-			// gyrestone vortex release CUT (re-ruled 2026-07-22 verification session): milling is
-			// safe -- the powder is the whole yield. GrindSpawn tags remain on blueprints for the
-			// Gravel Whorl's tear-apart system.
 			bool boulder = rock.GetBlueprint()?.DescendsFrom("BaseBoulder") ?? false;
 			int made = 0;
 			GameObject lastPowder = null;
@@ -286,6 +294,7 @@ namespace XRL.World.Parts
 				string message = "You grind " + sourceName + " into " + Grammar.Cardinal(made) + " serving" + (made == 1 ? "" : "s") + " of " + powderName + ".";
 				Popup.Show(message);
 			}
+			return true;
 		}
 
 		internal static GameObject MakePowder(string sourceBlueprint, string sourceName, string sourceType) // internal: the StoneHopper reuses the same powder recipe

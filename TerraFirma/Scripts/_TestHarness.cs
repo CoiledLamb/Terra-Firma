@@ -1790,9 +1790,10 @@ namespace XRL.World.Parts
 		{
 			CountMill(MillLive, out int liveStones, out int livePowders);
 			CountMill(MillDead, out int deadStones, out int deadPowders);
-			bool pass = liveStones == 0 && livePowders >= StonesEach * 2 && deadStones == StonesEach && deadPowders == 0;
+			// band floor = StonesEach * 3: the 2-3/rock hand rate PLUS the mill's +1 bonus (ruled 2026-07-25)
+			bool pass = liveStones == 0 && livePowders >= StonesEach * 3 && deadStones == StonesEach && deadPowders == 0;
 			Cleo.TerraFirma.Scripts.TestHarnessWishes.Report("hopper", pass,
-				$"after {TurnsTotal} turns: powered mill stones={liveStones} powders={livePowders} (want 0 / >={StonesEach * 2}), dead mill stones={deadStones} powders={deadPowders} (want {StonesEach} / 0)");
+				$"after {TurnsTotal} turns: powered mill stones={liveStones} powders={livePowders} (want 0 / >={StonesEach * 3}, mill +1 rate), dead mill stones={deadStones} powders={deadPowders} (want {StonesEach} / 0)");
 		}
 
 		private static void CountMill(GameObject mill, out int stones, out int powders)

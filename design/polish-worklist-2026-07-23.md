@@ -206,9 +206,11 @@ findings):**
 - [x] 🆕 `[design]` **Gossamarl one-use burst — CLOSED AS RESOLVED-BY-SYSTEM 2026-07-25** (rider
   on the tar ruling): the discharge law made one-use lawful for every spender, and tar took the
   reusable niche — the web/tar contrast is now designed. Veto reopens.
-- [ ] 🆕 `[design]` **Quarrelquartz/gyrestone at the mill** — reopen the mill-hazard layer for real
-  (port the whorl's tear-apart recipe: quarrelquartz detonates, gyrestone vents 3 vortices) or
-  stand by the safe-mill ruling and strike the stale Rocks.xml comment.
+- [x] 🆕 `[design]` **THE MILL LAW — RULED + BUILT + DEPLOYED 2026-07-25** (was
+  "quarrelquartz/gyrestone at the mill"; ruled as a CLASS of 17 armed stones, not two): armed
+  stones detonate at the millstone (HE/spacetime forfeit powder, gas/thermal/EMP coexist with
+  it), hand tools refuse them, and the mill pays +1 serving on every grind (user's reward
+  rider). tfhopper floor ×2 → ×3. Full record with the user's four riders in TODO.
 - [ ] 🆕 `[text]` **Name rewrite flags: strange rock · ~~dazestone~~ (CUT 2026-07-25, slot
   closed) · oilstone · glowing twins · healstone** — twins keep ONE shared name stamped twice
   (no-tells identity); REOPENS the pass-1 "stay bland on purpose" ruling for strange

@@ -300,6 +300,11 @@ consequences:
 - Throw fragility now rolls only when a payload discharged — payloadless ammo and step-only
   stones land intact; a cadence side-effect worth remembering: scav-fetched generic ammo no
   longer evaporates at 75% per throw.
+- **`tfhopper` assertion floor moved (2026-07-25, the mill law): powered-mill powders wanted
+  ≥ StonesEach×2 → ≥ StonesEach×3** — the mill now pays +1 serving per grind (user-ruled
+  reward rider). The round-1/2 PASSes above predate the bonus; the mechanism claim stands, the
+  yield band is new. The armed-stone branch (detonate at the mill, severity split, hand-tool
+  refusal) is GRIND-log instrumented but UNASSERTED — kitchen-round eyeball owns it for now.
 
 ---
 

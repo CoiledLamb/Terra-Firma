@@ -13,8 +13,18 @@ namespace XRL.World.Parts
 	/// in the millstone's inventory -- the base Joppa mill's own vinewafer workflow, extended to
 	/// rocks. Replaces the menu grind on the mill home entirely; the native power gate does the
 	/// work the old hidden-option check faked (a dead mill just doesn't grind its hopper).
-	/// Recipe shared with the pestle/campfire grind (Part_StoneMill.MakePowder + the same
-	/// 2-3 servings per rock, 5-6 per boulder). Throughput 1 stone/turn: DRAFT dial.
+	/// Recipe shared with the pestle/campfire grind (Part_StoneMill.MakePowder). Throughput
+	/// 1 stone/turn (RATIFIED 2026-07-25).
+	///
+	/// MILL LAW (RULED 2026-07-25, reverses the 2026-07-22 safe-mill cut and completes the
+	/// pattern the mouth and the whorl already honor): grinding CAPTURES a stone's potency into
+	/// flour; ARMED stones (grenade carriers + GrindSpawn) cannot be captured -- the mill has
+	/// the violence to set them off and the reaction fires at the millstone. Destructive
+	/// reactions (HE, spacetime) forfeit the powder ("stronger reactions, no powder"); gas/
+	/// thermal/EMP releases COEXIST with it ("minor things like gas? they can coexist" -- so
+	/// hushmica keeps its artifacts entry). The mill also pays a REWARD for its power demand:
+	/// +1 serving on every grind vs the hand rate (user-ruled 2026-07-25). Hand tools refuse
+	/// armed stones entirely (Part_StoneMill).
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_StoneHopper : IPart
@@ -65,7 +75,43 @@ namespace XRL.World.Parts
 			string sourceType = rock.GetPart<PreparedCookingIngredient>()?.type;
 			bool boulder = rock.GetBlueprint()?.DescendsFrom("BaseBoulder") ?? false;
 			GameObject single = rock.Count > 1 ? rock.RemoveOne() : rock;
-			int servings = boulder ? Stat.Random(5, 6) : Stat.Random(2, 3);
+			// the MILL LAW (2026-07-25): armed stones go off in the works
+			IGrenade grenade = single.GetFirstPartDescendedFrom<IGrenade>();
+			string grindSpawn = single.GetTag("Cleo_TerraFirma_GrindSpawn");
+			bool destructive = single.HasPart("HEGrenade") || !grindSpawn.IsNullOrEmpty();
+			Cell here = ParentObject.CurrentCell;
+			if (grenade != null)
+			{
+				Helpers.VerifyLog("GRIND", $"hopper: {sourceBlueprint} is ARMED -> detonates at the mill ({(destructive ? "destructive: powder forfeit" : "release: powder survives")})");
+				if (Visible())
+					IComponent<GameObject>.AddPlayerMessage(ParentObject.The + ParentObject.DisplayNameOnly + ParentObject.GetVerb("shudder") + " as " + sourceName + " goes off in the works!"); // DRAFT
+				grenade.Detonate(here, null, null, Indirect: true); // consumes the stone
+			}
+			if (!grindSpawn.IsNullOrEmpty() && here != null)
+			{
+				int spawnCount = 1;
+				int.TryParse(single.GetTag("Cleo_TerraFirma_GrindSpawnCount"), out spawnCount);
+				spawnCount = Math.Max(1, spawnCount);
+				Helpers.VerifyLog("GRIND", $"hopper: {sourceBlueprint} GrindSpawn -> {spawnCount}x {grindSpawn} at the mill");
+				List<Cell> openAdj = here.GetLocalAdjacentCells();
+				openAdj.RemoveAll((Cell c2) => c2.IsSolid());
+				here.AddObject(GameObject.Create(grindSpawn));
+				for (int i = 1; i < spawnCount && openAdj.Count > 0; i++)
+				{
+					int idx = Stat.Random(0, openAdj.Count - 1);
+					openAdj[idx].AddObject(GameObject.Create(grindSpawn));
+					openAdj.RemoveAt(idx);
+				}
+			}
+			if (destructive)
+			{
+				// stronger reactions forfeit the flour (user ruling 2026-07-25)
+				if (GameObject.Validate(single))
+					single.Destroy(null, Silent: true);
+				return;
+			}
+			// +1 serving: the mill's reward for demanding power (user-ruled 2026-07-25)
+			int servings = (boulder ? Stat.Random(5, 6) : Stat.Random(2, 3)) + 1;
 			GameObject powder = null;
 			for (int s = 0; s < servings; s++)
 			{
@@ -75,7 +121,7 @@ namespace XRL.World.Parts
 			if (GameObject.Validate(single))
 				single.Destroy(null, Silent: true);
 			ParentObject.PlayWorldSound("sfx_damage_stone");
-			Helpers.VerifyLog("GRIND", $"hopper: {ParentObject.Blueprint} milled 1x {sourceBlueprint} -> {servings} serving(s) of {powder?.Blueprint ?? "nothing"}{(boulder ? " (boulder rate)" : "")}");
+			Helpers.VerifyLog("GRIND", $"hopper: {ParentObject.Blueprint} milled 1x {sourceBlueprint} -> {servings} serving(s) of {powder?.Blueprint ?? "nothing"}{(boulder ? " (boulder rate)" : "")} (mill +1)");
 			if (Visible())
 				IComponent<GameObject>.AddPlayerMessage(ParentObject.The + ParentObject.DisplayNameOnly + ParentObject.GetVerb("mill") + " " + sourceName + " into " + (powder?.Render?.DisplayName ?? "rock flour") + "."); // native mill message shape
 		}
