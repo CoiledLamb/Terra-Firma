@@ -170,7 +170,21 @@ self-balancing via shots-cost-HP — the native cragmensch FabricateFromSelf rec
 Claude riff: the trim may let geysers SIMPLIFY — plain-rock turret (fixed blueprint =
 XML-only, no random-pool subclass), three tier variants collapse to one level-scaled
 blueprint alongside the retiring depth machinery; ring placement idea: a geyser can spawn
-IN a rim gap (the door that shoots back). Structural pieces
+IN a rim gap (the door that shoots back).
+
+**Milling + cooking — USER LEAN (2026-08-02, "probably"): CUT for the beta, until there's
+more stones.** Future homes user named: possibly a separate mod, or shipping with the
+stonecarver faction "when there's merchants to sell them" (powders as stonecarver trade
+goods — coheres with the manifest's future-faction phrasing). Scope of the gate as one
+unit: Part_StoneMill spawns, powder blueprints, CookingDomains_Rocks/ingredient mappings,
+mill-law behaviors, pantry text, GRIND harness rows. Beta-fallout note: with Lithovore held
+AND the mill cut, the entire rock-consumption economy is out of the beta — the six keepers
+are pure throw/field objects, which is consistent with the redoubt's terrain-first identity.
+
+**Wild-baboon merge fork (open question from the fallout sweep):** the Merges.xml back-out
+carries pocket stones AND StoneScavenger — separable. Claude lean: cut pockets, KEEP the
+scavenger (unarmed wild baboons loot your ring salvage and throw your fortress back at
+you — built, funny, on-theme). Full removal also defensible for beta simplicity. UNRULED. Structural pieces
 (rubble/crumbled walls/walls/cracked floor/stalagmite) graduate to ring fabric regardless.
 Notable cuts vs Claude's earlier pick: strange rock (self-consistent — a lottery over five
 entries isn't a lottery; ajistone inherits the gamble at gas scale; MALFORMED CRAGMENSCH
