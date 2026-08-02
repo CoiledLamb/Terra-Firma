@@ -150,11 +150,15 @@ world remembers your fights (Stonecarver-commemoration adjacency). Animation plu
 mod has shipped ephemeral-object work before (ephemeral munitions in the sound pass), so
 rising-and-vanishing wall sprites have in-house precedent.
 
-**USER LEAN (2026-08-02, end of jam — not yet a ruling): enter the friends beta with the
-REDOUBT version of Fissure, holding the full grenade table and Lithovore until fully ready.**
-Supersedes-if-confirmed the earlier "beta tests the current shape" plan from 5. Mechanics of
-holding (Claude recommendation, see conversation): git init first (already on TODO, ruled
-fresh-init/no-trailer), preserve current v2 state as branch/tag, develop redoubt on main;
-holds implemented as gate-level toggles (Lithovore chargen entry, rock spawn tables), NOT
-mass comment-outs — cross-references to watch: strange pool, malformed cragmensch ammo,
-tfeat/tfbatch rows, TF-VERIFY coverage for the new wave/ring code.
+**RULED 2026-08-02 (upgraded from lean same day, both cost-flags accepted): the friends
+beta ships the REDOUBT version of Fissure; full grenade table + Lithovore HELD until fully
+ready.** User on schedule: "the beta date has mostly been me dragging my feet. this will
+encourage me to put something polished in front of my friends." User on Lithovore: "not
+certain will be benched forever, but i do need to figure out where its place is after the
+friends beta." Supersedes the earlier "beta tests the current shape" plan from §5. Canonical
+ruling record now lives in TODO.md (friends-beta section, REDOUBT PIVOT entry). Baseline
+preserved at git tag `fissure-v2-grenade` (commit `9cbe9c2`, on the pre-existing 182-commit
+repo — the TODO's "set up git" item turned out stale). Holds = gate-level toggles (Lithovore
+chargen entry, rock spawn tables), NOT mass comment-outs — cross-references to watch:
+strange pool, malformed cragmensch ammo, tfeat/tfbatch rows, TF-VERIFY coverage for the new
+wave/ring code.
