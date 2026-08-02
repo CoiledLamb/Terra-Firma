@@ -476,6 +476,17 @@
 
 	<!-- ============ Band 3 (mutation Lv 7+) ============ -->
 
+	<!-- The stone figure (REDOUBT PIVOT, user ruled into v1 2026-08-02: "figurine can come in
+	     first pass"): the rim's rare premium piece. Blocks sight like a wall, inert, and
+	     deliberately mute about what it depicts (the figures' lore surface is the user's).
+	     Inherits base Statue: Solid, Occluding, AV 20, HP 1000, Diggable. Tile = PLACEHOLDER
+	     (tombstone, base game), rides the asset-debt tracker; sprite is the user's. -->
+	<object Name="Cleo_TerraFirma_RedoubtFigure" Inherits="Statue">
+		<part Name="Render" DisplayName="stone figure" RenderString="|" ColorString="&amp;y" DetailColor="K" Occluding="true" Tile="Terrain/tile_tombstone1.png" RenderLayer="6" />
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="The wave left this behind: a shape half-risen from the earth, worked by no hand you could name." /> -->
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
+
 	<object Name="Cleo_TerraFirma_Rock_Wall" Inherits="Sandstone">
 		<part Name="Render" DisplayName="fallen wall" />
 		<!-- BETA-HELD: <part Name="Description" Short="A shelf of the deep ceiling, standing now where it fell, load-bearing for nothing." /> -->

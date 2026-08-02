@@ -34,6 +34,18 @@
 			</group>
 		</group>
 	</population>
+	<!-- Redoubt keeper salvage (REDOUBT PIVOT 2026-08-02): what the ring occasionally coughs up,
+	     the "additional small spawns" of the trim ruling (user's words). Weights DRAFT/dials. -->
+	<population Name="Cleo_TerraFirma_RedoubtSalvage">
+		<group Name="Rocks" Style="pickone">
+			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Rubber" />
+			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_ShatteredStalactite" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Ajistone" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Vantabsidian" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Shunting" />
+			<object Weight="3" Blueprint="Cleo_TerraFirma_Rock_BaboonFigurine" />
+		</group>
+	</population>
 	<population Name="Cleo_TerraFirma_ThrowableRocks2">
 		<group Name="Rocks" Style="pickone">
 			<table Weight="60" Name="Cleo_TerraFirma_ThrowableRocks1" />

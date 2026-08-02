@@ -3,67 +3,59 @@ using System.Collections.Generic;
 using Cleo.TerraFirma.Scripts;
 using XRL.Core;
 using XRL.Rules;
-using XRL.World.AI; // AllySummon (the Burgeoning summon recipe)
+using XRL.World.Effects; // Stun (the wave's crowd control)
 using XRL.World.Parts;
 
 namespace XRL.World.Parts.Mutation
 {
 	/// <summary>
-	/// Fissure, rebuilt 2026-07-22 (Spec v2): the ceiling comes down in a self-centered ring.
-	/// A few rocks fall (crushing what they strike), sometimes spreading outward; what falls
-	/// lies where it fell, throwable ammunition and step-on hazard both. No targeting, so
-	/// NPC casters work through the same path. See TODO.md + design/fissure-rock-list.md.
+	/// Fissure, rebuilt 2026-08-02 (THE REDOUBT PIVOT, ruled same day): a wave of earth radiates
+	/// out from the caster -- damaging, pushing, and stunning what it moves -- and deposits a
+	/// rough NON-EXPIRING ring of broken stone where it dissipates. The wave CARVES natural
+	/// stone (level-scaled depth; constructed walls stop it: the World Engine's bones don't
+	/// answer), and carved mass thickens the ring. Items are never destroyed and never moved
+	/// (loot rule, ruled). Numbers per design/redoubt-numbers-draft.md -- every constant here
+	/// is a feel-session dial. Fissure v2 (grenade catalog) preserved at tag fissure-v2-grenade.
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_Fissure : BaseMutation
 	{
 		#region Fields
 		private const string COMMAND_ID = "Cleo_TerraFirma_CommandFissure";
-		// base spill; +5 per depth step, frozen at SPILL_MAX (depth-quantity ruling 2026-07-23)
-		private const int SPILL_CHANCE_BASE = 20;
-		private const int SPILL_MAX = 50;
-		// Burgeoning's prime-plant batching read geologically (seam ruling 2026-07-23): one stratum
-		// dominates each collapse -- this share of falls shed the per-cast seam stone
-		private const int SEAM_CHANCE = 50;
-		private const int MAX_RING_RADIUS = 4;
-		// Calcify's verified "large stone impact" -- the collapse slam
+		private const int MAX_RING_RADIUS = 5;
+		private const int GAP_COUNT = 3; // fixed count + growing circumference = proportional completeness (ruled)
+		private const int CRACK_GATE_CHANCE = 50; // % per gap: the doors made of dice
+		// Calcify's verified "large stone impact" -- the wave's slam
 		private const string SLAM_SOUND = "Sounds/Throw/sfx_throwing_stone_large_impact";
-		private const string CRUSH_DAMAGE_TAG = "Cleo_TerraFirma_CrushDamage";
-		private const string CRUSH_INSTAKILL_TAG = "Cleo_TerraFirma_CrushInstakill";
 		private const string DEBRIS_BLUEPRINT = "Cleo_TerraFirma_Rock_Generic";
-
-		/// <summary>Optional per-blueprint override for what a solid fall shatters into (e.g. a stalagmite shatters into its stalactite, not generic rock).</summary>
-		private const string DEBRIS_TAG = "Cleo_TerraFirma_DebrisBlueprint";
-
-		private const string STALAGMITE_BLUEPRINT = "Cleo_TerraFirma_Rock_Stalagmite";
-
-		private const string STALACTITE_BLUEPRINT = "Cleo_TerraFirma_Rock_ShatteredStalactite";
-
+		private const string RUBBLE_BLUEPRINT = "Cleo_TerraFirma_Rock_Rubble";
+		private const string CRUMBLED_BLUEPRINT = "Cleo_TerraFirma_Rock_CrumbledWall";
+		private const string WALL_BLUEPRINT = "Cleo_TerraFirma_Rock_Wall";
+		private const string CRACK_BLUEPRINT = "Cleo_TerraFirma_Rock_Crack";
+		private const string FIGURE_BLUEPRINT = "Cleo_TerraFirma_RedoubtFigure";
+		private const string SALVAGE_TABLE = "Cleo_TerraFirma_RedoubtSalvage";
+		// the Stoneshaper merges already classified every wall: this part = natural stone (carvable),
+		// its absence = constructed/metal (the wave breaks against it) -- connection doctrine, ruled
+		private const string CARVABLE_PART = "Cleo_TerraFirma_StoneshaperWallProperties";
 		private static readonly string[] SMOKE_COLORS = { "&K", "&y", "&w" };
 		#endregion
 
 		#region Basic data
 		public override string GetDescription()
 		{
-			// RULED at the 2026-07-26 voice sitting ("rewrite fissure to be as close to burgeoning as
-			// possible"): earth-neutral (the old ceiling framing read as underground-only), Burgeoning's
-			// flavor grammar. Built 2026-07-27.
-			return "You cause stones to fall in the area around you, crushing your enemies.";
+			// DRAFT (redoubt pivot 2026-08-02): ships for the beta under the standing
+			// beta-draft-text ruling; the vigilant signoff rides the release voice sitting.
+			return "You drive a wave through the earth that hurls your surroundings outward and raises a ring of broken stone.";
 		}
 
 		public override string GetLevelText(int Level)
 		{
-			// RULED at the 2026-07-26 voice sitting: Burgeoning-shaped, tersest-in-base model. Spill
-			// rides the Area line (Burgeoning's own "+ growth" idiom); "Deeper strata shed stronger
-			// stone." survives in the "More powerful plants summoned" slot; seam batching, proximity
-			// damage, center-weighting, and enemy non-avoidance go undocumented per Burgeoning's own
-			// silence. The stale dull-clock sentence (mechanical review F1) died with the old block.
-			// OPEN RIDER (unruled, currently OUT): "Fallen stones persist and can be thrown."
-			// Built 2026-07-27.
-			return "Falls: {{rules|" + GetFalls(Level) + "}}\n" +
-				"Area: {{rules|" + GetRingRadius(Level) + "}} squares around you + outward spill\n" +
-				"Damage: varies by stone, +{{rules|" + Level + "}}\n" +
-				"Deeper strata shed stronger stone.\n" +
+			// DRAFT (redoubt pivot 2026-08-02), same beta-draft status as GetDescription.
+			return "Ring radius: {{rules|" + GetRingRadius(Level) + "}} squares\n" +
+				"Damage: {{rules|" + GetWaveDamage(Level) + "}}\n" +
+				"Creatures are pushed outward; those moved must save or be stunned for {{rules|" + GetStunRounds(Level) + "}} " + (GetStunRounds(Level) == 1 ? "round" : "rounds") + ".\n" +
+				"The wave carves through {{rules|" + GetCarveDepth(Level) + "}} " + (GetCarveDepth(Level) == 1 ? "square" : "squares") + " of natural stone.\n" +
+				"The ring of stone persists.\n" +
 				"Cooldown: {{rules|" + GetCooldown(Level) + "}} rounds";
 		}
 
@@ -82,68 +74,83 @@ namespace XRL.World.Parts.Mutation
 		public override void CollectStats(Templates.StatCollector stats, int Level)
 		{
 			stats.Set("RingRadius", GetRingRadius(Level));
-			stats.Set("Falls", GetFalls(Level));
+			stats.Set("WaveDamage", GetWaveDamage(Level));
 			stats.CollectCooldownTurns(MyActivatedAbility(ActivatedAbilityID), GetCooldown(Level));
 		}
 		#endregion
 
-		#region Scaling
-		public static int GetRingRadius(int Lv) => Math.Min(MAX_RING_RADIUS, 1 + (Lv - 1) / 3);
+		#region Scaling (all values = design/redoubt-numbers-draft.md dials)
+		/// <summary>Level band 1-4: L1-3 / L4-6 / L7-9 / L10+.</summary>
+		public static int GetBand(int Lv) => Math.Min(4, 1 + (Lv - 1) / 3);
 
-		/// <summary>6/10/16/24 by radius — the disk rework ladder (user sign-off 2026-07-22): with
-		/// center-weighted placement this keeps adjacent-cell odds RISING with rank (~75/58/60/62%).</summary>
-		public static int GetFalls(int Lv)
+		public static int GetRingRadius(int Lv) => Math.Min(MAX_RING_RADIUS, 1 + GetBand(Lv));
+
+		/// <summary>Cells of natural stone the wave chews through along any path; full radius at band 4.</summary>
+		public static int GetCarveDepth(int Lv) => GetBand(Lv) >= 4 ? GetRingRadius(Lv) : GetBand(Lv);
+
+		public static string GetWaveDamage(int Lv)
 		{
-			switch (GetRingRadius(Lv))
+			switch (GetBand(Lv))
 			{
-				case 1: return 6;
-				case 2: return 10;
-				case 3: return 16;
-				default: return 24;
+				case 1: return "1d3+1";
+				case 2: return "1d3+2";
+				case 3: return "1d3+3";
+				default: return "1d3+5";
 			}
 		}
 
-		/// <summary>Burgeoning's tier roll, realigned (RULED 2026-07-23, supersedes bands + primes):
-		/// par = ceil(eff/2), spread rand(-1..+2) per fall — half of all rolls land ABOVE par —
-		/// clamped to the nine tier tables. Effective level tops at 18 (Lv10 + depth cap 8), so
-		/// tier 9 is exactly the deepest strata's par. Primes RETIRED same ruling: they existed to
-		/// patch the old tables' downward skew, and the spread skews up instead.</summary>
-		public static int RollTier(int EffLevel)
+		/// <summary>1/2/2/3 by band (draft table said 1-2 at band 2; deterministic reads cleaner in the level text -- dial).</summary>
+		public static int GetStunRounds(int Lv)
 		{
-			int tier = (int)Math.Ceiling(EffLevel / 2f) + Stat.Random(-1, 2);
-			return Math.Max(1, Math.Min(9, tier));
+			switch (GetBand(Lv))
+			{
+				case 1: return 1;
+				case 2:
+				case 3: return 2;
+				default: return 3;
+			}
 		}
 
-		public static string GetTierTable(int Tier) => "Cleo_TerraFirma_FissureTier" + Tier;
+		public static int GetStunSaveDC(int Lv) => 16 + Lv;
 
-		/// <summary>One roll of the tier machinery resolved to a blueprint — seam, falls, and spill all draw from here.</summary>
-		public static string RollRockBlueprint(int EffLevel)
+		/// <summary>Engine push force: weight-vs-force does the thunderdome sort natively (heavy
+		/// creatures barely move; whatever stands its ground is locked in with you).</summary>
+		public static int GetPushForce(int Lv) => (2 + Lv) * 1000;
+
+		// 100 FLAT (precedent dig 2026-08-02): exact Force Wall/Bubble parity -- the ruled
+		// analogues -- and 2x Stunning Force for "Stunning Force plus a permanent fortress".
+		// The product never expires, so level must not also buy frequency (no double-dip).
+		public static int GetCooldown(int Lv) => 100;
+
+		/// <summary>Keeper-salvage rolls per cast ("additional small spawns", ruled): 1 roll at bands 1-2, 2 at bands 3-4, each 50%.</summary>
+		public static int GetSalvageRolls(int Lv) => GetBand(Lv) >= 3 ? 2 : 1;
+
+		/// <summary>% chance a gap holds a geyser (the door that shoots back): 0/10/15/20 by band.</summary>
+		public static int GetGeyserChance(int Lv)
 		{
-			return PopulationManager.RollOneFrom(GetTierTable(RollTier(EffLevel)))?.Blueprint;
+			switch (GetBand(Lv))
+			{
+				case 1: return 0;
+				case 2: return 10;
+				case 3: return 15;
+				default: return 20;
+			}
 		}
 
-		// RE-RATIFIED 2026-07-24 (was 105-5L floor 40 = ~4x Burgeoning's max-level 15; user: "2x as
-		// slow at max instead"): same opening rhythm, lands at 30 = exactly 2x at Lv10
-		public static int GetCooldown(int Lv) => Math.Max(105 - 8 * Lv, 30);
+		/// <summary>Omnigeyser tier by band (2->1, 3->2, 4->3).</summary>
+		public static string GetGeyserBlueprint(int Lv) => "Cleo_TerraFirma_Rock_Omnigeyser" + Math.Max(1, GetBand(Lv) - 1);
 
-		/// <summary>Deeper casts spread farther (depth-quantity ruling 2026-07-23): filler-only growth,
-		/// structurally outward, frozen at SPILL_MAX so the deepest strata don't drown the disk.</summary>
-		public static int GetSpillChance(GameObject who) => Math.Min(SPILL_CHANCE_BASE + 5 * GetDepthBonus(who), SPILL_MAX);
-
-		/// <summary>
-		/// The deeper the strata, the stronger the stone the ceiling sheds (user ruling 2026-07-22).
-		/// Surface is stratum 10 (engine convention: Z > 10 = "the deep underground"); every 5 strata
-		/// below adds +1 effective level for tier selection only, capped at +8 — reached at Z50 and
-		/// flat below (RULED 2026-07-23; the strata run far deeper than 50, but the ceiling's
-		/// generosity plateaus). The mutation's own numbers (falls, radius, cooldown) never change
-		/// with depth; spill chance does (see GetSpillChance).
-		/// </summary>
-		public static int GetDepthBonus(GameObject who)
+		/// <summary>% chance the rim raises a stone figure (USER RULED into v1: "figurine can come
+		/// in first pass"): 0/2/4/6 by band, at most one per cast. A figure is an event, not a fixture.</summary>
+		public static int GetFigureChance(int Lv)
 		{
-			Zone zone = who?.CurrentZone;
-			if (zone == null || zone.IsWorldMap())
-				return 0;
-			return Math.Min(Math.Max((zone.Z - 10) / 5, 0), 8);
+			switch (GetBand(Lv))
+			{
+				case 1: return 0;
+				case 2: return 2;
+				case 3: return 4;
+				default: return 6;
+			}
 		}
 		#endregion
 
@@ -157,8 +164,8 @@ namespace XRL.World.Parts.Mutation
 
 		public override bool HandleEvent(AIGetOffensiveAbilityListEvent E)
 		{
-			// a self-centered collapse: worth casting when the enemy is at or near the ring
-			if (E.Distance <= GetRingRadius(Level) + 1 && IsMyActivatedAbilityAIUsable(ActivatedAbilityID))
+			// a self-centered wave: worth casting when the enemy is inside or at the rim
+			if (E.Distance <= GetRingRadius(Level) && IsMyActivatedAbilityAIUsable(ActivatedAbilityID))
 				E.Add(COMMAND_ID);
 			return base.HandleEvent(E);
 		}
@@ -173,281 +180,260 @@ namespace XRL.World.Parts.Mutation
 				return false;
 			}
 			Cell origin = ParentObject.CurrentCell;
-			if (origin == null)
+			Zone zone = origin?.ParentZone;
+			if (zone == null)
 				return false;
 			int radius = GetRingRadius(Level);
-			List<Cell> area = GetDiskCells(origin, radius);
-			if (area.Count == 0)
-			{
-				E.Actor?.Fail("There is nowhere for the stone to fall.");
-				return false;
-			}
+			int carveDepth = GetCarveDepth(Level);
 			UseEnergy(1000, "Physical Mutation Fissure");
 			CooldownMyActivatedAbility(ActivatedAbilityID, GetCooldown(Level));
 			ParentObject.PlayWorldSound(SLAM_SOUND, 1f, Combat: true);
-			// surface convention (user wording 2026-07-22): under open sky there is no ceiling to bring
-			// down -- the earth itself convulses (same Z <= 10 rule as the stalactite->stalagmite swap)
-			if ((origin.ParentZone?.Z ?? 10) <= 10)
-				IComponent<GameObject>.EmitMessage(ParentObject, "The earth heaves and convulses!", ColorAsGoodFor: ParentObject); // green like the ceiling line (user flag 2026-07-23)
-			else
-				XDidY(ParentObject, "bring", "the ceiling down", "!", ColorAsGoodFor: ParentObject);
-			int effectiveLevel = Level + GetDepthBonus(ParentObject);
-			int falls = Math.Min(GetFalls(Level), area.Count);
-			int spillChance = GetSpillChance(ParentObject);
-			// the seam (RULED 2026-07-23): one stratum dominates each collapse — rolled once, and
-			// every fall and spill echo coin-flips between the seam stone and a fresh tier roll.
-			// Same-stone falls also stack in the pack: the batching is quality-of-life, not power.
-			string seam = RollRockBlueprint(effectiveLevel);
-			// seam eligibility (RULED 2026-07-25, with the holographic rock): NoSeam-tagged
-			// blueprints never dominate a collapse -- re-roll, and if the table won't cooperate,
-			// this cast simply has no seam
-			for (int tries = 0; tries < 8 && HasNoSeamTag(seam); tries++)
-				seam = RollRockBlueprint(effectiveLevel);
-			if (HasNoSeamTag(seam))
-				seam = null;
-			Helpers.VerifyLog("FIS", $"cast by {ParentObject.Blueprint} Lv{Level} at Z={ParentObject.CurrentZone?.Z}: eff={effectiveLevel} (depth+{GetDepthBonus(ParentObject)}), radius={radius}, falls={falls}, spill={spillChance}%, seam={seam ?? "none"}");
-			// living-fall cap (RULED 2026-07-25, user: "capping somewhere like, 3-5 and then
-			// letting the rest of the seam roll something of that tier is fair" -- answers the
-			// nine-baboon jackpot cast): each collapse sheds at most a handful of living things;
-			// once the cap is hit, further living rolls re-roll the tier table for inert stone.
-			// The cap itself is rolled 3-5 per cast (Claude reading of the range, DRAFT).
-			int livingCap = Stat.Random(3, 5);
-			int livingFalls = 0;
-			string PickCapped()
+			XDidY(ParentObject, "drive", "a wave through the earth", "!", ColorAsGoodFor: ParentObject);
+			Helpers.VerifyLog("FIS", $"REDOUBT cast by {ParentObject.Blueprint} Lv{Level}: radius={radius}, carveDepth={carveDepth}, damage={GetWaveDamage(Level)}, stun={GetStunRounds(Level)}r DC{GetStunSaveDC(Level)}");
+
+			// ---- reach + carve: ray from origin to every disk cell; along any ray the wave
+			// penetrates at most carveDepth natural-stone cells and stops dead at the first
+			// constructed wall. Cells beyond the stop are unreached (no push, no ring there).
+			var reached = new HashSet<Cell>();
+			var carved = new HashSet<Cell>();
+			for (int dx = -radius; dx <= radius; dx++)
 			{
-				string bp = PickFallBlueprint(seam, effectiveLevel);
-				if (!IsLivingBlueprint(bp))
-					return bp;
-				if (livingFalls < livingCap)
+				for (int dy = -radius; dy <= radius; dy++)
 				{
-					livingFalls++;
-					return bp;
-				}
-				string was = bp;
-				for (int tries = 0; tries < 8 && IsLivingBlueprint(bp); tries++)
-					bp = RollRockBlueprint(effectiveLevel);
-				if (IsLivingBlueprint(bp))
-					bp = DEBRIS_BLUEPRINT; // the tier table would not stop rolling flesh; stone it is
-				Helpers.VerifyLog("FIS", $"living cap {livingCap} reached: {was} re-rolled to {bp}");
-				return bp;
-			}
-			for (int i = 0; i < falls; i++)
-			{
-				Cell landing = TakeWeightedCell(area, origin, radius);
-				DropRock(landing, PickCapped(), origin, radius, "fall");
-				if (spillChance.in100())
-				{
-					Cell echo = PickSpillCell(origin, landing);
-					if (echo != null)
-						DropRock(echo, PickCapped(), origin, radius, "spill"); // one echo, never chained
+					if (dx == 0 && dy == 0)
+						continue;
+					Cell target = zone.GetCell(origin.X + dx, origin.Y + dy);
+					if (target == null || reached.Contains(target))
+						continue;
+					List<Point> ray = Zone.Line(origin.X, origin.Y, target.X, target.Y);
+					int wallsBitten = 0;
+					bool blocked = false;
+					var rayCarves = new List<Cell>();
+					for (int i = 1; i < ray.Count; i++) // skip the origin point
+					{
+						Cell step = zone.GetCell(ray[i].X, ray[i].Y);
+						if (step == null) { blocked = true; break; }
+						if (step.IsSolid() && !carved.Contains(step))
+						{
+							GameObject wall = GetSolidObject(step);
+							if (wall == null || !wall.HasPart(CARVABLE_PART) || wallsBitten >= carveDepth)
+							{
+								blocked = true; // the stone doesn't answer, or the bite is spent
+								break;
+							}
+							wallsBitten++;
+							rayCarves.Add(step);
+						}
+					}
+					if (blocked)
+						continue;
+					foreach (Cell c in rayCarves)
+						carved.Add(c);
+					// every cell along a clean ray is reached (the wave passes through it)
+					for (int i = 1; i < ray.Count; i++)
+					{
+						Cell step = zone.GetCell(ray[i].X, ray[i].Y);
+						if (step != null)
+							reached.Add(step);
+					}
 				}
 			}
+			// physically carve: clean removal, no drops -- the mass reappears as ring fabric
+			int carvedMass = 0;
+			foreach (Cell c in carved)
+			{
+				GameObject wall = GetSolidObject(c);
+				if (wall != null)
+				{
+					Helpers.VerifyLog("FIS", $"CARVE @({c.X},{c.Y}): {wall.Blueprint}");
+					wall.Obliterate();
+					carvedMass++;
+					SmokePuff(c);
+				}
+			}
+
+			// ---- the wave: damage + push + stun-if-moved, working outward so inner creatures
+			// vacate before outer ones are considered. Items are untouched (loot rule, ruled).
+			var waveVictims = new List<GameObject>();
+			foreach (Cell c in reached)
+			{
+				foreach (GameObject o in c.GetObjectsWithPart("Combat"))
+				{
+					if (o != ParentObject && o.PhaseMatches(ParentObject) && !waveVictims.Contains(o))
+						waveVictims.Add(o);
+				}
+			}
+			waveVictims.Sort((a, b) => ChebyshevDistance(origin, a.CurrentCell).CompareTo(ChebyshevDistance(origin, b.CurrentCell)));
+			foreach (GameObject victim in waveVictims)
+			{
+				if (!GameObject.Validate(victim) || victim.CurrentCell == null)
+					continue;
+				if (victim.IsFlying)
+				{
+					// a ground wave: the airborne feel only the dust (dial -- flag if it grates)
+					Helpers.VerifyLog("FIS", $"wave spares {victim.Blueprint} (flying)");
+					continue;
+				}
+				int dmg = GetWaveDamage(Level).RollCached();
+				victim.TakeDamage(dmg, "from the heaving earth!", "Crushing",
+					"You were battered by a wave of earth.",
+					victim.It + victim.GetVerb("were", true, true) + " @@battered by a wave of earth.",
+					Attacker: ParentObject, Owner: ParentObject, Source: ParentObject);
+				if (!GameObject.Validate(victim) || victim.CurrentCell == null)
+					continue;
+				Cell before = victim.CurrentCell;
+				string dir = origin.GetDirectionFromCell(before);
+				victim.Push(dir, GetPushForce(Level), radius + 1);
+				bool moved = victim.CurrentCell != before;
+				Helpers.VerifyLog("FIS", $"wave hits {victim.Blueprint}: {dmg} dmg, push {dir} {(moved ? "MOVED" : "HELD GROUND")}");
+				// kept your feet = kept your wits: only the moved risk the stun (ruled riff, drafted)
+				if (moved && victim.IsValid() && victim.HasPart("Combat")
+					&& !victim.MakeSave("Toughness", GetStunSaveDC(Level), null, null, "Fissure Stun", IgnoreNaturals: false, IgnoreNatural1: false, IgnoreNatural20: false, IgnoreGodmode: false, ParentObject))
+				{
+					victim.ApplyEffect(new Stun(GetStunRounds(Level), GetStunSaveDC(Level)));
+					Helpers.VerifyLog("FIS", $"wave stuns {victim.Blueprint} for {GetStunRounds(Level)} round(s)");
+				}
+			}
+
+			// ---- the ring: fabric on every reached, open rim cell, minus the gaps
+			var rim = new List<Cell>();
+			foreach (Cell c in reached)
+			{
+				if (ChebyshevDistance(origin, c) == radius && !c.IsSolid())
+					rim.Add(c);
+			}
+			var gaps = new List<Cell>();
+			for (int g = 0; g < GAP_COUNT && rim.Count > 0; g++)
+			{
+				int pick = Stat.Random(0, rim.Count - 1);
+				gaps.Add(rim[pick]);
+				rim.RemoveAt(pick);
+			}
+			// carved mass thickens the ring: each carved wall banks one upgrade credit
+			// (rubble -> crumbled wall -> fallen wall) spent as the rim deposits
+			int upgradeCredits = carvedMass;
+			int deposited = 0, debris = 0;
+			foreach (Cell c in rim)
+			{
+				if (StillHoldsCombatant(c))
+				{
+					// no burying the thunderdome's audience: loose stone instead of fabric
+					c.AddObject(GameObject.Create(DEBRIS_BLUEPRINT));
+					debris++;
+					continue;
+				}
+				string fabric = RollFabric(Level);
+				while (upgradeCredits > 0 && fabric != WALL_BLUEPRINT)
+				{
+					fabric = fabric == RUBBLE_BLUEPRINT ? CRUMBLED_BLUEPRINT : WALL_BLUEPRINT;
+					upgradeCredits--;
+				}
+				if (fabric == WALL_BLUEPRINT)
+					SweepLooseItemsAside(c); // a wall owns its whole tile: loot spills out the side, never vanishes
+				GameObject piece = GameObject.Create(fabric);
+				StampOwner(piece);
+				c.AddObject(piece);
+				SmokePuff(c);
+				deposited++;
+			}
+			// gaps: sometimes a crack (the trap-gate), sometimes -- at depth -- the door that shoots back
+			bool geyserPlaced = false;
+			foreach (Cell gap in gaps)
+			{
+				if (!geyserPlaced && GetGeyserChance(Level).in100() && !StillHoldsCombatant(gap))
+				{
+					GameObject geyser = GameObject.Create(GetGeyserBlueprint(Level));
+					StampOwner(geyser);
+					gap.AddObject(geyser);
+					geyserPlaced = true;
+					Helpers.VerifyLog("FIS", $"RING geyser in gap @({gap.X},{gap.Y}): {GetGeyserBlueprint(Level)}");
+					continue;
+				}
+				if (CRACK_GATE_CHANCE.in100())
+				{
+					GameObject crack = GameObject.Create(CRACK_BLUEPRINT);
+					StampOwner(crack);
+					gap.AddObject(crack);
+					Helpers.VerifyLog("FIS", $"RING crack-gate in gap @({gap.X},{gap.Y})");
+				}
+			}
+			// keeper salvage among the rim ("additional small spawns", ruled)
+			int salvaged = 0;
+			for (int s = 0; s < GetSalvageRolls(Level); s++)
+			{
+				if (rim.Count > 0 && 50.in100())
+				{
+					Cell c = rim[Stat.Random(0, rim.Count - 1)];
+					string bp = PopulationManager.RollOneFrom(SALVAGE_TABLE)?.Blueprint;
+					if (bp != null)
+					{
+						GameObject rock = GameObject.Create(bp);
+						StampOwner(rock);
+						c.AddObject(rock);
+						salvaged++;
+						Helpers.VerifyLog("FIS", $"RING salvage @({c.X},{c.Y}): {bp}");
+					}
+				}
+			}
+			// the figure: at most one, rare, an event (USER RULED into v1)
+			if (rim.Count > 0 && GetFigureChance(Level).in100())
+			{
+				Cell c = rim[Stat.Random(0, rim.Count - 1)];
+				if (!StillHoldsCombatant(c))
+				{
+					SweepLooseItemsAside(c);
+					GameObject figure = GameObject.Create(FIGURE_BLUEPRINT);
+					c.AddObject(figure);
+					Helpers.VerifyLog("FIS", $"RING FIGURE raised @({c.X},{c.Y})");
+				}
+			}
+			Helpers.VerifyLog("FIS", $"RING complete: {deposited} fabric, {gaps.Count} gap(s), {debris} debris-for-occupied, {salvaged} salvage, carvedMass={carvedMass} (credits left {upgradeCredits}), figure={(GetFigureChance(Level) > 0 ? "rolled" : "n/a")}");
 			return base.HandleEvent(E);
 		}
 		#endregion
 
-		#region The collapse
-		/// <summary>All open cells within Chebyshev distance <paramref name="R"/> of <paramref name="origin"/>,
-		/// the origin itself excluded — the collapse never lands on the caster (disk rework 2026-07-22;
-		/// the old exactly-R ring left a growing safe hole around the caster at rank 2+).</summary>
-		private static List<Cell> GetDiskCells(Cell origin, int R)
+		#region Helpers
+		/// <summary>Base fabric mix by band: rubble/crumbled/wall at 70/25/5 -> 55/30/15 -> 40/35/25 -> 30/35/35 (dials).</summary>
+		private static string RollFabric(int Lv)
 		{
-			List<Cell> disk = new List<Cell>();
-			Zone zone = origin.ParentZone;
-			if (zone == null)
-				return disk;
-			for (int dx = -R; dx <= R; dx++)
+			int roll = Stat.Random(1, 100);
+			switch (GetBand(Lv))
 			{
-				for (int dy = -R; dy <= R; dy++)
-				{
-					if (dx == 0 && dy == 0)
-						continue;
-					Cell c = zone.GetCell(origin.X + dx, origin.Y + dy);
-					if (c != null && !c.IsSolid())
-						disk.Add(c);
-				}
+				case 1: return roll <= 70 ? RUBBLE_BLUEPRINT : (roll <= 95 ? CRUMBLED_BLUEPRINT : WALL_BLUEPRINT);
+				case 2: return roll <= 55 ? RUBBLE_BLUEPRINT : (roll <= 85 ? CRUMBLED_BLUEPRINT : WALL_BLUEPRINT);
+				case 3: return roll <= 40 ? RUBBLE_BLUEPRINT : (roll <= 75 ? CRUMBLED_BLUEPRINT : WALL_BLUEPRINT);
+				default: return roll <= 30 ? RUBBLE_BLUEPRINT : (roll <= 65 ? CRUMBLED_BLUEPRINT : WALL_BLUEPRINT);
 			}
-			return disk;
 		}
 
-		/// <summary>Removes and returns a random cell weighted by closeness-to-epicenter squared — the
-		/// ceiling nearest the caster falls thickest (user ruling 2026-07-22). No enemy-seeking: the
-		/// earth doesn't aim, it just falls hardest where it was shaken hardest.</summary>
-		private static Cell TakeWeightedCell(List<Cell> cells, Cell origin, int R)
+		/// <summary>The first solid, non-creature occupant of a cell -- the wall, for carving purposes.</summary>
+		private static GameObject GetSolidObject(Cell C)
 		{
-			int total = 0;
-			for (int i = 0; i < cells.Count; i++)
+			foreach (GameObject o in C.Objects)
 			{
-				int w = R + 1 - ChebyshevDistance(origin, cells[i]);
-				total += w * w;
+				if (o.Physics != null && o.Physics.Solid && !o.HasPart("Combat"))
+					return o;
 			}
-			int roll = Stat.Random(1, Math.Max(1, total));
-			for (int i = 0; i < cells.Count; i++)
-			{
-				int w = R + 1 - ChebyshevDistance(origin, cells[i]);
-				roll -= w * w;
-				if (roll <= 0)
-				{
-					Cell picked = cells[i];
-					cells.RemoveAt(i);
-					return picked;
-				}
-			}
-			Cell last = cells[cells.Count - 1];
-			cells.RemoveAt(cells.Count - 1);
-			return last;
+			return null;
 		}
 
-		/// <summary>An adjacent cell of <paramref name="landing"/> strictly farther from <paramref name="origin"/> — the collapse only ever spreads outward.</summary>
-		private static Cell PickSpillCell(Cell origin, Cell landing)
+		/// <summary>The shaker owns the field (party gate, RULED 2026-07-25): ring-born pieces that
+		/// carry the rock part stamp their caster so the redoubt never mines its own party.</summary>
+		private void StampOwner(GameObject rock)
 		{
-			int landingDist = ChebyshevDistance(origin, landing);
-			List<Cell> candidates = new List<Cell>();
-			foreach (Cell c in landing.GetAdjacentCells())
-			{
-				if (c != null && !c.IsSolid() && ChebyshevDistance(origin, c) > landingDist)
-					candidates.Add(c);
-			}
-			if (candidates.Count == 0)
-				return null;
-			return candidates[Stat.Random(0, candidates.Count - 1)];
+			if (rock.GetPart<Cleo_TerraFirma_FallenRockPart>() is Cleo_TerraFirma_FallenRockPart part)
+				part.Owner = ParentObject;
 		}
 
 		private static int ChebyshevDistance(Cell a, Cell b)
 		{
+			if (a == null || b == null)
+				return int.MaxValue;
 			return Math.Max(Math.Abs(a.X - b.X), Math.Abs(a.Y - b.Y));
 		}
 
-		/// <summary>The seam stone half the time, a fresh tier roll otherwise. Spill echoes draw here
-		/// identically — Burgeoning treats its spread cells the same as its burst cells.</summary>
-		private static string PickFallBlueprint(string seam, int effLevel)
-		{
-			if (seam != null && SEAM_CHANCE.in100())
-				return seam;
-			return RollRockBlueprint(effLevel);
-		}
-
-		/// <summary>NoSeam-tagged blueprints (the holographic rock) never dominate a collapse.</summary>
-		private static bool HasNoSeamTag(string bp)
-		{
-			if (bp == null)
-				return false;
-			GameObjectBlueprint def = GameObjectFactory.Factory.GetBlueprintIfExists(bp);
-			return def != null && def.HasTag("Cleo_TerraFirma_NoSeam");
-		}
-
-		/// <summary>A blueprint that would land ALIVE (DropRock's brain-branch) — the living-fall cap counts these.</summary>
-		private static bool IsLivingBlueprint(string bp)
-		{
-			if (bp == null)
-				return false;
-			GameObjectBlueprint def = GameObjectFactory.Factory.GetBlueprintIfExists(bp);
-			return def != null && def.HasPart("Brain");
-		}
-
-		/// <summary>One rock (<paramref name="Blueprint"/>, pre-rolled by the seam/tier machinery) falls into <paramref name="C"/>: smoke, crush, then the rock itself (or debris, if something solid failed to kill what it landed on).</summary>
-		private void DropRock(Cell C, string Blueprint, Cell origin, int Radius, string FallKind = "?")
-		{
-			string blueprint = Blueprint;
-			if (blueprint == null)
-				return;
-			// spawn geography (user ruling 2026-07-22): under open sky there is no ceiling to shed stalactites --
-			// those rolls raise stalagmites from the floor instead; caves keep the stalactite-heavy mix
-			bool surfaceSwap = blueprint == STALACTITE_BLUEPRINT && (C.ParentZone?.Z ?? 10) <= 10;
-			if (surfaceSwap)
-				blueprint = STALAGMITE_BLUEPRINT;
-			Helpers.VerifyLog("FIS", $"{FallKind} fall @({C.X},{C.Y}) d={ChebyshevDistance(origin, C)}: {blueprint}{(surfaceSwap ? " (surface: stalactite->stalagmite)" : "")}");
-			GameObject rock = GameObject.Create(blueprint);
-			// the shaker owns the field (party gate, RULED 2026-07-25): fissure-born stones stamp
-			// their caster so the collapse never mines its own summoner's party
-			if (rock.GetPart<Cleo_TerraFirma_FallenRockPart>() is Cleo_TerraFirma_FallenRockPart casterStamp)
-				casterStamp.Owner = ParentObject;
-			SmokePuff(C);
-			C.PlayWorldSound(SLAM_SOUND);
-			// crush whatever is beneath
-			string crush = rock.GetPropertyOrTag(CRUSH_DAMAGE_TAG);
-			int instakill = 0;
-			int.TryParse(rock.GetPropertyOrTag(CRUSH_INSTAKILL_TAG), out instakill);
-			if (!crush.IsNullOrEmpty())
-			{
-				List<GameObject> victims = new List<GameObject>();
-				foreach (GameObject o in C.Objects)
-				{
-					if (o.HasPart("Combat") && o.PhaseMatches(rock))
-						victims.Add(o); // fliers are NOT spared -- it falls from above
-				}
-				foreach (GameObject victim in victims)
-				{
-					if (instakill > 0 && instakill.in100())
-					{
-						Helpers.VerifyLog("FIS", $"CRUSH INSTAKILL: {blueprint} on {victim.Blueprint} ({instakill}% proc)");
-						XDidYToZ(ParentObject, "crush", victim, "beneath falling stone", "!", ColorAsGoodFor: ParentObject, ColorAsBadFor: victim);
-						victim.Die(ParentObject, null, "You were crushed beneath falling stone.",
-							victim.It + victim.GetVerb("were", true, true) + " @@crushed beneath falling stone.");
-					}
-					else
-					{
-						// +Level: the fall itself scales with mastery; +1d6 per step inside the rim —
-						// the ceiling directly overhead falls hardest (proximity ruling 2026-07-22)
-						int bonus = Level;
-						int proximitySteps = Math.Max(0, Radius - ChebyshevDistance(origin, C));
-						for (int p = 0; p < proximitySteps; p++)
-							bonus += Stat.Random(1, 6);
-						Helpers.VerifyLog("FIS", $"crush: {blueprint} on {victim.Blueprint} = {crush} + level {Level} + proximity {proximitySteps}d6 (bonus total {bonus})");
-						victim.TakeDamage(crush.RollCached() + bonus, "from falling stone!", "Crushing",
-							"You were crushed beneath falling stone.",
-							victim.It + victim.GetVerb("were", true, true) + " @@crushed beneath falling stone.",
-							Attacker: ParentObject, Owner: ParentObject, Source: ParentObject);
-					}
-				}
-			}
-			// a living thing that falls (the ape statue) lands ALIVE: allied to whoever brought the ceiling
-			// down, worth no XP -- Burgeoning's summon recipe verbatim; sidesteps into an open cell rather
-			// than sharing one with a combatant, and if nowhere will hold it, the earth keeps it
-			if (rock.Brain != null)
-			{
-				Cell home = C;
-				if (StillHoldsCombatant(home))
-				{
-					List<Cell> openAdj = home.GetLocalAdjacentCells()?.FindAll(x => !x.IsSolid() && !StillHoldsCombatant(x));
-					home = (openAdj != null && openAdj.Count > 0) ? openAdj[Stat.Random(0, openAdj.Count - 1)] : null;
-				}
-				if (home == null)
-				{
-					Helpers.VerifyLog("FIS", $"living fall {blueprint}: nowhere to stand, obliterated");
-					rock.Obliterate();
-					return;
-				}
-				rock.Brain.SetAlliedLeader<AllySummon>(ParentObject, 0, Silent: true);
-				rock.MakeActive();
-				if (rock.HasStat("XPValue"))
-					rock.GetStat("XPValue").BaseValue = 0;
-				Helpers.VerifyLog("FIS", $"living fall: {blueprint} lands ALIVE @({home.X},{home.Y}), allied to {ParentObject.Blueprint}, XP zeroed{(home != C ? " (sidestepped)" : "")}");
-				home.AddObject(rock);
-				return;
-			}
-			// a solid mass that failed to kill what it fell on shatters to debris instead of standing
-			bool solid = rock.Physics != null && rock.Physics.Solid;
-			if (solid && StillHoldsCombatant(C))
-			{
-				string debris = rock.GetPropertyOrTag(DEBRIS_TAG) ?? DEBRIS_BLUEPRINT;
-				rock.Obliterate();
-				int shards = Stat.Random(1, 2);
-				Helpers.VerifyLog("FIS", $"solid {blueprint} failed to kill -> shattered into {shards}x {debris}");
-				for (int i = 0; i < shards; i++)
-					C.AddObject(GameObject.Create(debris));
-				return;
-			}
-			if (solid)
-				SweepLooseItemsAside(C); // a wall owns its whole tile (user ruling): loot spills out the side, never vanishes beneath
-			Cleo_TerraFirma_FallenRockPart fallenPart = rock.GetPart<Cleo_TerraFirma_FallenRockPart>();
-			if (fallenPart != null)
-				fallenPart.Owner = ParentObject;
-			C.AddObject(rock);
-		}
-
-		/// <summary>Loose items (corpses, dropped gear) spill from under a solid fall into one open adjacent
-		/// cell — the Gravel Whorl's swat-aside recipe. If nothing adjacent is open, the earth keeps what it takes.</summary>
+		/// <summary>Loose items (corpses, dropped gear) spill from under a solid deposit into one open
+		/// adjacent cell -- the Gravel Whorl's swat-aside recipe; the loot rule forbids burying.</summary>
 		private static void SweepLooseItemsAside(Cell C)
 		{
 			List<GameObject> loose = new List<GameObject>();
@@ -461,7 +447,7 @@ namespace XRL.World.Parts.Mutation
 			List<Cell> open = C.GetLocalAdjacentCells()?.FindAll(x => !x.IsSolid());
 			if (open == null || open.Count == 0)
 			{
-				Helpers.VerifyLog("FIS", $"loot sweep: {loose.Count} loose item(s) BURIED (no open adjacent cell) -- the earth keeps what it takes");
+				Helpers.VerifyLog("FIS", $"loot sweep: {loose.Count} loose item(s) left in place beneath the fabric (no open adjacent cell; loot rule forbids burying, so the piece shares the tile)");
 				return;
 			}
 			Cell spill = open[Stat.Random(0, open.Count - 1)];
@@ -483,7 +469,7 @@ namespace XRL.World.Parts.Mutation
 			return false;
 		}
 
-		/// <summary>Gray shade-glyph particles drifting up out of the landing cell -- the dust of the fall.</summary>
+		/// <summary>Gray shade-glyph particles drifting up -- the dust of the heave.</summary>
 		private static void SmokePuff(Cell C)
 		{
 			C.ParticleBlip("&y*");

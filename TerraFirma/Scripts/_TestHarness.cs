@@ -1082,9 +1082,9 @@ namespace Cleo.TerraFirma.Scripts
 			if (caster.Brain != null)
 				caster.Brain.Target = ply;
 			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "fis", TurnsRemaining = 20, TurnsTotal = 20, Queue = queue };
-			driver.InitFis(caster, CountLooseFissureRocks(ply.CurrentZone));
+			driver.InitFis(caster, CountRingPieces(ply.CurrentZone));
 			ply.AddPart(driver);
-			MessageQueue.AddPlayerMessage("Harness: NPC Fissure caster running -- 20 turns; expect falling rocks.", "W");
+			MessageQueue.AddPlayerMessage("Harness: NPC redoubt caster running -- 20 turns; expect the earth to heave and a ring to rise.", "W");
 		}
 
 		internal static int CountLooseFissureRocks(Zone zone)
@@ -1093,6 +1093,19 @@ namespace Cleo.TerraFirma.Scripts
 			if (zone != null)
 				foreach (GameObject obj in zone.GetObjects())
 					if (obj.GetPart<Cleo_TerraFirma_FallenRockPart>() != null && obj.CurrentCell != null && obj.InInventory == null && obj.Equipped == null)
+						n += obj.Count;
+			return n;
+		}
+
+		/// <summary>Redoubt census: every mod rock-family object standing in the zone -- fabric
+		/// (rubble/crumbled/wall/crack), salvage keepers, geysers, debris, and the figure.</summary>
+		internal static int CountRingPieces(Zone zone)
+		{
+			int n = 0;
+			if (zone != null)
+				foreach (GameObject obj in zone.GetObjects())
+					if (obj.CurrentCell != null && obj.InInventory == null && obj.Equipped == null
+						&& (obj.Blueprint.StartsWith("Cleo_TerraFirma_Rock_") || obj.Blueprint == "Cleo_TerraFirma_RedoubtFigure"))
 						n += obj.Count;
 			return n;
 		}
@@ -1853,18 +1866,14 @@ namespace XRL.World.Parts
 
 		private void FinishFis(GameObject owner)
 		{
+			// REDOUBT shape (pivot 2026-08-02): a cast now deposits ring fabric (rubble/crumbled/
+			// wall/crack/salvage), not a shower of loose stones -- count ring pieces by prefix.
 			bool casterAlive = GameObject.Validate(FisCaster);
-			int rocksNow = Cleo.TerraFirma.Scripts.TestHarnessWishes.CountLooseFissureRocks(owner.CurrentZone);
-			int delta = rocksNow - FisRocksBaseline;
-			int allies = 0;
-			Zone zone = owner.CurrentZone;
-			if (zone != null && casterAlive)
-				foreach (GameObject obj in zone.GetObjects())
-					if (obj != FisCaster && obj.Brain != null && obj.Brain.PartyLeader == FisCaster)
-						allies++;
-			bool pass = casterAlive && delta >= 3;
+			int piecesNow = Cleo.TerraFirma.Scripts.TestHarnessWishes.CountRingPieces(owner.CurrentZone);
+			int delta = piecesNow - FisRocksBaseline;
+			bool pass = casterAlive && delta >= 5;
 			Cleo.TerraFirma.Scripts.TestHarnessWishes.Report("fis", pass,
-				$"NPC Fissure caster over {TurnsTotal} turns: loose fissure stones {FisRocksBaseline}->{rocksNow} (+{delta}, want >=3 = a cast happened), {allies} living fall(s) allied to the caster (seam-dependent, reported only). A zero here answers fis-npc: no AI advertisement on the mutation.");
+				$"NPC redoubt caster over {TurnsTotal} turns: ring pieces {FisRocksBaseline}->{piecesNow} (+{delta}, want >=5 = a wave happened and deposited a rim). A zero here answers fis-npc: no AI advertisement on the mutation.");
 		}
 
 		private void FinishShape()
