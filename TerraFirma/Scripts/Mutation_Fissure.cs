@@ -23,8 +23,9 @@ namespace XRL.World.Parts.Mutation
 		#region Fields
 		private const string COMMAND_ID = "Cleo_TerraFirma_CommandFissure";
 		private const int MAX_RING_RADIUS = 5;
-		private const int GAP_COUNT = 3; // fixed count + growing circumference = proportional completeness (ruled)
-		private const int CRACK_GATE_CHANCE = 50; // % per gap: the doors made of dice
+		// FEEL ROUND 1 (user, 2026-08-02): "walls feel too solid at lower levels - need more gaps"
+		// -- fixed 3 became a falling ladder; see GetGapCount. Crack-gates commented out same round.
+		// private const int CRACK_GATE_CHANCE = 50; // % per gap: the doors made of dice (BETA-HELD, feel round 1)
 		// Calcify's verified "large stone impact" -- the wave's slam
 		private const string SLAM_SOUND = "Sounds/Throw/sfx_throwing_stone_large_impact";
 		private const string DEBRIS_BLUEPRINT = "Cleo_TerraFirma_Rock_Generic";
@@ -84,6 +85,22 @@ namespace XRL.World.Parts.Mutation
 		public static int GetBand(int Lv) => Math.Min(4, 1 + (Lv - 1) / 3);
 
 		public static int GetRingRadius(int Lv) => Math.Min(MAX_RING_RADIUS, 1 + GetBand(Lv));
+
+		/// <summary>Gaps in the rim, FEEL ROUND 1 (user, 2026-08-02): more at low levels -- 6/5/4/3
+		/// by band. The ruled proportional-completeness now runs on both axes: circumference grows
+		/// AND gap count falls as you level.</summary>
+		public static int GetGapCount(int Lv) => 7 - GetBand(Lv);
+
+		/// <summary>FEEL ROUND 1 (user): "the ring feels a bit too square" -- the disk and rim are
+		/// Euclidean circles now, not Chebyshev squares. Integer tests: disk = d2 &lt;= r²+r
+		/// ((r+0.5)² rounded), ring = r²-r &lt; d2 &lt;= r²+r.</summary>
+		private static bool InDisk(int dx, int dy, int r) => dx * dx + dy * dy <= r * r + r;
+
+		private static bool OnRing(int dx, int dy, int r)
+		{
+			int d2 = dx * dx + dy * dy;
+			return d2 > r * r - r && d2 <= r * r + r;
+		}
 
 		/// <summary>Cells of natural stone the wave chews through along any path; full radius at band 4.</summary>
 		public static int GetCarveDepth(int Lv) => GetBand(Lv) >= 4 ? GetRingRadius(Lv) : GetBand(Lv);
@@ -202,6 +219,8 @@ namespace XRL.World.Parts.Mutation
 				{
 					if (dx == 0 && dy == 0)
 						continue;
+					if (!InDisk(dx, dy, radius)) // Euclidean circle, not Chebyshev square (feel round 1)
+						continue;
 					Cell target = zone.GetCell(origin.X + dx, origin.Y + dy);
 					if (target == null || reached.Contains(target))
 						continue;
@@ -299,11 +318,11 @@ namespace XRL.World.Parts.Mutation
 			var rim = new List<Cell>();
 			foreach (Cell c in reached)
 			{
-				if (ChebyshevDistance(origin, c) == radius && !c.IsSolid())
+				if (OnRing(c.X - origin.X, c.Y - origin.Y, radius) && !c.IsSolid())
 					rim.Add(c);
 			}
 			var gaps = new List<Cell>();
-			for (int g = 0; g < GAP_COUNT && rim.Count > 0; g++)
+			for (int g = 0; g < GetGapCount(Level) && rim.Count > 0; g++)
 			{
 				int pick = Stat.Random(0, rim.Count - 1);
 				gaps.Add(rim[pick]);
@@ -336,7 +355,7 @@ namespace XRL.World.Parts.Mutation
 				SmokePuff(c);
 				deposited++;
 			}
-			// gaps: sometimes a crack (the trap-gate), sometimes -- at depth -- the door that shoots back
+			// gaps: at depth, sometimes the door that shoots back
 			bool geyserPlaced = false;
 			foreach (Cell gap in gaps)
 			{
@@ -349,6 +368,8 @@ namespace XRL.World.Parts.Mutation
 					Helpers.VerifyLog("FIS", $"RING geyser in gap @({gap.X},{gap.Y}): {GetGeyserBlueprint(Level)}");
 					continue;
 				}
+				/* BETA-HELD (feel round 1, user 2026-08-02: "we can comment out cracks for now")
+				   -- the crack-gate under gaps. Restore with CRACK_GATE_CHANCE.
 				if (CRACK_GATE_CHANCE.in100())
 				{
 					GameObject crack = GameObject.Create(CRACK_BLUEPRINT);
@@ -356,6 +377,7 @@ namespace XRL.World.Parts.Mutation
 					gap.AddObject(crack);
 					Helpers.VerifyLog("FIS", $"RING crack-gate in gap @({gap.X},{gap.Y})");
 				}
+				*/
 			}
 			// keeper salvage among the rim ("additional small spawns", ruled)
 			int salvaged = 0;

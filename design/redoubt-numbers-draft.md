@@ -44,6 +44,17 @@ the house range, 2× Stunning Force for "Stunning Force plus a permanent fortres
 Feel-session lever: if high-level casters should remodel more freely, the Burgeoning idiom
 (e.g. 120−4L) is the alternative; open at flat.
 
+## Feel round 1 (2026-08-02, user, first live casts — all built + deployed same day)
+
+1. **"The ring feels a bit too square"** → disk and rim are now EUCLIDEAN CIRCLES, not
+   Chebyshev squares (integer tests: disk d² ≤ r²+r, ring r²−r < d² ≤ r²+r).
+2. **"The walls feel too solid at lower levels - need more gaps"** → gap count is now a
+   falling ladder, **6/5/4/3 by band** (was 3 fixed). Proportional completeness runs on both
+   axes: circumference grows AND gaps close as you level.
+3. **"We can comment out cracks for now"** → crack-gates under gaps BETA-HELD (code
+   commented in the cast, `CRACK_GATE_CHANCE` const held with it; the crack floor object
+   itself stays live elsewhere — tfcrack still covers it).
+
 ## Deliberate v1 exclusions
 
 - Item-plowing (wave ignores loose items — RULED, revisit post-beta if the wave feels like
