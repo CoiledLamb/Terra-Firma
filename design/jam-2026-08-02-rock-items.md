@@ -162,3 +162,19 @@ repo — the TODO's "set up git" item turned out stale). Holds = gate-level togg
 chargen entry, rock spawn tables), NOT mass comment-outs — cross-references to watch:
 strange pool, malformed cragmensch ammo, tfeat/tfbatch rows, TF-VERIFY coverage for the new
 wave/ring code.
+
+**Trim list — USER LEAN (2026-08-02, same jam, tentative wording): keep warped ajistone,
+baboon figurine, caromcobble; MAYBE vantabsidian and shunting rock; geysers PROBABLE sixth**
+(user: "a good kind of unit for this skill"; pool bloat acknowledged; strength concern
+self-balancing via shots-cost-HP — the native cragmensch FabricateFromSelf recipe).
+Claude riff: the trim may let geysers SIMPLIFY — plain-rock turret (fixed blueprint =
+XML-only, no random-pool subclass), three tier variants collapse to one level-scaled
+blueprint alongside the retiring depth machinery; ring placement idea: a geyser can spawn
+IN a rim gap (the door that shoots back). Structural pieces
+(rubble/crumbled walls/walls/cracked floor/stalagmite) graduate to ring fabric regardless.
+Notable cuts vs Claude's earlier pick: strange rock (self-consistent — a lottery over five
+entries isn't a lottery; ajistone inherits the gamble at gas scale; MALFORMED CRAGMENSCH
+AMMO NEEDS RE-POINTING), deep four (tied to the depth-tier catalog machinery, which the
+level-scaled redoubt may retire anyway — afterlife: deep walls/loot), glowing twins
+(XML-only, zero cost to shelve), ape statue (baboon covers the figure niche; ring-raised
+figures cover the rest), geysers (afterlife candidate: rare ring-piece turret).
