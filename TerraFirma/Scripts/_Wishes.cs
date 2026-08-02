@@ -114,8 +114,32 @@ namespace Cleo.TerraFirma.Scripts
 			Popup.Show(msg);
 		}
 
-		/// <summary>One of every fissure rock: takeables into the pack, creatures and standing
-		/// stone into open cells nearby. Enumerated by blueprint prefix, so future rocks join free.</summary>
+		/// <summary>One of every LIVE fissure rock: takeables into the pack, creatures and standing
+		/// stone into open cells nearby. BETA-HELD trim (redoubt pivot, RULED 2026-08-02): the
+		/// prefix enumeration would mint ~50 held blueprints, so the wish filters to the keeper
+		/// roster + structural pieces for the beta. Restore = empty the BetaLive set.</summary>
+		private static readonly HashSet<string> BetaLive = new HashSet<string>
+		{
+			// keepers (trim RULED 2026-08-02)
+			"Cleo_TerraFirma_Rock_Ajistone",
+			"Cleo_TerraFirma_Rock_BaboonFigurine",
+			"Cleo_TerraFirma_Rock_Rubber",
+			"Cleo_TerraFirma_Rock_Vantabsidian",
+			"Cleo_TerraFirma_Rock_Shunting",
+			"Cleo_TerraFirma_Rock_Omnigeyser1",
+			"Cleo_TerraFirma_Rock_Omnigeyser2",
+			"Cleo_TerraFirma_Rock_Omnigeyser3",
+			// structural fabric (incl. the ambiguity-1 promotions)
+			"Cleo_TerraFirma_Rock_Pebbles",
+			"Cleo_TerraFirma_Rock_Generic",
+			"Cleo_TerraFirma_Rock_Rubble",
+			"Cleo_TerraFirma_Rock_CrumbledWall",
+			"Cleo_TerraFirma_Rock_Wall",
+			"Cleo_TerraFirma_Rock_Crack",
+			"Cleo_TerraFirma_Rock_Stalagmite",
+			"Cleo_TerraFirma_Rock_ShatteredStalactite",
+		};
+
 		[WishCommand(Command = "fissurerocks")]
 		public static void FissureRocks()
 		{
@@ -130,6 +154,8 @@ namespace Cleo.TerraFirma.Scripts
 			{
 				if (!bp.Name.StartsWith("Cleo_TerraFirma_Rock_"))
 					continue;
+				if (!BetaLive.Contains(bp.Name))
+					continue; // BETA-HELD rock; see the trim ruling
 				GameObject rock = GameObjectFactory.Factory.CreateObject(bp.Name);
 				if (rock == null)
 					continue;

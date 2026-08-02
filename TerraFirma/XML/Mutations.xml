@@ -15,7 +15,12 @@
 	<!-- Lithovore (RULED 2026-07-22): you eat rocks, only rocks. Cost -2 = Carnivorous parity.
 	     Exclusions mirror the base Carnivorous <-> Photosynthetic Skin pair. Tile is the fallen
 	     rock's own (bespoke art whenever). BearerDescription "lithovores" is a DRAFT default. -->
+	<!-- BETA-HELD (redoubt pivot, RULED 2026-08-02): Lithovore held from the beta until its
+	     post-beta place is figured out — "not certain will be benched forever." Chargen entry
+	     gated; the class stays compiled and reachable via the kitchenrock dev wish (ruled dev
+	     door). Restore = uncomment the category below.
 	<category Name="PhysicalDefects">
 		<mutation Name="Lithovore" Cost="-2" MaxSelected="1" Class="Cleo_TerraFirma_Lithovore" Exclusions="Carnivorous,Photosynthetic Skin" BearerDescription="lithovores" Tile="Items/sw_smallboulder.bmp" />
 	</category>
+	-->
 </mutations>

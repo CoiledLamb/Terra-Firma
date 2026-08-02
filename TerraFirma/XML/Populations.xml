@@ -5,59 +5,22 @@
 	     Escalation (user ruling 2026-07-22, base-game loot-table mechanic): every roll has a
 	     small chance to reach a band up — the "Deeper" groups — and rarely two bands at once.
 	     Escalations land on band-exclusive content (the *New tables) so they're always visible. ====== -->
-	<!-- Throwable-only mirrors of the fissure bands (same weights, same "Deeper" escalation, minus
-	     creatures/standing stone). Shared by omnigeyser shots and baboon pocket-stones (2026-07-22).
-	     Strange rides the mirror on the bell (RULED 2026-07-30, "fix this to mirror, that's its
-	     purpose"): band weights 1/8/3/0 = effective ~1.3% TR1 / ~3.5% TR2 / ~2.9% TR3 / ~1.7% TR4,
-	     shallow-rare, mid-peak, deep-taper; band 4 carries none, the 60% nesting alone keeps the
-	     deep trickle (interior numbers = Claude picks under the ruled shape). -->
+	<!-- Throwable-only mirrors of the fissure bands. Shared by omnigeyser shots and baboon
+	     pocket-stones (2026-07-22). BETA-HELD TRIM (redoubt pivot, RULED 2026-08-02): mirrors
+	     pruned to the six keepers + inert plain stones; the strange-rock bell rides (RULED
+	     2026-07-30) retired with strange itself. Full pre-trim tables recoverable at git tag
+	     fissure-v2-grenade. -->
 	<population Name="Cleo_TerraFirma_ThrowableRocksBand2">
 		<group Name="Rocks" Style="pickone">
-			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Whorlstone" />
-			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Torpor" />
-			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Volatile" />
 			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Rubber" />
-			<group Name="Fungal" Weight="9" Style="pickone">
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Fungal" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_FungalLuminous" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_FungalWax" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_FungalMumbles" />
-			</group>
-			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_CompressedAsh" />
-			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Spiderweb" />
 			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_ShatteredStalactite" />
-			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Rusty" />
-			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Scary" />
-			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Bola" />
-			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Spiny" />
-			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 		</group>
 	</population>
 	<population Name="Cleo_TerraFirma_ThrowableRocksBand3">
 		<group Name="Rocks" Style="pickone">
-			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Voltaic" />
-			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Scorching" />
-			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Icy" />
-			<object Weight="7" Blueprint="Cleo_TerraFirma_Rock_Pulsestone" />
 			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Ajistone" />
 			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Vantabsidian" />
-			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Melting" />
 			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Shunting" />
-			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Hypersonic" />
-			<group Name="Glowing" Weight="7" Style="pickone">
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_GlowingRadioactive" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_GlowingPhosphorescent" />
-			</group>
-			<object Weight="7" Blueprint="Cleo_TerraFirma_Rock_Mullstone" />
-			<object Weight="7" Blueprint="Cleo_TerraFirma_Rock_Hexstone" />
-			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Lovestone" />
-			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Shieldstone" />
-			<object Weight="7" Blueprint="Cleo_TerraFirma_Rock_Drifting" />
-			<object Weight="4" Blueprint="Cleo_TerraFirma_Rock_Gyrestone" />
-			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Drainstone" />
-			<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Lodestone" />
-			<object Weight="4" Blueprint="Cleo_TerraFirma_Rock_Blurring" />
-			<object Weight="3" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 			<!-- crack + chasm are terrain: falls-only, never in the throwable mirrors -->
 		</group>
 	</population>
@@ -65,11 +28,6 @@
 		<group Name="Rocks" Style="pickone">
 			<object Weight="25" Blueprint="Cleo_TerraFirma_Rock_Pebbles" />
 			<object Weight="25" Blueprint="Cleo_TerraFirma_Rock_Generic" />
-			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Soupstone" />
-			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Sludgestone" />
-			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Salt" />
-			<object Weight="1" Blueprint="Cleo_TerraFirma_Rock_Strange" />
-			<object Weight="15" Blueprint="Cleo_TerraFirma_Rock_Pointy" />
 			<group Name="Deeper" Weight="5" Style="pickone">
 				<table Weight="90" Name="Cleo_TerraFirma_ThrowableRocksBand2" />
 				<table Weight="10" Name="Cleo_TerraFirma_ThrowableRocksBand3" />
@@ -85,6 +43,9 @@
 			</group>
 		</group>
 	</population>
+	<!-- BETA-HELD (redoubt pivot 2026-08-02): ThrowableRocksBand4 — the deep four — is entirely
+	     held content; table disabled, callers below re-pointed to Band3. Restore from tag
+	     fissure-v2-grenade.
 	<population Name="Cleo_TerraFirma_ThrowableRocksBand4">
 		<group Name="Rocks" Style="pickone">
 			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_DeepVoltaic" />
@@ -93,64 +54,45 @@
 			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_DeepMelting" />
 		</group>
 	</population>
+	-->
 	<population Name="Cleo_TerraFirma_ThrowableRocks3">
 		<group Name="Rocks" Style="pickone">
 			<table Weight="60" Name="Cleo_TerraFirma_ThrowableRocks2" />
 			<table Weight="40" Name="Cleo_TerraFirma_ThrowableRocksBand3" />
-			<group Name="Deeper" Weight="5" Style="pickone">
-				<table Weight="100" Name="Cleo_TerraFirma_ThrowableRocksBand4" />
-			</group>
 		</group>
 	</population>
 	<population Name="Cleo_TerraFirma_ThrowableRocks4">
 		<group Name="Rocks" Style="pickone">
 			<table Weight="60" Name="Cleo_TerraFirma_ThrowableRocks3" />
-			<table Weight="40" Name="Cleo_TerraFirma_ThrowableRocksBand4" />
+			<table Weight="40" Name="Cleo_TerraFirma_ThrowableRocksBand3" />
 		</group>
 	</population>
 
 	<!-- ============ 9-tier fall tables (RULED 2026-07-23, Burgeoning realignment) ============
-	     Structure per tier: 75% headliners / 25% generics, generics carry the inert crush ladder
-	     (pebbles -> generic -> rubble -> stalagmite -> crumbled walls -> walls -> chasm) plus
-	     10-weight bleeds into the adjacent tiers (Burgeoning's exact idiom). Strange rock seasons
-	     the generics of ALL NINE tiers on a bell, weights 1/2/4/6/8/6/4/2/1 (shape + endpoints
-	     RULED 2026-07-30: "most common in the middle levels but less likely at the top and
-	     bottom" / endpoints at 1 confirmed "the former"; interior ladder = Claude numbers under
-	     the ruled shape). Deep four ride tier 9 plain
-	     (RULED: no depth gate; effective level already gates tier 9's reach). Mullstone placed
-	     at tier 6 (the 6-vs-8 wobbler, resolved toward the thin roster; flag if it grates).
-	     All weights DRAFT. -->
+	     BETA-HELD TRIM (redoubt pivot, RULED 2026-08-02): all nine tiers pruned to the six
+	     keepers + the structural crush ladder (pebbles -> generic -> rubble -> stalagmite ->
+	     crumbled walls -> walls). The strange bell, deep four, and all other headliners are
+	     held; pre-trim tables at tag fissure-v2-grenade. These tables are TRANSITIONAL — the
+	     redoubt rebuild (Phase 2) replaces tier-based delivery with the wave/ring. Historical
+	     notes below kept where they explain surviving entries. All weights DRAFT. -->
 	<population Name="Cleo_TerraFirma_FissureTier1">
 		<group Name="Rocks" Style="pickone">
-			<group Name="Headliners" Weight="75" Style="pickone">
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Soupstone" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Salt" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Pointy" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Healstone" />
-			</group>
-			<group Name="Generics" Weight="25" Style="pickone">
-				<object Weight="20" Blueprint="Cleo_TerraFirma_Rock_Pebbles" />
-				<object Weight="1" Blueprint="Cleo_TerraFirma_Rock_Strange" />
-				<table Weight="10" Name="Cleo_TerraFirma_FissureTier2" />
-			</group>
+			<!-- BETA-HELD: tier 1's headliners (soupstone, salt, pointy, healstone) all held -->
+			<object Weight="20" Blueprint="Cleo_TerraFirma_Rock_Pebbles" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Generic" />
+			<table Weight="10" Name="Cleo_TerraFirma_FissureTier2" />
 		</group>
 	</population>
 	<population Name="Cleo_TerraFirma_FissureTier2">
 		<group Name="Rocks" Style="pickone">
 			<group Name="Headliners" Weight="75" Style="pickone">
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Sludgestone" />
+				<!-- BETA-HELD: sludgestone, scary (and the 2026-07-25 dazestone/grimslate swap
+				     notes) held with the catalog; crack is structural and stays -->
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Crack" />
-				<!-- dazestone CUT + grimslate down from tier 4 (RULED 2026-07-25, the intervention
-				     pass resolved by subtraction: "we could potentially just cut dazestone and move
-				     grimslate down" / "let's just go for that then"). Daze returns to being EB's
-				     verb; terror is tier 2's CC lesson now (confusion/sleep stay the tier-4 rungs). -->
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Scary" />
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Pebbles" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Generic" />
-				<object Weight="2" Blueprint="Cleo_TerraFirma_Rock_Strange" />
-				<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Holographic" /> <!-- the joke rock rides the shallow generics (RULED 2026-07-25); weight DRAFT -->
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier1" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier3" />
 			</group>
@@ -159,18 +101,15 @@
 	<population Name="Cleo_TerraFirma_FissureTier3">
 		<group Name="Rocks" Style="pickone">
 			<group Name="Headliners" Weight="75" Style="pickone">
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Oilstone" />
+				<!-- BETA-HELD: oilstone, rusty held -->
 				<!-- geography (user ruling): caves shed stalactites 3x over stalagmites; on the surface (Z<=10)
 				     the mutation substitutes every stalactite roll with a stalagmite at fall time -->
 				<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_ShatteredStalactite" />
 				<object Weight="3" Blueprint="Cleo_TerraFirma_Rock_Stalagmite" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Rusty" />
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Generic" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Rubble" />
-				<object Weight="4" Blueprint="Cleo_TerraFirma_Rock_Strange" />
-				<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Holographic" /> <!-- joke rock, shallow only (RULED 2026-07-25); weight DRAFT -->
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier2" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier4" />
 			</group>
@@ -178,40 +117,24 @@
 	</population>
 	<population Name="Cleo_TerraFirma_FissureTier4">
 		<group Name="Rocks" Style="pickone">
-			<group Name="Headliners" Weight="75" Style="pickone">
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Whorlstone" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Torpor" />
-				<!-- grimslate moved down to tier 2 (the dazestone cut-and-swap, 2026-07-25) -->
-				<group Name="Fungal" Weight="10" Style="pickone">
-					<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Fungal" />
-					<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_FungalLuminous" />
-					<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_FungalWax" />
-					<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_FungalMumbles" />
-				</group>
-			</group>
-			<group Name="Generics" Weight="25" Style="pickone">
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Rubble" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Stalagmite" />
-				<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Strange" />
-				<table Weight="10" Name="Cleo_TerraFirma_FissureTier3" />
-				<table Weight="10" Name="Cleo_TerraFirma_FissureTier5" />
-			</group>
+			<!-- BETA-HELD: tier 4's headliners (whorlstone, torpor, fungal four) all held;
+			     tier is pure structural until the redoubt rebuild -->
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Rubble" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Stalagmite" />
+			<table Weight="10" Name="Cleo_TerraFirma_FissureTier3" />
+			<table Weight="10" Name="Cleo_TerraFirma_FissureTier5" />
 		</group>
 	</population>
 	<population Name="Cleo_TerraFirma_FissureTier5">
 		<group Name="Rocks" Style="pickone">
 			<group Name="Headliners" Weight="75" Style="pickone">
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Bola" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Spiderweb" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Spiny" />
+				<!-- BETA-HELD: bola, spiderweb, spiny, compressed ash held -->
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Rubber" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_CompressedAsh" />
 				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_BaboonFigurine" />
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Stalagmite" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_CrumbledWall" />
-				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier4" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier6" />
 			</group>
@@ -220,20 +143,12 @@
 	<population Name="Cleo_TerraFirma_FissureTier6">
 		<group Name="Rocks" Style="pickone">
 			<group Name="Headliners" Weight="75" Style="pickone">
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Volatile" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Mullstone" />
+				<!-- BETA-HELD: volatile, mullstone, glowing twins (and their 2026-07-25 move
+				     notes) held -->
 				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Omnigeyser1" />
-				<!-- the glowing twins moved DOWN from tier 9 (RULED 2026-07-25: "they're really not
-				     that dangerous, and it pads out the roster more"); the 50/50 no-tells gamble
-				     rides one slot as always -->
-				<group Name="Glowing" Weight="8" Style="pickone">
-					<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_GlowingRadioactive" />
-					<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_GlowingPhosphorescent" />
-				</group>
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="20" Blueprint="Cleo_TerraFirma_Rock_CrumbledWall" />
-				<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier5" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier7" />
 			</group>
@@ -242,18 +157,13 @@
 	<population Name="Cleo_TerraFirma_FissureTier7">
 		<group Name="Rocks" Style="pickone">
 			<group Name="Headliners" Weight="75" Style="pickone">
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Voltaic" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Scorching" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Icy" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Melting" />
+				<!-- BETA-HELD: voltaic, scorching, icy, melting, ape statue held -->
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Shunting" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Vantabsidian" />
-				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_ApeStatue" />
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_CrumbledWall" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Wall" />
-				<object Weight="4" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier6" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier8" />
 			</group>
@@ -262,18 +172,13 @@
 	<population Name="Cleo_TerraFirma_FissureTier8">
 		<group Name="Rocks" Style="pickone">
 			<group Name="Headliners" Weight="75" Style="pickone">
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Drainstone" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Hexstone" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Hypersonic" />
+				<!-- BETA-HELD: drainstone, hexstone, hypersonic, pulsestone, shieldstone,
+				     lodestone held -->
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Ajistone" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Pulsestone" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Shieldstone" />
-				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Lodestone" />
 				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Omnigeyser2" />
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="20" Blueprint="Cleo_TerraFirma_Rock_Wall" />
-				<object Weight="2" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier7" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier9" />
 			</group>
@@ -282,16 +187,8 @@
 	<population Name="Cleo_TerraFirma_FissureTier9">
 		<group Name="Rocks" Style="pickone">
 			<group Name="Headliners" Weight="75" Style="pickone">
-				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Blurring" />
-				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Lovestone" />
-				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Drifting" />
-				<!-- glowing twins moved down to tier 6 (RULED 2026-07-25, roster padding) -->
-				<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Gyrestone" />
+				<!-- BETA-HELD: blurring, lovestone, drifting, gyrestone, deep four held -->
 				<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Omnigeyser3" />
-				<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_DeepVoltaic" />
-				<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_DeepScorching" />
-				<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_DeepIcy" />
-				<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_DeepMelting" />
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
 				<!-- chasm CUT from play (ruling 2026-07-24: "chasms should get cut but pits are too
@@ -300,7 +197,6 @@
 				     in its cell); blueprint stays dormant, and the visible-pit successor is its own
 				     future pass -->
 				<object Weight="20" Blueprint="Cleo_TerraFirma_Rock_Wall" />
-				<object Weight="1" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier8" />
 			</group>
 		</group>

@@ -15,7 +15,11 @@
        lottery. Stock FabricateFromSelf (Boulderer knobs) suffices; OmniFabricate not needed.
        Stats all RULED/ratified by the user 2026-07-27: HP 25->15, Toughness Boost 2->1,
        AV 15->10; strange-rock death-drop ratified same day. Tile = base cragmensch recolored as PLACEHOLDER; sprite is the user's.
-       Blueprint-only for now (wish-spawnable); world placement is an open design call. -->
+       Blueprint-only for now (wish-spawnable); world placement is an open design call.
+       BETA-HELD (redoubt pivot, RULED 2026-08-02): "malformed cragmensch is out" — it rides
+       the strange rock, which is held. Verified: zero population/encounter entries exist, so
+       the blueprint below is already unreachable in play (wish-only dev door, same policy as
+       kitchenrock). No world placement until the catalog returns. -->
   <object Name="Cleo_TerraFirma_Malformed Cragmensch" Inherits="Cragmensch">
     <part Name="Render" DisplayName="malformed cragmensch" ColorString="&amp;m" DetailColor="M" />
     <part Name="Description" Short="A cragmensch whose strata never knit true. Its hide sits thin over veins of shifting color, and the stones it wrenches loose from itself refuse to be the same stone twice." /> <!-- DRAFT, signoff owed -->

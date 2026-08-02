@@ -60,7 +60,7 @@ namespace Cleo.TerraFirma.Scripts
 		[WishCommand(Command = "tfverify")]
 		public static void Help()
 		{
-			MessageQueue.AddPlayerMessage("TF harness -- instant: tfstreak, tfstrange, tfcarom, tfcrack, tfspill, tfpuddle, tfmine (discharge law + party gate), tftar (tar redesign), tfdevour + tfeat (lithovore only). Turn-driven: tfquick (5t), tfhopper (5t), tfform (5t), tfshape (Stoneshaper, 3t), tffis (NPC caster, 20t), tfdrain (25t), tfscav (30t, you are the target). tfbatch = everything, ~95 turns standing still. Peek: tfspore (lottery state, pure read). Retired: tfdull (clock cut 2026-07-25).", "W");
+			MessageQueue.AddPlayerMessage("TF harness (BETA TRIM 2026-08-02) -- instant: tfquick (pockets+rep), tfcarom, tfcrack. Turn-driven: tfform (5t), tfshape (Stoneshaper, 3t), tffis (NPC caster, 20t), tfscav (30t, you are the target). tfbatch = the surviving set, ~60 turns standing still. Peek: tfspore (pure read). BETA-HELD dev doors (test held content, run by hand only): tfstreak, tfstrange, tfspill, tfpuddle, tfmine, tftar, tfhopper, tfdrain, tfdevour + tfeat (need kitchenrock's Lithovore grant), quickape/dull via queue.", "W");
 			if (!Helpers.VERIFY_WATCH)
 				MessageQueue.AddPlayerMessage("VERIFY_WATCH is OFF -- the harness is disabled.", "R");
 		}
@@ -100,39 +100,33 @@ namespace Cleo.TerraFirma.Scripts
 			Helpers.VerifyLog("SPORE", $"peek (tfspore): stored permutation={perm} (pure read)");
 		}
 
-		/// <summary>The full sweep (round 3 shape): six synchronous scenarios now, then the
-		/// turn-driven five chained through the driver's queue (~75 turns standing still).</summary>
+		/// <summary>The full sweep, BETA TRIM shape (redoubt pivot, RULED 2026-08-02): three
+		/// synchronous scenarios, then the turn-driven four chained through the driver's queue.
+		/// Held-content scenarios (streak/strange/spill/puddle/mine/tar/devour/eat/hopper/
+		/// quickape/drain) left compiled as hand-run dev doors; restore them to this chain with
+		/// the catalog. Pre-trim chain at tag fissure-v2-grenade.</summary>
 		[WishCommand(Command = "tfbatch")]
 		public static void Batch()
 		{
 			if (!Helpers.VERIFY_WATCH) { Help(); return; }
 			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
-			Streak();
-			Strange();
 			QuickSync();
 			CaromSync();
 			CrackSync();
-			SpillSync();
-			PuddleSync();
-			MineSync();
-			TarSync();
-			DevourSync();
-			EatSync();
-			SetupHopper(The.Player, "form,quickape,drain,shape,fis,scav"); // dull retired 2026-07-25 (clock cut)
+			SetupForm(The.Player, "shape,fis,scav");
 		}
 
 		// ---------------------------------------------------------------- round 3, synchronous
 
-		/// <summary>The quick shelf: baboon pocket counts, figurine rep-on-take, healstone
-		/// step-heal + ConsumedOnStep, aegischist cage. Four asserts, one wish, no turns.
-		/// (The ape-statue -> rubble half rides the turn-driven 'quickape' scenario.)</summary>
+		/// <summary>The quick shelf, beta-trim shape: baboon pocket counts (inverted at the
+		/// pivot) + figurine rep-on-take. Two asserts, one wish, no turns. (heal/cage asserts
+		/// and the quickape chain are BETA-HELD with their rocks.)</summary>
 		[WishCommand(Command = "tfquick")]
 		public static void Quick()
 		{
 			if (!Helpers.VERIFY_WATCH) { Help(); return; }
 			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
 			QuickSync();
-			SetupQuickApe(The.Player, "");
 		}
 
 		internal static void QuickSync()
@@ -142,13 +136,21 @@ namespace Cleo.TerraFirma.Scripts
 			if (origin == null)
 				return;
 
-			// pockets: the merge reaches Hulking by inheritance but NOT Quartz (inherits BaseBaboon)
+			// pockets, INVERTED at the redoubt pivot (RULED 2026-08-02: mod-rock pockets CUT,
+			// plain Small Stones kept -- "let them keep their stones"): the merge still reaches
+			// Hulking by inheritance but NOT Quartz; now it must deliver ZERO mod rocks and
+			// 2-3 base-game Small Stones.
 			GameObject hulk = GameObject.Create("Hulking Baboon");
 			GameObject quartz = GameObject.Create("Quartz Baboon");
 			int hulkRocks = CountModRocks(hulk);
 			int quartzRocks = CountModRocks(quartz);
-			Report("quick.pockets", hulkRocks >= 1 && quartzRocks == 0,
-				$"Hulking Baboon spawns with {hulkRocks} mod rock(s) (want >=1), Quartz Baboon with {quartzRocks} (want 0 -- outside the merge)");
+			int hulkPlain = 0;
+			if (hulk?.Inventory != null)
+				foreach (GameObject item in hulk.Inventory.GetObjects())
+					if (item.Blueprint == "Small Stone")
+						hulkPlain += item.Count;
+			Report("quick.pockets", hulkRocks == 0 && quartzRocks == 0 && hulkPlain >= 2,
+				$"Hulking Baboon spawns with {hulkRocks} mod rock(s) (want 0 post-pivot) and {hulkPlain} Small Stone(s) (want >=2), Quartz Baboon with {quartzRocks} mod rock(s) (want 0 -- outside the merge)");
 			hulk?.Obliterate();
 			quartz?.Obliterate();
 
@@ -166,6 +168,8 @@ namespace Cleo.TerraFirma.Scripts
 				$"figurine take: Baboons rep {repBefore}->{repAfter} (delta {delta}, INTENT +200 carried), after removal {repFinal}" +
 				(delta == 0 ? " -- AddsRep never applied: the WorksOnCarrier suspicion is CONFIRMED (part is equipper-only without it)" : ""));
 
+			/* BETA-HELD (redoubt pivot, RULED 2026-08-02): quick.heal + quick.cage test held rocks
+			   (healstone, aegischist). Restore with the catalog.
 			// healstone via the step path (no throw-damage confound): wounded patient forced over
 			// the stone until the 25% proc lands; heal must raise HP and ConsumedOnStep must eat the stone
 			List<Cell> open = origin.GetLocalAdjacentCells();
@@ -236,6 +240,7 @@ namespace Cleo.TerraFirma.Scripts
 			}
 			else
 				Report("quick.cage", false, "SETUP FAIL - no clear lane ending in an open-surrounded cell");
+			BETA-HELD end */
 		}
 
 		/// <summary>Caromcobble trip statistics: 40 forced crossings of the peel in one wish

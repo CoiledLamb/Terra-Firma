@@ -3,13 +3,13 @@
 	<object Name="BaseStone" Load="Merge">
 		<tag Name="Cleo_TerraFirma_IsAnyStone" />
 		<part Name="Cleo_TerraFirma_GeomancyStonePart" />
-		<part Name="Cleo_TerraFirma_StoneMill" /> <!-- rock-side "grind with your pestle" action (the ergonomic front door) -->
+		<!-- BETA-HELD (mill cut, RULED 2026-08-02): <part Name="Cleo_TerraFirma_StoneMill" /> rock-side "grind with your pestle" action (the ergonomic front door) -->
 	</object>
 	<object Name="Gemstone" Load="Merge">
 		<tag Name="Cleo_TerraFirma_IsAnyStone" />
 		<tag Name="Cleo_TerraFirma_IsGemstone" />
 		<part Name="Cleo_TerraFirma_GeomancyStonePart" />
-		<part Name="Cleo_TerraFirma_StoneMill" /> <!-- gemstones grind too (to flour; wasteful comedy, accepted) -->
+		<!-- BETA-HELD (mill cut, RULED 2026-08-02): <part Name="Cleo_TerraFirma_StoneMill" /> gemstones grind too (to flour; wasteful comedy, accepted) -->
 		<!-- RULED 2026-07-25 (user: "we would have to add the behavior for them to be thrown
 		     slot, but i think that's a good idea"): gemstones are first-class Geomancy ammo, so
 		     default equip should pick the Thrown Weapon slot - which the engine does for any
@@ -149,38 +149,37 @@
 	<object Name="BaseWallMainframe" Load="Merge">
 		<tag Name="Cleo_TerraFirma_NoStoneshape" />
 	</object>
-	<!-- Baboons and fissure stones (user rulings 2026-07-22, refined same day): only the basic
-	     early-game family. Merging on "Baboon" reaches Hulking/Shrewd/Hero by inheritance but NOT
-	     Quartz Baboon (which inherits BaseBaboon directly). Number="1-2" = 1 guaranteed, a second
-	     half the time; the bigger baboons override to 2-3 to show their strength. The scavenger part
-	     makes them fetch spent stones instead of settling for melee (enemy-closer-than-stone wins). -->
-	<!-- Stone milling (RULED 2026-07-22): one part, two homes. On the Campfire, the cooking menu
-	     grows "Grind stones with your pestle" (GetCookingActionsEvent dispatches to the campfire
-	     object; it does NOT cascade into inventory, so the pestle alone can't hear it there). On
-	     the Pestle (the base game's own jobless stone cudgel, now employed) "grind stones" is
-	     available anywhere, no campfire, no skill: the tool is the gate. -->
+	<!-- Baboons and stones (user rulings 2026-07-22, REVISED at the redoubt pivot 2026-08-02):
+	     only the basic early-game family. Merging on "Baboon" reaches Hulking/Shrewd/Hero by
+	     inheritance but NOT Quartz Baboon (which inherits BaseBaboon directly). The scavenger
+	     part STAYS ("scavenging is cool and we can keep that as long as it works") — baboons
+	     fetch spent stones off the floor, including fissure fallout. Pocket MOD-rocks are CUT
+	     ("baboons should no longer spawn with new stones"); they keep plain base-game Small
+	     Stones at the old quantities instead ("let them keep their stones"). -->
+	<!-- BETA-HELD (mill cut, RULED 2026-08-02) — the whole milling suite is out of the beta;
+	     future home = separate mod or stonecarver-faction merchants. Original rulings kept
+	     below for the restore. Stone milling (RULED 2026-07-22): one part, two homes. On the
+	     Campfire, the cooking menu grows "Grind stones with your pestle". On the Pestle,
+	     "grind stones" is available anywhere: the tool is the gate. HOPPER RULING (user
+	     2026-07-24): stones dropped into the millstone's inventory grind one per turn.
 	<object Name="Campfire" Load="Merge">
 		<part Name="Cleo_TerraFirma_StoneMill" />
 	</object>
 	<object Name="Pestle" Load="Merge">
 		<part Name="Cleo_TerraFirma_StoneMill" />
 	</object>
-	<!-- HOPPER RULING (user 2026-07-24, supersedes the menu-grind merge): stones dropped into the
-	     millstone's inventory are ground by its own powered process, one per turn, products
-	     accumulating for collection - the Joppa mill's native vinewafer workflow extended to
-	     rocks. The menu grind on the mill is GONE ("menu probably goes"); pestle and campfire
-	     homes unchanged. A dead mill simply doesn't grind its hopper. -->
 	<object Name="Millstone" Load="Merge">
 		<part Name="Cleo_TerraFirma_StoneHopper" />
 	</object>
+	-->
 	<object Name="Baboon" Load="Merge">
 		<part Name="Cleo_TerraFirma_StoneScavenger" />
-		<inventoryobject Blueprint="@Cleo_TerraFirma_ThrowableRocks1" Number="1-2" />
+		<inventoryobject Blueprint="Small Stone" Number="1-2" />
 	</object>
 	<object Name="Hulking Baboon" Load="Merge">
-		<inventoryobject Blueprint="@Cleo_TerraFirma_ThrowableRocks1" Number="2-3" />
+		<inventoryobject Blueprint="Small Stone" Number="2-3" />
 	</object>
 	<object Name="Shrewd Baboon" Load="Merge">
-		<inventoryobject Blueprint="@Cleo_TerraFirma_ThrowableRocks1" Number="2-3" />
+		<inventoryobject Blueprint="Small Stone" Number="2-3" />
 	</object>
 </objects>
