@@ -1,0 +1,56 @@
+[
+  {
+    "room": "communal (hookah corner)",
+    "source": "user jam",
+    "status": "slice built \u2014 tfpaint v2 (15-cell pocket, 3 tinted blocks, hookah, 2 cushions, fire dish); hookah-circle cluster SPECCED 2026-07-26 (user TFMAP, recipes.md) - replaces random cushion scatter",
+    "needs": "firedish.png; coziness sign-off"
+  },
+  {
+    "room": "feeding sty",
+    "source": "user jam",
+    "status": "not started",
+    "needs": "mineral lick sprite; feed/dung reuse checks"
+  },
+  {
+    "room": "overseer tent",
+    "source": "user jam",
+    "status": "not started",
+    "needs": "no new sprites (tent/chest/statues reuse)"
+  },
+  {
+    "room": "open-air workshop",
+    "source": "user jam",
+    "status": "not started",
+    "needs": "tool rack variant sprite"
+  },
+  {
+    "room": "block yard",
+    "source": "user jam",
+    "status": "SKETCHED + SPECCED 2026-07-26 (user TFMAP, see recipes.md): quarry-yard recipe - chalk-rect border, 1-3 stack rows (uniform fill per row), work column w/ bench+chair+loot basket; one open call (row fill ordering)",
+    "needs": "chalkline.png (now load-bearing); painter build"
+  },
+  {
+    "room": "sleeping niches (small camp)",
+    "source": "committed 2026-07-25",
+    "status": "built - tfsleep wish (3 alcoves, bedroll + figurine roll, puncture guard)",
+    "needs": "coziness critique"
+  },
+  {
+    "room": "divot tunnels (connective tissue)",
+    "source": "user 2026-07-25",
+    "status": "built - tftunnel / tfwarren wishes (L-spine, divots every 3rd cell)",
+    "needs": "layout critique"
+  },
+  {
+    "room": "shrine niche",
+    "source": "proposed (Claude)",
+    "status": "not committed",
+    "needs": "stele variant; viewing stone sprite"
+  },
+  {
+    "room": "mill-pantry",
+    "source": "proposed (Claude)",
+    "status": "not committed",
+    "needs": "no new sprites (Millstone/powders reuse)"
+  }
+]

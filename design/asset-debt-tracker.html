@@ -12,15 +12,15 @@ th{text-align:left;color:var(--ink3);font-weight:600;padding:4px 10px 6px 0;bord
 .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11.5px;font-weight:600;white-space:nowrap}.ok{background:var(--okbg);color:var(--ok)}.warn{background:var(--warnbg);color:var(--warn)}.info{background:var(--infobg);color:var(--info)}
 .foot{color:var(--ink3);font-size:12px;margin-top:8px}</style></head><body>
 <h1>Terra Firma -asset report</h1>
-<div class="sub">Generated 2026-07-25 23:37 by scanning the mod source and deployed folder. Nothing on this page is hand-maintained; rerun <b>design\generate-asset-report.ps1</b> to refresh. Design/ideation lives in asset-debt-tracker.md and TODO.md, not here.</div>
+<div class="sub">Generated 2026-07-26 23:33 by scanning the mod source and deployed folder. Nothing on this page is hand-maintained; rerun <b>design\generate-asset-report.ps1</b> to refresh. Design/ideation lives in asset-debt-tracker.md and TODO.md, not here.</div>
 <div class="tiles">
-<div class="tile"><div class="n">16</div><div class="l">mod sprites on disk</div></div>
+<div class="tile"><div class="n">22</div><div class="l">mod sprites on disk</div></div>
 <div class="tile"><div class="n">16</div><div class="l">wired to blueprints/code</div></div>
 <div class="tile"><div class="n">0</div><div class="l">referenced but MISSING</div></div>
-<div class="tile"><div class="n">0</div><div class="l">drawn but unwired</div></div>
-<div class="tile"><div class="n">129</div><div class="l">Cleo_* blueprints</div></div>
+<div class="tile"><div class="n">6</div><div class="l">drawn but unwired</div></div>
+<div class="tile"><div class="n">132</div><div class="l">Cleo_* blueprints</div></div>
 <div class="tile"><div class="n">0</div><div class="l">source&harr;deploy drift files</div></div>
-<div class="tile"><div class="n">18</div><div class="l">sprites still TO DRAW</div></div>
+<div class="tile"><div class="n">20</div><div class="l">sprites still TO DRAW</div></div>
 </div>
 <section><h2>Sprite queue -what still needs drawing (from sprites-needed.json; status auto-derived: drop the file in Textures and this flips on the next run)</h2><table><tr><th>Planned file</th><th>For</th><th>Source</th><th>Status</th></tr>
 <tr><td>hewer.png</td><td>NPC roster - hewer (Fissure)</td><td>ruled</td><td><span class="chip warn">TO DRAW</span></td></tr>
@@ -31,9 +31,9 @@ th{text-align:left;color:var(--ink3);font-weight:600;padding:4px 10px 6px 0;bord
 <tr><td>overseer.png</td><td>NPC roster - overseer (legendary)</td><td>ruled</td><td><span class="chip warn">TO DRAW</span></td></tr>
 <tr><td>molebeast.png</td><td>mole-beast (beast of burden)</td><td>ruled</td><td><span class="chip warn">TO DRAW</span></td></tr>
 <tr><td>firedish.png</td><td>communal - carved fire dish</td><td>user jam</td><td><span class="chip ok">done (drawn + wired)</span></td></tr>
-<tr><td>quarrybricks1.png</td><td>block yard / dressing</td><td>user jam</td><td><span class="chip ok">done (drawn + wired)</span></td></tr>
-<tr><td>quarrybricks2.png</td><td>block yard / dressing</td><td>user jam</td><td><span class="chip ok">done (drawn + wired)</span></td></tr>
-<tr><td>quarrybricks3.png</td><td>block yard / dressing</td><td>user jam</td><td><span class="chip ok">done (drawn + wired)</span></td></tr>
+<tr><td>quarrybricks1.png</td><td>quarried stack (low wall) tile 1 of 3 (re-ruled 2026-07-26; currently worn in-game by the loose-block furniture blueprint pending the stack blueprint)</td><td>user jam</td><td><span class="chip ok">done (drawn + wired)</span></td></tr>
+<tr><td>quarrybricks2.png</td><td>quarried stack (low wall) tile 2 of 3 (re-ruled 2026-07-26; currently worn in-game by the loose-block furniture blueprint pending the stack blueprint)</td><td>user jam</td><td><span class="chip ok">done (drawn + wired)</span></td></tr>
+<tr><td>quarrybricks3.png</td><td>quarried stack (low wall) tile 3 of 3 (re-ruled 2026-07-26; currently worn in-game by the loose-block furniture blueprint pending the stack blueprint)</td><td>user jam</td><td><span class="chip ok">done (drawn + wired)</span></td></tr>
 <tr><td>toolrack.png</td><td>workshop - tool rack (no base low-tech rack)</td><td>user jam</td><td><span class="chip warn">TO DRAW</span></td></tr>
 <tr><td>minerallick.png</td><td>sty - mineral lick</td><td>proposed (Claude)</td><td><span class="chip warn">TO DRAW</span></td></tr>
 <tr><td>lithophone.png</td><td>communal - lithophone</td><td>proposed (Claude)</td><td><span class="chip warn">TO DRAW</span></td></tr>
@@ -44,7 +44,9 @@ th{text-align:left;color:var(--ink3);font-weight:600;padding:4px 10px 6px 0;bord
 <tr><td>fossil.png</td><td>fossil curio</td><td>liked</td><td><span class="chip warn">TO DRAW</span></td></tr>
 <tr><td>mossbox.png</td><td>moss box</td><td>idea (user notes)</td><td><span class="chip warn">TO DRAW</span></td></tr>
 <tr><td>cragmensch_malformed.png</td><td>malformed cragmensch (VAR, if committed)</td><td>idea</td><td><span class="chip warn">TO DRAW</span></td></tr>
-<tr><td>quarrystack.png</td><td>quarried stone stack (LOW WALL, not furniture) - exterior yard rows with lanes, per user photo ref of palletized piles</td><td>user 2026-07-25</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>quarrystack.png</td><td>SATISFIED 2026-07-26 (user ruling): quarrybricks1-3.png ARE the stack low-wall tiles, arranged by filename number</td><td>user 2026-07-25</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>chalkline.png</td><td>chalk line (fence-type boundary marking - the carvers chalking cuts/plots; palette placeholder exists)</td><td>user 2026-07-26</td><td><span class="chip warn">TO DRAW</span></td></tr>
+<tr><td>quarrystones1a-3b.png (x6)</td><td>stack art variants within each fill stage (user 2026-07-26) - unwired until the stack low-wall blueprint exists; its RandomTile per stage = {base,a,b}</td><td>user 2026-07-26</td><td><span class="chip warn">TO DRAW</span></td></tr>
 </table></section>
 <section><h2>Missing sprites -referenced by the mod, no file on disk</h2><table><tr><th>Expected file</th><th>Referenced in</th></tr>
 <tr><td colspan="2"><span class="chip ok">none -every reference resolves</span></td></tr>
@@ -68,23 +70,28 @@ th{text-align:left;color:var(--ink3);font-weight:600;padding:4px 10px 6px 0;bord
 <tr><td>stonecarver.png</td><td><span class="chip ok">src+deploy</span></td><td>Callings.xml</td></tr>
 </table></section>
 <section><h2>Unwired sprites -drawn, nothing references them yet</h2><table><tr><th>Sprite</th><th>Present</th></tr>
-<tr><td colspan="2"><span class="chip ok">none</span></td></tr>
+<tr><td><span class="chip info">quarrystones1a.png</span></td><td>src+deploy</td></tr>
+<tr><td><span class="chip info">quarrystones1b.png</span></td><td>src+deploy</td></tr>
+<tr><td><span class="chip info">quarrystones2a.png</span></td><td>src+deploy</td></tr>
+<tr><td><span class="chip info">quarrystones2b.png</span></td><td>src+deploy</td></tr>
+<tr><td><span class="chip info">quarrystones3a.png</span></td><td>src+deploy</td></tr>
+<tr><td><span class="chip info">quarrystones3b.png</span></td><td>src+deploy</td></tr>
 </table></section>
 <section><h2>Source &harr; deploy drift</h2><table><tr><th>File</th><th>State</th></tr>
 <tr><td colspan="2"><span class="chip ok">in sync</span></td></tr>
 </table></section>
 <section><h2>Rooms (from rooms.json -the one hand-curated input)</h2><table><tr><th>Room</th><th>Source</th><th>Status</th><th>Needs</th></tr>
-<tr><td>communal (hookah corner)</td><td>user jam</td><td>slice built — tfpaint v2 (15-cell pocket, 3 tinted blocks, hookah, 2 cushions, fire dish)</td><td>firedish.png; coziness sign-off</td></tr>
+<tr><td>communal (hookah corner)</td><td>user jam</td><td>slice built — tfpaint v2 (15-cell pocket, 3 tinted blocks, hookah, 2 cushions, fire dish); hookah-circle cluster SPECCED 2026-07-26 (user TFMAP, recipes.md) - replaces random cushion scatter</td><td>firedish.png; coziness sign-off</td></tr>
 <tr><td>feeding sty</td><td>user jam</td><td>not started</td><td>mineral lick sprite; feed/dung reuse checks</td></tr>
 <tr><td>overseer tent</td><td>user jam</td><td>not started</td><td>no new sprites (tent/chest/statues reuse)</td></tr>
 <tr><td>open-air workshop</td><td>user jam</td><td>not started</td><td>tool rack variant sprite</td></tr>
-<tr><td>block yard</td><td>user jam</td><td>split ruling 2026-07-25: loose blocks INSIDE (work-in-progress, existing furniture) + stack rows OUTSIDE the mouth (staged inventory, low-wall blueprint, lanes between rows - camp signage + tier-1 of the theft ladder; marked blocks deep inside = tier 2)</td><td>quarrystack.png (low-wall tile)</td></tr>
+<tr><td>block yard</td><td>user jam</td><td>SKETCHED + SPECCED 2026-07-26 (user TFMAP, see recipes.md): quarry-yard recipe - chalk-rect border, 1-3 stack rows (uniform fill per row), work column w/ bench+chair+loot basket; one open call (row fill ordering)</td><td>chalkline.png (now load-bearing); painter build</td></tr>
 <tr><td>sleeping niches (small camp)</td><td>committed 2026-07-25</td><td>built - tfsleep wish (3 alcoves, bedroll + figurine roll, puncture guard)</td><td>coziness critique</td></tr>
 <tr><td>divot tunnels (connective tissue)</td><td>user 2026-07-25</td><td>built - tftunnel / tfwarren wishes (L-spine, divots every 3rd cell)</td><td>layout critique</td></tr>
 <tr><td>shrine niche</td><td>proposed (Claude)</td><td>not committed</td><td>stele variant; viewing stone sprite</td></tr>
 <tr><td>mill-pantry</td><td>proposed (Claude)</td><td>not committed</td><td>no new sprites (Millstone/powders reuse)</td></tr>
 </table></section>
-<section><h2>Cleo_* blueprint inventory (129)</h2><table><tr><th>Blueprint</th><th>File</th></tr>
+<section><h2>Cleo_* blueprint inventory (132)</h2><table><tr><th>Blueprint</th><th>File</th></tr>
 <tr><td>Cleo_TerraFirma_AcidPuddle</td><td>Rocks.xml</td></tr>
 <tr><td>Cleo_TerraFirma_Aculei</td><td>ObjectBlueprints.xml</td></tr>
 <tr><td>Cleo_TerraFirma_BaboonFigurineItem</td><td>Rocks.xml</td></tr>
@@ -102,6 +109,7 @@ th{text-align:left;color:var(--ink3);font-weight:600;padding:4px 10px 6px 0;bord
 <tr><td>Cleo_TerraFirma_Ground_Ajistone</td><td>Rocks.xml</td></tr>
 <tr><td>Cleo_TerraFirma_Ground_Blurring</td><td>Rocks.xml</td></tr>
 <tr><td>Cleo_TerraFirma_Ground_Bola</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Ground_CompressedAsh</td><td>Rocks.xml</td></tr>
 <tr><td>Cleo_TerraFirma_Ground_DeepIcy</td><td>Rocks.xml</td></tr>
 <tr><td>Cleo_TerraFirma_Ground_DeepMelting</td><td>Rocks.xml</td></tr>
 <tr><td>Cleo_TerraFirma_Ground_DeepScorching</td><td>Rocks.xml</td></tr>
@@ -150,7 +158,7 @@ th{text-align:left;color:var(--ink3);font-weight:600;padding:4px 10px 6px 0;bord
 <tr><td>Cleo_TerraFirma_Rock_CompressedAsh</td><td>Rocks.xml</td></tr>
 <tr><td>Cleo_TerraFirma_Rock_Crack</td><td>Rocks.xml</td></tr>
 <tr><td>Cleo_TerraFirma_Rock_CrumbledWall</td><td>Rocks.xml</td></tr>
-<!-- Rock_Dazestone row removed: CUT 2026-07-25 (blueprint dormant, no sprite owed) -->
+<tr><td>Cleo_TerraFirma_Rock_Dazestone</td><td>Rocks.xml</td></tr>
 <tr><td>Cleo_TerraFirma_Rock_DeepIcy</td><td>Rocks.xml</td></tr>
 <tr><td>Cleo_TerraFirma_Rock_DeepMelting</td><td>Rocks.xml</td></tr>
 <tr><td>Cleo_TerraFirma_Rock_DeepScorching</td><td>Rocks.xml</td></tr>
@@ -167,6 +175,7 @@ th{text-align:left;color:var(--ink3);font-weight:600;padding:4px 10px 6px 0;bord
 <tr><td>Cleo_TerraFirma_Rock_Gyrestone</td><td>Rocks.xml</td></tr>
 <tr><td>Cleo_TerraFirma_Rock_Healstone</td><td>Rocks.xml</td></tr>
 <tr><td>Cleo_TerraFirma_Rock_Hexstone</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_Rock_Holographic</td><td>Rocks.xml</td></tr>
 <tr><td>Cleo_TerraFirma_Rock_Hypersonic</td><td>Rocks.xml</td></tr>
 <tr><td>Cleo_TerraFirma_Rock_Icy</td><td>Rocks.xml</td></tr>
 <tr><td>Cleo_TerraFirma_Rock_Lodestone</td><td>Rocks.xml</td></tr>
@@ -212,6 +221,7 @@ th{text-align:left;color:var(--ink3);font-weight:600;padding:4px 10px 6px 0;bord
 <tr><td>Cleo_TerraFirma_StoneshaperStatue</td><td>Objects.xml</td></tr>
 <tr><td>Cleo_TerraFirma_StoneshaperStatueNaturalWeapon</td><td>Objects.xml</td></tr>
 <tr><td>Cleo_TerraFirma_SurgeField</td><td>Rocks.xml</td></tr>
+<tr><td>Cleo_TerraFirma_TarPatch</td><td>Rocks.xml</td></tr>
 <tr><td>Cleo_TerraFirma_Urchin Spine</td><td>ObjectBlueprints.xml</td></tr>
 <tr><td>Cleo_TerraFirma_WallCalcify</td><td>Objects.xml</td></tr>
 </table></section>

@@ -49,16 +49,24 @@ namespace XRL.World.Parts.Mutation
 
 		public override string GetLevelText(int Level)
 		{
+			// 2026-07-26 voice sitting rulings, built 2026-07-27: save line de-flowered (user: "too
+			// flowery" - stiffen/shake off -> advances/reverses); the staged-escape ladder simplified
+			// to its worst case (user: "saying too much" - per-stage recovery goes undocumented);
+			// "Each failure:" label recast as a sentence (labels are for values, not effects); the
+			// stone-mark mega-line split in two (effect + stats); the Toughness semicolon becomes a
+			// period (base's one-semicolon corpus); "sight" and every flat constant unwrap - only
+			// the computed save difficulty keeps its highlight.
 			return "You transfix an opponent with your unblinking gaze and slowly turn them to stone.\n" +
 				"Taking any action other than passing the turn will break your gaze.\n" +
-				"Each round your target makes a Toughness save; failures stiffen them, and successes shake off one stage of petrification.\n" +
-				"Save difficulty: {{rules|" + GetSaveDifficulty(Level) + "}} + your Willpower modifier, +{{rules|1}} per failed save\n" +
-				"Each failure: held in place, {{rules|-" + QUICKNESS_LOSS_PER_SAVE + "}} Quickness\n" +
-				"First success frees movement, second ends the slowing, third breaks the gaze entirely.\n" +
-				"Targets that fail {{rules|" + NUM_OF_SAVES + "}} saves are permanently turned to stone.\n" +
-				"Targets that escape after {{rules|" + STONE_MARK_MIN_FAILS + "}} or more failures are left partially petrified: {{rules|-" + Cleo_TerraFirma_PartiallyPetrified.MOVE_SPEED_PENALTY + "}} move speed, {{rules|-" + Cleo_TerraFirma_PartiallyPetrified.QUICKNESS_PENALTY + "}} Quickness, {{rules|+" + Cleo_TerraFirma_PartiallyPetrified.AV_BONUS + "}} AV for {{rules|" + Cleo_TerraFirma_PartiallyPetrified.DURATION + "}} rounds\n" +
-				"Range: {{rules|sight}}\n" +
-				"Cooldown: {{rules|" + BASE_COOLDOWN + "}} rounds";
+				"Each round your target makes a Toughness save. Each failure advances petrification by one stage. Each success reverses one stage.\n" +
+				"Save difficulty: {{rules|" + GetSaveDifficulty(Level) + "}} + your Willpower modifier, +1 per failed save\n" +
+				"Each failed save holds your target in place and applies -" + QUICKNESS_LOSS_PER_SAVE + " Quickness.\n" +
+				"Three successful saves break the gaze.\n" +
+				"Targets that fail " + NUM_OF_SAVES + " saves are permanently turned to stone.\n" +
+				"Targets that escape after " + STONE_MARK_MIN_FAILS + " or more failures are left partially petrified for " + Cleo_TerraFirma_PartiallyPetrified.DURATION + " rounds.\n" +
+				"Partial petrification: -" + Cleo_TerraFirma_PartiallyPetrified.MOVE_SPEED_PENALTY + " move speed, -" + Cleo_TerraFirma_PartiallyPetrified.QUICKNESS_PENALTY + " Quickness, +" + Cleo_TerraFirma_PartiallyPetrified.AV_BONUS + " AV\n" +
+				"Range: sight\n" +
+				"Cooldown: " + BASE_COOLDOWN + " rounds";
 		}
 
 		public override bool Mutate(GameObject GO, int Level = 1)

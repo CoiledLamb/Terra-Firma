@@ -28,13 +28,16 @@ namespace XRL.World.Parts.Mutation
 	///                                         same Options.ConfirmDangerousLiquid gate)
 	///   Cleo_TerraFirma_EatenHarm[Type]       typed internal damage dice
 	///   Cleo_TerraFirma_EatenWater            AddWater amount (10000 = one drink)
+	///   Cleo_TerraFirma_EatenHeal             heal dice on the eater (healstone, RULED 2026-07-27)
 	///   Cleo_TerraFirma_EatenTasty            forced tasty roll (salt ruling; RollTasty itself is
 	///                                         The.Player-hardcoded so we apply the effect directly)
 	///   Cleo_TerraFirma_EatenTemperature      temperature delta on the eater (TemperatureOnEat is
 	///                                         hardcoded +100 engine-side, useless for cold rocks)
 	///   Cleo_TerraFirma_EatenDetonate         the rock's grenade part detonates at the eater's cell
 	///                                         (deep four "elemental pulse" ruling + volatile rock)
-	///   Cleo_TerraFirma_EatenMagnetPulse      MagneticPulse.EmitMagneticPulse centered on the EATER
+	///   Cleo_TerraFirma_EatenMagnetPulse      radius: 75% the FETCH (loose metal items in radius
+	///                                         yank to the eater; items only), 25% the old full
+	///                                         pulse centered on the EATER (gear rip + robot drag)
 	///   Cleo_TerraFirma_EatenSpawn[Count]     blueprint spawned at the eater's cell (gyrestone)
 	///   Cleo_TerraFirma_EatenStrange          rolls the fissure pool for a surrogate rock that has
 	///                                         a meaningful eaten entry, and eats AS it (ruling:
@@ -55,6 +58,18 @@ namespace XRL.World.Parts.Mutation
 	///   Cleo_TerraFirma_EatenThunderclap      daze die: all adjacent creatures Dazed, eater spared
 	///   Cleo_TerraFirma_EatenHop              radius: the eater bounces -- an involuntary harmless
 	///                                         hop to a random open cell within it (caromcobble)
+	///   Cleo_TerraFirma_EatenDread            dread radiates: per-neighbor Terrified mental attack
+	///                                         (dreadroot's exact save shape); WITCHWOOD_BITE% it
+	///                                         turns inward and the eater flees instead
+	///   Cleo_TerraFirma_EatenConfuse          WITCHWOOD_BITE% the whorl takes hold (dreadroot-shaped
+	///                                         Confusion attack; the base part's buildup cut in port)
+	///   Cleo_TerraFirma_EatenNap              duration dice: WITCHWOOD_BITE% the nap lands (Asleep)
+	///   Cleo_TerraFirma_EatenDarkSight        duration: dark-adapted (temporary DarkVision mod,
+	///                                         skulk-tonic shape); WITCHWOOD_BITE% Blind (short)
+	///   Cleo_TerraFirma_EatenSureFooted       duration: anchored (saves vs forced movement and
+	///                                         knockdown); WITCHWOOD_BITE% briefly Stuck
+	///   Cleo_TerraFirma_EatenSlickProof       duration: cannot slip; WITCHWOOD_BITE% the oil passes
+	///                                         through (slick underfoot)
 	///   Cleo_TerraFirma_EatenEffect           marker: "this rock's eat does something" -- put it on
 	///                                         any rock carrying an *OnEat part or eat channel tag;
 	///                                         the strange-roll filter keys off it
@@ -74,17 +89,19 @@ namespace XRL.World.Parts.Mutation
 		private const string STRANGE_ROLL_TABLE = "Cleo_TerraFirma_StrangeRocksPool"; // curated pool (strange audit 2026-07-24) -- every entry has real payloads, so eaten-marker rerolls waste far fewer tries
 		private const int STRANGE_ROLL_TRIES = 30;
 		private const int EATEN_ARC_RANGE = 5; // RATIFIED 2026-07-24 (galvena arc reach)
+		private const int WITCHWOOD_BITE = 25; // the house witchwood bite rate (RULED 2026-07-31, eaten-table comb: positive most eats, this % the bite instead)
+		private const int BLIND_BITE_DURATION = 10; // vantabsidian's bite (DRAFT; user-flagged potentially revisitable)
+		private const int STUCK_BITE_DURATION = 5; // tanglelith's bite (DRAFT)
 
 		public override bool CanLevel() => false;
 
 		// DRAFT description -- user text pass owed, house voice attempted
 		public override string GetDescription()
 		{
-			return "You eat rocks. Only rocks.\n\n"
-				+ "You can eat stones and gemstones; other food turns your stomach.\n"
-				+ "You can't cook with plant or meat ingredients.\n"
-				+ "Some stones do you a bit of good on the way down. Others are inadvisable.\n"
-				+ "When you're famished, you may devour statues.";
+			// user-ruled final text 2026-07-27, complete as-is
+			return "You eat stone exclusively.\n\n"
+				+ "Some stones have additional effects when eaten.\n"
+				+ "You can't cook with plant or meat ingredients.";
 		}
 
 		public override string GetLevelText(int Level) => "";
@@ -207,6 +224,21 @@ namespace XRL.World.Parts.Mutation
 			// take exactly one from the stack
 			GameObject single = item.Count > 1 ? item.RemoveOne() : item;
 
+			// the joke completes (comb D4, RULED 2026-07-31): the hologram does not survive
+			// scrutiny this intimate -- zero satiety, no channels, no OnEat. Player line is the
+			// user's own, verbatim (RULED same day). NPCs get the silent no-op.
+			if (single.HasPart("Cleo_TerraFirma_HolographicPart"))
+			{
+				Helpers.VerifyLog("LITH", $"eat: {actor.Blueprint} bit down on the holographic rock (zero satiety, joke completes)");
+				if (actor.IsPlayer())
+					Popup.Show("You bite down on the holographic rock. It flickers to nothingness in your mouth.");
+				actor.PlayWorldSound("Human_Eating");
+				actor.UseEnergy(1000, "Item Eat");
+				if (GameObject.Validate(single))
+					single.Obliterate(); // it was never there
+				return true;
+			}
+
 			// strange rock: eat AS a surrogate rolled from the pool -- only rolls that do something
 			GameObject source = single;
 			GameObject surrogate = null;
@@ -282,6 +314,14 @@ namespace XRL.World.Parts.Mutation
 				}
 			}
 
+			// healstone (RULED 2026-07-27, closing mechanical-review flag L1): the healing rock
+			// heals eaten too, at its own payload die
+			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenHeal")))
+			{
+				LogChannel("Heal", tag);
+				actor.Heal(Math.Max(1, tag.RollCached()), Message: true, FloatText: true);
+			}
+
 			if (source.HasTag("Cleo_TerraFirma_EatenTasty"))
 			{
 				LogChannel("Tasty");
@@ -335,12 +375,47 @@ namespace XRL.World.Parts.Mutation
 				actor.ApplyEffect(new Cleo_TerraFirma_GasBelly(Stat.Random(50, 250), tag));
 			}
 
+			// lodestone RE-RULED 2026-07-31 (comb, "fetch sounds good"): most eats FETCH loose
+			// metal to the eater; the bite is the old full pulse (gear rip + robot drag intact)
 			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenMagnetPulse")))
 			{
 				if (int.TryParse(tag, out int radius) && actor.CurrentCell != null)
 				{
-					LogChannel("MagnetPulse", $"radius {radius}");
-					MagneticPulse.EmitMagneticPulse(actor, Math.Max(1, radius));
+					if (Stat.Random(1, 100) <= WITCHWOOD_BITE)
+					{
+						LogChannel("MagnetPulse", $"the bite -- full pulse grips the eater (radius {radius})");
+						MagneticPulse.EmitMagneticPulse(actor, Math.Max(1, radius));
+					}
+					else
+					{
+						// the fetch: loose metal items only (engine metal test), walked along the
+						// line toward the eater, stopping adjacent (MagneticPulse's own walk shape)
+						int fetched = 0;
+						foreach (Cell c2 in actor.CurrentCell.GetAdjacentCells(Math.Max(1, radius)))
+						{
+							foreach (GameObject o in new System.Collections.Generic.List<GameObject>(c2.Objects))
+							{
+								if (o.Brain != null || o.Equipped != null || o.InInventory != null)
+									continue;
+								if (!o.IsTakeable() || !CanBeMagneticallyManipulatedEvent.Check(o))
+									continue;
+								System.Collections.Generic.List<Tuple<Cell, char>> line = o.GetLineTo(actor);
+								Cell dest = null;
+								for (int k = 1; k < line.Count - 1 && line[k].Item1.IsEmptyOfSolidFor(o, o.IsCombatObject(NoBrainOnly: true)); k++)
+									dest = line[k].Item1;
+								if (dest != null && dest != o.CurrentCell)
+								{
+									o.DirectMoveTo(dest);
+									fetched++;
+								}
+							}
+						}
+						LogChannel("MagnetFetch", $"{fetched} loose item(s) dragged in (radius {radius})");
+						if (actor.IsPlayer())
+							MessageQueue.AddPlayerMessage(fetched > 0
+								? "Loose metal skitters toward you." // DRAFT
+								: "The pull finds nothing loose to claim."); // DRAFT
+					}
 				}
 			}
 
@@ -554,6 +629,118 @@ namespace XRL.World.Parts.Mutation
 				LogChannel("Oxidize", $"RustOnHit lent to natural weapons for {tag} turns");
 				if (actor.IsPlayer())
 					MessageQueue.AddPlayerMessage("Your teeth taste of old iron."); // DRAFT
+			}
+
+			// eaten dread (grimslate, comb C1 RULED 2026-07-31): dread radiates -- per-neighbor
+			// mental attack in dreadroot's exact save shape (Terrified 1d8 vs 8, 2d4 rounds, flee
+			// from the eater); the bite turns it inward, dreadroot's own self-attack verbatim
+			if (source.HasTag("Cleo_TerraFirma_EatenDread") && actor.CurrentCell != null)
+			{
+				if (Stat.Random(1, 100) <= WITCHWOOD_BITE)
+				{
+					LogChannel("Dread", "the bite -- dread turns inward");
+					if (PerformMentalAttack((MentalAttackEvent MAE) => Terrified.Attack(MAE, null, actor.CurrentCell), actor, actor, null, "Terrify OnEat", "1d8", 8, "2d4".RollCached()) && actor.IsPlayer())
+						actor.ForfeitTurn();
+				}
+				else
+				{
+					int routed = 0;
+					foreach (Cell c2 in actor.CurrentCell.GetLocalAdjacentCells())
+						// snapshot: routed creatures move mid-loop (the geyser-urchinite enumerator class)
+						foreach (GameObject o in new System.Collections.Generic.List<GameObject>(c2.Objects))
+							if (o != actor && o.HasPart("Combat") && o.PhaseMatches(actor)
+								&& PerformMentalAttack((MentalAttackEvent MAE) => Terrified.Attack(MAE, null, actor.CurrentCell), actor, o, null, "Terrify OnEat", "1d8", 8, "2d4".RollCached()))
+								routed++;
+					LogChannel("Dread", $"radiates outward: {routed} neighbor(s) routed");
+					if (actor.IsPlayer())
+						MessageQueue.AddPlayerMessage("Dread pours off of you."); // DRAFT
+				}
+			}
+
+			// eaten confuse (vertigneiss, comb C3): the port of ConfuseOnEat's mental attack,
+			// bite-gated; the base part's buildup mechanic deliberately cut (recorded)
+			if (source.HasTag("Cleo_TerraFirma_EatenConfuse"))
+			{
+				if (Stat.Random(1, 100) <= WITCHWOOD_BITE)
+				{
+					LogChannel("Confuse", "the bite -- the whorl takes hold");
+					PerformMentalAttack((MentalAttackEvent MAE) => Confusion.Confuse(MAE, Attack: false, 1, 3, Silent: true), actor, actor, null, "Confuse OnEat", "1d8", 8, "5d3".RollCached());
+				}
+				else
+					LogChannel("Confuse", "swallowed clean (the 75%)");
+			}
+
+			// eaten nap (lullabaster, comb C4): the KO chance-gated; the belly is the personality
+			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenNap")))
+			{
+				if (Stat.Random(1, 100) <= WITCHWOOD_BITE)
+				{
+					LogChannel("Nap", $"the bite -- the nap lands ({tag})");
+					actor.ApplyEffect(new Asleep { Duration = Math.Max(1, tag.RollCached()) });
+				}
+				else
+					LogChannel("Nap", "swallowed clean (the 75%)");
+			}
+
+			// eaten dark sight (vantabsidian, comb C2): your eyes drink the dark -- or it drinks back
+			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenDarkSight")))
+			{
+				if (int.TryParse(tag, out int sightDuration))
+				{
+					if (Stat.Random(1, 100) <= WITCHWOOD_BITE)
+					{
+						LogChannel("DarkSight", $"the bite -- the dark drinks back (Blind {BLIND_BITE_DURATION})");
+						actor.ApplyEffect(new Blind { Duration = BLIND_BITE_DURATION });
+						if (actor.IsPlayer())
+							MessageQueue.AddPlayerMessage("The dark drinks back."); // DRAFT
+					}
+					else
+					{
+						LogChannel("DarkSight", $"dark-adapted {sightDuration}");
+						actor.ApplyEffect(new Cleo_TerraFirma_DarkAdapted(sightDuration));
+					}
+				}
+			}
+
+			// eaten sure-footed (tanglelith, comb D2): the tar grips inward -- or too well
+			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenSureFooted")))
+			{
+				if (int.TryParse(tag, out int footDuration))
+				{
+					if (Stat.Random(1, 100) <= WITCHWOOD_BITE)
+					{
+						LogChannel("SureFooted", $"the bite -- the tar grips too well (Stuck {STUCK_BITE_DURATION})");
+						actor.ApplyEffect(new Stuck(STUCK_BITE_DURATION));
+						if (actor.IsPlayer())
+							MessageQueue.AddPlayerMessage("The tar grips too well."); // DRAFT
+					}
+					else
+					{
+						LogChannel("SureFooted", $"anchored {footDuration}");
+						actor.ApplyEffect(new Cleo_TerraFirma_SureFooted(footDuration));
+					}
+				}
+			}
+
+			// eaten slick-proof (oilstone, comb D1, the user's own witchwood shape): oil
+			// recognizes its own -- or passes straight through
+			if (!string.IsNullOrEmpty(tag = source.GetTag("Cleo_TerraFirma_EatenSlickProof")))
+			{
+				if (int.TryParse(tag, out int greaseDuration))
+				{
+					if (Stat.Random(1, 100) <= WITCHWOOD_BITE)
+					{
+						LogChannel("SlickProof", "the bite -- the oil passes through (slick underfoot)");
+						actor.CurrentCell?.AddObject(GameObject.Create("Cleo_TerraFirma_OilPuddle"));
+						if (actor.IsPlayer())
+							MessageQueue.AddPlayerMessage("The oil passes straight through."); // DRAFT
+					}
+					else
+					{
+						LogChannel("SlickProof", $"sure-greased {greaseDuration}");
+						actor.ApplyEffect(new Cleo_TerraFirma_SureGreased(greaseDuration));
+					}
+				}
 			}
 
 			// last: detonation destroys the source (deep four's internal elemental pulse; volatile rock)

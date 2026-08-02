@@ -123,19 +123,25 @@ namespace XRL.World.Parts.Mutation
 		#region Basic data
 		public override bool CanLevel() => false;
 
+		// 2026-07-26 voice sitting (restructure accepted, "that's fine"), built 2026-07-27:
+		// Geomancy is NON-LEVELED (CanLevel false), and base's settled pattern for those
+		// (SlimeGlands, Frost Webs, Kindle, Telepathy) puts everything in the description after
+		// the flavor line and leaves level text empty, with NO rules-wraps at all - the wrap
+		// marks level-scaling values, and nothing here scales.
 		public override string GetDescription()
 		{
-			return "You sense minute details through earthly vibrations.";
+			return "You sense minute details through earthly vibrations.\n\n" +
+				"Stones you throw reveal the area around their point of impact.\n" +
+				"Power equals the stone's sell value or weight, whichever is higher.\n" +
+				"Vision radius: 1 tile per " + (int)POWER_PER_TILE + " power (minimum " + (int)MIN_RADIUS_TILES + ")\n" +
+				"Vision duration: 1 round per " + (int)POWER_PER_TURN + " power (minimum " + (int)MIN_DURATION_TURNS + ")\n" +
+				"Gemstones also apply full scanning to creatures and walls in the revealed area.\n" +
+				"+2 thrown weapon range";
 		}
 
 		public override string GetLevelText(int Level)
 		{
-			return "Stones you throw reveal the area around their point of impact.\n" +
-				"Power equals the stone's {{rules|sell value}} or {{rules|weight}}, whichever is higher.\n" +
-				"Vision radius: {{rules|1}} tile per {{rules|" + POWER_PER_TILE + "}} power (minimum {{rules|" + MIN_RADIUS_TILES + "}})\n" +
-				"Vision duration: {{rules|1}} round per {{rules|" + POWER_PER_TURN + "}} power (minimum {{rules|" + MIN_DURATION_TURNS + "}})\n" +
-				"Gemstones also apply {{rules|full scanning}} to creatures and walls in the revealed area.\n" +
-				"+{{rules|2}} thrown weapon range";
+			return "";
 		}
 		#endregion
 

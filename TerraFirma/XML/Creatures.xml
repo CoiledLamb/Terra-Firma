@@ -9,4 +9,25 @@
     <mutation Name="Burrowing" Level="5" />
     <inventoryobject Blueprint="Cleo_TerraFirma_Aculei" Number="1" />
   </object>
+
+  <!-- Malformed cragmensch (user concept 2026-07-22, committed 2026-07-27): frailer than its kin,
+       but its self-fabricate wrenches out STRANGE ROCKS, so every throw rolls the full payload
+       lottery. Stock FabricateFromSelf (Boulderer knobs) suffices; OmniFabricate not needed.
+       Stats all RULED/ratified by the user 2026-07-27: HP 25->15, Toughness Boost 2->1,
+       AV 15->10; strange-rock death-drop ratified same day. Tile = base cragmensch recolored as PLACEHOLDER; sprite is the user's.
+       Blueprint-only for now (wish-spawnable); world placement is an open design call. -->
+  <object Name="Cleo_TerraFirma_Malformed Cragmensch" Inherits="Cragmensch">
+    <part Name="Render" DisplayName="malformed cragmensch" ColorString="&amp;m" DetailColor="M" />
+    <part Name="Description" Short="A cragmensch whose strata never knit true. Its hide sits thin over veins of shifting color, and the stones it wrenches loose from itself refuse to be the same stone twice." /> <!-- DRAFT, signoff owed -->
+    <stat Name="Hitpoints" Value="15" />
+    <stat Name="Toughness" Boost="1" />
+    <stat Name="AV" Value="10" />
+    <part Name="FabricateFromSelf" ChargeUse="0" FabricateBlueprint="Cleo_TerraFirma_Rock_Strange" FabricateVerb="excavate" BatchSize="1" HitpointsPer="1" AIUseForThrowing="true" AIHitpointsThreshold="10" HitpointsThreshold="5" EnergyCost="100" Cooldown="1d2+1" IsBioScannable="true" />
+    <!-- malformed innards: the death-drop boulder is strange too (Claude pick, flagged) -->
+    <part Name="DropOnDeath" Blueprints="Cleo_TerraFirma_Rock_Strange" />
+    <inventoryobject Blueprint="Cleo_TerraFirma_Rock_Strange" Number="1" />
+    <inventoryobject Blueprint="Cragmensch Fist" Number="2" />
+    <skill Name="Cudgel_Bludgeon" />
+    <tag Name="Role" Value="Artillery" />
+  </object>
 </objects>

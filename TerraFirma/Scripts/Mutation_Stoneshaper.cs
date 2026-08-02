@@ -86,17 +86,26 @@ namespace XRL.World.Parts.Mutation
 		{
 			WallType wt = GetValidWallsAtLevel(Level);
 			int duration = GetDuration(Level);
-			return "Gaze at a creature, then at a wall, to carve an animate statue of that creature from the wall.\n" +
-				"The statue inherits the creature's body plan and physique ({{rules|Strength}}, {{rules|Agility}}, {{rules|Toughness}}), but not its mutations, skills, or equipment. It fights with stone renditions of the creature's natural weapons.\n" +
+			// 2026-07-26 voice sitting rulings, built 2026-07-27: opener de-imperatived into Stone
+			// Gaze's own "You can gaze..." construction (creature-then-wall order verified against
+			// the code's picker prompts); the "stone renditions" natural-weapons line CUT (cosmetic
+			// copying goes undocumented); the inheritance mega-line split with attribute names
+			// unwrapped; attack line split per Horns ("fine"); the flowery closer CUT ENTIRELY
+			// (expiry-container behavior discoverable in play); Cooldown lands last, bare. The
+			// wall-type wrap stays - it scales with level, which is what rules-wrap is for.
+			return "You can gaze at a creature, then at a wall, to carve an animate statue of that creature.\n" +
+				"The statue inherits the creature's body plan and physique (Strength, Agility, Toughness).\n" +
+				"It does not inherit mutations, skills, or equipment.\n" +
 				"Nearby enemies must make a Willpower save (difficulty {{rules|" + GetDistractionSaveDifficulty(Level) + "}}) or direct their attacks at the statue.\n" +
 				"Can target {{rules|" + (wt == WallType.Stone ? "stone" : (wt == WallType.StoneAndMetal ? "stone and metal" : "almost any")) + " walls}}\n" +
 				"Statue hit points: {{rules|" + GetHP(Level) + "}}\n" +
 				"Statue AV: {{rules|" + GetAV(Level) + "}}\n" +
-				"Statue attack: {{rules|" + GetNaturalDamage(Level) + "}} damage with {{rules|+" + GetToHitBonus(Level) + "}} to-hit\n" +
+				"Statue damage increment: {{rules|" + GetNaturalDamage(Level) + "}}\n" +
+				"Statue to-hit bonus: +{{rules|" + GetToHitBonus(Level) + "}}\n" +
 				(duration == INFINITE_DURATION_PLACEHOLDER
 					? "The statue lasts {{rules|until destroyed}}. Carving another releases it.\n"
 					: "The statue lasts for {{rules|" + duration + "}} rounds.\n") +
-				"Expired and released statues return to lifeless stone where they stand, entombing anything worn or carried.";
+				"Cooldown: " + BASE_COOLDOWN + " rounds";
 		}
 
 		public override void CollectStats(Templates.StatCollector stats)

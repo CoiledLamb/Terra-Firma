@@ -825,6 +825,10 @@ namespace XRL.World.Parts
 					{
 						C.AddObject(other); // place-then-fire: the payload runs from a real cell
 						otherPart.Owner = Owner;
+						// RULED 2026-08-01 ("b works", the siphonyx-mint flag): a surrogate that
+						// force-equips (drainstone latch) rides the victim as designed, but must
+						// never outlive the ride -- DrainLatch's early-unlatch checks this stamp
+						other.SetIntProperty("Cleo_TerraFirma_MimicSurrogate", 1);
 						otherPart.FirePayload(victim, C, Reduced);
 						// the surrogate's work is done -- unless it force-equipped itself (drainstone
 						// latch), in which case it rides the victim to its natural end

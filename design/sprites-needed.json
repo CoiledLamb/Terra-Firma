@@ -1,0 +1,122 @@
+[
+  {
+    "file": "hewer.png",
+    "for": "NPC roster - hewer (Fissure)",
+    "source": "ruled"
+  },
+  {
+    "file": "mason.png",
+    "for": "NPC roster - mason (Stoneshaper)",
+    "source": "ruled"
+  },
+  {
+    "file": "outrider.png",
+    "for": "NPC roster - outrider (EB)",
+    "source": "ruled"
+  },
+  {
+    "file": "drover.png",
+    "for": "NPC roster - drover (beast-tender)",
+    "source": "ruled"
+  },
+  {
+    "file": "provisioner.png",
+    "for": "NPC roster - provisioner (trade)",
+    "source": "ruled"
+  },
+  {
+    "file": "overseer.png",
+    "for": "NPC roster - overseer (legendary)",
+    "source": "ruled"
+  },
+  {
+    "file": "molebeast.png",
+    "for": "mole-beast (beast of burden)",
+    "source": "ruled"
+  },
+  {
+    "file": "firedish.png",
+    "for": "communal - carved fire dish",
+    "source": "user jam"
+  },
+  {
+    "file": "quarrybricks1.png",
+    "for": "quarried stack (low wall) tile 1 of 3 (re-ruled 2026-07-26; currently worn in-game by the loose-block furniture blueprint pending the stack blueprint)",
+    "source": "user jam"
+  },
+  {
+    "file": "quarrybricks2.png",
+    "for": "quarried stack (low wall) tile 2 of 3 (re-ruled 2026-07-26; currently worn in-game by the loose-block furniture blueprint pending the stack blueprint)",
+    "source": "user jam"
+  },
+  {
+    "file": "quarrybricks3.png",
+    "for": "quarried stack (low wall) tile 3 of 3 (re-ruled 2026-07-26; currently worn in-game by the loose-block furniture blueprint pending the stack blueprint)",
+    "source": "user jam"
+  },
+  {
+    "file": "toolrack.png",
+    "for": "workshop - tool rack (no base low-tech rack)",
+    "source": "user jam"
+  },
+  {
+    "file": "minerallick.png",
+    "for": "sty - mineral lick",
+    "source": "proposed (Claude)"
+  },
+  {
+    "file": "lithophone.png",
+    "for": "communal - lithophone",
+    "source": "proposed (Claude)"
+  },
+  {
+    "file": "eyestele.png",
+    "for": "stele variant (boundary/memorial/musing)",
+    "source": "liked"
+  },
+  {
+    "file": "viewingstone.png",
+    "for": "viewing stone (trade curio)",
+    "source": "liked"
+  },
+  {
+    "file": "crackedviewingstone.png",
+    "for": "cracked viewing stone (Fissure drop)",
+    "source": "liked (user's item)"
+  },
+  {
+    "file": "sealedgeode.png",
+    "for": "sealed geode (Stilt lottery)",
+    "source": "liked"
+  },
+  {
+    "file": "fossil.png",
+    "for": "fossil curio",
+    "source": "liked"
+  },
+  {
+    "file": "mossbox.png",
+    "for": "moss box",
+    "source": "idea (user notes)"
+  },
+  {
+    "file": "cragmensch_malformed.png",
+    "for": "malformed cragmensch (VAR, if committed)",
+    "source": "idea"
+  },
+  {
+    "file": "quarrystack.png",
+    "for": "SATISFIED 2026-07-26 (user ruling): quarrybricks1-3.png ARE the stack low-wall tiles, arranged by filename number",
+    "source": "user 2026-07-25"
+  },
+  {
+    "file": "chalkline.png",
+    "for": "chalk line (fence-type boundary marking - the carvers chalking cuts/plots; palette placeholder exists)",
+    "source": "user 2026-07-26"
+  },
+  {
+    "file": "quarrystones1a-3b.png (x6)",
+    "for": "stack art variants within each fill stage (user 2026-07-26) - unwired until the stack low-wall blueprint exists; its RandomTile per stage = {base,a,b}",
+    "source": "user 2026-07-26"
+  }
+]

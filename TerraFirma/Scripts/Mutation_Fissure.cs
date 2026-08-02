@@ -45,18 +45,25 @@ namespace XRL.World.Parts.Mutation
 		#region Basic data
 		public override string GetDescription()
 		{
-			return "You shake the stones of the deep ceiling loose and bring them down around you.";
+			// RULED at the 2026-07-26 voice sitting ("rewrite fissure to be as close to burgeoning as
+			// possible"): earth-neutral (the old ceiling framing read as underground-only), Burgeoning's
+			// flavor grammar. Built 2026-07-27.
+			return "You cause stones to fall in the area around you, crushing your enemies.";
 		}
 
 		public override string GetLevelText(int Level)
 		{
-			return "The earth above you gives way, and its stones come down around you.\n" +
-				"{{rules|" + GetFalls(Level) + "}} rocks fall within {{rules|" + GetRingRadius(Level) + "}} squares of you, crushing whatever they strike for their heft plus {{rules|" + Level + "}}.\n" +
-				"The ceiling nearest you falls thickest and hardest.\n" +
-				"Each collapse favors one seam of stone; about half the falls shed it.\n" +
-				"The collapse sometimes spreads outward. Deeper, it spreads farther.\n" +
+			// RULED at the 2026-07-26 voice sitting: Burgeoning-shaped, tersest-in-base model. Spill
+			// rides the Area line (Burgeoning's own "+ growth" idiom); "Deeper strata shed stronger
+			// stone." survives in the "More powerful plants summoned" slot; seam batching, proximity
+			// damage, center-weighting, and enemy non-avoidance go undocumented per Burgeoning's own
+			// silence. The stale dull-clock sentence (mechanical review F1) died with the old block.
+			// OPEN RIDER (unruled, currently OUT): "Fallen stones persist and can be thrown."
+			// Built 2026-07-27.
+			return "Falls: {{rules|" + GetFalls(Level) + "}}\n" +
+				"Area: {{rules|" + GetRingRadius(Level) + "}} squares around you + outward spill\n" +
+				"Damage: varies by stone, +{{rules|" + Level + "}}\n" +
 				"Deeper strata shed stronger stone.\n" +
-				"What falls lies where it fell: take it up and hurl it, or leave it underfoot. Your enemies pay fallen rocks no mind. Pocketed too long, a fissure rock crumbles to plain stone.\n" +
 				"Cooldown: {{rules|" + GetCooldown(Level) + "}} rounds";
 		}
 

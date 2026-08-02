@@ -14,11 +14,10 @@ namespace XRL.World.Effects
 	//     Side effect of the move: gossamarl vacates stabilityMinor, which tanglelith inherits --
 	//     the oldest open row on the domain table closes at zero extra code.
 	//
-	//   Cleo_TerraFirma_Spacetime (myriad gyrestone + ground form) -- "worth it" ruling:
-	//     units = borrowed whole from the teleport domain (UnitBlink / UnitTeleportOther); the
-	//             domain's own identity lives in the action
-	//     trig  = CookingDomainTeleport_OnTeleport, borrowed ("whenever you teleport,")
-	//     act   = a space-time vortex opens nearby (below)
+	//   Cleo_TerraFirma_Spacetime -- CUT 2026-07-31 (comb L3, "cut it"): Ground_Gyrestone was
+	//     a dead blueprint under the mill law, and the user took the full cut over keeping the
+	//     domain as a strange-powder exclusive. The VortexOpen action class deleted with it;
+	//     the "worth it" ruling of 2026-07-22 is superseded.
 	//
 	// Class shapes mirror decompiled base examples (QuillBurst action, SlimeGlands unit).
 
@@ -95,33 +94,4 @@ namespace XRL.World.Effects
 		}
 	}
 
-	[Serializable]
-	public class Cleo_TerraFirma_CookingDomainSpacetime_VortexOpen_ProceduralCookingTriggeredAction : ProceduralCookingTriggeredAction
-	{
-		public override string GetDescription()
-		{
-			return "a space-time vortex opens nearby.";
-		}
-
-		public override string GetTemplatedDescription()
-		{
-			return "a space-time vortex opens nearby.";
-		}
-
-		public override string GetNotification()
-		{
-			return "space tears open nearby!";
-		}
-
-		public override void Apply(GameObject go)
-		{
-			Cell cell = go.Physics?.CurrentCell;
-			if (cell == null)
-				return;
-			System.Collections.Generic.List<Cell> open = cell.GetLocalAdjacentCells();
-			open.RemoveAll((Cell x) => x.IsSolid());
-			if (open.Count > 0)
-				open[Stat.Random(0, open.Count - 1)].AddObject(GameObject.Create("Space-Time Vortex"));
-		}
-	}
 }

@@ -141,7 +141,8 @@ namespace XRL.World.Parts
 
 		private void Unlatch(bool crumble)
 		{
-			Helpers.VerifyLog("DRAIN", crumble ? $"unlatch: duration spent -> {(Starved ? "dry crumble (starved)" : "gorged burst")}" : "unlatch: came off early (death/dismemberment) -> curse lifts, stone survives as loot");
+			bool surrogate = ParentObject.GetIntProperty("Cleo_TerraFirma_MimicSurrogate") > 0;
+			Helpers.VerifyLog("DRAIN", crumble ? $"unlatch: duration spent -> {(Starved ? "dry crumble (starved)" : "gorged burst")}" : $"unlatch: came off early (death/dismemberment) -> curse lifts, {(surrogate ? "mimic surrogate OBLITERATED (no minted siphonyx -- ruling 2026-08-01)" : "stone survives as loot")}");
 			RoundsLeft = 0;
 			Drainer = null;
 			if (ParentObject.HasPart<Cursed>())
@@ -155,6 +156,12 @@ namespace XRL.World.Parts
 						? ParentObject.Does("wither") + " and crumble away, dry and unfed."
 						: ParentObject.Does("burst") + " like a blood balloon, finally sated.");
 				ParentObject.Destroy(null, Silent: true);
+			}
+			else if (surrogate)
+			{
+				// the strange-roll rider (RULED 2026-08-01, "b works"): the ride was real, the rock
+				// never was -- an early unlatch must not mint a permanent siphonyx
+				ParentObject.Obliterate();
 			}
 		}
 

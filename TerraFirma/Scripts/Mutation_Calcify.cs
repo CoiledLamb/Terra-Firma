@@ -18,15 +18,21 @@ namespace XRL.World.Parts.Mutation
 		#region Basic data
 		public override string GetDescription()
 		{
-			return "Through intense focus, you may cause solid walls to appear out of thin air.";
+			// A' PICKED at the 2026-07-26 voice sitting ("A' sounds fine honestly"): Force Wall's
+			// concrete register; "out of thin air" appears nowhere in base text. Built 2026-07-27.
+			return "You raise walls of solid stone.";
 		}
 
 		public override string GetLevelText(int Level)
 		{
+			// 2026-07-26 voice sitting: flat constants unwrap (0 AV / -10 DV bare, values ratified
+			// 2026-07-25), Cooldown lands last per the ~100%-of-base convention (was missing
+			// entirely). Built 2026-07-27.
 			return "Creates a contiguous line of permanent walls in empty tiles starting adjacent to you\n" +
 				"Number created: {{rules|" + GetWallsCreated(Level) + "}}\n" +
 				"Hit points per wall: {{rules|" + GetWallHp(Level) + "}}\n" +
-				"Created walls have {{rules|0}} AV and {{rules|-10}} DV"; // DV corrected to reality (user find 2026-07-24: walls keep the universal wall -10; the old "0 DV" was never true). Lean (b) text-follows-reality, DRAFT - flip to a DV override at creation if vetoed.
+				"Created walls have 0 AV and -10 DV\n" +
+				"Cooldown: " + BASE_COOLDOWN + " rounds";
 		}
 
 		public override bool Mutate(GameObject GO, int Level = 1)

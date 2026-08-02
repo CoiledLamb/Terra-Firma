@@ -11,6 +11,9 @@
      describe each rock's DOMAIN ASSIGNMENT, which its ground form carries. Eaten-effect tags and
      parts (the raw channel) remain rock-side and are unaffected. -->
 <objects>
+	<!-- BETA HOLD (user ruling 2026-07-27): every spawnable's Description below is commented out
+	     (BETA-HELD markers) so unapproved draft text does not ship in the friends beta; rocks fall
+	     back to their inherited base-game description. Restore at the real text pass. -->
 	<!-- shared base: a throwable stone that fell from the ceiling -->
 	<object Name="Cleo_TerraFirma_BaseFallenRock" Inherits="BaseStone">
 		<!-- Weight 5 -> 1 (user ruling 2026-07-22 verification session): fissure stones are light;
@@ -38,7 +41,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Pebbles" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="pebbles" Tile="Items/sw_smallstone.bmp" ColorString="&amp;w" DetailColor="Y" />
-		<part Name="Description" Short="Smooth spall from the world's slow grinding, come down at last." />
+		<!-- BETA-HELD: <part Name="Description" Short="Smooth spall from the world's slow grinding, come down at last." /> -->
 		<part Name="Physics" Weight="0" /> <!-- user asked 0.1; engine Weight is an int, so 0 is the nearest (powder precedent) -->
 		<tag Name="Gender" Value="plural" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="1" />
@@ -47,7 +50,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Generic" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="fallen rock" Tile="Items/sw_smallboulder.bmp" ColorString="&amp;y" DetailColor="Y" />
-		<part Name="Description" Short="A fist of the ceiling, freshly parted from it." />
+		<!-- BETA-HELD: <part Name="Description" Short="A fist of the ceiling, freshly parted from it." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d6" />
@@ -66,7 +69,7 @@
 	<object Name="Cleo_TerraFirma_Rock_Holographic" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="holographic rock" Tile="Items/sw_smallboulder.bmp" ColorString="&amp;y" DetailColor="Y" /> <!-- the generic rock's own look, ON PURPOSE -->
 		<part Name="HologramMaterial" />
-		<part Name="Description" Short="A fist of the ceiling, freshly parted from it. Something about it asks you not to look twice." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A fist of the ceiling, freshly parted from it. Something about it asks you not to look twice." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="0" />
 		<part Name="Cleo_TerraFirma_HolographicPart" />
@@ -75,7 +78,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Rubble" Inherits="Rubble">
 		<part Name="Render" DisplayName="rubble" ColorString="&amp;y" DetailColor="w" />
-		<part Name="Description" Short="A volume of the ceiling lies where it landed, broken past any use but blocking the way all the same." />
+		<!-- BETA-HELD: <part Name="Description" Short="A volume of the ceiling lies where it landed, broken past any use but blocking the way all the same." /> -->
 		<stat Name="Hitpoints" Value="250" />
 		<tag Name="ExcludeFromDynamicEncounters" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="3d6" />
@@ -105,7 +108,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Soupstone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="brine geode" Tile="Items/sw_smallstone.bmp" ColorString="&amp;c" DetailColor="Y" /> <!-- was "soupstone"; rename pass 2 (2026-07-22) -->
-		<part Name="Description" Short="A porous stone sweating brine. The sea it remembers is long gone." />
+		<!-- BETA-HELD: <part Name="Description" Short="A porous stone sweating brine. The sea it remembers is long gone." /> -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Liquid" PayloadDetail="Cleo_TerraFirma_BrinePuddle" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass (RULED 2026-07-22): thirst domain (pickles precedent, user-given); eaten raw = a half-drink of brine (DRAFT amount) -->
@@ -116,7 +119,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Sludgestone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="sludgabbro" Tile="Items/sw_smallstone.bmp" ColorString="&amp;g" DetailColor="w" /> <!-- was "sludgestone"; rename pass 2 (2026-07-22) -->
-		<part Name="Description" Short="Slick films of ooze pearl across this stone and never quite dry." />
+		<!-- BETA-HELD: <part Name="Description" Short="Slick films of ooze pearl across this stone and never quite dry." /> -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Liquid" PayloadDetail="Cleo_TerraFirma_SlimePuddle" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass: slime domain (base slime liquid precedent, user-given); eaten raw (RULED round 6) = a pool of slime at your feet -->
@@ -130,13 +133,17 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Healstone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="healstone" Tile="Items/sw_smallstone.bmp" ColorString="&amp;W" DetailColor="R" />
-		<part Name="Description" Short="A warm stone. Flesh near it remembers how to knit." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A warm stone. Flesh near it remembers how to knit." /> -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<!-- consumable by design (ruling 2026-07-23): heals the creature struck (throw it at yourself)
 		     or the stepper, then ALWAYS breaks - HoldChance 0 never survives a throw, ConsumedOnStep
-		     covers step. Heal die 2d4 DRAFT, step procs half. Eaten = healing-over-time, owed to
-		     eat-pass 2. -->
+		     covers step. Heal die 2d4 DRAFT, step procs half. Eaten heal RULED 2026-07-27 (mechanical
+		     review L1, "easy to approve"): flat 2d4 now, the rock's own payload die; the old
+		     healing-over-time eat-pass-2 note is superseded. Cooking already regenLowtier (starapple
+		     domain), confirmed the user's wanted fit same ruling. -->
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Heal" PayloadDetail="2d4" PayloadOnThrowHit="true" ConsumedOnStep="true" HoldChance="0" />
+		<tag Name="Cleo_TerraFirma_EatenHeal" Value="2d4" />
+		<tag Name="Cleo_TerraFirma_EatenEffect" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
 
@@ -146,7 +153,7 @@
 	     Its rename slot, open cooking domain, and sprite debt all closed with the cut. -->
 	<object Name="Cleo_TerraFirma_Rock_Dazestone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="dazestone" Tile="Items/sw_smallstone.bmp" ColorString="&amp;B" DetailColor="W" />
-		<part Name="Description" Short="A stone with a ring in it that never quite stops." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A stone with a ring in it that never quite stops." /> -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<!-- Effect payload channel ON PURPOSE (debt-audit ruling 2026-07-23): a separate daze part
 		     would be invisible to strange rock's mimic. Duration 6 rounds DRAFT, step = half.
@@ -158,19 +165,25 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Oilstone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="oilstone" Tile="Items/sw_smallstone.bmp" ColorString="&amp;K" DetailColor="w" />
-		<part Name="Description" Short="A stone that weeps slow black beads. They burn." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A stone that weeps slow black beads. They burn." /> -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<!-- the liquid family recipe (soupstone/sludgestone shape) pointed at base OilPuddle -
 		     LiquidOil verified: Combustibility 90, FlameTemperature 250, natively slippery.
 		     OilPuddle is 500-dram like SaltyWaterPuddle: rides the pool-volume audit with its
-		     siblings. Eaten = drink-oil event, owed to eat-pass 2. -->
+		     siblings. -->
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Liquid" PayloadDetail="Cleo_TerraFirma_OilPuddle" PayloadOnThrowHit="true" />
+		<!-- Eaten RULED 2026-07-31 (comb D1 re-ruled to the user's own witchwood shape; the parked
+		     drink-oil idea and the brief slick-only ruling are both dead): SURE-GREASED. 75% =
+		     cannot slip for 50 turns (oil recognizes its own; sibling to tanglelith's sure-footed);
+		     25% = the oil passes straight through, slick underfoot. Numbers DRAFT. -->
+		<tag Name="Cleo_TerraFirma_EatenSlickProof" Value="50" />
+		<tag Name="Cleo_TerraFirma_EatenEffect" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
 
 	<object Name="Cleo_TerraFirma_Rock_Pointy" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="shivshale" Tile="Items/sw_smallstone.bmp" ColorString="&amp;Y" DetailColor="r" /> <!-- was "pointy rock"; rename pass 2026-07-22 -->
-		<part Name="Description" Short="Stone drawn to an argument. Its point has never once been dulled by use." />
+		<!-- BETA-HELD: <part Name="Description" Short="Stone drawn to an argument. Its point has never once been dulled by use." /> -->
 		<part Name="ThrownWeapon" Damage="1d4" Penetration="5" />
 		<part Name="BleedingOnHit" Amount="1d2" SaveTarget="16" Stack="true" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Bleed" PayloadDetail="1" />
@@ -182,7 +195,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Salt" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="chunk of salt" Tile="Items/sw_smallstone.bmp" ColorString="&amp;Y" DetailColor="y" />
-		<part Name="Description" Short="A cloudy crystal chipped from a brine seam. The thirsty earth kept a little water locked inside." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A cloudy crystal chipped from a brine seam. The thirsty earth kept a little water locked inside." /> -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<!-- asymmetric: thrown = quench the target's thirst (one drink); underfoot = salt puddle -->
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Water" PayloadAmount="10000" PayloadOnThrowHit="true" StepPayload="Liquid" StepPayloadDetail="Cleo_TerraFirma_SaltPuddle" />
@@ -194,7 +207,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Strange" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="strange rock" Tile="Items/sw_smallstone.bmp" ColorString="&amp;M" DetailColor="Y" />
-		<part Name="Description" Short="No two people describe it the same way, and neither do the same two people." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="No two people describe it the same way, and neither do the same two people." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- meta-roll: mimics a random entry from the FULL pool (band 3 table nests everything) each throw/step;
 		     band "any" per catalog, so it lives in the band-1 table and every level can draw the lottery -->
@@ -212,7 +225,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_CrumbledWall" Inherits="Rubble">
 		<part Name="Render" DisplayName="crumbled wall" ColorString="&amp;Y" DetailColor="y" />
-		<part Name="Description" Short="A slab too broken to stand and too stubborn to lie flat." />
+		<!-- BETA-HELD: <part Name="Description" Short="A slab too broken to stand and too stubborn to lie flat." /> -->
 		<stat Name="Hitpoints" Value="400" />
 		<tag Name="ExcludeFromDynamicEncounters" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="5d6" />
@@ -220,12 +233,15 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Whorlstone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="vertigneiss" Tile="Items/sw_smallstone.bmp" ColorString="&amp;b" DetailColor="c" /> <!-- was "whorlstone"; rename pass 2 (2026-07-22) -->
-		<part Name="Description" Short="Bands of blue mineral whorl in toward a middle that the eye keeps missing." />
+		<!-- BETA-HELD: <part Name="Description" Short="Bands of blue mineral whorl in toward a middle that the eye keeps missing." /> -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<part Name="GasGrenade" GasObject="ConfusionGas" Density="80" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Gas" PayloadDetail="ConfusionGas" PayloadAmount="80" />
-		<!-- Lithovore pass: burp family (girsh gland paste precedent); eaten raw = brief confusion (base part defaults) -->
-		<part Name="ConfuseOnEat" />
+		<!-- Lithovore pass, WITCHWOOD RE-RULED 2026-07-31 (eaten-table comb C3): the belly is the
+		     half-tool (you vent, the gas zones your own square); the immediate self-confusion is
+		     chance-gated at the house 25% bite rate (dreadroot-style mental attack, save intact;
+		     the base part's buildup mechanic cut in the port, recorded). -->
+		<tag Name="Cleo_TerraFirma_EatenConfuse" />
 		<tag Name="Cleo_TerraFirma_EatenSpew" Value="ConfusionGas" /> <!-- burp family (ruling 2026-07-22): settles in, vents for 50-250 turns -->
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
@@ -233,12 +249,14 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Torpor" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="lullabaster" Tile="Items/sw_smallstone.bmp" ColorString="&amp;w" DetailColor="W" /> <!-- was "torpor stone"; rename pass 2 (2026-07-22) -->
-		<part Name="Description" Short="A heavy stone wrapped in heavier air. Sleep pools in its shadow." />
+		<!-- BETA-HELD: <part Name="Description" Short="A heavy stone wrapped in heavier air. Sleep pools in its shadow." /> -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<part Name="GasGrenade" GasObject="SleepGas" Density="80" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Gas" PayloadDetail="SleepGas" PayloadAmount="80" />
-		<!-- Lithovore pass: burp family; eaten raw = a nap (Asleep has a default ctor, EffectOnEat-compatible; DRAFT duration) -->
-		<part Name="EffectOnEat" Effect="Asleep" Duration="1d6+2" />
+		<!-- Lithovore pass, WITCHWOOD RE-RULED 2026-07-31 (comb C4): belly untouched, the nap
+		     chance-gated at the house 25% (accepted charm: a landed nap somewhere safe is nearly
+		     a rest button). DRAFT duration. -->
+		<tag Name="Cleo_TerraFirma_EatenNap" Value="1d6+2" />
 		<tag Name="Cleo_TerraFirma_EatenSpew" Value="SleepGas" /> <!-- burp family: the nap, then the long settling -->
 
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
@@ -247,7 +265,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Rubber" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="caromcobble" Tile="Items/sw_smallstone.bmp" ColorString="&amp;w" DetailColor="Y" /> <!-- NAMED 2026-07-22 (slate: carom x cobble) -->
-		<part Name="Description" Short="A stone that never agreed to stop. Thrown, it keeps the argument going off everything nearby." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A stone that never agreed to stop. Thrown, it keeps the argument going off everything nearby." /> -->
 		<part Name="ThrownWeapon" Damage="1d4" Penetration="3" />
 		<!-- Rubber rock (RULED 2026-07-22): after every throw resolves - hit or miss, "the rock never
 		     lands where you aimed, ever" - it bounces 2 random-angle ricochet legs (flat d20 vs DV,
@@ -267,7 +285,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Volatile" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="quarrelquartz" Tile="Items/sw_smallstone.bmp" ColorString="&amp;r" DetailColor="R" /> <!-- was "volatile rock"; rename pass 2 (2026-07-22) -->
-		<part Name="Description" Short="A stone with an argument sealed inside, waiting on the last word." />
+		<!-- BETA-HELD: <part Name="Description" Short="A stone with an argument sealed inside, waiting on the last word." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="HEGrenade" Force="1200" Damage="1d6" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Explosion" PayloadDetail="1d6" PayloadAmount="1200" />
@@ -279,7 +297,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Fungal" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="sporolith" Tile="Items/sw_smallstone.bmp" ColorString="&amp;w" DetailColor="M" />
-		<part Name="Description" Short="A rind of mold holds this stone together more than the stone does. Its spores wait on any excuse." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A rind of mold holds this stone together more than the stone does. Its spores wait on any excuse." /> -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<part Name="GasGrenade" GasObject="FungalSporeGasPuff" Density="80" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Gas" PayloadDetail="FungalSporeGasPuff" PayloadAmount="80" />
@@ -313,7 +331,7 @@
 	<object Name="Cleo_TerraFirma_Rock_ShatteredStalactite" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Physics" Weight="5" /> <!-- stays heavy (user ruling): it's a spear of ceiling stone -->
 		<part Name="Render" DisplayName="shattered stalactite" Tile="Items/sw_stalag1.bmp" ColorString="&amp;w" DetailColor="r" />
-		<part Name="Description" Short="A spear of ceiling-grown stone, snapped at the root and honed by the fall." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A spear of ceiling-grown stone, snapped at the root and honed by the fall." /> -->
 		<part Name="ThrownWeapon" Damage="1d6" Penetration="6" Attributes="ShortBlades" />
 		<!-- "cracked on penetration": the engine's ShatteredArmor, -1 AV for the duration; inert underfoot per catalog. -->
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="0" Payload="Effect" PayloadDetail="ShatteredArmor" PayloadAmount="100" PayloadOnThrowHit="true" />
@@ -326,7 +344,7 @@
 	<object Name="Cleo_TerraFirma_Rock_Stalagmite" Inherits="InorganicObject">
 		<part Name="Render" DisplayName="stalagmite" RenderLayer="3" ColorString="&amp;w" DetailColor="r" />
 		<part Name="RandomTile" Tiles="Items/sw_stalag1.bmp,Items/sw_stalag2.bmp,Items/sw_stalag3.bmp,Items/sw_stalag4.bmp" />
-		<part Name="Description" Short="A tooth of the floor, grown drip by patient drip and snapped loose all at once." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A tooth of the floor, grown drip by patient drip and snapped loose all at once." /> -->
 		<!-- plant-wall fragility (user ruling 2026-07-22): any hit breaks it, and it hands over the goods -->
 		<part Name="Physics" Weight="500" Takeable="false" Solid="true" />
 		<stat Name="AV" Value="0" />
@@ -342,7 +360,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Spiderweb" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="gossamarl" Tile="Items/sw_smallstone.bmp" ColorString="&amp;Y" DetailColor="y" /> <!-- was "spiderweb stone" -->
-		<part Name="Description" Short="A stone cocooned in dusty silk. The strands remember their business." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A stone cocooned in dusty silk. The strands remember their business." /> -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<!-- part order matters: our part spawns the webs first, then StickyOnHit entangles the target and
 		     spends the stone (one-use, user ruling 2026-07-22). Step: chance of Stuck, stone survives. -->
@@ -361,7 +379,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Rusty" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="oxidian" Tile="Items/sw_smallstone.bmp" ColorString="&amp;r" DetailColor="w" />
-		<part Name="Description" Short="A stone bled through with old iron. What it touches, it teaches to decay." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A stone bled through with old iron. What it touches, it teaches to decay." /> -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="RustGear" PayloadOnThrowHit="true" />
 		<!-- Eaten raw (RULED 2026-07-25, the oxidian conversation): the description was the design
@@ -377,19 +395,21 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Scary" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="grimslate" Tile="Items/sw_smallstone.bmp" ColorString="&amp;K" DetailColor="r" />
-		<part Name="Description" Short="A dark tablet with nothing written on it, which is somehow worse." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A dark tablet with nothing written on it, which is somehow worse." /> -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Effect" PayloadDetail="Terrified" PayloadAmount="20" PayloadOnThrowHit="true" />
-		<!-- Lithovore pass: fear domain (lah petals precedent); eaten raw = Dreadroot's own FearOnEat (defaults 1d8/2d4 -
-		     snack-grade next to the tuber's 3d8/4d6). The fear rock scares your gut; honest. -->
-		<part Name="FearOnEat" />
+		<!-- Lithovore pass, WITCHWOOD RE-RULED 2026-07-31 (comb C1): dread radiates OUTWARD, a
+		     per-neighbor mental attack in dreadroot's exact save shape (Terrified, 1d8 vs 8, 2d4
+		     rounds, flee from the eater); 25% (house rate) the dread turns inward instead and the
+		     old self-fear lands. The panic button you can gamble on. -->
+		<tag Name="Cleo_TerraFirma_EatenDread" />
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
 
 	<object Name="Cleo_TerraFirma_Rock_Bola" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="tanglelith" Tile="Items/sw_smallstone.bmp" ColorString="&amp;w" DetailColor="g" />
-		<part Name="Description" Short="Veins of some clinging mineral wrap this stone like cords that never learned to let go." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="Veins of some clinging mineral wrap this stone like cords that never learned to let go." /> -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<!-- TAR REDESIGN (RULED 2026-07-25, weak-rock docket): the stone is a spender, what it
 		     buys is a ZONE. Thrown = 3 permanent tar patches (impact + scatter) + the victim
@@ -401,6 +421,12 @@
 		<!-- Lithovore pass, RULED round 8: inherits stabilityMinor from gossamarl's move to the Web
 		     domain; the musical-chairs resolution of the oldest open row (major stability stays a
 		     pass-2 candidate on the worklist) -->
+		<!-- Eaten RULED 2026-07-31 (comb D2, closing the old L2 gap): SURE-FOOTED, the tar grips
+		     inward. 75% = anchored 50 turns (save bonus vs forced movement and knockdown, the
+		     eat-mirrors-domain pattern on its stabilityMinor); 25% = the tar grips too well,
+		     briefly Stuck. Numbers DRAFT. -->
+		<tag Name="Cleo_TerraFirma_EatenSureFooted" Value="50" />
+		<tag Name="Cleo_TerraFirma_EatenEffect" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
 
@@ -411,7 +437,7 @@
 	     user's surface). -->
 	<object Name="Cleo_TerraFirma_TarPatch" Inherits="InorganicObject">
 		<part Name="Render" DisplayName="spilled tar" RenderString="~" ColorString="&amp;K" DetailColor="k" RenderLayer="3" RenderIfDark="false" />
-		<part Name="Description" Short="A slick of mineral pitch holds the floor, patient as only stone can be." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A slick of mineral pitch holds the floor, patient as only stone can be." /> -->
 		<part Name="Physics" Solid="false" Takeable="false" Weight="5" Conductivity="5" FreezeTemperature="-9999" BrittleTemperature="-9999" FlameTemperature="100" VaporTemperature="600" />
 		<stat Name="Hitpoints" Value="50" />
 		<part Name="Sticky" DestroyOnBreak="false" />
@@ -424,7 +450,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Spiny" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="urchinite" Tile="Items/sw_smallstone.bmp" ColorString="&amp;m" DetailColor="Y" />
-		<part Name="Description" Short="A knot of stone spines packed too tight to stay together forever." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A knot of stone spines packed too tight to stay together forever." /> -->
 		<part Name="ThrownWeapon" Damage="1d4" Penetration="5" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="QuillBurst" PayloadDetail="2d4" PayloadOnThrowHit="true" StepPayload="QuillBurst" StepPayloadDetail="1d4" />
 		<!-- Lithovore pass: damage-reflection domain (spine fruit jam precedent); eaten raw (RULED round 6) = you are the urchin: quill burst around you, sparing you (die is a DRAFT) -->
@@ -435,7 +461,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_CompressedAsh" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="compressed ash" Tile="Items/sw_smallstone.bmp" ColorString="&amp;K" DetailColor="w" />
-		<part Name="Description" Short="Old fires pressed to a brick by the patient weight of the ceiling. It crumbles at the edges into breathless gray." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="Old fires pressed to a brick by the patient weight of the ceiling. It crumbles at the edges into breathless gray." /> -->
 		<part Name="ThrownWeapon" Damage="1d2" Penetration="2" />
 		<part Name="GasGrenade" GasObject="MiasmaticAsh" Density="80" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Gas" PayloadDetail="MiasmaticAsh" PayloadAmount="80" />
@@ -444,6 +470,7 @@
 		     miasmatic ash, the venting this gas rock always deserved); cooking = the bespoke
 		     armorMinor domain on Ground_CompressedAsh below (aegischist's T1 shadow). -->
 		<tag Name="Cleo_TerraFirma_EatenSpew" Value="MiasmaticAsh" />
+		<tag Name="Cleo_TerraFirma_EatenEffect" /> <!-- marker restored 2026-07-31 (comb D3): the vent counts as a doer; strange-eat pool purity -->
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d4" />
 	</object>
 
@@ -451,7 +478,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Wall" Inherits="Sandstone">
 		<part Name="Render" DisplayName="fallen wall" />
-		<part Name="Description" Short="A shelf of the deep ceiling, standing now where it fell, load-bearing for nothing." />
+		<!-- BETA-HELD: <part Name="Description" Short="A shelf of the deep ceiling, standing now where it fell, load-bearing for nothing." /> -->
 		<tag Name="ExcludeFromDynamicEncounters" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="8d8" />
 		<tag Name="Cleo_TerraFirma_CrushInstakill" Value="15" />
@@ -459,7 +486,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Voltaic" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="galvena" Tile="Items/sw_smallstone.bmp" ColorString="&amp;W" DetailColor="w" /> <!-- was "voltaic rock" -->
-		<part Name="Description" Short="Veins of copper and older metals braid through this stone. They still carry a charge." />
+		<!-- BETA-HELD: <part Name="Description" Short="Veins of copper and older metals braid through this stone. They still carry a charge." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="DischargeOnHit" ChargeUse="0" Voltage="1d4" DamageRange="1d4" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Discharge" PayloadDetail="1d4" PayloadAmount="3" />
@@ -476,7 +503,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Scorching" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="pyroclase" Tile="Items/sw_smallstone.bmp" ColorString="&amp;R" DetailColor="W" /> <!-- was "scorching rock" -->
-		<part Name="Description" Short="It came down glowing and has not forgiven the fall." />
+		<!-- BETA-HELD: <part Name="Description" Short="It came down glowing and has not forgiven the fall." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="ThermalGrenade" TemperatureDelta="400" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Temperature" PayloadAmount="400" />
@@ -489,7 +516,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Icy" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="frostspar" Tile="Items/sw_smallstone.bmp" ColorString="&amp;C" DetailColor="Y" /> <!-- was "icy rock" -->
-		<part Name="Description" Short="Cold seeps from this stone as though winter were stored in it under pressure." />
+		<!-- BETA-HELD: <part Name="Description" Short="Cold seeps from this stone as though winter were stored in it under pressure." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="ThermalGrenade" TemperatureDelta="-350" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Temperature" PayloadAmount="-350" />
@@ -501,7 +528,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Pulsestone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="hushmica" Tile="Items/sw_smallstone.bmp" ColorString="&amp;c" DetailColor="W" /> <!-- was "pulsestone"; rename pass 2 (2026-07-22) -->
-		<part Name="Description" Short="A stone shot through with magnetized iron, humming at frequencies machines find upsetting." />
+		<!-- BETA-HELD: <part Name="Description" Short="A stone shot through with magnetized iron, humming at frequencies machines find upsetting." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="Metal" />
 		<part Name="EMPGrenade" Radius="2" Duration="2d4" />
@@ -516,7 +543,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Ajistone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="conchalk" Tile="Items/sw_smallstone.bmp" ColorString="&amp;m" DetailColor="M" /> <!-- was "warped ajistone"; rename pass 2 (2026-07-22) -->
-		<part Name="Description" Short="A stone warped around a hollow that whistles when it moves. Whatever air it swallowed last comes out changed." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A stone warped around a hollow that whistles when it moves. Whatever air it swallowed last comes out changed." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="RandomGas" PayloadAmount="80" PayloadOnThrowHit="true" />
 		<!-- Lithovore pass (RULED): a random gas-breath domain per cook - the comma list picks one
@@ -532,20 +559,23 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Vantabsidian" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="vantabsidian" Tile="Items/sw_smallstone.bmp" ColorString="&amp;K" DetailColor="y" />
-		<part Name="Description" Short="A shard of glass so black it unlights the air around it. Looking at it feels like a held breath." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A shard of glass so black it unlights the air around it. Looking at it feels like a held breath." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="Blackout" Radius="5" /> <!-- Vantabloom's part; the flower runs 9 -->
 		<!-- StepChance 0: inert underfoot (the darkness field IS its floor story); thrown = temporary blindness -->
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="0" Payload="Effect" PayloadDetail="Blind" PayloadAmount="20" PayloadOnThrowHit="true" />
-		<!-- Lithovore pass: darkness domain (Vanta Petals' own); eaten raw (RULED round 6) = blind 50 turns -->
-		<part Name="EffectOnEat" Effect="Blind" Duration="50" />
+		<!-- Lithovore pass, WITCHWOOD RE-RULED 2026-07-31 (comb C2, supersedes the round-6 blind
+		     50): your eyes drink the dark. 75% = dark-adapted 100 turns (skulk-tonic machinery,
+		     temporary DarkVision mod); 25% = the dark drinks back, Blind 10 (raw, no save; the
+		     duration flagged by the user as potentially revisitable). -->
+		<tag Name="Cleo_TerraFirma_EatenDarkSight" Value="100" />
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d6" />
 	</object>
 
 	<object Name="Cleo_TerraFirma_Rock_Melting" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="vitriolite" Tile="Items/sw_smallstone.bmp" ColorString="&amp;g" DetailColor="G" /> <!-- was "melting rock" -->
-		<part Name="Description" Short="A stone losing an argument with itself. What it sheds eats the floor." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A stone losing an argument with itself. What it sheds eats the floor." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- acid splash both ways; the ETCH restored at T1 scale (RULED 2026-07-25, "easy to sign
 		     off on"): 50% on throw-hit rides ShatteredArmor (the -1 AV crack, 100 turns,
@@ -564,7 +594,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Shunting" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="farflint" Tile="Items/sw_smallstone.bmp" ColorString="&amp;B" DetailColor="m" /> <!-- was "shunting rock" -->
-		<part Name="Description" Short="A stone that was somewhere else a moment ago. Whatever it strikes goes to find out where." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A stone that was somewhere else a moment ago. Whatever it strikes goes to find out where." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- step trigger ADDED by user re-ruling (2026-07-23 verification session, supersedes the
 		     no-step-effect catalog ruling): stepping on it shunts you too. Reduced halves the
@@ -587,7 +617,7 @@
 	     still owes the OTHER direction (item back to creature). -->
 	<object Name="Cleo_TerraFirma_BaboonFigurineItem" Inherits="Trinket">
 		<part Name="Render" DisplayName="baboon figurine" Tile="Assets_Content_Textures_Creatures_sw_baboon.bmp" RenderString="]" ColorString="&amp;y" DetailColor="K" />
-		<part Name="Description" Short="A baboon no taller than a knee, carved by patient hands. It holds very still, the way stone remembers to." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A baboon no taller than a knee, carved by patient hands. It holds very still, the way stone remembers to." /> -->
 		<part Name="Physics" Weight="5" />
 		<part Name="Commerce" Value="30" />
 		<!-- WorksOnCarrier: without it AddsRep is equipper-only and a trinket is never equipped
@@ -600,7 +630,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_ApeStatue" Inherits="BaseApe">
 		<part Name="Render" DisplayName="ape statue" RenderString="a" Tile="Creatures/albino-ape.png" ColorString="&amp;y" DetailColor="K" />
-		<part Name="Description" Short="An ape rendered in stone by no sculptor anyone can name. It moves like it remembers being one or the other." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="An ape rendered in stone by no sculptor anyone can name. It moves like it remembers being one or the other." /> -->
 		<part Name="Brain" Hostile="false" />
 		<stat Name="Level" Value="12" />
 		<!-- stone body (user ruling 2026-07-22): +2 AV over the flesh original, and acid eats stone.
@@ -651,7 +681,7 @@
 		     deferred stone-creature roster conversation may resurrect the tag for WILD stone
 		     creatures (stonefrog etc.) if party status ever isn't enough. -->
 		<part Name="Render" DisplayName="baboon statuette" Tile="Assets_Content_Textures_Creatures_sw_baboon.bmp" RenderString="a" ColorString="&amp;y" DetailColor="K" />
-		<part Name="Description" Short="A baboon no taller than a knee, carved by patient hands and impatient to be moving. It sizes up everything as either a threat or a throw." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A baboon no taller than a knee, carved by patient hands and impatient to be moving. It sizes up everything as either a threat or a throw." /> -->
 		<part Name="Brain" Hostile="false" />
 		<stat Name="Level" Value="5" />
 		<!-- stone body (user ruling 2026-07-22): +2 AV over BaseBaboon's 2, and acid eats stone -->
@@ -683,7 +713,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Hypersonic" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="streakschorl" Tile="Items/sw_smallstone.bmp" ColorString="&amp;C" DetailColor="W" /> <!-- was "hypersonic rock"; NAMED 2026-07-22, the cursed slot closes at 0-for-11 -->
-		<part Name="Description" Short="A stone still ringing from a speed it once knew. Thrown, it remembers the way." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A stone still ringing from a speed it once knew. Thrown, it remembers the way." /> -->
 		<part Name="ThrownWeapon" Damage="1d6" Penetration="4" Attributes="Cudgel Vorpal" />
 		<part Name="VibroWeapon" ChargeUse="0" />
 		<!-- Seek-and-bounce flight (RULED 2026-07-22, geomagnetic-disc adaptation): thrown at (or near)
@@ -713,7 +743,7 @@
 	     until it collapses. Falls as a living creature: DropRock's brain-branch allies it to the caster. -->
 	<object Name="Cleo_TerraFirma_Rock_Omnigeyser1" Inherits="Creature">
 		<part Name="Render" DisplayName="spitting geyser" RenderString="4" Tile="Items/sw_stalag2.bmp" ColorString="&amp;y" DetailColor="c" />
-		<part Name="Description" Short="A vent of restless stone. Every so often the earth below clears its throat." /> <!-- DRAFT; tile is a stalagmite reuse, bespoke art whenever -->
+		<!-- BETA-HELD (DRAFT; tile is a stalagmite reuse, bespoke art whenever): <part Name="Description" Short="A vent of restless stone. Every so often the earth below clears its throat." /> -->
 		<part Name="Brain" Hostile="false" Wanders="false" Mobile="false" Factions="Beasts-100" />
 		<part Name="Body" Anatomy="Fungus" />
 		<stat Name="Level" Value="8" />
@@ -760,7 +790,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Mullstone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="mullstone" Tile="Items/sw_smallstone.bmp" ColorString="&amp;y" DetailColor="K" />
-		<part Name="Description" Short="A stone that invites second thoughts, at length, about everything you know how to do." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A stone that invites second thoughts, at length, about everything you know how to do." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- thrown = every ability locked 10 rounds; stepped = one random ability, 5 -->
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="AbilityLock" PayloadAmount="10" PayloadOnThrowHit="true" />
@@ -774,7 +804,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Hexstone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="lattice euclase" Tile="Items/sw_smallstone.bmp" ColorString="&amp;B" DetailColor="Y" /> <!-- was "lattice hexstone"; rename pass 2 (2026-07-22) -->
-		<part Name="Description" Short="A stone latticed in perfect right angles. Reality straightens up around it, embarrassed." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A stone latticed in perfect right angles. Reality straightens up around it, embarrassed." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- anchor-on-hold rider from the catalog DROPPED: no native anchor effect exists (recon 2026-07-22); gas-only -->
 		<part Name="GasGrenade" GasObject="NormalityGas" Density="80" />
@@ -784,15 +814,16 @@
 		     semantics VERIFY at boot) + its own gas grenade bursts in you -->
 		<part Name="EffectOnEat" Effect="RealityStabilized" Duration="50" />
 		<tag Name="Cleo_TerraFirma_EatenSpew" Value="NormalityGas" /> <!-- burp family -->
-
-		<tag Name="Cleo_TerraFirma_EatenDetonate" />
+		<!-- EatenDetonate CUT 2026-07-31 (comb C5, "alright, sounds fine"): the triple stack lost
+		     its gratuitous third hit. The tether cuts both ways on its own: it mutes your tricks
+		     AND everything reality-distortion-based aimed at you. -->
 		<tag Name="Cleo_TerraFirma_EatenEffect" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d6" />
 	</object>
 
 	<object Name="Cleo_TerraFirma_Rock_Lovestone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="dotagate" Tile="Items/sw_smallstone.bmp" ColorString="&amp;R" DetailColor="M" /> <!-- was "lovestone"; rename pass 2 (2026-07-22) -->
-		<part Name="Description" Short="Warm to the touch, and pleased about something. Best hurled at strangers." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="Warm to the touch, and pleased about something. Best hurled at strangers." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- thrown = sudden devotion to the thrower, ~50 rounds (a hostile act); stepped = Lovesick -->
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="TempAlly" PayloadAmount="50" PayloadOnThrowHit="true" StepPayload="Effect" StepPayloadDetail="Lovesick" StepPayloadAmount="50" />
@@ -806,7 +837,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Shieldstone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="aegischist" Tile="Items/sw_smallstone.bmp" ColorString="&amp;C" DetailColor="B" /> <!-- was "shieldstone"; rename pass 2 (2026-07-22) -->
-		<part Name="Description" Short="A stone that refuses on your behalf." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A stone that refuses on your behalf." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- thrown = short line of force at the landing cell; stepped = force closes around the stepper -->
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="ForceWall" PayloadDetail="Cleo_TerraFirma_ForceWallShard" PayloadOnThrowHit="true" StepPayload="ForceBubble" StepPayloadDetail="Cleo_TerraFirma_ForceBubbleShard" />
@@ -820,7 +851,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Drifting" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="phasalt" Tile="Items/sw_smallstone.bmp" ColorString="&amp;y" DetailColor="K" />
-		<part Name="Description" Short="A stone that is mostly elsewhere. It can be held, with concentration." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A stone that is mostly elsewhere. It can be held, with concentration." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="OmniphaseObject" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Effect" PayloadDetail="Phased" PayloadAmount="30" PayloadOnThrowHit="true" />
@@ -832,7 +863,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Gyrestone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="myriad gyrestone" Tile="Items/sw_smallstone.bmp" ColorString="&amp;m" DetailColor="C" />
-		<part Name="Description" Short="Countless small spirals argue over which way this stone turns. Sometimes the argument spills out." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="Countless small spirals argue over which way this stone turns. Sometimes the argument spills out." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- vortexes send what they swallow to random zones: gloriously chaotic on both ends, as designed -->
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="SpawnObject" PayloadDetail="Space-Time Vortex" PayloadAmount="1" PayloadOnThrowHit="true" StepPayload="SpawnObject" StepPayloadDetail="Space-Time Vortex" StepPayloadAmount="2" />
@@ -855,7 +886,7 @@
 	     channel flips it live per triggered step. Falls-table only, obviously not throwable. -->
 	<object Name="Cleo_TerraFirma_Rock_Crack" Inherits="StairsDown">
 		<part Name="Render" DisplayName="cracked floor" Tile="Terrain/sw_crack.bmp" ColorString="&amp;K" TileColor="&amp;y" DetailColor="K" RenderString="." />
-		<part Name="Description" Short="A hairline parting in the floor, wide enough to have opinions about weight." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A hairline parting in the floor, wide enough to have opinions about weight." /> -->
 		<part Name="StairsDown" Connected="false" PullDown="false" PullMessage="The floor gives way!" />
 		<part Name="StairHighlight" bEnabled="false" />
 		<removepart Name="Interesting" />
@@ -871,21 +902,24 @@
 	     straight through, loose loot included; that is its crush). Zero mod code. -->
 	<object Name="Cleo_TerraFirma_Rock_Chasm" Inherits="OpenShaft">
 		<part Name="Render" DisplayName="chasm" />
-		<part Name="Description" Short="The collapse kept going. Below is only more below." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="The collapse kept going. Below is only more below." /> -->
 		<part Name="StairsDown" PullMessage="You plunge through the broken floor!" />
 		<tag Name="ExcludeFromDynamicEncounters" />
 	</object>
 
 	<object Name="Cleo_TerraFirma_Rock_Lodestone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="lodestone" Tile="Items/sw_smallstone.bmp" ColorString="&amp;K" DetailColor="c" /> <!-- was "magnetic lodestone"; rename pass 2 (2026-07-22) -->
-		<part Name="Description" Short="Iron with a grudge. Everything metal is owed to it, and it collects." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="Iron with a grudge. Everything metal is owed to it, and it collects." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="Metal" />
 		<!-- the engine's own MagneticPulse (decompiled): drags loose metal + robots to the stone, rips
 		     non-chest worn metal off everyone in radius toward it. Rocks don't discriminate: your gear
 		     too. Thrown radius 6, step 3 (Reduced halves). Pulse defers to landing when thrown. -->
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="MagnetPulse" PayloadAmount="6" PayloadOnThrowHit="true" />
-		<!-- Lithovore pass: NO cooking domain; eaten raw = the pulse fires centered on the EATER (your own gear rips free) -->
+		<!-- Lithovore pass: NO cooking domain. Eaten RE-RULED 2026-07-31 (comb, "fetch sounds
+		     good"): 75% = the FETCH, loose metal in radius skitters to the eater (vacuum-loot;
+		     items only); 25% = the old pulse, gear rips free and robots drag in (the bite keeps
+		     the full EmitMagneticPulse incl. the robot half). Warn stays: the bite is real. -->
 		<tag Name="Cleo_TerraFirma_DangerousToEat" />
 		<tag Name="Cleo_TerraFirma_EatenMagnetPulse" Value="3" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d6" />
@@ -893,7 +927,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Blurring" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="manymarble" Tile="Items/sw_smallstone.bmp" ColorString="&amp;y" DetailColor="M" /> <!-- was "blurring rock"; rename pass 2 (2026-07-22) -->
-		<part Name="Description" Short="Its edges refuse to commit. Whatever it strikes becomes similarly unsure how many of it there are." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="Its edges refuse to commit. Whatever it strikes becomes similarly unsure how many of it there are." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- fugue copies of the victim SERVE THE THROWER (ruling 2026-07-22: outnumber them with
 		     themselves; enemy hits you = clones of you that want you dead). Thrown 2 copies/20 rounds,
@@ -908,7 +942,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Drainstone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="siphonyx" Tile="Items/sw_smallstone.bmp" ColorString="&amp;r" DetailColor="K" /> <!-- was "drainstone"; rename pass 2 (2026-07-22) -->
-		<part Name="Description" Short="A stone pocked like old bone and faintly warm. It knows what it wants." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A stone pocked like old bone and faintly warm. It knows what it wants." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<!-- WornOn="*" (verified wildcard): any body slot accepts the latch. Side quirk, accepted:
 		     you can voluntarily WEAR a drainstone - it's inert unless latched. -->
@@ -935,7 +969,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_DeepVoltaic" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="deep galvena" Tile="Items/sw_smallstone.bmp" ColorString="&amp;W" DetailColor="C" />
-		<part Name="Description" Short="Veins of metal braid denser in the deep strata, and the charge they carry has had ages to build. It does not wait to be asked." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="Veins of metal braid denser in the deep strata, and the charge they carry has had ages to build. It does not wait to be asked." /> -->
 		<!-- HEFT (RULED 2026-07-24, "deep stones want heft"): weight back to 5, real dice, heavier
 		     crush; weight over 1 also makes the deep four FULL meals via size-scaled satiety -->
 		<part Name="Physics" Weight="5" />
@@ -955,7 +989,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_DeepScorching" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="deep pyroclase" Tile="Items/sw_smallstone.bmp" ColorString="&amp;R" DetailColor="r" />
-		<part Name="Description" Short="A knuckle of the world's own furnace, still deciding whether to cool." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A knuckle of the world's own furnace, still deciding whether to cool." /> -->
 		<!-- HEFT (RULED 2026-07-24): weight 5 rides the Physics line below -->
 		<part Name="ThrownWeapon" Damage="2d4" Penetration="6" />
 		<!-- base temperature 500: radiates heat into neighboring floor cells where it lies and smart AI
@@ -976,7 +1010,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_DeepIcy" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="deep frostspar" Tile="Items/sw_smallstone.bmp" ColorString="&amp;C" DetailColor="B" />
-		<part Name="Description" Short="Winter under pressure, condensed until it aches. The cold gets into the hand that holds it." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="Winter under pressure, condensed until it aches. The cold gets into the hand that holds it." /> -->
 		<!-- HEFT (RULED 2026-07-24): weight 5 rides the Physics line below -->
 		<part Name="ThrownWeapon" Damage="2d4" Penetration="6" />
 		<!-- freeze/brittle thresholds pushed out of reach: a frozen item can't be picked up -->
@@ -993,7 +1027,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_DeepMelting" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="deep vitriolite" Tile="Items/sw_smallstone.bmp" ColorString="&amp;G" DetailColor="g" />
-		<part Name="Description" Short="A stone dissolving itself out of spite. Everything it touches is invited." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A stone dissolving itself out of spite. Everything it touches is invited." /> -->
 		<!-- HEFT (RULED 2026-07-24): weight back to 5, real dice, heavier crush -->
 		<part Name="Physics" Weight="5" />
 		<part Name="ThrownWeapon" Damage="2d4" Penetration="6" />
@@ -1015,7 +1049,7 @@
 	     then spends itself (native Temporary, the force-shard pattern) -->
 	<object Name="Cleo_TerraFirma_SurgeField" Inherits="Furniture">
 		<part Name="Render" DisplayName="lingering surge" RenderString="15" ColorString="&amp;W" DetailColor="C" RenderLayer="6" Occluding="false" />
-		<part Name="Description" Short="Loose lightning with nowhere to be." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="Loose lightning with nowhere to be." /> -->
 		<part Name="Physics" Weight="0" Takeable="false" Solid="false" />
 		<part Name="Temporary" Duration="4" />
 		<part Name="Cleo_TerraFirma_SurgePart" Voltage="1d4" DamageRange="1d4" />
@@ -1039,7 +1073,7 @@
 	     catalog text, which gave it no step effect; deliberate, in service of the no-tell ruling). -->
 	<object Name="Cleo_TerraFirma_Rock_GlowingRadioactive" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="glowing rock" Tile="Items/sw_smallstone.bmp" ColorString="&amp;G" DetailColor="W" />
-		<part Name="Description" Short="A stone lit from within by a steady green light. It offers no opinion on what the light is." /> <!-- DRAFT; MUST stay identical on both twins -->
+		<!-- BETA-HELD (DRAFT; MUST stay identical on both twins): <part Name="Description" Short="A stone lit from within by a steady green light. It offers no opinion on what the light is." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="LightSource" Lit="true" Radius="3" />
 		<!-- part order matters: Mutating must land BEFORE the grenade detonates and consumes the rock
@@ -1056,7 +1090,7 @@
 	</object>
 	<object Name="Cleo_TerraFirma_Rock_GlowingPhosphorescent" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="glowing rock" Tile="Items/sw_smallstone.bmp" ColorString="&amp;G" DetailColor="W" />
-		<part Name="Description" Short="A stone lit from within by a steady green light. It offers no opinion on what the light is." /> <!-- DRAFT; MUST stay identical on both twins -->
+		<!-- BETA-HELD (DRAFT; MUST stay identical on both twins): <part Name="Description" Short="A stone lit from within by a steady green light. It offers no opinion on what the light is." /> -->
 		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
 		<part Name="LightSource" Lit="true" Radius="3" />
 		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="100" Payload="Effect" PayloadDetail="Luminous" PayloadAmount="300" PayloadOnThrowHit="true" />
@@ -1077,7 +1111,7 @@
 	     Tile is a rock reuse; bespoke art whenever. -->
 	<object Name="Cleo_TerraFirma_StoneMeal" Inherits="Preservable">
 		<part Name="Render" DisplayName="stone meal" Tile="Items/sw_smallstone.bmp" ColorString="&amp;y" DetailColor="Y" />
-		<part Name="Description" Short="Rock brought low, ground patient and fine. It keeps whatever the stone knew." /> <!-- DRAFT -->
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="Rock brought low, ground patient and fine. It keeps whatever the stone knew." /> -->
 		<part Name="PreparedCookingIngredient" type="tastyMinor" charges="1" /> <!-- placeholder; restamped at grind time -->
 		<part Name="Commerce" Value="1" />
 		<tag Name="ExcludeFromDynamicEncounters" />
@@ -1092,7 +1126,7 @@
 	     gamble survives milling. Fungal grounds carry the lottery and restamp their own domains. -->
 	<object Name="Cleo_TerraFirma_BaseGroundRock" Inherits="Preservable">
 		<part Name="Render" DisplayName="[ground rock]" Tile="Items/sw_smallstone.bmp" ColorString="&amp;y" DetailColor="Y" />
-		<part Name="Description" Short="Rock brought low, ground patient and fine. It keeps whatever the stone knew." /> <!-- DRAFT, shared -->
+		<!-- BETA-HELD (DRAFT, shared): <part Name="Description" Short="Rock brought low, ground patient and fine. It keeps whatever the stone knew." /> -->
 		<part Name="Commerce" Value="1" />
 		<tag Name="BaseObject" Value="*noinherit" />
 		<tag Name="ExcludeFromDynamicEncounters" />
@@ -1229,7 +1263,7 @@
 	</object>
 	<object Name="Cleo_TerraFirma_Ground_Strange" Inherits="Cleo_TerraFirma_BaseGroundRock">
 		<part Name="Render" DisplayName="ground strange rock" ColorString="&amp;M" DetailColor="Y" />
-		<part Name="PreparedCookingIngredient" type="thirst,slimeSpitting,tastyMinor,fungus,fear,stabilityMinor,confusionGasBreath,sleepGasBreath,reflect,teleport,electric,heatMinor,coldMinor,acidMinor,artifacts,darkness,willpower,love,armor,phase,quicknessMinor,normalityGasBreath,cloningMinor,HP,selfPoison,heat,cold,acid,fireBreath,iceBreath,corrosiveGasBreath,poisonGasBreath,stunGasBreath,Cleo_TerraFirma_Web,Cleo_TerraFirma_Spacetime,rubberLowTier" charges="1" />
+		<part Name="PreparedCookingIngredient" type="thirst,slimeSpitting,tastyMinor,fungus,fear,stabilityMinor,confusionGasBreath,sleepGasBreath,reflect,teleport,electric,heatMinor,coldMinor,acidMinor,artifacts,darkness,willpower,love,armor,phase,quicknessMinor,normalityGasBreath,cloningMinor,HP,selfPoison,heat,cold,acid,fireBreath,iceBreath,corrosiveGasBreath,poisonGasBreath,stunGasBreath,Cleo_TerraFirma_Web,rubberLowTier" charges="1" />
 		<tag Name="AggregatedIngredient" Value="StrangeRock" />
 	</object>
 	<object Name="Cleo_TerraFirma_Ground_Blurring" Inherits="Cleo_TerraFirma_BaseGroundRock">
@@ -1257,14 +1291,13 @@
 		<part Name="PreparedCookingIngredient" type="phase" charges="1" />
 		<tag Name="AggregatedIngredient" Value="Phasalt" />
 	</object>
-	<!-- ground gyrestone RESTORED under grind-first (RULED 2026-07-22): the Spacetime domain's only
-	     carrier, and milling is the only door to the pantry now; so the powder exists, but the
-	     three vortices (the rock's GrindSpawn tags) are its extraction cost. First, survive the grinding. -->
-	<object Name="Cleo_TerraFirma_Ground_Gyrestone" Inherits="Cleo_TerraFirma_BaseGroundRock">
-		<part Name="Render" DisplayName="ground gyrestone" ColorString="&amp;m" DetailColor="C" />
-		<part Name="PreparedCookingIngredient" type="Cleo_TerraFirma_Spacetime" charges="1" />
-		<tag Name="AggregatedIngredient" Value="Gyrestone" />
-	</object>
+	<!-- SPACETIME DOMAIN CUT 2026-07-31 (comb L3, user: "cut it" with the strange-union
+	     consumer surfaced): Ground_Gyrestone had been a dead blueprint since the mill law
+	     (gyrestone's grind spawns vortices and forfeits the powder, so nothing could mint
+	     this) and the user chose the FULL cut over keeping spacetime as a strange-powder
+	     exclusive. Blueprint deleted, Cleo_TerraFirma_Spacetime removed from Ground_Strange's
+	     union list, the IngredientMapping and the VortexOpen action class deleted with it.
+	     The rock's own eaten vortex and grind vortices are untouched; only the pantry door closed. -->
 	<!-- the twins' grounds: identical names, the gamble survives milling -->
 	<object Name="Cleo_TerraFirma_Ground_GlowingRadioactive" Inherits="Cleo_TerraFirma_BaseGroundRock">
 		<part Name="Render" DisplayName="ground glowing rock" ColorString="&amp;G" DetailColor="W" />
@@ -1323,14 +1356,8 @@
 		<tag Name="Description" Value="web-based" />
 		<tag Name="RandomWeight" Value="10" />
 	</object>
-	<object Name="ProceduralCookingIngredient_Cleo_TerraFirma_Spacetime" Inherits="IngredientMapping">
-		<tag Name="CookingDomain" Value="Cleo_TerraFirma_Spacetime" />
-		<tag Name="Units" Value="CookingDomainTeleport_UnitBlink,CookingDomainTeleport_UnitTeleportOther" />
-		<tag Name="Triggers" Value="CookingDomainTeleport_OnTeleport" />
-		<tag Name="Actions" Value="Cleo_TerraFirma_CookingDomainSpacetime_VortexOpen_ProceduralCookingTriggeredAction" />
-		<tag Name="Description" Value="spacetime-based" />
-		<tag Name="RandomWeight" Value="10" />
-	</object>
+	<!-- Spacetime IngredientMapping deleted 2026-07-31 with the domain cut (comb L3); see the
+	     Ground_Gyrestone cut comment above for the full record. -->
 	<!-- armorMinor (RULED 2026-07-25): units-only mapping, a passive +1 AV meal (the base
 	     armor domain's shape one tier down). If the loader demands a trigger/action pair, the
 	     kitchen verify will say so and one gets borrowed. -->

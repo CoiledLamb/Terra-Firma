@@ -537,10 +537,15 @@ namespace Cleo.TerraFirma.Scripts
 				obj.Obliterate();
 		}
 
-		/// <summary>lith-devour: the universal statue-devourability audit's descent detection,
-		/// eaten live — a famished lithovore devours an EaterStatue (base Statue family, no
-		/// Statue part, exactly the blueprint-descent case). Requires a lithovore character;
-		/// hunger is forced to famished for the bite and restored after.</summary>
+		/// <summary>lith-devour, EXTENDED 2026-07-27 (pre-beta hardening): the full devour
+		/// surface, six phases — (gate) a sated devour is refused; (descent) the EaterStatue
+		/// blueprint-descent bite, plus the hunger-actually-clears assert the original row
+		/// skipped; (spill) an inert container statue spills its entombed item at its feet;
+		/// (living) a living devourable dies properly and drops its possessions (the stats
+		/// part stamped at zero shifts to satisfy the predicate and route the Die branch;
+		/// XP zeroed); (rubble) rubble devoured whole; (boulder) refused as a sated snack,
+		/// then devoured straight from the pack while famished. Hunger and cooking counter
+		/// restored; every spawn swept.</summary>
 		[WishCommand(Command = "tfdevour")]
 		public static void DevourSync()
 		{
@@ -559,22 +564,106 @@ namespace Cleo.TerraFirma.Scripts
 			List<Cell> open = origin.GetLocalAdjacentCells();
 			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
 			if (open.Count < 1) { Report("devour", false, "SETUP FAIL - no open adjacent cell"); return; }
-			GameObject statue = GameObject.Create("EaterStatue");
-			statue.SetIntProperty(SPAWN_MARK, 1);
-			open[0].AddObject(statue);
+			Cell stage = open[0];
 			int hungerBefore = stomach.HungerLevel;
-			stomach.HungerLevel = 2; // famished: the devour gate
-			bool checkResult;
+			int cookBefore = stomach.CookingCounter;
+			int passCount = 0;
+			List<string> fails = new List<string>();
 			bool suppressed = Popup.Suppress;
 			Popup.Suppress = true;
-			try { checkResult = InventoryActionEvent.Check(ply, ply, statue, "Cleo_TerraFirma_DevourStatue"); }
-			finally { Popup.Suppress = suppressed; }
-			bool gone = !GameObject.Validate(statue);
-			stomach.HungerLevel = hungerBefore; // the devour cleared it; the test should not feed you
-			Report("devour", gone,
-				$"famished devour of an EaterStatue (base Statue family, blueprint-descent detection): action check={checkResult}, statue {(gone ? "devoured whole" : "STILL STANDS")}; hunger restored to pre-test");
-			if (!gone && GameObject.Validate(statue))
-				statue.Obliterate();
+			try
+			{
+				// ---- gate + descent: one statue serves both phases ----
+				GameObject statue = GameObject.Create("EaterStatue");
+				statue.SetIntProperty(SPAWN_MARK, 1);
+				stage.AddObject(statue);
+				stomach.HungerLevel = 0; // sated: the gate must refuse
+				InventoryActionEvent.Check(ply, ply, statue, "Cleo_TerraFirma_DevourStatue");
+				bool gated = GameObject.Validate(statue);
+				Helpers.VerifyLog("AUTO", $"devour.gate: {(gated ? "PASS" : "FAIL")} - {(gated ? "sated devour refused, statue untouched" : "statue eaten WITHOUT the famished gate")}");
+				if (gated) passCount++; else fails.Add("gate");
+
+				stomach.HungerLevel = 2; // famished
+				InventoryActionEvent.Check(ply, ply, statue, "Cleo_TerraFirma_DevourStatue");
+				bool gone = !GameObject.Validate(statue);
+				bool cleared = stomach.HungerLevel < 2;
+				Helpers.VerifyLog("AUTO", $"devour.descent: {(gone && cleared ? "PASS" : "FAIL")} - EaterStatue {(gone ? "devoured whole (blueprint-descent detection)" : "STILL STANDS")}, hunger {(cleared ? "cleared" : "NOT cleared")}");
+				if (gone && cleared) passCount++; else fails.Add("descent");
+				if (!gone && GameObject.Validate(statue)) statue.Obliterate();
+
+				// ---- spill: inert container statue with an entombed item ----
+				GameObject container = GameObject.Create("Cleo_TerraFirma_StoneshaperStatue");
+				container.SetIntProperty(SPAWN_MARK, 1);
+				container.RequirePart<Inventory>();
+				GameObject relic = GameObject.Create("Dagger");
+				container.ReceiveObject(relic);
+				stage.AddObject(container);
+				stomach.HungerLevel = 2;
+				InventoryActionEvent.Check(ply, ply, container, "Cleo_TerraFirma_DevourStatue");
+				bool contGone = !GameObject.Validate(container);
+				bool spilled = GameObject.Validate(relic) && relic.CurrentCell == stage;
+				Helpers.VerifyLog("AUTO", $"devour.spill: {(contGone && spilled ? "PASS" : "FAIL")} - container statue {(contGone ? "devoured" : "STILL STANDS")}, entombed dagger {(spilled ? "spilled at its feet" : "MISSING")}");
+				if (contGone && spilled) passCount++; else fails.Add("spill");
+				if (GameObject.Validate(relic)) relic.Obliterate();
+				if (!contGone && GameObject.Validate(container)) container.Obliterate();
+
+				// ---- living: the Die(actor) branch — dies properly, possessions drop ----
+				GameObject living = GameObject.Create(BABOON_BP);
+				living.SetIntProperty(SPAWN_MARK, 1);
+				living.GetStat("XPValue").BaseValue = 0; // the test must not level you
+				living.AddPart(new XRL.World.Parts.Cleo_TerraFirma_StoneshaperStatueStatsPart()); // zero shifts; satisfies the devour predicate, routes the living branch
+				GameObject keepsake = GameObject.Create("Dagger");
+				living.ReceiveObject(keepsake);
+				stage.AddObject(living);
+				stomach.HungerLevel = 2;
+				InventoryActionEvent.Check(ply, ply, living, "Cleo_TerraFirma_DevourStatue");
+				bool died = !GameObject.Validate(living) || living.Stat("Hitpoints") <= 0 || living.CurrentCell == null;
+				bool dropped = GameObject.Validate(keepsake) && keepsake.CurrentCell != null;
+				Helpers.VerifyLog("AUTO", $"devour.living: {(died && dropped ? "PASS" : "FAIL")} - living devourable {(died ? "died properly" : "SURVIVED the devour")}, its dagger {(dropped ? "dropped as loot" : "MISSING")}");
+				if (died && dropped) passCount++; else fails.Add("living");
+				if (GameObject.Validate(keepsake)) keepsake.Obliterate();
+				if (GameObject.Validate(living)) living.Obliterate();
+				foreach (GameObject leftover in new List<GameObject>(stage.Objects))
+					if (leftover.Blueprint != null && leftover.Blueprint.Contains("Corpse")) leftover.Obliterate();
+
+				// ---- rubble: the eating-a-path ruling ----
+				GameObject rubble = GameObject.Create("Rubble");
+				rubble.SetIntProperty(SPAWN_MARK, 1);
+				stage.AddObject(rubble);
+				stomach.HungerLevel = 2;
+				InventoryActionEvent.Check(ply, ply, rubble, "Cleo_TerraFirma_DevourStatue");
+				bool rubbleGone = !GameObject.Validate(rubble);
+				Helpers.VerifyLog("AUTO", $"devour.rubble: {(rubbleGone ? "PASS" : "FAIL")} - rubble {(rubbleGone ? "devoured (path-eating works)" : "STILL THERE")}");
+				if (rubbleGone) passCount++; else fails.Add("rubble");
+				if (!rubbleGone && GameObject.Validate(rubble)) rubble.Obliterate();
+
+				// ---- boulder: snack door refuses it sated; pack devour takes it famished ----
+				GameObject boulder = GameObject.Create("MediumBoulder");
+				ply.ReceiveObject(boulder);
+				// probes (2026-08-01, first-run FAIL was unattributable: no eat log, boulder gone --
+				// these name which step loses it: the receive, the eat-attempt, or the devour)
+				Helpers.VerifyLog("AUTO", $"devour.boulder probe after receive: valid={GameObject.Validate(boulder)}, inInv={boulder != null && boulder.InInventory == ply}, onGround={boulder?.CurrentCell != null}");
+				stomach.HungerLevel = 0;
+				InventoryActionEvent.Check(ply, ply, boulder, "Cleo_TerraFirma_EatStone");
+				Helpers.VerifyLog("AUTO", $"devour.boulder probe after eat-attempt: valid={GameObject.Validate(boulder)}, inInv={boulder != null && boulder.InInventory == ply}, onGround={boulder?.CurrentCell != null}");
+				bool refused = GameObject.Validate(boulder) && boulder.InInventory == ply;
+				stomach.HungerLevel = 2;
+				InventoryActionEvent.Check(ply, ply, boulder, "Cleo_TerraFirma_DevourStatue");
+				bool boulderGone = !GameObject.Validate(boulder) || boulder.InInventory != ply;
+				bool boulderCleared = stomach.HungerLevel < 2;
+				bool boulderPass = refused && boulderGone && boulderCleared;
+				Helpers.VerifyLog("AUTO", $"devour.boulder: {(boulderPass ? "PASS" : "FAIL")} - sated snack {(refused ? "refused" : "ACCEPTED (boulders must not be snackable)")}, famished pack-devour {(boulderGone ? "consumed from inventory" : "DID NOT consume")}, hunger {(boulderCleared ? "cleared" : "NOT cleared")}");
+				if (boulderPass) passCount++; else fails.Add("boulder");
+				if (GameObject.Validate(boulder) && boulder.InInventory == ply) boulder.Obliterate();
+			}
+			finally
+			{
+				Popup.Suppress = suppressed;
+				stomach.HungerLevel = hungerBefore; // devours cleared it; the test should not feed you
+				stomach.CookingCounter = cookBefore;
+			}
+			Report("devour", fails.Count == 0,
+				$"{passCount}/6 devour phases asserted{(fails.Count > 0 ? "; FAILS: " + string.Join(", ", fails) : "")} (gate, descent, spill, living, rubble, boulder); hunger + cooking counter restored, spawns swept");
 		}
 
 		[WishCommand(Command = "tfshape")]
@@ -710,6 +799,7 @@ namespace Cleo.TerraFirma.Scripts
 
 			string[,] rows = {
 				{ GEODE_BP, "water", "brine geode" },
+				{ "Cleo_TerraFirma_Rock_Healstone", "heal", "healstone (eaten heal, ruled 2026-07-27)" },
 				{ "Cleo_TerraFirma_Rock_Salt", "consume", "chunk of salt (tasty)" },
 				{ "Cleo_TerraFirma_Rock_Pointy", "bleed", "pointy rock" },
 				{ "Cleo_TerraFirma_Rock_ShatteredStalactite", "bleed", "shattered stalactite" },
@@ -727,6 +817,16 @@ namespace Cleo.TerraFirma.Scripts
 				{ "Cleo_TerraFirma_Rock_Voltaic", "consume", "galvena (self-arc/crackle)" },
 				{ "Cleo_TerraFirma_Rock_Spiny", "consume", "urchinite (quill burst)" },
 				{ STRANGE_BP, "consume", "strange rock (mimic eat)" },
+				// eaten-table comb rows (2026-07-31): witchwood channels assert EITHER branch --
+				// exactly one of the two outcomes must land where both are raw applications;
+				// save-gated channels (grimslate dread, vertigneiss confuse) stay log-grade
+				{ "Cleo_TerraFirma_Rock_Scary", "consume", "grimslate (dread invert; save-gated, log-grade)" },
+				{ "Cleo_TerraFirma_Rock_Vantabsidian", "darksight", "vantabsidian (dark-adapted or the blind bite)" },
+				{ "Cleo_TerraFirma_Rock_Torpor", "sleepbelly", "lullabaster (sleep belly; nap bite-gated)" },
+				{ "Cleo_TerraFirma_Rock_Bola", "footing", "tanglelith (sure-footed or the stuck bite)" },
+				{ "Cleo_TerraFirma_Rock_Oilstone", "greased", "oilstone (sure-greased or the slick bite)" },
+				{ "Cleo_TerraFirma_Rock_Hexstone", "anchor", "lattice euclase (tether + belly, detonate cut)" },
+				{ "Cleo_TerraFirma_Rock_Holographic", "hologram", "holographic rock (zero-satiety joke)" },
 			};
 
 			int passCount = 0;
@@ -742,9 +842,12 @@ namespace Cleo.TerraFirma.Scripts
 				int hpBefore = ply.GetStat("Hitpoints").Value;
 				int waterBefore = stomach.Water;
 				int tempBefore = ply.Physics?.Temperature ?? 25;
+				int cookRowBefore = stomach.CookingCounter;
 				Cell cellBefore = ply.CurrentCell;
-				if (kind == "spawnliquid")
+				if (kind == "spawnliquid" || kind == "greased")
 					SweepPuddlesAround(ply); // pools MERGE: a leftover puddle absorbs the spawn and the object count never moves (live find: sludgestone's slime vanished into melting's acid)
+				int healStagedPenalty = 0;
+				if (kind == "heal") { ply.GetStat("Hitpoints").Penalty += 5; healStagedPenalty = ply.GetStat("Hitpoints").Penalty; } // a heal needs a wound to show itself; the stage is restored with the rest
 				int liquidsBefore = CountPuddlesAround(ply);
 				int websBefore = CountAround(ply, "Web");
 				bool suppressed = Popup.Suppress;
@@ -768,6 +871,10 @@ namespace Cleo.TerraFirma.Scripts
 					case "harm":
 						pass = consumed && ply.GetStat("Hitpoints").Value < hpBefore;
 						detail = $"HP {hpBefore}->{ply.GetStat("Hitpoints").Value}";
+						break;
+					case "heal":
+						pass = consumed && ply.GetStat("Hitpoints").Penalty < healStagedPenalty;
+						detail = $"HP penalty {healStagedPenalty}->{ply.GetStat("Hitpoints").Penalty} (staged wound {(pass ? "healed" : "NOT healed")})";
 						break;
 					case "moved":
 						pass = consumed && ply.CurrentCell != cellBefore;
@@ -809,6 +916,49 @@ namespace Cleo.TerraFirma.Scripts
 					case "cold":
 						pass = consumed && (ply.Physics?.Temperature ?? 25) < tempBefore;
 						detail = $"temperature {tempBefore}->{ply.Physics?.Temperature}";
+						break;
+					case "darksight":
+						bool adapted = ply.HasEffect(typeof(XRL.World.Effects.Cleo_TerraFirma_DarkAdapted));
+						bool blinded = ply.HasEffect(typeof(XRL.World.Effects.Blind));
+						pass = consumed && (adapted || blinded);
+						detail = adapted ? "dark-adapted (the 75%)" : blinded ? "blind (the bite)" : "NEITHER effect landed";
+						ply.RemoveEffect<XRL.World.Effects.Cleo_TerraFirma_DarkAdapted>();
+						ply.RemoveEffect<XRL.World.Effects.Blind>();
+						break;
+					case "sleepbelly":
+						pass = consumed && ply.HasEffect(typeof(XRL.World.Effects.Cleo_TerraFirma_GasBelly));
+						detail = "sleep belly " + (pass ? "settled in" : "MISSING")
+							+ (ply.HasEffect(typeof(XRL.World.Effects.Asleep)) ? "; the nap landed (the bite)" : "");
+						ply.RemoveEffect<XRL.World.Effects.Cleo_TerraFirma_GasBelly>();
+						ply.RemoveEffect<XRL.World.Effects.Asleep>();
+						break;
+					case "footing":
+						bool footed = ply.HasEffect(typeof(XRL.World.Effects.Cleo_TerraFirma_SureFooted));
+						bool stuckBite = ply.HasEffect(typeof(XRL.World.Effects.Stuck));
+						pass = consumed && (footed || stuckBite);
+						detail = footed ? "sure-footed (the 75%)" : stuckBite ? "stuck (the bite)" : "NEITHER landed";
+						ply.RemoveEffect<XRL.World.Effects.Cleo_TerraFirma_SureFooted>();
+						ply.RemoveEffect<XRL.World.Effects.Stuck>();
+						break;
+					case "greased":
+						bool greasedOn = ply.HasEffect(typeof(XRL.World.Effects.Cleo_TerraFirma_SureGreased));
+						bool slicked = CountPuddlesAround(ply) > liquidsBefore;
+						pass = consumed && (greasedOn || slicked);
+						detail = greasedOn ? "sure-greased (the 75%)" : slicked ? "slick underfoot (the bite)" : "NEITHER landed";
+						ply.RemoveEffect<XRL.World.Effects.Cleo_TerraFirma_SureGreased>();
+						SweepPuddlesAround(ply);
+						break;
+					case "anchor":
+						bool tethered = ply.HasEffect(typeof(XRL.World.Effects.RealityStabilized));
+						bool anchorBelly = ply.HasEffect(typeof(XRL.World.Effects.Cleo_TerraFirma_GasBelly));
+						pass = consumed && tethered && anchorBelly && ply.GetStat("Hitpoints").Value == hpBefore;
+						detail = $"tether {(tethered ? "on" : "MISSING")}, belly {(anchorBelly ? "on" : "MISSING")}, HP {hpBefore}->{ply.GetStat("Hitpoints").Value} (detonate stays cut)";
+						ply.RemoveEffect<XRL.World.Effects.RealityStabilized>();
+						ply.RemoveEffect<XRL.World.Effects.Cleo_TerraFirma_GasBelly>();
+						break;
+					case "hologram":
+						pass = consumed && stomach.CookingCounter == cookRowBefore;
+						detail = "satiety " + (stomach.CookingCounter == cookRowBefore ? "unchanged (the joke completes)" : $"CHANGED {cookRowBefore}->{stomach.CookingCounter}");
 						break;
 					default: // consume
 						pass = consumed;
@@ -866,7 +1016,7 @@ namespace Cleo.TerraFirma.Scripts
 			if (neighbor != null && GameObject.Validate(neighbor))
 				neighbor.Obliterate();
 			Report("eat", fails.Count == 0,
-				$"{passCount}/{totalRows} eaten channels asserted{(fails.Count > 0 ? "; FAILS: " + string.Join(", ", fails) : "")}; skipped by design: detonate pair, fungal twins, deep four. Player state restored (cooldowns included).");
+				$"{passCount}/{totalRows} eaten channels asserted{(fails.Count > 0 ? "; FAILS: " + string.Join(", ", fails) : "")}; skipped by design: detonate pair, fungal twins, deep four, lodestone (the 25% bite rips real gear). Player state restored (cooldowns included).");
 		}
 
 		private static int CountAround(GameObject who, string blueprint)

@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TF Tile Sketch</title>
+<style>
+  :root { --bg:#14161c; --panel:#1d2028; --ink:#e8e9ee; --ink2:#aab0bf; --line:#2c303b; --accent:#6f9bd8; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:14px; background:var(--bg); color:var(--ink); font:13px/1.4 "Segoe UI",system-ui,sans-serif; }
+  h1 { font-size:16px; margin:0 0 2px; }
+  .sub { color:var(--ink2); font-size:12px; margin-bottom:10px; }
+  .wrap { display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px; }
+  #palette { width:240px; }
+  .pgroup { font-size:11px; color:var(--ink2); font-weight:600; margin:8px 0 3px; text-transform:uppercase; letter-spacing:.05em; }
+  .pbtn { display:flex; align-items:center; gap:8px; width:100%; padding:3px 6px; margin:1px 0; background:none; border:1px solid transparent; border-radius:5px; color:var(--ink); cursor:pointer; font:12px "Segoe UI",sans-serif; text-align:left; }
+  .pbtn:hover { border-color:var(--line); }
+  .pbtn.sel { border-color:var(--accent); background:#26304a; }
+  .sw { image-rendering:pixelated; width:20px; height:30px; display:flex; align-items:center; justify-content:center; font:bold 16px Consolas,monospace; border-radius:2px; flex:none; background-size:100% 100%; background-position:center; }
+  #gridwrap { overflow:auto; max-width:calc(100vw - 300px); }
+  #grid { display:grid; width:max-content; border:1px solid var(--line); cursor:crosshair; }
+  .cell { image-rendering:pixelated; width:var(--cw,20px); height:var(--ch,30px); display:flex; align-items:center; justify-content:center; font:bold 15px Consolas,monospace; background:#0b0c10; background-size:100% 100%; background-position:center; outline:1px solid #1a1c22; user-select:none; }
+  .toolbar { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; align-items:center; }
+  button, .filelabel { background:#26304a; color:var(--ink); border:1px solid var(--line); border-radius:5px; padding:4px 10px; cursor:pointer; font:12px "Segoe UI",sans-serif; }
+  button:hover, .filelabel:hover { border-color:var(--accent); }
+  input[type=number] { width:52px; background:#0b0c10; color:var(--ink); border:1px solid var(--line); border-radius:4px; padding:3px 6px; }
+  textarea { width:100%; height:170px; background:#0b0c10; color:var(--ink); border:1px solid var(--line); border-radius:6px; font:12px Consolas,monospace; padding:8px; white-space:pre; }
+  #status { color:var(--ink2); font-size:12px; margin-left:auto; }
+  .hint { color:var(--ink2); font-size:11px; margin-top:6px; }
+  select { background:#0b0c10; color:var(--ink); border:1px solid var(--line); border-radius:4px; padding:3px 6px; max-width:150px; }
+  .mode.on { border-color:var(--accent); background:#2e3c5e; }
+  #grid { touch-action:none; }
+  @media (max-width: 760px) {
+    body { padding:8px; }
+    .wrap { flex-direction:column; }
+    #palette { width:100%; max-height:190px; overflow-y:auto; order:2; }
+    #gridwrap { max-width:100%; }
+    #grid { --cw:24px; --ch:36px; }
+  }
+  .selcell { box-shadow: inset 0 0 0 2px var(--accent); }
+  .ghostcell { box-shadow: inset 0 0 0 2px #77bfcf; }
+</style>
+</head>
+<body>
+<script>
+window.onerror = function (msg, src, line) {
+  var d = document.createElement("div");
+  d.style.cssText = "background:#7a2727;color:#fff;padding:8px 12px;font:13px monospace;border-radius:6px;margin-bottom:8px;";
+  d.textContent = "script error: " + msg + " (line " + line + ")";
+  document.body.insertBefore(d, document.body.firstChild);
+};
+</script>
+<h1>Terra Firma — tile sketch</h1>
+<div class="sub">Paint the layout you have in mind; Export gives a text block to paste into chat. Import renders a pasted block. Left-drag paints, right-drag erases. Autosaves locally.</div>
+<div class="wrap">
+  <div class="panel" id="palette"><input type="text" id="pfilter" placeholder="filter tiles..." style="width:100%;background:#0b0c10;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:4px 8px;margin-bottom:4px;"></div>
+  <div style="flex:1; min-width:400px;">
+    <div class="toolbar panel">
+      <label>W <input type="number" id="gw" value="36" min="4" max="80"></label>
+      <label>H <input type="number" id="gh" value="18" min="4" max="25"></label>
+      <button id="resize">Resize</button>
+      <button id="clear">Clear</button>
+      <button id="export">Export</button>
+      <button id="import">Import</button>
+      <button id="mode-paint" class="mode on" title="paint">&#9998;</button>
+      <button id="mode-erase" class="mode" title="erase">&#9003;</button>
+      <button id="mode-select" class="mode" title="select: drag a box, then drag it to move (Ctrl-drop = copy, Del = clear, Esc = deselect)">&#11034;</button>
+      <button id="mode-pan" class="mode" title="pan / scroll (touch)">&#9995;</button>
+      <button id="btn-undo" title="undo (Ctrl+Z)">&#8630;</button>
+      <button id="btn-redo" title="redo (Ctrl+Y)">&#8631;</button>
+      <label class="filelabel">Load tiles<input type="file" id="tilefiles" multiple accept="image/png" style="display:none"></label>
+      <span id="status"></span>
+    </div>
+    <div class="toolbar panel">
+      <input type="text" id="cname" placeholder="canvas name" style="width:130px;background:#0b0c10;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:3px 6px;">
+      <button id="csave">Save</button>
+      <select id="clist"></select>
+      <button id="cload">Load</button>
+      <button id="cdel">Delete</button>
+    </div>
+    <div class="panel" id="gridwrap"><div id="grid"></div></div>
+    <div class="panel" style="margin-top:8px;">
+      <textarea id="io" placeholder="Export writes here; paste a TFMAP block here and hit Import."></textarea>
+      <div class="hint">Real tiles: use "Load tiles" and pick png files (e.g. firedish.png, quarrybricks1.png from the mod Textures folder) — they replace the glyph for the matching palette entry. Placeholders are fine for layout talk; this sketches roles and shapes, not final art.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // ---- palette: id, export char, glyph, colors, group, optional png filename ----
+  var PALETTE = [
+    { id:"wall",      c:"#", g:"▓", fg:"#7d7d6e", bg:"#33332c", n:"wall (shale)",        grp:"Terrain", img:"tiles/wall.png" },
+    { id:"floor",     c:".", g:"·", fg:"#5b5b52", bg:"#101010", n:"carved floor",        grp:"Terrain" },
+    { id:"mouth",     c:">", g:">",      fg:"#e8e9ee", bg:"#101010", n:"mouth / entrance",    grp:"Terrain" },
+    { id:"stack1", c:"=", g:"▂", fg:"#a64a2e", bg:"#22221e", n:"quarried stack 1 (low wall)", grp:"Terrain", img:"tiles/stack1.png" },
+    { id:"stack2", c:"q", g:"▄", fg:"#a64a2e", bg:"#22221e", n:"quarried stack 2 (low wall)", grp:"Terrain", img:"tiles/stack2.png" },
+    { id:"stack3", c:"!", g:"▆", fg:"#a64a2e", bg:"#22221e", n:"quarried stack 3 (low wall)", grp:"Terrain", img:"tiles/stack3.png" },
+    { id:"stack1a", c:"$", g:"▃", fg:"#a64a2e", bg:"#22221e", n:"quarried stack 1a (low wall)", grp:"Terrain", img:"tiles/stack1a.png" },
+    { id:"stack1b", c:"'", g:"▃", fg:"#a64a2e", bg:"#22221e", n:"quarried stack 1b (low wall)", grp:"Terrain", img:"tiles/stack1b.png" },
+    { id:"stack2a", c:",", g:"▃", fg:"#a64a2e", bg:"#22221e", n:"quarried stack 2a (low wall)", grp:"Terrain", img:"tiles/stack2a.png" },
+    { id:"stack2b", c:"-", g:"▃", fg:"#a64a2e", bg:"#22221e", n:"quarried stack 2b (low wall)", grp:"Terrain", img:"tiles/stack2b.png" },
+    { id:"stack3a", c:"/", g:"▃", fg:"#a64a2e", bg:"#22221e", n:"quarried stack 3a (low wall)", grp:"Terrain", img:"tiles/stack3a.png" },
+    { id:"stack3b", c:"<", g:"▃", fg:"#a64a2e", bg:"#22221e", n:"quarried stack 3b (low wall)", grp:"Terrain", img:"tiles/stack3b.png" },
+    { id:"chalkline", c:"|", g:"╌", fg:"#FFFFFF", bg:"#101010", n:"chalk line (fence, PLACEHOLDER)", grp:"Terrain" },
+    { id:"firedish",  c:"F", g:"ʘ", fg:"#e06c30", bg:"#101010", n:"fire dish",           grp:"Objects", img:"tiles/firedish.png" },
+    { id:"hookah",    c:"H", g:"§", fg:"#b48ead", bg:"#101010", n:"hookah",              grp:"Objects", img:"tiles/hookah.png" },
+    { id:"cushion",   c:"o", g:"○", fg:"#c2a05a", bg:"#101010", n:"floor cushion",       grp:"Objects", img:"tiles/cushion.png" },
+    { id:"bedroll",   c:"b", g:"=",      fg:"#a08662", bg:"#101010", n:"bedroll",             grp:"Objects", img:"tiles/bedroll.png" },
+    { id:"torch",     c:"t", g:"!",      fg:"#e0b040", bg:"#101010", n:"torchpost",           grp:"Objects", img:"tiles/torch.png" },
+    { id:"figurine",  c:"f", g:"☺", fg:"#c87f3a", bg:"#101010", n:"figurine (effects)",  grp:"Objects", img:"tiles/figurine.png" },
+    { id:"stele",     c:"I", g:"║", fg:"#8fa3b8", bg:"#101010", n:"eye stele",           grp:"Objects", img:"tiles/stele.png" },
+    { id:"chest",     c:"C", g:"■", fg:"#a0763a", bg:"#101010", n:"chest",               grp:"Objects", img:"tiles/chest.png" },
+    { id:"millstone", c:"M", g:"⊙", fg:"#9a9a88", bg:"#101010", n:"millstone",           grp:"Objects", img:"tiles/millstone.png" },
+    { id:"lick",      c:"L", g:"▄", fg:"#d8d0c0", bg:"#101010", n:"mineral lick",        grp:"Objects" },
+    { id:"trough",    c:"~", g:"~",      fg:"#5f9ea0", bg:"#101010", n:"water runnel/seep",   grp:"Objects" },
+    { id:"slot",      c:"?", g:"?",      fg:"#ff5fd7", bg:"#2a1030", n:"BLANK (recipe slot)", grp:"Recipe" },
+    { id:"hewer",     c:"1", g:"h",      fg:"#d0d0c0", bg:"#101010", n:"hewer",               grp:"NPCs" },
+    { id:"mason",     c:"2", g:"m",      fg:"#d0d0c0", bg:"#101010", n:"mason",               grp:"NPCs" },
+    { id:"outrider",  c:"3", g:"u",      fg:"#d0d0c0", bg:"#101010", n:"outrider",            grp:"NPCs" },
+    { id:"drover",    c:"4", g:"d",      fg:"#d0d0c0", bg:"#101010", n:"drover",              grp:"NPCs" },
+    { id:"provisioner",c:"5",g:"p",      fg:"#d0d0c0", bg:"#101010", n:"provisioner",         grp:"NPCs" },
+    { id:"overseer",  c:"6", g:"O",      fg:"#e8d080", bg:"#101010", n:"overseer",            grp:"NPCs" },
+    { id:"mole",      c:"7", g:"M",      fg:"#b09070", bg:"#101010", n:"mole-beast",          grp:"NPCs", img:"molebeast.png" },
+    { id:"bg.bed", c:"a", g:"\u2261", fg:"#b1c9c3", bg:"#101010", n:"bed", grp:"Base Furniture", img:"tiles/bg_bed.png" },
+    { id:"bg.four_poster_bed", c:"c", g:"\u2261", fg:"#b1c9c3", bg:"#101010", n:"four-poster bed", grp:"Base Furniture", img:"tiles/bg_four_poster_bed.png" },
+    { id:"bg.bedroll", c:"d", g:"\u2310", fg:"#b1c9c3", bg:"#101010", n:"bedroll", grp:"Base Furniture", img:"tiles/bg_bedroll.png" },
+    { id:"bg.folding_cot", c:"e", g:"\u2261", fg:"#b1c9c3", bg:"#101010", n:"folding cot", grp:"Base Furniture", img:"tiles/bg_folding_cot.png" },
+    { id:"bg.bench", c:"g", g:"\u255b", fg:"#b1c9c3", bg:"#101010", n:"bench", grp:"Base Furniture", img:"tiles/bg_bench.png" },
+    { id:"bg.ornate_bench", c:"h", g:"\u255b", fg:"#b1c9c3", bg:"#101010", n:"ornate bench", grp:"Base Furniture", img:"tiles/bg_ornate_bench.png" },
+    { id:"bg.floor_cushion", c:"i", g:"○", fg:"#b1c9c3", bg:"#101010", n:"floor cushion", grp:"Base Furniture", img:"tiles/bg_floor_cushion.png" },
+    { id:"bg.work_chair", c:"j", g:"\u255b", fg:"#b1c9c3", bg:"#101010", n:"rolling chair", grp:"Base Furniture", img:"tiles/bg_work_chair.png" },
+    { id:"bg.canvas_folding_chair", c:"k", g:"\u255b", fg:"#b1c9c3", bg:"#101010", n:"canvas folding chair", grp:"Base Furniture", img:"tiles/bg_canvas_folding_chair.png" },
+    { id:"bg.table", c:"l", g:"\u03c0", fg:"#b1c9c3", bg:"#101010", n:"table", grp:"Base Furniture", img:"tiles/bg_table.png" },
+    { id:"bg.chest", c:"n", g:"\u25a0", fg:"#b1c9c3", bg:"#101010", n:"chest", grp:"Base Furniture", img:"tiles/bg_chest.png" },
+    { id:"bg.woven_basket", c:"p", g:"\u03c3", fg:"#b1c9c3", bg:"#101010", n:"woven basket", grp:"Base Furniture", img:"tiles/bg_woven_basket.png" },
+    { id:"bg.brazier", c:"r", g:"\u2219", fg:"#b1c9c3", bg:"#101010", n:"bronze brazier", grp:"Base Furniture", img:"tiles/bg_brazier.png" },
+    { id:"bg.tall_brazier", c:"s", g:"\u2219", fg:"#b1c9c3", bg:"#101010", n:"bronze brazier", grp:"Base Furniture", img:"tiles/bg_tall_brazier.png" },
+    { id:"bg.campfire", c:"u", g:"\u2219", fg:"#b1c9c3", bg:"#101010", n:"campfire", grp:"Base Furniture", img:"tiles/bg_campfire.png" },
+    { id:"bg.torchpost", c:"v", g:"\u2219", fg:"#b1c9c3", bg:"#101010", n:"torch sconce", grp:"Base Furniture", img:"tiles/bg_torchpost.png" },
+    { id:"bg.oven", c:"w", g:"\u03a9", fg:"#b1c9c3", bg:"#101010", n:"clay oven", grp:"Base Furniture", img:"tiles/bg_oven.png" },
+    { id:"bg.millstone", c:"x", g:"☼", fg:"#b1c9c3", bg:"#101010", n:"millstone", grp:"Base Furniture", img:"tiles/bg_millstone.png" },
+    { id:"bg.hookah", c:"y", g:"\u03c0", fg:"#b1c9c3", bg:"#101010", n:"hookah", grp:"Base Furniture", img:"tiles/bg_hookah.png" },
+    { id:"bg.empty_urn", c:"z", g:"▼", fg:"#b1c9c3", bg:"#101010", n:"funerary urn", grp:"Base Furniture", img:"tiles/bg_empty_urn.png" },
+    { id:"bg.urn", c:"A", g:".", fg:"#b1c9c3", bg:"#101010", n:"funerary urn", grp:"Base Furniture", img:"tiles/bg_urn.png" },
+    { id:"bg.statue", c:"B", g:"?", fg:"#b1c9c3", bg:"#101010", n:"Statue", grp:"Base Furniture", img:"tiles/bg_statue.png" },
+    { id:"bg.random_stone_statue", c:"D", g:"|", fg:"#b1c9c3", bg:"#101010", n:"stone statue", grp:"Base Furniture", img:"tiles/bg_random_stone_statue.png" },
+    { id:"bg.village_monument_stele", c:"E", g:"|", fg:"#b1c9c3", bg:"#0f2626", n:"stone stele", grp:"Base Furniture", img:"tiles/bg_village_monument_stele.png" },
+    { id:"bg.sign", c:"G", g:"=", fg:"#b1c9c3", bg:"#101010", n:"Sign", grp:"Base Furniture" },
+    { id:"bg.bookshelf", c:"J", g:"\u2562", fg:"#b1c9c3", bg:"#101010", n:"wooden bookshelf", grp:"Base Furniture", img:"tiles/bg_bookshelf.png" },
+    { id:"bg.catchbasin", c:"K", g:"\u03c3", fg:"#b1c9c3", bg:"#101010", n:"catch basin", grp:"Base Furniture", img:"tiles/bg_catchbasin.png" },
+    { id:"bg.wine_pitcher", c:"N", g:"\u00bf", fg:"#b1c9c3", bg:"#101010", n:"clay pitcher", grp:"Base Furniture", img:"tiles/bg_wine_pitcher.png" },
+    { id:"bg.glass_furnace", c:"P", g:"\u03a9", fg:"#b1c9c3", bg:"#101010", n:"glass furnace", grp:"Base Furniture", img:"tiles/bg_glass_furnace.png" },
+    { id:"bg.workbench", c:"Q", g:"\u03c0", fg:"#b1c9c3", bg:"#101010", n:"workbench", grp:"Base Furniture", img:"tiles/bg_workbench.png" },
+    { id:"bg.anvil", c:"R", g:"\u2553", fg:"#b1c9c3", bg:"#101010", n:"stone anvil", grp:"Base Furniture", img:"tiles/bg_anvil.png" },
+    { id:"bg.door", c:"+", g:"+", fg:"#b1c9c3", bg:"#101010", n:"door", grp:"Base Furniture", img:"tiles/bg_door.png" },
+    { id:"bg.metal_door", c:"(", g:"+", fg:"#b1c9c3", bg:"#101010", n:"door", grp:"Base Furniture", img:"tiles/bg_metal_door.png" },
+    { id:"bg.double_door", c:")", g:"+", fg:"#b1c9c3", bg:"#101010", n:"door", grp:"Base Furniture", img:"tiles/bg_double_door.png" },
+    { id:"bg.alchemist_table", c:"[", g:"π", fg:"#b1c9c3", bg:"#101010", n:"alchemist's table", grp:"Base Furniture", img:"tiles/bg_alchemist_table.png" },
+    { id:"bg.witchwood_tree", c:"T", g:"\u00a5", fg:"#b1c9c3", bg:"#101010", n:"witchwood tree", grp:"Plants", img:"tiles/bg_witchwood_tree.png" },
+    { id:"bg.starapple_tree", c:"U", g:"\u00a5", fg:"#b1c9c3", bg:"#101010", n:"starapple tree", grp:"Plants", img:"tiles/bg_starapple_tree.png" },
+    { id:"bg.swarmshade_tree", c:"V", g:"♣", fg:"#b1c9c3", bg:"#101010", n:"swarmshade tree", grp:"Plants", img:"tiles/bg_swarmshade_tree.png" },
+    { id:"bg.dogthorn_tree", c:"W", g:"\u00a5", fg:"#b1c9c3", bg:"#101010", n:"dogthorn tree", grp:"Plants", img:"tiles/bg_dogthorn_tree.png" },
+    { id:"bg.dicalyptus_tree", c:"X", g:"\u00a5", fg:"#b1c9c3", bg:"#101010", n:"diacalyptus tree", grp:"Plants", img:"tiles/bg_dicalyptus_tree.png" },
+    { id:"bg.sunflower", c:"]", g:"☼", fg:"#b1c9c3", bg:"#101010", n:"sunflower", grp:"Plants", img:"tiles/bg_sunflower.png" },
+    { id:"flower_r", c:"%", g:"*", fg:"#d74200", bg:"#101010", n:"painted flowers (red)", grp:"Plants", img:"tiles/flower_r.png" },
+    { id:"flower_m", c:"&", g:"*", fg:"#da5bd6", bg:"#101010", n:"painted flowers (magenta)", grp:"Plants", img:"tiles/flower_m.png" },
+    { id:"flower_w", c:"*", g:"*", fg:"#cfc041", bg:"#101010", n:"painted flowers (gold)", grp:"Plants", img:"tiles/flower_w.png" },
+    { id:"flower_y", c:"0", g:"*", fg:"#FFFFFF", bg:"#101010", n:"painted flowers (white)", grp:"Plants", img:"tiles/flower_y.png" },
+    { id:"flowercarpet_r", c:"8", g:"*", fg:"#d74200", bg:"#101010", n:"flower carpet (red)", grp:"Plants", img:"tiles/flowercarpet_r.png" },
+    { id:"flowercarpet_m", c:"9", g:"*", fg:"#da5bd6", bg:"#101010", n:"flower carpet (magenta)", grp:"Plants", img:"tiles/flowercarpet_m.png" },
+  ];
+  var byId = {}, byChar = {};
+  PALETTE.forEach(function (p) { byId[p.id] = p; byChar[p.c] = p; });
+
+  var W = 36, H = 18, grid = [], sel = PALETTE[0], painting = 0, images = {}, mode = "paint";
+  var undoStack = [], redoStack = [];
+  function snap() { return JSON.stringify({ W: W, H: H, grid: grid }); }
+  function checkpoint() { undoStack.push(snap()); if (undoStack.length > 60) undoStack.shift(); redoStack = []; }
+  function restoreState(s) {
+    var o = JSON.parse(s); W = o.W; H = o.H; grid = o.grid;
+    document.getElementById("gw").value = W; document.getElementById("gh").value = H;
+    render(); save();
+  }
+  function undo() { if (!undoStack.length) return; redoStack.push(snap()); restoreState(undoStack.pop()); }
+  function redo() { if (!redoStack.length) return; undoStack.push(snap()); restoreState(redoStack.pop()); }
+  document.addEventListener("keydown", function (e) {
+    if (!(e.ctrlKey || e.metaKey)) return;
+    var k = e.key.toLowerCase();
+    if (k === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
+    else if (k === "y" || (k === "z" && e.shiftKey)) { e.preventDefault(); redo(); }
+  });
+  var gridEl = document.getElementById("grid"), io = document.getElementById("io"), status = document.getElementById("status");
+
+  function blank() { grid = []; for (var y = 0; y < H; y++) { var row = []; for (var x = 0; x < W; x++) row.push(null); grid.push(row); } }
+
+  function cellStyle(el, id) {
+    var p = id ? byId[id] : null;
+    el.textContent = ""; el.style.backgroundImage = "";
+    if (!p) { el.style.backgroundColor = "#0b0c10"; return; }
+    var src = p.img ? (images[p.img.toLowerCase()] || (p.img.indexOf("/") >= 0 ? p.img : null)) : null;
+    if (src) {
+      el.style.backgroundImage = "url(" + src + ")";
+      el.style.backgroundColor = "#101010";
+    } else {
+      el.textContent = p.g; el.style.color = p.fg; el.style.backgroundColor = p.bg;
+    }
+  }
+
+  function render() {
+    gridEl.style.gridTemplateColumns = "repeat(" + W + ", var(--cw,20px))";
+    gridEl.innerHTML = "";
+    for (var y = 0; y < H; y++) (function (y) {
+      for (var x = 0; x < W; x++) (function (x) {
+        var el = document.createElement("div");
+        el.className = "cell";
+        cellStyle(el, grid[y][x]);
+        el.addEventListener("mousedown", function (e) {
+          if (mode === "select") { selMouseDown(x, y, e); e.preventDefault(); return; }
+          checkpoint(); painting = e.button === 2 ? 2 : 1; apply(x, y, el); e.preventDefault();
+        });
+        el.addEventListener("mouseover", function () {
+          if (mode === "select") selMouseOver(x, y);
+          else if (painting) apply(x, y, el);
+          status.textContent = "(" + x + "," + y + ") " + (grid[y][x] ? byId[grid[y][x]].n : "");
+        });
+        el.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+        gridEl.appendChild(el);
+      })(x);
+    })(y);
+  }
+  var _renderOrig_marker = true;
+  function apply(x, y, el) { grid[y][x] = (painting === 2 || mode === "erase") ? null : sel.id; cellStyle(el, grid[y][x]); save(); }
+  ["paint", "erase", "select", "pan"].forEach(function (m) {
+    document.getElementById("mode-" + m).addEventListener("click", function () {
+      mode = m;
+      document.querySelectorAll(".mode").forEach(function (b) { b.classList.remove("on"); });
+      this.classList.add("on");
+      gridEl.style.touchAction = (m === "pan") ? "auto" : "none";
+      if (m !== "select") { selRect = null; marquee = null; dragSel = null; if (typeof drawSelVis === "function") drawSelVis(); }
+    });
+  });
+  function touchPaint(e) {
+    if (mode === "pan" || mode === "select") return;
+    e.preventDefault();
+    var t = e.touches[0];
+    var el = document.elementFromPoint(t.clientX, t.clientY);
+    if (el && el.classList.contains("cell")) {
+      var idx = Array.prototype.indexOf.call(gridEl.children, el);
+      if (idx >= 0) { if (e.type === "touchstart") checkpoint(); painting = (mode === "erase") ? 2 : 1; apply(idx % W, (idx / W) | 0, el); painting = 0; }
+    }
+  }
+  gridEl.addEventListener("touchstart", touchPaint, { passive: false });
+  gridEl.addEventListener("touchmove", touchPaint, { passive: false });
+  var selRect = null, marquee = null, dragSel = null;
+  function rectNorm(ax, ay, bx, by) {
+    return { x0: Math.min(ax, bx), y0: Math.min(ay, by), x1: Math.max(ax, bx), y1: Math.max(ay, by) };
+  }
+  function drawSelVis() {
+    var kids = gridEl.children;
+    for (var i = 0; i < kids.length; i++) kids[i].classList.remove("selcell", "ghostcell");
+    if (!selRect) return;
+    var ox = dragSel ? dragSel.dx : 0, oy = dragSel ? dragSel.dy : 0;
+    for (var y = selRect.y0; y <= selRect.y1; y++)
+      for (var x = selRect.x0; x <= selRect.x1; x++) {
+        if (y >= 0 && y < H && x >= 0 && x < W) kids[y * W + x].classList.add("selcell");
+        var ty = y + oy, tx = x + ox;
+        if ((ox || oy) && ty >= 0 && ty < H && tx >= 0 && tx < W) kids[ty * W + tx].classList.add("ghostcell");
+      }
+  }
+  function selMouseDown(x, y, e) {
+    if (selRect && x >= selRect.x0 && x <= selRect.x1 && y >= selRect.y0 && y <= selRect.y1) {
+      dragSel = { sx: x, sy: y, dx: 0, dy: 0, copy: e.ctrlKey || e.metaKey };
+    } else {
+      marquee = { ax: x, ay: y };
+      selRect = { x0: x, y0: y, x1: x, y1: y };
+    }
+    drawSelVis();
+  }
+  function selMouseOver(x, y) {
+    if (marquee) { selRect = rectNorm(marquee.ax, marquee.ay, x, y); drawSelVis(); }
+    else if (dragSel) { dragSel.dx = x - dragSel.sx; dragSel.dy = y - dragSel.sy; drawSelVis(); }
+  }
+  function selMouseUp() {
+    if (marquee) { marquee = null; }
+    else if (dragSel) {
+      if (dragSel.dx || dragSel.dy) commitSelMove();
+      dragSel = null; drawSelVis();
+    }
+  }
+  function commitSelMove() {
+    checkpoint();
+    var r = selRect, ox = dragSel.dx, oy = dragSel.dy, buf = [];
+    for (var y = r.y0; y <= r.y1; y++) { var row = []; for (var x = r.x0; x <= r.x1; x++) row.push(grid[y][x]); buf.push(row); }
+    if (!dragSel.copy)
+      for (var y = r.y0; y <= r.y1; y++) for (var x = r.x0; x <= r.x1; x++) grid[y][x] = null;
+    for (var y = 0; y < buf.length; y++)
+      for (var x = 0; x < buf[y].length; x++) {
+        var tx = r.x0 + x + ox, ty = r.y0 + y + oy;
+        if (tx >= 0 && tx < W && ty >= 0 && ty < H && buf[y][x] !== null) grid[ty][tx] = buf[y][x];
+      }
+    selRect = { x0: Math.max(0, r.x0 + ox), y0: Math.max(0, r.y0 + oy), x1: Math.min(W - 1, r.x1 + ox), y1: Math.min(H - 1, r.y1 + oy) };
+    render(); save();
+  }
+  document.addEventListener("keydown", function (e) {
+    if (mode !== "select" || !selRect) return;
+    if (e.key === "Escape") { selRect = null; marquee = null; dragSel = null; drawSelVis(); }
+    else if (e.key === "Delete" || e.key === "Backspace") {
+      e.preventDefault(); checkpoint();
+      for (var y = selRect.y0; y <= selRect.y1; y++)
+        for (var x = selRect.x0; x <= selRect.x1; x++) grid[y][x] = null;
+      render(); save(); drawSelVis();
+    }
+  });
+  document.addEventListener("mouseup", function () { painting = 0; selMouseUp(); });
+
+  // palette UI
+  var pal = document.getElementById("palette"), lastGrp = "";
+  PALETTE.forEach(function (p) {
+    if (p.grp !== lastGrp) { var h = document.createElement("div"); h.className = "pgroup"; h.textContent = p.grp; pal.appendChild(h); lastGrp = p.grp; }
+    var b = document.createElement("button"); b.className = "pbtn"; b.dataset.id = p.id;
+    var sw = document.createElement("span"); sw.className = "sw"; sw.textContent = p.g; sw.style.color = p.fg; sw.style.backgroundColor = p.bg;
+    if (p.img && p.img.indexOf("/") >= 0) { sw.textContent = ""; sw.style.backgroundImage = "url(" + p.img + ")"; }
+    b.appendChild(sw); b.appendChild(document.createTextNode(p.n + "  [" + p.c + "]"));
+    b.addEventListener("click", function () { sel = p; document.querySelectorAll(".pbtn").forEach(function (x) { x.classList.remove("sel"); }); b.classList.add("sel"); });
+    pal.appendChild(b);
+  });
+  pal.querySelector(".pbtn").classList.add("sel");
+  document.getElementById("pfilter").addEventListener("input", function () {
+    var q = this.value.toLowerCase();
+    var btns = pal.querySelectorAll(".pbtn"), grps = pal.querySelectorAll(".pgroup");
+    btns.forEach(function (b) { b.style.display = b.textContent.toLowerCase().indexOf(q) >= 0 ? "" : "none"; });
+    grps.forEach(function (g) {
+      var el = g.nextElementSibling, any = false;
+      while (el && !el.classList.contains("pgroup")) { if (el.classList.contains("pbtn") && el.style.display !== "none") any = true; el = el.nextElementSibling; }
+      g.style.display = any ? "" : "none";
+    });
+  });
+
+  // tile image loading (match by filename)
+  document.getElementById("tilefiles").addEventListener("change", function (e) {
+    Array.prototype.forEach.call(e.target.files, function (f) {
+      var r = new FileReader();
+      r.onload = function () {
+        images[f.name.toLowerCase()] = r.result;
+        PALETTE.forEach(function (p) { if (p.img && p.img.toLowerCase() === f.name.toLowerCase()) {
+          var sw = pal.querySelector('.pbtn[data-id="' + p.id + '"] .sw');
+          if (sw) { sw.textContent = ""; sw.style.backgroundImage = "url(" + r.result + ")"; }
+        }});
+        render();
+      };
+      r.readAsDataURL(f);
+    });
+    status.textContent = "tiles loaded";
+  });
+
+  // export / import
+  document.getElementById("export").addEventListener("click", function () {
+    var used = {};
+    var rows = grid.map(function (row) {
+      return row.map(function (id) { if (!id) return " "; used[byId[id].c] = byId[id].id; return byId[id].c; }).join("");
+    });
+    io.value = "TFMAP v1 " + W + "x" + H + "\nlegend " + JSON.stringify(used) + "\n" + rows.join("\n");
+    io.select(); status.textContent = "exported - copy the block into chat";
+  });
+  document.getElementById("import").addEventListener("click", function () {
+    var lines = io.value.replace(/\r/g, "").split("\n").filter(function (l) { return l.length; });
+    var head = lines.shift() || "";
+    var m = head.match(/TFMAP v1 (\d+)x(\d+)/);
+    if (!m) { status.textContent = "no TFMAP header found"; return; }
+    W = +m[1]; H = +m[2];
+    document.getElementById("gw").value = W; document.getElementById("gh").value = H;
+    if (lines[0] && lines[0].indexOf("legend") === 0) lines.shift(); // chars are globally stable; legend is for humans
+    checkpoint();
+    blank();
+    for (var y = 0; y < H && y < lines.length; y++)
+      for (var x = 0; x < W && x < lines[y].length; x++) {
+        var p = byChar[lines[y][x]];
+        if (p) grid[y][x] = p.id;
+      }
+    render(); save(); status.textContent = "imported";
+  });
+
+  document.getElementById("resize").addEventListener("click", function () {
+    var nw = +document.getElementById("gw").value, nh = +document.getElementById("gh").value;
+    var old = grid; W = nw; H = nh; blank();
+    for (var y = 0; y < Math.min(H, old.length); y++)
+      for (var x = 0; x < Math.min(W, old[y].length); x++) grid[y][x] = old[y][x];
+    render(); save();
+  });
+  document.getElementById("clear").addEventListener("click", function () { checkpoint(); blank(); render(); save(); });
+
+  function save() { try { localStorage.setItem("tfsketch", JSON.stringify({ W: W, H: H, grid: grid })); } catch (e) {} }
+  function load() {
+    try {
+      var s = JSON.parse(localStorage.getItem("tfsketch"));
+      if (s && s.grid) { W = s.W; H = s.H; grid = s.grid; document.getElementById("gw").value = W; document.getElementById("gh").value = H; return; }
+    } catch (e) {}
+    blank();
+  }
+  function libGet() { try { return JSON.parse(localStorage.getItem("tfsketch_lib")) || {}; } catch (e) { return {}; } }
+  function libSet(l) { try { localStorage.setItem("tfsketch_lib", JSON.stringify(l)); } catch (e) {} }
+  function libRefresh() {
+    var l = libGet(), s = document.getElementById("clist");
+    s.innerHTML = "";
+    Object.keys(l).sort().forEach(function (n) { var o = document.createElement("option"); o.value = n; o.textContent = n; s.appendChild(o); });
+  }
+  document.getElementById("csave").addEventListener("click", function () {
+    var n = document.getElementById("cname").value.trim();
+    if (!n) { status.textContent = "name the canvas first"; return; }
+    var l = libGet(); l[n] = { W: W, H: H, grid: grid, ts: Date.now() };
+    libSet(l); libRefresh();
+    document.getElementById("clist").value = n;
+    status.textContent = "saved \"" + n + "\"";
+  });
+  document.getElementById("cload").addEventListener("click", function () {
+    var n = document.getElementById("clist").value, l = libGet();
+    if (!n || !l[n]) return;
+    W = l[n].W; H = l[n].H; grid = l[n].grid;
+    document.getElementById("gw").value = W; document.getElementById("gh").value = H;
+    document.getElementById("cname").value = n;
+    render(); save(); status.textContent = "loaded \"" + n + "\"";
+  });
+  document.getElementById("cdel").addEventListener("click", function () {
+    var n = document.getElementById("clist").value, l = libGet();
+    if (!n || !l[n]) return;
+    delete l[n]; libSet(l); libRefresh(); status.textContent = "deleted \"" + n + "\"";
+  });
+  document.getElementById("btn-undo").addEventListener("click", function () { undo(); });
+  document.getElementById("btn-redo").addEventListener("click", function () { redo(); });
+  libRefresh(); load(); render();
+})();
+</script>
+</body>
+</html>

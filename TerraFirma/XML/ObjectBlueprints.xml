@@ -37,4 +37,18 @@
     <part Name="MeleeWeapon" BaseDamage="1d6" Skill="Axe" Stat="Strength" Slot="Body" />
     <tag Name="Gender" Value="plural" />
   </object>
+
+  <!-- ===== Painter vertical-slice test objects (2026-07-25). All names/descriptions are DRAFT pending user sign-off. ===== -->
+  <!-- Fire dish: inherits Campfire wholesale so the flame VFX come free (AnimatedMaterialFire + PrefabImposter particle flames + LightSource). Tile expects Textures/firedish.png (not yet supplied). -->
+  <object Name="Cleo_TerraFirma_FireDish" Inherits="Campfire">
+    <part Name="Render" Tile="firedish.png" DisplayName="carved fire dish" />
+    <part Name="Description" Short="A wide basin of dressed stone cradles a bed of embers." />
+  </object>
+  <!-- Quarried block: RandomTile builder rotates the three user sprites. -->
+  <object Name="Cleo_TerraFirma_QuarriedBlock" Inherits="Furniture">
+    <part Name="Render" Tile="quarrybricks1.png" DisplayName="quarried stone" RenderString="#" ColorString="&amp;y" DetailColor="K" Occluding="false" />
+    <builder Name="RandomTile" Tiles="quarrybricks1.png,quarrybricks2.png,quarrybricks3.png" />
+    <part Name="Description" Short="Canyon stone, cut square and stacked for the crossing." />
+    <part Name="Physics" Takeable="false" Weight="500" />
+  </object>
 </objects>

@@ -6,7 +6,11 @@
 	     small chance to reach a band up — the "Deeper" groups — and rarely two bands at once.
 	     Escalations land on band-exclusive content (the *New tables) so they're always visible. ====== -->
 	<!-- Throwable-only mirrors of the fissure bands (same weights, same "Deeper" escalation, minus
-	     creatures/standing stone). Shared by omnigeyser shots and baboon pocket-stones (2026-07-22). -->
+	     creatures/standing stone). Shared by omnigeyser shots and baboon pocket-stones (2026-07-22).
+	     Strange rides the mirror on the bell (RULED 2026-07-30, "fix this to mirror, that's its
+	     purpose"): band weights 1/8/3/0 = effective ~1.3% TR1 / ~3.5% TR2 / ~2.9% TR3 / ~1.7% TR4,
+	     shallow-rare, mid-peak, deep-taper; band 4 carries none, the 60% nesting alone keeps the
+	     deep trickle (interior numbers = Claude picks under the ruled shape). -->
 	<population Name="Cleo_TerraFirma_ThrowableRocksBand2">
 		<group Name="Rocks" Style="pickone">
 			<object Weight="9" Blueprint="Cleo_TerraFirma_Rock_Whorlstone" />
@@ -26,6 +30,7 @@
 			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Scary" />
 			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Bola" />
 			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Spiny" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 		</group>
 	</population>
 	<population Name="Cleo_TerraFirma_ThrowableRocksBand3">
@@ -52,6 +57,7 @@
 			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Drainstone" />
 			<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Lodestone" />
 			<object Weight="4" Blueprint="Cleo_TerraFirma_Rock_Blurring" />
+			<object Weight="3" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 			<!-- crack + chasm are terrain: falls-only, never in the throwable mirrors -->
 		</group>
 	</population>
@@ -62,7 +68,7 @@
 			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Soupstone" />
 			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Sludgestone" />
 			<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Salt" />
-			<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Strange" />
+			<object Weight="1" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 			<object Weight="15" Blueprint="Cleo_TerraFirma_Rock_Pointy" />
 			<group Name="Deeper" Weight="5" Style="pickone">
 				<table Weight="90" Name="Cleo_TerraFirma_ThrowableRocksBand2" />
@@ -107,7 +113,10 @@
 	     Structure per tier: 75% headliners / 25% generics, generics carry the inert crush ladder
 	     (pebbles -> generic -> rubble -> stalagmite -> crumbled walls -> walls -> chasm) plus
 	     10-weight bleeds into the adjacent tiers (Burgeoning's exact idiom). Strange rock seasons
-	     the generics of tiers 2-8 at weight 5 (placement DRAFT). Deep four ride tier 9 plain
+	     the generics of ALL NINE tiers on a bell, weights 1/2/4/6/8/6/4/2/1 (shape + endpoints
+	     RULED 2026-07-30: "most common in the middle levels but less likely at the top and
+	     bottom" / endpoints at 1 confirmed "the former"; interior ladder = Claude numbers under
+	     the ruled shape). Deep four ride tier 9 plain
 	     (RULED: no depth gate; effective level already gates tier 9's reach). Mullstone placed
 	     at tier 6 (the 6-vs-8 wobbler, resolved toward the thin roster; flag if it grates).
 	     All weights DRAFT. -->
@@ -121,6 +130,7 @@
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="20" Blueprint="Cleo_TerraFirma_Rock_Pebbles" />
+				<object Weight="1" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier2" />
 			</group>
 		</group>
@@ -139,7 +149,7 @@
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Pebbles" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Generic" />
-				<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Strange" />
+				<object Weight="2" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 				<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Holographic" /> <!-- the joke rock rides the shallow generics (RULED 2026-07-25); weight DRAFT -->
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier1" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier3" />
@@ -159,7 +169,7 @@
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Generic" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Rubble" />
-				<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Strange" />
+				<object Weight="4" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 				<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Holographic" /> <!-- joke rock, shallow only (RULED 2026-07-25); weight DRAFT -->
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier2" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier4" />
@@ -182,7 +192,7 @@
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Rubble" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Stalagmite" />
-				<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Strange" />
+				<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier3" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier5" />
 			</group>
@@ -201,7 +211,7 @@
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Stalagmite" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_CrumbledWall" />
-				<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Strange" />
+				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier4" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier6" />
 			</group>
@@ -223,7 +233,7 @@
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="20" Blueprint="Cleo_TerraFirma_Rock_CrumbledWall" />
-				<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Strange" />
+				<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier5" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier7" />
 			</group>
@@ -243,7 +253,7 @@
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_CrumbledWall" />
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Wall" />
-				<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Strange" />
+				<object Weight="4" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier6" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier8" />
 			</group>
@@ -263,7 +273,7 @@
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="20" Blueprint="Cleo_TerraFirma_Rock_Wall" />
-				<object Weight="5" Blueprint="Cleo_TerraFirma_Rock_Strange" />
+				<object Weight="2" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier7" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier9" />
 			</group>
@@ -285,9 +295,12 @@
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
 				<!-- chasm CUT from play (ruling 2026-07-24: "chasms should get cut but pits are too
-				     spicy to lock in now"); blueprint stays dormant, and the visible-pit successor
-				     is its own future pass -->
+				     spicy to lock in now"; full rationale RECORDED 2026-07-31: the real drivers were
+				     textural, no actual visible hole in the floor, plus chasm DESTROYED loot landing
+				     in its cell); blueprint stays dormant, and the visible-pit successor is its own
+				     future pass -->
 				<object Weight="20" Blueprint="Cleo_TerraFirma_Rock_Wall" />
+				<object Weight="1" Blueprint="Cleo_TerraFirma_Rock_Strange" />
 				<table Weight="10" Name="Cleo_TerraFirma_FissureTier8" />
 			</group>
 		</group>

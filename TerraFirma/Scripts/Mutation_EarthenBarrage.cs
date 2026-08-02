@@ -67,18 +67,28 @@ namespace XRL.World.Parts.Mutation
 
 		public override string GetLevelText(int Level)
 		{
-			return "You sculpt stones at a rate of 1 every {{rules|" + GetTurnsPerCharge() + "}} rounds, up to a reserve of {{rules|" + MaxCharges(Level) + "}}.\n" +
-				"While active, a sculpted stone occupies your thrown weapon slot and is replaced from your reserve when thrown.\n" +
-				"Stones crumble to dust after {{rules|" + ROCK_LIFETIME_MIN + "}}-{{rules|" + ROCK_LIFETIME_MAX + "}} rounds of not being held as a thrown weapon.\n" +
+			// 2026-07-26 voice sitting (upper ladder accepted as drafted, "it's fine"), built
+			// 2026-07-27: the design-rationale parenthetical CUT; compound lines split one fact per
+			// line; retune QoL line CUT (goes undocumented, base idiom); reserve clause CUT from the
+			// slot line; vibro phrasing recast on the Vibro Dagger/Blade RulesDescription precedent
+			// (states the rule, drops the word "vibro", names no trade-off - the deeper precedent);
+			// flat constants bare per the Electrical Generation pattern (user RULED "do whatever is
+			// most base game accurate there"). The DV-in-place-of-AV line stays accurate to CURRENT
+			// behavior - re-draft it if the parked whorl-DV fix ever lands (user paces).
+			return "You sculpt a stone every {{rules|" + GetTurnsPerCharge() + "}} rounds, up to a reserve of {{rules|" + MaxCharges(Level) + "}}.\n" +
+				"Sculpted stones occupy your thrown weapon slot.\n" +
+				"Stones not held as a thrown weapon crumble to dust after " + ROCK_LIFETIME_MIN + "-" + ROCK_LIFETIME_MAX + " rounds.\n" +
 				"Damage increment: {{rules|" + GetThrowDamage(Level) + "}}\n" +
-				"Penetration bonus: {{rules|+" + GetThrowPenetrations(Level) + "}} (attuned stones forgo it; resonance pierces by matching, not force)\n" +
+				"Penetration bonus: {{rules|+" + GetThrowPenetrations(Level) + "}}\n" +
 				"Daze chance on penetrating hit: {{rules|" + GetThrowDazeChanceIn100(Level) + "%}}\n" +
-				"While you have stones in reserve, they whorl about you and deflect physical projectiles. Lasers and other energy attacks pass through.\n" +
-				"Deflect chance: {{rules|3%}} per stone in reserve, +{{rules|1%}} per mutation level\n" +
-				"+{{rules|1}} AV while 3 or more stones are in reserve; +{{rules|2}} AV while 9 or more are" +
+				"Stones in reserve whorl about you and deflect physical projectiles.\n" +
+				"Lasers and other energy attacks pass through the whorl.\n" +
+				"Deflect chance: 3% per stone in reserve, +1% per mutation level\n" +
+				"+1 AV while 3 or more stones are in reserve\n" +
+				"+2 AV while 9 or more stones are in reserve" +
 				(Level >= RESONANT_UNLOCK_LEVEL
-					? "\nYou may attune your stones to {{C|resonance}}: they penetrate as vibro weapons, and your whorl deflects light instead of matter, granting {{rules|+2}}/{{rules|+4}} DV in place of AV.\nAttuning retunes the stone in your hand at no cost."
-					: "\nAt level {{rules|" + RESONANT_UNLOCK_LEVEL + "}}, you learn to attune your stones to {{C|resonance}}.");
+					? "\nYou may attune your stones to {{C|resonance}}.\nResonant stones' penetration value is equal to the defender's armor value.\nWhile attuned, your whorl deflects light instead of matter and grants +2 or +4 DV in place of AV."
+					: "\nAt level " + RESONANT_UNLOCK_LEVEL + ", you learn to attune your stones to {{C|resonance}}.");
 		}
 
 		public override void CollectStats(Templates.StatCollector stats)
