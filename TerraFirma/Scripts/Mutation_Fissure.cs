@@ -29,12 +29,10 @@ namespace XRL.World.Parts.Mutation
 		// FEEL ROUND 1 (user, 2026-08-02): "walls feel too solid at lower levels - need more gaps"
 		// -- fixed 3 became a falling ladder; see GetGapCount. Crack-gates commented out same round.
 		// private const int CRACK_GATE_CHANCE = 50; // % per gap: the doors made of dice (BETA-HELD, feel round 1)
-		// ANIMATION PASS (user spec 2026-08-02/03, recipe in design/vfx-survey-2026-08-03.md):
-		// pulse-travel (two beats per shell, rubble-tile dip / wall-tile rise -- Burgeoning's own
-		// two-frame sprout swept radially), full-ring eruption with camera shake, settle. All
-		// beats are cosmetic replay over already-resolved mechanics. BEAT_MS = the tempo dial.
-		private const int BEAT_MS = 40;
-		private const int ERUPTION_BEAT_MS = 60;
+		// ANIMATION PASS v2 (user spec 2026-08-03): sprite-slide emergence on the CombatJuice
+		// layer -- see Fx_StoneRise.cs, where all tempo/geometry dials now live. The v1
+		// buffer-stamp approach (color-block pulse) was rejected at feel review: "transitioning
+		// color blocks don't communicate what is actually happening."
 		// Calcify's verified "large stone impact" -- the wave's slam
 		private const string SLAM_SOUND = "Sounds/Throw/sfx_throwing_stone_large_impact";
 		private const string DEBRIS_BLUEPRINT = "Cleo_TerraFirma_Rock_Generic";
@@ -436,75 +434,27 @@ namespace XRL.World.Parts.Mutation
 		#endregion
 
 		#region Animation
-		/// <summary>The wave, drawn (spec: user 2026-08-02/03; recipe: design/vfx-survey-2026-08-03.md).
-		/// Scrap-buffer scan per StunningForce/the rays: two beats per shell -- half rise (the
-		/// wall's own tile, gold) then quarter dip (rubble's tile, ochre) -- then the full ring
-		/// erupts bright with a camera shake, and the settle happens in the real zone after.
-		/// Base textures only (user direction): the tiles are read off the fabric blueprints, so
-		/// classic view gets CP437 half/full blocks and tile view gets the actual wall art.</summary>
+		/// <summary>The wave, drawn (ANIMATION PASS v2, user spec 2026-08-03: "a rock wall sprite
+		/// sliding into the earth and briefly emerging" -- sprites, not color blocks; never the
+		/// burrow idiom). Pooled sprites of the wall's own tile slide partway out of the ground
+		/// and back as the front travels; the rim breaks through staggered, rises near-full, and
+		/// holds until the real fabric takes over. Choreography enqueued on the CombatJuice
+		/// layer (Cleo_TerraFirma_StoneRiseFX); the game thread sleeps its length while the
+		/// Unity side plays it, then the settle applies. Cosmetic replay -- mechanics resolved.</summary>
 		private void PlayWaveAnimation(Cell origin, Zone zone, int radius, HashSet<Cell> reached, List<Cell> rimAll)
 		{
 			if (!zone.IsActive() || !origin.IsVisible())
 				return;
-			string wallTile = BlueprintTile(WALL_BLUEPRINT);
-			string rubbleTile = BlueprintTile(RUBBLE_BLUEPRINT);
-			UnityEngine.Color ochre = ColorUtility.ColorMap['w'];
-			UnityEngine.Color gold = ColorUtility.ColorMap['W'];
-			UnityEngine.Color flash = ColorUtility.ColorMap['Y'];
-			ScreenBuffer buf = ScreenBuffer.GetScrapBuffer1(bLoadFromCurrent: true);
-			TextConsole console = Popup._TextConsole;
-			for (int r = 1; r <= radius; r++)
-			{
-				for (int phase = 0; phase < 2; phase++)
-				{
-					XRLCore.Core.RenderBaseToBuffer(buf);
-					foreach (Cell c in reached)
-					{
-						if (!OnRing(c.X - origin.X, c.Y - origin.Y, r) || !c.IsVisible())
-							continue;
-						if (phase == 0)
-							Stamp(buf, c, wallTile, (char)220, gold); // half rise
-						else
-							Stamp(buf, c, rubbleTile, (char)176, ochre); // quarter dip
-					}
-					console.DrawBuffer(buf);
-					Thread.Sleep(BEAT_MS);
-				}
-			}
-			// eruption: the whole circle stands up at once, and the ground remembers it
-			ParentObject.PlayWorldSound(SLAM_SOUND, 1f, Combat: true);
-			CombatJuice.cameraShake(0.35f);
-			for (int k = 0; k < 2; k++)
-			{
-				XRLCore.Core.RenderBaseToBuffer(buf);
-				foreach (Cell c in rimAll)
-				{
-					if (c.IsVisible())
-						Stamp(buf, c, wallTile, (char)219, k == 0 ? flash : gold);
-				}
-				console.DrawBuffer(buf);
-				Thread.Sleep(ERUPTION_BEAT_MS);
-			}
-		}
-
-		private static void Stamp(ScreenBuffer buf, Cell c, string tile, char glyph, UnityEngine.Color color)
-		{
-			ConsoleChar ch = buf[c.X, c.Y];
-			if (ch == null)
+			GameObject sample = GameObject.Create(WALL_BLUEPRINT);
+			ConsoleLib.Console.IRenderable wallTile = sample?.RenderForUI();
+			sample?.Obliterate();
+			if (wallTile == null)
 				return;
-			ch.Char = glyph;
-			if (!tile.IsNullOrEmpty())
-				ch.Tile = tile;
-			ch.Foreground = color;
-			ch.TileForeground = color;
-			ch.Detail = color;
-		}
-
-		/// <summary>A blueprint's tile path, inheritance-resolved -- the wave wears the ring's own materials.</summary>
-		private static string BlueprintTile(string bp)
-		{
-			GameObjectBlueprint def = GameObjectFactory.Factory.GetBlueprintIfExists(bp);
-			return def?.GetPartParameter<string>("Render", "Tile");
+			ParentObject.PlayWorldSound(SLAM_SOUND, 1f, Combat: true);
+			CombatJuice.cameraShake(0.3f); // the ground complains while the wave runs
+			float total = Cleo_TerraFirma_StoneRiseFX.Play(origin, radius, reached, wallTile, OnRing);
+			if (total > 0f)
+				Thread.Sleep((int)(total * 1000f) + 60); // Unity plays the sprites while we hold the turn
 		}
 		#endregion
 
