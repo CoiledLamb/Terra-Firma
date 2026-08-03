@@ -447,11 +447,21 @@ namespace XRL.World.Parts.Mutation
 				return;
 			GameObject sample = GameObject.Create(WALL_BLUEPRINT);
 			// Walls carry NO blueprint tile -- the zone painter assigns connectivity tiles at
-			// render time (PaintedWall tag), so a fresh sample is tileless and the sprite fell
-			// back to glyphs (feel note 2026-08-03: "the tiles are not working"). Borrow the
-			// mod's own quarry stone texture, proven in-game via the QuarriedBlock.
+			// render time from the PaintedWall tag (ZoneManager.PaintWall, decompiled 2026-08-03:
+			// atlas + value + '-' + 8 neighbor bits + extension). A rising wave piece is a lone
+			// wall, so paint the sample exactly as the painter would paint an isolated one:
+			// the -00000000 variant of the wall's own rock tileset.
 			if (sample?.Render != null && sample.Render.Tile.IsNullOrEmpty())
-				sample.Render.Tile = "quarrystones1a.png";
+			{
+				string paint = sample.GetTagOrStringProperty("PaintedWall");
+				if (!paint.IsNullOrEmpty())
+				{
+					string sub = paint.Contains(",") ? paint.Split(',')[0] : paint;
+					sample.Render.Tile = sample.GetTagOrStringProperty("PaintedWallAtlas", "Assets_Content_Textures_Tiles_")
+						+ sub + "-00000000"
+						+ sample.GetTagOrStringProperty("PaintedWallExtension", ".bmp");
+				}
+			}
 			ConsoleLib.Console.IRenderable wallTile = sample?.RenderForUI();
 			sample?.Obliterate();
 			if (wallTile == null)
