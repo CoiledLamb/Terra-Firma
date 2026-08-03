@@ -63,8 +63,9 @@ Feel-session lever: if high-level casters should remodel more freely, the Burgeo
 2. Interior wake scatter: ~15% of interior cells get loose stone in the wave's wake
    (10% plain stone / 3% pebbles / 2% MediumBoulder, timed to shell passage). Floor-painting
    version noted as possible future dial, not built.
-3. **Salvage + baboon + geyser BETA-HELD ("all salvage + baboon and geyser, for now" --
-   reconsider once the mutation is functioning). The figure STAYS.**
+3. **Salvage + geyser + THE STONE FIGURE all BETA-HELD ("all salvage + baboon and geyser,
+   for now" -- corrected same day: "that's what i meant by the baboon" = the figure).
+   The ring is pure fabric for the beta; reconsider once the mutation is functioning.**
 4. **Wall share 10 -> 75 by band with growing variance (user numbers: 10/30/55/75 base,
    +/-5/8/12/15 rolled per cast)**; remainder splits 55/45 rubble/crumbled. **The ring
    dresses as the zone's dominant painted wall** (modal PaintedWall value stamped on
