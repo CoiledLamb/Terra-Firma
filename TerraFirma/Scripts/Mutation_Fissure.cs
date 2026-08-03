@@ -446,6 +446,12 @@ namespace XRL.World.Parts.Mutation
 			if (!zone.IsActive() || !origin.IsVisible())
 				return;
 			GameObject sample = GameObject.Create(WALL_BLUEPRINT);
+			// Walls carry NO blueprint tile -- the zone painter assigns connectivity tiles at
+			// render time (PaintedWall tag), so a fresh sample is tileless and the sprite fell
+			// back to glyphs (feel note 2026-08-03: "the tiles are not working"). Borrow the
+			// mod's own quarry stone texture, proven in-game via the QuarriedBlock.
+			if (sample?.Render != null && sample.Render.Tile.IsNullOrEmpty())
+				sample.Render.Tile = "quarrystones1a.png";
 			ConsoleLib.Console.IRenderable wallTile = sample?.RenderForUI();
 			sample?.Obliterate();
 			if (wallTile == null)

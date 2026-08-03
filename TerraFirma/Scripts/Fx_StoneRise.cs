@@ -29,7 +29,9 @@ namespace Cleo.TerraFirma.Scripts
 		private float BuriedY;
 		private float EmergeY;
 
-		public Cleo_TerraFirma_JuiceStoneRise(IRenderable tile, Vector3 basePos, float delay, float rise, float hold, float sink, float buriedDepth, float emergeHeight)
+		private bool StayUp; // rim pieces hold at full emergence until the real fabric takes over -- no dip before the handoff
+
+		public Cleo_TerraFirma_JuiceStoneRise(IRenderable tile, Vector3 basePos, float delay, float rise, float hold, float sink, float buriedDepth, float emergeHeight, bool stayUp = false)
 		{
 			Tile = tile;
 			Base = basePos;
@@ -39,7 +41,8 @@ namespace Cleo.TerraFirma.Scripts
 			Sink = Mathf.Max(0.01f, sink);
 			BuriedY = -buriedDepth;
 			EmergeY = -buriedDepth + emergeHeight;
-			duration = delay + this.Rise + hold + this.Sink;
+			StayUp = stayUp;
+			duration = delay + this.Rise + hold + (stayUp ? 0f : this.Sink);
 		}
 
 		public override void start()
@@ -60,7 +63,7 @@ namespace Cleo.TerraFirma.Scripts
 			float y;
 			if (p <= Rise)
 				y = Mathf.Lerp(BuriedY, EmergeY, Easing.SineEaseOut(Mathf.Clamp01(p / Rise)));
-			else if (p <= Rise + Hold)
+			else if (StayUp || p <= Rise + Hold)
 				y = EmergeY;
 			else
 				y = Mathf.Lerp(EmergeY, BuriedY, Easing.SineEaseInOut(Mathf.Clamp01((p - Rise - Hold) / Sink)));
@@ -104,7 +107,10 @@ namespace Cleo.TerraFirma.Scripts
 			if (gm == null)
 				return 0f;
 			float rimStart = radius * SHELL_SEC;
-			float total = rimStart + RIM_STAGGER + RIM_RISE + 0.20f + RIM_SINK;
+			// linger trimmed (feel note 2026-08-03: "lingers a bit too long on the last bit"):
+			// tail padding 0.20 -> 0.06, and rim pieces STAY UP into the handoff instead of
+			// sinking first -- the real fabric appears as the held sprites vanish.
+			float total = rimStart + RIM_STAGGER + RIM_RISE + 0.06f;
 			int enqueued = 0;
 			foreach (Cell c in reached)
 			{
@@ -117,8 +123,8 @@ namespace Cleo.TerraFirma.Scripts
 				if (rim)
 				{
 					float delay = rimStart + 0.01f * Stat.Random(0, (int)(RIM_STAGGER * 100f));
-					float hold = total - delay - RIM_RISE - RIM_SINK; // every rim piece settles together
-					CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(wallTile, basePos, delay, RIM_RISE, hold, RIM_SINK, BURIED_DEPTH, RIM_EMERGE), async: true);
+					float hold = total - delay - RIM_RISE; // every rim piece holds to the common end
+					CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(wallTile, basePos, delay, RIM_RISE, hold, RIM_SINK, BURIED_DEPTH, RIM_EMERGE, stayUp: true), async: true);
 					enqueued++;
 					continue;
 				}
