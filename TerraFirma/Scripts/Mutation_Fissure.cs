@@ -396,8 +396,12 @@ namespace XRL.World.Parts.Mutation
 				}
 			}
 			*/
-			// the figure: at most one, rare, an event (USER RULED into v1) -- it REPLACES its
-			// cell's fabric rather than stacking a second solid on it
+			/* BETA-HELD (feel round 2 correction, user 2026-08-03: "i think you're confused
+			   about the figurine - that's what i meant by the baboon") -- the stone figure
+			   rides the same cut as salvage and geyser after all. Blueprint stays defined;
+			   restore alongside GetFigureChance.
+			// the figure: at most one, rare, an event -- it REPLACES its cell's fabric rather
+			// than stacking a second solid on it
 			if (rim.Count > 0 && GetFigureChance(Level).in100())
 			{
 				Cell c = rim[Stat.Random(0, rim.Count - 1)];
@@ -414,6 +418,7 @@ namespace XRL.World.Parts.Mutation
 					}
 				}
 			}
+			*/
 			// interior wake scatter (FEEL ROUND 2, user: "spawn some stones or boulders in
 			// addition to the ring. breaking up the inside will also make it feel more
 			// uniform") -- loose stone in the wave's wake, timed to each shell's passing
