@@ -346,48 +346,45 @@ namespace XRL.World.Parts.Mutation
 			// carved mass thickens the ring: each carved wall banks one upgrade credit
 			// (rubble -> crumbled wall -> fallen wall) spent as the rim deposits
 			int upgradeCredits = carvedMass;
+			int wallShare = GetWallShare(Level);
+			string dominantPaint = DominantWallPaint(zone);
 			int deposited = 0, debris = 0;
-			var deposits = new List<KeyValuePair<Cell, string>>();
+			var deposits = new List<(Cell cell, string bp, float time)>();
 			foreach (Cell c in rim)
 			{
 				if (StillHoldsCombatant(c))
 				{
 					// no burying the thunderdome's audience: loose stone instead of fabric
-					deposits.Add(new KeyValuePair<Cell, string>(c, DEBRIS_BLUEPRINT));
+					deposits.Add((c, DEBRIS_BLUEPRINT, 0f));
 					debris++;
 					continue;
 				}
-				string fabric = RollFabric(Level);
+				string fabric = RollFabric(wallShare);
 				while (upgradeCredits > 0 && fabric != WALL_BLUEPRINT)
 				{
 					fabric = fabric == RUBBLE_BLUEPRINT ? CRUMBLED_BLUEPRINT : WALL_BLUEPRINT;
 					upgradeCredits--;
 				}
-				deposits.Add(new KeyValuePair<Cell, string>(c, fabric));
+				deposits.Add((c, fabric, 0f));
 				deposited++;
 			}
-			// gaps: at depth, sometimes the door that shoots back
+			/* BETA-HELD (feel round 2, user 2026-08-03: "all salvage + baboon and geyser, for
+			   now" -- reconsider once the mutation is functioning). The geyser-in-gap and the
+			   keeper-salvage rolls, cut together; the figure survives (lore-bearing, not loot).
+			   Feel round 1's crack-gate hold rides inside. Restore alongside GetGeyserChance/
+			   GetSalvageRolls/SALVAGE_TABLE.
 			bool geyserPlaced = false;
 			foreach (Cell gap in gaps)
 			{
 				if (!geyserPlaced && GetGeyserChance(Level).in100() && !StillHoldsCombatant(gap))
 				{
-					deposits.Add(new KeyValuePair<Cell, string>(gap, GetGeyserBlueprint(Level)));
+					deposits.Add((gap, GetGeyserBlueprint(Level), 0f));
 					geyserPlaced = true;
-					Helpers.VerifyLog("FIS", $"RING geyser in gap @({gap.X},{gap.Y}): {GetGeyserBlueprint(Level)}");
 					continue;
 				}
-				/* BETA-HELD (feel round 1, user 2026-08-02: "we can comment out cracks for now")
-				   -- the crack-gate under gaps. Restore with CRACK_GATE_CHANCE.
 				if (CRACK_GATE_CHANCE.in100())
-				{
-					deposits.Add(new KeyValuePair<Cell, string>(gap, CRACK_BLUEPRINT));
-					Helpers.VerifyLog("FIS", $"RING crack-gate in gap @({gap.X},{gap.Y})");
-				}
-				*/
+					deposits.Add((gap, CRACK_BLUEPRINT, 0f));
 			}
-			// keeper salvage among the rim ("additional small spawns", ruled)
-			int salvaged = 0;
 			for (int s = 0; s < GetSalvageRolls(Level); s++)
 			{
 				if (rim.Count > 0 && 50.in100())
@@ -395,80 +392,180 @@ namespace XRL.World.Parts.Mutation
 					Cell c = rim[Stat.Random(0, rim.Count - 1)];
 					string bp = PopulationManager.RollOneFrom(SALVAGE_TABLE)?.Blueprint;
 					if (bp != null)
-					{
-						deposits.Add(new KeyValuePair<Cell, string>(c, bp));
-						salvaged++;
-						Helpers.VerifyLog("FIS", $"RING salvage @({c.X},{c.Y}): {bp}");
-					}
+						deposits.Add((c, bp, 0f));
 				}
 			}
-			// the figure: at most one, rare, an event (USER RULED into v1)
+			*/
+			// the figure: at most one, rare, an event (USER RULED into v1) -- it REPLACES its
+			// cell's fabric rather than stacking a second solid on it
 			if (rim.Count > 0 && GetFigureChance(Level).in100())
 			{
 				Cell c = rim[Stat.Random(0, rim.Count - 1)];
 				if (!StillHoldsCombatant(c))
 				{
-					deposits.Add(new KeyValuePair<Cell, string>(c, FIGURE_BLUEPRINT));
-					Helpers.VerifyLog("FIS", $"RING FIGURE raised @({c.X},{c.Y})");
+					for (int i = 0; i < deposits.Count; i++)
+					{
+						if (deposits[i].cell == c)
+						{
+							deposits[i] = (c, FIGURE_BLUEPRINT, deposits[i].time);
+							Helpers.VerifyLog("FIS", $"RING FIGURE raised @({c.X},{c.Y})");
+							break;
+						}
+					}
+				}
+			}
+			// interior wake scatter (FEEL ROUND 2, user: "spawn some stones or boulders in
+			// addition to the ring. breaking up the inside will also make it feel more
+			// uniform") -- loose stone in the wave's wake, timed to each shell's passing
+			int scattered = 0;
+			foreach (Cell c in reached)
+			{
+				int dx = c.X - origin.X;
+				int dy = c.Y - origin.Y;
+				int ringIdx = RingIndexOf(dx, dy, radius);
+				if (ringIdx == 0 || c.IsSolid() || StillHoldsCombatant(c))
+					continue;
+				int roll = Stat.Random(1, 100);
+				string bp = roll <= 10 ? DEBRIS_BLUEPRINT : (roll <= 13 ? "Cleo_TerraFirma_Rock_Pebbles" : (roll <= 15 ? "MediumBoulder" : null));
+				if (bp != null)
+				{
+					deposits.Add((c, bp, ringIdx * Cleo_TerraFirma_StoneRiseFX.SHELL_SEC + Cleo_TerraFirma_StoneRiseFX.TRAVEL_RISE));
+					scattered++;
 				}
 			}
 
-			// ---- the animation: cosmetic replay over the resolved cast (skipped when unseen)
-			PlayWaveAnimation(origin, zone, radius, reached, rimAll);
-
-			// ---- settle: the rim resolves into stone; the gaps crumble away with smoke
-			foreach (KeyValuePair<Cell, string> plan in deposits)
+			// ---- the animation + settle: choreography enqueued on the juice layer, then a
+			// frame-pump loop (the rays' own draw-and-sleep idiom) keeps the world rendering
+			// live while each piece materializes at its own moment -- no more lump-sum settle
+			// with frozen smoke (feel round 2, note 1)
+			Cleo_TerraFirma_StoneRiseFX.Schedule schedule = null;
+			if (zone.IsActive() && origin.IsVisible())
+				schedule = Cleo_TerraFirma_StoneRiseFX.Play(origin, radius, reached, gaps, dominantPaint, OnRing);
+			void Place((Cell cell, string bp, float time) plan)
 			{
-				if (plan.Value == WALL_BLUEPRINT || plan.Value == FIGURE_BLUEPRINT)
-					SweepLooseItemsAside(plan.Key); // a wall owns its whole tile: loot spills out the side, never vanishes
-				GameObject piece = GameObject.Create(plan.Value);
+				if (plan.bp == WALL_BLUEPRINT || plan.bp == FIGURE_BLUEPRINT)
+					SweepLooseItemsAside(plan.cell); // a wall owns its whole tile: loot spills out the side, never vanishes
+				GameObject piece = GameObject.Create(plan.bp);
+				if (plan.bp == WALL_BLUEPRINT && !dominantPaint.IsNullOrEmpty())
+					piece.SetStringProperty("PaintedWall", dominantPaint); // the ring dresses as the local geology
 				StampOwner(piece);
-				plan.Key.AddObject(piece);
-				SmokePuff(plan.Key);
+				plan.cell.AddObject(piece);
+				SmokePuff(plan.cell);
 			}
-			foreach (Cell gap in gaps)
-				SmokePuff(gap); // the sections the earth couldn't hold
-			Helpers.VerifyLog("FIS", $"RING complete: {deposited} fabric, {gaps.Count} gap(s), {debris} debris-for-occupied, {salvaged} salvage, carvedMass={carvedMass} (credits left {upgradeCredits}), figure={(GetFigureChance(Level) > 0 ? "rolled" : "n/a")}");
+			if (schedule != null)
+			{
+				CombatJuice.cameraShake(0.3f); // the ground complains while the wave runs
+				for (int i = 0; i < deposits.Count; i++)
+				{
+					if (deposits[i].time <= 0f && schedule.SettleTimes.TryGetValue(deposits[i].cell, out float settleAt))
+						deposits[i] = (deposits[i].cell, deposits[i].bp, settleAt);
+				}
+				deposits.Sort((a, b) => a.time.CompareTo(b.time));
+				var gapPuffs = new List<(Cell cell, float time)>();
+				foreach (KeyValuePair<Cell, float> kv in schedule.GapTimes)
+					gapPuffs.Add((kv.Key, kv.Value));
+				gapPuffs.Sort((a, b) => a.time.CompareTo(b.time));
+				ScreenBuffer buf = ScreenBuffer.GetScrapBuffer1(bLoadFromCurrent: true);
+				TextConsole console = Popup._TextConsole;
+				float t = 0f;
+				int di = 0, gi = 0;
+				float end = schedule.Total + 0.08f;
+				while (t < end)
+				{
+					while (di < deposits.Count && deposits[di].time <= t)
+						Place(deposits[di++]);
+					while (gi < gapPuffs.Count && gapPuffs[gi].time <= t)
+						SmokePuff(gapPuffs[gi++].cell); // the sections the earth couldn't hold
+					XRLCore.Core.RenderBaseToBuffer(buf);
+					console.DrawBuffer(buf);
+					Thread.Sleep(40);
+					t += 0.04f;
+				}
+				while (di < deposits.Count)
+					Place(deposits[di++]);
+				while (gi < gapPuffs.Count)
+					SmokePuff(gapPuffs[gi++].cell);
+			}
+			else
+			{
+				// unseen cast: no choreography, everything lands at once
+				foreach ((Cell cell, string bp, float time) plan in deposits)
+					Place(plan);
+				foreach (Cell gap in gaps)
+					SmokePuff(gap);
+			}
+			Helpers.VerifyLog("FIS", $"RING complete: {deposited} fabric (wall share {wallShare}%), {gaps.Count} gap(s), {debris} debris-for-occupied, {scattered} wake scatter, carvedMass={carvedMass} (credits left {upgradeCredits}), paint={dominantPaint ?? "none/sandstone"}");
 			return base.HandleEvent(E);
 		}
 		#endregion
 
-		#region Animation
-		/// <summary>The wave, drawn (ANIMATION PASS v2, user spec 2026-08-03: "a rock wall sprite
-		/// sliding into the earth and briefly emerging" -- sprites, not color blocks; never the
-		/// burrow idiom). Pooled sprites of the wall's own tile slide partway out of the ground
-		/// and back as the front travels; the rim breaks through staggered, rises near-full, and
-		/// holds until the real fabric takes over. Choreography enqueued on the CombatJuice
-		/// layer (Cleo_TerraFirma_StoneRiseFX); the game thread sleeps its length while the
-		/// Unity side plays it, then the settle applies. Cosmetic replay -- mechanics resolved.</summary>
-		private void PlayWaveAnimation(Cell origin, Zone zone, int radius, HashSet<Cell> reached, List<Cell> rimAll)
-		{
-			if (!zone.IsActive() || !origin.IsVisible())
-				return;
-			// Tile selection lives in the FX class now: walls are painted at zone level (no
-			// blueprint tile), so the sprite's rock tile is resolved at runtime against the
-			// atlas from a probed candidate list -- see Cleo_TerraFirma_StoneRiseFX.ResolveTile
-			// and the FIS "anim tile" log lines it emits.
-			ParentObject.PlayWorldSound(SLAM_SOUND, 1f, Combat: true);
-			CombatJuice.cameraShake(0.3f); // the ground complains while the wave runs
-			float total = Cleo_TerraFirma_StoneRiseFX.Play(origin, radius, reached, OnRing);
-			if (total > 0f)
-				Thread.Sleep((int)(total * 1000f) + 60); // Unity plays the sprites while we hold the turn
-		}
-		#endregion
-
 		#region Helpers
-		/// <summary>Base fabric mix by band: rubble/crumbled/wall at 70/25/5 -> 55/30/15 -> 40/35/25 -> 30/35/35 (dials).</summary>
-		private static string RollFabric(int Lv)
+		/// <summary>Per-cast wall share of the rim fabric, FEEL ROUND 2 (user 2026-08-03:
+		/// "probably something like 10 going to 75 (with variance of 5-15 as you progress, so
+		/// 75 could be 90 or 60)"): base 10/30/55/75 by band, rolled once per cast with
+		/// variance 5/8/12/15.</summary>
+		public static int GetWallShare(int Lv)
 		{
-			int roll = Stat.Random(1, 100);
+			int baseShare, variance;
 			switch (GetBand(Lv))
 			{
-				case 1: return roll <= 70 ? RUBBLE_BLUEPRINT : (roll <= 95 ? CRUMBLED_BLUEPRINT : WALL_BLUEPRINT);
-				case 2: return roll <= 55 ? RUBBLE_BLUEPRINT : (roll <= 85 ? CRUMBLED_BLUEPRINT : WALL_BLUEPRINT);
-				case 3: return roll <= 40 ? RUBBLE_BLUEPRINT : (roll <= 75 ? CRUMBLED_BLUEPRINT : WALL_BLUEPRINT);
-				default: return roll <= 30 ? RUBBLE_BLUEPRINT : (roll <= 65 ? CRUMBLED_BLUEPRINT : WALL_BLUEPRINT);
+				case 1: baseShare = 10; variance = 5; break;
+				case 2: baseShare = 30; variance = 8; break;
+				case 3: baseShare = 55; variance = 12; break;
+				default: baseShare = 75; variance = 15; break;
 			}
+			return Math.Max(0, Math.Min(100, baseShare + Stat.Random(-variance, variance)));
+		}
+
+		/// <summary>Fabric by the cast's rolled wall share; the non-wall remainder splits 55/45 rubble/crumbled.</summary>
+		private static string RollFabric(int wallShare)
+		{
+			int roll = Stat.Random(1, 100);
+			if (roll <= wallShare)
+				return WALL_BLUEPRINT;
+			int rubbleThreshold = wallShare + (100 - wallShare) * 55 / 100;
+			return roll <= rubbleThreshold ? RUBBLE_BLUEPRINT : CRUMBLED_BLUEPRINT;
+		}
+
+		/// <summary>The zone's dominant painted-wall material (FEEL ROUND 2: the ring dresses
+		/// as the local geology). Null when the zone has no painted walls -- deposits keep
+		/// their sandstone and the sprite falls back to wall_rock.</summary>
+		private static string DominantWallPaint(Zone zone)
+		{
+			var counts = new Dictionary<string, int>();
+			foreach (GameObject obj in zone.GetObjects())
+			{
+				if (obj.Physics == null || !obj.Physics.Solid)
+					continue;
+				string paint = obj.GetTagOrStringProperty("PaintedWall");
+				if (paint.IsNullOrEmpty())
+					continue;
+				if (paint.Contains(","))
+					paint = paint.Split(',')[0];
+				counts[paint] = counts.TryGetValue(paint, out int n) ? n + 1 : 1;
+			}
+			string best = null;
+			int bestN = 0;
+			foreach (KeyValuePair<string, int> kv in counts)
+			{
+				if (kv.Value > bestN)
+				{
+					best = kv.Key;
+					bestN = kv.Value;
+				}
+			}
+			return best;
+		}
+
+		/// <summary>Which travel shell a disk cell belongs to (1..radius-1), or 0 for none.</summary>
+		private static int RingIndexOf(int dx, int dy, int radius)
+		{
+			for (int r = 1; r < radius; r++)
+			{
+				if (OnRing(dx, dy, r))
+					return r;
+			}
+			return 0;
 		}
 
 		/// <summary>The first solid, non-creature occupant of a cell -- the wall, for carving purposes.</summary>

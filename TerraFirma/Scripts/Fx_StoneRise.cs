@@ -107,71 +107,85 @@ namespace Cleo.TerraFirma.Scripts
 	/// (the game thread sleeps that long while the Unity side plays it out).</summary>
 	public static class Cleo_TerraFirma_StoneRiseFX
 	{
-		/// <summary>Candidate tile paths for the rising stone, probed against the sprite
-		/// manager's own atlas at first cast (the painted-wall naming varies by atlas tag and
-		/// extension across wall families -- resolve empirically, log the verdict). First =
-		/// the rock tileset's isolated-connectivity variant in the blueprint-literal form
-		/// (brinestalk precedent: Walls/wall_brinestalk-00000000.png).</summary>
-		private static readonly string[] TILE_CANDIDATES =
-		{
-			"Walls/wall_rock-00000000.png",
-			"Assets_Content_Textures_Walls_wall_rock-00000000.png",
-			"Assets_Content_Textures_Walls_wall_rock-00000000.bmp",
-			"Assets_Content_Textures_Tiles_wall_rock-00000000.bmp",
-			"Walls/wall_brinestalk-00000000.png",
-		};
+		/// <summary>Tile resolution, generalized to any painted-wall material (feel round 2:
+		/// the ring wears the zone's dominant wall). Candidates probed against the sprite
+		/// manager's atlas, verdict logged, result cached per material value. Naming forms
+		/// per the brinestalk blueprint literal (Walls/wall_brinestalk-00000000.png) plus the
+		/// atlas-tag variants seen in the wall families.</summary>
+		private static readonly Dictionary<string, string> ResolvedTiles = new Dictionary<string, string>();
 
-		private static string ResolvedTile;
-		private static bool ResolveTried;
-
-		private static string ResolveTile()
+		private static string ResolveTile(string paintValue)
 		{
-			if (ResolveTried)
-				return ResolvedTile;
-			ResolveTried = true;
-			foreach (string candidate in TILE_CANDIDATES)
+			if (paintValue.IsNullOrEmpty())
+				paintValue = "wall_rock";
+			if (ResolvedTiles.TryGetValue(paintValue, out string cached))
+				return cached;
+			string[] candidates =
+			{
+				"Walls/" + paintValue + "-00000000.png",
+				"Assets_Content_Textures_Walls_" + paintValue + "-00000000.png",
+				"Assets_Content_Textures_Walls_" + paintValue + "-00000000.bmp",
+				"Assets_Content_Textures_Tiles_" + paintValue + "-00000000.bmp",
+				"Walls/wall_rock-00000000.png", // the rock fallback so exotic materials still rise as stone
+			};
+			string resolved = null;
+			foreach (string candidate in candidates)
 			{
 				if (SpriteManager.TryGetTextureInfo(candidate, out _))
 				{
-					ResolvedTile = candidate;
-					Helpers.VerifyLog("FIS", $"anim tile RESOLVED: {candidate}");
-					return ResolvedTile;
+					resolved = candidate;
+					Helpers.VerifyLog("FIS", $"anim tile RESOLVED for '{paintValue}': {candidate}");
+					break;
 				}
 				Helpers.VerifyLog("FIS", $"anim tile rejected (not in atlas): {candidate}");
 			}
-			Helpers.VerifyLog("FIS", "anim tile UNRESOLVED -- no candidate in atlas, emergence sprites skipped");
-			return null;
+			if (resolved == null)
+				Helpers.VerifyLog("FIS", $"anim tile UNRESOLVED for '{paintValue}' -- emergence sprites skipped");
+			ResolvedTiles[paintValue] = resolved;
+			return resolved;
+		}
+
+		/// <summary>Everything the mutation's frame-pump loop needs to settle the cast in
+		/// sync with the sprites: per-cell moments (seconds from choreography start) and the
+		/// total run length.</summary>
+		public class Schedule
+		{
+			public float Total;
+			public Dictionary<Cell, float> SettleTimes = new Dictionary<Cell, float>(); // rim fabric materializes here
+			public Dictionary<Cell, float> GapTimes = new Dictionary<Cell, float>();    // gap sprites sink back here (dust cue)
 		}
 		// tempo dials (seconds)
-		private const float SHELL_SEC = 0.10f;   // wave-front travel per shell
-		private const float TRAVEL_RISE = 0.09f;
+		public const float SHELL_SEC = 0.10f;    // wave-front travel per shell (public: the wake scatter keys off it)
+		public const float TRAVEL_RISE = 0.09f;
 		private const float TRAVEL_HOLD = 0.03f;
 		private const float TRAVEL_SINK = 0.10f;
 		private const float RIM_STAGGER = 0.18f; // breakthrough spread ("softly", staggered)
 		private const float RIM_RISE = 0.14f;
+		private const float RIM_HOLD = 0.10f;    // held emergence before the real fabric takes over
 		private const float RIM_SINK = 0.06f;
 		// tile geometry (world units; a tile is ~24 tall -- floatingText's +12 half-tile offset)
 		private const float BURIED_DEPTH = 20f;
 		private const float TRAVEL_EMERGE = 9f;  // a low shoulder of stone
 		private const float RIM_EMERGE = 20f;    // near-full breakthrough
 
-		/// <summary>Returns total choreography seconds; 0 = nothing enqueued.</summary>
-		public static float Play(Cell origin, int radius, ICollection<Cell> reached, Func<int, int, int, bool> onRing)
+		/// <summary>Enqueues the emergence choreography and returns the settle schedule for
+		/// the mutation's frame-pump loop; null = nothing to animate (unseen cast). Gap cells
+		/// rise and SINK BACK (the sections the earth couldn't hold); everything else on the
+		/// rim rises, holds, and hands off to the real fabric at its own settle moment.</summary>
+		public static Schedule Play(Cell origin, int radius, ICollection<Cell> reached, ICollection<Cell> gaps, string paintValue, Func<int, int, int, bool> onRing)
 		{
 			if (origin == null)
-				return 0f;
+				return null;
 			GameManager gm = GameManager.Instance;
 			if (gm == null)
-				return 0f;
-			string tilePath = ResolveTile();
+				return null;
+			string tilePath = ResolveTile(paintValue);
 			if (tilePath == null)
-				return 0f;
+				return null;
 			IRenderable wallTile = new Cleo_TerraFirma_StoneTileRenderable(tilePath);
 			float rimStart = radius * SHELL_SEC;
-			// linger trimmed (feel note 2026-08-03: "lingers a bit too long on the last bit"):
-			// tail padding 0.20 -> 0.06, and rim pieces STAY UP into the handoff instead of
-			// sinking first -- the real fabric appears as the held sprites vanish.
-			float total = rimStart + RIM_STAGGER + RIM_RISE + 0.06f;
+			Schedule schedule = new Schedule();
+			schedule.Total = rimStart + RIM_STAGGER + RIM_RISE + RIM_HOLD + 0.04f;
 			int enqueued = 0;
 			foreach (Cell c in reached)
 			{
@@ -184,8 +198,17 @@ namespace Cleo.TerraFirma.Scripts
 				if (rim)
 				{
 					float delay = rimStart + 0.01f * Stat.Random(0, (int)(RIM_STAGGER * 100f));
-					float hold = total - delay - RIM_RISE; // every rim piece holds to the common end
-					CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(wallTile, basePos, delay, RIM_RISE, hold, RIM_SINK, BURIED_DEPTH, RIM_EMERGE, stayUp: true), async: true);
+					if (gaps != null && gaps.Contains(c))
+					{
+						// couldn't hold: rise, falter, sink back
+						CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(wallTile, basePos, delay, RIM_RISE, 0.04f, RIM_SINK, BURIED_DEPTH, RIM_EMERGE * 0.7f), async: true);
+						schedule.GapTimes[c] = delay + RIM_RISE + 0.04f;
+					}
+					else
+					{
+						CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(wallTile, basePos, delay, RIM_RISE, RIM_HOLD, RIM_SINK, BURIED_DEPTH, RIM_EMERGE, stayUp: true), async: true);
+						schedule.SettleTimes[c] = delay + RIM_RISE + RIM_HOLD;
+					}
 					enqueued++;
 					continue;
 				}
@@ -200,7 +223,7 @@ namespace Cleo.TerraFirma.Scripts
 					}
 				}
 			}
-			return enqueued > 0 ? total : 0f;
+			return enqueued > 0 ? schedule : null;
 		}
 	}
 }
