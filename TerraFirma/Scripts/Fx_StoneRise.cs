@@ -83,22 +83,27 @@ namespace Cleo.TerraFirma.Scripts
 
 	/// <summary>A self-authored renderable for the emergence sprite -- no RenderForUI middleman
 	/// (walls are painted at zone level and a fresh sample carries no tile; feel notes
-	/// 2026-08-03, two failed attempts). Sandstone's colors, our resolved tile.</summary>
+	/// 2026-08-03, two failed attempts). Colors follow the dominant material (feel round 3:
+	/// hardcoded sandstone red made every rising stone red in non-red zones).</summary>
 	public class Cleo_TerraFirma_StoneTileRenderable : IRenderable
 	{
 		private string TilePath;
+		private char Fg;
+		private char Detail;
 
-		public Cleo_TerraFirma_StoneTileRenderable(string tilePath)
+		public Cleo_TerraFirma_StoneTileRenderable(string tilePath, char fg, char detail)
 		{
 			TilePath = tilePath;
+			Fg = fg;
+			Detail = detail;
 		}
 
 		public string getTile() => TilePath;
 		public string getRenderString() => "#";
-		public string getColorString() => "&r";
-		public string getTileColor() => "&r";
-		public char getDetailColor() => 'W';
-		public ColorChars getColorChars() => new ColorChars { foreground = 'r', background = 'k', detail = 'W' };
+		public string getColorString() => "&" + Fg;
+		public string getTileColor() => "&" + Fg;
+		public char getDetailColor() => Detail;
+		public ColorChars getColorChars() => new ColorChars { foreground = Fg, background = 'k', detail = Detail };
 		public bool getHFlip() => false;
 		public bool getVFlip() => false;
 	}
@@ -172,7 +177,7 @@ namespace Cleo.TerraFirma.Scripts
 		/// the mutation's frame-pump loop; null = nothing to animate (unseen cast). Gap cells
 		/// rise and SINK BACK (the sections the earth couldn't hold); everything else on the
 		/// rim rises, holds, and hands off to the real fabric at its own settle moment.</summary>
-		public static Schedule Play(Cell origin, int radius, ICollection<Cell> reached, ICollection<Cell> gaps, string paintValue, Func<int, int, int, bool> onRing)
+		public static Schedule Play(Cell origin, int radius, ICollection<Cell> reached, ICollection<Cell> gaps, string paintValue, char paintFg, char paintDetail, Func<int, int, int, bool> onRing)
 		{
 			if (origin == null)
 				return null;
@@ -182,7 +187,7 @@ namespace Cleo.TerraFirma.Scripts
 			string tilePath = ResolveTile(paintValue);
 			if (tilePath == null)
 				return null;
-			IRenderable wallTile = new Cleo_TerraFirma_StoneTileRenderable(tilePath);
+			IRenderable wallTile = new Cleo_TerraFirma_StoneTileRenderable(tilePath, paintFg, paintDetail);
 			float rimStart = radius * SHELL_SEC;
 			Schedule schedule = new Schedule();
 			schedule.Total = rimStart + RIM_STAGGER + RIM_RISE + RIM_HOLD + 0.04f;

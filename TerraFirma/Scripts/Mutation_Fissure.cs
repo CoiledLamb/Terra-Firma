@@ -347,7 +347,7 @@ namespace XRL.World.Parts.Mutation
 			// (rubble -> crumbled wall -> fallen wall) spent as the rim deposits
 			int upgradeCredits = carvedMass;
 			int wallShare = GetWallShare(Level);
-			string dominantPaint = DominantWallPaint(zone);
+			string dominantPaint = DominantWallPaint(zone, out char paintFg, out char paintDetail);
 			int deposited = 0, debris = 0;
 			var deposits = new List<(Cell cell, string bp, float time)>();
 			foreach (Cell c in rim)
@@ -445,7 +445,7 @@ namespace XRL.World.Parts.Mutation
 			// with frozen smoke (feel round 2, note 1)
 			Cleo_TerraFirma_StoneRiseFX.Schedule schedule = null;
 			if (zone.IsActive() && origin.IsVisible())
-				schedule = Cleo_TerraFirma_StoneRiseFX.Play(origin, radius, reached, gaps, dominantPaint, OnRing);
+				schedule = Cleo_TerraFirma_StoneRiseFX.Play(origin, radius, reached, gaps, dominantPaint, paintFg, paintDetail, OnRing);
 			void Place((Cell cell, string bp, float time) plan)
 			{
 				if (plan.bp == WALL_BLUEPRINT || plan.bp == FIGURE_BLUEPRINT)
@@ -455,7 +455,13 @@ namespace XRL.World.Parts.Mutation
 					piece.SetStringProperty("PaintedWall", dominantPaint); // the ring dresses as the local geology
 				StampOwner(piece);
 				plan.cell.AddObject(piece);
-				SmokePuff(plan.cell);
+				// smoke thinned (feel round 3: "a bit too much smoke") -- fabric puffs light,
+				// wake scatter only sometimes
+				bool scatter = plan.bp != WALL_BLUEPRINT && plan.bp != CRUMBLED_BLUEPRINT && plan.bp != RUBBLE_BLUEPRINT;
+				if (!scatter)
+					SmokePuff(plan.cell, plan.bp == WALL_BLUEPRINT ? 3 : 2);
+				else if (40.in100())
+					SmokePuff(plan.cell, 2);
 			}
 			if (schedule != null)
 			{
@@ -533,11 +539,16 @@ namespace XRL.World.Parts.Mutation
 		}
 
 		/// <summary>The zone's dominant painted-wall material (FEEL ROUND 2: the ring dresses
-		/// as the local geology). Null when the zone has no painted walls -- deposits keep
-		/// their sandstone and the sprite falls back to wall_rock.</summary>
-		private static string DominantWallPaint(Zone zone)
+		/// as the local geology), plus that material's tile colors for the emergence sprite
+		/// (FEEL ROUND 3: hardcoded sandstone red made rising stone red everywhere). Null
+		/// paint = no walls in the zone; deposits keep sandstone, sprite falls back to
+		/// wall_rock in earthy ochre.</summary>
+		private static string DominantWallPaint(Zone zone, out char fg, out char detail)
 		{
+			fg = 'w';
+			detail = 'W';
 			var counts = new Dictionary<string, int>();
+			var samples = new Dictionary<string, GameObject>();
 			foreach (GameObject obj in zone.GetObjects())
 			{
 				if (obj.Physics == null || !obj.Physics.Solid)
@@ -548,6 +559,8 @@ namespace XRL.World.Parts.Mutation
 				if (paint.Contains(","))
 					paint = paint.Split(',')[0];
 				counts[paint] = counts.TryGetValue(paint, out int n) ? n + 1 : 1;
+				if (!samples.ContainsKey(paint))
+					samples[paint] = obj;
 			}
 			string best = null;
 			int bestN = 0;
@@ -558,6 +571,20 @@ namespace XRL.World.Parts.Mutation
 					best = kv.Key;
 					bestN = kv.Value;
 				}
+			}
+			if (best != null && samples.TryGetValue(best, out GameObject sample) && sample.Render != null)
+			{
+				string tc = sample.Render.TileColor;
+				if (tc.IsNullOrEmpty())
+					tc = sample.Render.ColorString;
+				if (!tc.IsNullOrEmpty())
+				{
+					int amp = tc.IndexOf('&');
+					if (amp >= 0 && amp + 1 < tc.Length)
+						fg = tc[amp + 1];
+				}
+				if (!sample.Render.DetailColor.IsNullOrEmpty())
+					detail = sample.Render.DetailColor[0];
 			}
 			return best;
 		}
@@ -636,11 +663,12 @@ namespace XRL.World.Parts.Mutation
 			return false;
 		}
 
-		/// <summary>Gray shade-glyph particles drifting up -- the dust of the heave.</summary>
-		private static void SmokePuff(Cell C)
+		/// <summary>Gray shade-glyph particles drifting up -- the dust of the heave. Count
+		/// trimmed 5 -> 2 default (feel round 3: "a bit too much smoke").</summary>
+		private static void SmokePuff(Cell C, int particles = 2)
 		{
 			C.ParticleBlip("&y*");
-			for (int i = 0; i < 5; i++)
+			for (int i = 0; i < particles; i++)
 			{
 				string glyph = SMOKE_COLORS[Stat.Random(0, SMOKE_COLORS.Length - 1)] + (char)(176 + Stat.Random(0, 2));
 				XRLCore.ParticleManager.AddSinusoidal(glyph, C.X, C.Y,
