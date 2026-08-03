@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cleo.TerraFirma.Scripts;
+using ConsoleLib.Console;
 using XRL.Core;
 using XRL.Rules;
+using XRL.UI;
 using XRL.World.Effects; // Stun (the wave's crowd control)
 using XRL.World.Parts;
 
@@ -26,6 +29,12 @@ namespace XRL.World.Parts.Mutation
 		// FEEL ROUND 1 (user, 2026-08-02): "walls feel too solid at lower levels - need more gaps"
 		// -- fixed 3 became a falling ladder; see GetGapCount. Crack-gates commented out same round.
 		// private const int CRACK_GATE_CHANCE = 50; // % per gap: the doors made of dice (BETA-HELD, feel round 1)
+		// ANIMATION PASS (user spec 2026-08-02/03, recipe in design/vfx-survey-2026-08-03.md):
+		// pulse-travel (two beats per shell, rubble-tile dip / wall-tile rise -- Burgeoning's own
+		// two-frame sprout swept radially), full-ring eruption with camera shake, settle. All
+		// beats are cosmetic replay over already-resolved mechanics. BEAT_MS = the tempo dial.
+		private const int BEAT_MS = 40;
+		private const int ERUPTION_BEAT_MS = 60;
 		// Calcify's verified "large stone impact" -- the wave's slam
 		private const string SLAM_SOUND = "Sounds/Throw/sfx_throwing_stone_large_impact";
 		private const string DEBRIS_BLUEPRINT = "Cleo_TerraFirma_Rock_Generic";
@@ -314,12 +323,20 @@ namespace XRL.World.Parts.Mutation
 				}
 			}
 
-			// ---- the ring: fabric on every reached, open rim cell, minus the gaps
+			// ---- the ring: fabric on every reached, open rim cell, minus the gaps.
+			// Deposits are PLANNED here and applied after the animation plays -- the rim must
+			// stay visually empty until the eruption beat resolves into stone (arrival, not
+			// pre-spoiled architecture).
 			var rim = new List<Cell>();
+			var rimAll = new List<Cell>(); // full circle incl. gaps-to-be, for the eruption stamp
 			foreach (Cell c in reached)
 			{
-				if (OnRing(c.X - origin.X, c.Y - origin.Y, radius) && !c.IsSolid())
-					rim.Add(c);
+				if (OnRing(c.X - origin.X, c.Y - origin.Y, radius))
+				{
+					rimAll.Add(c);
+					if (!c.IsSolid())
+						rim.Add(c);
+				}
 			}
 			var gaps = new List<Cell>();
 			for (int g = 0; g < GetGapCount(Level) && rim.Count > 0; g++)
@@ -332,12 +349,13 @@ namespace XRL.World.Parts.Mutation
 			// (rubble -> crumbled wall -> fallen wall) spent as the rim deposits
 			int upgradeCredits = carvedMass;
 			int deposited = 0, debris = 0;
+			var deposits = new List<KeyValuePair<Cell, string>>();
 			foreach (Cell c in rim)
 			{
 				if (StillHoldsCombatant(c))
 				{
 					// no burying the thunderdome's audience: loose stone instead of fabric
-					c.AddObject(GameObject.Create(DEBRIS_BLUEPRINT));
+					deposits.Add(new KeyValuePair<Cell, string>(c, DEBRIS_BLUEPRINT));
 					debris++;
 					continue;
 				}
@@ -347,12 +365,7 @@ namespace XRL.World.Parts.Mutation
 					fabric = fabric == RUBBLE_BLUEPRINT ? CRUMBLED_BLUEPRINT : WALL_BLUEPRINT;
 					upgradeCredits--;
 				}
-				if (fabric == WALL_BLUEPRINT)
-					SweepLooseItemsAside(c); // a wall owns its whole tile: loot spills out the side, never vanishes
-				GameObject piece = GameObject.Create(fabric);
-				StampOwner(piece);
-				c.AddObject(piece);
-				SmokePuff(c);
+				deposits.Add(new KeyValuePair<Cell, string>(c, fabric));
 				deposited++;
 			}
 			// gaps: at depth, sometimes the door that shoots back
@@ -361,9 +374,7 @@ namespace XRL.World.Parts.Mutation
 			{
 				if (!geyserPlaced && GetGeyserChance(Level).in100() && !StillHoldsCombatant(gap))
 				{
-					GameObject geyser = GameObject.Create(GetGeyserBlueprint(Level));
-					StampOwner(geyser);
-					gap.AddObject(geyser);
+					deposits.Add(new KeyValuePair<Cell, string>(gap, GetGeyserBlueprint(Level)));
 					geyserPlaced = true;
 					Helpers.VerifyLog("FIS", $"RING geyser in gap @({gap.X},{gap.Y}): {GetGeyserBlueprint(Level)}");
 					continue;
@@ -372,9 +383,7 @@ namespace XRL.World.Parts.Mutation
 				   -- the crack-gate under gaps. Restore with CRACK_GATE_CHANCE.
 				if (CRACK_GATE_CHANCE.in100())
 				{
-					GameObject crack = GameObject.Create(CRACK_BLUEPRINT);
-					StampOwner(crack);
-					gap.AddObject(crack);
+					deposits.Add(new KeyValuePair<Cell, string>(gap, CRACK_BLUEPRINT));
 					Helpers.VerifyLog("FIS", $"RING crack-gate in gap @({gap.X},{gap.Y})");
 				}
 				*/
@@ -389,9 +398,7 @@ namespace XRL.World.Parts.Mutation
 					string bp = PopulationManager.RollOneFrom(SALVAGE_TABLE)?.Blueprint;
 					if (bp != null)
 					{
-						GameObject rock = GameObject.Create(bp);
-						StampOwner(rock);
-						c.AddObject(rock);
+						deposits.Add(new KeyValuePair<Cell, string>(c, bp));
 						salvaged++;
 						Helpers.VerifyLog("FIS", $"RING salvage @({c.X},{c.Y}): {bp}");
 					}
@@ -403,14 +410,101 @@ namespace XRL.World.Parts.Mutation
 				Cell c = rim[Stat.Random(0, rim.Count - 1)];
 				if (!StillHoldsCombatant(c))
 				{
-					SweepLooseItemsAside(c);
-					GameObject figure = GameObject.Create(FIGURE_BLUEPRINT);
-					c.AddObject(figure);
+					deposits.Add(new KeyValuePair<Cell, string>(c, FIGURE_BLUEPRINT));
 					Helpers.VerifyLog("FIS", $"RING FIGURE raised @({c.X},{c.Y})");
 				}
 			}
+
+			// ---- the animation: cosmetic replay over the resolved cast (skipped when unseen)
+			PlayWaveAnimation(origin, zone, radius, reached, rimAll);
+
+			// ---- settle: the rim resolves into stone; the gaps crumble away with smoke
+			foreach (KeyValuePair<Cell, string> plan in deposits)
+			{
+				if (plan.Value == WALL_BLUEPRINT || plan.Value == FIGURE_BLUEPRINT)
+					SweepLooseItemsAside(plan.Key); // a wall owns its whole tile: loot spills out the side, never vanishes
+				GameObject piece = GameObject.Create(plan.Value);
+				StampOwner(piece);
+				plan.Key.AddObject(piece);
+				SmokePuff(plan.Key);
+			}
+			foreach (Cell gap in gaps)
+				SmokePuff(gap); // the sections the earth couldn't hold
 			Helpers.VerifyLog("FIS", $"RING complete: {deposited} fabric, {gaps.Count} gap(s), {debris} debris-for-occupied, {salvaged} salvage, carvedMass={carvedMass} (credits left {upgradeCredits}), figure={(GetFigureChance(Level) > 0 ? "rolled" : "n/a")}");
 			return base.HandleEvent(E);
+		}
+		#endregion
+
+		#region Animation
+		/// <summary>The wave, drawn (spec: user 2026-08-02/03; recipe: design/vfx-survey-2026-08-03.md).
+		/// Scrap-buffer scan per StunningForce/the rays: two beats per shell -- half rise (the
+		/// wall's own tile, gold) then quarter dip (rubble's tile, ochre) -- then the full ring
+		/// erupts bright with a camera shake, and the settle happens in the real zone after.
+		/// Base textures only (user direction): the tiles are read off the fabric blueprints, so
+		/// classic view gets CP437 half/full blocks and tile view gets the actual wall art.</summary>
+		private void PlayWaveAnimation(Cell origin, Zone zone, int radius, HashSet<Cell> reached, List<Cell> rimAll)
+		{
+			if (!zone.IsActive() || !origin.IsVisible())
+				return;
+			string wallTile = BlueprintTile(WALL_BLUEPRINT);
+			string rubbleTile = BlueprintTile(RUBBLE_BLUEPRINT);
+			UnityEngine.Color ochre = ColorUtility.ColorMap['w'];
+			UnityEngine.Color gold = ColorUtility.ColorMap['W'];
+			UnityEngine.Color flash = ColorUtility.ColorMap['Y'];
+			ScreenBuffer buf = ScreenBuffer.GetScrapBuffer1(bLoadFromCurrent: true);
+			TextConsole console = Popup._TextConsole;
+			for (int r = 1; r <= radius; r++)
+			{
+				for (int phase = 0; phase < 2; phase++)
+				{
+					XRLCore.Core.RenderBaseToBuffer(buf);
+					foreach (Cell c in reached)
+					{
+						if (!OnRing(c.X - origin.X, c.Y - origin.Y, r) || !c.IsVisible())
+							continue;
+						if (phase == 0)
+							Stamp(buf, c, wallTile, (char)220, gold); // half rise
+						else
+							Stamp(buf, c, rubbleTile, (char)176, ochre); // quarter dip
+					}
+					console.DrawBuffer(buf);
+					Thread.Sleep(BEAT_MS);
+				}
+			}
+			// eruption: the whole circle stands up at once, and the ground remembers it
+			ParentObject.PlayWorldSound(SLAM_SOUND, 1f, Combat: true);
+			CombatJuice.cameraShake(0.35f);
+			for (int k = 0; k < 2; k++)
+			{
+				XRLCore.Core.RenderBaseToBuffer(buf);
+				foreach (Cell c in rimAll)
+				{
+					if (c.IsVisible())
+						Stamp(buf, c, wallTile, (char)219, k == 0 ? flash : gold);
+				}
+				console.DrawBuffer(buf);
+				Thread.Sleep(ERUPTION_BEAT_MS);
+			}
+		}
+
+		private static void Stamp(ScreenBuffer buf, Cell c, string tile, char glyph, UnityEngine.Color color)
+		{
+			ConsoleChar ch = buf[c.X, c.Y];
+			if (ch == null)
+				return;
+			ch.Char = glyph;
+			if (!tile.IsNullOrEmpty())
+				ch.Tile = tile;
+			ch.Foreground = color;
+			ch.TileForeground = color;
+			ch.Detail = color;
+		}
+
+		/// <summary>A blueprint's tile path, inheritance-resolved -- the wave wears the ring's own materials.</summary>
+		private static string BlueprintTile(string bp)
+		{
+			GameObjectBlueprint def = GameObjectFactory.Factory.GetBlueprintIfExists(bp);
+			return def?.GetPartParameter<string>("Render", "Tile");
 		}
 		#endregion
 
