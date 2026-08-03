@@ -448,18 +448,69 @@ namespace XRL.World.Parts.Mutation
 				schedule = Cleo_TerraFirma_StoneRiseFX.Play(origin, radius, reached, gaps, dominantPaint, paintFg, paintDetail, OnRing);
 			void Place((Cell cell, string bp, float time) plan)
 			{
-				if (plan.bp == WALL_BLUEPRINT || plan.bp == FIGURE_BLUEPRINT)
+				string bp = plan.bp;
+				// walls over water (feel round 3: "the walls look weird when cast over water"):
+				// the heave DISPLACES the pool into an adjacent dry cell -- water is currency,
+				// never destroyed. If every neighbor is wet or solid, the deep can't be dammed:
+				// the wall downgrades to rubble breaking the surface.
+				if (bp == WALL_BLUEPRINT)
+				{
+					GameObject liquid = null;
+					foreach (GameObject o in plan.cell.Objects)
+					{
+						if (o.IsOpenLiquidVolume())
+						{
+							liquid = o;
+							break;
+						}
+					}
+					if (liquid != null)
+					{
+						Cell dry = null;
+						foreach (Cell adj in plan.cell.GetLocalAdjacentCells())
+						{
+							if (adj.IsSolid())
+								continue;
+							bool wet = false;
+							foreach (GameObject o in adj.Objects)
+							{
+								if (o.IsOpenLiquidVolume())
+								{
+									wet = true;
+									break;
+								}
+							}
+							if (!wet)
+							{
+								dry = adj;
+								break;
+							}
+						}
+						if (dry != null)
+						{
+							liquid.RemoveFromContext();
+							dry.AddObject(liquid);
+							Helpers.VerifyLog("FIS", $"wall over liquid @({plan.cell.X},{plan.cell.Y}): pool displaced to ({dry.X},{dry.Y})");
+						}
+						else
+						{
+							bp = RUBBLE_BLUEPRINT;
+							Helpers.VerifyLog("FIS", $"wall over liquid @({plan.cell.X},{plan.cell.Y}): no dry neighbor, downgraded to rubble");
+						}
+					}
+				}
+				if (bp == WALL_BLUEPRINT || bp == FIGURE_BLUEPRINT)
 					SweepLooseItemsAside(plan.cell); // a wall owns its whole tile: loot spills out the side, never vanishes
-				GameObject piece = GameObject.Create(plan.bp);
-				if (plan.bp == WALL_BLUEPRINT && !dominantPaint.IsNullOrEmpty())
+				GameObject piece = GameObject.Create(bp);
+				if (bp == WALL_BLUEPRINT && !dominantPaint.IsNullOrEmpty())
 					piece.SetStringProperty("PaintedWall", dominantPaint); // the ring dresses as the local geology
 				StampOwner(piece);
 				plan.cell.AddObject(piece);
 				// smoke thinned (feel round 3: "a bit too much smoke") -- fabric puffs light,
 				// wake scatter only sometimes
-				bool scatter = plan.bp != WALL_BLUEPRINT && plan.bp != CRUMBLED_BLUEPRINT && plan.bp != RUBBLE_BLUEPRINT;
+				bool scatter = bp != WALL_BLUEPRINT && bp != CRUMBLED_BLUEPRINT && bp != RUBBLE_BLUEPRINT;
 				if (!scatter)
-					SmokePuff(plan.cell, plan.bp == WALL_BLUEPRINT ? 3 : 2);
+					SmokePuff(plan.cell, bp == WALL_BLUEPRINT ? 3 : 2);
 				else if (40.in100())
 					SmokePuff(plan.cell, 2);
 			}
