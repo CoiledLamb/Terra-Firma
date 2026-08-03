@@ -605,6 +605,11 @@ namespace XRL.World.Parts.Mutation
 			{
 				if (obj.Physics == null || !obj.Physics.Solid)
 					continue;
+				// only true geology dresses the ring (feel round 3 screenshot: a Joppa-outskirts
+				// cast came out brinestalk-orange -- the scan was counting cane fencing and
+				// masonry). Same classifier as the carve: the wave wears what it could carve.
+				if (!obj.HasPart(CARVABLE_PART))
+					continue;
 				string paint = obj.GetTagOrStringProperty("PaintedWall");
 				if (paint.IsNullOrEmpty())
 					continue;
