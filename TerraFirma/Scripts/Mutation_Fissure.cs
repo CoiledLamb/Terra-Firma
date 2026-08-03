@@ -347,7 +347,7 @@ namespace XRL.World.Parts.Mutation
 			// (rubble -> crumbled wall -> fallen wall) spent as the rim deposits
 			int upgradeCredits = carvedMass;
 			int wallShare = GetWallShare(Level);
-			string dominantPaint = DominantWallPaint(zone, out char paintFg, out char paintDetail);
+			string dominantPaint = DominantWallPaint(zone, out char paintFg, out char paintDetail, out char paintBg);
 			int deposited = 0, debris = 0;
 			var deposits = new List<(Cell cell, string bp, float time)>();
 			foreach (Cell c in rim)
@@ -445,7 +445,7 @@ namespace XRL.World.Parts.Mutation
 			// with frozen smoke (feel round 2, note 1)
 			Cleo_TerraFirma_StoneRiseFX.Schedule schedule = null;
 			if (zone.IsActive() && origin.IsVisible())
-				schedule = Cleo_TerraFirma_StoneRiseFX.Play(origin, radius, reached, gaps, dominantPaint, paintFg, paintDetail, OnRing);
+				schedule = Cleo_TerraFirma_StoneRiseFX.Play(origin, radius, reached, gaps, dominantPaint, paintFg, paintDetail, paintBg, OnRing);
 			void Place((Cell cell, string bp, float time) plan)
 			{
 				string bp = plan.bp;
@@ -594,10 +594,11 @@ namespace XRL.World.Parts.Mutation
 		/// (FEEL ROUND 3: hardcoded sandstone red made rising stone red everywhere). Null
 		/// paint = no walls in the zone; deposits keep sandstone, sprite falls back to
 		/// wall_rock in earthy ochre.</summary>
-		private static string DominantWallPaint(Zone zone, out char fg, out char detail)
+		private static string DominantWallPaint(Zone zone, out char fg, out char detail, out char bg)
 		{
 			fg = 'w';
 			detail = 'W';
+			bg = 'k'; // solid black backing by default -- the sprite renders opaque either way
 			var counts = new Dictionary<string, int>();
 			var samples = new Dictionary<string, GameObject>();
 			foreach (GameObject obj in zone.GetObjects())
@@ -636,6 +637,15 @@ namespace XRL.World.Parts.Mutation
 				}
 				if (!sample.Render.DetailColor.IsNullOrEmpty())
 					detail = sample.Render.DetailColor[0];
+				// the material's own background (the '^' half of ColorString), for the sprite's
+				// opaque backing -- walls render as solid blocks, the rising stone should too
+				string cs = sample.Render.ColorString;
+				if (!cs.IsNullOrEmpty())
+				{
+					int caret = cs.IndexOf('^');
+					if (caret >= 0 && caret + 1 < cs.Length)
+						bg = cs[caret + 1];
+				}
 			}
 			return best;
 		}

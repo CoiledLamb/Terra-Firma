@@ -47,7 +47,10 @@ namespace Cleo.TerraFirma.Scripts
 
 		public override void start()
 		{
-			Target = SpriteManager.GetPooledSprite(Tile, Transparent: true);
+			// OPAQUE (feel round 3: transparent backing let water/floor show through the tile
+			// while it rose -- "the occluding bit"): the sprite renders as a solid block, the
+			// way standing walls do, so the rising stone reads as mass, not a cutout.
+			Target = SpriteManager.GetPooledSprite(Tile, Transparent: false);
 			Transform transform = Target.gameObject.transform;
 			transform.SetParent(GameManager.Instance.TileRoot.transform);
 			transform.position = Base + new Vector3(0f, BuriedY, 100f); // parked behind the map until its cue
@@ -90,20 +93,22 @@ namespace Cleo.TerraFirma.Scripts
 		private string TilePath;
 		private char Fg;
 		private char Detail;
+		private char Bg;
 
-		public Cleo_TerraFirma_StoneTileRenderable(string tilePath, char fg, char detail)
+		public Cleo_TerraFirma_StoneTileRenderable(string tilePath, char fg, char detail, char bg)
 		{
 			TilePath = tilePath;
 			Fg = fg;
 			Detail = detail;
+			Bg = bg;
 		}
 
 		public string getTile() => TilePath;
 		public string getRenderString() => "#";
-		public string getColorString() => "&" + Fg;
-		public string getTileColor() => "&" + Fg;
+		public string getColorString() => "&" + Fg + "^" + Bg;
+		public string getTileColor() => "&" + Fg + "^" + Bg;
 		public char getDetailColor() => Detail;
-		public ColorChars getColorChars() => new ColorChars { foreground = Fg, background = 'k', detail = Detail };
+		public ColorChars getColorChars() => new ColorChars { foreground = Fg, background = Bg, detail = Detail };
 		public bool getHFlip() => false;
 		public bool getVFlip() => false;
 	}
@@ -177,7 +182,7 @@ namespace Cleo.TerraFirma.Scripts
 		/// the mutation's frame-pump loop; null = nothing to animate (unseen cast). Gap cells
 		/// rise and SINK BACK (the sections the earth couldn't hold); everything else on the
 		/// rim rises, holds, and hands off to the real fabric at its own settle moment.</summary>
-		public static Schedule Play(Cell origin, int radius, ICollection<Cell> reached, ICollection<Cell> gaps, string paintValue, char paintFg, char paintDetail, Func<int, int, int, bool> onRing)
+		public static Schedule Play(Cell origin, int radius, ICollection<Cell> reached, ICollection<Cell> gaps, string paintValue, char paintFg, char paintDetail, char paintBg, Func<int, int, int, bool> onRing)
 		{
 			if (origin == null)
 				return null;
@@ -187,7 +192,7 @@ namespace Cleo.TerraFirma.Scripts
 			string tilePath = ResolveTile(paintValue);
 			if (tilePath == null)
 				return null;
-			IRenderable wallTile = new Cleo_TerraFirma_StoneTileRenderable(tilePath, paintFg, paintDetail);
+			IRenderable wallTile = new Cleo_TerraFirma_StoneTileRenderable(tilePath, paintFg, paintDetail, paintBg);
 			float rimStart = radius * SHELL_SEC;
 			Schedule schedule = new Schedule();
 			schedule.Total = rimStart + RIM_STAGGER + RIM_RISE + RIM_HOLD + 0.04f;
