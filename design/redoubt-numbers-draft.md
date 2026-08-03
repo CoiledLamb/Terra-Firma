@@ -55,6 +55,22 @@ Feel-session lever: if high-level casters should remodel more freely, the Burgeo
    commented in the cast, `CRACK_GATE_CHANCE` const held with it; the crack floor object
    itself stays live elsewhere — tfcrack still covers it).
 
+## Feel round 2 (2026-08-03, user, all built + deployed same day)
+
+1. Frame-pump settle: choreography and world render now interleave (the rays' draw-and-
+   sleep idiom) -- each rim piece materializes at its own breakthrough moment with its own
+   smoke; gap sprites rise and SINK BACK. Fixes "rocks just appear / smoke all at the end".
+2. Interior wake scatter: ~15% of interior cells get loose stone in the wave's wake
+   (10% plain stone / 3% pebbles / 2% MediumBoulder, timed to shell passage). Floor-painting
+   version noted as possible future dial, not built.
+3. **Salvage + baboon + geyser BETA-HELD ("all salvage + baboon and geyser, for now" --
+   reconsider once the mutation is functioning). The figure STAYS.**
+4. **Wall share 10 -> 75 by band with growing variance (user numbers: 10/30/55/75 base,
+   +/-5/8/12/15 rolled per cast)**; remainder splits 55/45 rubble/crumbled. **The ring
+   dresses as the zone's dominant painted wall** (modal PaintedWall value stamped on
+   deposited walls, zone painter renders connectivity; emergence sprite resolves the same
+   material's isolated tile; sandstone fallback in wall-less zones).
+
 ## Deliberate v1 exclusions
 
 - Item-plowing (wave ignores loose items — RULED, revisit post-beta if the wave feels like
