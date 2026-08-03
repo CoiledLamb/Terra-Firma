@@ -445,30 +445,13 @@ namespace XRL.World.Parts.Mutation
 		{
 			if (!zone.IsActive() || !origin.IsVisible())
 				return;
-			GameObject sample = GameObject.Create(WALL_BLUEPRINT);
-			// Walls carry NO blueprint tile -- the zone painter assigns connectivity tiles at
-			// render time from the PaintedWall tag (ZoneManager.PaintWall, decompiled 2026-08-03:
-			// atlas + value + '-' + 8 neighbor bits + extension). A rising wave piece is a lone
-			// wall, so paint the sample exactly as the painter would paint an isolated one:
-			// the -00000000 variant of the wall's own rock tileset.
-			if (sample?.Render != null && sample.Render.Tile.IsNullOrEmpty())
-			{
-				string paint = sample.GetTagOrStringProperty("PaintedWall");
-				if (!paint.IsNullOrEmpty())
-				{
-					string sub = paint.Contains(",") ? paint.Split(',')[0] : paint;
-					sample.Render.Tile = sample.GetTagOrStringProperty("PaintedWallAtlas", "Assets_Content_Textures_Tiles_")
-						+ sub + "-00000000"
-						+ sample.GetTagOrStringProperty("PaintedWallExtension", ".bmp");
-				}
-			}
-			ConsoleLib.Console.IRenderable wallTile = sample?.RenderForUI();
-			sample?.Obliterate();
-			if (wallTile == null)
-				return;
+			// Tile selection lives in the FX class now: walls are painted at zone level (no
+			// blueprint tile), so the sprite's rock tile is resolved at runtime against the
+			// atlas from a probed candidate list -- see Cleo_TerraFirma_StoneRiseFX.ResolveTile
+			// and the FIS "anim tile" log lines it emits.
 			ParentObject.PlayWorldSound(SLAM_SOUND, 1f, Combat: true);
 			CombatJuice.cameraShake(0.3f); // the ground complains while the wave runs
-			float total = Cleo_TerraFirma_StoneRiseFX.Play(origin, radius, reached, wallTile, OnRing);
+			float total = Cleo_TerraFirma_StoneRiseFX.Play(origin, radius, reached, OnRing);
 			if (total > 0f)
 				Thread.Sleep((int)(total * 1000f) + 60); // Unity plays the sprites while we hold the turn
 		}

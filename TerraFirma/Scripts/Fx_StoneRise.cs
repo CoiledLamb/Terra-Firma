@@ -81,10 +81,67 @@ namespace Cleo.TerraFirma.Scripts
 		}
 	}
 
+	/// <summary>A self-authored renderable for the emergence sprite -- no RenderForUI middleman
+	/// (walls are painted at zone level and a fresh sample carries no tile; feel notes
+	/// 2026-08-03, two failed attempts). Sandstone's colors, our resolved tile.</summary>
+	public class Cleo_TerraFirma_StoneTileRenderable : IRenderable
+	{
+		private string TilePath;
+
+		public Cleo_TerraFirma_StoneTileRenderable(string tilePath)
+		{
+			TilePath = tilePath;
+		}
+
+		public string getTile() => TilePath;
+		public string getRenderString() => "#";
+		public string getColorString() => "&r";
+		public string getTileColor() => "&r";
+		public char getDetailColor() => 'W';
+		public ColorChars getColorChars() => new ColorChars { foreground = 'r', background = 'k', detail = 'W' };
+		public bool getHFlip() => false;
+		public bool getVFlip() => false;
+	}
+
 	/// <summary>Enqueues the whole cast's emergence choreography and reports its total length
 	/// (the game thread sleeps that long while the Unity side plays it out).</summary>
 	public static class Cleo_TerraFirma_StoneRiseFX
 	{
+		/// <summary>Candidate tile paths for the rising stone, probed against the sprite
+		/// manager's own atlas at first cast (the painted-wall naming varies by atlas tag and
+		/// extension across wall families -- resolve empirically, log the verdict). First =
+		/// the rock tileset's isolated-connectivity variant in the blueprint-literal form
+		/// (brinestalk precedent: Walls/wall_brinestalk-00000000.png).</summary>
+		private static readonly string[] TILE_CANDIDATES =
+		{
+			"Walls/wall_rock-00000000.png",
+			"Assets_Content_Textures_Walls_wall_rock-00000000.png",
+			"Assets_Content_Textures_Walls_wall_rock-00000000.bmp",
+			"Assets_Content_Textures_Tiles_wall_rock-00000000.bmp",
+			"Walls/wall_brinestalk-00000000.png",
+		};
+
+		private static string ResolvedTile;
+		private static bool ResolveTried;
+
+		private static string ResolveTile()
+		{
+			if (ResolveTried)
+				return ResolvedTile;
+			ResolveTried = true;
+			foreach (string candidate in TILE_CANDIDATES)
+			{
+				if (SpriteManager.TryGetTextureInfo(candidate, out _))
+				{
+					ResolvedTile = candidate;
+					Helpers.VerifyLog("FIS", $"anim tile RESOLVED: {candidate}");
+					return ResolvedTile;
+				}
+				Helpers.VerifyLog("FIS", $"anim tile rejected (not in atlas): {candidate}");
+			}
+			Helpers.VerifyLog("FIS", "anim tile UNRESOLVED -- no candidate in atlas, emergence sprites skipped");
+			return null;
+		}
 		// tempo dials (seconds)
 		private const float SHELL_SEC = 0.10f;   // wave-front travel per shell
 		private const float TRAVEL_RISE = 0.09f;
@@ -99,13 +156,17 @@ namespace Cleo.TerraFirma.Scripts
 		private const float RIM_EMERGE = 20f;    // near-full breakthrough
 
 		/// <summary>Returns total choreography seconds; 0 = nothing enqueued.</summary>
-		public static float Play(Cell origin, int radius, ICollection<Cell> reached, IRenderable wallTile, Func<int, int, int, bool> onRing)
+		public static float Play(Cell origin, int radius, ICollection<Cell> reached, Func<int, int, int, bool> onRing)
 		{
-			if (origin == null || wallTile == null)
+			if (origin == null)
 				return 0f;
 			GameManager gm = GameManager.Instance;
 			if (gm == null)
 				return 0f;
+			string tilePath = ResolveTile();
+			if (tilePath == null)
+				return 0f;
+			IRenderable wallTile = new Cleo_TerraFirma_StoneTileRenderable(tilePath);
 			float rimStart = radius * SHELL_SEC;
 			// linger trimmed (feel note 2026-08-03: "lingers a bit too long on the last bit"):
 			// tail padding 0.20 -> 0.06, and rim pieces STAY UP into the handoff instead of
