@@ -109,6 +109,16 @@ namespace XRL.World.Parts.Mutation
 		/// <summary>Cells of natural stone the wave chews through along any path; full radius at band 4.</summary>
 		public static int GetCarveDepth(int Lv) => GetBand(Lv) >= 4 ? GetRingRadius(Lv) : GetBand(Lv);
 
+		/// <summary>Penetration bonus of the wave's bite against wall AV (carve-as-attack,
+		/// RULED 2026-08-04; Burrowing Claws' wall-pen precedent of 3x level): soft sedimentary
+		/// stone (AV 6-10) answers from L1, marble (AV 25) asks for band 3, granite (AV 40)
+		/// shrugs at any level a mortal reaches. Draft dial, feel-session re-dial reserved.</summary>
+		public static int GetCarvePV(int Lv) => 6 + 3 * Lv;
+
+		/// <summary>% of a wall's MAX hit points torn away per penetration: three pens fell any
+		/// wall, one or two leave it standing damaged -- "some walls are leftover".</summary>
+		public const int CARVE_PCT_PER_PEN = 34;
+
 		public static string GetWaveDamage(int Lv)
 		{
 			switch (GetBand(Lv))
@@ -213,10 +223,14 @@ namespace XRL.World.Parts.Mutation
 			Helpers.VerifyLog("FIS", $"REDOUBT cast by {ParentObject.Blueprint} Lv{Level}: radius={radius}, carveDepth={carveDepth}, damage={GetWaveDamage(Level)}, stun={GetStunRounds(Level)}r DC{GetStunSaveDC(Level)}");
 
 			// ---- reach + carve: ray from origin to every disk cell; along any ray the wave
-			// penetrates at most carveDepth natural-stone cells and stops dead at the first
-			// constructed wall. Cells beyond the stop are unreached (no push, no ring there).
+			// bites at most carveDepth natural-stone cells and stops dead at the first
+			// constructed wall OR the first natural wall that shrugs its attack (carve-as-attack,
+			// RULED 2026-08-04: the bite is a penetration roll vs the wall's AV, resolved the
+			// first time any ray reaches the wall; every later ray reuses the outcome). Cells
+			// beyond a stop are unreached (no push, no ring there).
 			var reached = new HashSet<Cell>();
-			var carved = new HashSet<Cell>();
+			var carved = new HashSet<Cell>();      // walls that FELL -- these feed the ring's mass credits
+			var wallFate = new Dictionary<Cell, bool>(); // every attacked wall cell -> did it fall?
 			for (int dx = -radius; dx <= radius; dx++)
 			{
 				for (int dy = -radius; dy <= radius; dy++)
@@ -231,11 +245,23 @@ namespace XRL.World.Parts.Mutation
 					List<Point> ray = Zone.Line(origin.X, origin.Y, target.X, target.Y);
 					int wallsBitten = 0;
 					bool blocked = false;
-					var rayCarves = new List<Cell>();
 					for (int i = 1; i < ray.Count; i++) // skip the origin point
 					{
 						Cell step = zone.GetCell(ray[i].X, ray[i].Y);
 						if (step == null) { blocked = true; break; }
+						// a wall another ray already resolved: a fallen one still spends THIS
+						// ray's bite (unspent budgets must not chain through breaches -- the
+						// full-row corridor bug), a standing one blocks outright
+						if (wallFate.TryGetValue(step, out bool fell))
+						{
+							if (!fell || wallsBitten >= carveDepth)
+							{
+								blocked = true;
+								break;
+							}
+							wallsBitten++;
+							continue;
+						}
 						if (step.IsSolid())
 						{
 							if (wallsBitten >= carveDepth)
@@ -243,28 +269,25 @@ namespace XRL.World.Parts.Mutation
 								blocked = true; // the bite is spent
 								break;
 							}
-							// a cell an earlier ray already claimed still spends THIS ray's bite --
-							// exempting it let straight corridors chain one-cell budgets into full-row
-							// carves (and east chewed deeper than west by iteration order alone)
-							if (carved.Contains(step))
-							{
-								wallsBitten++;
-								continue;
-							}
 							GameObject wall = GetSolidObject(step);
 							if (wall == null || !IsCarvableStone(wall))
 							{
 								blocked = true; // the stone doesn't answer
 								break;
 							}
+							bool died = WaveBitesWall(wall, step);
+							wallFate[step] = died;
+							if (!died)
+							{
+								blocked = true; // the stone held -- a leftover wall, and the wave breaks on it
+								break;
+							}
 							wallsBitten++;
-							rayCarves.Add(step);
+							carved.Add(step);
 						}
 					}
 					if (blocked)
 						continue;
-					foreach (Cell c in rayCarves)
-						carved.Add(c);
 					// every cell along a clean ray is reached (the wave passes through it)
 					for (int i = 1; i < ray.Count; i++)
 					{
@@ -274,19 +297,7 @@ namespace XRL.World.Parts.Mutation
 					}
 				}
 			}
-			// physically carve: clean removal, no drops -- the mass reappears as ring fabric
-			int carvedMass = 0;
-			foreach (Cell c in carved)
-			{
-				GameObject wall = GetSolidObject(c);
-				if (wall != null)
-				{
-					Helpers.VerifyLog("FIS", $"CARVE @({c.X},{c.Y}): {wall.Blueprint}");
-					wall.Obliterate();
-					carvedMass++;
-					SmokePuff(c);
-				}
-			}
+			int carvedMass = carved.Count; // the fallen reappear as ring fabric
 
 			// ---- the wave: damage + push + stun-if-moved, working outward so inner creatures
 			// vacate before outer ones are considered. Items are untouched (loot rule, ruled).
@@ -685,6 +696,35 @@ namespace XRL.World.Parts.Mutation
 		{
 			Cleo_TerraFirma_StoneshaperWallProperties props = wall?.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>();
 			return props != null && props.MaterialType == "stone" && props.Natural;
+		}
+
+		/// <summary>The wave's bite is an ATTACK, not an edit (RULED 2026-08-04, user: "rather
+		/// than having it autonomously destroy walls, could we have it make an attack against
+		/// the walls armor? so the end result is similar but some walls are leftover"):
+		/// penetration roll vs the wall's AV, each penetration tearing away a share of the
+		/// wall's MAX hit points -- percent-of-max is the Burrowing Claws wall grammar, so
+		/// granite's five-digit health means granite endurance, not granite bookkeeping. Zero
+		/// penetrations: the stone shrugs, no damage, and the wave breaks on it. Returns
+		/// whether the wall fell.</summary>
+		private bool WaveBitesWall(GameObject wall, Cell c)
+		{
+			int av = wall.Stat("AV");
+			int pv = GetCarvePV(Level);
+			int pens = Stat.RollDamagePenetrations(av, pv, pv);
+			if (pens <= 0)
+			{
+				Helpers.VerifyLog("FIS", $"CARVE attack @({c.X},{c.Y}): {wall.Blueprint} AV {av} vs PV {pv} -- no penetration, the stone holds");
+				SmokePuff(c, 1); // chip dust off the survivor
+				return false;
+			}
+			int maxHP = wall.GetStat("Hitpoints").BaseValue;
+			int dmg = Math.Max(1, maxHP * pens * CARVE_PCT_PER_PEN / 100);
+			wall.TakeDamage(dmg, "from the heaving earth!", "Crushing", null, null,
+				Attacker: ParentObject, Owner: ParentObject, Source: ParentObject);
+			bool died = !GameObject.Validate(wall) || wall.CurrentCell == null || wall.IsInGraveyard();
+			Helpers.VerifyLog("FIS", $"CARVE attack @({c.X},{c.Y}): {wall.Blueprint} AV {av} vs PV {pv} -- {pens} pen(s), {dmg} dmg, {(died ? "FELL" : "leftover standing")}");
+			SmokePuff(c, died ? 2 : 1);
+			return died;
 		}
 
 		/// <summary>The first solid, non-creature occupant of a cell -- the wall, for carving purposes.</summary>

@@ -72,6 +72,29 @@ Feel-session lever: if high-level casters should remodel more freely, the Burgeo
    deposited walls, zone painter renders connectivity; emergence sprite resolves the same
    material's isolated tile; sandstone fallback in wall-less zones).
 
+## Carve-as-attack (2026-08-04, RULED)
+
+User's words: "rather than having it autonomously destroy walls, could we have it make an
+attack against the walls armor? so the end result is similar but some walls are leftover."
+
+The bite is now a penetration roll vs the wall's AV, resolved once per wall (the first ray
+to reach it; later rays reuse the outcome). Grammar borrowed from Burrowing Claws (wall-pen
+bonus + percent-of-max-HP damage), so granite's 26,000 HP means granite ENDURANCE, not
+26,000 points of bookkeeping. Numbers are Claude drafts under the standing delegation:
+
+| Dial | Value | Notes |
+|---|---|---|
+| Wave PV vs walls | 6 + 3×Level | Burrowing Claws' 3×level wall-pen precedent. L1 = 9, L4 = 18, L7 = 27, L10 = 36 |
+| Damage per penetration | 34% of the wall's MAX hit points | 3+ pens fell any wall; 1–2 leave it standing damaged (the leftover) |
+| Zero penetrations | no damage, wave breaks on the wall | "the stone shrugs" — a leftover at full health |
+| Mass credit | only walls that FELL feed ring-fabric upgrades | survivors are stops, not fuel |
+
+Anchors against base wall AVs: soft sedimentary stone (shale/sandstone, AV 6–10) answers
+from L1 but occasionally shrugs a low-level wave; marble (AV 25) wants band 3; granite
+(AV 40, 26k HP) shrugs at any level a mortal reaches — the deep hard stone is now a real
+material boundary instead of a carve like any other. Carve depth still caps how many walls
+one ray can chew THROUGH; a surviving wall stops the ray regardless of budget left.
+
 ## Deliberate v1 exclusions
 
 - Item-plowing (wave ignores loose items — RULED, revisit post-beta if the wave feels like

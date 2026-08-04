@@ -1421,11 +1421,25 @@ namespace Cleo.TerraFirma.Scripts
 			SweepSpawns(zone);
 		}
 
-		/// <summary>Carve depth against built terrain: at L1 (bite 1) a two-deep sandstone file
-		/// east loses exactly its first wall; at L4 (bite 2) a three-deep file loses two. A
-		/// metal wall and a wood wall at distance 1 must stand through both casts -- the
-		/// corridor ruling's "constructed stops the wave at all levels", now gated on the
-		/// Natural flag rather than bare part presence.</summary>
+		private static GameObject RedoubtRigWall(string bp, Cell c, int av = -1, int hp = -1)
+		{
+			GameObject w = GameObject.Create(bp);
+			if (av >= 0)
+				w.GetStat("AV").BaseValue = av;
+			if (hp >= 0)
+				w.GetStat("Hitpoints").BaseValue = hp;
+			c.AddObject(w);
+			return w;
+		}
+
+		/// <summary>Carve-as-attack (RULED 2026-08-04: the bite is a penetration roll vs wall
+		/// AV; some walls are leftover). Glass-jaw sandstones (AV 0, 1 HP: any penetration
+		/// fells them, and vs AV 0 the wave always penetrates) keep the DEPTH asserts
+		/// deterministic: L1 fells exactly one of a two-file, L4 exactly two of three. An
+		/// armored survivor probe (AV 999: the roll can never win) must STAND with its health
+		/// untouched -- the leftover half of the ruling, and natural stone stopping the wave
+		/// by toughness alone. Metal and wood walls must refuse before any attack at both
+		/// bands (the Natural gate).</summary>
 		private static void RedoubtCarve(GameObject ply, Zone zone, Cell origin, XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure fis)
 		{
 			Cell e1 = origin.GetCellFromDirection("E");
@@ -1433,17 +1447,17 @@ namespace Cleo.TerraFirma.Scripts
 			Cell e3 = e2?.GetCellFromDirection("E");
 			Cell w1 = origin.GetCellFromDirection("W");
 			Cell n1 = origin.GetCellFromDirection("N");
-			if (e1 == null || e2 == null || e3 == null || w1 == null || n1 == null
-				|| e1.IsSolid() || e2.IsSolid() || e3.IsSolid() || w1.IsSolid() || n1.IsSolid())
+			Cell s1 = origin.GetCellFromDirection("S");
+			if (e1 == null || e2 == null || e3 == null || w1 == null || n1 == null || s1 == null
+				|| e1.IsSolid() || e2.IsSolid() || e3.IsSolid() || w1.IsSolid() || n1.IsSolid() || s1.IsSolid())
 			{
-				Report("redoubt.carve", false, "SETUP FAIL - need open E1/E2/E3/W1/N1 cells");
+				Report("redoubt.carve", false, "SETUP FAIL - need open E1/E2/E3/W1/N1/S1 cells");
 				return;
 			}
 			List<string> fails = new List<string>();
 
 			// cast A -- L1, carve depth 1
-			GameObject sand1 = GameObject.Create(NATURAL_WALL_BP);
-			e1.AddObject(sand1);
+			GameObject sand1 = RedoubtRigWall(NATURAL_WALL_BP, e1, 0, 1);
 			Cleo_TerraFirma_StoneshaperWallProperties props = sand1.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>();
 			if (props == null || props.MaterialType != "stone" || !props.Natural)
 			{
@@ -1451,46 +1465,54 @@ namespace Cleo.TerraFirma.Scripts
 				sand1.Obliterate();
 				return;
 			}
-			GameObject sand2 = GameObject.Create(NATURAL_WALL_BP);
-			e2.AddObject(sand2);
-			GameObject metal = GameObject.Create(METAL_WALL_BP);
-			w1.AddObject(metal);
-			GameObject wood = GameObject.Create(WOOD_WALL_BP);
-			n1.AddObject(wood);
+			GameObject sand2 = RedoubtRigWall(NATURAL_WALL_BP, e2, 0, 1);
+			GameObject survivor = RedoubtRigWall(NATURAL_WALL_BP, s1, 999);
+			int survivorHP = survivor.GetStat("Hitpoints").Value;
+			GameObject metal = RedoubtRigWall(METAL_WALL_BP, w1);
+			int metalHP = metal.GetStat("Hitpoints").Value;
+			GameObject wood = RedoubtRigWall(WOOD_WALL_BP, n1);
+			int woodHP = wood.GetStat("Hitpoints").Value;
 			HashSet<GameObject> before = SnapshotZone(zone);
 			RedoubtCast(ply, fis, 1);
-			if (GameObject.Validate(sand1) && sand1.CurrentCell != null) fails.Add("L1: first sandstone NOT carved");
-			if (!GameObject.Validate(sand2) || sand2.CurrentCell != e2) fails.Add("L1: second sandstone carved PAST the one-cell bite");
-			if (!GameObject.Validate(metal) || metal.CurrentCell != w1) fails.Add("L1: METAL wall did not stop the wave");
-			if (!GameObject.Validate(wood) || wood.CurrentCell != n1) fails.Add("L1: WOOD wall did not stop the wave");
+			if (GameObject.Validate(sand1) && sand1.CurrentCell != null) fails.Add("L1: first glass-jaw sandstone NOT felled");
+			if (!GameObject.Validate(sand2) || sand2.CurrentCell != e2) fails.Add("L1: second sandstone attacked PAST the one-cell bite");
+			if (!GameObject.Validate(survivor) || survivor.CurrentCell != s1) fails.Add("L1: AV-999 survivor FELL (armor must hold)");
+			else if (survivor.GetStat("Hitpoints").Value != survivorHP) fails.Add("L1: AV-999 survivor took damage on zero penetrations");
+			if (!GameObject.Validate(metal) || metal.CurrentCell != w1 || metal.GetStat("Hitpoints").Value != metalHP) fails.Add("L1: METAL wall attacked or felled");
+			if (!GameObject.Validate(wood) || wood.CurrentCell != n1 || wood.GetStat("Hitpoints").Value != woodHP) fails.Add("L1: WOOD wall attacked or felled");
 			RedoubtCleanup(NewSince(zone, before));
 			if (GameObject.Validate(sand2)) sand2.Obliterate();
 			if (GameObject.Validate(wood)) wood.Obliterate();
 
-			// cast B -- L4, carve depth 2; metal stays put for the at-all-levels claim
-			GameObject b1 = GameObject.Create(NATURAL_WALL_BP);
-			e1.AddObject(b1);
-			GameObject b2 = GameObject.Create(NATURAL_WALL_BP);
-			e2.AddObject(b2);
-			GameObject b3 = GameObject.Create(NATURAL_WALL_BP);
-			e3.AddObject(b3);
+			// cast B -- L4, carve depth 2; metal and the armored survivor stand for the
+			// at-all-levels claim (higher PV, same refusals)
+			GameObject b1 = RedoubtRigWall(NATURAL_WALL_BP, e1, 0, 1);
+			GameObject b2 = RedoubtRigWall(NATURAL_WALL_BP, e2, 0, 1);
+			GameObject b3 = RedoubtRigWall(NATURAL_WALL_BP, e3, 0, 1);
 			if (!GameObject.Validate(metal) || metal.CurrentCell != w1)
 			{
-				metal = GameObject.Create(METAL_WALL_BP);
-				w1.AddObject(metal);
+				metal = RedoubtRigWall(METAL_WALL_BP, w1);
+				metalHP = metal.GetStat("Hitpoints").Value;
+			}
+			if (!GameObject.Validate(survivor) || survivor.CurrentCell != s1)
+			{
+				survivor = RedoubtRigWall(NATURAL_WALL_BP, s1, 999);
+				survivorHP = survivor.GetStat("Hitpoints").Value;
 			}
 			before = SnapshotZone(zone);
 			RedoubtCast(ply, fis, 4);
-			if (GameObject.Validate(b1) && b1.CurrentCell != null) fails.Add("L4: first sandstone NOT carved");
-			if (GameObject.Validate(b2) && b2.CurrentCell != null) fails.Add("L4: second sandstone NOT carved (bite 2 unspent)");
-			if (!GameObject.Validate(b3) || b3.CurrentCell != e3) fails.Add("L4: third sandstone carved PAST the two-cell bite");
-			if (!GameObject.Validate(metal) || metal.CurrentCell != w1) fails.Add("L4: METAL wall did not stop the wave");
+			if (GameObject.Validate(b1) && b1.CurrentCell != null) fails.Add("L4: first glass-jaw sandstone NOT felled");
+			if (GameObject.Validate(b2) && b2.CurrentCell != null) fails.Add("L4: second glass-jaw sandstone NOT felled (bite 2 unspent)");
+			if (!GameObject.Validate(b3) || b3.CurrentCell != e3) fails.Add("L4: third sandstone attacked PAST the two-cell bite");
+			if (!GameObject.Validate(survivor) || survivor.CurrentCell != s1 || survivor.GetStat("Hitpoints").Value != survivorHP) fails.Add("L4: AV-999 survivor fell or took damage");
+			if (!GameObject.Validate(metal) || metal.CurrentCell != w1 || metal.GetStat("Hitpoints").Value != metalHP) fails.Add("L4: METAL wall attacked or felled");
 			RedoubtCleanup(NewSince(zone, before));
 			if (GameObject.Validate(b3)) b3.Obliterate();
 			if (GameObject.Validate(metal)) metal.Obliterate();
+			if (GameObject.Validate(survivor)) survivor.Obliterate();
 			Report("redoubt.carve", fails.Count == 0,
 				fails.Count == 0
-					? "L1 bit exactly one sandstone of a two-file (second stood); L4 bit exactly two of a three-file (third stood); metal and wood walls refused the wave at both bands"
+					? "carve-as-attack holds: L1 felled exactly one glass-jaw sandstone of a two-file, L4 exactly two of three; the AV-999 survivor stood untouched at both bands (leftover walls); metal and wood refused the wave before any attack"
 					: string.Join("; ", fails.ToArray()));
 		}
 
