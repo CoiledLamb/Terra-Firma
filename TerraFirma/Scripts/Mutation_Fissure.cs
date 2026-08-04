@@ -523,8 +523,19 @@ namespace XRL.World.Parts.Mutation
 				if (bp == WALL_BLUEPRINT || bp == FIGURE_BLUEPRINT)
 					SweepLooseItemsAside(plan.cell); // a wall owns its whole tile: loot spills out the side, never vanishes
 				GameObject piece = GameObject.Create(bp);
-				if (bp == WALL_BLUEPRINT && !dominantPaint.IsNullOrEmpty())
-					piece.SetStringProperty("PaintedWall", dominantPaint); // the ring dresses as the local geology
+				if (bp == WALL_BLUEPRINT)
+				{
+					if (!dominantPaint.IsNullOrEmpty())
+						piece.SetStringProperty("PaintedWall", dominantPaint); // the ring dresses as the local geology
+					// the dressing is COLORS as much as tile (the paint stamp changes shape only):
+					// dominant material's own palette, or the gray fallback where nothing answers
+					if (piece.Render != null)
+					{
+						piece.Render.TileColor = "&" + paintFg;
+						piece.Render.DetailColor = paintDetail.ToString();
+						piece.Render.ColorString = "&" + paintFg + "^" + paintBg;
+					}
+				}
 				StampOwner(piece);
 				plan.cell.AddObject(piece);
 				// smoke thinned (feel round 3: "a bit too much smoke") -- fabric puffs light,
@@ -617,9 +628,12 @@ namespace XRL.World.Parts.Mutation
 		/// wall_rock in earthy ochre.</summary>
 		private static string DominantWallPaint(Zone zone, out char fg, out char detail, out char bg)
 		{
-			fg = 'w';
-			detail = 'W';
-			bg = 'k'; // solid black backing by default -- the sprite renders opaque either way
+			// no-geology fallback = neutral GRAY plain rock (limestone's &y^K scheme), not the
+			// Rock_Wall blueprint's inherited sandstone red -- feel flag 2026-08-04, a Joppa
+			// cast against brinestalk: "my rocks did that yellow thing again"
+			fg = 'y';
+			detail = 'K';
+			bg = 'K'; // dark-gray backing (limestone's fill): solid stone, not a hole; sprite renders opaque either way
 			var counts = new Dictionary<string, int>();
 			var samples = new Dictionary<string, GameObject>();
 			foreach (GameObject obj in zone.GetObjects())
