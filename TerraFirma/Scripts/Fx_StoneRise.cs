@@ -251,13 +251,37 @@ namespace Cleo.TerraFirma.Scripts
 					}
 				}
 			}
+			// PLAN before PLAY: plates first, then every tile variant this cast needs resolved
+			// while the juice queue is still quiet. TryGetTextureInfo's miss path loads the
+			// texture under the atlas WRITE lock -- probing new variants while the Unity side
+			// was fetching our already-enqueued sprites deadlocked into a hard freeze
+			// (2026-08-04, third live cast). After this warmup, enqueue-time ResolveTile
+			// calls are pure cache hits and never touch the atlas.
+			List<List<Cell>>[] shellPlates = new List<List<Cell>>[radius];
+			for (int r = 1; r < radius; r++)
+			{
+				if (shells[r] != null)
+					shellPlates[r] = CutPlates(SortByAngle(shells[r], origin));
+			}
+			List<List<Cell>> rimPlates = CutPlates(SortByAngle(rimFabric, origin));
+			for (int r = 1; r < radius; r++)
+			{
+				if (shellPlates[r] == null)
+					continue;
+				foreach (List<Cell> plate in shellPlates[r])
+					for (int i = 0; i < plate.Count; i++)
+						ResolveTile(paintValue, MaskFor(plate, i));
+			}
+			foreach (List<Cell> plate in rimPlates)
+				for (int i = 0; i < plate.Count; i++)
+					ResolveTile(paintValue, MaskFor(plate, i));
 			int enqueued = 0;
 			// travel shells: fractured plates surging outward, one shared delay per plate
 			for (int r = 1; r < radius; r++)
 			{
-				if (shells[r] == null)
+				if (shellPlates[r] == null)
 					continue;
-				foreach (List<Cell> plate in CutPlates(SortByAngle(shells[r], origin)))
+				foreach (List<Cell> plate in shellPlates[r])
 				{
 					float delay = r * SHELL_SEC + 0.01f * Stat.Random(0, PLATE_JITTER_STEPS);
 					enqueued += EnqueuePlate(plate, gm, paintValue, paintFg, paintDetail, paintBg,
@@ -265,7 +289,7 @@ namespace Cleo.TerraFirma.Scripts
 				}
 			}
 			// the rim: plates of rampart punching through together, held until the fabric lands
-			foreach (List<Cell> plate in CutPlates(SortByAngle(rimFabric, origin)))
+			foreach (List<Cell> plate in rimPlates)
 			{
 				float delay = rimStart + 0.01f * Stat.Random(0, (int)(RIM_STAGGER * 100f));
 				enqueued += EnqueuePlate(plate, gm, paintValue, paintFg, paintDetail, paintBg,
