@@ -106,6 +106,27 @@ one ray can chew THROUGH; a surviving wall stops the ray regardless of budget le
    fallback is neutral gray `&y^K` (limestone's scheme) for settled fabric AND the
    emergence sprite (was "earthy ochre").
 
+## Feel round 5 (2026-08-04, user idea, built same day): FRACTURED PLATES
+
+User: connected sections in the wave's rising stone, "not the entire thing, so it looks
+like there's fractures in the plate, but some connectivity between parts" -- adopted for
+the travel shells AND the rim ("including the connected rim plates punching through bit").
+
+Mechanism (sprite-side only, zero painter/persistence involvement): each shell and the
+rim are partitioned into contiguous arcs -- PLATES -- of 2-4 cells with ~15% lone shards.
+Every plate member's sprite wears the wall-tile connectivity variant pointing at its
+arc-neighbors (the zone painter's own 8-digit suffix grammar, N,NE,E,SE,S,SW,W,NW,
+decomp-verified), so plate interiors fuse and plate ends keep broken faces. A plate
+shares ONE delay -- the slab heaves as a piece; adjacent plates land at offset moments,
+so the fractures read in motion, not just texture. Shells never fuse radially (the time
+offset IS the outward travel). Gap cells stay lone shards that rise and sink back. Rim
+plates punch through together and settle their fabric together. Missing atlas variants
+fall back to the isolated tile (an extra fracture, never a hole).
+
+Dials (Fx_StoneRise.cs): PLATE_MIN 2 / PLATE_MAX 4 / SHARD_CHANCE 15% / travel plate
+jitter 0..0.05s (PLATE_JITTER_STEPS 5); rim plates roll their stagger inside the same
+RIM_STAGGER 0.18s window as before, per plate instead of per cell.
+
 ## Deliberate v1 exclusions
 
 - Item-plowing (wave ignores loose items — RULED, revisit post-beta if the wave feels like
