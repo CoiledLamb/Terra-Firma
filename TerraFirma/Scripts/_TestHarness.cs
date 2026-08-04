@@ -1160,6 +1160,7 @@ namespace Cleo.TerraFirma.Scripts
 				entry = ply.ActivatedAbilities?.GetAbility(fis.ActivatedAbilityID);
 				savedCooldown = entry?.Cooldown ?? 0;
 			}
+			int savedCap = fis.CapOverride;
 			bool suppressed = Popup.Suppress;
 			Popup.Suppress = true;
 			Cleo_TerraFirma_StoneRiseFX.HarnessMute = true;
@@ -1178,6 +1179,7 @@ namespace Cleo.TerraFirma.Scripts
 					mutations.RemoveMutation(fis);
 				else
 				{
+					fis.CapOverride = savedCap;
 					fis.Level = savedLevel;
 					if (entry != null)
 						entry.Cooldown = savedCooldown;
@@ -1188,6 +1190,10 @@ namespace Cleo.TerraFirma.Scripts
 
 		private static void RedoubtCast(GameObject ply, XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure fis, int level)
 		{
+			// CapOverride lifts the character-level mutation cap (the mosquito-Wings-10 door);
+			// without it every scripted level clamps back to the test character's cap -- the
+			// 2026-08-04 boot ran all eight casts at Lv1 because of exactly this
+			fis.CapOverride = level;
 			fis.Level = level;
 			CommandEvent.Send(ply, FIS_COMMAND);
 		}
@@ -1384,6 +1390,11 @@ namespace Cleo.TerraFirma.Scripts
 					moth = GameObject.Create(MOTH_BP);
 					moth.SetIntProperty(SPAWN_MARK, 1);
 					c.AddObject(moth);
+					// spawned creatures start GROUNDED (the AI toggles flight on its own turns,
+					// and no turns pass here) -- the 2026-08-04 boot's moth ate the wave for
+					// exactly this reason. Force takeoff; if it still won't fly, the probe
+					// reports itself inert instead of failing the scenario.
+					XRL.World.Capabilities.Flight.StartFlying(moth, moth);
 					mothCell = c;
 					mothHP = moth.GetStat("Hitpoints").Value;
 					continue;
@@ -1393,6 +1404,7 @@ namespace Cleo.TerraFirma.Scripts
 				lootCell = c;
 				break;
 			}
+			bool mothFlying = moth != null && moth.IsFlying;
 			HashSet<GameObject> before = SnapshotZone(zone);
 			RedoubtCast(ply, fis, LV);
 			int movedN = 0, hurtN = 0, stunN = 0, counted = 0;
@@ -1408,12 +1420,14 @@ namespace Cleo.TerraFirma.Scripts
 				if (b.HasEffect(typeof(XRL.World.Effects.Stun)))
 					stunN++;
 			}
-			bool mothSpared = moth == null || (GameObject.Validate(moth) && moth.CurrentCell == mothCell && moth.GetStat("Hitpoints").Value == mothHP);
+			bool mothSpared = !mothFlying || (GameObject.Validate(moth) && moth.CurrentCell == mothCell && moth.GetStat("Hitpoints").Value == mothHP);
 			bool lootHeld = loot == null || (GameObject.Validate(loot) && loot.CurrentCell == lootCell);
 			bool pass = counted == victims.Count && movedN == counted && hurtN == counted && stunN >= 1 && mothSpared && lootHeld;
 			Report("redoubt.push", pass,
 				$"L{LV} wave vs {victims.Count} baboons at distance 1: {movedN} pushed outward (want all), {hurtN} damaged (want all), {stunN} stunned (moved-only rule, DC 21; >=1 wanted, all-save flake is rare)" +
-				(moth != null ? $"; flyer {(mothSpared ? "spared untouched" : "TOUCHED -- ground-wave exemption broken")}" : "; no room for the flyer probe") +
+				(moth == null ? "; no room for the flyer probe"
+					: !mothFlying ? "; flyer probe INERT (moth would not take off -- exemption untested this run)"
+					: $"; flyer {(mothSpared ? "spared untouched" : "TOUCHED -- ground-wave exemption broken")}") +
 				(loot != null ? $"; loose Small Stone {(lootHeld ? "unmoved (loot rule holds)" : "MOVED OR DESTROYED -- loot rule broken")}" : "; no room for the loot probe"));
 			if (GameObject.Validate(loot))
 				loot.Obliterate();
