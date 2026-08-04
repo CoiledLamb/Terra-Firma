@@ -95,6 +95,17 @@ from L1 but occasionally shrugs a low-level wave; marble (AV 25) wants band 3; g
 material boundary instead of a carve like any other. Carve depth still caps how many walls
 one ray can chew THROUGH; a surviving wall stops the ray regardless of budget left.
 
+## Feel round 4 (2026-08-04, user, Joppa cast against brinestalk)
+
+1. **"My rocks did that yellow thing again"** + the zoom-in catch: **yellow in the tiles'
+   negative space**, not just a clashing hue. Root: Rock_Wall inherits base Sandstone,
+   whose ColorString `&r^W` carries a bright-yellow BACKGROUND half that fills the tile;
+   the paint stamp only ever changed tile shape, so deposits always wore raw sandstone
+   color. Fix: deposited walls now take the full color triple (fg, detail, background)
+   from the dominant material's sample; where a zone offers no natural stone, the
+   fallback is neutral gray `&y^K` (limestone's scheme) for settled fabric AND the
+   emergence sprite (was "earthy ochre").
+
 ## Deliberate v1 exclusions
 
 - Item-plowing (wave ignores loose items — RULED, revisit post-beta if the wave feels like
