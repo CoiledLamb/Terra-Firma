@@ -13,6 +13,13 @@ namespace XRL.World.Parts
 		/// </summary>
 		public string MaterialType;
 		/// <summary>
+		/// True geology -- stone the world grew, not a wall anyone built. The redoubt wave
+		/// (Fissure) carves only walls with this flag and dresses its ring as them; everything
+		/// constructed refuses the wave (corridor ruling 2026-08-02: "the World Engine's bones
+		/// don't answer"). Set in Merges.xml on the natural-stone family; defaults false.
+		/// </summary>
+		public bool Natural;
+		/// <summary>
 		/// This is applied to the name of a statue created from this wall, which will cause it to render as something like "shale statue" and etc.
 		/// </summary>
 		public string MaterialDisplayName;

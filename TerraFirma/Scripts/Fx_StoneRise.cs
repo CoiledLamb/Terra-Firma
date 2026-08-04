@@ -117,6 +117,11 @@ namespace Cleo.TerraFirma.Scripts
 	/// (the game thread sleeps that long while the Unity side plays it out).</summary>
 	public static class Cleo_TerraFirma_StoneRiseFX
 	{
+		/// <summary>Harness kill switch (tfredoubt): true routes scripted casts through the
+		/// unseen-cast branch -- deposits land synchronously, no frame pump, no sprites.
+		/// Set (and always restored) only by the test harness; rides the TF-VERIFY strip.</summary>
+		public static bool HarnessMute;
+
 		/// <summary>Tile resolution, generalized to any painted-wall material (feel round 2:
 		/// the ring wears the zone's dominant wall). Candidates probed against the sprite
 		/// manager's atlas, verdict logged, result cached per material value. Naming forms

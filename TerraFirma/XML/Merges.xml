@@ -17,44 +17,48 @@
 		     item: creatures holding gems can now ready and throw them. -->
 		<part Name="ThrownWeapon" Damage="1d2" />
 	</object>
+	<!-- Natural="true" = true geology (the redoubt wave's carve gate + ring dressing, corridor
+	     ruling 2026-08-02: natural stone only; constructed/metal/ruins walls stop the wave).
+	     Deliberately unmarked: Mudroot (built clay huts), brick/fulcrete/foamcrete/concrete,
+	     bone, and the tomb walls (columbarium/crypt/sultan/mural): built stone, so it refuses. -->
 	<object Name="BaseSedimentaryRock" Load="Merge">
-		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" />
+		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" Natural="true" />
 	</object>
 	<object Name="BaseMetamorphicRock" Load="Merge">
-		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" />
+		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" Natural="true" />
 	</object>
 	<object Name="Basalt" Load="Merge">
-		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" MaterialDisplayName="basalt" />
+		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" Natural="true" MaterialDisplayName="basalt" />
 	</object>
 	<object Name="Granite" Load="Merge">
-		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" MaterialDisplayName="granite" />
+		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" Natural="true" MaterialDisplayName="granite" />
 	</object>
 	<object Name="Marble" Load="Merge">
-		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" MaterialDisplayName="marble" StatName="Toughness" StatShift="4" />
+		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" Natural="true" MaterialDisplayName="marble" StatName="Toughness" StatShift="4" />
 	</object>
 	<object Name="Mudroot" Load="Merge">
 		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" MaterialDisplayName="clay" />
 	</object>
 	<object Name="AgateWall" Load="Merge">
-		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" MaterialDisplayName="gem-studded" StatName="Ego" StatShift="1" />
+		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" Natural="true" MaterialDisplayName="gem-studded" StatName="Ego" StatShift="1" />
 	</object>
 	<object Name="TopazWall" Load="Merge">
-		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" MaterialDisplayName="gem-studded" StatName="Ego" StatShift="2" />
+		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" Natural="true" MaterialDisplayName="gem-studded" StatName="Ego" StatShift="2" />
 	</object>
 	<object Name="JasperWall" Load="Merge">
-		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" MaterialDisplayName="gem-studded" StatName="Ego" StatShift="3" />
+		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" Natural="true" MaterialDisplayName="gem-studded" StatName="Ego" StatShift="3" />
 	</object>
 	<object Name="AmethystWall" Load="Merge">
-		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" MaterialDisplayName="gem-studded" StatName="Ego" StatShift="4" />
+		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" Natural="true" MaterialDisplayName="gem-studded" StatName="Ego" StatShift="4" />
 	</object>
 	<object Name="SapphireWall" Load="Merge">
-		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" MaterialDisplayName="gem-studded" StatName="Ego" StatShift="5" />
+		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" Natural="true" MaterialDisplayName="gem-studded" StatName="Ego" StatShift="5" />
 	</object>
 	<object Name="EmeraldWall" Load="Merge">
-		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" MaterialDisplayName="gem-studded" StatName="Ego" StatShift="6" />
+		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" Natural="true" MaterialDisplayName="gem-studded" StatName="Ego" StatShift="6" />
 	</object>
 	<object Name="PeridotWall" Load="Merge">
-		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" MaterialDisplayName="gem-studded" StatName="Ego" StatShift="7" />
+		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="stone" Natural="true" MaterialDisplayName="gem-studded" StatName="Ego" StatShift="7" />
 	</object>
 	<object Name="BaseWallMetal" Load="Merge">
 		<part Name="Cleo_TerraFirma_StoneshaperWallProperties" MaterialType="metal" StatName="AV" StatShift="2" />

@@ -42,9 +42,6 @@ namespace XRL.World.Parts.Mutation
 		private const string CRACK_BLUEPRINT = "Cleo_TerraFirma_Rock_Crack";
 		private const string FIGURE_BLUEPRINT = "Cleo_TerraFirma_RedoubtFigure";
 		private const string SALVAGE_TABLE = "Cleo_TerraFirma_RedoubtSalvage";
-		// the Stoneshaper merges already classified every wall: this part = natural stone (carvable),
-		// its absence = constructed/metal (the wave breaks against it) -- connection doctrine, ruled
-		private const string CARVABLE_PART = "Cleo_TerraFirma_StoneshaperWallProperties";
 		private static readonly string[] SMOKE_COLORS = { "&K", "&y", "&w" };
 		#endregion
 
@@ -239,12 +236,25 @@ namespace XRL.World.Parts.Mutation
 					{
 						Cell step = zone.GetCell(ray[i].X, ray[i].Y);
 						if (step == null) { blocked = true; break; }
-						if (step.IsSolid() && !carved.Contains(step))
+						if (step.IsSolid())
 						{
-							GameObject wall = GetSolidObject(step);
-							if (wall == null || !wall.HasPart(CARVABLE_PART) || wallsBitten >= carveDepth)
+							if (wallsBitten >= carveDepth)
 							{
-								blocked = true; // the stone doesn't answer, or the bite is spent
+								blocked = true; // the bite is spent
+								break;
+							}
+							// a cell an earlier ray already claimed still spends THIS ray's bite --
+							// exempting it let straight corridors chain one-cell budgets into full-row
+							// carves (and east chewed deeper than west by iteration order alone)
+							if (carved.Contains(step))
+							{
+								wallsBitten++;
+								continue;
+							}
+							GameObject wall = GetSolidObject(step);
+							if (wall == null || !IsCarvableStone(wall))
+							{
+								blocked = true; // the stone doesn't answer
 								break;
 							}
 							wallsBitten++;
@@ -444,7 +454,7 @@ namespace XRL.World.Parts.Mutation
 			// live while each piece materializes at its own moment -- no more lump-sum settle
 			// with frozen smoke (feel round 2, note 1)
 			Cleo_TerraFirma_StoneRiseFX.Schedule schedule = null;
-			if (zone.IsActive() && origin.IsVisible())
+			if (!Cleo_TerraFirma_StoneRiseFX.HarnessMute && zone.IsActive() && origin.IsVisible())
 				schedule = Cleo_TerraFirma_StoneRiseFX.Play(origin, radius, reached, gaps, dominantPaint, paintFg, paintDetail, paintBg, OnRing);
 			void Place((Cell cell, string bp, float time) plan)
 			{
@@ -608,7 +618,7 @@ namespace XRL.World.Parts.Mutation
 				// only true geology dresses the ring (feel round 3 screenshot: a Joppa-outskirts
 				// cast came out brinestalk-orange -- the scan was counting cane fencing and
 				// masonry). Same classifier as the carve: the wave wears what it could carve.
-				if (!obj.HasPart(CARVABLE_PART))
+				if (!IsCarvableStone(obj))
 					continue;
 				string paint = obj.GetTagOrStringProperty("PaintedWall");
 				if (paint.IsNullOrEmpty())
@@ -664,6 +674,17 @@ namespace XRL.World.Parts.Mutation
 					return r;
 			}
 			return 0;
+		}
+
+		/// <summary>The carve gate (corridor ruling 2026-08-02: NATURAL stone only -- constructed,
+		/// metal, and ruins walls stop the wave at all levels). The Stoneshaper classification
+		/// carries the flag: MaterialType "stone" AND Natural, marked in Merges.xml on the
+		/// true-geology family. Part presence alone is NOT the gate -- wood fences, machine
+		/// walls, and tomb masonry carry the part too, for statue purposes.</summary>
+		private static bool IsCarvableStone(GameObject wall)
+		{
+			Cleo_TerraFirma_StoneshaperWallProperties props = wall?.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>();
+			return props != null && props.MaterialType == "stone" && props.Natural;
 		}
 
 		/// <summary>The first solid, non-creature occupant of a cell -- the wall, for carving purposes.</summary>

@@ -60,7 +60,7 @@ namespace Cleo.TerraFirma.Scripts
 		[WishCommand(Command = "tfverify")]
 		public static void Help()
 		{
-			MessageQueue.AddPlayerMessage("TF harness (BETA TRIM 2026-08-02) -- instant: tfquick (pockets+rep), tfcarom, tfcrack. Turn-driven: tfform (5t), tfshape (Stoneshaper, 3t), tffis (NPC caster, 20t), tfscav (30t, you are the target). tfbatch = the surviving set, ~60 turns standing still. Peek: tfspore (pure read). BETA-HELD dev doors (test held content, run by hand only): tfstreak, tfstrange, tfspill, tfpuddle, tfmine, tftar, tfhopper, tfdrain, tfdevour + tfeat (need kitchenrock's Lithovore grant), quickape/dull via queue.", "W");
+			MessageQueue.AddPlayerMessage("TF harness (BETA TRIM 2026-08-02) -- instant: tfquick (pockets+rep), tfcarom, tfcrack, tfredoubt (8 scripted casts: ring census by band, push/stun, carve depth, water displacement -- chews nearby natural stone). Turn-driven: tfform (5t), tfshape (Stoneshaper, 3t), tffis (NPC caster, 20t), tfscav (30t, you are the target). tfbatch = the surviving set, ~60 turns standing still. Peek: tfspore (pure read). BETA-HELD dev doors (test held content, run by hand only): tfstreak, tfstrange, tfspill, tfpuddle, tfmine, tftar, tfhopper, tfdrain, tfdevour + tfeat (need kitchenrock's Lithovore grant), quickape/dull via queue.", "W");
 			if (!Helpers.VERIFY_WATCH)
 				MessageQueue.AddPlayerMessage("VERIFY_WATCH is OFF -- the harness is disabled.", "R");
 		}
@@ -113,6 +113,7 @@ namespace Cleo.TerraFirma.Scripts
 			QuickSync();
 			CaromSync();
 			CrackSync();
+			RedoubtSync();
 			SetupForm(The.Player, "shape,fis,scav");
 		}
 
@@ -1108,6 +1109,448 @@ namespace Cleo.TerraFirma.Scripts
 						&& (obj.Blueprint.StartsWith("Cleo_TerraFirma_Rock_") || obj.Blueprint == "Cleo_TerraFirma_RedoubtFigure"))
 						n += obj.Count;
 			return n;
+		}
+
+		// ---------------------------------------------------------------- redoubt battery (2026-08-04)
+
+		private const string FIS_COMMAND = "Cleo_TerraFirma_CommandFissure";
+		private const string FABRIC_CRUMBLED_BP = "Cleo_TerraFirma_Rock_CrumbledWall";
+		private const string FABRIC_WALL_BP = "Cleo_TerraFirma_Rock_Wall";
+		private const string NATURAL_WALL_BP = "Sandstone";
+		private const string METAL_WALL_BP = "MetalWall";
+		private const string WOOD_WALL_BP = "WoodWall";
+		private const string PUDDLE_BP = "FreshWaterPuddle";
+
+		[WishCommand(Command = "tfredoubt")]
+		public static void Redoubt()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
+			RedoubtSync();
+		}
+
+		/// <summary>The redoubt battery (owed since the pivot: ring census by band, wave
+		/// push/stun, carve depth, water displacement): eight player-path casts through the
+		/// real CommandEvent pipeline at scripted levels, choreography muted so every deposit
+		/// lands synchronously and assertable. The casts CHEW LIVE TERRAIN (natural stone
+		/// answers the wave, radius up to 5) -- run somewhere you don't mind rearranging.
+		/// Spawns and deposits are swept; a native Fissure's level and cooldown are restored.</summary>
+		internal static void RedoubtSync()
+		{
+			GameObject ply = The.Player;
+			Cell origin = ply?.CurrentCell;
+			Zone zone = origin?.ParentZone;
+			if (zone == null)
+				return;
+			MessageQueue.AddPlayerMessage("Harness: redoubt battery running -- 8 scripted casts; the wave will chew natural stone around you and shove anything standing nearby.", "W");
+			Mutations mutations = ply.RequirePart<Mutations>();
+			XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure fis = ply.GetPart<XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure>();
+			bool granted = false;
+			int savedLevel = 0, savedCooldown = 0;
+			ActivatedAbilityEntry entry = null;
+			if (fis == null)
+			{
+				fis = new XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure();
+				mutations.AddMutation(fis, 1);
+				granted = true;
+			}
+			else
+			{
+				savedLevel = fis.BaseLevel;
+				entry = ply.ActivatedAbilities?.GetAbility(fis.ActivatedAbilityID);
+				savedCooldown = entry?.Cooldown ?? 0;
+			}
+			bool suppressed = Popup.Suppress;
+			Popup.Suppress = true;
+			Cleo_TerraFirma_StoneRiseFX.HarnessMute = true;
+			try
+			{
+				RedoubtRingCensus(ply, zone, origin, fis);
+				RedoubtPush(ply, zone, origin, fis);
+				RedoubtCarve(ply, zone, origin, fis);
+				RedoubtWater(ply, zone, origin, fis);
+			}
+			finally
+			{
+				Cleo_TerraFirma_StoneRiseFX.HarnessMute = false;
+				Popup.Suppress = suppressed;
+				if (granted)
+					mutations.RemoveMutation(fis);
+				else
+				{
+					fis.Level = savedLevel;
+					if (entry != null)
+						entry.Cooldown = savedCooldown;
+				}
+				SweepSpawns(zone);
+			}
+		}
+
+		private static void RedoubtCast(GameObject ply, XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure fis, int level)
+		{
+			fis.Level = level;
+			CommandEvent.Send(ply, FIS_COMMAND);
+		}
+
+		// the cast's own Euclidean contract (Mutation_Fissure InDisk/OnRing), restated here as
+		// the assertion's independent copy -- if the cast's geometry drifts, the census fails
+		private static bool RedoubtDisk(int dx, int dy, int r) => dx * dx + dy * dy <= r * r + r;
+
+		private static bool RedoubtRim(int dx, int dy, int r)
+		{
+			int d2 = dx * dx + dy * dy;
+			return d2 > r * r - r && d2 <= r * r + r;
+		}
+
+		private static int RedoubtCheb(Cell a, Cell b) => Math.Max(Math.Abs(a.X - b.X), Math.Abs(a.Y - b.Y));
+
+		private static bool RedoubtIsFabric(string bp) => bp == RUBBLE_BP || bp == FABRIC_CRUMBLED_BP || bp == FABRIC_WALL_BP;
+
+		private static bool RedoubtIsScatter(string bp) => bp == GENERIC_BP || bp == PEBBLES_BP || bp == "MediumBoulder";
+
+		private static HashSet<GameObject> SnapshotZone(Zone zone)
+		{
+			HashSet<GameObject> set = new HashSet<GameObject>();
+			foreach (GameObject o in zone.GetObjects())
+				set.Add(o);
+			return set;
+		}
+
+		private static List<GameObject> NewSince(Zone zone, HashSet<GameObject> before)
+		{
+			List<GameObject> fresh = new List<GameObject>();
+			foreach (GameObject o in zone.GetObjects())
+				if (!before.Contains(o))
+					fresh.Add(o);
+			return fresh;
+		}
+
+		private static void RedoubtCleanup(List<GameObject> fresh)
+		{
+			foreach (GameObject o in fresh)
+			{
+				if (!GameObject.Validate(o))
+					continue;
+				string bp = o.Blueprint;
+				if (bp != null && (bp.StartsWith("Cleo_TerraFirma_Rock_") || bp == "Cleo_TerraFirma_RedoubtFigure" || bp == "MediumBoulder"))
+					o.Obliterate();
+			}
+		}
+
+		private static bool RedoubtHasOpenLiquid(Cell c)
+		{
+			foreach (GameObject o in c.Objects)
+				if (o.IsOpenLiquidVolume())
+					return true;
+			return false;
+		}
+
+		private static int RedoubtCountLiquids(Zone zone)
+		{
+			int n = 0;
+			foreach (GameObject o in zone.GetObjects())
+				if (o.CurrentCell != null && o.IsOpenLiquidVolume())
+					n++;
+			return n;
+		}
+
+		/// <summary>Ring census, one cast per band (L1/4/7/10): fabric confined to the Euclidean
+		/// rim, gap count exact on a clear disk, wake scatter interior-only, and NO beta-held
+		/// content (crack/geyser/salvage/figure) leaking out of the marked blocks. Wall share is
+		/// reported, not asserted -- rolled variance on small rims is too noisy to pin.</summary>
+		private static void RedoubtRingCensus(GameObject ply, Zone zone, Cell origin, XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure fis)
+		{
+			int[] levels = { 1, 4, 7, 10 };
+			List<string> fails = new List<string>();
+			List<string> notes = new List<string>();
+			foreach (int lv in levels)
+			{
+				int radius = XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure.GetRingRadius(lv);
+				int gapWant = XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure.GetGapCount(lv);
+				HashSet<Cell> openRim = new HashSet<Cell>();
+				bool diskClear = true;
+				for (int dx = -radius; dx <= radius; dx++)
+				{
+					for (int dy = -radius; dy <= radius; dy++)
+					{
+						if (dx == 0 && dy == 0)
+							continue;
+						if (!RedoubtDisk(dx, dy, radius))
+							continue;
+						Cell c = zone.GetCell(origin.X + dx, origin.Y + dy);
+						if (c == null || c.IsSolid() || c.HasObjectWithPart("Combat"))
+						{
+							diskClear = false;
+							continue;
+						}
+						if (RedoubtRim(dx, dy, radius))
+							openRim.Add(c);
+					}
+				}
+				HashSet<GameObject> before = SnapshotZone(zone);
+				RedoubtCast(ply, fis, lv);
+				List<GameObject> fresh = NewSince(zone, before);
+				int onRim = 0, offRim = 0, walls = 0, scatter = 0, scatterOnRim = 0, leaks = 0;
+				foreach (GameObject o in fresh)
+				{
+					Cell c = o.CurrentCell;
+					string bp = o.Blueprint;
+					if (c == null || bp == null)
+						continue;
+					if (RedoubtIsFabric(bp))
+					{
+						if (openRim.Contains(c)) { onRim++; if (bp == FABRIC_WALL_BP) walls++; }
+						else offRim++;
+					}
+					else if (RedoubtIsScatter(bp))
+					{
+						scatter++;
+						if (openRim.Contains(c))
+							scatterOnRim++;
+					}
+					else if (bp.StartsWith("Cleo_TerraFirma_"))
+					{
+						leaks++;
+						fails.Add($"L{lv}: BETA-HELD leak -- {bp} spawned by the cast");
+					}
+				}
+				int gapsObserved = openRim.Count - onRim;
+				string line = $"L{lv} r{radius}: {onRim} fabric on {openRim.Count} open rim cells ({walls} walls), {gapsObserved} gaps (table {gapWant}), {scatter} wake scatter";
+				if (diskClear)
+				{
+					if (offRim > 0) fails.Add($"L{lv}: {offRim} fabric OFF the rim");
+					if (scatterOnRim > 0) fails.Add($"L{lv}: {scatterOnRim} wake scatter ON the rim");
+					if (gapsObserved != gapWant) fails.Add($"L{lv}: {gapsObserved} gaps, table says {gapWant} (disk was clear)");
+				}
+				else
+					line += " [terrain in the disk: census reported, not asserted]";
+				notes.Add(line);
+				RedoubtCleanup(fresh);
+			}
+			Report("redoubt.ring", fails.Count == 0,
+				string.Join(" | ", notes.ToArray()) + (fails.Count > 0 ? "; FAILS: " + string.Join("; ", fails.ToArray()) : "; fabric held to the Euclidean rim at every band, no beta-held content leaked"));
+		}
+
+		/// <summary>The wave's crowd control at L5 (band 2: push force 7000, 1d3+2, stun 2r on a
+		/// Toughness DC 21 save, moved-only): baboons ringed at distance 1 must all be shoved
+		/// outward, damaged, and at least one stunned; a glowmoth overhead must be untouched
+		/// (ground wave spares flyers); a loose Small Stone inside the disk must not move (loot
+		/// rule -- the wave never touches items).</summary>
+		private static void RedoubtPush(GameObject ply, Zone zone, Cell origin, XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure fis)
+		{
+			const int LV = 5;
+			string[] dirs = { "N", "S", "E", "W" };
+			List<GameObject> victims = new List<GameObject>();
+			Dictionary<GameObject, Cell> starts = new Dictionary<GameObject, Cell>();
+			Dictionary<GameObject, int> hp = new Dictionary<GameObject, int>();
+			foreach (string dir in dirs)
+			{
+				Cell c1 = origin.GetCellFromDirection(dir);
+				Cell c2 = c1?.GetCellFromDirection(dir);
+				// the push lane: distance-2 must be open too, so "moved" is physically possible
+				if (c1 == null || c2 == null || c1.IsSolid() || c2.IsSolid() || c1.HasObjectWithPart("Combat") || c2.HasObjectWithPart("Combat"))
+					continue;
+				GameObject b = GameObject.Create(BABOON_BP);
+				b.SetIntProperty(SPAWN_MARK, 1);
+				b.GetStat("Hitpoints").BaseValue = 60;
+				c1.AddObject(b);
+				victims.Add(b);
+				starts[b] = c1;
+				hp[b] = b.GetStat("Hitpoints").Value;
+			}
+			if (victims.Count < 2)
+			{
+				Report("redoubt.push", false, "SETUP FAIL - need at least two open two-deep orthogonal lanes");
+				SweepSpawns(zone);
+				return;
+			}
+			// the flyer probe and the loot probe sit strictly INSIDE the rim (d2 <= r*r-r), where
+			// only non-wall wake scatter can land -- a wall deposit would sweep loot legitimately
+			GameObject moth = null;
+			Cell mothCell = null;
+			int mothHP = 0;
+			GameObject loot = null;
+			Cell lootCell = null;
+			int rad = XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure.GetRingRadius(LV);
+			foreach (Cell c in origin.GetLocalAdjacentCells(2))
+			{
+				int dx = c.X - origin.X, dy = c.Y - origin.Y;
+				if (c.IsSolid() || c.HasObjectWithPart("Combat") || RedoubtCheb(c, origin) != 2)
+					continue;
+				if (dx * dx + dy * dy > rad * rad - rad)
+					continue;
+				if (moth == null)
+				{
+					moth = GameObject.Create(MOTH_BP);
+					moth.SetIntProperty(SPAWN_MARK, 1);
+					c.AddObject(moth);
+					mothCell = c;
+					mothHP = moth.GetStat("Hitpoints").Value;
+					continue;
+				}
+				loot = GameObject.Create("Small Stone");
+				c.AddObject(loot);
+				lootCell = c;
+				break;
+			}
+			HashSet<GameObject> before = SnapshotZone(zone);
+			RedoubtCast(ply, fis, LV);
+			int movedN = 0, hurtN = 0, stunN = 0, counted = 0;
+			foreach (GameObject b in victims)
+			{
+				if (!GameObject.Validate(b) || b.CurrentCell == null)
+					continue;
+				counted++;
+				if (RedoubtCheb(b.CurrentCell, origin) > RedoubtCheb(starts[b], origin))
+					movedN++;
+				if (b.GetStat("Hitpoints").Value < hp[b])
+					hurtN++;
+				if (b.HasEffect(typeof(XRL.World.Effects.Stun)))
+					stunN++;
+			}
+			bool mothSpared = moth == null || (GameObject.Validate(moth) && moth.CurrentCell == mothCell && moth.GetStat("Hitpoints").Value == mothHP);
+			bool lootHeld = loot == null || (GameObject.Validate(loot) && loot.CurrentCell == lootCell);
+			bool pass = counted == victims.Count && movedN == counted && hurtN == counted && stunN >= 1 && mothSpared && lootHeld;
+			Report("redoubt.push", pass,
+				$"L{LV} wave vs {victims.Count} baboons at distance 1: {movedN} pushed outward (want all), {hurtN} damaged (want all), {stunN} stunned (moved-only rule, DC 21; >=1 wanted, all-save flake is rare)" +
+				(moth != null ? $"; flyer {(mothSpared ? "spared untouched" : "TOUCHED -- ground-wave exemption broken")}" : "; no room for the flyer probe") +
+				(loot != null ? $"; loose Small Stone {(lootHeld ? "unmoved (loot rule holds)" : "MOVED OR DESTROYED -- loot rule broken")}" : "; no room for the loot probe"));
+			if (GameObject.Validate(loot))
+				loot.Obliterate();
+			RedoubtCleanup(NewSince(zone, before));
+			SweepSpawns(zone);
+		}
+
+		/// <summary>Carve depth against built terrain: at L1 (bite 1) a two-deep sandstone file
+		/// east loses exactly its first wall; at L4 (bite 2) a three-deep file loses two. A
+		/// metal wall and a wood wall at distance 1 must stand through both casts -- the
+		/// corridor ruling's "constructed stops the wave at all levels", now gated on the
+		/// Natural flag rather than bare part presence.</summary>
+		private static void RedoubtCarve(GameObject ply, Zone zone, Cell origin, XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure fis)
+		{
+			Cell e1 = origin.GetCellFromDirection("E");
+			Cell e2 = e1?.GetCellFromDirection("E");
+			Cell e3 = e2?.GetCellFromDirection("E");
+			Cell w1 = origin.GetCellFromDirection("W");
+			Cell n1 = origin.GetCellFromDirection("N");
+			if (e1 == null || e2 == null || e3 == null || w1 == null || n1 == null
+				|| e1.IsSolid() || e2.IsSolid() || e3.IsSolid() || w1.IsSolid() || n1.IsSolid())
+			{
+				Report("redoubt.carve", false, "SETUP FAIL - need open E1/E2/E3/W1/N1 cells");
+				return;
+			}
+			List<string> fails = new List<string>();
+
+			// cast A -- L1, carve depth 1
+			GameObject sand1 = GameObject.Create(NATURAL_WALL_BP);
+			e1.AddObject(sand1);
+			Cleo_TerraFirma_StoneshaperWallProperties props = sand1.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>();
+			if (props == null || props.MaterialType != "stone" || !props.Natural)
+			{
+				Report("redoubt.carve", false, $"SETUP FAIL - spawned {NATURAL_WALL_BP} is not classified natural stone (Merges Natural flag missing or unmapped)");
+				sand1.Obliterate();
+				return;
+			}
+			GameObject sand2 = GameObject.Create(NATURAL_WALL_BP);
+			e2.AddObject(sand2);
+			GameObject metal = GameObject.Create(METAL_WALL_BP);
+			w1.AddObject(metal);
+			GameObject wood = GameObject.Create(WOOD_WALL_BP);
+			n1.AddObject(wood);
+			HashSet<GameObject> before = SnapshotZone(zone);
+			RedoubtCast(ply, fis, 1);
+			if (GameObject.Validate(sand1) && sand1.CurrentCell != null) fails.Add("L1: first sandstone NOT carved");
+			if (!GameObject.Validate(sand2) || sand2.CurrentCell != e2) fails.Add("L1: second sandstone carved PAST the one-cell bite");
+			if (!GameObject.Validate(metal) || metal.CurrentCell != w1) fails.Add("L1: METAL wall did not stop the wave");
+			if (!GameObject.Validate(wood) || wood.CurrentCell != n1) fails.Add("L1: WOOD wall did not stop the wave");
+			RedoubtCleanup(NewSince(zone, before));
+			if (GameObject.Validate(sand2)) sand2.Obliterate();
+			if (GameObject.Validate(wood)) wood.Obliterate();
+
+			// cast B -- L4, carve depth 2; metal stays put for the at-all-levels claim
+			GameObject b1 = GameObject.Create(NATURAL_WALL_BP);
+			e1.AddObject(b1);
+			GameObject b2 = GameObject.Create(NATURAL_WALL_BP);
+			e2.AddObject(b2);
+			GameObject b3 = GameObject.Create(NATURAL_WALL_BP);
+			e3.AddObject(b3);
+			if (!GameObject.Validate(metal) || metal.CurrentCell != w1)
+			{
+				metal = GameObject.Create(METAL_WALL_BP);
+				w1.AddObject(metal);
+			}
+			before = SnapshotZone(zone);
+			RedoubtCast(ply, fis, 4);
+			if (GameObject.Validate(b1) && b1.CurrentCell != null) fails.Add("L4: first sandstone NOT carved");
+			if (GameObject.Validate(b2) && b2.CurrentCell != null) fails.Add("L4: second sandstone NOT carved (bite 2 unspent)");
+			if (!GameObject.Validate(b3) || b3.CurrentCell != e3) fails.Add("L4: third sandstone carved PAST the two-cell bite");
+			if (!GameObject.Validate(metal) || metal.CurrentCell != w1) fails.Add("L4: METAL wall did not stop the wave");
+			RedoubtCleanup(NewSince(zone, before));
+			if (GameObject.Validate(b3)) b3.Obliterate();
+			if (GameObject.Validate(metal)) metal.Obliterate();
+			Report("redoubt.carve", fails.Count == 0,
+				fails.Count == 0
+					? "L1 bit exactly one sandstone of a two-file (second stood); L4 bit exactly two of a three-file (third stood); metal and wood walls refused the wave at both bands"
+					: string.Join("; ", fails.ToArray()));
+		}
+
+		/// <summary>Walls over water at L7 (band 3, wall share 55±12): every open rim cell is
+		/// flooded first, so raised walls MUST displace their pools (or downgrade to rubble
+		/// where undammable). Asserts: the zone-wide open-liquid census is unchanged (water is
+		/// currency, never destroyed), and no wall shares a tile with standing liquid.</summary>
+		private static void RedoubtWater(GameObject ply, Zone zone, Cell origin, XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure fis)
+		{
+			const int LV = 7;
+			int radius = XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure.GetRingRadius(LV);
+			List<GameObject> puddles = new List<GameObject>();
+			HashSet<Cell> wet = new HashSet<Cell>();
+			for (int dx = -radius; dx <= radius; dx++)
+			{
+				for (int dy = -radius; dy <= radius; dy++)
+				{
+					if (!RedoubtRim(dx, dy, radius))
+						continue;
+					Cell c = zone.GetCell(origin.X + dx, origin.Y + dy);
+					if (c == null || c.IsSolid() || c.HasObjectWithPart("Combat") || RedoubtHasOpenLiquid(c))
+						continue;
+					GameObject pool = GameObject.Create(PUDDLE_BP);
+					c.AddObject(pool);
+					puddles.Add(pool);
+					wet.Add(c);
+				}
+			}
+			if (wet.Count < 6)
+			{
+				Report("redoubt.water", false, $"SETUP FAIL - only {wet.Count} open rim cells to flood (want >=6)");
+				foreach (GameObject p in puddles)
+					if (GameObject.Validate(p))
+						p.Obliterate();
+				return;
+			}
+			int liquidsBefore = RedoubtCountLiquids(zone);
+			HashSet<GameObject> before = SnapshotZone(zone);
+			RedoubtCast(ply, fis, LV);
+			int liquidsAfter = RedoubtCountLiquids(zone);
+			List<GameObject> fresh = NewSince(zone, before);
+			int wallsTotal = 0, wallsOnWet = 0, cohabit = 0;
+			foreach (GameObject o in fresh)
+			{
+				if (o.Blueprint != FABRIC_WALL_BP || o.CurrentCell == null)
+					continue;
+				wallsTotal++;
+				if (wet.Contains(o.CurrentCell))
+					wallsOnWet++;
+				if (RedoubtHasOpenLiquid(o.CurrentCell))
+					cohabit++;
+			}
+			bool conserved = liquidsAfter == liquidsBefore;
+			bool pass = conserved && cohabit == 0 && wallsOnWet >= 1;
+			Report("redoubt.water", pass,
+				$"L{LV} cast over a flooded rim ({wet.Count} puddles laid): open-liquid census {liquidsBefore}->{liquidsAfter} ({(conserved ? "water conserved" : "WATER DESTROYED OR DUPLICATED")}), {wallsTotal} walls raised, {wallsOnWet} on formerly wet cells (want >=1), {cohabit} sharing a tile with standing liquid (want 0: displaced or downgraded)");
+			RedoubtCleanup(fresh);
+			foreach (GameObject p in puddles)
+				if (GameObject.Validate(p))
+					p.Obliterate();
 		}
 
 		// ---------------------------------------------------------------- round 3, turn-driven setups
