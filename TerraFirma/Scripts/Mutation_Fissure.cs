@@ -542,6 +542,11 @@ namespace XRL.World.Parts.Mutation
 				// through the settle loop -- user flag 2026-08-04, Calcify showed it too):
 				// paint on landing; no-ops for the unpainted fabric
 				plan.cell.CheckPaintWallsAround(piece);
+				if (bp == WALL_BLUEPRINT)
+				{
+					string paintedTile = piece.Render?.Tile;
+					Helpers.VerifyLog("FIS", $"wall landed @({plan.cell.X},{plan.cell.Y}): post-paint Render.Tile={(paintedTile.IsNullOrEmpty() ? "NULL (paint did not take)" : paintedTile)}");
+				}
 				// smoke thinned twice (feel round 3, then 2026-08-04 "bit less smoke") --
 				// fabric puffs light, wake scatter only sometimes
 				bool scatter = bp != WALL_BLUEPRINT && bp != CRUMBLED_BLUEPRINT && bp != RUBBLE_BLUEPRINT;

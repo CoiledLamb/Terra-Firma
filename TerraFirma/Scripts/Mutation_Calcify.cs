@@ -203,6 +203,8 @@ namespace XRL.World.Parts.Mutation
 				// it renders as its ASCII glyph through the pump (user flag 2026-08-04).
 				// Paint it (and its neighbors' connectivity) the moment it lands.
 				planCells[i].CheckPaintWallsAround(wall);
+				string paintedTile = wall.Render?.Tile;
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CALC", $"wall landed @({planCells[i].X},{planCells[i].Y}): post-paint Render.Tile={(paintedTile.IsNullOrEmpty() ? "NULL (paint did not take)" : paintedTile)}");
 			}
 			Cleo.TerraFirma.Scripts.Cleo_TerraFirma_StoneRiseFX.Schedule schedule = null;
 			Zone zone = ParentObject.CurrentZone;
