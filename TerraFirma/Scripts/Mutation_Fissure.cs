@@ -538,13 +538,13 @@ namespace XRL.World.Parts.Mutation
 				}
 				StampOwner(piece);
 				plan.cell.AddObject(piece);
-				// smoke thinned (feel round 3: "a bit too much smoke") -- fabric puffs light,
-				// wake scatter only sometimes
+				// smoke thinned twice (feel round 3, then 2026-08-04 "bit less smoke") --
+				// fabric puffs light, wake scatter only sometimes
 				bool scatter = bp != WALL_BLUEPRINT && bp != CRUMBLED_BLUEPRINT && bp != RUBBLE_BLUEPRINT;
 				if (!scatter)
-					SmokePuff(plan.cell, bp == WALL_BLUEPRINT ? 3 : 2);
-				else if (40.in100())
-					SmokePuff(plan.cell, 2);
+					SmokePuff(plan.cell, bp == WALL_BLUEPRINT ? 2 : 1);
+				else if (25.in100())
+					SmokePuff(plan.cell);
 			}
 			if (schedule != null)
 			{
@@ -736,7 +736,7 @@ namespace XRL.World.Parts.Mutation
 				Attacker: ParentObject, Owner: ParentObject, Source: ParentObject);
 			bool died = !GameObject.Validate(wall) || wall.CurrentCell == null || wall.IsInGraveyard();
 			Helpers.VerifyLog("FIS", $"CARVE attack @({c.X},{c.Y}): {wall.Blueprint} AV {av} vs PV {pv} -- {pens} pen(s), {dmg} dmg, {(died ? "FELL" : "leftover standing")}");
-			SmokePuff(c, died ? 2 : 1);
+			SmokePuff(c);
 			return died;
 		}
 
@@ -804,8 +804,9 @@ namespace XRL.World.Parts.Mutation
 		}
 
 		/// <summary>Gray shade-glyph particles drifting up -- the dust of the heave. Count
-		/// trimmed 5 -> 2 default (feel round 3: "a bit too much smoke").</summary>
-		private static void SmokePuff(Cell C, int particles = 2)
+		/// trimmed 5 -> 2 (feel round 3: "a bit too much smoke") -> 1 default (2026-08-04,
+		/// "bit less smoke on fissure").</summary>
+		private static void SmokePuff(Cell C, int particles = 1)
 		{
 			C.ParticleBlip("&y*");
 			for (int i = 0; i < particles; i++)
