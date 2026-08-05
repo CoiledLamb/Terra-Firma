@@ -195,10 +195,15 @@ namespace Cleo.TerraFirma.Scripts
 		private const float RIM_SINK = 0.06f;
 		// plate dials (feel round 5, user: fractured-plate connectivity -- arcs of each shell
 		// fuse into slabs that heave TOGETHER; the breaks between them are the fractures)
-		// re-dialed 2026-08-04 (user: "plates could be a bit less fractured") -- was 2/4/15
-		private const int PLATE_MIN = 3;
-		private const int PLATE_MAX = 6;
-		private const int SHARD_CHANCE = 8;       // % of cuts that come off as a lone shard
+		// re-dialed 2026-08-04 twice (user: "plates could be a bit less fractured", then "bit
+		// more fragmentation would be good on the wave also") -- the axes split: the TRAVELING
+		// wave breaks busier, the rim's rampart slabs stay big
+		private const int TRAVEL_PLATE_MIN = 2;
+		private const int TRAVEL_PLATE_MAX = 4;
+		private const int TRAVEL_SHARD_CHANCE = 12; // % of cuts that come off as a lone shard
+		private const int RIM_PLATE_MIN = 3;
+		private const int RIM_PLATE_MAX = 6;
+		private const int RIM_SHARD_CHANCE = 8;
 		private const int PLATE_JITTER_STEPS = 5; // travel plates offset 0..0.05s within their shell
 		// tile geometry (world units; a tile is ~24 tall -- floatingText's +12 half-tile offset)
 		private const float BURIED_DEPTH = 20f;
@@ -262,9 +267,9 @@ namespace Cleo.TerraFirma.Scripts
 			for (int r = 1; r < radius; r++)
 			{
 				if (shells[r] != null)
-					shellPlates[r] = CutPlates(SortByAngle(shells[r], origin));
+					shellPlates[r] = CutPlates(SortByAngle(shells[r], origin), TRAVEL_PLATE_MIN, TRAVEL_PLATE_MAX, TRAVEL_SHARD_CHANCE);
 			}
-			List<List<Cell>> rimPlates = CutPlates(SortByAngle(rimFabric, origin));
+			List<List<Cell>> rimPlates = CutPlates(SortByAngle(rimFabric, origin), RIM_PLATE_MIN, RIM_PLATE_MAX, RIM_SHARD_CHANCE);
 			for (int r = 1; r < radius; r++)
 			{
 				if (shellPlates[r] == null)
@@ -370,9 +375,9 @@ namespace Cleo.TerraFirma.Scripts
 		/// <summary>Partition an angle-ordered ring into plates: first split at every spatial
 		/// break (cells not touching -- unreached ground, walls, the gaps), rotating the walk
 		/// to start at a natural break so no run straddles the list seam; then cut each
-		/// contiguous run into arcs of PLATE_MIN..PLATE_MAX with the occasional lone shard.
+		/// contiguous run into arcs of plateMin..plateMax with the occasional lone shard.
 		/// A fully unbroken circle simply gets one arbitrary fracture where the walk began.</summary>
-		private static List<List<Cell>> CutPlates(List<Cell> ring)
+		private static List<List<Cell>> CutPlates(List<Cell> ring, int plateMin, int plateMax, int shardChance)
 		{
 			List<List<Cell>> plates = new List<List<Cell>>();
 			int n = ring.Count;
@@ -407,7 +412,7 @@ namespace Cleo.TerraFirma.Scripts
 				int i = 0;
 				while (i < r.Count)
 				{
-					int len = Stat.Random(1, 100) <= SHARD_CHANCE ? 1 : Stat.Random(PLATE_MIN, PLATE_MAX);
+					int len = Stat.Random(1, 100) <= shardChance ? 1 : Stat.Random(plateMin, plateMax);
 					len = Math.Min(len, r.Count - i);
 					plates.Add(r.GetRange(i, len));
 					i += len;

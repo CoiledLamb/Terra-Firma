@@ -130,6 +130,11 @@ RIM_STAGGER 0.18s window as before, per plate instead of per cell.
 Re-dial same day (user eyes-on: "plates could be a bit less fractured? but other than
 that think it looks good"): PLATE_MIN 3 / PLATE_MAX 6 / SHARD_CHANCE 8%.
 
+Re-dial 2, same day (user: "bit more fragmentation would be good on the wave also") --
+the axes SPLIT: travel plates 2-4 cells / 12% shards (busier break-up in motion), rim
+plates stay 3-6 / 8% (big rampart slabs at the breakthrough). Separate dial pairs in
+Fx_StoneRise.cs now (TRAVEL_PLATE_* / RIM_PLATE_*).
+
 Same sitting, RULED: **the stone call is harmonized across the earth mutations** -- the
 shared classifier `Cleo_TerraFirma_StoneshaperWallProperties.IsNaturalStone` (MaterialType
 stone + Natural) now gates Fissure's carve/dressing AND Calcify's wall-borrowing, including
