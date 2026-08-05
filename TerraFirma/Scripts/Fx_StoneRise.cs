@@ -29,9 +29,7 @@ namespace Cleo.TerraFirma.Scripts
 		private float BuriedY;
 		private float EmergeY;
 
-		private bool StayUp; // rim pieces hold at full emergence until the real fabric takes over -- no dip before the handoff
-
-		public Cleo_TerraFirma_JuiceStoneRise(IRenderable tile, Vector3 basePos, float delay, float rise, float hold, float sink, float buriedDepth, float emergeHeight, bool stayUp = false)
+		public Cleo_TerraFirma_JuiceStoneRise(IRenderable tile, Vector3 basePos, float delay, float rise, float hold, float sink, float buriedDepth, float emergeHeight)
 		{
 			Tile = tile;
 			Base = basePos;
@@ -41,8 +39,7 @@ namespace Cleo.TerraFirma.Scripts
 			Sink = Mathf.Max(0.01f, sink);
 			BuriedY = -buriedDepth;
 			EmergeY = -buriedDepth + emergeHeight;
-			StayUp = stayUp;
-			duration = delay + this.Rise + hold + (stayUp ? 0f : this.Sink);
+			duration = delay + this.Rise + hold + this.Sink;
 		}
 
 		public override void start()
@@ -66,10 +63,24 @@ namespace Cleo.TerraFirma.Scripts
 			float y;
 			if (p <= Rise)
 				y = Mathf.Lerp(BuriedY, EmergeY, Easing.SineEaseOut(Mathf.Clamp01(p / Rise)));
-			else if (StayUp || p <= Rise + Hold)
+			else if (p <= Rise + Hold)
 				y = EmergeY;
 			else
-				y = Mathf.Lerp(EmergeY, BuriedY, Easing.SineEaseInOut(Mathf.Clamp01((p - Rise - Hold) / Sink)));
+			{
+				float q = Mathf.Clamp01((p - Rise - Hold) / Sink);
+				if (q >= 1f)
+				{
+					// spent: park BEHIND the map immediately rather than waiting on finish().
+					// The juice manager finishes entries on turn cadence, which can lag well
+					// past the handoff -- and a lagging OPAQUE held sprite over the real wall
+					// was the "error shale": a flat grid-aligned stone block wearing sprite
+					// tiles, healing only when the sweep finally ran (2026-08-04 diagnosis;
+					// the walls beneath were painted correctly the whole time).
+					Target.transform.position = Base + new Vector3(0f, BuriedY, 100f);
+					return;
+				}
+				y = Mathf.Lerp(EmergeY, BuriedY, Easing.SineEaseInOut(q));
+			}
 			Target.transform.position = Base + new Vector3(0f, y, -10f);
 		}
 
@@ -250,7 +261,7 @@ namespace Cleo.TerraFirma.Scripts
 				{
 					float delay = r * SHELL_SEC + 0.01f * Stat.Random(0, PLATE_JITTER_STEPS);
 					enqueued += EnqueuePlate(plate, gm, paintValue, paintAtlas, paintExt, paintFg, paintDetail, paintBg,
-						delay, TRAVEL_RISE, TRAVEL_HOLD, TRAVEL_SINK, TRAVEL_EMERGE, StayUp: false, schedule, Settle: false);
+						delay, TRAVEL_RISE, TRAVEL_HOLD, TRAVEL_SINK, TRAVEL_EMERGE, schedule, Settle: false);
 				}
 			}
 			// the rim: plates of rampart punching through together, held until the fabric lands
@@ -258,7 +269,7 @@ namespace Cleo.TerraFirma.Scripts
 			{
 				float delay = rimStart + 0.01f * Stat.Random(0, (int)(RIM_STAGGER * 100f));
 				enqueued += EnqueuePlate(plate, gm, paintValue, paintAtlas, paintExt, paintFg, paintDetail, paintBg,
-					delay, RIM_RISE, RIM_HOLD, RIM_SINK, RIM_EMERGE, StayUp: true, schedule, Settle: true);
+					delay, RIM_RISE, RIM_HOLD, RIM_SINK, RIM_EMERGE, schedule, Settle: true);
 			}
 			// gaps: lone shards, their own stagger, rise-falter-sink
 			string gapTile = ComposeTile(paintValue, paintAtlas, paintExt, ISOLATED_MASK);
@@ -303,7 +314,7 @@ namespace Cleo.TerraFirma.Scripts
 					continue;
 				float delay = CALC_LEAD_SEC + i * CALC_STEP_SEC;
 				IRenderable tile = new Cleo_TerraFirma_StoneTileRenderable(tiles[i], fgs[i], details[i], bgs[i]);
-				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(tile, gm.getTileCenter(cells[i].X, cells[i].Y), delay, RIM_RISE, RIM_HOLD, RIM_SINK, BURIED_DEPTH, RIM_EMERGE, stayUp: true), async: true);
+				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(tile, gm.getTileCenter(cells[i].X, cells[i].Y), delay, RIM_RISE, RIM_HOLD, RIM_SINK, BURIED_DEPTH, RIM_EMERGE), async: true);
 				schedule.SettleTimes[cells[i]] = delay + RIM_RISE + RIM_HOLD;
 				schedule.Total = Mathf.Max(schedule.Total, delay + RIM_RISE + RIM_HOLD);
 				enqueued++;
@@ -369,7 +380,7 @@ namespace Cleo.TerraFirma.Scripts
 		/// <summary>One plate: every cell's sprite wears the tile variant connected toward its
 		/// arc-neighbors and shares the plate's delay -- the slab heaves as one piece.</summary>
 		private static int EnqueuePlate(List<Cell> plate, GameManager gm, string paintValue, string atlas, string ext, char fg, char detail, char bg,
-			float Delay, float Rise, float Hold, float Sink, float Emerge, bool StayUp, Schedule schedule, bool Settle)
+			float Delay, float Rise, float Hold, float Sink, float Emerge, Schedule schedule, bool Settle)
 		{
 			int enqueued = 0;
 			for (int i = 0; i < plate.Count; i++)
@@ -377,7 +388,7 @@ namespace Cleo.TerraFirma.Scripts
 				string tilePath = ComposeTile(paintValue, atlas, ext, MaskFor(plate, i));
 				Cell c = plate[i];
 				IRenderable tile = new Cleo_TerraFirma_StoneTileRenderable(tilePath, fg, detail, bg);
-				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(tile, gm.getTileCenter(c.X, c.Y), Delay, Rise, Hold, Sink, BURIED_DEPTH, Emerge, StayUp), async: true);
+				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(tile, gm.getTileCenter(c.X, c.Y), Delay, Rise, Hold, Sink, BURIED_DEPTH, Emerge), async: true);
 				if (Settle)
 					schedule.SettleTimes[c] = Delay + Rise + Hold;
 				enqueued++;

@@ -537,11 +537,7 @@ namespace XRL.World.Parts.Mutation
 					}
 				}
 				StampOwner(piece);
-				plan.cell.AddObject(piece);
-				// fresh painted-family walls have no tile until the painter runs (ASCII flash
-				// through the settle loop -- user flag 2026-08-04, Calcify showed it too):
-				// paint on landing; no-ops for the unpainted fabric
-				plan.cell.CheckPaintWallsAround(piece);
+				plan.cell.AddObject(piece); // AddObject paints natively (CheckPaintWallsAround inside; diagnosed 2026-08-04)
 				if (bp == WALL_BLUEPRINT)
 				{
 					string paintedTile = piece.Render?.Tile;
