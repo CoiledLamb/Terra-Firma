@@ -17,7 +17,13 @@
 		<part Name="ThrownWeapon" Penetration="4" Damage="1d8" Attributes="Cudgel Vorpal" /> <!-- Vorpal = thrown-path vibro; damage still set in C# -->
 	</object>
 	<object Name="Cleo_TerraFirma_WallCalcify" Inherits="Sandstone">
-		<!-- fallback wall for Calcify when the zone defines no default wall and no stone neighbor is found -->
+		<!-- fallback wall for Calcify when the zone defines no default wall and no stone neighbor
+		     is found. RULED 2026-08-04 ("let's have the fallback stone wall be the same for both
+		     calcify and fissure"): dressed identically to Fissure's no-geology fallback, neutral
+		     gray &y^K (limestone scheme) over the inherited wall_rock paint family, never raw
+		     sandstone red. DisplayName = DRAFT under the beta-text ruling (a gray wall reading
+		     "sandstone" would be worse); release sitting signs off. -->
+		<part Name="Render" DisplayName="calcified stone" ColorString="&amp;y^K" TileColor="&amp;y" DetailColor="K" />
 	</object>
 	<object Name="Cleo_TerraFirma_StoneshaperStatue" Inherits="Random Statue">
 		<tag Name="Animatable" />
