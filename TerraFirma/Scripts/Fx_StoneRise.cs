@@ -122,57 +122,28 @@ namespace Cleo.TerraFirma.Scripts
 		/// Set (and always restored) only by the test harness; rides the TF-VERIFY strip.</summary>
 		public static bool HarnessMute;
 
-		/// <summary>Tile resolution, generalized to any painted-wall material (feel round 2)
-		/// AND any connectivity mask (feel round 5: fractured plates). The mask is the zone
-		/// painter's own 8-digit suffix -- N,NE,E,SE,S,SW,W,NW, 1 per connected neighbor,
-		/// decomp-verified in ZoneManager.PaintWall -- so a plate's sprites wear the same
-		/// variants standing walls would. Candidates probed against the atlas, cached per
-		/// material+mask; a missing mask variant falls back to the isolated tile (an extra
-		/// fracture, never a hole), a missing material falls back to wall_rock.</summary>
-		private static readonly Dictionary<string, string> ResolvedTiles = new Dictionary<string, string>();
-
 		public const string ISOLATED_MASK = "00000000";
+		private const string DEFAULT_ATLAS = "Assets_Content_Textures_Tiles_"; // the painter's own default (ZoneManager.PaintWall)
+		private const string DEFAULT_EXT = ".bmp";
 
-		private static string ResolveTile(string paintValue, string mask)
+		/// <summary>Tile path composed the zone painter's own way -- PaintedWallAtlas prefix +
+		/// paint value + 8-digit connectivity suffix + extension -- with NO atlas probing.
+		/// TryGetTextureInfo's miss path loads textures under the atlas WRITE lock, and
+		/// calling it from the game thread deadlocked against the Unity side twice
+		/// (2026-08-04; the second freeze hit during cold-cache pre-resolve with only ambient
+		/// juice running). The base game never touches the atlas from the game thread: paths
+		/// resolve to textures Unity-side inside GetPooledSprite, and a variant the atlas
+		/// doesn't stock renders as the engine's blank InvalidInfo with a one-time warning
+		/// in Player.log ("No texture found by ID") -- annoying, never fatal.</summary>
+		private static string ComposeTile(string paint, string atlas, string ext, string mask)
 		{
-			if (paintValue.IsNullOrEmpty())
-				paintValue = "wall_rock";
-			string key = paintValue + "-" + mask;
-			if (ResolvedTiles.TryGetValue(key, out string cached))
-				return cached;
-			string[] candidates =
-			{
-				"Walls/" + paintValue + "-" + mask + ".png",
-				"Assets_Content_Textures_Walls_" + paintValue + "-" + mask + ".png",
-				"Assets_Content_Textures_Walls_" + paintValue + "-" + mask + ".bmp",
-				"Assets_Content_Textures_Tiles_" + paintValue + "-" + mask + ".bmp",
-			};
-			string resolved = null;
-			foreach (string candidate in candidates)
-			{
-				if (SpriteManager.TryGetTextureInfo(candidate, out _))
-				{
-					resolved = candidate;
-					break;
-				}
-			}
-			if (resolved != null)
-				Helpers.VerifyLog("FIS", $"anim tile RESOLVED for '{key}': {resolved}");
-			else if (mask != ISOLATED_MASK)
-			{
-				// the atlas doesn't stock this variant: fracture the plate rather than skip the cell
-				Helpers.VerifyLog("FIS", $"anim tile: no '{key}' variant, isolated fallback");
-				resolved = ResolveTile(paintValue, ISOLATED_MASK);
-			}
-			else if (paintValue != "wall_rock")
-			{
-				Helpers.VerifyLog("FIS", $"anim tile: no isolated tile for '{paintValue}', wall_rock fallback");
-				resolved = ResolveTile("wall_rock", ISOLATED_MASK);
-			}
-			else
-				Helpers.VerifyLog("FIS", "anim tile UNRESOLVED for 'wall_rock' -- emergence sprites skipped");
-			ResolvedTiles[key] = resolved;
-			return resolved;
+			if (paint.IsNullOrEmpty())
+				paint = "wall_rock";
+			if (atlas.IsNullOrEmpty())
+				atlas = DEFAULT_ATLAS;
+			if (ext.IsNullOrEmpty())
+				ext = DEFAULT_EXT;
+			return atlas + paint + "-" + mask + ext;
 		}
 
 		/// <summary>Everything the mutation's frame-pump loop needs to settle the cast in
@@ -224,14 +195,12 @@ namespace Cleo.TerraFirma.Scripts
 		/// through together and hold; gap cells stay lone shards that rise and SINK BACK
 		/// (the sections the earth couldn't hold). Shells never fuse radially -- they move
 		/// at different moments, and the offset IS the outward travel.</summary>
-		public static Schedule Play(Cell origin, int radius, ICollection<Cell> reached, ICollection<Cell> gaps, string paintValue, char paintFg, char paintDetail, char paintBg, Func<int, int, int, bool> onRing)
+		public static Schedule Play(Cell origin, int radius, ICollection<Cell> reached, ICollection<Cell> gaps, string paintValue, string paintAtlas, string paintExt, char paintFg, char paintDetail, char paintBg, Func<int, int, int, bool> onRing)
 		{
 			if (origin == null)
 				return null;
 			GameManager gm = GameManager.Instance;
 			if (gm == null)
-				return null;
-			if (ResolveTile(paintValue, ISOLATED_MASK) == null)
 				return null;
 			float rimStart = radius * SHELL_SEC;
 			Schedule schedule = new Schedule();
@@ -263,12 +232,6 @@ namespace Cleo.TerraFirma.Scripts
 					}
 				}
 			}
-			// PLAN before PLAY: plates first, then every tile variant this cast needs resolved
-			// while the juice queue is still quiet. TryGetTextureInfo's miss path loads the
-			// texture under the atlas WRITE lock -- probing new variants while the Unity side
-			// was fetching our already-enqueued sprites deadlocked into a hard freeze
-			// (2026-08-04, third live cast). After this warmup, enqueue-time ResolveTile
-			// calls are pure cache hits and never touch the atlas.
 			List<List<Cell>>[] shellPlates = new List<List<Cell>>[radius];
 			for (int r = 1; r < radius; r++)
 			{
@@ -276,17 +239,7 @@ namespace Cleo.TerraFirma.Scripts
 					shellPlates[r] = CutPlates(SortByAngle(shells[r], origin), TRAVEL_PLATE_MIN, TRAVEL_PLATE_MAX, TRAVEL_SHARD_CHANCE);
 			}
 			List<List<Cell>> rimPlates = CutPlates(SortByAngle(rimFabric, origin), RIM_PLATE_MIN, RIM_PLATE_MAX, RIM_SHARD_CHANCE);
-			for (int r = 1; r < radius; r++)
-			{
-				if (shellPlates[r] == null)
-					continue;
-				foreach (List<Cell> plate in shellPlates[r])
-					for (int i = 0; i < plate.Count; i++)
-						ResolveTile(paintValue, MaskFor(plate, i));
-			}
-			foreach (List<Cell> plate in rimPlates)
-				for (int i = 0; i < plate.Count; i++)
-					ResolveTile(paintValue, MaskFor(plate, i));
+			Helpers.VerifyLog("FIS", $"anim tiles composed painter-style: {(paintAtlas.IsNullOrEmpty() ? DEFAULT_ATLAS : paintAtlas)}{(paintValue.IsNullOrEmpty() ? "wall_rock" : paintValue)}-<mask>{(paintExt.IsNullOrEmpty() ? DEFAULT_EXT : paintExt)}");
 			int enqueued = 0;
 			// travel shells: fractured plates surging outward, one shared delay per plate
 			for (int r = 1; r < radius; r++)
@@ -296,7 +249,7 @@ namespace Cleo.TerraFirma.Scripts
 				foreach (List<Cell> plate in shellPlates[r])
 				{
 					float delay = r * SHELL_SEC + 0.01f * Stat.Random(0, PLATE_JITTER_STEPS);
-					enqueued += EnqueuePlate(plate, gm, paintValue, paintFg, paintDetail, paintBg,
+					enqueued += EnqueuePlate(plate, gm, paintValue, paintAtlas, paintExt, paintFg, paintDetail, paintBg,
 						delay, TRAVEL_RISE, TRAVEL_HOLD, TRAVEL_SINK, TRAVEL_EMERGE, StayUp: false, schedule, Settle: false);
 				}
 			}
@@ -304,11 +257,11 @@ namespace Cleo.TerraFirma.Scripts
 			foreach (List<Cell> plate in rimPlates)
 			{
 				float delay = rimStart + 0.01f * Stat.Random(0, (int)(RIM_STAGGER * 100f));
-				enqueued += EnqueuePlate(plate, gm, paintValue, paintFg, paintDetail, paintBg,
+				enqueued += EnqueuePlate(plate, gm, paintValue, paintAtlas, paintExt, paintFg, paintDetail, paintBg,
 					delay, RIM_RISE, RIM_HOLD, RIM_SINK, RIM_EMERGE, StayUp: true, schedule, Settle: true);
 			}
 			// gaps: lone shards, their own stagger, rise-falter-sink
-			string gapTile = ResolveTile(paintValue, ISOLATED_MASK);
+			string gapTile = ComposeTile(paintValue, paintAtlas, paintExt, ISOLATED_MASK);
 			foreach (Cell c in rimGaps)
 			{
 				float delay = rimStart + 0.01f * Stat.Random(0, (int)(RIM_STAGGER * 100f));
@@ -339,14 +292,14 @@ namespace Cleo.TerraFirma.Scripts
 			char[] bgs = new char[cells.Count];
 			for (int i = 0; i < cells.Count; i++)
 			{
-				ResolveWallDressing(i < blueprints.Count ? blueprints[i] : null, out string paint, out fgs[i], out details[i], out bgs[i]);
-				tiles[i] = ResolveTile(paint, MaskForSet(cells, i));
+				ResolveWallDressing(i < blueprints.Count ? blueprints[i] : null, out string paint, out string atlas, out string ext, out fgs[i], out details[i], out bgs[i]);
+				tiles[i] = ComposeTile(paint, atlas, ext, MaskForSet(cells, i));
 			}
 			Schedule schedule = new Schedule();
 			int enqueued = 0;
 			for (int i = 0; i < cells.Count; i++)
 			{
-				if (tiles[i] == null || !cells[i].IsVisible())
+				if (!cells[i].IsVisible())
 					continue;
 				float delay = CALC_LEAD_SEC + i * CALC_STEP_SEC;
 				IRenderable tile = new Cleo_TerraFirma_StoneTileRenderable(tiles[i], fgs[i], details[i], bgs[i]);
@@ -371,13 +324,16 @@ namespace Cleo.TerraFirma.Scripts
 			return new string(mask);
 		}
 
-		/// <summary>Paint family + color triple straight off a wall blueprint: PaintedWall tag
-		/// (first comma variant) and Render colors, inheritance already baked into the
-		/// blueprint tree; the shared gray (&y^K over wall_rock) where a blueprint offers
-		/// nothing -- the same fallback the settled fabric wears.</summary>
-		private static void ResolveWallDressing(string blueprint, out string paint, out char fg, out char detail, out char bg)
+		/// <summary>Paint family, atlas prefix + extension, and color triple straight off a
+		/// wall blueprint: PaintedWall tag (first comma variant) and Render colors,
+		/// inheritance already baked into the blueprint tree; the shared gray (&y^K over
+		/// wall_rock) where a blueprint offers nothing -- the same fallback the settled
+		/// fabric wears.</summary>
+		private static void ResolveWallDressing(string blueprint, out string paint, out string atlas, out string ext, out char fg, out char detail, out char bg)
 		{
 			paint = "wall_rock";
+			atlas = null;
+			ext = null;
 			fg = 'y';
 			detail = 'K';
 			bg = 'K';
@@ -387,6 +343,8 @@ namespace Cleo.TerraFirma.Scripts
 			string p = b.GetTag("PaintedWall");
 			if (!p.IsNullOrEmpty())
 				paint = p.Contains(",") ? p.Split(',')[0] : p;
+			atlas = b.GetTag("PaintedWallAtlas", null);
+			ext = b.GetTag("PaintedWallExtension", null);
 			string tc = b.GetPartParameter<string>("Render", "TileColor");
 			if (tc.IsNullOrEmpty())
 				tc = b.GetPartParameter<string>("Render", "ColorString");
@@ -410,15 +368,13 @@ namespace Cleo.TerraFirma.Scripts
 
 		/// <summary>One plate: every cell's sprite wears the tile variant connected toward its
 		/// arc-neighbors and shares the plate's delay -- the slab heaves as one piece.</summary>
-		private static int EnqueuePlate(List<Cell> plate, GameManager gm, string paintValue, char fg, char detail, char bg,
+		private static int EnqueuePlate(List<Cell> plate, GameManager gm, string paintValue, string atlas, string ext, char fg, char detail, char bg,
 			float Delay, float Rise, float Hold, float Sink, float Emerge, bool StayUp, Schedule schedule, bool Settle)
 		{
 			int enqueued = 0;
 			for (int i = 0; i < plate.Count; i++)
 			{
-				string tilePath = ResolveTile(paintValue, MaskFor(plate, i));
-				if (tilePath == null)
-					continue;
+				string tilePath = ComposeTile(paintValue, atlas, ext, MaskFor(plate, i));
 				Cell c = plate[i];
 				IRenderable tile = new Cleo_TerraFirma_StoneTileRenderable(tilePath, fg, detail, bg);
 				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(tile, gm.getTileCenter(c.X, c.Y), Delay, Rise, Hold, Sink, BURIED_DEPTH, Emerge, StayUp), async: true);

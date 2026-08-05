@@ -368,7 +368,7 @@ namespace XRL.World.Parts.Mutation
 			// (rubble -> crumbled wall -> fallen wall) spent as the rim deposits
 			int upgradeCredits = carvedMass;
 			int wallShare = GetWallShare(Level);
-			string dominantPaint = DominantWallPaint(zone, out char paintFg, out char paintDetail, out char paintBg);
+			string dominantPaint = DominantWallPaint(zone, out string paintAtlas, out string paintExt, out char paintFg, out char paintDetail, out char paintBg);
 			int deposited = 0, debris = 0;
 			var deposits = new List<(Cell cell, string bp, float time)>();
 			foreach (Cell c in rim)
@@ -466,7 +466,7 @@ namespace XRL.World.Parts.Mutation
 			// with frozen smoke (feel round 2, note 1)
 			Cleo_TerraFirma_StoneRiseFX.Schedule schedule = null;
 			if (!Cleo_TerraFirma_StoneRiseFX.HarnessMute && zone.IsActive() && origin.IsVisible())
-				schedule = Cleo_TerraFirma_StoneRiseFX.Play(origin, radius, reached, gaps, dominantPaint, paintFg, paintDetail, paintBg, OnRing);
+				schedule = Cleo_TerraFirma_StoneRiseFX.Play(origin, radius, reached, gaps, dominantPaint, paintAtlas, paintExt, paintFg, paintDetail, paintBg, OnRing);
 			void Place((Cell cell, string bp, float time) plan)
 			{
 				string bp = plan.bp;
@@ -630,8 +630,10 @@ namespace XRL.World.Parts.Mutation
 		/// (FEEL ROUND 3: hardcoded sandstone red made rising stone red everywhere). Null
 		/// paint = no walls in the zone; deposits keep sandstone, sprite falls back to
 		/// wall_rock in earthy ochre.</summary>
-		private static string DominantWallPaint(Zone zone, out char fg, out char detail, out char bg)
+		private static string DominantWallPaint(Zone zone, out string atlas, out string ext, out char fg, out char detail, out char bg)
 		{
+			atlas = null; // the FX composes with the painter's defaults when these stay null
+			ext = null;
 			// no-geology fallback = neutral GRAY plain rock (limestone's &y^K scheme), not the
 			// Rock_Wall blueprint's inherited sandstone red -- feel flag 2026-08-04, a Joppa
 			// cast against brinestalk: "my rocks did that yellow thing again"
@@ -670,6 +672,8 @@ namespace XRL.World.Parts.Mutation
 			}
 			if (best != null && samples.TryGetValue(best, out GameObject sample) && sample.Render != null)
 			{
+				atlas = sample.GetTagOrStringProperty("PaintedWallAtlas");
+				ext = sample.GetTagOrStringProperty("PaintedWallExtension");
 				string tc = sample.Render.TileColor;
 				if (tc.IsNullOrEmpty())
 					tc = sample.Render.ColorString;
