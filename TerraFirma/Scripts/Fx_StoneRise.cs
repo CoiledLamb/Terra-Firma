@@ -204,6 +204,12 @@ namespace Cleo.TerraFirma.Scripts
 		private const int RIM_PLATE_MIN = 3;
 		private const int RIM_PLATE_MAX = 6;
 		private const int RIM_SHARD_CHANCE = 8;
+		// Calcify's raise (feel 2026-08-04: "rising of stones matching the order in which you
+		// selected tiles, with a slight offset"). The lead-in also gives the Unity juice queue
+		// its spin-up time -- the all-at-once slab lived inside 0.24s and startup latency ate
+		// it ("the walls aren't rendering during the animation").
+		private const float CALC_LEAD_SEC = 0.10f;
+		private const float CALC_STEP_SEC = 0.07f; // per-wall offset down the picked line
 		private const int PLATE_JITTER_STEPS = 5; // travel plates offset 0..0.05s within their shell
 		// tile geometry (world units; a tile is ~24 tall -- floatingText's +12 half-tile offset)
 		private const float BURIED_DEPTH = 20f;
@@ -314,18 +320,19 @@ namespace Cleo.TerraFirma.Scripts
 			return enqueued > 0 ? schedule : null;
 		}
 
-		/// <summary>Calcify's wall raise (VFX pass, flagged + user-confirmed 2026-08-04): the
-		/// whole line rises as ONE connected slab -- full-adjacency masks so an L-bend still
-		/// fuses -- with rim-style rise and hold. Every tile is pre-resolved before the first
-		/// enqueue (the freeze lesson). Each cell dresses from its OWN blueprint (Calcify
-		/// raises real blueprints, and the sticky borrow can change stone mid-line). Returns
-		/// the settle moment in seconds; 0 = nothing to animate. The caller places the real
-		/// walls when the settle moment arrives.</summary>
-		public static float PlayWallRise(List<Cell> cells, List<string> blueprints)
+		/// <summary>Calcify's wall raise (VFX pass, flagged + user-confirmed 2026-08-04; ripple
+		/// re-spec same day): one connected slab -- full-adjacency masks so an L-bend still
+		/// fuses -- rising in PICK ORDER, each wall a slight beat after the last (the stone
+		/// follows your gesture; an NPC's line ripples outward from its anchor). Every tile
+		/// is pre-resolved before the first enqueue (the freeze lesson); each cell dresses
+		/// from its OWN blueprint (the sticky borrow can change stone mid-line). Returns the
+		/// settle schedule -- per-cell handoff moments -- or null if nothing animates; the
+		/// caller places each real wall as its moment arrives.</summary>
+		public static Schedule PlayWallRise(List<Cell> cells, List<string> blueprints)
 		{
 			GameManager gm = GameManager.Instance;
 			if (gm == null || cells == null || cells.Count == 0)
-				return 0f;
+				return null;
 			string[] tiles = new string[cells.Count];
 			char[] fgs = new char[cells.Count];
 			char[] details = new char[cells.Count];
@@ -335,16 +342,20 @@ namespace Cleo.TerraFirma.Scripts
 				ResolveWallDressing(i < blueprints.Count ? blueprints[i] : null, out string paint, out fgs[i], out details[i], out bgs[i]);
 				tiles[i] = ResolveTile(paint, MaskForSet(cells, i));
 			}
+			Schedule schedule = new Schedule();
 			int enqueued = 0;
 			for (int i = 0; i < cells.Count; i++)
 			{
 				if (tiles[i] == null || !cells[i].IsVisible())
 					continue;
+				float delay = CALC_LEAD_SEC + i * CALC_STEP_SEC;
 				IRenderable tile = new Cleo_TerraFirma_StoneTileRenderable(tiles[i], fgs[i], details[i], bgs[i]);
-				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(tile, gm.getTileCenter(cells[i].X, cells[i].Y), 0f, RIM_RISE, RIM_HOLD, RIM_SINK, BURIED_DEPTH, RIM_EMERGE, stayUp: true), async: true);
+				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(tile, gm.getTileCenter(cells[i].X, cells[i].Y), delay, RIM_RISE, RIM_HOLD, RIM_SINK, BURIED_DEPTH, RIM_EMERGE, stayUp: true), async: true);
+				schedule.SettleTimes[cells[i]] = delay + RIM_RISE + RIM_HOLD;
+				schedule.Total = Mathf.Max(schedule.Total, delay + RIM_RISE + RIM_HOLD);
 				enqueued++;
 			}
-			return enqueued > 0 ? RIM_RISE + RIM_HOLD : 0f;
+			return enqueued > 0 ? schedule : null;
 		}
 
 		/// <summary>Mask connected toward EVERY set-member within reach, unlike the arcs'

@@ -193,34 +193,46 @@ namespace XRL.World.Parts.Mutation
 				planBps.Add(bp ?? "Cleo_TerraFirma_WallCalcify");
 			}
 			PlayWorldSound("Sounds/Throw/sfx_throwing_stone_large_impact", 1f, Combat: true); // the slam covers the rise
-			float settle = 0f;
-			Zone zone = ParentObject.CurrentZone;
-			if (!Cleo.TerraFirma.Scripts.Cleo_TerraFirma_StoneRiseFX.HarnessMute && zone != null && zone.IsActive() && ParentObject.CurrentCell?.IsVisible() == true)
-				settle = Cleo.TerraFirma.Scripts.Cleo_TerraFirma_StoneRiseFX.PlayWallRise(planCells, planBps);
-			if (settle > 0f)
-			{
-				// the frame-pump idiom (Fissure's settle loop): the world renders live while
-				// the slab comes up, and the real walls land exactly at the handoff
-				ScreenBuffer buf = ScreenBuffer.GetScrapBuffer1(bLoadFromCurrent: true);
-				TextConsole console = Popup._TextConsole;
-				float t = 0f;
-				while (t < settle)
-				{
-					XRLCore.Core.RenderBaseToBuffer(buf);
-					console.DrawBuffer(buf);
-					Thread.Sleep(40);
-					t += 0.04f;
-				}
-			}
-			for (int i = 0; i < planCells.Count; i++)
+			void PlaceWall(int i)
 			{
 				GameObject wall = GameObject.Create(planBps[i]);
 				wall.AddPart(new Cleo_TerraFirma_CalcifyWallPart(wallHp - wall.GetStatValue("Hitpoints"), wall.GetStatValue("AV")));
 				Phase.carryOver(ParentObject, wall);
 				planCells[i].AddObject(wall);
 			}
+			Cleo.TerraFirma.Scripts.Cleo_TerraFirma_StoneRiseFX.Schedule schedule = null;
+			Zone zone = ParentObject.CurrentZone;
+			if (!Cleo.TerraFirma.Scripts.Cleo_TerraFirma_StoneRiseFX.HarnessMute && zone != null && zone.IsActive() && ParentObject.CurrentCell?.IsVisible() == true)
+				schedule = Cleo.TerraFirma.Scripts.Cleo_TerraFirma_StoneRiseFX.PlayWallRise(planCells, planBps);
+			if (schedule != null)
+			{
+				// Fissure's settle idiom: the world renders live while the stones come up in
+				// pick order, and each real wall lands exactly at its own sprite's handoff
+				ScreenBuffer buf = ScreenBuffer.GetScrapBuffer1(bLoadFromCurrent: true);
+				TextConsole console = Popup._TextConsole;
+				float t = 0f;
+				float end = schedule.Total + 0.08f;
+				int placed = 0;
+				while (t < end)
+				{
+					while (placed < planCells.Count
+						&& (!schedule.SettleTimes.TryGetValue(planCells[placed], out float settleAt) || settleAt <= t))
+						PlaceWall(placed++);
+					XRLCore.Core.RenderBaseToBuffer(buf);
+					console.DrawBuffer(buf);
+					Thread.Sleep(40);
+					t += 0.04f;
+				}
+				while (placed < planCells.Count)
+					PlaceWall(placed++);
+			}
+			else
+			{
+				for (int i = 0; i < planCells.Count; i++)
+					PlaceWall(i);
+			}
 			DidX("calcify", "loose matter", ColorAsGoodFor: ParentObject, Source: ParentObject);
-			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CALC", $"cast Lv{Level}: {planCells.Count} wall(s) raised of {targeted.Count} targeted (formula {GetWallsCreated(Level)}), wall HP {GetWallHp(Level)}, blueprint={bp ?? "FALLBACK Cleo_TerraFirma_WallCalcify"}, animated={(settle > 0f ? settle.ToString("0.00") + "s slab rise" : "no")}");
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CALC", $"cast Lv{Level}: {planCells.Count} wall(s) raised of {targeted.Count} targeted (formula {GetWallsCreated(Level)}), wall HP {GetWallHp(Level)}, blueprint={bp ?? "FALLBACK Cleo_TerraFirma_WallCalcify"}, animated={(schedule != null ? schedule.Total.ToString("0.00") + "s pick-order ripple" : "no")}");
 			return base.HandleEvent(E);
 		}
 		#endregion
