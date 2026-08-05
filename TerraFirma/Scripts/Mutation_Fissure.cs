@@ -708,8 +708,7 @@ namespace XRL.World.Parts.Mutation
 		/// walls, and tomb masonry carry the part too, for statue purposes.</summary>
 		private static bool IsCarvableStone(GameObject wall)
 		{
-			Cleo_TerraFirma_StoneshaperWallProperties props = wall?.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>();
-			return props != null && props.MaterialType == "stone" && props.Natural;
+			return Cleo_TerraFirma_StoneshaperWallProperties.IsNaturalStone(wall?.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>());
 		}
 
 		/// <summary>The wave's bite is an ATTACK, not an edit (RULED 2026-08-04, user: "rather

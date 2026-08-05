@@ -154,7 +154,19 @@ namespace XRL.World.Parts.Mutation
 			UseEnergy(1000, $"Physical Mutation {Name}");
 			CooldownMyActivatedAbility(ActivatedAbilityID, GetCooldown(Level));
 			int wallHp = GetWallHp(Level);
-			var bp = ParentObject.CurrentZone.GetDefaultWall();
+			// the stone call, harmonized with Fissure's carve gate (RULED 2026-08-04: "we should
+			// harmonize the stone call as well"): only TRUE GEOLOGY answers. The zone's default
+			// wall must itself be natural stone, neighbor borrowing demands the Natural flag,
+			// and where nothing natural stands, the shared gray fallback rises.
+			string bp = ParentObject.CurrentZone.GetDefaultWall();
+			if (bp != null)
+			{
+				GameObjectBlueprint defaultWall = GameObjectFactory.Factory.GetBlueprintIfExists(bp);
+				if (defaultWall == null
+					|| defaultWall.GetPartParameter<string>("Cleo_TerraFirma_StoneshaperWallProperties", "MaterialType") != "stone"
+					|| !defaultWall.GetPartParameter("Cleo_TerraFirma_StoneshaperWallProperties", "Natural", false))
+					bp = null;
+			}
 			foreach (Cell cell in targeted)
 			{
 				if (!cell.IsEmpty())
@@ -162,7 +174,7 @@ namespace XRL.World.Parts.Mutation
 				foreach (Cell c in cell.GetCardinalAdjacentCellsWhere(x => x.HasWall()))
 				{
 					var wallProps = c.GetFirstWall().GetPart<Cleo_TerraFirma_StoneshaperWallProperties>();
-					if (wallProps?.MaterialType == "stone")
+					if (Cleo_TerraFirma_StoneshaperWallProperties.IsNaturalStone(wallProps))
 					{
 						bp = wallProps.ParentObject.Blueprint;
 						break;

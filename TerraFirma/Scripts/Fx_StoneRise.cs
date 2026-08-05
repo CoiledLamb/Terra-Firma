@@ -195,9 +195,10 @@ namespace Cleo.TerraFirma.Scripts
 		private const float RIM_SINK = 0.06f;
 		// plate dials (feel round 5, user: fractured-plate connectivity -- arcs of each shell
 		// fuse into slabs that heave TOGETHER; the breaks between them are the fractures)
-		private const int PLATE_MIN = 2;
-		private const int PLATE_MAX = 4;
-		private const int SHARD_CHANCE = 15;      // % of cuts that come off as a lone shard
+		// re-dialed 2026-08-04 (user: "plates could be a bit less fractured") -- was 2/4/15
+		private const int PLATE_MIN = 3;
+		private const int PLATE_MAX = 6;
+		private const int SHARD_CHANCE = 8;       // % of cuts that come off as a lone shard
 		private const int PLATE_JITTER_STEPS = 5; // travel plates offset 0..0.05s within their shell
 		// tile geometry (world units; a tile is ~24 tall -- floatingText's +12 half-tile offset)
 		private const float BURIED_DEPTH = 20f;

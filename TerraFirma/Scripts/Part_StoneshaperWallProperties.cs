@@ -19,6 +19,14 @@ namespace XRL.World.Parts
 		/// don't answer"). Set in Merges.xml on the natural-stone family; defaults false.
 		/// </summary>
 		public bool Natural;
+
+		/// <summary>The house classifier for the earth mutations' shared stone call (harmonized
+		/// RULED 2026-08-04): natural stone answers, everything constructed refuses. Fissure's
+		/// carve gate and ring dressing and Calcify's wall-borrowing all route through here.</summary>
+		public static bool IsNaturalStone(Cleo_TerraFirma_StoneshaperWallProperties props)
+		{
+			return props != null && props.MaterialType == "stone" && props.Natural;
+		}
 		/// <summary>
 		/// This is applied to the name of a statue created from this wall, which will cause it to render as something like "shale statue" and etc.
 		/// </summary>

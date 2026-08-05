@@ -127,6 +127,15 @@ Dials (Fx_StoneRise.cs): PLATE_MIN 2 / PLATE_MAX 4 / SHARD_CHANCE 15% / travel p
 jitter 0..0.05s (PLATE_JITTER_STEPS 5); rim plates roll their stagger inside the same
 RIM_STAGGER 0.18s window as before, per plate instead of per cell.
 
+Re-dial same day (user eyes-on: "plates could be a bit less fractured? but other than
+that think it looks good"): PLATE_MIN 3 / PLATE_MAX 6 / SHARD_CHANCE 8%.
+
+Same sitting, RULED: **the stone call is harmonized across the earth mutations** -- the
+shared classifier `Cleo_TerraFirma_StoneshaperWallProperties.IsNaturalStone` (MaterialType
+stone + Natural) now gates Fissure's carve/dressing AND Calcify's wall-borrowing, including
+Calcify's zone-default wall (checked at blueprint level; a fulcrete-default ruins zone now
+falls through to the shared gray fallback instead of raising fulcrete).
+
 ## Deliberate v1 exclusions
 
 - Item-plowing (wave ignores loose items — RULED, revisit post-beta if the wave feels like
