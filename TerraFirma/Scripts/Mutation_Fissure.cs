@@ -593,6 +593,10 @@ namespace XRL.World.Parts.Mutation
 				foreach (Cell gap in gaps)
 					SmokePuff(gap);
 			}
+			// one repaint over the finished redoubt: deposits land one at a time through the
+			// settle loop, each painted knowing only its predecessors -- landing-order variants
+			// linger otherwise (the light-vs-dark mystery, 2026-08-04)
+			ZoneManager.PaintWalls(zone, origin.X - radius - 1, origin.Y - radius - 1, origin.X + radius + 1, origin.Y + radius + 1);
 			Helpers.VerifyLog("FIS", $"RING complete: {deposited} fabric (wall share {wallShare}%), {gaps.Count} gap(s), {debris} debris-for-occupied, {scattered} wake scatter, carvedMass={carvedMass} (credits left {upgradeCredits}), paint={dominantPaint ?? "none/sandstone"}");
 			return base.HandleEvent(E);
 		}

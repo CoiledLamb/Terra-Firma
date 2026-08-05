@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using ConsoleLib.Console;
 using UnityEngine;
@@ -234,6 +235,19 @@ namespace XRL.World.Parts.Mutation
 			{
 				for (int i = 0; i < planCells.Count; i++)
 					PlaceWall(i);
+			}
+			// one repaint over the finished line: walls land one at a time (the ripple), so each
+			// painted knowing only its predecessors -- landing-order variants linger otherwise
+			// (the light-vs-dark column mystery, 2026-08-04)
+			if (planCells.Count > 0)
+			{
+				int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
+				foreach (Cell c in planCells)
+				{
+					minX = Math.Min(minX, c.X); maxX = Math.Max(maxX, c.X);
+					minY = Math.Min(minY, c.Y); maxY = Math.Max(maxY, c.Y);
+				}
+				ZoneManager.PaintWalls(zone, minX - 1, minY - 1, maxX + 1, maxY + 1);
 			}
 			DidX("calcify", "loose matter", ColorAsGoodFor: ParentObject, Source: ParentObject);
 			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CALC", $"cast Lv{Level}: {planCells.Count} wall(s) raised of {targeted.Count} targeted (formula {GetWallsCreated(Level)}), wall HP {GetWallHp(Level)}, blueprint={bp ?? "FALLBACK Cleo_TerraFirma_WallCalcify"}, animated={(schedule != null ? schedule.Total.ToString("0.00") + "s pick-order ripple" : "no")}");

@@ -276,7 +276,7 @@ namespace Cleo.TerraFirma.Scripts
 			foreach (Cell c in rimGaps)
 			{
 				float delay = rimStart + 0.01f * Stat.Random(0, (int)(RIM_STAGGER * 100f));
-				IRenderable tile = new Cleo_TerraFirma_StoneTileRenderable(gapTile, paintFg, paintDetail, paintBg);
+				IRenderable tile = new Cleo_TerraFirma_StoneTileRenderable(gapTile, paintFg, paintDetail, 'k');
 				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(tile, gm.getTileCenter(c.X, c.Y), delay, RIM_RISE, 0.04f, RIM_SINK, BURIED_DEPTH, RIM_EMERGE * 0.7f), async: true);
 				schedule.GapTimes[c] = delay + RIM_RISE + 0.04f;
 				enqueued++;
@@ -313,7 +313,10 @@ namespace Cleo.TerraFirma.Scripts
 				if (!cells[i].IsVisible())
 					continue;
 				float delay = CALC_LEAD_SEC + i * CALC_STEP_SEC;
-				IRenderable tile = new Cleo_TerraFirma_StoneTileRenderable(tiles[i], fgs[i], details[i], bgs[i]);
+				// black backing always (user call 2026-08-04, "put a black mask on the bottom
+				// layer of the animation": the material caret backing -- shale's ^w light
+				// brown -- made every holding sprite a light-tan impostor over the dark wall)
+				IRenderable tile = new Cleo_TerraFirma_StoneTileRenderable(tiles[i], fgs[i], details[i], 'k');
 				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(tile, gm.getTileCenter(cells[i].X, cells[i].Y), delay, RIM_RISE, RIM_HOLD, RIM_SINK, BURIED_DEPTH, RIM_EMERGE), async: true);
 				schedule.SettleTimes[cells[i]] = delay + RIM_RISE + RIM_HOLD;
 				schedule.Total = Mathf.Max(schedule.Total, delay + RIM_RISE + RIM_HOLD);
@@ -387,7 +390,7 @@ namespace Cleo.TerraFirma.Scripts
 			{
 				string tilePath = ComposeTile(paintValue, atlas, ext, MaskFor(plate, i));
 				Cell c = plate[i];
-				IRenderable tile = new Cleo_TerraFirma_StoneTileRenderable(tilePath, fg, detail, bg);
+				IRenderable tile = new Cleo_TerraFirma_StoneTileRenderable(tilePath, fg, detail, 'k'); // black backing, same call as above
 				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(tile, gm.getTileCenter(c.X, c.Y), Delay, Rise, Hold, Sink, BURIED_DEPTH, Emerge), async: true);
 				if (Settle)
 					schedule.SettleTimes[c] = Delay + Rise + Hold;
