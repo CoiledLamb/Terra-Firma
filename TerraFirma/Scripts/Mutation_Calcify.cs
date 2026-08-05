@@ -1,5 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
+using ConsoleLib.Console;
 using UnityEngine;
+using XRL.Core;
+using XRL.UI;
 using XRL.World.Capabilities;
 
 namespace XRL.World.Parts.Mutation
@@ -167,6 +171,11 @@ namespace XRL.World.Parts.Mutation
 					|| !defaultWall.GetPartParameter("Cleo_TerraFirma_StoneshaperWallProperties", "Natural", false))
 					bp = null;
 			}
+			// plan first, place after the rise (VFX pass 2026-08-04, user-confirmed: the
+			// Fissure emergence machinery, one connected slab): the borrow stays sticky and
+			// order-dependent exactly as before, but no wall exists until the stone has risen
+			List<Cell> planCells = new List<Cell>();
+			List<string> planBps = new List<string>();
 			foreach (Cell cell in targeted)
 			{
 				if (!cell.IsEmpty())
@@ -180,14 +189,38 @@ namespace XRL.World.Parts.Mutation
 						break;
 					}
 				}
-				GameObject wall = GameObject.Create(bp ?? "Cleo_TerraFirma_WallCalcify");
+				planCells.Add(cell);
+				planBps.Add(bp ?? "Cleo_TerraFirma_WallCalcify");
+			}
+			PlayWorldSound("Sounds/Throw/sfx_throwing_stone_large_impact", 1f, Combat: true); // the slam covers the rise
+			float settle = 0f;
+			Zone zone = ParentObject.CurrentZone;
+			if (!Cleo.TerraFirma.Scripts.Cleo_TerraFirma_StoneRiseFX.HarnessMute && zone != null && zone.IsActive() && ParentObject.CurrentCell?.IsVisible() == true)
+				settle = Cleo.TerraFirma.Scripts.Cleo_TerraFirma_StoneRiseFX.PlayWallRise(planCells, planBps);
+			if (settle > 0f)
+			{
+				// the frame-pump idiom (Fissure's settle loop): the world renders live while
+				// the slab comes up, and the real walls land exactly at the handoff
+				ScreenBuffer buf = ScreenBuffer.GetScrapBuffer1(bLoadFromCurrent: true);
+				TextConsole console = Popup._TextConsole;
+				float t = 0f;
+				while (t < settle)
+				{
+					XRLCore.Core.RenderBaseToBuffer(buf);
+					console.DrawBuffer(buf);
+					Thread.Sleep(40);
+					t += 0.04f;
+				}
+			}
+			for (int i = 0; i < planCells.Count; i++)
+			{
+				GameObject wall = GameObject.Create(planBps[i]);
 				wall.AddPart(new Cleo_TerraFirma_CalcifyWallPart(wallHp - wall.GetStatValue("Hitpoints"), wall.GetStatValue("AV")));
 				Phase.carryOver(ParentObject, wall);
-				cell.AddObject(wall);
+				planCells[i].AddObject(wall);
 			}
-			PlayWorldSound("Sounds/Throw/sfx_throwing_stone_large_impact", 1f, Combat: true);
 			DidX("calcify", "loose matter", ColorAsGoodFor: ParentObject, Source: ParentObject);
-			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CALC", $"cast Lv{Level}: {targeted.Count} cells targeted (formula {GetWallsCreated(Level)}), wall HP {GetWallHp(Level)}, blueprint={bp ?? "FALLBACK Cleo_TerraFirma_WallCalcify"}");
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CALC", $"cast Lv{Level}: {planCells.Count} wall(s) raised of {targeted.Count} targeted (formula {GetWallsCreated(Level)}), wall HP {GetWallHp(Level)}, blueprint={bp ?? "FALLBACK Cleo_TerraFirma_WallCalcify"}, animated={(settle > 0f ? settle.ToString("0.00") + "s slab rise" : "no")}");
 			return base.HandleEvent(E);
 		}
 		#endregion

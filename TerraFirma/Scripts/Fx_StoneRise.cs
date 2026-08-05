@@ -314,6 +314,89 @@ namespace Cleo.TerraFirma.Scripts
 			return enqueued > 0 ? schedule : null;
 		}
 
+		/// <summary>Calcify's wall raise (VFX pass, flagged + user-confirmed 2026-08-04): the
+		/// whole line rises as ONE connected slab -- full-adjacency masks so an L-bend still
+		/// fuses -- with rim-style rise and hold. Every tile is pre-resolved before the first
+		/// enqueue (the freeze lesson). Each cell dresses from its OWN blueprint (Calcify
+		/// raises real blueprints, and the sticky borrow can change stone mid-line). Returns
+		/// the settle moment in seconds; 0 = nothing to animate. The caller places the real
+		/// walls when the settle moment arrives.</summary>
+		public static float PlayWallRise(List<Cell> cells, List<string> blueprints)
+		{
+			GameManager gm = GameManager.Instance;
+			if (gm == null || cells == null || cells.Count == 0)
+				return 0f;
+			string[] tiles = new string[cells.Count];
+			char[] fgs = new char[cells.Count];
+			char[] details = new char[cells.Count];
+			char[] bgs = new char[cells.Count];
+			for (int i = 0; i < cells.Count; i++)
+			{
+				ResolveWallDressing(i < blueprints.Count ? blueprints[i] : null, out string paint, out fgs[i], out details[i], out bgs[i]);
+				tiles[i] = ResolveTile(paint, MaskForSet(cells, i));
+			}
+			int enqueued = 0;
+			for (int i = 0; i < cells.Count; i++)
+			{
+				if (tiles[i] == null || !cells[i].IsVisible())
+					continue;
+				IRenderable tile = new Cleo_TerraFirma_StoneTileRenderable(tiles[i], fgs[i], details[i], bgs[i]);
+				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(tile, gm.getTileCenter(cells[i].X, cells[i].Y), 0f, RIM_RISE, RIM_HOLD, RIM_SINK, BURIED_DEPTH, RIM_EMERGE, stayUp: true), async: true);
+				enqueued++;
+			}
+			return enqueued > 0 ? RIM_RISE + RIM_HOLD : 0f;
+		}
+
+		/// <summary>Mask connected toward EVERY set-member within reach, unlike the arcs'
+		/// chain masks: a calcified line is one deliberate rampart, bends included.</summary>
+		private static string MaskForSet(List<Cell> set, int idx)
+		{
+			char[] mask = ISOLATED_MASK.ToCharArray();
+			for (int j = 0; j < set.Count; j++)
+			{
+				if (j != idx)
+					SetMaskBit(mask, set[idx], set[j]);
+			}
+			return new string(mask);
+		}
+
+		/// <summary>Paint family + color triple straight off a wall blueprint: PaintedWall tag
+		/// (first comma variant) and Render colors, inheritance already baked into the
+		/// blueprint tree; the shared gray (&y^K over wall_rock) where a blueprint offers
+		/// nothing -- the same fallback the settled fabric wears.</summary>
+		private static void ResolveWallDressing(string blueprint, out string paint, out char fg, out char detail, out char bg)
+		{
+			paint = "wall_rock";
+			fg = 'y';
+			detail = 'K';
+			bg = 'K';
+			GameObjectBlueprint b = blueprint == null ? null : GameObjectFactory.Factory.GetBlueprintIfExists(blueprint);
+			if (b == null)
+				return;
+			string p = b.GetTag("PaintedWall");
+			if (!p.IsNullOrEmpty())
+				paint = p.Contains(",") ? p.Split(',')[0] : p;
+			string tc = b.GetPartParameter<string>("Render", "TileColor");
+			if (tc.IsNullOrEmpty())
+				tc = b.GetPartParameter<string>("Render", "ColorString");
+			if (!tc.IsNullOrEmpty())
+			{
+				int amp = tc.IndexOf('&');
+				if (amp >= 0 && amp + 1 < tc.Length)
+					fg = tc[amp + 1];
+			}
+			string dc = b.GetPartParameter<string>("Render", "DetailColor");
+			if (!dc.IsNullOrEmpty())
+				detail = dc[0];
+			string cs = b.GetPartParameter<string>("Render", "ColorString");
+			if (!cs.IsNullOrEmpty())
+			{
+				int caret = cs.IndexOf('^');
+				if (caret >= 0 && caret + 1 < cs.Length)
+					bg = cs[caret + 1];
+			}
+		}
+
 		/// <summary>One plate: every cell's sprite wears the tile variant connected toward its
 		/// arc-neighbors and shares the plate's delay -- the slab heaves as one piece.</summary>
 		private static int EnqueuePlate(List<Cell> plate, GameManager gm, string paintValue, char fg, char detail, char bg,
