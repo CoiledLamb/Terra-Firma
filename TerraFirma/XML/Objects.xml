@@ -69,10 +69,16 @@
 		<part Name="Physics" Weight="8" Category="Tools" />
 		<part Name="Cleo_TerraFirma_StatueMakerPart" />
 		<part Name="Examiner" Unknown="UnknownOddTrinket" Complexity="3" />
+		<tag Name="Tier" Value="3" />
+		<!-- BETA-HELD (RULED 2026-08-05: "we should just bench the statue making item with the rest
+		     of the gear we're adding in phase 2"): all three acquisition surfaces gated below; the
+		     blueprint + part stay compiled as an inert dev door (wish-reachable only), per the
+		     redoubt pivot's spawn-layer gating philosophy. The placeholder description rides the
+		     bench; its real text moves to the phase-2 gearset pass. Restore = uncomment.
 		<tag Name="Gift" Value="*noinherit" />
 		<tag Name="GiftSkillRestriction" Value="Tinkering_Scavenger" />
-		<tag Name="Tier" Value="3" />
 		<part Name="TinkerItem" Bits="0013" CanDisassemble="true" CanBuild="true" />
 		<tag Name="DynamicObjectsTable:Trinkets" />
+		-->
 	</object>
 </objects>
