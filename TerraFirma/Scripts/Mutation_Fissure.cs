@@ -538,6 +538,10 @@ namespace XRL.World.Parts.Mutation
 				}
 				StampOwner(piece);
 				plan.cell.AddObject(piece);
+				// fresh painted-family walls have no tile until the painter runs (ASCII flash
+				// through the settle loop -- user flag 2026-08-04, Calcify showed it too):
+				// paint on landing; no-ops for the unpainted fabric
+				plan.cell.CheckPaintWallsAround(piece);
 				// smoke thinned twice (feel round 3, then 2026-08-04 "bit less smoke") --
 				// fabric puffs light, wake scatter only sometimes
 				bool scatter = bp != WALL_BLUEPRINT && bp != CRUMBLED_BLUEPRINT && bp != RUBBLE_BLUEPRINT;
