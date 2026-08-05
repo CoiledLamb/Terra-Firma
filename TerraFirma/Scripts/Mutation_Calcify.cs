@@ -163,6 +163,7 @@ namespace XRL.World.Parts.Mutation
 			// wall must itself be natural stone, neighbor borrowing demands the Natural flag,
 			// and where nothing natural stands, the shared gray fallback rises.
 			string bp = ParentObject.CurrentZone.GetDefaultWall();
+			string rawDefault = bp;
 			if (bp != null)
 			{
 				GameObjectBlueprint defaultWall = GameObjectFactory.Factory.GetBlueprintIfExists(bp);
@@ -171,6 +172,7 @@ namespace XRL.World.Parts.Mutation
 					|| !defaultWall.GetPartParameter("Cleo_TerraFirma_StoneshaperWallProperties", "Natural", false))
 					bp = null;
 			}
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CALC", $"stone call: zone default wall={rawDefault ?? "none"}, vet {(bp == null ? "REFUSED (not natural stone) -- fallback/borrow decides" : "passed")}");
 			// plan first, place after the rise (VFX pass 2026-08-04, user-confirmed: the
 			// Fissure emergence machinery, one connected slab): the borrow stays sticky and
 			// order-dependent exactly as before, but no wall exists until the stone has risen
@@ -200,7 +202,7 @@ namespace XRL.World.Parts.Mutation
 				Phase.carryOver(ParentObject, wall);
 				planCells[i].AddObject(wall); // AddObject paints natively (CheckPaintWallsAround inside; diagnosed 2026-08-04)
 				string paintedTile = wall.Render?.Tile;
-				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CALC", $"wall landed @({planCells[i].X},{planCells[i].Y}): post-paint Render.Tile={(paintedTile.IsNullOrEmpty() ? "NULL (paint did not take)" : paintedTile)}");
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CALC", $"wall landed @({planCells[i].X},{planCells[i].Y}): bp={planBps[i]}, post-paint Render.Tile={(paintedTile.IsNullOrEmpty() ? "NULL (paint did not take)" : paintedTile)}");
 			}
 			Cleo.TerraFirma.Scripts.Cleo_TerraFirma_StoneRiseFX.Schedule schedule = null;
 			Zone zone = ParentObject.CurrentZone;
