@@ -202,6 +202,14 @@ namespace XRL.World.Parts.Mutation
 				wall.AddPart(new Cleo_TerraFirma_CalcifyWallPart(wallHp - wall.GetStatValue("Hitpoints"), wall.GetStatValue("AV")));
 				Phase.carryOver(ParentObject, wall);
 				planCells[i].AddObject(wall); // AddObject paints natively (CheckPaintWallsAround inside; diagnosed 2026-08-04)
+				// zone-build dressing (user 2026-08-05, calcified shale beside water wore plain red
+				// while its natural neighbors wore vineshale green): ShaleVines runs only on
+				// ZoneBuiltEvent, which our walls postdate. Run the same check at placement so a
+				// water-adjacent calcified wall dresses exactly as the zone's own stone does; the
+				// post-cast region repaint picks up its swapped paint value.
+				if (wall.TryGetPart(out XRL.World.Parts.ShaleVines vines))
+					vines.GrowVines();
+				Cleo_TerraFirma_Fissure.SmokePuff(planCells[i]); // one drift of dust per landing (user 2026-08-05: "a very small amount of smoke ... for symmetry with fissure")
 				string paintedTile = wall.Render?.Tile;
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CALC", $"wall landed @({planCells[i].X},{planCells[i].Y}): bp={planBps[i]}, post-paint Render.Tile={(paintedTile.IsNullOrEmpty() ? "NULL (paint did not take)" : paintedTile)}");
 			}

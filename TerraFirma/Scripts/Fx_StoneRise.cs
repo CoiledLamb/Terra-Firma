@@ -28,8 +28,13 @@ namespace Cleo.TerraFirma.Scripts
 		private float Sink;
 		private float BuriedY;
 		private float EmergeY;
+		private bool VanishAfterHold;
+		private Color Foreground;
+		private Color Background;
+		private Color Detail;
+		private Color DetailNudge;
 
-		public Cleo_TerraFirma_JuiceStoneRise(IRenderable tile, Vector3 basePos, float delay, float rise, float hold, float sink, float buriedDepth, float emergeHeight)
+		public Cleo_TerraFirma_JuiceStoneRise(IRenderable tile, Vector3 basePos, float delay, float rise, float hold, float sink, float buriedDepth, float emergeHeight, bool vanishAfterHold = false)
 		{
 			Tile = tile;
 			Base = basePos;
@@ -39,6 +44,7 @@ namespace Cleo.TerraFirma.Scripts
 			Sink = Mathf.Max(0.01f, sink);
 			BuriedY = -buriedDepth;
 			EmergeY = -buriedDepth + emergeHeight;
+			VanishAfterHold = vanishAfterHold;
 			duration = delay + this.Rise + hold + this.Sink;
 		}
 
@@ -48,6 +54,10 @@ namespace Cleo.TerraFirma.Scripts
 			// while it rose -- "the occluding bit"): the sprite renders as a solid block, the
 			// way standing walls do, so the rising stone reads as mass, not a cutout.
 			Target = SpriteManager.GetPooledSprite(Tile, Transparent: false);
+			Foreground = Target.color;
+			Background = Target.backcolor;
+			Detail = Target.detailcolor;
+			DetailNudge = new Color(Detail.r, Detail.g, Detail.b, 0.996f);
 			Transform transform = Target.gameObject.transform;
 			transform.SetParent(GameManager.Instance.TileRoot.transform);
 			transform.position = Base + new Vector3(0f, BuriedY, 100f); // parked behind the map until its cue
@@ -57,6 +67,19 @@ namespace Cleo.TerraFirma.Scripts
 		{
 			if (Target == null)
 				return;
+			// detail-channel repair (user report 2026-08-05: fg red rendered, detail BLACK where
+			// the settled wall wears brown). The Kobold shader reads the detail color off the
+			// mesh NORMALS; a first-use pooled sprite's FillBuffers queues exUpdateFlags.All,
+			// and that flush's Normal block overwrites the normals with geometric (0,0,-1) --
+			// black -- AFTER the Color block wrote them (exMesh.FlushBuffers order). Pool
+			// REUSES skip FillBuffers and render fine, so the bug looked intermittent. The
+			// color setters no-op on equal values, so nudge detailcolor every update to force
+			// a Color-only re-flush; first one wins, the rest rewrite 4 vertices. (Same stomp
+			// class the chassis guards against by re-applying its colors every update.)
+			Target.color = Foreground;
+			Target.backcolor = Background;
+			Target.detailcolor = DetailNudge;
+			Target.detailcolor = Detail;
 			float p = t - Delay;
 			if (p < 0f)
 				return;
@@ -67,6 +90,15 @@ namespace Cleo.TerraFirma.Scripts
 				y = EmergeY;
 			else
 			{
+				if (VanishAfterHold)
+				{
+					// handoff mode (Calcify, 2026-08-05): the real wall lands exactly when the
+					// hold ends, so a sink phase plays out as a duplicate wall sliding down in
+					// FRONT of the settled fabric ("flies downwards before disappearing").
+					// Nothing to sink back INTO the earth here -- park behind the map instead.
+					Target.transform.position = Base + new Vector3(0f, BuriedY, 100f);
+					return;
+				}
 				float q = Mathf.Clamp01((p - Rise - Hold) / Sink);
 				if (q >= 1f)
 				{
@@ -90,6 +122,248 @@ namespace Cleo.TerraFirma.Scripts
 			{
 				SpriteManager.Return(Target);
 				Target = null;
+			}
+			base.finish();
+		}
+	}
+
+	/// <summary>
+	/// The carved block of the Stoneshaper carve reveal (feel round 2, 2026-08-05: the
+	/// sprite is LITERALLY broken apart -- sub-rect atlas clones, see CloneSubRect). One
+	/// pooled sprite wearing the wall's OWN painted tile, pixel-identical to the standing
+	/// wall at t=0; at each break its textureInfo swaps to a clone covering only the
+	/// remaining BOTTOM of the tile's atlas rect, so the sprite shows the wall's actual
+	/// surviving pixels at natural size -- no squash -- and shortens as the top is carved
+	/// off. Parks behind the map after the third break. Rotated/diced atlas entries can't
+	/// be sub-rected safely and fall back to the vertical-squash look. Chassis rules:
+	/// opaque backing, normals-stomp color repair every frame (textureInfo swaps re-queue
+	/// the stomping flush, the per-frame repair already covers it), park-behind-map exit,
+	/// every piece of pool state (scale, textureInfo) captured and restored.
+	/// </summary>
+	public class Cleo_TerraFirma_JuiceCarveBlock : CombatJuiceEntry
+	{
+		private IRenderable Tile;
+		private ex3DSprite2 Target;
+		private Vector3 Center;
+		private float FirstBreak;
+		private float BreakStep;
+		private Vector3 OrigScale;
+		private bool ScaleFallback;
+		private exTextureInfo BaseInfo;
+		private exTextureInfo[] SubInfos; // [0] bottom 2/3 after break 1, [1] bottom 1/3 after break 2
+		private int Applied;
+		private Color Foreground;
+		private Color Background;
+		private Color Detail;
+		private Color DetailNudge;
+
+		public Cleo_TerraFirma_JuiceCarveBlock(IRenderable tile, Vector3 center, float firstBreak, float breakStep)
+		{
+			Tile = tile;
+			Center = center;
+			FirstBreak = firstBreak;
+			BreakStep = Mathf.Max(0.01f, breakStep);
+			duration = firstBreak + 2f * this.BreakStep + 0.02f;
+		}
+
+		public override void start()
+		{
+			Target = SpriteManager.GetPooledSprite(Tile, Transparent: false);
+			Foreground = Target.color;
+			Background = Target.backcolor;
+			Detail = Target.detailcolor;
+			DetailNudge = new Color(Detail.r, Detail.g, Detail.b, 0.996f);
+			Transform transform = Target.gameObject.transform;
+			transform.SetParent(GameManager.Instance.TileRoot.transform);
+			OrigScale = transform.localScale;
+			ScaleFallback = false;
+			Applied = 0;
+			BaseInfo = Target.textureInfo;
+			SubInfos = null;
+			if (BaseInfo != null && !BaseInfo.rotated && !BaseInfo.isDiced)
+			{
+				SubInfos = new exTextureInfo[2];
+				SubInfos[0] = Cleo_TerraFirma_StoneRiseFX.CloneSubRect(BaseInfo, 0f, 0f, 1f, 2f / 3f);
+				SubInfos[1] = Cleo_TerraFirma_StoneRiseFX.CloneSubRect(BaseInfo, 0f, 0f, 1f, 1f / 3f);
+			}
+			transform.position = Center + new Vector3(0f, 0f, -10f);
+		}
+
+		public override void update()
+		{
+			if (Target == null)
+				return;
+			// normals-stomp repair, verbatim from the rise entry (first-use FillBuffers
+			// overwrites the detail channel with geometric normals -> black detail)
+			Target.color = Foreground;
+			Target.backcolor = Background;
+			Target.detailcolor = DetailNudge;
+			Target.detailcolor = Detail;
+			int broken = t < FirstBreak ? 0 : Mathf.Min(3, 1 + (int)((t - FirstBreak) / BreakStep));
+			if (broken >= 3)
+			{
+				// fully carved away: park BEHIND the map immediately rather than waiting on
+				// finish() (the "error shale" lesson -- finish() runs on turn cadence)
+				Target.transform.position = Center + new Vector3(0f, 0f, 100f);
+				return;
+			}
+			if (broken != Applied)
+			{
+				Applied = broken;
+				if (SubInfos != null)
+					Target.textureInfo = SubInfos[broken - 1]; // mesh resizes to the sub-rect (SetTextureInfo queues Vertex+UV)
+				else
+				{
+					Target.gameObject.transform.localScale = Vector3.Scale(OrigScale, new Vector3(1f, (3 - broken) / 3f, 1f));
+					ScaleFallback = true;
+				}
+			}
+			// bottom-anchored: remaining height h keeps its base at -12, center sits at -12 + h/2
+			float sy = (3 - broken) / 3f;
+			Target.transform.position = Center + new Vector3(0f, -12f * (1f - sy), -10f);
+		}
+
+		public override void finish()
+		{
+			if (Target != null)
+			{
+				// pool-contamination guards: both scale and textureInfo are pool state
+				if (ScaleFallback)
+					Target.gameObject.transform.localScale = OrigScale;
+				if (SubInfos != null && BaseInfo != null)
+					Target.textureInfo = BaseInfo;
+				SpriteManager.Return(Target);
+				Target = null;
+			}
+			if (SubInfos != null)
+			{
+				// the clones are ScriptableObjects we own; destroy or they leak per cast
+				for (int i = 0; i < SubInfos.Length; i++)
+				{
+					if (SubInfos[i] != null)
+						UnityEngine.Object.Destroy(SubInfos[i]);
+				}
+				SubInfos = null;
+			}
+			base.finish();
+		}
+	}
+
+	/// <summary>
+	/// One debris chunk breaking off the carve block (feel round 2, 2026-08-05: "break
+	/// apart the sprite we're destroying" -- each chunk wears the LITERAL pixels of the
+	/// band that broke off, via a sub-rect atlas clone: its half of the removed top band,
+	/// rendered at natural size). Hidden until its break, then popping off the block's
+	/// current top edge on a ballistic arc -- a short upward hop, gravity takes over, a
+	/// slight outward drift -- at z -11, in FRONT of the shrinking block (-10). Parks
+	/// behind the map once spent. Rotated/diced atlas entries fall back to a small
+	/// uniformly-scaled whole tile.
+	/// </summary>
+	public class Cleo_TerraFirma_JuiceStoneChunk : CombatJuiceEntry
+	{
+		private IRenderable Tile;
+		private ex3DSprite2 Target;
+		private Vector3 Rest;
+		private float DriftX;
+		private float DropAt;
+		private float Air;
+		private int Row;
+		private int Col;
+		private Vector3 OrigScale;
+		private bool ScaleFallback;
+		private exTextureInfo BaseInfo;
+		private exTextureInfo SubInfo;
+		private Color Foreground;
+		private Color Background;
+		private Color Detail;
+		private Color DetailNudge;
+		// ballistic arc: apex ~+5px at 0.10s, ~40px below the break point by 0.40s
+		private const float BOUNCE_V0 = 100f;  // px/s upward
+		private const float BOUNCE_G = 1000f;  // px/s^2
+		private static readonly Vector3 DEBRIS_SCALE = new Vector3(0.4f, 0.4f, 1f); // fallback look only
+
+		public Cleo_TerraFirma_JuiceStoneChunk(IRenderable tile, Vector3 rest, float driftX, float dropAt, float air, int row, int col)
+		{
+			Tile = tile;
+			Rest = rest;
+			DriftX = driftX;
+			DropAt = dropAt;
+			Air = Mathf.Max(0.01f, air);
+			Row = row;
+			Col = col;
+			duration = dropAt + this.Air + 0.02f;
+		}
+
+		public override void start()
+		{
+			Target = SpriteManager.GetPooledSprite(Tile, Transparent: false);
+			Foreground = Target.color;
+			Background = Target.backcolor;
+			Detail = Target.detailcolor;
+			DetailNudge = new Color(Detail.r, Detail.g, Detail.b, 0.996f);
+			Transform transform = Target.gameObject.transform;
+			transform.SetParent(GameManager.Instance.TileRoot.transform);
+			OrigScale = transform.localScale;
+			ScaleFallback = false;
+			BaseInfo = Target.textureInfo;
+			SubInfo = null;
+			if (BaseInfo != null && !BaseInfo.rotated && !BaseInfo.isDiced)
+			{
+				// this chunk's share of the tile: its column's half of the removed band
+				// (rows count from the TOP of the tile; atlas y is bottom-up per the
+				// SpriteBuilder UV math, hence the (2 - Row) flip)
+				SubInfo = Cleo_TerraFirma_StoneRiseFX.CloneSubRect(BaseInfo, Col == 0 ? 0f : 0.5f, (2 - Row) / 3f, 0.5f, 1f / 3f);
+				Target.textureInfo = SubInfo;
+			}
+			else
+			{
+				transform.localScale = Vector3.Scale(OrigScale, DEBRIS_SCALE);
+				ScaleFallback = true;
+			}
+			transform.position = Rest + new Vector3(0f, 0f, 100f); // parked behind the map until its break
+		}
+
+		public override void update()
+		{
+			if (Target == null)
+				return;
+			// normals-stomp repair, verbatim from the rise entry
+			Target.color = Foreground;
+			Target.backcolor = Background;
+			Target.detailcolor = DetailNudge;
+			Target.detailcolor = Detail;
+			float p = t - DropAt;
+			if (p < 0f)
+			{
+				Target.transform.position = Rest + new Vector3(0f, 0f, 100f);
+				return;
+			}
+			if (p >= Air)
+			{
+				// spent: park BEHIND the map immediately rather than waiting on finish()
+				Target.transform.position = Rest + new Vector3(0f, 0f, 100f);
+				return;
+			}
+			float y = BOUNCE_V0 * p - 0.5f * BOUNCE_G * p * p;
+			Target.transform.position = Rest + new Vector3(DriftX * (p / Air), y, -11f);
+		}
+
+		public override void finish()
+		{
+			if (Target != null)
+			{
+				// pool-contamination guards: both scale and textureInfo are pool state
+				if (ScaleFallback)
+					Target.gameObject.transform.localScale = OrigScale;
+				if (SubInfo != null && BaseInfo != null)
+					Target.textureInfo = BaseInfo;
+				SpriteManager.Return(Target);
+				Target = null;
+			}
+			if (SubInfo != null)
+			{
+				UnityEngine.Object.Destroy(SubInfo); // our clone, our leak to prevent
+				SubInfo = null;
 			}
 			base.finish();
 		}
@@ -163,8 +437,9 @@ namespace Cleo.TerraFirma.Scripts
 		public class Schedule
 		{
 			public float Total;
-			public Dictionary<Cell, float> SettleTimes = new Dictionary<Cell, float>(); // rim fabric materializes here
+			public Dictionary<Cell, float> SettleTimes = new Dictionary<Cell, float>(); // rim fabric materializes here (carve: the hidden wall->statue swap)
 			public Dictionary<Cell, float> GapTimes = new Dictionary<Cell, float>();    // gap sprites sink back here (dust cue)
+			public List<float> BreakTimes = new List<float>();                          // carve reveal: dust + crack-sound moments
 		}
 		// tempo dials (seconds)
 		public const float SHELL_SEC = 0.10f;    // wave-front travel per shell (public: the wake scatter keys off it)
@@ -192,6 +467,15 @@ namespace Cleo.TerraFirma.Scripts
 		// it ("the walls aren't rendering during the animation").
 		private const float CALC_LEAD_SEC = 0.10f;
 		private const float CALC_STEP_SEC = 0.07f; // per-wall offset down the picked line
+		// Stoneshaper carve dials (VFX pass 2026-08-05). The swap lead doubles as the juice
+		// queue's spin-up window (Calcify's eaten-slab lesson): the wall stands until the
+		// mosaic has had time to render over it, then the real wall->statue swap happens
+		// hidden behind the opaque chunks.
+		private const float CARVE_SWAP_SEC = 0.20f;
+		private const float CARVE_FIRST_BREAK_SEC = 0.35f;
+		private const float CARVE_BREAK_STEP_SEC = 0.30f;
+		private const float CARVE_AIR_SEC = 0.40f; // a debris chunk's full arc: hop, fall, gone
+		private const float CHUNK_DRIFT = 3f;      // slight outward lean as a pair breaks away
 		private const int PLATE_JITTER_STEPS = 5; // travel plates offset 0..0.05s within their shell
 		// tile geometry (world units; a tile is ~24 tall -- floatingText's +12 half-tile offset)
 		private const float BURIED_DEPTH = 20f;
@@ -313,16 +597,91 @@ namespace Cleo.TerraFirma.Scripts
 				if (!cells[i].IsVisible())
 					continue;
 				float delay = CALC_LEAD_SEC + i * CALC_STEP_SEC;
-				// black backing always (user call 2026-08-04, "put a black mask on the bottom
-				// layer of the animation": the material caret backing -- shale's ^w light
-				// brown -- made every holding sprite a light-tan impostor over the dark wall)
+				// black backing stands (user, 2026-08-05: "the backing color *does* need to be
+				// black for negative space" -- reaffirming the 2026-08-04 black-mask call; the
+				// black-detail report that briefly implicated it was the mesh-normals stomp,
+				// repaired in the juice entry's update)
 				IRenderable tile = new Cleo_TerraFirma_StoneTileRenderable(tiles[i], fgs[i], details[i], 'k');
-				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(tile, gm.getTileCenter(cells[i].X, cells[i].Y), delay, RIM_RISE, RIM_HOLD, RIM_SINK, BURIED_DEPTH, RIM_EMERGE), async: true);
+				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneRise(tile, gm.getTileCenter(cells[i].X, cells[i].Y), delay, RIM_RISE, RIM_HOLD, RIM_SINK, BURIED_DEPTH, RIM_EMERGE, vanishAfterHold: true), async: true);
 				schedule.SettleTimes[cells[i]] = delay + RIM_RISE + RIM_HOLD;
 				schedule.Total = Mathf.Max(schedule.Total, delay + RIM_RISE + RIM_HOLD);
 				enqueued++;
 			}
 			return enqueued > 0 ? schedule : null;
+		}
+
+		/// <summary>The Stoneshaper carve reveal (user concept, wishlist 2026-08-05; feel round
+		/// 2 same day -- "break apart the sprite we're destroying"): ONE block sprite wearing
+		/// the wall's own already-painted tile, pixel-identical to the standing wall at t=0.
+		/// Three breaks, each carving the top third off the block (sub-rect atlas swap -- the
+		/// block shows the wall's actual surviving pixels) while a pair of debris chunks
+		/// wearing the LITERAL pixels of the removed band pop off its top edge: an upward
+		/// hop, then gravity, then gone. The statue stands revealed top-down behind it all.
+		/// Returns the schedule -- the hidden swap moment in SettleTimes, the break moments
+		/// in BreakTimes -- or null if nothing animates. Game-thread side only composes
+		/// strings; all atlas-info work happens Unity-side in the entries' start() (the
+		/// freeze lesson). The caller performs the actual wall->statue swap at the scheduled
+		/// moment from its frame pump.</summary>
+		public static Schedule PlayCarveReveal(Cell cell, XRL.World.GameObject wall)
+		{
+			GameManager gm = GameManager.Instance;
+			if (gm == null || cell == null || wall == null)
+				return null;
+			ResolveWallDressing(wall.Blueprint, out string paint, out string atlas, out string ext, out char fg, out char detail, out char _);
+			// the block wears the wall's OWN Render.Tile -- it exists and is already painted
+			// with its real connectivity mask, so the cover starts pixel-identical to the wall
+			// (colors still ride the blueprint resolve, the proven parse)
+			string blockTile = wall.Render?.Tile;
+			if (blockTile.IsNullOrEmpty())
+				blockTile = ComposeTile(paint, atlas, ext, ISOLATED_MASK);
+			Vector3 center = gm.getTileCenter(cell.X, cell.Y);
+			Schedule schedule = new Schedule();
+			CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceCarveBlock(
+				new Cleo_TerraFirma_StoneTileRenderable(blockTile, fg, detail, 'k'), // black backing, house call
+				center, CARVE_FIRST_BREAK_SEC, CARVE_BREAK_STEP_SEC), async: true);
+			for (int row = 0; row < 3; row++)
+			{
+				float dropAt = CARVE_FIRST_BREAK_SEC + row * CARVE_BREAK_STEP_SEC;
+				for (int col = 0; col < 2; col++)
+				{
+					// break points: cols at +-4 of the 16-wide tile; each break's pair pops off
+					// the band being carved away (+8 / 0 / -8 of the 24-tall tile, top-down).
+					// Debris wears the SAME tile as the block -- each chunk sub-rects its own
+					// half of the removed band in its entry's start(), Unity-side
+					Vector3 rest = center + new Vector3(col == 0 ? -4f : 4f, 8f - row * 8f, 0f);
+					IRenderable tile = new Cleo_TerraFirma_StoneTileRenderable(blockTile, fg, detail, 'k');
+					CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneChunk(tile, rest, col == 0 ? -CHUNK_DRIFT : CHUNK_DRIFT, dropAt, CARVE_AIR_SEC, row, col), async: true);
+				}
+				schedule.BreakTimes.Add(dropAt);
+			}
+			schedule.SettleTimes[cell] = CARVE_SWAP_SEC;
+			schedule.Total = CARVE_FIRST_BREAK_SEC + 2f * CARVE_BREAK_STEP_SEC + CARVE_AIR_SEC + 0.05f;
+			return schedule;
+		}
+
+		/// <summary>A sub-rect clone of a pooled sprite's atlas info -- the mechanism that lets
+		/// the carve block and its debris wear the LITERAL pixels of the tile region they
+		/// represent (feel round 2). The info that GetPooledSprite assigns is the SHARED
+		/// cached instance world rendering uses and must NEVER be mutated; clones are tiny
+		/// ScriptableObjects owned by the juice entry that made them, destroyed at its
+		/// finish(). Fractions are of the stored rect in atlas space, y-up (SpriteBuilder's
+		/// UV math puts textureInfo.y at the tile's BOTTOM edge); callers skip rotated and
+		/// diced infos. Unity-side only (ScriptableObject.CreateInstance) -- call from a
+		/// juice entry's start()/update(), never the game thread.</summary>
+		internal static exTextureInfo CloneSubRect(exTextureInfo src, float fx, float fy, float fw, float fh)
+		{
+			exTextureInfo sub = ScriptableObject.CreateInstance<exTextureInfo>();
+			sub.texture = src.texture;
+			sub.ShaderMode = src.ShaderMode;
+			sub.rawWidth = src.rawWidth;
+			sub.rawHeight = src.rawHeight;
+			int nx = src.x + Mathf.RoundToInt(src.width * fx);
+			int ny = src.y + Mathf.RoundToInt(src.height * fy);
+			sub.x = nx;
+			sub.y = ny;
+			sub.width = Mathf.Clamp(Mathf.RoundToInt(src.width * fw), 1, src.x + src.width - nx);
+			sub.height = Mathf.Clamp(Mathf.RoundToInt(src.height * fh), 1, src.y + src.height - ny);
+			return sub;
 		}
 
 		/// <summary>Mask connected toward EVERY set-member within reach, unlike the arcs'

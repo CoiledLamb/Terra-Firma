@@ -1,8 +1,11 @@
 ﻿using Cleo.TerraFirma.Scripts;
+using ConsoleLib.Console;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using UnityEngine;
+using XRL.Core;
 using XRL.Rules;
 using XRL.UI;
 using XRL.World.Anatomy;
@@ -300,8 +303,55 @@ namespace XRL.World.Parts.Mutation
 			StatueLifetimeRemaining = GetDuration(Level);
 			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", $"carved: muse={creature.Blueprint}, wall={refWall?.Blueprint ?? "?"}, Lv{Level}, lifetime={(StatueLifetimeRemaining == INFINITE_DURATION_PLACEHOLDER ? "PERMANENT" : StatueLifetimeRemaining.ToString() + " turns")}");
 
-			walls.ForEach(x => x.Obliterate());
-			targetWallCell.AddObject(statue, true, Silent: true);
+			// carve reveal (VFX pass 2026-08-05, user concept from the wishlist; reshaped at feel
+			// round 1: one whole stone, not a mosaic): a block sprite wearing the wall's own
+			// painted tile covers the cell; the real wall->statue swap happens early and HIDDEN
+			// behind it; three breaks each shrink the block by a third and pop a pair of debris
+			// chunks off its top edge (hop, then fall), revealing the statue top-down.
+			// Frame-pump settle idiom per Calcify; unseen, inactive-zone, and harness-muted
+			// casts place instantly as before.
+			void PlaceStatue()
+			{
+				walls.ForEach(x => x.Obliterate());
+				targetWallCell.AddObject(statue, true, Silent: true);
+			}
+			Cleo_TerraFirma_StoneRiseFX.Schedule schedule = null;
+			Zone zone = targetWallCell.ParentZone;
+			if (!Cleo_TerraFirma_StoneRiseFX.HarnessMute && zone != null && zone.IsActive() && targetWallCell.IsVisible())
+				schedule = Cleo_TerraFirma_StoneRiseFX.PlayCarveReveal(targetWallCell, refWall);
+			if (schedule != null)
+			{
+				ScreenBuffer buf = ScreenBuffer.GetScrapBuffer1(bLoadFromCurrent: true);
+				TextConsole console = Popup._TextConsole;
+				float swapAt = schedule.SettleTimes[targetWallCell];
+				bool swapped = false;
+				int breaksPlayed = 0;
+				float t = 0f;
+				float end = schedule.Total + 0.08f;
+				while (t < end)
+				{
+					if (!swapped && swapAt <= t)
+					{
+						PlaceStatue();
+						swapped = true;
+					}
+					while (breaksPlayed < schedule.BreakTimes.Count && schedule.BreakTimes[breaksPlayed] <= t)
+					{
+						PlayWorldSound("Sounds/Damage/sfx_damage_stone", 1f, Combat: true, SourceCell: targetWallCell);
+						Cleo_TerraFirma_Fissure.SmokePuff(targetWallCell);
+						breaksPlayed++;
+					}
+					XRLCore.Core.RenderBaseToBuffer(buf);
+					console.DrawBuffer(buf);
+					Thread.Sleep(40);
+					t += 0.04f;
+				}
+				if (!swapped)
+					PlaceStatue();
+			}
+			else
+				PlaceStatue();
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", $"carve reveal: {(schedule != null ? schedule.Total.ToString("0.00") + "s, block + 6 debris / 3 breaks" : "instant (unseen or harness-muted)")}");
 			statue.Splatter($"&{statue.GetForegroundColor()}*");
 			PlayWorldSound("Sounds/Throw/sfx_throwing_stone_small_impact", 1f, Combat: true, SourceCell: targetWallCell);
 

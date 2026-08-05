@@ -23,7 +23,17 @@
 		     gray &y^K (limestone scheme) over the inherited wall_rock paint family, never raw
 		     sandstone red. DisplayName = DRAFT under the beta-text ruling (a gray wall reading
 		     "sandstone" would be worse); release sitting signs off. -->
-		<part Name="Render" DisplayName="calcified stone" ColorString="&amp;y^K" TileColor="&amp;y" DetailColor="K" />
+		<!-- DisplayName is the bare noun ON PURPOSE (bug 2026-08-05: "calcified calcified stone"):
+		     every spawn of this blueprint comes through Calcify's PlaceWall, which attaches
+		     Cleo_TerraFirma_CalcifyWallPart, and THAT part prepends "calcified" via GetDisplayName.
+		     Borrowed walls render "calcified shale"; this one renders "calcified stone". -->
+		<part Name="Render" DisplayName="stone" ColorString="&amp;y^K" TileColor="&amp;y" DetailColor="K" />
+		<!-- seam fix (2026-08-05, with Rocks.xml's fallen wall): distinct blueprint = the painter
+		     draws broken faces against fissure walls and zone stone. Same two hooks as there:
+		     PaintPart fuses this wall toward any mod-marked stone; PaintWith "*" fuses neighbors
+		     toward it. -->
+		<tag Name="PaintWith" Value="*" />
+		<tag Name="PaintPart" Value="Cleo_TerraFirma_StoneshaperWallProperties" />
 	</object>
 	<object Name="Cleo_TerraFirma_StoneshaperStatue" Inherits="Random Statue">
 		<tag Name="Animatable" />

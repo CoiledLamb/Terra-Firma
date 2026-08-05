@@ -270,20 +270,26 @@ namespace XRL.World.Parts.Mutation
 								break;
 							}
 							GameObject wall = GetSolidObject(step);
-							if (wall == null || !IsCarvableStone(wall))
+							if (wall == null)
 							{
-								blocked = true; // the stone doesn't answer
+								blocked = true; // solid but not a wall -- the wave breaks on it
 								break;
 							}
+							// every wall takes the attack (RULED 2026-08-05, superseding the silent
+							// refusal: "machinery still gets hurt by the earth, it just doesn't get
+							// destroyed"): natural stone can fall and feeds the ring; soft organics
+							// can fall but are not stone; constructed/metal is damage-clamped inside
+							// WaveBitesWall and always stops the wave
 							bool died = WaveBitesWall(wall, step);
 							wallFate[step] = died;
 							if (!died)
 							{
-								blocked = true; // the stone held -- a leftover wall, and the wave breaks on it
+								blocked = true; // the wall held -- leftover standing, and the wave breaks on it
 								break;
 							}
 							wallsBitten++;
-							carved.Add(step);
+							if (IsCarvableStone(wall))
+								carved.Add(step); // ring mass stays stone-only
 						}
 					}
 					if (blocked)
@@ -714,14 +720,36 @@ namespace XRL.World.Parts.Mutation
 			return 0;
 		}
 
-		/// <summary>The carve gate (corridor ruling 2026-08-02: NATURAL stone only -- constructed,
-		/// metal, and ruins walls stop the wave at all levels). The Stoneshaper classification
-		/// carries the flag: MaterialType "stone" AND Natural, marked in Merges.xml on the
-		/// true-geology family. Part presence alone is NOT the gate -- wood fences, machine
-		/// walls, and tomb masonry carry the part too, for statue purposes.</summary>
+		/// <summary>True geology (corridor ruling 2026-08-02; role narrowed 2026-08-05): since the
+		/// attack-any-wall ruling this no longer gates who gets ATTACKED -- it gates what counts
+		/// as STONE: ring-mass credit and ring dressing draw only from walls with MaterialType
+		/// "stone" AND Natural (Merges.xml, the true-geology family). Part presence alone is NOT
+		/// the flag -- wood fences, machine walls, and tomb masonry carry the part too, for
+		/// statue purposes.</summary>
 		private static bool IsCarvableStone(GameObject wall)
 		{
 			return Cleo_TerraFirma_StoneshaperWallProperties.IsNaturalStone(wall?.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>());
+		}
+
+		/// <summary>The wave's material read (RULED 2026-08-05, superseding the corridor ruling's
+		/// silent refusal; user: "really i'd have it just make the attack on any wall --
+		/// machinery still gets hurt by the earth, it just doesn't get destroyed ... it'd maybe
+		/// be less effective on constructed stone in the sense of 'can't fully break it', but
+		/// that would apply less to things like brinestalk or fungus walls"). Three classes:
+		/// natural stone falls and feeds the ring (unchanged); soft organics (wallProps
+		/// MaterialType "other": plant, fungus, wood -- DRAFT boundary) take the full attack
+		/// and can fall; everything else (metal, machine walls, constructed stone, unmarked
+		/// fulcrete/brick/ruins) is hurt but never destroyed.</summary>
+		private enum WaveWallClass { Stone, Soft, Hard }
+
+		private static WaveWallClass ClassifyWaveWall(GameObject wall)
+		{
+			var props = wall?.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>();
+			if (Cleo_TerraFirma_StoneshaperWallProperties.IsNaturalStone(props))
+				return WaveWallClass.Stone;
+			if (props?.MaterialType == "other")
+				return WaveWallClass.Soft;
+			return WaveWallClass.Hard;
 		}
 
 		/// <summary>The wave's bite is an ATTACK, not an edit (RULED 2026-08-04, user: "rather
@@ -730,25 +758,38 @@ namespace XRL.World.Parts.Mutation
 		/// penetration roll vs the wall's AV, each penetration tearing away a share of the
 		/// wall's MAX hit points -- percent-of-max is the Burrowing Claws wall grammar, so
 		/// granite's five-digit health means granite endurance, not granite bookkeeping. Zero
-		/// penetrations: the stone shrugs, no damage, and the wave breaks on it. Returns
-		/// whether the wall fell.</summary>
+		/// penetrations: the stone shrugs, no damage, and the wave breaks on it. Hard-class
+		/// walls (see ClassifyWaveWall) have the damage clamped to leave 1 HP -- hurt by the
+		/// earth, never felled by it. All feedback is dust, never messages (user 2026-08-05:
+		/// popup spam). Returns whether the wall fell.</summary>
 		private bool WaveBitesWall(GameObject wall, Cell c)
 		{
+			WaveWallClass cls = ClassifyWaveWall(wall);
 			int av = wall.Stat("AV");
 			int pv = GetCarvePV(Level);
 			int pens = Stat.RollDamagePenetrations(av, pv, pv);
 			if (pens <= 0)
 			{
-				Helpers.VerifyLog("FIS", $"CARVE attack @({c.X},{c.Y}): {wall.Blueprint} AV {av} vs PV {pv} -- no penetration, the stone holds");
+				Helpers.VerifyLog("FIS", $"CARVE attack @({c.X},{c.Y}): {wall.Blueprint} [{cls}] AV {av} vs PV {pv} -- no penetration, the wall holds");
 				SmokePuff(c, 1); // chip dust off the survivor
 				return false;
 			}
 			int maxHP = wall.GetStat("Hitpoints").BaseValue;
 			int dmg = Math.Max(1, maxHP * pens * CARVE_PCT_PER_PEN / 100);
+			if (cls == WaveWallClass.Hard)
+			{
+				dmg = Math.Min(dmg, wall.GetStat("Hitpoints").Value - 1); // can't fully break it
+				if (dmg <= 0)
+				{
+					Helpers.VerifyLog("FIS", $"CARVE attack @({c.X},{c.Y}): {wall.Blueprint} [Hard] AV {av} vs PV {pv} -- already at the clamp floor, no further damage");
+					SmokePuff(c, 1);
+					return false;
+				}
+			}
 			wall.TakeDamage(dmg, "from the heaving earth!", "Crushing", null, null,
 				Attacker: ParentObject, Owner: ParentObject, Source: ParentObject);
 			bool died = !GameObject.Validate(wall) || wall.CurrentCell == null || wall.IsInGraveyard();
-			Helpers.VerifyLog("FIS", $"CARVE attack @({c.X},{c.Y}): {wall.Blueprint} AV {av} vs PV {pv} -- {pens} pen(s), {dmg} dmg, {(died ? "FELL" : "leftover standing")}");
+			Helpers.VerifyLog("FIS", $"CARVE attack @({c.X},{c.Y}): {wall.Blueprint} [{cls}] AV {av} vs PV {pv} -- {pens} pen(s), {dmg} dmg, {(died ? "FELL" : "leftover standing")}");
 			SmokePuff(c);
 			return died;
 		}
@@ -818,8 +859,9 @@ namespace XRL.World.Parts.Mutation
 
 		/// <summary>Gray shade-glyph particles drifting up -- the dust of the heave. Count
 		/// trimmed 5 -> 2 (feel round 3: "a bit too much smoke") -> 1 default (2026-08-04,
-		/// "bit less smoke on fissure").</summary>
-		private static void SmokePuff(Cell C, int particles = 1)
+		/// "bit less smoke on fissure"). Public since 2026-08-05: Calcify borrows it, a puff
+		/// per landed wall ("a very small amount of smoke ... for symmetry with fissure").</summary>
+		public static void SmokePuff(Cell C, int particles = 1)
 		{
 			C.ParticleBlip("&y*");
 			for (int i = 0; i < particles; i++)

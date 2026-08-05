@@ -493,6 +493,15 @@
 		<tag Name="ExcludeFromDynamicEncounters" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="8d8" />
 		<tag Name="Cleo_TerraFirma_CrushInstakill" Value="15" />
+		<!-- seam fix (user 2026-08-05: "fissure walls don't seem to paint with calcify walls"):
+		     the painter only fuses same-blueprint / matching-PaintWith / neighbor-wildcard /
+		     PaintPart-hit neighbors, and this blueprint matched calcify's zone-borrowed stone on
+		     none of them. PaintPart makes THIS wall draw fused toward anything carrying the mod's
+		     stone part (calcify walls, zone geology; Merges.xml puts it on all natural rock);
+		     PaintWith "*" is the engine wildcard making neighbors draw fused toward THIS wall.
+		     Both directions covered = no broken faces at the joint. -->
+		<tag Name="PaintWith" Value="*" />
+		<tag Name="PaintPart" Value="Cleo_TerraFirma_StoneshaperWallProperties" />
 	</object>
 
 	<object Name="Cleo_TerraFirma_Rock_Voltaic" Inherits="Cleo_TerraFirma_BaseFallenRock">
