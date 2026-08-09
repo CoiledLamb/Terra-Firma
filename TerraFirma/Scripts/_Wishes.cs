@@ -207,8 +207,9 @@ namespace Cleo.TerraFirma.Scripts
 				Helpers.VerifyLog("FIS", $"tfpen PV {pv}: {string.Join(", ", cells.ToArray())}");
 			}
 			// expected ring-1 TOTAL damage (all three pulses connecting) = expected pens x the
-			// band's summed average dice -- the number the dice ladder is actually dialing
-			int[] bandLevels = { 1, 4, 7, 10 };
+			// level's summed average dice -- the number the staircase is actually dialing.
+			// Sample levels track the v5 staircase's dice-change points, not the old bands.
+			int[] bandLevels = { 1, 4, 6, 8, 10 };
 			foreach (int lv in bandLevels)
 			{
 				double diceSum = 0;

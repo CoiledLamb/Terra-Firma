@@ -1557,9 +1557,9 @@ namespace Cleo.TerraFirma.Scripts
 				string.Join(" | ", notes.ToArray()) + (fails.Count > 0 ? "; FAILS: " + string.Join("; ", fails.ToArray()) : "; fabric held to the Euclidean rim at every band, no beta-held content leaked"));
 		}
 
-		/// <summary>The churn's crowd control at L5 (band 2 under the pulse pass: push force
-		/// 7000 clamped to one ring per pulse, dice 3d3/2d3/1d3 rolled per penetration at PV
-		/// 4+Str, ONE stun check per cast at 2r, stepped DC 18 at L5, moved-only): baboons ringed at distance
+		/// <summary>The churn's crowd control at L5 (v5 staircase: push force 7000 clamped to
+		/// one ring per pulse, dice 3d4/2d4/1d4 rolled per penetration at PV 4+Str, ONE stun
+		/// check per cast at 2r, stepped DC 18 at L5, moved-only): baboons ringed at distance
 		/// 1 ride the full churn (3 hits, shoved ring by ring to the rim and evicted clear),
 		/// so all must end further out, all damaged (three pen rolls vs baboon AV going 0-pen
 		/// every time is the only flake path), and at least one stunned; a glowmoth overhead

@@ -141,7 +141,7 @@ PV evolution within the sitting: flat 4 (user's opener) → 4+(L-1)/2 lase-style
 → **4 + Strength mod, RULED** — the armor curve is answered by build investment instead
 of a level ladder. Details in the PV row below.
 
-### Pulse dice ladder (draft v3; per-PULSE dice)
+### Pulse dice ladder (draft v3; per-PULSE dice) — SUPERSEDED 2026-08-09 by the v5 staircase below (kept for ladder history)
 
 Ladder history: v1 pinned the tail at 1d3 all levels ("furthest ring should do 1d3");
 SUPERSEDED same sitting ("it doesn't need to be pinned at all levels"). v2 grew back-to-
@@ -170,13 +170,54 @@ story holds where companions actually keep pace. Every cell is a feel dial; the
 harness pen-distribution pass (build-time item) puts measured expected-damage numbers
 under all of this before the feel session.
 
+### Ladder v5 — THE STAIRCASE (RULED 2026-08-09 numbers sitting; SUPERSEDES the v3 band table above)
+
+User shape, assembled across the sitting: band-1 base "3d3 adjacent, 2d3 middle, and 1d3
+on the edge" · "scaling should be more gradual as you level it up" · die-size step before
+die-count ("maybe 3d4 instead of 4d3") · "it could also go to 4d4 after the first stun
+level, and repeat that pattern for the next 2 levels, then have a stun level, repeat the
+previous pattern" · waypoint corrections: "the stun should hit at level 5, the tail
+should hit at level 4" · save DC realigned to the stun levels at the user's prompt ("why
+is the save DC not in level 9?"). Pinned-tail variant REJECTED ("i don't like pinned
+tail personally"); the earlier straight-shift band ladder was discussed but never locked
+("i didn't say i was locked in on the new dice numbers").
+
+One cell upgrades per level, front/middle/tail order, stun levels interleaved:
+
+| Level | Pulses | Paper avg | Upgrade |
+|---|---|---|---|
+| 1 | 3d3/2d3/1d3 | 12 | base |
+| 2 | 3d4/2d3/1d3 | 13.5 | front die-size |
+| 3 | 3d4/2d4/1d3 | 15 | middle die-size |
+| 4 | 3d4/2d4/1d4 | 15.5 | tail die-size |
+| 5 | — | 15.5 | stun 2 rounds + save DC 18 |
+| 6 | 4d4/2d4/1d4 | 18 | front +1 die |
+| 7 | 4d4/3d4/1d4 | 20.5 | middle +1 die |
+| 8 | 4d4/3d4/2d4 | 22.5 | tail +1 die |
+| 9 | — | 22.5 | stun 3 rounds + save DC 20 |
+| 10 | 5d4/3d4/2d4 | 25 | front +1 die |
+
+Closed form: pulse p takes its s-th step at level 4(s−1)+p+1 (step 1 = d3→d4, later = +1
+die); stun rounds = 1 + (L−1)/4 (stun levels 5/9/13...); save DC = 16 / 18 (L5) / 20 (L9),
+capped — boosts buy rounds, never DC. Ego-boosted ranks keep climbing the same staircase
+(L11 middle 4d4, L12 tail 3d4, L13 stun 4 rounds...). FLAGGED, accepted by adoption: stun
+round 4 moves out of base reach (L13+). Stun anchor decomp-verified (StunningForce.cs:265):
+SF is Toughness 15+Level flat 3 rounds — DC 25 by L10 vs our cap 20; weaker via saves as
+directed ("make sure the stun isn't as strong as stunning force (via saves)").
+
+Measured reality check (pen formula ported from decomp Stat.cs:160; expected pens vs AV 0
+at PV 4 = 3.56, NOT ~1 — the volley system multiplies): full ring-1 rides at matched tiers
+run ~19–43 (L1, PV 4–5 vs AV 0–4) through ~28–64 (L10, PV 10 vs AV 8–12); triple-digit
+spikes only where high PV meets under-leveled AV, which is the pen system's own behavior.
+MaxStrengthBonus-style pen cap stays reserved as a feel dial — measured pens run hot.
+
 ### The rest of the table
 
 | Dial | Draft | Notes |
 |---|---|---|
 | Creature-hit PV | 4 + Strength mod (RULED 2026-08-08) | the melee-weapon grammar itself — BC's claws take Str mod as PV like any weapon. Level-scaled pen BONUS rejected same sitting (user: "penetration bonus can be a slippery slope due to how armor overpens work") — bonus-pen ladders are hidden damage multipliers that peak against the SQUISHIEST targets; Str-scaling bounds pens by build investment, the price every other physical attacker pays. Cap (weapon-style MaxStrengthBonus) reserved as a feel dial if overpen shows vs chaff |
 | Wall-bite PV | keep 6+3L | BC's split; the low-band governor question stands (3 bites at ring 1 vs old depth-1 budget — feel-test whether 6+3L needs softening now that repetition digs) |
-| Stun | 1/2/3/4 rounds by band; Toughness DC STEPPED 16/18/20 at L1/5/10 (RULED 2026-08-09, superseding 16+L) | one check per cast (ruled). User direction: "make sure the stun isn't as strong as stunning force (via saves)" with the DC steps at 5 and 10 as "the shape of the upgrade pattern," not a rider -- rounds arrive at 4/7/10, save steps at 5/10, interleaved. SF anchor decomp-verified (StunningForce.cs:265): Toughness 15+Level, flat 3 rounds -- SF hits DC 25 by L10, ours tops at 20 |
+| Stun | staircase (v5, RULED 2026-08-09): rounds 1+(L-1)/4 on stun levels 5/9/13..., Toughness DC stepped 16/18/20 at L1/5/9, capped | one check per cast (ruled). Each stun level buys rounds AND save difficulty together -- "not a rider, just the shape of the upgrade pattern"; no per-level DC creep. Weaker than SF via saves as directed (SF decomp anchor: 15+Level, flat 3 rounds -- DC 25 by L10 vs our cap 20). Round 4 = L13+, boost-only (flagged, accepted) |
 | Pin/rider slam | the current pulse's die (fork-matching) | per-pulse slams as ruled |
 | Rim eviction | bounced-inside = slam die; flung-away = 0 | eviction ruled; token fling damage stays a dial |
 

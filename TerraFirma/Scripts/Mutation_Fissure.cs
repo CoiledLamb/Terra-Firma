@@ -140,27 +140,22 @@ namespace XRL.World.Parts.Mutation
 		/// <summary>How many pulses one cast throws; pulse t covers everything within ring t.</summary>
 		public const int PULSE_COUNT = 3;
 
-		/// <summary>Per-pulse damage dice (spec draft v3, 2026-08-08 sitting; supersedes the flat
-		/// 1d3+N ladder): flat bonuses out, the budget redistributed into three decaying dice
-		/// pools (direction RULED: "cut the +7 from the damage budget and then allow more
-		/// variance and dice rolls with what's left"). Dice are THE level-scaling lever -- PV
-		/// rides Strength, not level -- with the d3-&gt;d4 step at band 3 so the late wave hits
-		/// HARDER, not just more. Shape invariant: p1 &gt;= p2 &gt;= p3, the wave spends itself.
-		/// These are PER-PENETRATION rolls. USER FLAG ON RECORD: "not sure about these dice
-		/// numbers" -- every cell is a feel dial; tfpen measures before the feel session.
-		/// OPEN at the 2026-08-09 numbers sitting: the user floated 3d3/2d3/1d3 for band 1;
-		/// a full ladder shift was discussed, the pinned-tail variant rejected ("i don't like
-		/// pinned tail personally"), and the user explicitly did NOT lock new numbers ("i
-		/// didn't say i was locked in on the new dice numbers") -- v3 stands until ruled.</summary>
+		/// <summary>Per-pulse damage dice -- THE STAIRCASE (ladder v5, RULED 2026-08-09 numbers
+		/// sitting, superseding the v3 band ladder; user shape: "scaling should be more
+		/// gradual as you level it up," one cell per level in front/middle/tail order, die-size
+		/// step first ("maybe 3d4 instead of 4d3"), then counts, with stun levels interleaved
+		/// ("it could also go to 4d4 after the first stun level, and repeat that pattern");
+		/// waypoints ruled: base 3d3/2d3/1d3, tail step at L4, stun at L5, 4d4 at L6).
+		/// Cadence: pulse p upgrades at levels 4(s-1)+p+1 -- front L2/6/10/14..., middle
+		/// L3/7/11..., tail L4/8/12... -- step 1 is d3-&gt;d4, later steps +1 die. L10 = 5d4/
+		/// 3d4/2d4 (paper 25); Ego-boosted ranks keep climbing the same staircase. These are
+		/// PER-PENETRATION rolls (pen sim tables in the spec's v5 section). Cells stay feel
+		/// dials; pinned-tail variant rejected same sitting ("i don't like pinned tail").</summary>
 		public static string GetPulseDice(int Lv, int pulse)
 		{
-			switch (GetBand(Lv))
-			{
-				case 1: return pulse == 1 ? "2d3" : "1d3";
-				case 2: return pulse == 1 ? "3d3" : (pulse == 2 ? "2d3" : "1d3");
-				case 3: return pulse == 1 ? "3d4" : (pulse == 2 ? "2d4" : "1d4");
-				default: return pulse == 1 ? "4d4" : "2d4";
-			}
+			int steps = Lv >= pulse + 1 ? (Lv - pulse - 1) / 4 + 1 : 0;
+			int count = (4 - pulse) + Math.Max(0, steps - 1);
+			return count + (steps == 0 ? "d3" : "d4");
 		}
 
 		/// <summary>Creature-hit PV (RULED 2026-08-08): 4 + Strength mod -- the melee-weapon
@@ -170,17 +165,23 @@ namespace XRL.World.Parts.Mutation
 		/// MaxStrengthBonus-style cap stays reserved as a feel dial if overpen shows vs chaff.</summary>
 		public int GetCreaturePV() => 4 + ParentObject.StatMod("Strength");
 
-		public static int GetStunRounds(int Lv) => GetBand(Lv);
+		/// <summary>Stun rounds ride the staircase's stun levels (RULED 2026-08-09: "the stun
+		/// should hit at level 5" then the cadence repeats -- L5/9/13...): 1 at L1-4, 2 at
+		/// L5-8, 3 at L9-12, 4 at L13+. FLAGGED at the sitting, accepted by adoption: round 4
+		/// moves out of base reach (L13 = Ego-boost territory); the staircase is uncapped so
+		/// boosted ranks keep climbing. Supersedes the band ladder (was 1/2/3/4 at 1/4/7/10).</summary>
+		public static int GetStunRounds(int Lv) => 1 + (Lv - 1) / 4;
 
-		/// <summary>Stun save DC, STEPPED (RULED 2026-08-09: "make sure the stun isn't as
-		/// strong as stunning force (via saves)" + easing at the named ranks, "not a rider,
-		/// just the shape of the upgrade pattern"): 16 at L1-4, 18 at L5-9, 20 at L10+ -- the
-		/// per-level creep is gone. Stun ROUNDS still arrive at bands (L4/7/10), so the
-		/// upgrade pattern interleaves: rounds at 4/7/10, save steps at 5/10. Anchor
-		/// (decomp-verified StunningForce.cs:265): SF is Toughness 15+Level, flat 3 rounds --
-		/// SF's DC reaches 25 by L10 where ours tops at 20; weaker via saves as ruled. The
-		/// same DC gates the wall-rider slam save, unchanged.</summary>
-		public static int GetStunSaveDC(int Lv) => Lv >= 10 ? 20 : (Lv >= 5 ? 18 : 16);
+		/// <summary>Stun save DC, STEPPED on the stun levels (RULED 2026-08-09: "make sure the
+		/// stun isn't as strong as stunning force (via saves)," steps as "the shape of the
+		/// upgrade pattern," not a rider; realigned to the staircase's stun levels at the
+		/// user's prompt, "why is the save DC not in level 9?"): 16 at L1-4, 18 at L5-8, 20 at
+		/// L9+ -- each stun level buys rounds AND save difficulty together, no per-level
+		/// creep, capped at 20 (boosts buy rounds, never DC). Anchor (decomp-verified
+		/// StunningForce.cs:265): SF is Toughness 15+Level, flat 3 rounds -- SF reaches DC 25
+		/// by L10 where ours tops at 20; weaker via saves as ruled. The same DC gates the
+		/// wall-rider slam save, unchanged.</summary>
+		public static int GetStunSaveDC(int Lv) => Lv >= 9 ? 20 : (Lv >= 5 ? 18 : 16);
 
 		/// <summary>Engine push force: weight-vs-force does the thunderdome sort natively (heavy
 		/// creatures barely move; whatever stands its ground is locked in with you).</summary>
