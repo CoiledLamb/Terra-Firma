@@ -182,7 +182,12 @@ under all of this before the feel session.
 
 ## Downstream (not blocking design)
 
-- **Level text**: new stat lines for the pulse mechanic — user's voice, draft-until-signoff.
+- **Level text**: ~~new stat lines for the pulse mechanic — user's voice, draft-until-signoff.~~
+  **SIGNED OFF 2026-08-09 (desc pass v3, against design/mutation-level-text-corpus-2026-08-09.md):**
+  description reworded to the user's line ("You send pulses through the earth, raising a
+  ring of broken stone." — user: "what if instead of 'you send a wave' it was 'you send
+  pulses'"); level text = the bare stat block, option C ("bare C seems fine"), flavor in
+  the description per the base game's own split.
 - **FX**: StoneRiseFX sells one traveling front; three pulses want three readable beats.
   How a player reads "three hits, one action" is the design-adjacent half; tempo dials
   are port-pass work. Animation concept RULED 2026-08-09 (port-pass sitting): CONCEPT B,

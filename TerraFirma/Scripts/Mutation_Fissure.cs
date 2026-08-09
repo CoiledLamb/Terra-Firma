@@ -57,25 +57,26 @@ namespace XRL.World.Parts.Mutation
 		#region Basic data
 		public override string GetDescription()
 		{
-			// Option B from the 2026-08-06 voice audit, picked by user same day ("what about B")
-			// during the in-progress text review: carries the ring identity, mid-register, no
-			// mechanics claims (the old draft's "hurls your surroundings" implied loot moves).
-			return "You send a wave through the earth, raising a ring of broken stone.";
+			// USER WORDING, RULED 2026-08-09 (desc pass v3: "what if instead of 'you send a
+			// wave' it was 'you send pulses'"): the description carries the pulse flavor --
+			// the base game's own split, flavor in the description, mechanics in the level
+			// text. Supersedes the 08-06 voice-audit option B ("wave") it was built from;
+			// ring identity and mid-register kept.
+			return "You send pulses through the earth, raising a ring of broken stone.";
 		}
 
 		public override string GetLevelText(int Level)
 		{
-			// CLAUDE DRAFT for the pulse mechanic (2026-08-09, port pass) -- NOT SIGNED OFF.
-			// The 2026-08-06 voice-audit conventions carried where they still fit: stat lines
-			// first (Stunning Force's precedent), no mechanism opener, cooldown bare, ruled
-			// silences stay silent (flyer exemption, loot, gap ladder, engulf catch, moved-only
-			// stun nuance, pinning, eviction). New lines needing the user's voice: the
-			// three-pulse damage line and the walls line (the depth claim is gone -- repetition
-			// digs now). No em dashes.
+			// SIGNED OFF 2026-08-09 (desc pass v3, corpus doc
+			// design/mutation-level-text-corpus-2026-08-09.md): user picked option C, the bare
+			// stat block ("i lean towards C", then "bare C seems fine" over the Stunning
+			// Force-style behavior sentence), with the pulse flavor moved into the
+			// description. Precedent for the bare block: Phasing/Burgeoning/Temporal Fugue.
+			// Ruled silences stay silent: flyer exemption, loot, gap ladder, engulf catch,
+			// moved-only stun nuance, pinning, eviction, walls (repetition digs, undocumented).
 			return "Ring radius: " + GetRingRadius(Level) + " squares\n" +
-				"Damage: {{rules|" + GetPulseDice(Level, 1) + "}}, then {{rules|" + GetPulseDice(Level, 2) + "}}, then {{rules|" + GetPulseDice(Level, 3) + "}} as the churn spreads to 1, 2, and 3 squares\n" +
+				"Damage: {{rules|" + GetPulseDice(Level, 1) + "/" + GetPulseDice(Level, 2) + "/" + GetPulseDice(Level, 3) + "}} in three spreading pulses\n" +
 				"Creatures caught in its path are pushed outward and must make a Toughness save or be stunned for {{rules|" + GetStunRounds(Level) + "}} " + (GetStunRounds(Level) == 1 ? "round" : "rounds") + ".\n" +
-				"Each pulse batters the walls it reaches.\n" +
 				"Cooldown: " + GetCooldown(Level) + " rounds";
 		}
 
