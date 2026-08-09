@@ -10,15 +10,23 @@ using XRL.World;
 namespace Cleo.TerraFirma.Scripts
 {
 	/// <summary>
-	/// Painter test suite (2026-07-25): the three carve primitives — blob (node pocket),
-	/// satellite (one-cell alcove, back-wall puncture guard), spine (1-wide tunnel, one
-	/// L-bend, no pathfinding) — plus wishes that walk the permutation ladder so layouts
+	/// Painter test suite (2026-07-25; carve vocabulary extended 2026-08-07): the carve
+	/// primitives — blob (node pocket), satellite (one-cell alcove, back-wall puncture
+	/// guard), spine (1-wide tunnel, one L-bend, no pathfinding), face (comb of 3x3
+	/// extraction sockets with rolled work-states), gallery (room-and-pillar chamber),
+	/// bore (the beast's sinuous 2-wide tunnel, zero spoil), mouth-weathering (time's
+	/// stochastic widening) — plus wishes that walk the permutation ladder so layouts
 	/// can be critiqued before sprites exist:
-	///   tfslab   — paint a 36x16 shale mass near the player (test canvas, any zone)
-	///   tfpaint  — one node, communal dressing (fire dish, blocks, hookah, cushions)
-	///   tfsleep  — one node + torchpost + 3 sleeping alcoves (bedroll + figurine roll)
-	///   tftunnel — two nodes joined by a divot spine (sleeping divots on the tunnel)
-	///   tfwarren — three nodes (communal / sleeping / yard) + two spines: the full shape
+	///   tfslab    — paint a 36x16 shale mass near the player (test canvas, any zone)
+	///   tfpaint   — one node, communal dressing (fire dish, blocks, hookah, cushions)
+	///   tfsleep   — one node + torchpost + 3 sleeping alcoves (bedroll + figurine roll)
+	///   tftunnel  — two nodes joined by a divot spine (sleeping divots on the tunnel)
+	///   tfwarren  — three nodes (communal / sleeping / yard) + two spines: the full shape
+	///   tfface    — quarry face: 3 sockets cut into the nearest wall run
+	///   tfgallery — room-and-pillar gallery cut at the nearest wall run
+	///   tfbore    — beast bore wandering into the nearest wall mass
+	///   tfquarry  — smallest complete camp, carved THEN dressed (two-phase order):
+	///               weathered mouth -> home blob -> spine -> gallery -> face sockets
 	/// All decisions log as [TF-VERIFY] [PAINT].
 	/// </summary>
 	[HasWishCommand]
@@ -118,6 +126,173 @@ namespace Cleo.TerraFirma.Scripts
 			foreach (GameObject wall in c.GetWalls().ToList())
 				wall.Obliterate();
 			path.Add(c);
+		}
+
+		/// <summary>Face: a comb of 3x3 extraction sockets cut into a wall run, spaced by
+		/// 1-wide stubs. Each socket rolls a work-state — carved (all 9 cells), standing
+		/// (ring cut, center block still attached), started (front row only) — and keeps a
+		/// guard row of wall behind it. Per-socket fit rule: skip on failure, never shift.</summary>
+		private static List<Cell> CarveFace(Zone Z, Cell mouth, int dx, int dy, int sockets)
+		{
+			int px = dy != 0 ? 1 : 0, py = dx != 0 ? 1 : 0;
+			var carved = new List<Cell>();
+			int made = 0;
+			for (int s = 0; s < sockets; s++)
+			{
+				int off = (s - sockets / 2) * 4;   // 3 wide + 1 stub between sockets
+				Cell corridor = Z.GetCell(mouth.X + px * off, mouth.Y + py * off);
+				if (corridor == null || corridor.HasWall())
+				{
+					Helpers.VerifyLog("PAINT", $"face socket {s}: no corridor at lateral {off}, skipped");
+					continue;
+				}
+				bool fits = true;
+				var cells = new Cell[3, 3];
+				for (int dep = 1; dep <= 4 && fits; dep++)
+					for (int lat = -1; lat <= 1; lat++)
+					{
+						int fx = mouth.X + dx * dep + px * (off + lat);
+						int fy = mouth.Y + dy * dep + py * (off + lat);
+						if (fx < 1 || fx > Z.Width - 2 || fy < 1 || fy > Z.Height - 2) { fits = false; break; }
+						Cell f = Z.GetCell(fx, fy);
+						if (f == null || !f.HasWall()) { fits = false; break; }   // dep 4 = guard row, must stay wall
+						if (dep <= 3)
+							cells[dep - 1, lat + 1] = f;
+					}
+				if (!fits)
+				{
+					Helpers.VerifyLog("PAINT", $"face socket {s}: footprint/guard failed at lateral {off}, skipped");
+					continue;
+				}
+				int roll = Stat.Random(1, 100);
+				string state = roll <= 50 ? "carved" : roll <= 80 ? "standing" : "started";
+				for (int dep = 0; dep < 3; dep++)
+					for (int lat = 0; lat < 3; lat++)
+					{
+						if (state == "standing" && dep == 1 && lat == 1)
+							continue;   // the block, still attached
+						if (state == "started" && dep > 0)
+							continue;   // only the front row cut so far
+						foreach (GameObject wall in cells[dep, lat].GetWalls().ToList())
+							wall.Obliterate();
+						carved.Add(cells[dep, lat]);
+					}
+				made++;
+				Helpers.VerifyLog("PAINT", $"face socket {s} ({state}) at lateral {off}");
+			}
+			Helpers.VerifyLog("PAINT", $"face complete: {made}/{sockets} sockets");
+			return carved;
+		}
+
+		/// <summary>Gallery: room-and-pillar — a rectangular chamber with a grid of unmined
+		/// 1-cell pillars left standing (roof-support fiction; breaks sightlines so the big
+		/// room still reads den-scaled). Fit ladder: 9x7 with six pillars, else 7x5 with
+		/// four, else skip.</summary>
+		private static List<Cell> CarveGallery(Zone Z, Cell mouth, int dx, int dy, bool quiet = false)
+		{
+			var variants = new (int halfLat, int depth, int[] plats, int[] pdeps)[] {
+				(4, 7, new[] { -3, 0, 3 }, new[] { 2, 5 }),
+				(3, 5, new[] { -2, 2 }, new[] { 2, 4 }),
+				// drift variants (sim finding 2026-08-07): long and low, for the thin wall
+				// band beside a corridor — roof pillars run down the centerline
+				(2, 8, new[] { 0 }, new[] { 2, 4, 6 }),
+				(2, 5, new[] { 0 }, new[] { 2, 4 }),
+			};
+			int px = dy != 0 ? 1 : 0, py = dx != 0 ? 1 : 0;
+			foreach (var v in variants)
+			{
+				bool fits = true;
+				var open = new List<Cell>();
+				int pillars = 0;
+				for (int dep = 1; dep <= v.depth + 1 && fits; dep++)
+					for (int lat = -v.halfLat; lat <= v.halfLat; lat++)
+					{
+						int fx = mouth.X + dx * dep + px * lat;
+						int fy = mouth.Y + dy * dep + py * lat;
+						if (fx < 1 || fx > Z.Width - 2 || fy < 1 || fy > Z.Height - 2) { fits = false; break; }
+						Cell f = Z.GetCell(fx, fy);
+						if (f == null || !f.HasWall()) { fits = false; break; }   // depth+1 row = guard
+						if (dep > v.depth)
+							continue;
+						if (v.pdeps.Contains(dep) && v.plats.Contains(lat))
+							pillars++;
+						else
+							open.Add(f);
+					}
+				if (!fits)
+					continue;
+				foreach (Cell f in open)
+					foreach (GameObject wall in f.GetWalls().ToList())
+						wall.Obliterate();
+				Helpers.VerifyLog("PAINT", $"gallery carved: {2 * v.halfLat + 1}x{v.depth}, {open.Count} cells, {pillars} pillars standing");
+				return open;
+			}
+			if (!quiet)
+				Helpers.VerifyLog("PAINT", "gallery: no variant fit");
+			return null;
+		}
+
+		/// <summary>Bore: the beast's hand — a sinuous 2-wide tunnel weaving through wall
+		/// mass on summed sines (visual stand-in; production bore should use the ShugBurrow
+		/// Simplex-cost pathfinder, see design/cavegen-survey-2026-08-07.md). Zero spoil.
+		/// (Wall-lining/smoothing CUT 2026-08-07 by user ruling — plain walls for now.)</summary>
+		private static List<Cell> CarveBore(Zone Z, Cell start, int dx, int dy)
+		{
+			int px = dy != 0 ? 1 : 0, py = dx != 0 ? 1 : 0;
+			double p1 = Stat.Random(0, 628) / 100.0, p2 = Stat.Random(0, 628) / 100.0;
+			var carved = new List<Cell>();
+			for (int step = 1; step <= 30; step++)
+			{
+				int off = (int)Math.Round(2.2 * Math.Sin(0.35 * step + p1) + 1.1 * Math.Sin(0.13 * step + p2));
+				int lx = start.X + dx * step + px * off;
+				int ly = start.Y + dy * step + py * off;
+				if (lx < 1 || lx > Z.Width - 2 || ly < 1 || ly > Z.Height - 2)
+					break;
+				Cell lead = Z.GetCell(lx, ly);
+				if (lead == null)
+					break;
+				if (!lead.HasWall() && step > 3)
+				{
+					Helpers.VerifyLog("PAINT", $"bore breakthrough at step {step} — the beast moved on");
+					break;
+				}
+				for (int w = 0; w <= 1; w++)   // 2-wide: the beast is broad
+				{
+					int fx = lx + px * w, fy = ly + py * w;
+					if (fx < 1 || fx > Z.Width - 2 || fy < 1 || fy > Z.Height - 2)
+						continue;
+					Cell f = Z.GetCell(fx, fy);
+					if (f == null)
+						continue;
+					foreach (GameObject wall in f.GetWalls().ToList())
+						wall.Obliterate();
+					carved.Add(f);
+				}
+			}
+			Helpers.VerifyLog("PAINT", $"bore: {carved.Count} cells carved");
+			return carved;
+		}
+
+		/// <summary>Weather the mouth: time's hand — stochastic widening at an entrance
+		/// (the Cave/CanyonBuilder wobble idiom: 75% clear at radius 1, 35% at radius 2).
+		/// Run AFTER the geometry it weathers — history applies in order.</summary>
+		private static void WeatherMouth(Zone Z, Cell mouth)
+		{
+			int cleared = 0;
+			foreach (Cell n in mouth.GetLocalAdjacentCells(2))
+			{
+				if (n == null || !n.HasWall())
+					continue;
+				if (n.X < 1 || n.X > Z.Width - 2 || n.Y < 1 || n.Y > Z.Height - 2)
+					continue;
+				int dist = Math.Max(Math.Abs(n.X - mouth.X), Math.Abs(n.Y - mouth.Y));
+				if (Stat.Random(1, 100) > (dist <= 1 ? 75 : 35))
+					continue;
+				foreach (GameObject wall in n.GetWalls().ToList())
+					wall.Obliterate();
+				cleared++;
+			}
+			Helpers.VerifyLog("PAINT", $"mouth weathered: {cleared} cells");
 		}
 
 		/// <summary>Mouth search: open floor with a deep wall run behind it, nearest the player.</summary>
@@ -380,6 +555,130 @@ namespace Cleo.TerraFirma.Scripts
 			}
 			Helpers.VerifyLog("PAINT", $"warren complete: {nodes} nodes, {divots} tunnel divots");
 			MessageQueue.AddPlayerMessage($"tfwarren: {nodes} nodes, {divots} tunnel divots. Communal / sleeping / yard.");
+		}
+
+		[WishCommand(Command = "tfface")]
+		public static void PaintFace()
+		{
+			Zone Z = The.Player?.CurrentZone;
+			if (Z == null) return;
+			if (!FindMouth(Z, The.Player.CurrentCell, out Cell mouth, out int dx, out int dy))
+			{ MessageQueue.AddPlayerMessage("tfface: no viable wall run here (try tfslab)."); return; }
+			List<Cell> carved = CarveFace(Z, mouth, dx, dy, 3);
+			MessageQueue.AddPlayerMessage($"tfface: {carved.Count} cells cut at ({mouth.X},{mouth.Y}). States in the log.");
+		}
+
+		[WishCommand(Command = "tfgallery")]
+		public static void PaintGallery()
+		{
+			Zone Z = The.Player?.CurrentZone;
+			if (Z == null) return;
+			if (!FindMouth(Z, The.Player.CurrentCell, out Cell mouth, out int dx, out int dy))
+			{ MessageQueue.AddPlayerMessage("tfgallery: no viable wall run here (try tfslab)."); return; }
+			List<Cell> open = CarveGallery(Z, mouth, dx, dy);
+			MessageQueue.AddPlayerMessage(open != null
+				? $"tfgallery: {open.Count} cells at ({mouth.X},{mouth.Y}), pillars standing."
+				: "tfgallery: {{R|no variant fit}} — wall mass too thin.");
+		}
+
+		[WishCommand(Command = "tfbore")]
+		public static void PaintBore()
+		{
+			Zone Z = The.Player?.CurrentZone;
+			if (Z == null) return;
+			if (!FindMouth(Z, The.Player.CurrentCell, out Cell mouth, out int dx, out int dy))
+			{ MessageQueue.AddPlayerMessage("tfbore: no viable wall mass here (try tfslab)."); return; }
+			List<Cell> carved = CarveBore(Z, mouth, dx, dy);
+			MessageQueue.AddPlayerMessage($"tfbore: {carved.Count} cells of bore from ({mouth.X},{mouth.Y}). No spoil. Something ate this.");
+		}
+
+		/// <summary>The smallest complete camp: carve phase lays ALL geometry (mouth ->
+		/// home blob -> spine -> gallery -> face, then time weathers the mouth), dress
+		/// phase reads the spaces and places the life. The two-phase order, practiced.</summary>
+		[WishCommand(Command = "tfquarry")]
+		public static void PaintQuarry()
+		{
+			Zone Z = The.Player?.CurrentZone;
+			if (Z == null) return;
+			// ---- carve phase ----
+			if (!FindMouth(Z, The.Player.CurrentCell, out Cell mouth, out int dx, out int dy))
+			{ MessageQueue.AddPlayerMessage("tfquarry: no viable wall mass here (try tfslab)."); return; }
+			// Home sits >=1 cell behind the corridor; the entry is a deliberate 1-wide
+			// threshold squeeze. SEALED-CAMP BUGFIX (sim finding 2026-08-07): deeper
+			// homes (extra > 0) left wall between mouth and blob tip and relied on
+			// weathering luck to open — the threshold is now always carved.
+			Carve home = null;
+			int gap = 0;
+			for (int extra = 1; extra <= 3 && home == null; extra++)
+			{
+				home = CarveBlob(Z, mouth.X + dx * (NODE_HALF_DEPTH + 1 + extra), mouth.Y + dy * (NODE_HALF_DEPTH + 1 + extra), dx, dy);
+				if (home != null)
+					gap = extra;
+			}
+			if (home == null) { MessageQueue.AddPlayerMessage("tfquarry: home node did not fit (wall mass too thin)."); return; }
+			for (int td = 1; td <= gap; td++)
+			{
+				Cell t = Z.GetCell(mouth.X + dx * td, mouth.Y + dy * td);
+				if (t != null)
+				{
+					foreach (GameObject w in t.GetWalls().ToList())
+						w.Obliterate();
+				}
+			}
+			Helpers.VerifyLog("PAINT", $"threshold: {gap}-cell squeeze carved at the mouth");
+			// The working wing turns PERPENDICULAR after the home pocket — quarries drift
+			// along the seam, not into the mountain (sim finding 2026-08-07: the straight
+			// chain is ~20 cells deep and cannot fit a real 80x25 canyon zone's wall band).
+			// Walk the seam: both lateral directions, several spine lengths, first fit wins.
+			int px = dy != 0 ? 1 : 0, py = dx != 0 ? 1 : 0;
+			List<Cell> spine = new List<Cell>();
+			List<Cell> gallery = null;
+			int gdx = 0, gdy = 0, spineEndX = 0, spineEndY = 0;
+			int firstSign = Stat.Random(0, 1) == 0 ? 1 : -1;
+			foreach (int sign in new[] { firstSign, -firstSign })
+			{
+				if (gallery != null)
+					break;
+				foreach (int len in new[] { 8, 6, 10, 12 })
+				{
+					int tx = home.CX + px * sign * len + dx * 2;
+					int ty = home.CY + py * sign * len + dy * 2;
+					Cell gm = Z.GetCell(tx, ty);
+					if (gm == null)
+						continue;
+					gallery = CarveGallery(Z, gm, px * sign, py * sign, quiet: true);
+					if (gallery != null)
+					{
+						gdx = px * sign; gdy = py * sign; spineEndX = tx; spineEndY = ty;
+						break;
+					}
+				}
+			}
+			if (gallery != null)
+				spine = CarveSpine(Z, home.CX, home.CY, spineEndX, spineEndY);
+			else
+				Helpers.VerifyLog("PAINT", "gallery: no fit along the seam (8 spots tried)");
+			List<Cell> face = null;
+			if (gallery != null)
+			{
+				// face mouth = the gallery's deepest open row, center aisle
+				int gdepth = gallery.Max(c => Math.Abs((c.X - spineEndX) * gdx + (c.Y - spineEndY) * gdy));
+				Cell faceMouth = Z.GetCell(spineEndX + gdx * gdepth, spineEndY + gdy * gdepth);
+				if (faceMouth != null && !faceMouth.HasWall())
+					face = CarveFace(Z, faceMouth, gdx, gdy, 3);
+			}
+			WeatherMouth(Z, mouth);   // time runs last
+			Helpers.VerifyLog("PAINT", "quarry carve phase complete");
+			// ---- dress phase ----
+			DressCommunal(home);
+			DressSleepAlcoves(Z, home, 2);
+			if (spine.Count > 0)
+				DressSpineDivots(Z, spine, 3);
+			if (gallery != null)
+				foreach (Cell g in gallery.Where(c => !c.IsSolid()).Take(2))
+					PlaceTinted(g, "Cleo_TerraFirma_QuarriedBlock", home);
+			Helpers.VerifyLog("PAINT", "quarry dress phase complete");
+			MessageQueue.AddPlayerMessage($"tfquarry: mouth ({mouth.X},{mouth.Y}) -> home ({home.CX},{home.CY}) -> gallery {(gallery != null ? "carved" : "{{R|skipped}}")} -> face {(face != null ? $"{face.Count} cells" : "{{R|skipped}}")}.");
 		}
 	}
 }

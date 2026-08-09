@@ -1,10 +1,15 @@
-﻿using System;
+using System;
 
 namespace XRL.World.Parts
 {
 	/// <summary>
-	/// Used on walls created by Calcify.
-	/// Scales HP and AV, and gives a unique description and display name to differentiate them from regular walls.
+	/// Used on walls created by Calcify. Since the 2026-08-06 rebalance (user: "calcify should
+	/// fully copy the wall it's adjacent to if possible, including description and stats") this is
+	/// a MARKER part: the wall keeps its source blueprint's own HP, AV, DV, and description. The
+	/// part still prepends "calcified" to the display name (how you tell your wall from the world's)
+	/// and anchors the fugue tether (Calcify's CheckExistenceSupportEvent handler keys on it).
+	/// The stat-shift fields and Attach/Remove shift logic survive for OLD SAVES only: walls placed
+	/// before the rebalance carry nonzero values and their StatShifter state, and must keep them.
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_CalcifyWallPart : IPart
@@ -42,17 +47,19 @@ namespace XRL.World.Parts
 
 		public override void Attach()
 		{
-			StatShifter.SetStatShift("Hitpoints", CurHp, true);
-			StatShifter.SetStatShift("AV", -AvReduction, true);
-			if (ParentObject.TryGetPart(out Description d))
-				d.Short = "Dust and grit were strung into cubic costume and set to bar passage.";
+			// legacy path only: rebalanced casts attach with both fields zero and shift nothing
+			if (CurHp != 0)
+				StatShifter.SetStatShift("Hitpoints", CurHp, true);
+			if (AvReduction != 0)
+				StatShifter.SetStatShift("AV", -AvReduction, true);
 		}
 
 		public override void Remove()
 		{
 			StatShifter.RemoveStatShifts();
-			if (ParentObject.TryGetPart(out Description d))
-				d.Short = ParentObject.GetBlueprint().GetPartParameter("Description", "Short", d.Short); // restore if restorable; otherwise leave the calcified text in place
+			// old walls had their Description overridden at attach; restore if restorable
+			if ((CurHp != 0 || AvReduction != 0) && ParentObject.TryGetPart(out Description d))
+				d.Short = ParentObject.GetBlueprint().GetPartParameter("Description", "Short", d.Short);
 		}
 	}
 }

@@ -39,8 +39,18 @@ namespace XRL.World.Parts.Mutation
 
 		public override bool HandleEvent(BeforeRenderEvent E)
 		{
+			long now = Cleo_TerraFirma_GeomancyPulseFX.NowMS;
 			foreach (Cleo_TerraFirma_GeomancyCellData cd in Cells)
+			{
+				if (cd.RevealAtMS > now)
+					continue; // the unveiling front hasn't reached this cell yet (subsecond, realtime)
+				if (!cd.MapMarked)
+				{
+					cd.Cell.SetExplored();
+					cd.MapMarked = true;
+				}
 				cd.Cell.ParentZone.AddLight(cd.Cell.X, cd.Cell.Y, 0, LightLevel.Omniscient);
+			}
 			return base.HandleEvent(E);
 		}
 
@@ -82,7 +92,10 @@ namespace XRL.World.Parts.Mutation
 		{
 			Helpers.DebugLog($"handling landed stone", DEBUG_CONTEXT);
 			Helpers.DebugLog($"-> weapon: {Weapon?.DisplayName}", DEBUG_CONTEXT);
-			if (Weapon == null || !Weapon.HasTag("Cleo_TerraFirma_IsAnyStone"))
+			// IsGeomancyStone = the Geomancy-only pass for trade goods (nuggets/figurines, user
+			// ruling 2026-08-06) -- deliberately NOT IsAnyStone, which would also feed the
+			// lithovore/auto-sculpt gates
+			if (Weapon == null || (!Weapon.HasTag("Cleo_TerraFirma_IsAnyStone") && !Weapon.HasTag("Cleo_TerraFirma_IsGeomancyStone")))
 				return;
 			Cell landingCell = Weapon.CurrentCell;
 			if (landingCell == null || landingCell.OnWorldMap())
@@ -107,16 +120,44 @@ namespace XRL.World.Parts.Mutation
 				DidX("listen", "for vibrations", ColorAsGoodFor: ParentObject);
 			Helpers.DebugLog($"---> radius, duration, do scan: {radiusRevealed}, {durationTurns}, {doScan}", DEBUG_CONTEXT);
 			Helpers.VerifyLog("GEO", $"reveal: {Weapon.Blueprint} landed, radius {radiusRevealed}, {durationTurns} turns, scan={doScan}, {pickedRadius.Count} cells pass the distortion mask");
+			// pulse/unveiling gate: NO IsVisible() third condition (Fissure's idiom) -- the
+			// landing cell is legitimately dark when thrown into unexplored ground, and
+			// unveiling it is the whole effect
+			bool animate = !Cleo_TerraFirma_StoneRiseFX.HarnessMute && landingCell.ParentZone != null && landingCell.ParentZone.IsActive();
+			long now = animate ? Cleo_TerraFirma_GeomancyPulseFX.NowMS : 0L;
+			List<(Cell cell, float dist)> pulseCells = animate ? new List<(Cell cell, float dist)>(pickedRadius.Count) : null;
+			float maxDist = 0f;
 			foreach (Cell c in pickedRadius)
 			{
-				Cells.Add(new Cleo_TerraFirma_GeomancyCellData(c, durationTurns, doScan));
-				c.SetExplored();
+				var cd = new Cleo_TerraFirma_GeomancyCellData(c, durationTurns, doScan);
+				if (animate)
+				{
+					int dx = c.X - landingCell.X, dy = c.Y - landingCell.Y;
+					float dist = Mathf.Sqrt(dx * dx + dy * dy);
+					cd.RevealAtMS = now + (long)(dist * Cleo_TerraFirma_GeomancyPulseFX.RING_MS);
+					pulseCells.Add((c, dist));
+					if (dist > maxDist)
+						maxDist = dist;
+				}
+				else
+				{
+					c.SetExplored();
+					cd.MapMarked = true;
+				}
+				Cells.Add(cd);
 				if (doScan)
 				{
 					foreach (GameObject go in c.GetObjects(x => x != ParentObject && VibesWith(x) && !x.HasPart<Cleo_TerraFirma_PartGeomancyScan>()))
 						go.AddPart<Cleo_TerraFirma_PartGeomancyScan>();
 				}
 			}
+			if (animate)
+			{
+				int dots = Cleo_TerraFirma_GeomancyPulseFX.Play(landingCell, maxDist, pulseCells);
+				Helpers.VerifyLog("GEO", $"pulse: {pickedRadius.Count} cells unveiling over {(long)(maxDist * Cleo_TerraFirma_GeomancyPulseFX.RING_MS)}ms, sparks={dots}, classic={Cleo_TerraFirma_GeomancyPulseFX.CLASSIC_FRONT}");
+			}
+			else
+				Helpers.VerifyLog("GEO", "pulse: skipped (muted or inactive zone), instant reveal");
 		}
 		#endregion
 
@@ -192,6 +233,12 @@ namespace XRL.World.Parts.Mutation
 			public Cell Cell;
 			public int Duration;
 			public bool DoScan;
+
+			// unveiling-front state, deliberately NOT serialized (see Write/Read): a
+			// loaded save has 0/false -> instant light + one idempotent SetExplored,
+			// which is correct -- the sweep is a moment, not a condition
+			public long RevealAtMS;
+			public bool MapMarked;
 
 			public Cleo_TerraFirma_GeomancyCellData(Cell cell, int duration, bool doScan)
 			{

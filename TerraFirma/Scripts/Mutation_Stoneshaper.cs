@@ -138,15 +138,113 @@ namespace XRL.World.Parts.Mutation
 		public override bool WantEvent(int ID, int cascade)
 		{
 			if (!base.WantEvent(ID, cascade) &&
-				ID != PooledEvent<CommandEvent>.ID)
+				ID != PooledEvent<CommandEvent>.ID &&
+				ID != AIGetOffensiveAbilityListEvent.ID)
 				return ID == SingletonEvent<EndTurnEvent>.ID;
 			return true;
+		}
+
+		// ---- NPC advertisement (2026-08-06, user: legendary creatures can roll pool mutations
+		// via RandomMutations -- "we could just work the advertisement out"). The AI branch rides
+		// the harness's own picker-free seam: CarveFrom(actor, creature, wallCell). Muse = the
+		// AI's combat target; wall = nearest carvable within NPC_WALL_SCAN_RADIUS, validity
+		// mirroring the player picker's checks. ----
+		private const int NPC_WALL_SCAN_RADIUS = 8; // Claude dial
+
+		public override bool HandleEvent(AIGetOffensiveAbilityListEvent E)
+		{
+			if (IsMyActivatedAbilityAIUsable(ActivatedAbilityID) && E.Target != null && E.Target.Body != null && FindCarvableWallCellFor(E.Actor) != null)
+				E.Add(COMMAND_ID);
+			return base.HandleEvent(E);
+		}
+
+		/// <summary>The muse an NPC shaper actually carves (USER 2026-08-06: "pick the strongest
+		/// monster nearby... determine strongest by level, since that's the easiest indicator"):
+		/// the highest-Level creature in sight within the scan radius -- the statue inherits its
+		/// muse's physique, so the beefiest model makes the best statue. The combat target is the
+		/// fallback and keeps ties; the caster and its own current statue are excluded.</summary>
+		private GameObject FindBestMuseFor(GameObject actor, GameObject fallback)
+		{
+			GameObject best = fallback;
+			int bestLevel = fallback != null && fallback.HasStat("Level") ? fallback.GetStatValue("Level") : 0;
+			Cell origin = actor?.CurrentCell;
+			if (origin == null)
+				return best;
+			foreach (Cell c in origin.GetLocalAdjacentCells(NPC_WALL_SCAN_RADIUS))
+			{
+				foreach (GameObject obj in c.Objects)
+				{
+					if (!obj.IsCreature || obj.Body == null || obj == actor || obj == fallback || obj == CurStatue)
+						continue;
+					if (!obj.HasStat("Level") || obj.GetStatValue("Level") <= bestLevel)
+						continue;
+					if (!actor.HasLOSTo(obj))
+						continue;
+					best = obj;
+					bestLevel = obj.GetStatValue("Level");
+				}
+			}
+			return best;
+		}
+
+		/// <summary>Nearest wall cell this caster could legally carve from: the player picker's
+		/// validity checks (solid wall, no hologram/walltrap/forcefield, no refusal tag, audited
+		/// properties present, type within the level's reach), nearest-first.</summary>
+		private Cell FindCarvableWallCellFor(GameObject actor)
+		{
+			Cell origin = actor?.CurrentCell;
+			if (origin == null)
+				return null;
+			WallType validWalls = GetValidWallsAtLevel(Level);
+			Cell best = null;
+			int bestDist = int.MaxValue;
+			foreach (Cell c in origin.GetLocalAdjacentCells(NPC_WALL_SCAN_RADIUS))
+			{
+				int d = origin.DistanceTo(c);
+				if (d >= bestDist || !c.HasWall())
+					continue;
+				List<GameObject> walls = c.GetWalls();
+				if (walls.Count == 0)
+					continue;
+				GameObject w = walls.First();
+				if (w.HasPart<HologramMaterial>() || w.HasPart<Walltrap>() || w.HasPart<Forcefield>() || w.HasTag("Cleo_TerraFirma_NoStoneshape"))
+					continue;
+				Cleo_TerraFirma_StoneshaperWallProperties props = w.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>();
+				if (props == null)
+					continue;
+				bool isStone = props.MaterialType == "stone";
+				bool isMetal = props.MaterialType == "metal";
+				if (validWalls == WallType.Stone && !isStone)
+					continue;
+				if (validWalls == WallType.StoneAndMetal && !isStone && !isMetal)
+					continue;
+				best = c;
+				bestDist = d;
+			}
+			return best;
 		}
 
 		public override bool HandleEvent(CommandEvent E)
 		{
 			if (E.Command != COMMAND_ID)
 				return base.HandleEvent(E);
+			if (E.Actor != null && !E.Actor.IsPlayer())
+			{
+				// AI-fired commands carry the target (recorded plumbing: CommandEvent.Send
+				// populates E.Target); the swap-confirm popup is player UX -- an NPC re-carve
+				// swaps silently, cooldown-gated like everything else. The muse upgrades from
+				// the combat target to the strongest creature in sight (user ruling, by Level).
+				GameObject muse = E.Target;
+				if (!GameObject.Validate(ref muse))
+					return false;
+				muse = FindBestMuseFor(E.Actor, muse);
+				if (muse == null || muse.Body == null)
+					return false;
+				Cell npcWallCell = FindCarvableWallCellFor(E.Actor);
+				if (npcWallCell == null)
+					return false;
+				return CarveFrom(E.Actor, muse, npcWallCell) != null && base.HandleEvent(E);
+			}
 			if (CurStatue != null)
 			{
 				// ANY living statue may be swapped (RULED 2026-07-23, extending the Lv10 path down:
@@ -297,6 +395,10 @@ namespace XRL.World.Parts.Mutation
 			{
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", "SWAP: prior statue de-animated (gear entombed) before the new carve");
 				XDidY(CurStatue, "return", "wearily to earth", Source: CurStatue, ColorAsBadFor: ParentObject);
+				// swap alone stays quiet (RULED 2026-08-07, with popup-on-expiry): the player just
+				// confirmed this de-animation, so the mourning drops to a log line here while
+				// natural expiry and combat deaths keep the popup (blueprint no longer blanket-tagged)
+				CurStatue.SetStringProperty("NoFollowerDeathPopup", "1");
 				DeanimateStatue(CurStatue);
 			}
 			CurStatue = statue;
@@ -338,7 +440,6 @@ namespace XRL.World.Parts.Mutation
 					while (breaksPlayed < schedule.BreakTimes.Count && schedule.BreakTimes[breaksPlayed] <= t)
 					{
 						PlayWorldSound("Sounds/Damage/sfx_damage_stone", 1f, Combat: true, SourceCell: targetWallCell);
-						Cleo_TerraFirma_Fissure.SmokePuff(targetWallCell);
 						breaksPlayed++;
 					}
 					XRLCore.Core.RenderBaseToBuffer(buf);
@@ -348,6 +449,9 @@ namespace XRL.World.Parts.Mutation
 				}
 				if (!swapped)
 					PlaceStatue();
+				// smoke only AFTER the reveal (RULED 2026-08-05: mid-carve smoke hid the statue;
+				// "have the smoke spawn at the end", "a random amount of puffs ... between 1-4")
+				Cleo_TerraFirma_Fissure.SmokePuff(targetWallCell, Stat.Random(1, 4));
 			}
 			else
 				PlaceStatue();
@@ -602,6 +706,17 @@ namespace XRL.World.Parts.Mutation
 			randomStatuePart.Material = WallProperties?.MaterialDisplayName ?? WallProperties?.MaterialType ?? "stone";
 			randomStatuePart.SetCreature(Muse);
 			statue.DisplayName = $"{(NamePrefix != string.Empty ? $"{NamePrefix} " : "")}{statue.DisplayName}";
+
+			// a rough statue can't "intricately depict" anything (friend's catch via the feedback
+			// thread; RULED 2026-08-07, "crudely" = user's word). Only tier 1 contradicts the base
+			// RandomStatue sentence, so only tier 1 diverges from it; the descriptor switch is the
+			// hook if a full per-tier ladder ever lands. Rides into the inert copy via DeanimateStatue.
+			if (NamePrefix == "rough")
+			{
+				Description roughDesc = statue.GetPart<Description>();
+				if (roughDesc != null)
+					roughDesc._Short = roughDesc._Short.Replace(" intricately depicts ", " crudely depicts ");
+			}
 
 			statue.Physics.FlameTemperature = Wall.Physics.FlameTemperature;
 			statue.Physics.VaporTemperature = Wall.Physics.VaporTemperature;

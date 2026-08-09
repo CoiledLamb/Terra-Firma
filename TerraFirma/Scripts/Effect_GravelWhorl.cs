@@ -18,8 +18,9 @@ namespace XRL.World.Effects
 	/// Resonant whorls additionally SCATTER LASE-TYPE BEAMS via the engine's native RefractLight
 	/// machinery (RULED 2026-07-21, built 2026-07-22): beams only -- laser missile shots carry a
 	/// Projectile param and stay in the outcome scale above, no double-dip.
-	/// Also grants a small AV bonus that scales with the size of the reserve (see <see cref="Sync"/>).
 	/// The reserve itself is the shield: deflecting costs nothing, but every stone thrown weakens it.
+	/// (AV/DV stat shifts CUT 2026-08-06, beta rebalance pass, user: "cut stat shift from whorl" --
+	/// deflection is the whole defensive identity now; Remove keeps RemoveStatShifts for old saves.)
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_GravelWhorl : Effect
@@ -56,12 +57,13 @@ namespace XRL.World.Effects
 
 		public override string GetDetails()
 		{
-			// RATIFIED 2026-07-23 (tail reworded same day to kill the remains/remain doubling).
-			// FLAGGED for the text pass: user dislikes the resonant branch's dashes -- both
-			// descriptions are candidates for a rewrite as close to base-game language as possible.
+			// RATIFIED 2026-07-23; TRIMMED by user ruling 2026-08-06 (AI-tells audit): the
+			// "% chance to deflect" sentence and "Stones devoured feed the reserve." cut. This
+			// also retires the 2026-07-23 dash flag (the dashes lived in the cut sentence).
+			// The deflect mechanic stays documented in the Earthen Barrage / Attune Stones text.
 			if (Resonant)
-				return $"Sheathed in keening gravel. {DeflectChance}% chance to deflect light-based projectiles -- devoured, swatted aside, or sent careening -- and to scatter laser beams. Physical projectiles pass through. Lasts while stones remain in reserve.";
-			return $"Sheathed in whorling gravel. {DeflectChance}% chance to deflect physical projectiles: devoured, swatted aside, or sent careening. Stones devoured feed the reserve. Lasers and other energy attacks pass through. Lasts while stones remain in reserve.";
+				return "Sheathed in keening gravel. Physical projectiles pass through. Lasts while stones remain in reserve.";
+			return "Sheathed in whorling gravel. Lasers and other energy attacks pass through. Lasts while stones remain in reserve.";
 		}
 
 		public override bool UseStandardDurationCountdown() => false;
@@ -69,10 +71,10 @@ namespace XRL.World.Effects
 
 		#region Logic
 		/// <summary>
-		/// Updates the deflect chance, attunement, and stat shift to match the current reserve.
-		/// Normal: +1 AV at 3+ stones, +2 at 9+. Resonant: +2 DV at 3+, +4 at 9+ (RULED
-		/// 2026-07-23, supersedes the provisional +2/+3: DV is worth less per point than AV,
-		/// so the compensation runs at the full 1 AV = 2 DV rate).
+		/// Updates the deflect chance and attunement to match the current reserve.
+		/// (The AV/DV reserve-size shifts -- +1/+2 AV, resonant +2/+4 DV per the 2026-07-23
+		/// compensation ruling -- were CUT at the 2026-08-06 rebalance: any lingering shift
+		/// from a pre-cut save is cleared here.)
 		/// </summary>
 		public void Sync(int NewDeflectChance, int Charges, bool NewResonant)
 		{
@@ -80,16 +82,7 @@ namespace XRL.World.Effects
 				Helpers.VerifyLog("GVW", $"sync: chance={NewDeflectChance}% charges={Charges} resonant={NewResonant}");
 			DeflectChance = NewDeflectChance;
 			Resonant = NewResonant;
-			if (Resonant)
-			{
-				StatShifter.SetStatShift("AV", 0);
-				StatShifter.SetStatShift("DV", Charges >= 9 ? 4 : (Charges >= 3 ? 2 : 0));
-			}
-			else
-			{
-				StatShifter.SetStatShift("DV", 0);
-				StatShifter.SetStatShift("AV", Charges >= 9 ? 2 : (Charges >= 3 ? 1 : 0));
-			}
+			StatShifter.RemoveStatShifts();
 		}
 
 		public override bool Apply(GameObject Object)

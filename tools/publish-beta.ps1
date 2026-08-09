@@ -6,10 +6,15 @@
 #   powershell -NoProfile -ExecutionPolicy Bypass -File tools\publish-beta.ps1
 #
 # Steps: copy tree -> strip .cs (real lexer: strings, verbatim strings, interpolation
-# holes with nested strings all handled; line count preserved) -> strip .xml (textual
-# <!-- --> removal; legal because -- cannot appear inside a well-formed XML comment)
-# -> tidy blank lines -> strict-validate every XML -> compile-check the stripped copy
-# with the repo csproj -> zip. Any failure aborts before a zip is produced.
+# holes with nested strings all handled; line count preserved) -> scrub date tokens from
+# the surviving .cs text (RULED 2026-08-05: the 7 date-bearing runtime strings scrub in
+# the published copy, repo keeps them; generic yyyy-mm-dd removal + a hard guard so new
+# ones cannot slip through) -> strip .xml (textual <!-- --> removal; legal because --
+# cannot appear inside a well-formed XML comment) -> tidy blank lines -> strict-validate
+# every XML -> compile-check the stripped copy with the repo csproj -> zip -> stage the
+# stripped tree as the standing Mods\TerraFirmaBeta upload source (workshop plan
+# 2026-08-06; beta manifest id, workshop.json/preview.png preserved). Any failure aborts
+# before a zip is produced.
 
 param(
     [string]$RepoRoot = (Split-Path -Parent $PSScriptRoot),
@@ -160,12 +165,29 @@ Copy-Item -Recurse "$src\*" $dst
 $csCount = 0; $xmlCount = 0
 
 # ---------------------------------------------------------------- strip .cs
+$dateToken = ' ?\b20\d{2}-\d{2}-\d{2}\b'  # optional leading space so "cut 2026-07-25)" tidies to "cut)"
+$datesScrubbed = 0
 foreach ($f in Get-ChildItem $dst -Recurse -Filter *.cs) {
     $raw = [System.IO.File]::ReadAllText($f.FullName)
     $strippedText = [TfCommentStripper]::Strip($raw)
     $tidy = Tidy-Lines ($raw -split "\r?\n") ($strippedText -split "\r?\n")
-    [System.IO.File]::WriteAllLines($f.FullName, $tidy, (New-Object System.Text.UTF8Encoding $true))
+    # date scrub: comments are gone, so any surviving date lives in a runtime string
+    $scrubbed = New-Object System.Collections.Generic.List[string]
+    foreach ($line in $tidy) {
+        $datesScrubbed += ([regex]::Matches($line, $dateToken)).Count
+        $scrubbed.Add(($line -replace $dateToken, ''))
+    }
+    [System.IO.File]::WriteAllLines($f.FullName, $scrubbed, (New-Object System.Text.UTF8Encoding $true))
     $csCount++
+}
+
+# leak guard: a date surviving the scrub means the pattern missed something -- abort
+foreach ($f in Get-ChildItem $dst -Recurse -Filter *.cs) {
+    $leak = Select-String -Path $f.FullName -Pattern '\b20\d{2}-\d{2}-\d{2}\b'
+    if ($leak) {
+        $leak | ForEach-Object { Write-Host $_ }
+        throw "date token survived the scrub in $($f.Name) -- publish aborted"
+    }
 }
 
 # ---------------------------------------------------------------- strip .xml
@@ -207,6 +229,30 @@ $zip = Join-Path $pubRoot "CoQ_TerraFirma_beta_$stamp.zip"
 if (Test-Path $zip) { Remove-Item -Force $zip }
 Compress-Archive -Path $dst -DestinationPath $zip
 
+# ---------------------------------------------------------------- stage for workshop upload
+# (2026-08-06, workshop plan): the stripped tree also lands as a STANDING second mod at
+# Mods\TerraFirmaBeta with its manifest id rewritten -- two local mods cannot share an id
+# (ModManager.RegisterMod skips the duplicate), and this one exists solely as the in-game
+# uploader's source. It stays unapproved in the mod manager, so it never loads content.
+# workshop.json (the item identity, written by the game's first upload) and preview.png
+# are preserved across refreshes.
+$stage = Join-Path $env:USERPROFILE "AppData\LocalLow\Freehold Games\CavesOfQud\Mods\TerraFirmaBeta"
+$preserve = @{}
+foreach ($p in @("workshop.json", "preview.png")) {
+    $pp = Join-Path $stage $p
+    if (Test-Path $pp) { $preserve[$p] = [System.IO.File]::ReadAllBytes($pp) }
+}
+if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
+New-Item -ItemType Directory -Force $stage | Out-Null
+Copy-Item -Recurse "$dst\*" $stage
+$manifestPath = Join-Path $stage "manifest.json"
+$manifestText = [System.IO.File]::ReadAllText($manifestPath) -replace '"id"\s*:\s*"Cleo_TerraFirma"', '"id": "Cleo_TerraFirmaBeta"'
+[System.IO.File]::WriteAllText($manifestPath, $manifestText, (New-Object System.Text.UTF8Encoding $false))
+if ((Get-Content $manifestPath -Raw) -notmatch '"Cleo_TerraFirmaBeta"') { throw "manifest id rewrite failed -- staging aborted" }
+foreach ($k in $preserve.Keys) { [System.IO.File]::WriteAllBytes((Join-Path $stage $k), $preserve[$k]) }
+$workshopNote = if ($preserve.ContainsKey("workshop.json")) { "workshop.json preserved" } else { "no workshop.json yet (the game's first upload creates it)" }
+
 Write-Host "publish OK: $csCount .cs stripped, $xmlCount .xml stripped + validated, compile check green"
 Write-Host "folder: $dst"
 Write-Host "zip:    $zip"
+Write-Host "staged: $stage (manifest id Cleo_TerraFirmaBeta, $workshopNote)"

@@ -28,6 +28,12 @@
 		     Cleo_TerraFirma_CalcifyWallPart, and THAT part prepends "calcified" via GetDisplayName.
 		     Borrowed walls render "calcified shale"; this one renders "calcified stone". -->
 		<part Name="Render" DisplayName="stone" ColorString="&amp;y^K" TileColor="&amp;y" DetailColor="K" />
+		<!-- rebalance 2026-08-06 (true-copy walls): the wall part no longer overrides descriptions,
+		     so the fallback carries its own here (the former part text, verbatim); without it a
+		     gray "calcified stone" would read Sandstone's inherited description. Borrowed walls
+		     need nothing: they ARE their source blueprint now, description and stats included.
+		     Stats ride the Sandstone inherit (150 HP, AV 8); the no-geology floor. -->
+		<part Name="Description" Short="Dust and grit were strung into cubic costume and set to bar passage." />
 		<!-- seam fix (2026-08-05, with Rocks.xml's fallen wall): distinct blueprint = the painter
 		     draws broken faces against fissure walls and zone stone. Same two hooks as there:
 		     PaintPart fuses this wall toward any mod-marked stone; PaintWith "*" fuses neighbors
@@ -38,7 +44,10 @@
 	<object Name="Cleo_TerraFirma_StoneshaperStatue" Inherits="Random Statue">
 		<tag Name="Animatable" />
 		<tag Name="NoTrade" />
-		<tag Name="NoFollowerDeathPopup" />
+		<!-- no NoFollowerDeathPopup here (RULED 2026-08-07): combat deaths and natural expiry
+		     both get the engine's mourning popup (DeanimateStatue's CustomDeathVerb makes expiry
+		     read "expired", not "died"). The swap-carve branch alone stays quiet via a property
+		     stamp in Mutation_Stoneshaper; the player just ordered that de-animation. -->
 		<tag Name="NoAnimatedNamePrefix" />
 		<tag Name="DeathSounds" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_die" />
 		<tag Name="TakeDamageSound" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_hurt" />

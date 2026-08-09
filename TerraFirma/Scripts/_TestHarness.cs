@@ -60,7 +60,7 @@ namespace Cleo.TerraFirma.Scripts
 		[WishCommand(Command = "tfverify")]
 		public static void Help()
 		{
-			MessageQueue.AddPlayerMessage("TF harness (BETA TRIM 2026-08-02) -- instant: tfquick (pockets+rep), tfcarom, tfcrack, tfredoubt (8 scripted casts: ring census by band, push/stun, carve depth, water displacement -- chews nearby natural stone). Turn-driven: tfform (5t), tfshape (Stoneshaper, 3t), tffis (NPC caster, 20t), tfscav (30t, you are the target). tfbatch = the surviving set, ~60 turns standing still. Peek: tfspore (pure read). BETA-HELD dev doors (test held content, run by hand only): tfstreak, tfstrange, tfspill, tfpuddle, tfmine, tftar, tfhopper, tfdrain, tfdevour + tfeat (need kitchenrock's Lithovore grant), quickape/dull via queue.", "W");
+			MessageQueue.AddPlayerMessage("TF harness (BETA TRIM 2026-08-02) -- instant: tfquick (pockets+rep), tffeedback (2026-08-07 batch: Husangeion name/bleed, statue popup tag, rough-vs-tier look-text, gaze-wall lockout belt), tfcarom, tfcrack, tfredoubt (8 scripted casts: ring census by band, push/stun, carve depth, water displacement -- chews nearby natural stone). Turn-driven: tfform (5t), tfshape (Stoneshaper, 3t; incl. shape.mourning swap-quiet stamp), tffis (NPC caster, 20t), tfscav (30t, you are the target). tfbatch = the surviving set, ~60 turns standing still, ends with ONE 'BATCH COMPLETE' verdict line for the quick boot-and-test loop. Stage-for-eyes: tfgazewall (plain + animated holo wall, you cast the gaze). Peek: tfspore (pure read). BETA-HELD dev doors (test held content, run by hand only): tfstreak, tfstrange, tfspill, tfpuddle, tfmine, tftar, tfhopper, tfdrain, tfdevour + tfeat (need kitchenrock's Lithovore grant), quickape/dull via queue.", "W");
 			if (!Helpers.VERIFY_WATCH)
 				MessageQueue.AddPlayerMessage("VERIFY_WATCH is OFF -- the harness is disabled.", "R");
 		}
@@ -100,6 +100,50 @@ namespace Cleo.TerraFirma.Scripts
 			Helpers.VerifyLog("SPORE", $"peek (tfspore): stored permutation={perm} (pure read)");
 		}
 
+		/// <summary>NPC-caster spawner (2026-08-06, riding the advertisement pass: RandomMutations
+		/// rolls are random, so eyeballing NPC casts needs a deterministic door). "tfnpc gorgon 4"
+		/// spawns a hostile snapjaw beside the player carrying the named mutation at the given
+		/// level (default 4), pre-aggroed so its AI starts advertising immediately. Keys: gorgon,
+		/// eb, shaper, calcify, fissure (geomancy deliberately absent -- nothing for an NPC to
+		/// use). Dev door only; strips with the harness.</summary>
+		[WishCommand(Command = "tfnpc")]
+		public static void SpawnNpcCaster(string args)
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			string[] parts = args.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+			if (parts.Length == 0)
+			{
+				MessageQueue.AddPlayerMessage("tfnpc <gorgon|eb|shaper|calcify|fissure> [level] -- hostile snapjaw with the mutation, default level 4.", "W");
+				return;
+			}
+			int level = parts.Length > 1 && int.TryParse(parts[1], out int lv) ? Math.Max(1, lv) : 4;
+			XRL.World.Parts.Mutation.BaseMutation mutation;
+			switch (parts[0].ToLower())
+			{
+				case "gorgon": mutation = new XRL.World.Parts.Mutation.Cleo_TerraFirma_GorgonsGaze(); break;
+				case "eb": mutation = new XRL.World.Parts.Mutation.Cleo_TerraFirma_EarthenBarrage(); break;
+				case "shaper": mutation = new XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper(); break;
+				case "calcify": mutation = new XRL.World.Parts.Mutation.Cleo_TerraFirma_Calcify(); break;
+				case "fissure": mutation = new XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure(); break;
+				default:
+					MessageQueue.AddPlayerMessage($"tfnpc: unknown mutation key '{parts[0]}' (gorgon|eb|shaper|calcify|fissure).", "R");
+					return;
+			}
+			Cell here = The.Player?.CurrentCell;
+			Cell spot = here?.GetLocalAdjacentCells(3)?.Find(c => c.IsEmpty());
+			if (spot == null)
+			{
+				MessageQueue.AddPlayerMessage("tfnpc: no open cell within 3 tiles.", "R");
+				return;
+			}
+			GameObject npc = GameObjectFactory.Factory.CreateObject("Snapjaw");
+			npc.RequirePart<XRL.World.Parts.Mutations>().AddMutation(mutation, level);
+			spot.AddObject(npc);
+			npc.Brain.Attacked(The.Player); // pre-aggro: the ad events start firing on its first turn
+			MessageQueue.AddPlayerMessage($"tfnpc: hostile Snapjaw with {parts[0]} Lv{level} at ({spot.X},{spot.Y}).", "W");
+			Helpers.VerifyLog("NPC", $"tfnpc spawned Snapjaw + {mutation.GetType().Name} Lv{level} @({spot.X},{spot.Y})");
+		}
+
 		/// <summary>The full sweep, BETA TRIM shape (redoubt pivot, RULED 2026-08-02): three
 		/// synchronous scenarios, then the turn-driven four chained through the driver's queue.
 		/// Held-content scenarios (streak/strange/spill/puddle/mine/tar/devour/eat/hopper/
@@ -110,7 +154,12 @@ namespace Cleo.TerraFirma.Scripts
 		{
 			if (!Helpers.VERIFY_WATCH) { Help(); return; }
 			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
+			BatchPass = 0;
+			BatchFail = 0;
+			BatchFails.Clear();
+			BatchActive = true;
 			QuickSync();
+			FeedbackSync();
 			CaromSync();
 			CrackSync();
 			RedoubtSync();
@@ -242,6 +291,169 @@ namespace Cleo.TerraFirma.Scripts
 			else
 				Report("quick.cage", false, "SETUP FAIL - no clear lane ending in an open-surrounded cell");
 			BETA-HELD end */
+		}
+
+		/// <summary>The 2026-08-07 Discord-feedback batch, synchronous: Husangeion rename (ASCII-only
+		/// after the H-root-sk-theta-vos glyph bug: the classic font draws by raw codepoint, so any
+		/// accented char renders as CP437 salad) + salt-trace bleed with the producer left pure ·
+		/// statue blueprint popup-eligible again (blanket NoFollowerDeathPopup deleted per the
+		/// popup-on-expiry ruling) · rough carves read "crudely depicts" while other tiers keep the
+		/// base "intricately" (tier-1-only ruling). The swap-quiet property stamp is asserted in
+		/// tfshape (shape.mourning), where a real swap-carve runs.</summary>
+		[WishCommand(Command = "tffeedback")]
+		public static void Feedback()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			FeedbackSync();
+		}
+
+		internal static void FeedbackSync()
+		{
+			GameObject ply = The.Player;
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+
+			// Husangeion: rename landed, name stays renderable, bleed carries the salt trace
+			GameObject boar = GameObject.Create("Cleo_TerraFirma_BoarVessel");
+			if (boar == null)
+			{
+				Report("feedback.boar", false, "SETUP FAIL - boar vessel blueprint would not spawn");
+			}
+			else
+			{
+				string name = boar.Render?.DisplayName ?? "";
+				bool ascii = true;
+				foreach (char ch in name)
+					if (ch < ' ' || ch > '~') { ascii = false; break; }
+				Report("feedback.boarname", name == "Husangeion" && ascii,
+					$"display name '{name}' (want 'Husangeion', pure ASCII)");
+				string bleed = boar.GetPropertyOrTag("BleedLiquid", "");
+				LiquidProducer producer = boar.GetPart<LiquidProducer>();
+				bool saltTrace = bleed == "water-900,salt-100";
+				bool purePour = producer != null && producer.Liquid == "water";
+				Report("feedback.boarbleed", saltTrace && purePour,
+					$"BleedLiquid='{bleed}' (want water-900,salt-100, the ruled salt trace), producer liquid='{(producer == null ? "MISSING" : producer.Liquid)}' (want water -- the drinkable cargo stays pure)");
+				// mood-ring glaze (2026-08-07; empty rule settled third-round on NEGATIVE SPACE,
+				// "the channels fluid runs through"): part mounted, and a fresh boar's detail
+				// matches its rolled cargo -- B over water, k over an empty tank (StartVolume
+				// 1d33-1 CAN roll zero). Cider/wine tints are eyes-on -- pour and watch.
+				bool tintMounted = boar.HasPart<Cleo_TerraFirma_VesselTint>();
+				string detailNow = boar.Render?.DetailColor ?? "?";
+				bool hasCargo = (boar.LiquidVolume?.Volume ?? 0) > 0;
+				string wantDetail = hasCargo ? "B" : "k";
+				Report("feedback.boartint", tintMounted && detailNow == wantDetail,
+					$"VesselTint part {(tintMounted ? "mounted" : "MISSING")}, fresh-boar detail '{detailNow}' over {(hasCargo ? "water cargo (want B)" : "an empty tank (want k, the empty channels)")}");
+				// it/its ruling, same day: Gender tag rides the blueprint
+				string gender = boar.GetPropertyOrTag("Gender", "");
+				Report("feedback.boargender", gender == "neuterperson",
+					$"Gender='{gender}' (want neuterperson -- the base creature it/its idiom)");
+				boar.Obliterate();
+			}
+
+			// statue blueprint: the mourning popup is eligible again (blanket tag deleted)
+			GameObject inert = GameObject.Create("Cleo_TerraFirma_StoneshaperStatue");
+			bool loud = inert != null && !inert.HasTagOrProperty("NoFollowerDeathPopup");
+			Report("feedback.mourntag", loud, loud
+				? "statue blueprint carries NO blanket NoFollowerDeathPopup (combat + expiry popups restored)"
+				: "statue blueprint STILL blanket-tagged -- the popup ruling is not in effect");
+			if (inert != null) inert.Obliterate();
+
+			// tier look-text: rough diverges to "crudely", every other tier keeps the base sentence
+			List<Cell> open = origin.GetLocalAdjacentCells();
+			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
+			if (open.Count < 1)
+			{
+				Report("feedback.look", false, "SETUP FAIL - no open adjacent cell for the test wall");
+				return;
+			}
+			GameObject wall = GameObject.Create("Sandstone");
+			open[0].AddObject(wall);
+			GameObject muse = GameObject.Create(BABOON_BP);
+			muse.SetIntProperty(SPAWN_MARK, 1);
+			GameObject rough = XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper.MakeStatueOfCreatureFromWall(muse, wall, "rough");
+			string roughDesc = rough?.GetPart<Description>()?._Short ?? "";
+			bool crude = roughDesc.Contains("crudely depicts") && !roughDesc.Contains("intricately");
+			Report("feedback.roughlook", crude, crude
+				? "rough carve reads 'crudely depicts' with no 'intricately' residue"
+				: $"rough carve look-text WRONG: '{Snip(roughDesc)}'");
+			GameObject fine = XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper.MakeStatueOfCreatureFromWall(muse, wall, "fine");
+			string fineDesc = fine?.GetPart<Description>()?._Short ?? "";
+			bool untouched = fineDesc.Contains("intricately depicts") && !fineDesc.Contains("crudely");
+			Report("feedback.tierlook", untouched, untouched
+				? "fine carve keeps the base 'intricately depicts' (tier-1-only divergence holds)"
+				: $"fine carve look-text WRONG: '{Snip(fineDesc)}'");
+			if (rough != null && GameObject.Validate(rough)) rough.Obliterate();
+			if (fine != null && GameObject.Validate(fine)) fine.Obliterate();
+			if (GameObject.Validate(muse)) muse.Obliterate();
+			if (GameObject.Validate(wall)) wall.Obliterate();
+
+			// gaze-wall lockout regression (major bug 2026-08-07): a brainless gaze target must
+			// RELEASE on the first tick, never NRE the action loop into the endless pass cycle.
+			// BeginGaze bypasses the command gate ON PURPOSE -- this drives the TickGaze belt,
+			// the same path that self-heals a save made inside the lockout.
+			if (open.Count < 2)
+			{
+				Report("feedback.gazewall", false, "SETUP FAIL - need two open adjacent cells for the gaze rig");
+				return;
+			}
+			GameObject gorgon = GameObject.Create("Snapjaw");
+			gorgon.SetIntProperty(SPAWN_MARK, 1);
+			open[1].AddObject(gorgon);
+			var gaze = new XRL.World.Parts.Mutation.Cleo_TerraFirma_GorgonsGaze();
+			gorgon.RequirePart<Mutations>().AddMutation(gaze, 4);
+			GameObject holoWall = GameObject.Create("HolographicShaleWall");
+			holoWall.SetIntProperty(SPAWN_MARK, 1);
+			open[0].AddObject(holoWall);
+			bool released;
+			string gazeDetail;
+			try
+			{
+				gaze.BeginGaze(holoWall);
+				gaze.TickGaze();
+				released = gaze.Target == null;
+				gazeDetail = released
+					? "brainless HolographicShaleWall released on tick one (no NRE, no lockout)"
+					: $"gaze STILL HOLDS {gaze.Target?.Blueprint ?? "?"} after the tick -- the release belt did not fire";
+			}
+			catch (Exception ex)
+			{
+				released = false;
+				gazeDetail = $"tick THREW {ex.GetType().Name} -- the endless-pass lockout is live ({ex.Message})";
+			}
+			Report("feedback.gazewall", released, gazeDetail);
+			if (GameObject.Validate(holoWall)) holoWall.Obliterate();
+			if (GameObject.Validate(gorgon)) gorgon.Obliterate();
+		}
+
+		private static string Snip(string s) => s.IsNullOrEmpty() ? "(empty)" : (s.Length > 90 ? s.Substring(0, 90) + "..." : s);
+
+		/// <summary>Manual staging for the gaze-wall fix (user test design 2026-08-07): one PLAIN
+		/// HolographicShaleWall (gaze it -> expect "You cannot transfix..." with NO cooldown burn)
+		/// and one ANIMATED one (gaze it -> expect a normal petrify duel; animation grants Brain +
+		/// donor stats and strips HologramInvulnerability). Eyes-on wish -- you cast the gaze.</summary>
+		[WishCommand(Command = "tfgazewall")]
+		public static void GazeWallStage()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			GameObject ply = The.Player;
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+			List<Cell> open = origin.GetLocalAdjacentCells();
+			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
+			if (open.Count < 2)
+			{
+				MessageQueue.AddPlayerMessage("tfgazewall: need two open adjacent cells.", "R");
+				return;
+			}
+			GameObject plain = GameObject.Create("HolographicShaleWall");
+			open[0].AddObject(plain);
+			GameObject animated = GameObject.Create("HolographicShaleWall");
+			open[1].AddObject(animated);
+			AnimateObject.Animate(animated);
+			Helpers.VerifyLog("GAZE", $"tfgazewall staged: plain wall @({open[0].X},{open[0].Y}), animated wall @({open[1].X},{open[1].Y})");
+			MessageQueue.AddPlayerMessage($"Staged: PLAIN holographic shale at ({open[0].X},{open[0].Y}) -- gaze must refuse, no cooldown; ANIMATED at ({open[1].X},{open[1].Y}) -- gaze must duel normally.", "W");
 		}
 
 		/// <summary>Caromcobble trip statistics: 40 forced crossings of the peel in one wish
@@ -748,6 +960,14 @@ namespace Cleo.TerraFirma.Scripts
 			bool swapped = statueB != null && GameObject.Validate(statueB) && shaper.CurStatue == statueB && statueB != statueA;
 			if (statueB != null) statueB.SetIntProperty(SPAWN_MARK, 1);
 			Report("shape.swap", swapped, $"carve #2 (Scrapbot muse): {(swapped ? "swap-down committed -- new statue tracked, prior returned to stone (gear entombed)" : "SWAP FAILED")}");
+
+			// popup ruling 2026-08-07: the swap branch alone stamps quiet-suppression on the
+			// OUTGOING statue (graveyard reference still readable post-obliterate); the incoming
+			// statue must stay popup-eligible so its combat death / natural expiry mourns loud
+			bool swapQuiet = statueA != null && statueA.GetStringProperty("NoFollowerDeathPopup") == "1";
+			bool freshLoud = statueB != null && !statueB.HasTagOrProperty("NoFollowerDeathPopup");
+			Report("shape.mourning", swapQuiet && freshLoud,
+				$"swap-carve suppression stamp on the outgoing statue: {(swapQuiet ? "present (swap stays a log line)" : "MISSING (swap would popup)")}; incoming statue popup-eligible: {(freshLoud ? "yes (combat/expiry mourn loud)" : "NO (something re-tagged it)")}");
 
 			if (!swapped || entry == null)
 			{
@@ -1452,8 +1672,11 @@ namespace Cleo.TerraFirma.Scripts
 		/// deterministic: L1 fells exactly one of a two-file, L4 exactly two of three. An
 		/// armored survivor probe (AV 999: the roll can never win) must STAND with its health
 		/// untouched -- the leftover half of the ruling, and natural stone stopping the wave
-		/// by toughness alone. Metal and wood walls must refuse before any attack at both
-		/// bands (the Natural gate).</summary>
+		/// by toughness alone. ATTACK-ANY-WALL (RULED 2026-08-05, supersedes the old refuse
+		/// asserts that went red on the first post-ruling boot): a glass-jaw WOOD wall (Soft
+		/// class) must FELL; an AV-0 METAL wall (Hard class) must be damaged but STAND (the
+		/// 1-HP clamp); a native-AV metal wall at L4 must hold untouched (PV 18 cannot
+		/// penetrate AV 30 -- the zero-pen no-damage path).</summary>
 		private static void RedoubtCarve(GameObject ply, Zone zone, Cell origin, XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure fis)
 		{
 			Cell e1 = origin.GetCellFromDirection("E");
@@ -1482,32 +1705,31 @@ namespace Cleo.TerraFirma.Scripts
 			GameObject sand2 = RedoubtRigWall(NATURAL_WALL_BP, e2, 0, 1);
 			GameObject survivor = RedoubtRigWall(NATURAL_WALL_BP, s1, 999);
 			int survivorHP = survivor.GetStat("Hitpoints").Value;
-			GameObject metal = RedoubtRigWall(METAL_WALL_BP, w1);
+			GameObject metal = RedoubtRigWall(METAL_WALL_BP, w1, 0); // AV 0: pens guaranteed, the Hard-clamp probe
 			int metalHP = metal.GetStat("Hitpoints").Value;
-			GameObject wood = RedoubtRigWall(WOOD_WALL_BP, n1);
-			int woodHP = wood.GetStat("Hitpoints").Value;
+			GameObject wood = RedoubtRigWall(WOOD_WALL_BP, n1, 0, 1); // glass-jaw Soft: must fall to the wave
 			HashSet<GameObject> before = SnapshotZone(zone);
 			RedoubtCast(ply, fis, 1);
 			if (GameObject.Validate(sand1) && sand1.CurrentCell != null) fails.Add("L1: first glass-jaw sandstone NOT felled");
 			if (!GameObject.Validate(sand2) || sand2.CurrentCell != e2) fails.Add("L1: second sandstone attacked PAST the one-cell bite");
 			if (!GameObject.Validate(survivor) || survivor.CurrentCell != s1) fails.Add("L1: AV-999 survivor FELL (armor must hold)");
 			else if (survivor.GetStat("Hitpoints").Value != survivorHP) fails.Add("L1: AV-999 survivor took damage on zero penetrations");
-			if (!GameObject.Validate(metal) || metal.CurrentCell != w1 || metal.GetStat("Hitpoints").Value != metalHP) fails.Add("L1: METAL wall attacked or felled");
-			if (!GameObject.Validate(wood) || wood.CurrentCell != n1 || wood.GetStat("Hitpoints").Value != woodHP) fails.Add("L1: WOOD wall attacked or felled");
+			if (!GameObject.Validate(metal) || metal.CurrentCell != w1) fails.Add("L1: AV-0 METAL wall FELL (Hard clamp must hold it at >=1 HP)");
+			else if (metal.GetStat("Hitpoints").Value >= metalHP) fails.Add("L1: AV-0 METAL wall took no damage (Hard class must be attacked; AV 0 guarantees penetrations)");
+			if (GameObject.Validate(wood) && wood.CurrentCell != null) fails.Add("L1: glass-jaw WOOD wall NOT felled (Soft class takes the full attack)");
 			RedoubtCleanup(NewSince(zone, before));
 			if (GameObject.Validate(sand2)) sand2.Obliterate();
 			if (GameObject.Validate(wood)) wood.Obliterate();
+			if (GameObject.Validate(metal)) metal.Obliterate(); // cast B wants the native-AV holds probe, not the clamp probe
 
-			// cast B -- L4, carve depth 2; metal and the armored survivor stand for the
-			// at-all-levels claim (higher PV, same refusals)
+			// cast B -- L4, carve depth 2; the survivor stands for the at-all-levels claim,
+			// and a NATIVE-AV metal wall (AV 30 vs PV 18: zero pens ever) probes the
+			// attacked-but-untouched path of the Hard class
 			GameObject b1 = RedoubtRigWall(NATURAL_WALL_BP, e1, 0, 1);
 			GameObject b2 = RedoubtRigWall(NATURAL_WALL_BP, e2, 0, 1);
 			GameObject b3 = RedoubtRigWall(NATURAL_WALL_BP, e3, 0, 1);
-			if (!GameObject.Validate(metal) || metal.CurrentCell != w1)
-			{
-				metal = RedoubtRigWall(METAL_WALL_BP, w1);
-				metalHP = metal.GetStat("Hitpoints").Value;
-			}
+			metal = RedoubtRigWall(METAL_WALL_BP, w1);
+			metalHP = metal.GetStat("Hitpoints").Value;
 			if (!GameObject.Validate(survivor) || survivor.CurrentCell != s1)
 			{
 				survivor = RedoubtRigWall(NATURAL_WALL_BP, s1, 999);
@@ -1519,14 +1741,14 @@ namespace Cleo.TerraFirma.Scripts
 			if (GameObject.Validate(b2) && b2.CurrentCell != null) fails.Add("L4: second glass-jaw sandstone NOT felled (bite 2 unspent)");
 			if (!GameObject.Validate(b3) || b3.CurrentCell != e3) fails.Add("L4: third sandstone attacked PAST the two-cell bite");
 			if (!GameObject.Validate(survivor) || survivor.CurrentCell != s1 || survivor.GetStat("Hitpoints").Value != survivorHP) fails.Add("L4: AV-999 survivor fell or took damage");
-			if (!GameObject.Validate(metal) || metal.CurrentCell != w1 || metal.GetStat("Hitpoints").Value != metalHP) fails.Add("L4: METAL wall attacked or felled");
+			if (!GameObject.Validate(metal) || metal.CurrentCell != w1 || metal.GetStat("Hitpoints").Value != metalHP) fails.Add("L4: native-AV METAL wall felled or damaged (AV 30 vs PV 18 must hold untouched on zero penetrations)");
 			RedoubtCleanup(NewSince(zone, before));
 			if (GameObject.Validate(b3)) b3.Obliterate();
 			if (GameObject.Validate(metal)) metal.Obliterate();
 			if (GameObject.Validate(survivor)) survivor.Obliterate();
 			Report("redoubt.carve", fails.Count == 0,
 				fails.Count == 0
-					? "carve-as-attack holds: L1 felled exactly one glass-jaw sandstone of a two-file, L4 exactly two of three; the AV-999 survivor stood untouched at both bands (leftover walls); metal and wood refused the wave before any attack"
+					? "carve-as-attack holds: L1 felled exactly one glass-jaw sandstone of a two-file, L4 exactly two of three; the AV-999 survivor stood untouched at both bands (leftover walls); attack-any-wall verified -- glass-jaw wood FELL (Soft), AV-0 metal damaged but standing (Hard clamp), native-AV metal untouched on zero pens"
 					: string.Join("; ", fails.ToArray()));
 		}
 
@@ -2026,7 +2248,10 @@ namespace Cleo.TerraFirma.Scripts
 		internal static void RunNext(string queue, GameObject ply)
 		{
 			if (queue.IsNullOrEmpty() || ply == null)
+			{
+				FinishBatch(); // end of a tfbatch chain (or a lost-state abort dropped the queue); no-op outside a batch
 				return;
+			}
 			int comma = queue.IndexOf(',');
 			string next = comma < 0 ? queue : queue.Substring(0, comma);
 			string rest = comma < 0 ? "" : queue.Substring(comma + 1);
@@ -2155,10 +2380,32 @@ namespace Cleo.TerraFirma.Scripts
 			return n;
 		}
 
+		// quick-loop tally (2026-08-07 sprucing): tfbatch counts its Reports and closes with ONE
+		// grep-able verdict line, so a boot-and-test pass is launch -> tfbatch -> read the verdict
+		internal static int BatchPass;
+		internal static int BatchFail;
+		internal static readonly List<string> BatchFails = new List<string>();
+		internal static bool BatchActive;
+
 		internal static void Report(string scenario, bool pass, string detail)
 		{
+			if (BatchActive)
+			{
+				if (pass) BatchPass++;
+				else { BatchFail++; BatchFails.Add(scenario); }
+			}
 			Helpers.VerifyLog("AUTO", $"SCENARIO {scenario}: {(pass ? "PASS" : "FAIL")} - {detail}");
 			MessageQueue.AddPlayerMessage($"Harness {scenario}: {(pass ? "&GPASS" : "&RFAIL")}&y - {detail}");
+		}
+
+		internal static void FinishBatch()
+		{
+			if (!BatchActive)
+				return;
+			BatchActive = false;
+			string verdict = BatchFail == 0 ? "ALL GREEN" : "FAILS: " + string.Join(", ", BatchFails);
+			Helpers.VerifyLog("AUTO", $"BATCH COMPLETE: {BatchPass} pass / {BatchFail} fail -- {verdict}");
+			MessageQueue.AddPlayerMessage($"Harness batch complete: {BatchPass} pass / {BatchFail} fail -- {verdict}", BatchFail == 0 ? "G" : "R");
 		}
 
 		internal static void SweepSpawns(Zone zone)
@@ -2290,6 +2537,7 @@ namespace XRL.World.Parts
 					Cleo.TerraFirma.Scripts.TestHarnessWishes.Report(Scenario, false, "INCONCLUSIVE - driver state lost (save/load mid-scenario?); aborting");
 					TurnsRemaining = 0;
 					ParentObject.RemovePart(this);
+					Cleo.TerraFirma.Scripts.TestHarnessWishes.FinishBatch(); // the abort drops the queue; close the tally so the verdict line still lands
 					return base.HandleEvent(E);
 				}
 				if (Scenario == "hopper" && !LoggedReadiness)

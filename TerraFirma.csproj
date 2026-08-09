@@ -9,6 +9,9 @@
 		<GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
 		<QudLibPath>D:\Steam\steamapps\common\Caves of Qud\CoQ_Data\Managed\</QudLibPath>
 		<DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+		<!-- publish/ holds packaged snapshots of the mod; without this exclude the implicit
+		     glob compiles every script twice (CS0101 duplicate-definition wall, 2026-08-05). -->
+		<DefaultItemExcludes>$(DefaultItemExcludes);publish\**</DefaultItemExcludes>
 	</PropertyGroup>
 	<!-- The original csproj listed two XML files as <Compile> items, producing ~73 garbage
 	     C# syntax errors per build. That noise masked a REAL error on 2026-07-23 (a missing

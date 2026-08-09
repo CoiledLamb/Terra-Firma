@@ -39,6 +39,14 @@ namespace XRL.World.Parts.Mutation
 		/// </summary>
 		[NonSerialized]
 		public Cleo_TerraFirma_Petrifying AssocEffect;
+
+		/// <summary>
+		/// The rising-stone-band overlay's shared state (VFX, ruled 2026-08-06). NonSerialized by design:
+		/// juice entries don't survive a save, and the next tick after a load re-creates the band at the
+		/// then-current height (every tick rolls a save, so a state change is at most one round away).
+		/// </summary>
+		[NonSerialized]
+		private Cleo_TerraFirma_PetrifyBandState BandFx;
 		#endregion
 
 		#region Basic data
@@ -80,6 +88,8 @@ namespace XRL.World.Parts.Mutation
 			RemoveMyActivatedAbility(ref ActivatedAbilityID);
 			if (AssocEffect != null)
 				AssocEffect.Receding = true;
+			Cleo_TerraFirma_GorgonPetrifyFX.Release(BandFx, ShrinkOut: true);
+			BandFx = null;
 			return base.Unmutate(GO);
 		}
 
@@ -100,36 +110,91 @@ namespace XRL.World.Parts.Mutation
 		{
 			if (!base.WantEvent(ID, cascade) &&
 				ID != SingletonEvent<BeginTakeActionEvent>.ID &&
+				ID != SingletonEvent<BeforeTakeActionEvent>.ID &&
 				ID != PooledEvent<CommandEvent>.ID &&
+				ID != AIGetOffensiveAbilityListEvent.ID &&
 				ID != SingletonEvent<EndTurnEvent>.ID)
 				return ID == SingletonEvent<UseEnergyEvent>.ID;
 			return true;
+		}
+
+		// ---- NPC advertisement (2026-08-06, user: legendary creatures can roll pool mutations).
+		// The channel is the hard part, solved by the recorded Sunder Mind recipe: the tick stays
+		// on BeginTakeActionEvent (fires once per turn), and BeforeTakeActionEvent -- which fires
+		// per ACTION -- consumes a channeling NPC's actions with PassTurn(), whose energy
+		// signature (Passive + "Pass") the UseEnergy break filter already ignores. Per-tick
+		// LOS-break stays UNRULED and matches the player's own contract (zone-exit only). ----
+		public override bool HandleEvent(AIGetOffensiveAbilityListEvent E)
+		{
+			if (Target == null && E.Target != null && E.Distance <= GetRange(Level) &&
+				IsMyActivatedAbilityAIUsable(ActivatedAbilityID) && !E.Target.HasEffect<Cleo_TerraFirma_Petrifying>())
+				E.Add(COMMAND_ID);
+			return base.HandleEvent(E);
+		}
+
+		public override bool HandleEvent(BeforeTakeActionEvent E)
+		{
+			// mid-channel, a non-player caster spends every action holding the gaze
+			// (MemberOfPsychicBattle's exact idiom: PassTurn, swallow the action)
+			if (Target != null && !ParentObject.IsPlayer())
+			{
+				ParentObject.PassTurn();
+				return false;
+			}
+			return base.HandleEvent(E);
 		}
 
 		public override bool HandleEvent(CommandEvent E)
 		{
 			if (E.Command != COMMAND_ID)
 				return base.HandleEvent(E);
-			Cell cell = PickDestinationCell(GetRange(Level), RequireCombat: true, Label: "Choose a target to gaze at.");
-			if (cell == null)
-				return false;
-			GameObject victim = cell.GetCombatTarget(ParentObject, true);
-			if (victim == null)
-				return false;
-			if (victim == ParentObject)
+			GameObject victim;
+			if (E.Actor != null && !E.Actor.IsPlayer())
 			{
-				if (victim.IsPlayer())
-				{
-					Popup.Show("You gaze at yourself.");
-					Popup.Show("Everything seems to be in order.");
-				}
-				return false;
+				// AI-fired commands carry the target (recorded plumbing); the picker is player UX
+				victim = E.Target;
+				if (!GameObject.Validate(ref victim) || victim == ParentObject || victim.Brain == null || victim.HasEffect<Cleo_TerraFirma_Petrifying>())
+					return false;
 			}
-			if (victim.HasEffect<Cleo_TerraFirma_Petrifying>())
+			else
 			{
-				if (E.Actor.IsPlayer())
-					Popup.ShowFail($"{victim.T()} is already being petrified! Wait your turn!");
-				return false;
+				Cell cell = PickDestinationCell(GetRange(Level), RequireCombat: true, Label: "Choose a target to gaze at.");
+				if (cell == null)
+					return false;
+				victim = cell.GetCombatTarget(ParentObject, true);
+				if (victim == null)
+					return false;
+				if (victim == ParentObject)
+				{
+					if (victim.IsPlayer())
+					{
+						Popup.Show("You gaze at yourself.");
+						Popup.Show("Everything seems to be in order.");
+					}
+					return false;
+				}
+				if (victim.HasEffect<Cleo_TerraFirma_Petrifying>())
+				{
+					if (E.Actor.IsPlayer())
+						Popup.ShowFail($"{victim.T()} is already being petrified! Wait your turn!");
+					return false;
+				}
+				// THE HOLOGRAPHIC-SHALE LOCKOUT (user major-bug report 2026-08-07): the picker's
+				// GetCombatTarget call rides the engine default AllowInanimate=true, so a plain
+				// wall -- ANY wall, holographic or not; furniture too -- was a legal victim. A
+				// brainless target then NREs TickGaze's Target.Brain.Attacked on EVERY
+				// BeginTakeActionEvent: the engine aborts the player's action each segment, and
+				// the gaze can never break because breaking requires a SUCCESSFUL energy spend --
+				// the endless pass cycle with the game live. (An ANIMATED wall is a real creature
+				// with a Brain and full stats and duels fine; animation even strips
+				// HologramInvulnerability.) Refuse brainless victims before the energy/cooldown
+				// spend; every true creature carries a Brain, mindless ones included.
+				if (victim.Brain == null)
+				{
+					if (E.Actor.IsPlayer())
+						Popup.ShowFail($"You cannot transfix {victim.t()}."); // DRAFT
+					return false;
+				}
 			}
 			UseEnergy(1000, $"Physical Mutation {Name}");
 			CooldownMyActivatedAbility(ActivatedAbilityID, BASE_COOLDOWN);
@@ -174,6 +239,8 @@ namespace XRL.World.Parts.Mutation
 
 		public void BeginGaze(GameObject Victim)
 		{
+			Cleo_TerraFirma_GorgonPetrifyFX.Release(BandFx, ShrinkOut: false); // a stale band never carries to a new victim
+			BandFx = null;
 			Target = Victim;
 			CurFailedSaves = 0;
 			CurSuccessfulSaves = 0;
@@ -181,7 +248,9 @@ namespace XRL.World.Parts.Mutation
 			XDidY(ParentObject, "level", $"an unblinking gaze at {Victim.t()}", "!", ColorAsGoodFor: ParentObject, ColorAsBadFor: Victim);
 			if (Victim.IsPlayer())
 			{
-				Popup.Show($"{ParentObject.T()} {The.Player.DescribeDirectionToward(ParentObject)} {ParentObject.GetVerb("begin")} turning you to stone with an unblinking gaze!");
+				// no space before GetVerb: it returns " begins" with its own leading space (the
+				// double-space was live-caught 2026-08-06, first sighting of the player-victim popup)
+				Popup.Show($"{ParentObject.T()} {The.Player.DescribeDirectionToward(ParentObject)}{ParentObject.GetVerb("begin")} turning you to stone with an unblinking gaze!");
 				AutoAct.Interrupt(ParentObject, true, true);
 			}
 			AssocEffect = new Cleo_TerraFirma_Petrifying(ParentObject);
@@ -200,6 +269,25 @@ namespace XRL.World.Parts.Mutation
 			if (ParentObject.CurrentZone != Target.CurrentZone)
 			{
 				CancelGaze($"{Target.T()} exits the reach of your unblinking gaze, breaking its hold.");
+				return;
+			}
+			// stunned/confused/asleep/paralyzed caster breaks the channel -- the 2026-07-24
+			// DEFERRED verify, un-deferred by NPC gorgons existing (2026-08-06 advertisement
+			// pass): the NPC pass-turn loop would otherwise hold a gaze straight through a stun.
+			// Sunder Mind's own channel breaks on these; now ours does too, for every caster.
+			if (ParentObject.HasEffect<Stun>() || ParentObject.HasEffect<StunGasStun>() || ParentObject.HasEffect<Confused>() || ParentObject.HasEffect<Asleep>() || ParentObject.HasEffect<Paralyzed>())
+			{
+				Helpers.VerifyLog("GAZE", $"caster incapacitated (stun/confusion/sleep/paralysis) -> gaze breaks at {CurFailedSaves}F/{CurSuccessfulSaves}S");
+				CancelGaze($"You cannot hold your unblinking gaze!"); // DRAFT
+				return;
+			}
+			// belt for the command gate: a brainless Target (gazed on a pre-fix build, or a
+			// creature that lost its brain mid-channel) releases instead of NRE-ing the action
+			// loop -- this line is also what UNSTICKS a save made inside the lockout
+			if (Target.Brain == null)
+			{
+				Helpers.VerifyLog("GAZE", $"brainless target {Target.Blueprint} -> gaze releases (lockout self-heal)");
+				CancelGaze(Silent: true);
 				return;
 			}
 			AssocEffect ??= Target.GetEffect<Cleo_TerraFirma_Petrifying>(); // re-link after save/load
@@ -230,6 +318,7 @@ namespace XRL.World.Parts.Mutation
 					AssocEffect?.ClearSlow();
 					XDidY(Target, "shake", "the stiffness from " + Target.its + " limbs", "!", ColorAsGoodFor: Target, ColorAsBadFor: ParentObject);
 				}
+				UpdateBandFx("success"); // the stone visibly slides back -- the breaking-out half of the ruled read
 				return;
 			}
 			AssocEffect?.ApplyFailure();
@@ -238,21 +327,46 @@ namespace XRL.World.Parts.Mutation
 			{
 				Helpers.VerifyLog("GAZE", $"10th fail: {Target.Blueprint} PETRIFIED (statue + entombed possessions)");
 				Petrify(ParentObject, Target);
+				// the statue IS the outcome -- zero the tally so CancelGaze's stone-mark branch
+				// (escapees only) can't fire on the freshly petrified victim (log-caught
+				// 2026-08-06: a spurious 500-round mark + "remains partially petrified" stinger
+				// landed on the dying object under every statue swap)
+				CurFailedSaves = 0;
 				CancelGaze(Silent: true);
 			}
 			else
 			{
 				ParentObject.PlayWorldSound("Sounds/Abilities/sfx_ability_sunderMind_dig");
 				Target.PlayWorldSound("Sounds/Abilities/sfx_ability_sunderMind_dig");
-				Target.Splatter("&y*");
-				Target.ParticleBlip("&y*", CurFailedSaves);
+				// feel round 1 (user 2026-08-06): the asterisk splatter/blip replaced by small
+				// rocks popping off the body -- shedding a little more of itself per fail
+				Cleo_TerraFirma_GorgonPetrifyFX.RockPops(Target, 2 + CurFailedSaves / 4);
+				UpdateBandFx("fail"); // the stone visibly climbs
 				if (ParentObject.IsPlayer())
 					DidX("continue", "to gaze", "…", ColorAsGoodFor: ParentObject, ColorAsBadFor: Target, Source: ParentObject);
 			}
 		}
 
+		/// <summary>
+		/// Drive the rising-stone-band overlay off the channel's NET state (fails minus successes) --
+		/// the tug-of-war read the user ruled 2026-08-06 ("both the animation and the breaking out").
+		/// The STATUE still counts cumulative fails; the divergence is deliberate and recorded in TODO.
+		/// </summary>
+		private void UpdateBandFx(string why)
+		{
+			int net = Math.Max(0, CurFailedSaves - CurSuccessfulSaves);
+			float frac = Cleo_TerraFirma_GorgonPetrifyFX.FracForNet(net);
+			BandFx = Cleo_TerraFirma_GorgonPetrifyFX.Show(BandFx, Target, frac);
+			Helpers.VerifyLog("GAZE", $"band ({why}): net {net} -> frac {frac:0.00}{(BandFx == null ? " [no sprite: muted/unseen/text-mode]" : "")}");
+		}
+
 		public void CancelGaze(string Reason = "", bool Silent = false)
 		{
+			// every end path sheds the band the same way: it slides off where they stood
+			// (over a fresh statue the gray-on-gray shrink is invisible -- the statue IS the
+			// completed look; over an escapee it reads as the stone letting go)
+			Cleo_TerraFirma_GorgonPetrifyFX.Release(BandFx, ShrinkOut: true);
+			BandFx = null;
 			if (AssocEffect == null && GameObject.Validate(Target))
 				AssocEffect = Target.GetEffect<Cleo_TerraFirma_Petrifying>(); // re-link after save/load
 			if (!Silent)
@@ -281,8 +395,8 @@ namespace XRL.World.Parts.Mutation
 
 		public static void Petrify(GameObject Medusa, GameObject Victim)
 		{
-			Victim.Splatter("&y*");
-			Victim.ParticleBlip("&y*", 20);
+			// feel round 1: the completion shower -- a hard burst of rock debris under the statue swap
+			Cleo_TerraFirma_GorgonPetrifyFX.RockPops(Victim, 10, Burst: true);
 			The.Player.PlayWorldSound("burn_blast", 1f, Combat: true);
 			if (Victim.IsPlayer())
 				Achievement.TURNED_STONE.Unlock();

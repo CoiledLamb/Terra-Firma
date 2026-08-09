@@ -4,6 +4,7 @@ using System.Threading;
 using ConsoleLib.Console;
 using UnityEngine;
 using XRL.Core;
+using XRL.Rules;
 using XRL.UI;
 using XRL.World.Capabilities;
 
@@ -14,10 +15,15 @@ namespace XRL.World.Parts.Mutation
 		#region Fields
 		private const string COMMAND_ID = "Cleo_TerraFirma_CommandCalcify";
 
-		private const float BASE_WALL_HP = 500f;
 		private const int BASE_WALLS_CREATED = 4; // 4 at Lv1, exactly 9 at Lv10 -- Force Wall's count at full investment, in permanent stone
 
-		private const int BASE_COOLDOWN = 90;
+		// RULED 2026-08-06 (rebalance pass, user: "we can try out cool down"): with true-copy walls,
+		// the every-level lattice interleaves -- even levels buy +1 wall, odd levels buy -10 cooldown.
+		// Base idiom precedent for declining cooldowns: Burgeoning 115-10L, Teleport Other 115-10L,
+		// Belcher 210-10L (all floor-clamped). Lv1 stays at the old 90.
+		private const int COOLDOWN_MAX = 100;
+		private const int COOLDOWN_STEP = 10;
+		private const int COOLDOWN_FLOOR = 50;
 		#endregion
 
 		#region Basic data
@@ -30,14 +36,16 @@ namespace XRL.World.Parts.Mutation
 
 		public override string GetLevelText(int Level)
 		{
-			// 2026-07-26 voice sitting: flat constants unwrap (0 AV / -10 DV bare, values ratified
-			// 2026-07-25), Cooldown lands last per the ~100%-of-base convention (was missing
-			// entirely). Built 2026-07-27.
+			// REBALANCED 2026-08-06 (user: "calcify should fully copy the wall it's adjacent to if
+			// possible, including description and stats. it should no longer gain HP scaling per
+			// level"): the HP line and the 0 AV / -10 DV line retired with the stat overrides --
+			// walls now carry their blueprint's own numbers. Replacement line DRAFT, awaiting
+			// signoff. Cooldown lands last per the ~100%-of-base convention (2026-07-26 sitting).
+			// cooldown scales now (odd levels), so it earns the rules-wrap the flat 90 never had
 			return "Creates a contiguous line of permanent walls in empty tiles starting adjacent to you\n" +
 				"Number created: {{rules|" + GetWallsCreated(Level) + "}}\n" +
-				"Hit points per wall: {{rules|" + GetWallHp(Level) + "}}\n" +
-				"Created walls have 0 AV and -10 DV\n" +
-				"Cooldown: " + BASE_COOLDOWN + " rounds";
+				"Walls are true copies of the local stone\n" + // DRAFT
+				"Cooldown: {{rules|" + GetCooldown(Level) + "}} rounds";
 		}
 
 		public override bool Mutate(GameObject GO, int Level = 1)
@@ -55,7 +63,6 @@ namespace XRL.World.Parts.Mutation
 		public override void CollectStats(Templates.StatCollector stats, int Level)
 		{
 			stats.Set("WallNum", GetWallsCreated(Level));
-			stats.Set("WallHp", GetWallHp(Level));
 			stats.CollectCooldownTurns(MyActivatedAbility(ActivatedAbilityID), GetCooldown(Level));
 		}
 		#endregion
@@ -63,9 +70,26 @@ namespace XRL.World.Parts.Mutation
 		#region Events
 		public override bool WantEvent(int ID, int cascade)
 		{
-			if (!base.WantEvent(ID, cascade) && ID != AIGetDefensiveAbilityListEvent.ID && ID != AIGetRetreatAbilityListEvent.ID)
+			if (!base.WantEvent(ID, cascade) && ID != AIGetDefensiveAbilityListEvent.ID && ID != AIGetRetreatAbilityListEvent.ID && ID != PooledEvent<CheckExistenceSupportEvent>.ID)
 				return ID == PooledEvent<CommandEvent>.ID;
 			return true;
+		}
+
+		/// <summary>The answering half of the fugue tether (BUG FOUND at the 2026-08-06 residue
+		/// eyeball: clone walls vanished INSTANTLY -- the cast attached ExistenceSupport pointed
+		/// at the clone, but nothing on the clone ANSWERED CheckExistenceSupportEvent, and an
+		/// unanswered check reads as unsupported on the first validation tick). The engine's
+		/// contract is inverted stop-propagation: returning FALSE means "supported" -- ForceBubble
+		/// is the decomp precedent. Scope is safe by construction: the check only fires at the
+		/// creature the wall's ExistenceSupport points to, and only fugue-clone casts point one at
+		/// their caster -- so answering for any calcify wall here can never over-claim. The clone
+		/// carries this mutation (fugue copies mutations), answers while it exists, and its
+		/// obliteration silences the answer: the wall dissipates exactly when the clone does.</summary>
+		public override bool HandleEvent(CheckExistenceSupportEvent E)
+		{
+			if (E.Object?.HasPart<Cleo_TerraFirma_CalcifyWallPart>() == true)
+				return false;
+			return base.HandleEvent(E);
 		}
 
 		// ---- AI advertisement (NPC gap closed 2026-07-23; the quarriers ruling had already
@@ -158,7 +182,6 @@ namespace XRL.World.Parts.Mutation
 				return false;
 			UseEnergy(1000, $"Physical Mutation {Name}");
 			CooldownMyActivatedAbility(ActivatedAbilityID, GetCooldown(Level));
-			int wallHp = GetWallHp(Level);
 			// the stone call, harmonized with Fissure's carve gate (RULED 2026-08-04: "we should
 			// harmonize the stone call as well"): only TRUE GEOLOGY answers. The zone's default
 			// wall must itself be natural stone, neighbor borrowing demands the Natural flag,
@@ -199,8 +222,20 @@ namespace XRL.World.Parts.Mutation
 			void PlaceWall(int i)
 			{
 				GameObject wall = GameObject.Create(planBps[i]);
-				wall.AddPart(new Cleo_TerraFirma_CalcifyWallPart(wallHp - wall.GetStatValue("Hitpoints"), wall.GetStatValue("AV")));
+				// REBALANCED 2026-08-06 (user): the wall is a TRUE COPY of its source blueprint --
+				// native HP, AV, DV, and description all stand. The part stays as the "calcified"
+				// name prefix and the fugue-tether marker, but shifts nothing.
+				wall.AddPart(new Cleo_TerraFirma_CalcifyWallPart());
 				Phase.carryOver(ParentObject, wall);
+				// fugue-clone casts (RULED 2026-08-05, recon 2026-07-24: "walls as temporal as
+				// their maker"): a temporal fugue copy's walls ride the engine's own
+				// ExistenceSupport and dissipate the moment the clone does. Normal casts skip.
+				if (ParentObject.HasStringProperty("FugueCopy"))
+				{
+					XRL.World.Parts.ExistenceSupport support = wall.RequirePart<XRL.World.Parts.ExistenceSupport>();
+					support.SupportedBy = ParentObject;
+					support.ValidateEveryTurn = true;
+				}
 				planCells[i].AddObject(wall); // AddObject paints natively (CheckPaintWallsAround inside; diagnosed 2026-08-04)
 				// zone-build dressing (user 2026-08-05, calcified shale beside water wore plain red
 				// while its natural neighbors wore vineshale green): ShaleVines runs only on
@@ -209,7 +244,6 @@ namespace XRL.World.Parts.Mutation
 				// post-cast region repaint picks up its swapped paint value.
 				if (wall.TryGetPart(out XRL.World.Parts.ShaleVines vines))
 					vines.GrowVines();
-				Cleo_TerraFirma_Fissure.SmokePuff(planCells[i]); // one drift of dust per landing (user 2026-08-05: "a very small amount of smoke ... for symmetry with fissure")
 				string paintedTile = wall.Render?.Tile;
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CALC", $"wall landed @({planCells[i].X},{planCells[i].Y}): bp={planBps[i]}, post-paint Render.Tile={(paintedTile.IsNullOrEmpty() ? "NULL (paint did not take)" : paintedTile)}");
 			}
@@ -244,6 +278,15 @@ namespace XRL.World.Parts.Mutation
 				for (int i = 0; i < planCells.Count; i++)
 					PlaceWall(i);
 			}
+			// smoke only AFTER the line has fully risen (RULED 2026-08-05: per-landing smoke hid
+			// the risen walls; "have the smoke spawn at the end", "a random amount of puffs ...
+			// between 1-4") -- each puff lands on a random cell of the finished line
+			if (planCells.Count > 0)
+			{
+				int puffs = Stat.Random(1, 4);
+				for (int i = 0; i < puffs; i++)
+					Cleo_TerraFirma_Fissure.SmokePuff(planCells[Stat.Random(0, planCells.Count - 1)]);
+			}
 			// one repaint over the finished line: walls land one at a time (the ripple), so each
 			// painted knowing only its predecessors -- landing-order variants linger otherwise
 			// (the light-vs-dark column mystery, 2026-08-04)
@@ -258,7 +301,7 @@ namespace XRL.World.Parts.Mutation
 				ZoneManager.PaintWalls(zone, minX - 1, minY - 1, maxX + 1, maxY + 1);
 			}
 			DidX("calcify", "loose matter", ColorAsGoodFor: ParentObject, Source: ParentObject);
-			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CALC", $"cast Lv{Level}: {planCells.Count} wall(s) raised of {targeted.Count} targeted (formula {GetWallsCreated(Level)}), wall HP {GetWallHp(Level)}, blueprint={bp ?? "FALLBACK Cleo_TerraFirma_WallCalcify"}, animated={(schedule != null ? schedule.Total.ToString("0.00") + "s pick-order ripple" : "no")}");
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CALC", $"cast Lv{Level}: {planCells.Count} wall(s) raised of {targeted.Count} targeted (formula {GetWallsCreated(Level)}), true-copy stats (rebalance 2026-08-06), blueprint={bp ?? "FALLBACK Cleo_TerraFirma_WallCalcify"}, animated={(schedule != null ? schedule.Total.ToString("0.00") + "s pick-order ripple" : "no")}{(ParentObject.HasStringProperty("FugueCopy") ? ", fugue-tethered (walls die with the clone)" : "")}");
 			return base.HandleEvent(E);
 		}
 		#endregion
@@ -266,9 +309,12 @@ namespace XRL.World.Parts.Mutation
 		#region Helpers
 		public static int GetWallsCreated(int Lv) => (int)(BASE_WALLS_CREATED + Mathf.Floor(Lv / 2f));
 
-		public static int GetWallHp(int Lv) => (int)(BASE_WALL_HP * Mathf.Ceil(Lv / 2f));
+		// GetWallHp RETIRED 2026-08-06 (user rebalance: "no longer gain HP scaling per level") --
+		// walls carry their source blueprint's own hit points; level buys count only.
 
-		public static int GetCooldown(int Lv) => BASE_COOLDOWN;
+		/// <summary>90/90, 80/80, 70/70, 60/60, 50/50 by level pair -- each odd level past 1 shaves
+		/// 10 rounds, floor 50 (Stunning Force's flat; half Force Wall's 100).</summary>
+		public static int GetCooldown(int Lv) => Math.Max(COOLDOWN_MAX - COOLDOWN_STEP * ((Lv + 1) / 2), COOLDOWN_FLOOR);
 		#endregion
 	}
 }

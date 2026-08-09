@@ -3,3 +3,6 @@
 obj/
 bin/
 publish/
+
+# Qud-extracted wall sprites (Freehold Games assets; regenerate with design/extract-qud-walls.py)
+design/tiles/walls/

@@ -31,5 +31,16 @@ namespace Cleo.TerraFirma.Scripts
 			if (VERIFY_WATCH)
 				MetricsManager.LogInfo($"[TF-VERIFY] [{Context}] {Msg}");
 		}
+
+		/// <summary>
+		/// Save-format sentinel (2026-08-07, the save-compat shim): parts with hand-rolled
+		/// Write/Read lead their block with this magic int + a format-version int, so a reader
+		/// can tell a current block from any legacy layout at a glance. Legacy blocks fail the
+		/// sentinel check, throw before consuming more than 4 bytes, and land in the part's
+		/// ReadError, which re-parses or resets and seeks cleanly to the block end -- never
+		/// bleeding into a neighboring part's stream. NOT part of the VERIFY_WATCH strip:
+		/// this is shipping serialization machinery.
+		/// </summary>
+		public const int SERIAL_SENTINEL = unchecked((int)0xC1E0E7C4);
 	}
 }

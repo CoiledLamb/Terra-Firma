@@ -17,6 +17,21 @@
 		     item: creatures holding gems can now ready and throw them. -->
 		<part Name="ThrownWeapon" Damage="1d2" />
 	</object>
+	<!-- Trade goods work for Geomancy (user ruling 2026-08-06: "trade goods (nuggets and
+	     figurines) should work for geomancy. it's a great tutorial for the mechanic when you
+	     start stonecarver"). The tag is NARROW on purpose: IsAnyStone is load-bearing elsewhere
+	     (lithovore food gate, EB auto-sculpt after throwing any stone), so trade goods carry a
+	     Geomancy-only pass instead. Power = max(weight, value) already favors them; a gold
+	     nugget reveals wide. BaseNugget covers copper/silver/gold; Random Figurine covers the
+	     whole figurine family by inheritance. -->
+	<object Name="BaseNugget" Load="Merge">
+		<tag Name="Cleo_TerraFirma_IsGeomancyStone" />
+		<part Name="Cleo_TerraFirma_GeomancyStonePart" />
+	</object>
+	<object Name="Random Figurine" Load="Merge">
+		<tag Name="Cleo_TerraFirma_IsGeomancyStone" />
+		<part Name="Cleo_TerraFirma_GeomancyStonePart" />
+	</object>
 	<!-- Natural="true" = true geology (the redoubt wave's carve gate + ring dressing, corridor
 	     ruling 2026-08-02: natural stone only; constructed/metal/ruins walls stop the wave).
 	     Deliberately unmarked: Mudroot (built clay huts), brick/fulcrete/foamcrete/concrete,
@@ -185,5 +200,18 @@
 	</object>
 	<object Name="Shrewd Baboon" Load="Merge">
 		<inventoryobject Blueprint="Small Stone" Number="2-3" />
+	</object>
+	<!-- Etching (RULED 2026-08-05): the verb lives on the target. Base Wall root covers every
+	     wall; the part's own gate then requires the audited StoneshaperWallProperties merge and
+	     refuses MaterialType "metal" (user: metal walls excluded). Statue + Random Statue roots
+	     cover base statues, the redoubt figure, and Stoneshaper statues by inheritance. -->
+	<object Name="Wall" Load="Merge">
+		<part Name="Cleo_TerraFirma_Etchable" />
+	</object>
+	<object Name="Statue" Load="Merge">
+		<part Name="Cleo_TerraFirma_Etchable" />
+	</object>
+	<object Name="Random Statue" Load="Merge">
+		<part Name="Cleo_TerraFirma_Etchable" />
 	</object>
 </objects>

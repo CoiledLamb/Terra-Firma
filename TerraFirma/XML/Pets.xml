@@ -7,10 +7,22 @@
          NOT an engine brain mechanism; Ercolano's peace comes from being animated furniture, and a
          BaseAnimal brain needs this flag to match. -->
     <part Name="Brain" Passive="true" />
-    <part Name="Body" Anatomy="Pottery" />
-    <part Name="Render" DisplayName="Boar Vessel" Tile="boar vessel.png" RenderString="b" ColorString="&amp;w" DetailColor="B" />
+    <!-- Boar part layout with the Stone category (user ruling 2026-08-06; see XML/Bodies.xml) -->
+    <part Name="Body" Anatomy="Cleo_TerraFirma_BoarVessel" />
+    <!-- Husangeion (user ruling 2026-08-07): hus (pig) + aggeion (vessel), gamma-gamma as "ng".
+         Replaced Hûskévos — accented chars CANNOT render: the classic font indexes its glyph
+         atlas by raw Unicode codepoint (û/251 drew as the √ glyph, é/233 as Θ), and the CP437
+         slots those glyphs occupy are untypeable C1 controls. Display names must stay ASCII. -->
+    <part Name="Render" DisplayName="Husangeion" Tile="boar vessel.png" RenderString="b" ColorString="&amp;w" DetailColor="B" />
     <part Name="Description" Short="A roughly shaped piece of earth meant to resemble the common sow, mud still wet after decades of drying. Though the hands of whoever first worked this are unknown, their living record remains in this constant companion."></part>
     <part Name="LiquidVolume" MaxVolume="64" Volume="64" StartVolume="1d33-1" InitialLiquid="water-1000" ManualSeal="true" />
+    <!-- mood-ring glaze (user tweak 2026-08-07): DetailColor tracks the majority liquid in
+         the tank per end of turn; water's engine color IS the shipped B, cider overridden
+         to red per the user's example, wine lands purple natively. See Part_VesselTint.
+         Empty = NEGATIVE SPACE (user final rule 2026-08-07, third round: black detail reads
+         as "the channels fluid runs through" standing empty; the dry-clay brown "w" was the
+         interim pick and remains the one-char fallback if the hollow look misreads). -->
+    <part Name="Cleo_TerraFirma_VesselTint" EmptyColor="k" />
     <part Name="LiquidProducer" Liquid="water" VariableRate="200-2000" WorksOnWearer="false" WorksOnSelf="true" />
     <stat Name="Level" Value="1"></stat>
     <stat Name="AV" Value="5"></stat>
@@ -20,9 +32,21 @@
     <tag Name="Pet"/>
     <tag Name="StartingPet"/>
     <xtagGrammar Proper="true"></xtagGrammar>
+    <!-- it/its (user ruling 2026-08-07): "neuterperson" is the base creature idiom for
+         it-pronouns (every robot carries it); plain "neuter" is reserved for true objects -->
+    <tag Name="Gender" Value="neuterperson" />
     <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
     <xtagTextFragments Skin="glaze" PoeticFeatures="artfulness,gentle stillness,childlike wonder" />
 	  <tag Name="Species" Value="oddity" />
     <tag Name="NoCombat"></tag>
+    <!-- a water vessel bleeds its cargo (user ruling 2026-08-06: "yeag have it bleedwater");
+         Bleeds=1 rides in from BaseAnimal, these tags swap what leaks. Base pattern: slime/oil/sap
+         bleeders. Prefix word "wet" is a DRAFT; swap freely.
+         Salt trace (user ruling 2026-08-07: "a tiny bit of salt"): 900/100 is the base game's
+         lightest brackish mix; mixed bleeds are precedented (wine-400,acid-600). Bleed only —
+         the drinkable cargo stays pure water. -->
+    <tag Name="BleedLiquid" Value="water-900,salt-100" />
+    <tag Name="BleedColor" Value="&amp;B" />
+    <tag Name="BleedPrefix" Value="{{B|wet}}" />
   </object>
 </objects>

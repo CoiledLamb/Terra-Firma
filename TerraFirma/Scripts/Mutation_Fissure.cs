@@ -25,7 +25,12 @@ namespace XRL.World.Parts.Mutation
 	{
 		#region Fields
 		private const string COMMAND_ID = "Cleo_TerraFirma_CommandFissure";
-		private const int MAX_RING_RADIUS = 5;
+		// REBALANCED 2026-08-06 (user: "instead of fissure range expanding with level, it could
+		// get a bit more damage and stun increment"; radius 4 + ladders proposed, user: "sounds
+		// fine"): the ring is a FIXED radius 4 at every level -- the scaling budget moved into
+		// the damage and stun ladders below. Early-level side effect accepted: L1-3 rings grew
+		// from radius 2 to 4. Progression feel now rides gap count + wall share alone.
+		private const int RING_RADIUS = 4;
 		// FEEL ROUND 1 (user, 2026-08-02): "walls feel too solid at lower levels - need more gaps"
 		// -- fixed 3 became a falling ladder; see GetGapCount. Crack-gates commented out same round.
 		// private const int CRACK_GATE_CHANCE = 50; // % per gap: the doors made of dice (BETA-HELD, feel round 1)
@@ -48,20 +53,28 @@ namespace XRL.World.Parts.Mutation
 		#region Basic data
 		public override string GetDescription()
 		{
-			// DRAFT (redoubt pivot 2026-08-02): ships for the beta under the standing
-			// beta-draft-text ruling; the vigilant signoff rides the release voice sitting.
-			return "You drive a wave through the earth that hurls your surroundings outward and raises a ring of broken stone.";
+			// Option B from the 2026-08-06 voice audit, picked by user same day ("what about B")
+			// during the in-progress text review: carries the ring identity, mid-register, no
+			// mechanics claims (the old draft's "hurls your surroundings" implied loot moves).
+			return "You send a wave through the earth, raising a ring of broken stone.";
 		}
 
 		public override string GetLevelText(int Level)
 		{
-			// DRAFT (redoubt pivot 2026-08-02), same beta-draft status as GetDescription.
-			return "Ring radius: {{rules|" + GetRingRadius(Level) + "}} squares\n" +
+			// 2026-08-06 voice-audit review (design/mutation-voice-audit-2026-08-06.md), user
+			// rulings: stun + carve lines in the user's own voice ("creatures caught in its
+			// path...", "the wave batters walls", hardest-stone sentence cut); NO mechanism
+			// opener (user: "do we need the second sentence at all?" -- stat lines first per
+			// Stunning Force's precedent, ring permanence undocumented, discoverable in play);
+			// cooldown bare (flat 100, base flat-constant convention). Ruled silences stay
+			// silent: flyer exemption, loot, gap ladder, ring-density credits, moved-only stun
+			// nuance (the save reads as riding the push).
+			// radius unwrapped 2026-08-06: fixed at every level now, and flat constants go bare
+			return "Ring radius: " + GetRingRadius(Level) + " squares\n" +
 				"Damage: {{rules|" + GetWaveDamage(Level) + "}}\n" +
-				"Creatures are pushed outward; those moved must save or be stunned for {{rules|" + GetStunRounds(Level) + "}} " + (GetStunRounds(Level) == 1 ? "round" : "rounds") + ".\n" +
-				"The wave carves through {{rules|" + GetCarveDepth(Level) + "}} " + (GetCarveDepth(Level) == 1 ? "square" : "squares") + " of natural stone.\n" +
-				"The ring of stone persists.\n" +
-				"Cooldown: {{rules|" + GetCooldown(Level) + "}} rounds";
+				"Creatures caught in its path are pushed outward and must make a Toughness save or be stunned for {{rules|" + GetStunRounds(Level) + "}} " + (GetStunRounds(Level) == 1 ? "round" : "rounds") + ".\n" +
+				"The wave batters walls, tearing through up to {{rules|" + GetCarveDepth(Level) + "}} " + (GetCarveDepth(Level) == 1 ? "square" : "squares") + ".\n" +
+				"Cooldown: " + GetCooldown(Level) + " rounds";
 		}
 
 		public override bool Mutate(GameObject GO, int Level = 1)
@@ -88,7 +101,7 @@ namespace XRL.World.Parts.Mutation
 		/// <summary>Level band 1-4: L1-3 / L4-6 / L7-9 / L10+.</summary>
 		public static int GetBand(int Lv) => Math.Min(4, 1 + (Lv - 1) / 3);
 
-		public static int GetRingRadius(int Lv) => Math.Min(MAX_RING_RADIUS, 1 + GetBand(Lv));
+		public static int GetRingRadius(int Lv) => RING_RADIUS; // fixed (rebalance 2026-08-06); signature kept for the call sites
 
 		/// <summary>Gaps in the rim, FEEL ROUND 1 (user, 2026-08-02): more at low levels -- 6/5/4/3
 		/// by band. The ruled proportional-completeness now runs on both axes: circumference grows
@@ -119,28 +132,22 @@ namespace XRL.World.Parts.Mutation
 		/// wall, one or two leave it standing damaged -- "some walls are leftover".</summary>
 		public const int CARVE_PCT_PER_PEN = 34;
 
+		// Damage +1/+3/+5/+7 and stun 1/2/3/4 by band (rebalance 2026-08-06, supersedes the draft
+		// ladders +1/+2/+3/+5 and 1/2/2/3): the radius freeze moved its scaling budget here.
+		// 1d3 base kept deliberately -- rider-damage family (Stunning Force's grammar), tight
+		// variance for an unmitigated disk-wide hit that includes companions.
 		public static string GetWaveDamage(int Lv)
 		{
 			switch (GetBand(Lv))
 			{
 				case 1: return "1d3+1";
-				case 2: return "1d3+2";
-				case 3: return "1d3+3";
-				default: return "1d3+5";
+				case 2: return "1d3+3";
+				case 3: return "1d3+5";
+				default: return "1d3+7";
 			}
 		}
 
-		/// <summary>1/2/2/3 by band (draft table said 1-2 at band 2; deterministic reads cleaner in the level text -- dial).</summary>
-		public static int GetStunRounds(int Lv)
-		{
-			switch (GetBand(Lv))
-			{
-				case 1: return 1;
-				case 2:
-				case 3: return 2;
-				default: return 3;
-			}
-		}
+		public static int GetStunRounds(int Lv) => GetBand(Lv);
 
 		public static int GetStunSaveDC(int Lv) => 16 + Lv;
 
@@ -188,7 +195,7 @@ namespace XRL.World.Parts.Mutation
 		#region Events
 		public override bool WantEvent(int ID, int cascade)
 		{
-			if (!base.WantEvent(ID, cascade) && ID != PooledEvent<CommandEvent>.ID)
+			if (!base.WantEvent(ID, cascade) && ID != PooledEvent<CommandEvent>.ID && ID != PooledEvent<CheckExistenceSupportEvent>.ID)
 				return ID == AIGetOffensiveAbilityListEvent.ID;
 			return true;
 		}
@@ -231,6 +238,9 @@ namespace XRL.World.Parts.Mutation
 			var reached = new HashSet<Cell>();
 			var carved = new HashSet<Cell>();      // walls that FELL -- these feed the ring's mass credits
 			var wallFate = new Dictionary<Cell, bool>(); // every attacked wall cell -> did it fall?
+			var struckWalls = new HashSet<Cell>(); // standing walls the wave broke against -- their riders get the slam check
+			var ownFelledCells = new HashSet<Cell>(); // the maker's own fabric, recycled this cast: free passage for EVERY ray
+			int ownFelled = 0;
 			for (int dx = -radius; dx <= radius; dx++)
 			{
 				for (int dy = -radius; dy <= radius; dy++)
@@ -249,6 +259,11 @@ namespace XRL.World.Parts.Mutation
 					{
 						Cell step = zone.GetCell(ray[i].X, ray[i].Y);
 						if (step == null) { blocked = true; break; }
+						// the maker's own breach is free passage for every ray (recast-refresh
+						// ruling 2026-08-06) -- the anti-corridor bite charge below is for the
+						// WORLD's walls, not recycled fabric
+						if (ownFelledCells.Contains(step))
+							continue;
 						// a wall another ray already resolved: a fallen one still spends THIS
 						// ray's bite (unspent budgets must not chain through breaches -- the
 						// full-row corridor bug), a standing one blocks outright
@@ -264,14 +279,33 @@ namespace XRL.World.Parts.Mutation
 						}
 						if (step.IsSolid())
 						{
+							GameObject wall = GetSolidObject(step);
+							// own fabric yields (RULED 2026-08-06, the recast-refresh fix): the
+							// earth that rose for you kneels for you -- no attack roll, no bite
+							// spent, the mass recycled straight into this cast's upgrade credits.
+							// Checked BEFORE the budget so a spent bite never leaves your own
+							// wall shadowing the new rim.
+							string maker = wall?.GetStringProperty(RING_MAKER_PROP);
+							if (!maker.IsNullOrEmpty() && ParentObject.idmatch(maker))
+							{
+								if (IsCarvableStone(wall))
+									carved.Add(step);
+								ownFelledCells.Add(step);
+								ownFelled++;
+								Helpers.VerifyLog("FIS", $"own fabric yields @({step.X},{step.Y}): {wall.Blueprint} recycled");
+								SmokePuff(step, 1);
+								wall.Obliterate(); // no death drops: the mass moved into the credits
+								continue;
+							}
 							if (wallsBitten >= carveDepth)
 							{
+								struckWalls.Add(step);
 								blocked = true; // the bite is spent
 								break;
 							}
-							GameObject wall = GetSolidObject(step);
 							if (wall == null)
 							{
+								struckWalls.Add(step);
 								blocked = true; // solid but not a wall -- the wave breaks on it
 								break;
 							}
@@ -284,6 +318,7 @@ namespace XRL.World.Parts.Mutation
 							wallFate[step] = died;
 							if (!died)
 							{
+								struckWalls.Add(step);
 								blocked = true; // the wall held -- leftover standing, and the wave breaks on it
 								break;
 							}
@@ -348,6 +383,43 @@ namespace XRL.World.Parts.Mutation
 				}
 			}
 
+			// ---- wall riders: a blocked ray never feeds `reached`, so anything clinging to a
+			// standing wall (wall climbers, burrowers) sat out the wave entirely (user beta flag
+			// 2026-08-06). They can't be pushed off their wall, so it's save-or-slam instead
+			// (RULED same day): Toughness vs the stun DC -- pass clings on, fail takes the wave's
+			// damage carried straight through the stone. No push, no stun. Riders of walls that
+			// FELL need nothing here -- the breach cell is reached and they took the normal wave.
+			var wallRiders = new List<GameObject>();
+			foreach (Cell c in struckWalls)
+			{
+				foreach (GameObject o in c.GetObjectsWithPart("Combat"))
+				{
+					if (o != ParentObject && o.PhaseMatches(ParentObject) && !wallRiders.Contains(o) && !waveVictims.Contains(o))
+						wallRiders.Add(o);
+				}
+			}
+			foreach (GameObject rider in wallRiders)
+			{
+				if (!GameObject.Validate(rider) || rider.CurrentCell == null)
+					continue;
+				if (rider.IsFlying)
+				{
+					Helpers.VerifyLog("FIS", $"wave spares {rider.Blueprint} (flying, at a wall)");
+					continue;
+				}
+				if (rider.MakeSave("Toughness", GetStunSaveDC(Level), null, null, "Fissure Slam", IgnoreNaturals: false, IgnoreNatural1: false, IgnoreNatural20: false, IgnoreGodmode: false, ParentObject))
+				{
+					Helpers.VerifyLog("FIS", $"wave: {rider.Blueprint} clings to its wall (made the slam save)");
+					continue;
+				}
+				int slam = GetWaveDamage(Level).RollCached();
+				rider.TakeDamage(slam, "from the heaving earth!", "Crushing",
+					"You were battered by a wave of earth.",
+					rider.It + rider.GetVerb("were", true, true) + " @@battered by a wave of earth.",
+					Attacker: ParentObject, Owner: ParentObject, Source: ParentObject);
+				Helpers.VerifyLog("FIS", $"wave slams {rider.Blueprint} against its wall: {slam} dmg (failed the slam save)");
+			}
+
 			// ---- the ring: fabric on every reached, open rim cell, minus the gaps.
 			// Deposits are PLANNED here and applied after the animation plays -- the rim must
 			// stay visually empty until the eruption beat resolves into stone (arrival, not
@@ -363,13 +435,21 @@ namespace XRL.World.Parts.Mutation
 						rim.Add(c);
 				}
 			}
+			// seal on refresh (RULED 2026-08-06, with own-fabric-yields: user picked the sealed
+			// variant knowing it allows the closed donut): a recast that recycled at least a
+			// gap-quota's worth of its own old fabric has earned a ring with no gaps rolled.
+			// Threshold = GetGapCount is the dial; a fresh-ground cast (ownFelled 0) is unchanged.
+			bool sealRing = ownFelled >= GetGapCount(Level);
 			var gaps = new List<Cell>();
-			for (int g = 0; g < GetGapCount(Level) && rim.Count > 0; g++)
-			{
-				int pick = Stat.Random(0, rim.Count - 1);
-				gaps.Add(rim[pick]);
-				rim.RemoveAt(pick);
-			}
+			if (sealRing)
+				Helpers.VerifyLog("FIS", $"ring SEALS: {ownFelled} own pieces recycled (quota {GetGapCount(Level)}), no gaps rolled");
+			else
+				for (int g = 0; g < GetGapCount(Level) && rim.Count > 0; g++)
+				{
+					int pick = Stat.Random(0, rim.Count - 1);
+					gaps.Add(rim[pick]);
+					rim.RemoveAt(pick);
+				}
 			// carved mass thickens the ring: each carved wall banks one upgrade credit
 			// (rubble -> crumbled wall -> fallen wall) spent as the rim deposits
 			int upgradeCredits = carvedMass;
@@ -805,12 +885,41 @@ namespace XRL.World.Parts.Mutation
 			return null;
 		}
 
+		private const string FUGUE_DEPOSIT_PROP = "Cleo_TerraFirma_FugueRingPiece";
+		/// <summary>Every ring deposit remembers its maker's GameObject.ID (recast-refresh ruling
+		/// 2026-08-06): a later wave from the same caster fells own fabric freely and recycles the
+		/// mass. Fabric placed before this stamp existed has no marker and behaves as world stone.</summary>
+		private const string RING_MAKER_PROP = "Cleo_TerraFirma_RingMaker";
+
 		/// <summary>The shaker owns the field (party gate, RULED 2026-07-25): ring-born pieces that
-		/// carry the rock part stamp their caster so the redoubt never mines its own party.</summary>
+		/// carry the rock part stamp their caster so the redoubt never mines its own party.
+		/// Also the fugue tether's attach point (RULED 2026-08-06: "calcify/fissure stone can
+		/// disappear when the fugue clone dies"): a temporal copy's deposits ride ExistenceSupport
+		/// pointed at the clone, answered by this mutation's CheckExistenceSupportEvent handler --
+		/// the engine's inverted contract, where an UNANSWERED check means instant obliteration
+		/// (the Calcify tether bug of the same day is the precedent). The marker property scopes
+		/// the answer to pieces we tethered.</summary>
 		private void StampOwner(GameObject rock)
 		{
+			rock.SetStringProperty(RING_MAKER_PROP, ParentObject.ID); // recast-refresh: the deposit knows its maker
 			if (rock.GetPart<Cleo_TerraFirma_FallenRockPart>() is Cleo_TerraFirma_FallenRockPart part)
 				part.Owner = ParentObject;
+			if (ParentObject.HasStringProperty("FugueCopy"))
+			{
+				rock.SetIntProperty(FUGUE_DEPOSIT_PROP, 1);
+				XRL.World.Parts.ExistenceSupport support = rock.RequirePart<XRL.World.Parts.ExistenceSupport>();
+				support.SupportedBy = ParentObject;
+				support.ValidateEveryTurn = true;
+			}
+		}
+
+		/// <summary>The answering half of the fugue tether: returning false = "supported"
+		/// (ForceBubble's idiom). Only pieces this clone's own casts marked ever ask.</summary>
+		public override bool HandleEvent(CheckExistenceSupportEvent E)
+		{
+			if (E.Object != null && E.Object.GetIntProperty(FUGUE_DEPOSIT_PROP) > 0)
+				return false;
+			return base.HandleEvent(E);
 		}
 
 		private static int ChebyshevDistance(Cell a, Cell b)
@@ -859,8 +968,9 @@ namespace XRL.World.Parts.Mutation
 
 		/// <summary>Gray shade-glyph particles drifting up -- the dust of the heave. Count
 		/// trimmed 5 -> 2 (feel round 3: "a bit too much smoke") -> 1 default (2026-08-04,
-		/// "bit less smoke on fissure"). Public since 2026-08-05: Calcify borrows it, a puff
-		/// per landed wall ("a very small amount of smoke ... for symmetry with fissure").</summary>
+		/// "bit less smoke on fissure"). Public since 2026-08-05: Calcify and the Stoneshaper
+		/// carve borrow it AFTER their reveals finish (RULED 2026-08-05: smoke during either
+		/// animation hid what was being revealed; 1-4 puffs at the end instead).</summary>
 		public static void SmokePuff(Cell C, int particles = 1)
 		{
 			C.ParticleBlip("&y*");

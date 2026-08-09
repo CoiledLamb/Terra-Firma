@@ -15,13 +15,21 @@ namespace XRL.World.Parts.Mutation
 		private const string BLUEPRINT_RESONANT = "Cleo_TerraFirma_EphemeralStoneResonant";
 		private const int RESONANT_UNLOCK_LEVEL = 10;
 
-		private const float BASE_DAZE_CHANCE = 10f;
-		private const float DAZE_CHANCE_PER_LEVEL = 3f;
+		// Daze rider CUT 2026-08-06 (beta rebalance pass, user: "cutting the daze rider from
+		// earthen barrage"): constants, formula, part attachment, and text all removed.
+		// Part_DazeOnThrowPens.cs survives as an orphan -- earmarked for a wild rock-thrower
+		// variant (see the cragmensch note in TODO-archive).
 
 		private const int TURNS_PER_CHARGE = 15;
 
 		private const int ROCK_LIFETIME_MIN = 50;
 		private const int ROCK_LIFETIME_MAX = 100;
+
+		/// <summary>World-map travel advances time in batched turn ticks far larger than the rock
+		/// lifetime, so the per-end-of-turn sustain cannot keep pace and the held stone crumbles
+		/// mid-journey (user beta flag 2026-08-06). While held, the stone rides this oversized
+		/// lease instead; the promised 50-100 round lifetime is handed back the moment it is thrown.</summary>
+		private const int HELD_SUSTAIN_LEASE = 9999;
 
 		/// <summary>
 		/// How many charges are left to draw from.
@@ -32,6 +40,75 @@ namespace XRL.World.Parts.Mutation
 		/// How many full turns have passed since a charge has last been regained.
 		/// </summary>
 		public int TurnsSinceLastCharge;
+
+		/// <summary>
+		/// One-shot QoL latch (user 2026-08-06): the first end-of-turn with the toggle on arms a
+		/// starting character automatically, exactly once. Serialized so a load never re-fires it.
+		/// </summary>
+		public bool EverArmed;
+
+		/// <summary>
+		/// True while the last end-of-turn saw us on the world map -- arms the arrival backstop
+		/// (user beta flag 2026-08-06). Serialized so saving mid-journey keeps it.
+		/// </summary>
+		public bool WasOnWorldMap;
+
+		/// <summary>Bump when the serialized shape changes again; Read branches on it.</summary>
+		private const int FORMAT_VERSION = 2;
+
+		public override void Write(GameObject Basis, SerializationWriter Writer)
+		{
+			Writer.Write(Cleo.TerraFirma.Scripts.Helpers.SERIAL_SENTINEL);
+			Writer.Write(FORMAT_VERSION);
+			base.Write(Basis, Writer);
+		}
+
+		public override void Read(GameObject Basis, SerializationReader Reader)
+		{
+			// legacy blocks fail this having cost only 4 bytes; ReadError recovers or resets.
+			// The check exists because WasOnWorldMap (2026-08-07 deploy wave) changed the
+			// positional field layout, and EB's all-primitive tail means a misaligned read
+			// would NOT throw -- it would silently overrun into the next part's stream.
+			if (Reader.ReadInt32() != Cleo.TerraFirma.Scripts.Helpers.SERIAL_SENTINEL)
+				throw new FormatException("Cleo_TerraFirma_EarthenBarrage: pre-sentinel block");
+			Reader.ReadInt32(); // FORMAT_VERSION: branch here when the shape next changes
+			base.Read(Basis, Reader);
+		}
+
+		/// <summary>
+		/// Save-compat recovery (2026-08-07 shim): first re-parse the block as the pre-sentinel
+		/// LOCAL layout (current reflection fields, no header) and accept only on EXACT
+		/// end-of-block alignment -- that loads every post-WasOnWorldMap local save perfectly.
+		/// The friends-beta layout lacks WasOnWorldMap, so its re-parse lands one byte short of
+		/// the block end and falls through to a clean reset (state re-primes: charges regrow,
+		/// the toggle re-arms; mutation LEVEL resets too -- the one casualty, flagged in the
+		/// beta update note). Either way the reader seeks cleanly past and the engine logs nothing.
+		/// </summary>
+		public override bool ReadError(Exception Exception, SerializationReader Reader, long Start, int Length)
+		{
+			try
+			{
+				Reader.Stream.Position = Start;
+				Reader.ReadTokenizedType();
+				StatShifter.Load(Reader, ParentObject); // discard: EB carries no stat shifts
+				base.Read(ParentObject, Reader);
+				if (Reader.Stream.Position == Start + Length)
+				{
+					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SERIAL", $"EB pre-sentinel local block recovered in place (charges={Charges}, level intact)");
+					return true;
+				}
+			}
+			catch
+			{
+			}
+			Charges = 0;
+			TurnsSinceLastCharge = 0;
+			EverArmed = false;
+			WasOnWorldMap = false;
+			Reader.Stream.Position = Start + Length;
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SERIAL", $"EB legacy block reset ({Length} byte(s) skipped; beta-layout save -- level re-set expected)");
+			return true;
+		}
 
 		/// <summary>
 		/// Cached reference to the <see cref="Cleo_TerraFirma_GravelWhorl"/> instance associated with this mutation.
@@ -73,21 +150,19 @@ namespace XRL.World.Parts.Mutation
 			// slot line; vibro phrasing recast on the Vibro Dagger/Blade RulesDescription precedent
 			// (states the rule, drops the word "vibro", names no trade-off - the deeper precedent);
 			// flat constants bare per the Electrical Generation pattern (user RULED "do whatever is
-			// most base game accurate there"). The DV-in-place-of-AV line stays accurate to CURRENT
-			// behavior - re-draft it if the parked whorl-DV fix ever lands (user paces).
+			// most base game accurate there"). (The old DV-in-place-of-AV caveat retired with the
+			// whorl stat shifts, cut 2026-08-06 -- the parked whorl-DV fix is moot.)
 			return "You sculpt a stone every {{rules|" + GetTurnsPerCharge() + "}} rounds, up to a reserve of {{rules|" + MaxCharges(Level) + "}}.\n" +
 				"Sculpted stones occupy your thrown weapon slot.\n" +
 				"Stones not held as a thrown weapon crumble to dust after " + ROCK_LIFETIME_MIN + "-" + ROCK_LIFETIME_MAX + " rounds.\n" +
 				"Damage increment: {{rules|" + GetThrowDamage(Level) + "}}\n" +
 				"Penetration bonus: {{rules|+" + GetThrowPenetrations(Level) + "}}\n" +
-				"Daze chance on penetrating hit: {{rules|" + GetThrowDazeChanceIn100(Level) + "%}}\n" +
+				// AV/DV lines CUT with the whorl stat shifts (rebalance 2026-08-06)
 				"Stones in reserve whorl about you and deflect physical projectiles.\n" +
 				"Lasers and other energy attacks pass through the whorl.\n" +
-				"Deflect chance: 3% per stone in reserve, +1% per mutation level\n" +
-				"+1 AV while 3 or more stones are in reserve\n" +
-				"+2 AV while 9 or more stones are in reserve" +
+				"Deflect chance: 3% per stone in reserve, +1% per mutation level" +
 				(Level >= RESONANT_UNLOCK_LEVEL
-					? "\nYou may attune your stones to {{C|resonance}}.\nResonant stones' penetration value is equal to the defender's armor value.\nWhile attuned, your whorl deflects light instead of matter and grants +2 or +4 DV in place of AV."
+					? "\nYou may attune your stones to {{C|resonance}}.\nResonant stones' penetration value is equal to the defender's armor value.\nWhile attuned, your whorl deflects light instead of matter."
 					: "\nAt level " + RESONANT_UNLOCK_LEVEL + ", you learn to attune your stones to {{C|resonance}}.");
 		}
 
@@ -95,7 +170,6 @@ namespace XRL.World.Parts.Mutation
 		{
 			stats.Set("Damage", GetThrowDamage(Level));
 			stats.Set("Penetrations", GetThrowPenetrations(Level));
-			stats.Set("DazeChance", GetThrowDazeChanceIn100(Level).ToString());
 			stats.Set("TurnsPerCharge", GetTurnsPerCharge());
 			stats.Set("MaxCharges", MaxCharges(Level));
 			stats.Set("Lifetime", $"{ROCK_LIFETIME_MIN}-{ROCK_LIFETIME_MAX}");
@@ -200,11 +274,57 @@ namespace XRL.World.Parts.Mutation
 
 		public override bool HandleEvent(EndTurnEvent E)
 		{
+			// NPC auto-arm (2026-08-06 advertisement pass, user: legendaries can roll pool
+			// mutations): the Take Stones toggle is player UX -- a generated NPC keeps it on
+			// and keeps a stone sculpted. No AI ability list needed: base AI throws thrown-slot
+			// weapons natively (the wild-baboon scavenger precedent), so staying armed IS the
+			// advertisement. Quiet arm -- the retrieve flourish is for deliberate casts.
+			if (!ParentObject.IsPlayer())
+			{
+				if (!IsMyActivatedAbilityToggledOn(ActivatedAbilityID))
+					ToggleMyActivatedAbility(ActivatedAbilityID);
+				if (IsMyActivatedAbilityToggledOn(ActivatedAbilityID) && ParentObject.GetFirstThrownWeapon() == null && CanGetStone(true))
+					Activate();
+			}
+			else if (!EverArmed && IsMyActivatedAbilityToggledOn(ActivatedAbilityID))
+			{
+				// one-shot QoL (user 2026-08-06): a character who begins with Take Stones toggled
+				// on begins ARMED -- the first end-of-turn sculpts their opening stone instead of
+				// waiting for a manual retoggle. Fires once ever; the deliberate re-arm scope
+				// (throws + the ran-dry regen edge) stays exactly as ruled 2026-07-23.
+				EverArmed = true;
+				if (ParentObject.GetFirstThrownWeapon() == null && CanGetStone(true))
+				{
+					Activate();
+					XDidY(ParentObject, "retrieve", $"a {GetStoneName(Level)}", Source: ParentObject);
+				}
+			}
+			// world-map arrival backstop (user beta flag 2026-08-06, "take stone auto equip not
+			// working after coming down from world map"): if travel still cost us the held stone
+			// (a journey outlasting even the oversized lease, or a loss path we haven't met),
+			// re-sculpt on the first ground turn. Not a widening of the ruled re-arm scope --
+			// travel loss is the wear of time, not a player choice. NPCs skip it: their branch
+			// above already re-arms every turn.
+			if (ParentObject.OnWorldMap())
+			{
+				WasOnWorldMap = true;
+			}
+			else if (WasOnWorldMap)
+			{
+				WasOnWorldMap = false;
+				if (ParentObject.IsPlayer() && IsMyActivatedAbilityToggledOn(ActivatedAbilityID)
+					&& ParentObject.GetFirstThrownWeapon() == null && CanGetStone(true))
+				{
+					Activate();
+					XDidY(ParentObject, "retrieve", $"a {GetStoneName(Level)}", Source: ParentObject);
+					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("EB", "world-map arrival re-arm: slot came back empty, sculpted a fresh stone");
+				}
+			}
 			GameObject heldPebble = ParentObject.FindEquippedItem(x => IsOurStone(x) && x.IsEquippedAsThrownWeapon());
 			if (heldPebble != null)
 			{
 				Temporary t = heldPebble.GetPart<Temporary>();
-				t.Duration = Stat.Random(ROCK_LIFETIME_MIN, ROCK_LIFETIME_MAX); // continually sustain as long as held
+				t.Duration = HELD_SUSTAIN_LEASE; // oversized lease vs world-map turn batching; the 50-100 round promise returns on throw
 			}
 			// a sculpted stone is a held intention, not a possession (user ruling 2026-07-23): one that
 			// gets UNEQUIPPED into the pack returns to the reserve at end of turn -- charge refunded when
@@ -250,6 +370,11 @@ namespace XRL.World.Parts.Mutation
 		{
 			if (Retuning)
 				return base.HandleEvent(E);
+			// the thrown stone leaves the sustain: hand back the promised 50-100 round lifetime
+			// (its lease was oversized while held -- see HELD_SUSTAIN_LEASE)
+			if (E.PreviouslyEquipped != null && IsOurStone(E.PreviouslyEquipped)
+				&& E.PreviouslyEquipped.GetPart<Temporary>() is Temporary flung)
+				flung.Duration = Stat.Random(ROCK_LIFETIME_MIN, ROCK_LIFETIME_MAX);
 			// re-arm after throwing ANY stone, not just our own pebbles (bug fix 2026-07-23: with the
 			// toggle on, throwing a picked-up ground rock -- fissure fallout, Small Stones -- emptied
 			// the slot and the old IsOurStone-only check shrugged; live-fire repro'd by the user).
@@ -326,6 +451,8 @@ namespace XRL.World.Parts.Mutation
 			// a fraction of the unattuned value, +1 at Lv10): vibro already matches penetration to the
 			// target's armor, and stacking the full bonus on top rolled ~6 penetrations against ANYTHING --
 			// double a normal stone's damage vs the soft targets normal stones are supposed to own.
+			// (Since the 2026-08-06 pen cut caps the trained bonus at +3, the fifth is 0 at every
+			// level -- resonant stones ride pure vibro now; the "+1 at Lv10" note is superseded.)
 			if (Resonant)
 				scaledPens /= 5;
 			if (stone.TryGetPart(out MeleeWeapon mw))
@@ -338,7 +465,6 @@ namespace XRL.World.Parts.Mutation
 				tw.Damage = scaledDamage;
 				tw.PenetrationBonus = scaledPens;
 			}
-			stone.AddPart(new Cleo_TerraFirma_DazeOnThrowPensPart(GetThrowDazeChanceIn100(Level)));
 			return stone;
 		}
 
@@ -445,12 +571,11 @@ namespace XRL.World.Parts.Mutation
 
 		public static int GetThrowPenetrations(int Lv)
 		{
-			return (int)Mathf.Floor(Lv / 2);
-		}
-
-		public static float GetThrowDazeChanceIn100(int Lv)
-		{
-			return BASE_DAZE_CHANCE + (DAZE_CHANCE_PER_LEVEL * Lv);
+			// REBALANCED 2026-08-06 (was Lv/2; user picked the pen cut from the simmed menu: "I lean
+			// penetration cut"): the L4 electrofuge one-shots came from pen multiplication vs soft
+			// armor, so the pen bonus slowed to thirds -- +1/+2/+3 at 3/6/9. Damage dice untouched.
+			// Sim: design/eb_damage_sim.py.
+			return Lv / 3;
 		}
 
 		public static int MaxCharges(int Lv)

@@ -659,6 +659,34 @@ namespace Cleo.TerraFirma.Scripts
 			return schedule;
 		}
 
+		/// <summary>The etch flavor of the carve reveal (user 2026-08-07: "the same visual flair
+		/// of carving away the top layer to see the recolored item underneath"): identical block
+		/// + band-debris choreography to PlayCarveReveal, but the cover wears CALLER-captured
+		/// dressing (the etched object's pre-flip tile and colors) instead of resolving wall
+		/// paint -- statues and painted walls alike hand in their live Render. No Schedule
+		/// returned: the etched object stands the whole time; the color flip already happened
+		/// game-side beneath the cover, and the carve-away is what exposes it.</summary>
+		public static void PlayEtchReveal(Cell cell, string tile, char fg, char detail)
+		{
+			GameManager gm = GameManager.Instance;
+			if (gm == null || cell == null || tile.IsNullOrEmpty() || HarnessMute)
+				return;
+			Vector3 center = gm.getTileCenter(cell.X, cell.Y);
+			CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceCarveBlock(
+				new Cleo_TerraFirma_StoneTileRenderable(tile, fg, detail, 'k'),
+				center, CARVE_FIRST_BREAK_SEC, CARVE_BREAK_STEP_SEC), async: true);
+			for (int row = 0; row < 3; row++)
+			{
+				float dropAt = CARVE_FIRST_BREAK_SEC + row * CARVE_BREAK_STEP_SEC;
+				for (int col = 0; col < 2; col++)
+				{
+					Vector3 rest = center + new Vector3(col == 0 ? -4f : 4f, 8f - row * 8f, 0f);
+					IRenderable tileChunk = new Cleo_TerraFirma_StoneTileRenderable(tile, fg, detail, 'k');
+					CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneChunk(tileChunk, rest, col == 0 ? -CHUNK_DRIFT : CHUNK_DRIFT, dropAt, CARVE_AIR_SEC, row, col), async: true);
+				}
+			}
+		}
+
 		/// <summary>A sub-rect clone of a pooled sprite's atlas info -- the mechanism that lets
 		/// the carve block and its debris wear the LITERAL pixels of the tile region they
 		/// represent (feel round 2). The info that GetPooledSprite assigns is the SHARED

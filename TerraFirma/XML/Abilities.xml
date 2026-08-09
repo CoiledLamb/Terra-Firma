@@ -5,7 +5,9 @@
 			<p>You calcify sturdy walls to form obstacles.</p>
 			<br />
 			<p>Walls are placed in a contiguous shape, beginning adjacent to you. Only empty spaces will form walls.</p>
-			<p>Creates <stat Name="WallNum" /> walls with <stat Name="WallHp" /> hit points each.</p>
+			<!-- rebalance 2026-08-06: walls are true copies of the source stone, so the per-level
+			     HP stat is gone; replacement sentence DRAFT, awaiting signoff -->
+			<p>Creates <stat Name="WallNum" /> walls, true copies of the local stone.</p>
 			<statline Name="Cooldown" />
 		</description>
 		<UITile Tile="Abilities/abil_calcify.png" Foreground="w" Detail="C" />
@@ -15,7 +17,8 @@
 			<p>When enabled, automatically retrieves stones from your reserves to use as thrown weapons.</p>
 			<p>Thrown pebbles will continually be replaced as long as you have reserves remaining.</p>
 			<br />
-			<p>Stones deal <stat Name="Damage" /> damage at +<stat Name="Penetrations" /> PV and have a <stat Name="DazeChance" />% chance to daze on hit</p>
+			<!-- daze rider cut 2026-08-06 (rebalance pass) -->
+			<p>Stones deal <stat Name="Damage" /> damage at +<stat Name="Penetrations" /> PV</p>
 			<p>A new stone is sculpted every <stat Name="TurnsPerCharge" /> rounds, up to a reserve of <stat Name="MaxCharges" /></p>
 			<p>Thrown stones disappear after <stat Name="Lifetime" /> consecutive turns of not being held as a thrown weapon</p>
 			<br />
@@ -29,7 +32,8 @@
 			<p>Attune your sculpted stones to a keening resonance, or still them again.</p>
 			<br />
 			<p>Resonant stones penetrate as vibro weapons, meeting armor at its own frequency.</p>
-			<p>While attuned, your gravel whorl deflects light-based projectiles instead of physical ones and grants DV in place of AV.</p>
+			<!-- AV/DV clause cut with the whorl stat shifts (rebalance 2026-08-06) -->
+			<p>While attuned, your gravel whorl deflects light-based projectiles instead of physical ones.</p>
 			<p>Attuning retunes the stone in your hand at no cost. Direct beams pass through the whorl in either mode.</p>
 		</description>
 		<UITile Tile="Abilities/abil_attunestone.png" Foreground="C" Detail="c" />

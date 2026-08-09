@@ -60,8 +60,11 @@ need rulings first (Fissure's lyric level text; Lithovore's wryness).
 - [ ] **Fissure level text** — final pass owed (draft in place since the rebuild).
 - [ ] **Calcify / Stoneshaper / Geomancy text passes** (worklist Passes 4/6/7).
 - [ ] **Gorgon's Gaze** — already house-voice; residue check only.
-- [ ] **Whorl resonant branch** — the dashes the user dislikes (RATIFIED-BUT-FLAGGED)
-  + the resonant verb set (refract-register candidates DRAFT in TODO).
+- [ ] **Whorl resonant branch** — ~~the dashes the user dislikes (RATIFIED-BUT-FLAGGED)~~
+  **dash flag RESOLVED BY CUT 2026-08-06** (user trimmed both `GetDetails` branches at the
+  AI-tells audit; the dashed sentence is gone — TODO § Text pass has the record)
+  + the resonant verb set (refract-register candidates DRAFT in TODO) — still open, it
+  lives in the Devour/Swat/Ricochet combat messages, not the cut details text.
 - [ ] **Lithovore strings** — BearerDescription "lithovores", grind messages, warn
   prompts, GasBelly details text (name pending Sitting A's talk).
 - [ ] **Attune Stones icon re-verify rides the planned icon edit** (art, listed for
