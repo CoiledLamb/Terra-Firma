@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using XRL;
 using XRL.Messages;
+using XRL.Rules;
 using XRL.UI;
 using XRL.Wish;
 using XRL.World;
@@ -177,6 +178,59 @@ namespace Cleo.TerraFirma.Scripts
 				}
 			}
 			MessageQueue.AddPlayerMessage("the ceiling provides: " + pocketed + " rocks pocketed, " + placed + " placed nearby" + (skipped > 0 ? ", " + skipped + " skipped for lack of room" : "") + ".", Capitalize: false);
+		}
+
+		/// <summary>Pen-distribution measurement for the Fissure pulse feel session (build item,
+		/// spec design/fissure-pulse-rework-2026-08-08.md): Stat.RollDamagePenetrations sampled
+		/// a few thousand times per cell across PV 4..10 x AV 0/4/8/12, expected penetrations
+		/// and expected ring-1 damage under the v3 pulse ladder written to Player.log as
+		/// [TF-VERIFY][FIS] lines. The feel session dials against MEASUREMENTS, not estimates.
+		/// Rides the TF-VERIFY strip at 1.0 like the rest of the harness.</summary>
+		[WishCommand(Command = "tfpen")]
+		public static void PenDistribution()
+		{
+			const int TRIALS = 4000;
+			int[] avs = { 0, 4, 8, 12 };
+			Helpers.VerifyLog("FIS", $"tfpen: expected penetrations over {TRIALS} rolls per cell (PV rows 4..10, AV cols 0/4/8/12)");
+			double[,] expectedPens = new double[11, 13];
+			for (int pv = 4; pv <= 10; pv++)
+			{
+				List<string> cells = new List<string>();
+				foreach (int av in avs)
+				{
+					long total = 0;
+					for (int i = 0; i < TRIALS; i++)
+						total += Stat.RollDamagePenetrations(av, pv, pv);
+					expectedPens[pv, av] = (double)total / TRIALS;
+					cells.Add($"AV{av}={expectedPens[pv, av]:F2}");
+				}
+				Helpers.VerifyLog("FIS", $"tfpen PV {pv}: {string.Join(", ", cells.ToArray())}");
+			}
+			// expected ring-1 TOTAL damage (all three pulses connecting) = expected pens x the
+			// band's summed average dice -- the number the dice ladder is actually dialing
+			int[] bandLevels = { 1, 4, 7, 10 };
+			foreach (int lv in bandLevels)
+			{
+				double diceSum = 0;
+				List<string> ladder = new List<string>();
+				for (int p = 1; p <= Cleo_TerraFirma_Fissure.PULSE_COUNT; p++)
+				{
+					string dice = Cleo_TerraFirma_Fissure.GetPulseDice(lv, p);
+					long tot = 0;
+					for (int i = 0; i < TRIALS; i++)
+						tot += dice.RollCached();
+					diceSum += (double)tot / TRIALS;
+					ladder.Add(dice);
+				}
+				foreach (int av in avs)
+				{
+					List<string> cells = new List<string>();
+					for (int pv = 4; pv <= 10; pv++)
+						cells.Add($"PV{pv}={expectedPens[pv, av] * diceSum:F1}");
+					Helpers.VerifyLog("FIS", $"tfpen L{lv} ({string.Join("/", ladder.ToArray())}, avg sum {diceSum:F1}) ring-1 total vs AV {av}: {string.Join(", ", cells.ToArray())}");
+				}
+			}
+			MessageQueue.AddPlayerMessage("tfpen: pen and damage distributions written to Player.log.", Capitalize: false);
 		}
 	}
 }

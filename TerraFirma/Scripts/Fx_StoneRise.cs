@@ -440,12 +440,17 @@ namespace Cleo.TerraFirma.Scripts
 			public Dictionary<Cell, float> SettleTimes = new Dictionary<Cell, float>(); // rim fabric materializes here (carve: the hidden wall->statue swap)
 			public Dictionary<Cell, float> GapTimes = new Dictionary<Cell, float>();    // gap sprites sink back here (dust cue)
 			public List<float> BreakTimes = new List<float>();                          // carve reveal: dust + crack-sound moments
+			public List<(float time, float mag)> ShakeTimes = new List<(float time, float mag)>(); // pulse pass: one camera shake per beat, descending
 		}
-		// tempo dials (seconds)
-		public const float SHELL_SEC = 0.10f;    // wave-front travel per shell (public: the wake scatter keys off it)
-		public const float TRAVEL_RISE = 0.09f;
-		private const float TRAVEL_HOLD = 0.03f;
-		private const float TRAVEL_SINK = 0.10f;
+		// tempo dials (seconds) -- PULSE PASS (concept B, RULED 2026-08-09): three ripple
+		// beats of decaying amplitude replace the single traveling front. The tall motion
+		// stays INTERIOR: amplitude belongs to the PULSE (100/50/25 by beat), so beat 1's
+		// full-height churn plays at ring 1 and every later, wider beat plays lower. Churn
+		// BOBS (up-crest-settle, the round trip below); rim fabric RISES AND STAYS.
+		public const float BEAT_SEC = 0.25f;     // one churn beat (public: the wake scatter keys off it); covers the full bob below
+		public const float BOB_RISE = 0.09f;     // up (public: scatter lands at the crest)
+		private const float BOB_HOLD = 0.03f;    // crest
+		private const float BOB_SINK = 0.10f;    // settle
 		private const float RIM_STAGGER = 0.18f; // breakthrough spread ("softly", staggered)
 		private const float RIM_RISE = 0.14f;
 		private const float RIM_HOLD = 0.10f;    // held emergence before the real fabric takes over
@@ -479,17 +484,24 @@ namespace Cleo.TerraFirma.Scripts
 		private const int PLATE_JITTER_STEPS = 5; // travel plates offset 0..0.05s within their shell
 		// tile geometry (world units; a tile is ~24 tall -- floatingText's +12 half-tile offset)
 		private const float BURIED_DEPTH = 20f;
-		private const float TRAVEL_EMERGE = 9f;  // a low shoulder of stone
+		private const float PULSE1_EMERGE = 14f;               // beat 1's full churn height (base dial; taller than the old 9 -- it IS the strong beat)
+		private static readonly float[] BEAT_AMP = { 1f, 0.5f, 0.25f }; // amplitude by beat, the RULED 100/50/25 grammar
+		private const int REBOB_PCT = 50;                      // % of interior plates that re-bob on a later beat ("sampled, not all ~50 cells" -- density dial)
+		private const float SHAKE_MAG_1 = 0.3f;                // three camera shakes, descending with the beats
+		private const float SHAKE_MAG_STEP = 0.1f;
 		private const float RIM_EMERGE = 20f;    // near-full breakthrough
 
 		/// <summary>Enqueues the emergence choreography and returns the settle schedule for
-		/// the mutation's frame-pump loop; null = nothing to animate (unseen cast). FEEL
-		/// ROUND 5 (user): each shell and the rim are partitioned into contiguous ARCS --
-		/// plates -- whose sprites wear connected wall-tile variants and heave as one slab
-		/// (shared delay); the breaks between plates are the fractures. Rim plates punch
-		/// through together and hold; gap cells stay lone shards that rise and SINK BACK
-		/// (the sections the earth couldn't hold). Shells never fuse radially -- they move
-		/// at different moments, and the offset IS the outward travel.</summary>
+		/// the mutation's frame-pump loop; null = nothing to animate (unseen cast). PULSE
+		/// PASS (concept B, RULED 2026-08-09): three ripple beats of decaying amplitude --
+		/// beat t covers rings 1..t, ring t's plates bob whole as the front while interior
+		/// rings re-bob SAMPLED at the CURRENT beat's (smaller) amplitude, so the tall motion
+		/// stays interior and the spread reads as the wave spending itself. Fractured-plate
+		/// grammar carried whole from feel round 5 (arcs bob as slabs, breaks are the
+		/// fractures). Rim plates still punch through together after the last beat and hold
+		/// until the fabric lands -- the signature closing beat, nothing crowds it; gap cells
+		/// stay lone shards that rise and SINK BACK. One camera shake per beat, descending
+		/// (fired by the mutation's pump off ShakeTimes).</summary>
 		public static Schedule Play(Cell origin, int radius, ICollection<Cell> reached, ICollection<Cell> gaps, string paintValue, string paintAtlas, string paintExt, char paintFg, char paintDetail, char paintBg, Func<int, int, int, bool> onRing)
 		{
 			if (origin == null)
@@ -497,7 +509,8 @@ namespace Cleo.TerraFirma.Scripts
 			GameManager gm = GameManager.Instance;
 			if (gm == null)
 				return null;
-			float rimStart = radius * SHELL_SEC;
+			int beats = radius - 1; // rings 1..radius-1 churn; the rim is the closing beat
+			float rimStart = beats * BEAT_SEC;
 			Schedule schedule = new Schedule();
 			schedule.Total = rimStart + RIM_STAGGER + RIM_RISE + RIM_HOLD + 0.04f;
 			// bucket the visible cells: rim fabric / rim gaps / travel shells 1..radius-1
@@ -536,16 +549,26 @@ namespace Cleo.TerraFirma.Scripts
 			List<List<Cell>> rimPlates = CutPlates(SortByAngle(rimFabric, origin), RIM_PLATE_MIN, RIM_PLATE_MAX, RIM_SHARD_CHANCE);
 			Helpers.VerifyLog("FIS", $"anim tiles composed painter-style: {(paintAtlas.IsNullOrEmpty() ? DEFAULT_ATLAS : paintAtlas)}{(paintValue.IsNullOrEmpty() ? "wall_rock" : paintValue)}-<mask>{(paintExt.IsNullOrEmpty() ? DEFAULT_EXT : paintExt)}");
 			int enqueued = 0;
-			// travel shells: fractured plates surging outward, one shared delay per plate
-			for (int r = 1; r < radius; r++)
+			// the ripple beats: beat t's amplitude belongs to the PULSE (100/50/25) -- the
+			// front ring bobs whole, interior rings re-bob sampled at the same lower height
+			for (int beat = 1; beat <= beats; beat++)
 			{
-				if (shellPlates[r] == null)
-					continue;
-				foreach (List<Cell> plate in shellPlates[r])
+				float beatStart = (beat - 1) * BEAT_SEC;
+				float amp = PULSE1_EMERGE * BEAT_AMP[Math.Min(beat, BEAT_AMP.Length) - 1];
+				schedule.ShakeTimes.Add((beatStart, SHAKE_MAG_1 - (beat - 1) * SHAKE_MAG_STEP));
+				for (int r = 1; r <= beat && r < radius; r++)
 				{
-					float delay = r * SHELL_SEC + 0.01f * Stat.Random(0, PLATE_JITTER_STEPS);
-					enqueued += EnqueuePlate(plate, gm, paintValue, paintAtlas, paintExt, paintFg, paintDetail, paintBg,
-						delay, TRAVEL_RISE, TRAVEL_HOLD, TRAVEL_SINK, TRAVEL_EMERGE, schedule, Settle: false);
+					if (shellPlates[r] == null)
+						continue;
+					foreach (List<Cell> plate in shellPlates[r])
+					{
+						// interior rings re-bob SAMPLED (density dial); the front bobs whole
+						if (r < beat && Stat.Random(1, 100) > REBOB_PCT)
+							continue;
+						float delay = beatStart + 0.01f * Stat.Random(0, PLATE_JITTER_STEPS);
+						enqueued += EnqueuePlate(plate, gm, paintValue, paintAtlas, paintExt, paintFg, paintDetail, paintBg,
+							delay, BOB_RISE, BOB_HOLD, BOB_SINK, amp, schedule, Settle: false);
+					}
 				}
 			}
 			// the rim: plates of rampart punching through together, held until the fabric lands

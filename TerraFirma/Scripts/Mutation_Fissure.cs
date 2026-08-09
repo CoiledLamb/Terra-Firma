@@ -12,13 +12,17 @@ using XRL.World.Parts;
 namespace XRL.World.Parts.Mutation
 {
 	/// <summary>
-	/// Fissure, rebuilt 2026-08-02 (THE REDOUBT PIVOT, ruled same day): a wave of earth radiates
-	/// out from the caster -- damaging, pushing, and stunning what it moves -- and deposits a
-	/// rough NON-EXPIRING ring of broken stone where it dissipates. The wave CARVES natural
-	/// stone (level-scaled depth; constructed walls stop it: the World Engine's bones don't
-	/// answer), and carved mass thickens the ring. Items are never destroyed and never moved
-	/// (loot rule, ruled). Numbers per design/redoubt-numbers-draft.md -- every constant here
-	/// is a feel-session dial. Fissure v2 (grenade catalog) preserved at tag fissure-v2-grenade.
+	/// Fissure, rebuilt 2026-08-02 (THE REDOUBT PIVOT) and re-waved 2026-08-09 (THE PULSE
+	/// PASS, spec design/fissure-pulse-rework-2026-08-08.md, every shape item RULED): the
+	/// single-hit wave became THREE PULSES in one action -- pulse t hits everything within
+	/// ring t (origin tile included, caster exempt) at attenuating dice, then pushes the hit
+	/// one ring outward (clamp ruled). Pulse hits are ATTACKS at PV 4 + Strength mod (the
+	/// BC-split fork, ruled); walls take one carve-as-attack bite per covering pulse
+	/// (repetition digs -- the depth ladder retired). The rim still rises at radius 4 as a
+	/// NON-EXPIRING ring; rim eviction bounces or slams whoever stands where it erupts.
+	/// Items are never destroyed and never moved (loot rule, ruled). Non-wave numbers per
+	/// design/redoubt-numbers-draft.md -- every constant is a feel dial. Prior casts
+	/// preserved at tags fissure-v2-grenade and fissure-v3-redoubt.
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_Fissure : BaseMutation
@@ -61,19 +65,17 @@ namespace XRL.World.Parts.Mutation
 
 		public override string GetLevelText(int Level)
 		{
-			// 2026-08-06 voice-audit review (design/mutation-voice-audit-2026-08-06.md), user
-			// rulings: stun + carve lines in the user's own voice ("creatures caught in its
-			// path...", "the wave batters walls", hardest-stone sentence cut); NO mechanism
-			// opener (user: "do we need the second sentence at all?" -- stat lines first per
-			// Stunning Force's precedent, ring permanence undocumented, discoverable in play);
-			// cooldown bare (flat 100, base flat-constant convention). Ruled silences stay
-			// silent: flyer exemption, loot, gap ladder, ring-density credits, moved-only stun
-			// nuance (the save reads as riding the push).
-			// radius unwrapped 2026-08-06: fixed at every level now, and flat constants go bare
+			// CLAUDE DRAFT for the pulse mechanic (2026-08-09, port pass) -- NOT SIGNED OFF.
+			// The 2026-08-06 voice-audit conventions carried where they still fit: stat lines
+			// first (Stunning Force's precedent), no mechanism opener, cooldown bare, ruled
+			// silences stay silent (flyer exemption, loot, gap ladder, engulf catch, moved-only
+			// stun nuance, pinning, eviction). New lines needing the user's voice: the
+			// three-pulse damage line and the walls line (the depth claim is gone -- repetition
+			// digs now). No em dashes.
 			return "Ring radius: " + GetRingRadius(Level) + " squares\n" +
-				"Damage: {{rules|" + GetWaveDamage(Level) + "}}\n" +
+				"Damage: {{rules|" + GetPulseDice(Level, 1) + "}}, then {{rules|" + GetPulseDice(Level, 2) + "}}, then {{rules|" + GetPulseDice(Level, 3) + "}} as the churn spreads to 1, 2, and 3 squares\n" +
 				"Creatures caught in its path are pushed outward and must make a Toughness save or be stunned for {{rules|" + GetStunRounds(Level) + "}} " + (GetStunRounds(Level) == 1 ? "round" : "rounds") + ".\n" +
-				"The wave batters walls, tearing through up to {{rules|" + GetCarveDepth(Level) + "}} " + (GetCarveDepth(Level) == 1 ? "square" : "squares") + ".\n" +
+				"Each pulse batters the walls it reaches.\n" +
 				"Cooldown: " + GetCooldown(Level) + " rounds";
 		}
 
@@ -92,7 +94,7 @@ namespace XRL.World.Parts.Mutation
 		public override void CollectStats(Templates.StatCollector stats, int Level)
 		{
 			stats.Set("RingRadius", GetRingRadius(Level));
-			stats.Set("WaveDamage", GetWaveDamage(Level));
+			stats.Set("WaveDamage", GetPulseDice(Level, 1) + "/" + GetPulseDice(Level, 2) + "/" + GetPulseDice(Level, 3));
 			stats.CollectCooldownTurns(MyActivatedAbility(ActivatedAbilityID), GetCooldown(Level));
 		}
 		#endregion
@@ -119,8 +121,10 @@ namespace XRL.World.Parts.Mutation
 			return d2 > r * r - r && d2 <= r * r + r;
 		}
 
-		/// <summary>Cells of natural stone the wave chews through along any path; full radius at band 4.</summary>
-		public static int GetCarveDepth(int Lv) => GetBand(Lv) >= 4 ? GetRingRadius(Lv) : GetBand(Lv);
+		// GetCarveDepth RETIRED (pulse pass, RULED 2026-08-08 "probably replacing, it's more
+		// natural - could hit like pickaxes and dig through them with repeated damage"): carve
+		// depth stopped being a separate band ladder -- every wall in a pulse's coverage takes
+		// one bite, so a ring-1 wall takes up to 3 and the natural bound is the radius itself.
 
 		/// <summary>Penetration bonus of the wave's bite against wall AV (carve-as-attack,
 		/// RULED 2026-08-04; Burrowing Claws' wall-pen precedent of 3x level): soft sedimentary
@@ -132,20 +136,34 @@ namespace XRL.World.Parts.Mutation
 		/// wall, one or two leave it standing damaged -- "some walls are leftover".</summary>
 		public const int CARVE_PCT_PER_PEN = 34;
 
-		// Damage +1/+3/+5/+7 and stun 1/2/3/4 by band (rebalance 2026-08-06, supersedes the draft
-		// ladders +1/+2/+3/+5 and 1/2/2/3): the radius freeze moved its scaling budget here.
-		// 1d3 base kept deliberately -- rider-damage family (Stunning Force's grammar), tight
-		// variance for an unmitigated disk-wide hit that includes companions.
-		public static string GetWaveDamage(int Lv)
+		/// <summary>How many pulses one cast throws; pulse t covers everything within ring t.</summary>
+		public const int PULSE_COUNT = 3;
+
+		/// <summary>Per-pulse damage dice (spec draft v3, 2026-08-08 sitting; supersedes the flat
+		/// 1d3+N ladder): flat bonuses out, the budget redistributed into three decaying dice
+		/// pools (direction RULED: "cut the +7 from the damage budget and then allow more
+		/// variance and dice rolls with what's left"). Dice are THE level-scaling lever -- PV
+		/// rides Strength, not level -- with the d3-&gt;d4 step at band 3 so the late wave hits
+		/// HARDER, not just more. Shape invariant: p1 &gt;= p2 &gt;= p3, the wave spends itself.
+		/// These are PER-PENETRATION rolls. USER FLAG ON RECORD: "not sure about these dice
+		/// numbers" -- every cell is a feel dial; tfpen measures before the feel session.</summary>
+		public static string GetPulseDice(int Lv, int pulse)
 		{
 			switch (GetBand(Lv))
 			{
-				case 1: return "1d3+1";
-				case 2: return "1d3+3";
-				case 3: return "1d3+5";
-				default: return "1d3+7";
+				case 1: return pulse == 1 ? "2d3" : "1d3";
+				case 2: return pulse == 1 ? "3d3" : (pulse == 2 ? "2d3" : "1d3");
+				case 3: return pulse == 1 ? "3d4" : (pulse == 2 ? "2d4" : "1d4");
+				default: return pulse == 1 ? "4d4" : "2d4";
 			}
 		}
+
+		/// <summary>Creature-hit PV (RULED 2026-08-08): 4 + Strength mod -- the melee-weapon
+		/// grammar itself, BC's claws taking Str like any weapon. A level-scaled pen bonus was
+		/// REJECTED same sitting (user: "penetration bonus can be a slippery slope due to how
+		/// armor overpens work"); the armor curve is answered by build investment instead. A
+		/// MaxStrengthBonus-style cap stays reserved as a feel dial if overpen shows vs chaff.</summary>
+		public int GetCreaturePV() => 4 + ParentObject.StatMod("Strength");
 
 		public static int GetStunRounds(int Lv) => GetBand(Lv);
 
@@ -202,9 +220,17 @@ namespace XRL.World.Parts.Mutation
 
 		public override bool HandleEvent(AIGetOffensiveAbilityListEvent E)
 		{
-			// a self-centered wave: worth casting when the enemy is inside or at the rim
-			if (E.Distance <= GetRingRadius(Level) && IsMyActivatedAbilityAIUsable(ActivatedAbilityID))
-				E.Add(COMMAND_ID);
+			// pulse coverage is rings 1-3 (a ring-4 target takes only the rim), and adjacency
+			// is the damage mode (3 hits): the worth-casting gate tightened from the rim radius
+			// to the coverage radius, with fringe casts coin-flipped so the AI leans point-blank
+			// (CLAUDE PICK at port time, spec's AI note; the flip is a feel dial)
+			if (IsMyActivatedAbilityAIUsable(ActivatedAbilityID))
+			{
+				if (E.Distance <= 1)
+					E.Add(COMMAND_ID);
+				else if (E.Distance <= PULSE_COUNT && Stat.Random(1, 100) <= 50)
+					E.Add(COMMAND_ID);
+			}
 			return base.HandleEvent(E);
 		}
 
@@ -222,69 +248,63 @@ namespace XRL.World.Parts.Mutation
 			if (zone == null)
 				return false;
 			int radius = GetRingRadius(Level);
-			int carveDepth = GetCarveDepth(Level);
+			int creaturePV = GetCreaturePV();
 			UseEnergy(1000, "Physical Mutation Fissure");
 			CooldownMyActivatedAbility(ActivatedAbilityID, GetCooldown(Level));
 			ParentObject.PlayWorldSound(SLAM_SOUND, 1f, Combat: true);
 			XDidY(ParentObject, "drive", "a wave through the earth", "!", ColorAsGoodFor: ParentObject);
-			Helpers.VerifyLog("FIS", $"REDOUBT cast by {ParentObject.Blueprint} Lv{Level}: radius={radius}, carveDepth={carveDepth}, damage={GetWaveDamage(Level)}, stun={GetStunRounds(Level)}r DC{GetStunSaveDC(Level)}");
+			Helpers.VerifyLog("FIS", $"PULSE cast by {ParentObject.Blueprint} Lv{Level}: radius={radius}, dice={GetPulseDice(Level, 1)}/{GetPulseDice(Level, 2)}/{GetPulseDice(Level, 3)}, creaturePV={creaturePV} (4+Str), wallPV={GetCarvePV(Level)}, stun={GetStunRounds(Level)}r DC{GetStunSaveDC(Level)}");
 
-			// ---- reach + carve: ray from origin to every disk cell; along any ray the wave
-			// bites at most carveDepth natural-stone cells and stops dead at the first
-			// constructed wall OR the first natural wall that shrugs its attack (carve-as-attack,
-			// RULED 2026-08-04: the bite is a penetration roll vs the wall's AV, resolved the
-			// first time any ray reaches the wall; every later ray reuses the outcome). Cells
-			// beyond a stop are unreached (no push, no ring there).
-			var reached = new HashSet<Cell>();
-			var carved = new HashSet<Cell>();      // walls that FELL -- these feed the ring's mass credits
-			var wallFate = new Dictionary<Cell, bool>(); // every attacked wall cell -> did it fall?
-			var struckWalls = new HashSet<Cell>(); // standing walls the wave broke against -- their riders get the slam check
-			var ownFelledCells = new HashSet<Cell>(); // the maker's own fabric, recycled this cast: free passage for EVERY ray
+			// ---- the three pulses (spec design/fissure-pulse-rework-2026-08-08.md, shape all
+			// RULED 2026-08-08/09): pulse t sweeps everything within ring t -- rays from the
+			// origin, standing walls block and shadow exactly as before -- biting every standing
+			// wall it reaches ONCE (carve-as-attack grammar unchanged; the depth ladder and the
+			// per-ray bite budget retired, repetition digs), hitting every creature in coverage
+			// at the pulse's dice (attacks at PV 4+Str, the BC-split fork), then pushing the hit
+			// one ring outward (clamp ruled; weight-vs-force still decides IF they move).
+			var fallen = new HashSet<Cell>();     // wall cells opened this cast (fell or yielded): free passage for every later ray
+			var carved = new HashSet<Cell>();     // stone that FELL -- the ring's mass credits
+			var ownFelledCells = new HashSet<Cell>(); // the maker's own fabric, recycled this cast
 			int ownFelled = 0;
-			for (int dx = -radius; dx <= radius; dx++)
+			var lastMovedPulse = new Dictionary<GameObject, int>(); // stun: ONE check per cast, on the last pulse that moved the creature (ruled)
+			var hitCounts = new Dictionary<GameObject, int>();
+
+			// one wavefront: rays to every cell within ring `reach`; standing walls whose ring
+			// index sits in [biteFloor, biteCeil] take one bite each (per sweep) -- a wall that
+			// holds blocks and shadows, a wall that falls opens passage for the rest of the
+			// sweep (the front surges through the fresh breach; corridor chaining is geometry-
+			// bounded by `reach` now, the retired budget's job). Returns the cells the front
+			// passed through; `struckNow` collects the standing walls it broke against.
+			HashSet<Cell> Sweep(int reach, int biteFloor, int biteCeil, HashSet<Cell> struckNow)
 			{
-				for (int dy = -radius; dy <= radius; dy++)
+				var reached = new HashSet<Cell>();
+				var held = new HashSet<Cell>(); // walls that shrugged THIS sweep: block without re-rolling
+				for (int dx = -reach; dx <= reach; dx++)
 				{
-					if (dx == 0 && dy == 0)
-						continue;
-					if (!InDisk(dx, dy, radius)) // Euclidean circle, not Chebyshev square (feel round 1)
-						continue;
-					Cell target = zone.GetCell(origin.X + dx, origin.Y + dy);
-					if (target == null || reached.Contains(target))
-						continue;
-					List<Point> ray = Zone.Line(origin.X, origin.Y, target.X, target.Y);
-					int wallsBitten = 0;
-					bool blocked = false;
-					for (int i = 1; i < ray.Count; i++) // skip the origin point
+					for (int dy = -reach; dy <= reach; dy++)
 					{
-						Cell step = zone.GetCell(ray[i].X, ray[i].Y);
-						if (step == null) { blocked = true; break; }
-						// the maker's own breach is free passage for every ray (recast-refresh
-						// ruling 2026-08-06) -- the anti-corridor bite charge below is for the
-						// WORLD's walls, not recycled fabric
-						if (ownFelledCells.Contains(step))
+						if (dx == 0 && dy == 0)
 							continue;
-						// a wall another ray already resolved: a fallen one still spends THIS
-						// ray's bite (unspent budgets must not chain through breaches -- the
-						// full-row corridor bug), a standing one blocks outright
-						if (wallFate.TryGetValue(step, out bool fell))
-						{
-							if (!fell || wallsBitten >= carveDepth)
-							{
-								blocked = true;
-								break;
-							}
-							wallsBitten++;
+						if (!InDisk(dx, dy, reach)) // Euclidean circle, not Chebyshev square (feel round 1)
 							continue;
-						}
-						if (step.IsSolid())
+						Cell target = zone.GetCell(origin.X + dx, origin.Y + dy);
+						if (target == null || reached.Contains(target))
+							continue;
+						List<Point> ray = Zone.Line(origin.X, origin.Y, target.X, target.Y);
+						bool blocked = false;
+						for (int i = 1; i < ray.Count; i++) // skip the origin point
 						{
+							Cell step = zone.GetCell(ray[i].X, ray[i].Y);
+							if (step == null) { blocked = true; break; }
+							if (fallen.Contains(step) || ownFelledCells.Contains(step))
+								continue; // the breach is open ground for every ray after it
+							if (held.Contains(step)) { blocked = true; break; }
+							if (!step.IsSolid())
+								continue;
 							GameObject wall = GetSolidObject(step);
 							// own fabric yields (RULED 2026-08-06, the recast-refresh fix): the
-							// earth that rose for you kneels for you -- no attack roll, no bite
-							// spent, the mass recycled straight into this cast's upgrade credits.
-							// Checked BEFORE the budget so a spent bite never leaves your own
-							// wall shadowing the new rim.
+							// earth that rose for you kneels for you -- no attack roll, the mass
+							// recycled straight into this cast's upgrade credits
 							string maker = wall?.GetStringProperty(RING_MAKER_PROP);
 							if (!maker.IsNullOrEmpty() && ParentObject.idmatch(maker))
 							{
@@ -297,128 +317,187 @@ namespace XRL.World.Parts.Mutation
 								wall.Obliterate(); // no death drops: the mass moved into the credits
 								continue;
 							}
-							if (wallsBitten >= carveDepth)
+							int wallRing = RingOf(step.X - origin.X, step.Y - origin.Y);
+							if (wall == null || wallRing < biteFloor || wallRing > biteCeil)
 							{
-								struckWalls.Add(step);
-								blocked = true; // the bite is spent
+								// solid non-wall, or outside this front's bite window (only the
+								// dissipating front carries a window): the wave breaks on it
+								held.Add(step);
+								struckNow?.Add(step);
+								blocked = true;
 								break;
 							}
-							if (wall == null)
+							// every wall takes the attack (RULED 2026-08-05: "machinery still gets
+							// hurt by the earth, it just doesn't get destroyed"); class handling
+							// lives in WaveBitesWall, unchanged
+							if (WaveBitesWall(wall, step))
 							{
-								struckWalls.Add(step);
-								blocked = true; // solid but not a wall -- the wave breaks on it
-								break;
+								fallen.Add(step);
+								if (IsCarvableStone(wall))
+									carved.Add(step); // ring mass stays stone-only
+								continue;
 							}
-							// every wall takes the attack (RULED 2026-08-05, superseding the silent
-							// refusal: "machinery still gets hurt by the earth, it just doesn't get
-							// destroyed"): natural stone can fall and feeds the ring; soft organics
-							// can fall but are not stone; constructed/metal is damage-clamped inside
-							// WaveBitesWall and always stops the wave
-							bool died = WaveBitesWall(wall, step);
-							wallFate[step] = died;
-							if (!died)
-							{
-								struckWalls.Add(step);
-								blocked = true; // the wall held -- leftover standing, and the wave breaks on it
-								break;
-							}
-							wallsBitten++;
-							if (IsCarvableStone(wall))
-								carved.Add(step); // ring mass stays stone-only
+							held.Add(step);
+							struckNow?.Add(step);
+							blocked = true; // the wall held -- leftover standing, and the wave breaks on it
+							break;
+						}
+						if (blocked)
+							continue;
+						// every cell along a clean ray is reached (the front passes through it)
+						for (int i = 1; i < ray.Count; i++)
+						{
+							Cell step = zone.GetCell(ray[i].X, ray[i].Y);
+							if (step != null)
+								reached.Add(step);
 						}
 					}
-					if (blocked)
-						continue;
-					// every cell along a clean ray is reached (the wave passes through it)
-					for (int i = 1; i < ray.Count; i++)
+				}
+				return reached;
+			}
+
+			for (int pulse = 1; pulse <= PULSE_COUNT; pulse++)
+			{
+				string dice = GetPulseDice(Level, pulse);
+				var struckNow = new HashSet<Cell>();
+				HashSet<Cell> coverage = Sweep(pulse, 1, pulse, struckNow);
+				// origin tile in coverage all 3 pulses, caster exempt (RULED 2026-08-08
+				// "agreed": the engulf catch). An unpushable epicenter occupant takes the
+				// DEPLETING sequence (RULED 2026-08-09): the dice belong to the pulse, never
+				// the position -- nothing special-cased here, the loop just runs.
+				coverage.Add(origin);
+				var victims = new List<GameObject>();
+				foreach (Cell c in coverage)
+				{
+					foreach (GameObject o in c.GetObjectsWithPart("Combat"))
 					{
-						Cell step = zone.GetCell(ray[i].X, ray[i].Y);
-						if (step != null)
-							reached.Add(step);
+						if (o != ParentObject && o.PhaseMatches(ParentObject) && !victims.Contains(o))
+							victims.Add(o);
 					}
 				}
+				// outermost first: the churned vacate outward ahead of the shove behind them
+				victims.Sort((a, b) => ChebyshevDistance(origin, b.CurrentCell).CompareTo(ChebyshevDistance(origin, a.CurrentCell)));
+				Helpers.VerifyLog("FIS", $"pulse {pulse}: coverage {coverage.Count} cell(s), {victims.Count} creature(s), dice {dice}, {struckNow.Count} standing wall(s) struck");
+				foreach (GameObject victim in victims)
+				{
+					if (!GameObject.Validate(victim) || victim.CurrentCell == null)
+						continue;
+					if (victim.IsFlying)
+					{
+						// a ground churn: the airborne feel only the dust (dial -- flag if it grates)
+						Helpers.VerifyLog("FIS", $"pulse {pulse} spares {victim.Blueprint} (flying)");
+						continue;
+					}
+					// the pulse hit is an ATTACK (mitigation fork RULED 2026-08-08 "i lean
+					// option b"): PV 4+Str vs the target's AV, the pulse dice rolled once per
+					// penetration. Zero-pen pulses exist -- vs a high-AV brute the cast is
+					// control + fortress, which the redoubt draft already embraced.
+					int av = victim.Stat("AV");
+					int pens = Stat.RollDamagePenetrations(av, creaturePV, creaturePV);
+					int dmg = 0;
+					for (int p = 0; p < pens; p++)
+						dmg += dice.RollCached();
+					if (dmg > 0)
+					{
+						victim.TakeDamage(dmg, "from the heaving earth!", "Crushing",
+							"You were battered by a wave of earth.",
+							victim.It + victim.GetVerb("were", true, true) + " @@battered by a wave of earth.",
+							Attacker: ParentObject, Owner: ParentObject, Source: ParentObject);
+					}
+					hitCounts[victim] = hitCounts.TryGetValue(victim, out int hc) ? hc + 1 : 1;
+					if (!GameObject.Validate(victim) || victim.CurrentCell == null)
+					{
+						Helpers.VerifyLog("FIS", $"pulse {pulse} hits {victim.Blueprint}: AV {av} vs PV {creaturePV}, {pens} pen(s), {dmg} dmg -- DOWN");
+						continue;
+					}
+					Cell before = victim.CurrentCell;
+					string dir = before == origin ? DIRS8[Stat.Random(0, 7)] : origin.GetDirectionFromCell(before);
+					// one ring per pulse (clamp RULED 2026-08-08 "i like the clamp more");
+					// weight-vs-force does the thunderdome sort on WHETHER it moves
+					victim.Push(dir, GetPushForce(Level), 1);
+					bool moved = victim.CurrentCell != before;
+					string note = moved ? "MOVED" : "HELD GROUND";
+					if (moved)
+						lastMovedPulse[victim] = pulse;
+					else
+					{
+						// pinning (RULED 2026-08-08 "slamming enemies into walls sounds good"):
+						// held in place by standing stone at their back = slammed against it at
+						// the current pulse's die, again each remaining pulse they sit in coverage
+						Cell behind = before.GetCellFromDirection(dir);
+						if (behind != null && behind.IsSolid() && GetSolidObject(behind) != null)
+						{
+							int slam = dice.RollCached();
+							victim.TakeDamage(slam, "from the heaving earth!", "Crushing",
+								"You were battered by a wave of earth.",
+								victim.It + victim.GetVerb("were", true, true) + " @@battered by a wave of earth.",
+								Attacker: ParentObject, Owner: ParentObject, Source: ParentObject);
+							note = $"PINNED (slam {slam})";
+						}
+					}
+					Helpers.VerifyLog("FIS", $"pulse {pulse} hits {victim.Blueprint}: AV {av} vs PV {creaturePV}, {pens} pen(s), {dmg} dmg, push {dir} {note}");
+				}
+				// wall riders (RULED 2026-08-08 "that's fine to me"): the save-or-slam runs PER
+				// PULSE for climbers/burrowers on walls this pulse broke against, at this
+				// pulse's die -- riders of walls that FELL took the normal pulse instead
+				var riders = new List<GameObject>();
+				foreach (Cell c in struckNow)
+				{
+					foreach (GameObject o in c.GetObjectsWithPart("Combat"))
+					{
+						if (o != ParentObject && o.PhaseMatches(ParentObject) && !riders.Contains(o))
+							riders.Add(o);
+					}
+				}
+				foreach (GameObject rider in riders)
+				{
+					if (!GameObject.Validate(rider) || rider.CurrentCell == null)
+						continue;
+					if (rider.IsFlying)
+					{
+						Helpers.VerifyLog("FIS", $"pulse {pulse} spares {rider.Blueprint} (flying, at a wall)");
+						continue;
+					}
+					if (rider.MakeSave("Toughness", GetStunSaveDC(Level), null, null, "Fissure Slam", IgnoreNaturals: false, IgnoreNatural1: false, IgnoreNatural20: false, IgnoreGodmode: false, ParentObject))
+					{
+						Helpers.VerifyLog("FIS", $"pulse {pulse}: {rider.Blueprint} clings to its wall (made the slam save)");
+						continue;
+					}
+					int slam = dice.RollCached();
+					rider.TakeDamage(slam, "from the heaving earth!", "Crushing",
+						"You were battered by a wave of earth.",
+						rider.It + rider.GetVerb("were", true, true) + " @@battered by a wave of earth.",
+						Attacker: ParentObject, Owner: ParentObject, Source: ParentObject);
+					Helpers.VerifyLog("FIS", $"pulse {pulse} slams {rider.Blueprint} against its wall: {slam} dmg (failed the slam save)");
+				}
 			}
-			int carvedMass = carved.Count; // the fallen reappear as ring fabric
 
-			// ---- the wave: damage + push + stun-if-moved, working outward so inner creatures
-			// vacate before outer ones are considered. Items are untouched (loot rule, ruled).
-			var waveVictims = new List<GameObject>();
-			foreach (Cell c in reached)
+			// stun: ONE check per cast (RULED 2026-08-08 "sounds good"), riding the last pulse
+			// that moved the creature; kept your feet = kept your wits, the never-moved never
+			// roll. Rounds 1/2/3/4 by band, Toughness DC 16+L, all unchanged.
+			foreach (KeyValuePair<GameObject, int> kv in lastMovedPulse)
 			{
-				foreach (GameObject o in c.GetObjectsWithPart("Combat"))
-				{
-					if (o != ParentObject && o.PhaseMatches(ParentObject) && !waveVictims.Contains(o))
-						waveVictims.Add(o);
-				}
-			}
-			waveVictims.Sort((a, b) => ChebyshevDistance(origin, a.CurrentCell).CompareTo(ChebyshevDistance(origin, b.CurrentCell)));
-			foreach (GameObject victim in waveVictims)
-			{
-				if (!GameObject.Validate(victim) || victim.CurrentCell == null)
+				GameObject victim = kv.Key;
+				if (!GameObject.Validate(victim) || victim.CurrentCell == null || !victim.HasPart("Combat"))
 					continue;
-				if (victim.IsFlying)
-				{
-					// a ground wave: the airborne feel only the dust (dial -- flag if it grates)
-					Helpers.VerifyLog("FIS", $"wave spares {victim.Blueprint} (flying)");
-					continue;
-				}
-				int dmg = GetWaveDamage(Level).RollCached();
-				victim.TakeDamage(dmg, "from the heaving earth!", "Crushing",
-					"You were battered by a wave of earth.",
-					victim.It + victim.GetVerb("were", true, true) + " @@battered by a wave of earth.",
-					Attacker: ParentObject, Owner: ParentObject, Source: ParentObject);
-				if (!GameObject.Validate(victim) || victim.CurrentCell == null)
-					continue;
-				Cell before = victim.CurrentCell;
-				string dir = origin.GetDirectionFromCell(before);
-				victim.Push(dir, GetPushForce(Level), radius + 1);
-				bool moved = victim.CurrentCell != before;
-				Helpers.VerifyLog("FIS", $"wave hits {victim.Blueprint}: {dmg} dmg, push {dir} {(moved ? "MOVED" : "HELD GROUND")}");
-				// kept your feet = kept your wits: only the moved risk the stun (ruled riff, drafted)
-				if (moved && victim.IsValid() && victim.HasPart("Combat")
-					&& !victim.MakeSave("Toughness", GetStunSaveDC(Level), null, null, "Fissure Stun", IgnoreNaturals: false, IgnoreNatural1: false, IgnoreNatural20: false, IgnoreGodmode: false, ParentObject))
+				if (!victim.MakeSave("Toughness", GetStunSaveDC(Level), null, null, "Fissure Stun", IgnoreNaturals: false, IgnoreNatural1: false, IgnoreNatural20: false, IgnoreGodmode: false, ParentObject))
 				{
 					victim.ApplyEffect(new Stun(GetStunRounds(Level), GetStunSaveDC(Level)));
-					Helpers.VerifyLog("FIS", $"wave stuns {victim.Blueprint} for {GetStunRounds(Level)} round(s)");
+					Helpers.VerifyLog("FIS", $"churn stuns {victim.Blueprint} for {GetStunRounds(Level)} round(s) (last moved on pulse {kv.Value})");
 				}
 			}
+			foreach (KeyValuePair<GameObject, int> kv in hitCounts)
+				Helpers.VerifyLog("FIS", $"churn total: {kv.Key.Blueprint} took {kv.Value} pulse hit(s)");
 
-			// ---- wall riders: a blocked ray never feeds `reached`, so anything clinging to a
-			// standing wall (wall climbers, burrowers) sat out the wave entirely (user beta flag
-			// 2026-08-06). They can't be pushed off their wall, so it's save-or-slam instead
-			// (RULED same day): Toughness vs the stun DC -- pass clings on, fail takes the wave's
-			// damage carried straight through the stone. No push, no stun. Riders of walls that
-			// FELL need nothing here -- the breach cell is reached and they took the normal wave.
-			var wallRiders = new List<GameObject>();
-			foreach (Cell c in struckWalls)
-			{
-				foreach (GameObject o in c.GetObjectsWithPart("Combat"))
-				{
-					if (o != ParentObject && o.PhaseMatches(ParentObject) && !wallRiders.Contains(o) && !waveVictims.Contains(o))
-						wallRiders.Add(o);
-				}
-			}
-			foreach (GameObject rider in wallRiders)
-			{
-				if (!GameObject.Validate(rider) || rider.CurrentCell == null)
-					continue;
-				if (rider.IsFlying)
-				{
-					Helpers.VerifyLog("FIS", $"wave spares {rider.Blueprint} (flying, at a wall)");
-					continue;
-				}
-				if (rider.MakeSave("Toughness", GetStunSaveDC(Level), null, null, "Fissure Slam", IgnoreNaturals: false, IgnoreNatural1: false, IgnoreNatural20: false, IgnoreGodmode: false, ParentObject))
-				{
-					Helpers.VerifyLog("FIS", $"wave: {rider.Blueprint} clings to its wall (made the slam save)");
-					continue;
-				}
-				int slam = GetWaveDamage(Level).RollCached();
-				rider.TakeDamage(slam, "from the heaving earth!", "Crushing",
-					"You were battered by a wave of earth.",
-					rider.It + rider.GetVerb("were", true, true) + " @@battered by a wave of earth.",
-					Attacker: ParentObject, Owner: ParentObject, Source: ParentObject);
-				Helpers.VerifyLog("FIS", $"wave slams {rider.Blueprint} against its wall: {slam} dmg (failed the slam save)");
-			}
+			// ---- the dissipating front (spec's OPEN item, CLAUDE PICK at port time -- log
+			// says so, flagged for feel): the wave still travels to radius 4 to place the rim
+			// (blocked rays shadow it, unchanged), and it bites each ring-4 wall it reaches
+			// ONCE on the way out. Reasoning: the old full-radius carve reached rim walls, and
+			// a rim wall that can never fall would shadow its own rim cell on every recast.
+			// Rings 1-3 got their pulse bites already; the window stops re-bites here.
+			HashSet<Cell> reached = Sweep(radius, radius, radius, null);
+			int carvedMass = carved.Count; // the fallen reappear as ring fabric
+			Helpers.VerifyLog("FIS", $"front pass: {reached.Count} cell(s) reached to the rim, carvedMass={carvedMass}, ownFelled={ownFelled}");
 
 			// ---- the ring: fabric on every reached, open rim cell, minus the gaps.
 			// Deposits are PLANNED here and applied after the animation plays -- the rim must
@@ -459,9 +538,12 @@ namespace XRL.World.Parts.Mutation
 			var deposits = new List<(Cell cell, string bp, float time)>();
 			foreach (Cell c in rim)
 			{
-				if (StillHoldsCombatant(c))
+				// rim eviction (RULED 2026-08-08, feel-pass confirm reserved): the fabric
+				// ALWAYS rises -- the ring completes -- and whoever stands where it erupts is
+				// bounced off the emergence; which way is geometry. Only the both-blocked
+				// corridor micro-fallback keeps the old debris downgrade.
+				if (StillHoldsCombatant(c) && !TryEvictRimOccupants(c, origin, GetPulseDice(Level, PULSE_COUNT)))
 				{
-					// no burying the thunderdome's audience: loose stone instead of fabric
 					deposits.Add((c, DEBRIS_BLUEPRINT, 0f));
 					debris++;
 					continue;
@@ -541,7 +623,8 @@ namespace XRL.World.Parts.Mutation
 				string bp = roll <= 10 ? DEBRIS_BLUEPRINT : (roll <= 13 ? "Cleo_TerraFirma_Rock_Pebbles" : (roll <= 15 ? "MediumBoulder" : null));
 				if (bp != null)
 				{
-					deposits.Add((c, bp, ringIdx * Cleo_TerraFirma_StoneRiseFX.SHELL_SEC + Cleo_TerraFirma_StoneRiseFX.TRAVEL_RISE));
+					// timed to the beat whose front first covers this ring (pulse r = beat r)
+					deposits.Add((c, bp, (ringIdx - 1) * Cleo_TerraFirma_StoneRiseFX.BEAT_SEC + Cleo_TerraFirma_StoneRiseFX.BOB_RISE));
 					scattered++;
 				}
 			}
@@ -639,7 +722,6 @@ namespace XRL.World.Parts.Mutation
 			}
 			if (schedule != null)
 			{
-				CombatJuice.cameraShake(0.3f); // the ground complains while the wave runs
 				for (int i = 0; i < deposits.Count; i++)
 				{
 					if (deposits[i].time <= 0f && schedule.SettleTimes.TryGetValue(deposits[i].cell, out float settleAt))
@@ -653,10 +735,14 @@ namespace XRL.World.Parts.Mutation
 				ScreenBuffer buf = ScreenBuffer.GetScrapBuffer1(bLoadFromCurrent: true);
 				TextConsole console = Popup._TextConsole;
 				float t = 0f;
-				int di = 0, gi = 0;
+				int di = 0, gi = 0, si = 0;
 				float end = schedule.Total + 0.08f;
 				while (t < end)
 				{
+					// three camera shakes, descending (concept B, RULED 2026-08-09) -- one per
+					// ripple beat, fired at the beat's moment instead of the old lump-sum shake
+					while (si < schedule.ShakeTimes.Count && schedule.ShakeTimes[si].time <= t)
+						CombatJuice.cameraShake(schedule.ShakeTimes[si++].mag);
 					while (di < deposits.Count && deposits[di].time <= t)
 						Place(deposits[di++]);
 					while (gi < gapPuffs.Count && gapPuffs[gi].time <= t)
@@ -927,6 +1013,71 @@ namespace XRL.World.Parts.Mutation
 			if (a == null || b == null)
 				return int.MaxValue;
 			return Math.Max(Math.Abs(a.X - b.X), Math.Abs(a.Y - b.Y));
+		}
+
+		/// <summary>Euclidean ring index of an offset (the smallest r whose disk holds it) --
+		/// the pulse fronts' distance grammar, same integer tests as InDisk/OnRing.</summary>
+		private static int RingOf(int dx, int dy)
+		{
+			int d2 = dx * dx + dy * dy;
+			int r = 0;
+			while (d2 > r * r + r)
+				r++;
+			return r;
+		}
+
+		/// <summary>Push direction for a victim sharing the caster's tile (the engulf catch):
+		/// the churn has no outward there, so the shove picks a compass point at random.</summary>
+		private static readonly string[] DIRS8 = { "N", "NE", "E", "SE", "S", "SW", "W", "NW" };
+
+		/// <summary>Rim eviction (RULED 2026-08-08, feel-pass confirm reserved): the fabric
+		/// ALWAYS rises, and which way the occupant bounces is geometry. Outward open = the
+		/// emergence FLINGS them clear of the ring (no damage; a token fling die stays a dial
+		/// at 0). Outward blocked = slammed against the blocker (the last pulse's die, the pin
+		/// grammar) and deposited INSIDE the ring with the caster -- the almost-escaped thrown
+		/// back into the thunderdome. Returns false where the cell could not be cleared (both
+		/// faces blocked -- the corridor micro-fallback -- or an occupant out of phase): that
+		/// spot keeps the debris downgrade, crushed-but-not-buried.</summary>
+		private bool TryEvictRimOccupants(Cell c, Cell origin, string slamDice)
+		{
+			var occupants = new List<GameObject>();
+			foreach (GameObject o in c.Objects)
+			{
+				if (o.HasPart("Combat") && o.IsValid() && !o.IsInGraveyard())
+					occupants.Add(o);
+			}
+			string dir = origin.GetDirectionFromCell(c);   // outward: origin -> rim, continued
+			Cell outCell = c.GetCellFromDirection(dir);
+			Cell inCell = c.GetCellFromDirection(c.GetDirectionFromCell(origin)); // inward: back toward the caster
+			foreach (GameObject o in occupants)
+			{
+				if (!GameObject.Validate(o) || o.CurrentCell != c)
+					continue;
+				if (!o.PhaseMatches(ParentObject))
+					return false; // out of phase with the wave: nothing to bounce it with
+				if (outCell != null && !outCell.IsSolid())
+				{
+					o.DirectMoveTo(outCell);
+					Helpers.VerifyLog("FIS", $"rim eviction: {o.Blueprint} bounced clear to ({outCell.X},{outCell.Y})");
+				}
+				else if (inCell != null && !inCell.IsSolid())
+				{
+					int slam = slamDice.RollCached();
+					o.TakeDamage(slam, "from the heaving earth!", "Crushing",
+						"You were battered by a wave of earth.",
+						o.It + o.GetVerb("were", true, true) + " @@battered by a wave of earth.",
+						Attacker: ParentObject, Owner: ParentObject, Source: ParentObject);
+					if (GameObject.Validate(o) && o.CurrentCell == c)
+						o.DirectMoveTo(inCell);
+					Helpers.VerifyLog("FIS", $"rim eviction: {o.Blueprint} slammed for {slam} and deposited inside at ({inCell.X},{inCell.Y})");
+				}
+				else
+				{
+					Helpers.VerifyLog("FIS", $"rim eviction: {o.Blueprint} walled on both faces -- the debris downgrade stands");
+					return false;
+				}
+			}
+			return !StillHoldsCombatant(c);
 		}
 
 		/// <summary>Loose items (corpses, dropped gear) spill from under a solid deposit into one open
