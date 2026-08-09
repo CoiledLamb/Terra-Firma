@@ -176,7 +176,7 @@ under all of this before the feel session.
 |---|---|---|
 | Creature-hit PV | 4 + Strength mod (RULED 2026-08-08) | the melee-weapon grammar itself — BC's claws take Str mod as PV like any weapon. Level-scaled pen BONUS rejected same sitting (user: "penetration bonus can be a slippery slope due to how armor overpens work") — bonus-pen ladders are hidden damage multipliers that peak against the SQUISHIEST targets; Str-scaling bounds pens by build investment, the price every other physical attacker pays. Cap (weapon-style MaxStrengthBonus) reserved as a feel dial if overpen shows vs chaff |
 | Wall-bite PV | keep 6+3L | BC's split; the low-band governor question stands (3 bites at ring 1 vs old depth-1 budget — feel-test whether 6+3L needs softening now that repetition digs) |
-| Stun | 1/2/3/4 rounds by band, Toughness DC 16+L | carried unchanged; one check per cast (ruled). SF anchor: flat 3 rounds, DC 15+L |
+| Stun | 1/2/3/4 rounds by band; Toughness DC STEPPED 16/18/20 at L1/5/10 (RULED 2026-08-09, superseding 16+L) | one check per cast (ruled). User direction: "make sure the stun isn't as strong as stunning force (via saves)" with the DC steps at 5 and 10 as "the shape of the upgrade pattern," not a rider -- rounds arrive at 4/7/10, save steps at 5/10, interleaved. SF anchor decomp-verified (StunningForce.cs:265): Toughness 15+Level, flat 3 rounds -- SF hits DC 25 by L10, ours tops at 20 |
 | Pin/rider slam | the current pulse's die (fork-matching) | per-pulse slams as ruled |
 | Rim eviction | bounced-inside = slam die; flung-away = 0 | eviction ruled; token fling damage stays a dial |
 

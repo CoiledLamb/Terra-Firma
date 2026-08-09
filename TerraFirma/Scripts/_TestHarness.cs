@@ -1559,7 +1559,7 @@ namespace Cleo.TerraFirma.Scripts
 
 		/// <summary>The churn's crowd control at L5 (band 2 under the pulse pass: push force
 		/// 7000 clamped to one ring per pulse, dice 3d3/2d3/1d3 rolled per penetration at PV
-		/// 4+Str, ONE stun check per cast at 2r DC 21, moved-only): baboons ringed at distance
+		/// 4+Str, ONE stun check per cast at 2r, stepped DC 18 at L5, moved-only): baboons ringed at distance
 		/// 1 ride the full churn (3 hits, shoved ring by ring to the rim and evicted clear),
 		/// so all must end further out, all damaged (three pen rolls vs baboon AV going 0-pen
 		/// every time is the only flake path), and at least one stunned; a glowmoth overhead
@@ -1647,7 +1647,7 @@ namespace Cleo.TerraFirma.Scripts
 			bool lootHeld = loot == null || (GameObject.Validate(loot) && loot.CurrentCell == lootCell);
 			bool pass = counted == victims.Count && movedN == counted && hurtN == counted && stunN >= 1 && mothSpared && lootHeld;
 			Report("redoubt.push", pass,
-				$"L{LV} wave vs {victims.Count} baboons at distance 1: {movedN} pushed outward (want all), {hurtN} damaged (want all), {stunN} stunned (moved-only rule, DC 21; >=1 wanted, all-save flake is rare)" +
+				$"L{LV} wave vs {victims.Count} baboons at distance 1: {movedN} pushed outward (want all), {hurtN} damaged (want all), {stunN} stunned (moved-only rule, stepped DC {XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure.GetStunSaveDC(LV)}; >=1 wanted, all-save flake is rare)" +
 				(moth == null ? "; no room for the flyer probe"
 					: !mothFlying ? "; flyer probe INERT (moth would not take off -- exemption untested this run)"
 					: $"; flyer {(mothSpared ? "spared untouched" : "TOUCHED -- ground-wave exemption broken")}") +

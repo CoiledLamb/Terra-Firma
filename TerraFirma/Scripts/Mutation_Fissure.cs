@@ -147,7 +147,11 @@ namespace XRL.World.Parts.Mutation
 		/// rides Strength, not level -- with the d3-&gt;d4 step at band 3 so the late wave hits
 		/// HARDER, not just more. Shape invariant: p1 &gt;= p2 &gt;= p3, the wave spends itself.
 		/// These are PER-PENETRATION rolls. USER FLAG ON RECORD: "not sure about these dice
-		/// numbers" -- every cell is a feel dial; tfpen measures before the feel session.</summary>
+		/// numbers" -- every cell is a feel dial; tfpen measures before the feel session.
+		/// OPEN at the 2026-08-09 numbers sitting: the user floated 3d3/2d3/1d3 for band 1;
+		/// a full ladder shift was discussed, the pinned-tail variant rejected ("i don't like
+		/// pinned tail personally"), and the user explicitly did NOT lock new numbers ("i
+		/// didn't say i was locked in on the new dice numbers") -- v3 stands until ruled.</summary>
 		public static string GetPulseDice(int Lv, int pulse)
 		{
 			switch (GetBand(Lv))
@@ -168,7 +172,15 @@ namespace XRL.World.Parts.Mutation
 
 		public static int GetStunRounds(int Lv) => GetBand(Lv);
 
-		public static int GetStunSaveDC(int Lv) => 16 + Lv;
+		/// <summary>Stun save DC, STEPPED (RULED 2026-08-09: "make sure the stun isn't as
+		/// strong as stunning force (via saves)" + easing at the named ranks, "not a rider,
+		/// just the shape of the upgrade pattern"): 16 at L1-4, 18 at L5-9, 20 at L10+ -- the
+		/// per-level creep is gone. Stun ROUNDS still arrive at bands (L4/7/10), so the
+		/// upgrade pattern interleaves: rounds at 4/7/10, save steps at 5/10. Anchor
+		/// (decomp-verified StunningForce.cs:265): SF is Toughness 15+Level, flat 3 rounds --
+		/// SF's DC reaches 25 by L10 where ours tops at 20; weaker via saves as ruled. The
+		/// same DC gates the wall-rider slam save, unchanged.</summary>
+		public static int GetStunSaveDC(int Lv) => Lv >= 10 ? 20 : (Lv >= 5 ? 18 : 16);
 
 		/// <summary>Engine push force: weight-vs-force does the thunderdome sort natively (heavy
 		/// creatures barely move; whatever stands its ground is locked in with you).</summary>
