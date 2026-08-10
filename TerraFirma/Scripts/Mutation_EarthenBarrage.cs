@@ -156,7 +156,9 @@ namespace XRL.World.Parts.Mutation
 				"Sculpted stones occupy your thrown weapon slot.\n" +
 				"Stones not held as a thrown weapon crumble to dust after " + ROCK_LIFETIME_MIN + "-" + ROCK_LIFETIME_MAX + " rounds.\n" +
 				"Damage increment: {{rules|" + GetThrowDamage(Level) + "}}\n" +
-				"Penetration bonus: {{rules|+" + GetThrowPenetrations(Level) + "}}\n" +
+				// DRAFT (pen-cap rework 2026-08-09, awaiting text signoff): the bonus line
+				// became a cap line; phrasing is Claude's until the user rules
+				"Stone penetration: your Strength modifier, up to {{rules|" + GetPenetrationCap(Level) + "}}\n" +
 				// AV/DV lines CUT with the whorl stat shifts (rebalance 2026-08-06)
 				"Stones in reserve whorl about you and deflect physical projectiles.\n" +
 				"Lasers and other energy attacks pass through the whorl.\n" +
@@ -169,7 +171,7 @@ namespace XRL.World.Parts.Mutation
 		public override void CollectStats(Templates.StatCollector stats)
 		{
 			stats.Set("Damage", GetThrowDamage(Level));
-			stats.Set("Penetrations", GetThrowPenetrations(Level));
+			stats.Set("PenetrationCap", GetPenetrationCap(Level));
 			stats.Set("TurnsPerCharge", GetTurnsPerCharge());
 			stats.Set("MaxCharges", MaxCharges(Level));
 			stats.Set("Lifetime", $"{ROCK_LIFETIME_MIN}-{ROCK_LIFETIME_MAX}");
@@ -446,24 +448,27 @@ namespace XRL.World.Parts.Mutation
 			GameObject stone = GameObject.Create(Resonant ? BLUEPRINT_RESONANT : BLUEPRINT);
 			stone.SetIntProperty("NeverStack", 1);
 			string scaledDamage = GetThrowDamage(Level);
-			int scaledPens = GetThrowPenetrations(Level);
-			// Attuned stones keep only a fifth of the trained penetration bonus (user ruling 2026-07-22:
-			// a fraction of the unattuned value, +1 at Lv10): vibro already matches penetration to the
-			// target's armor, and stacking the full bonus on top rolled ~6 penetrations against ANYTHING --
-			// double a normal stone's damage vs the soft targets normal stones are supposed to own.
-			// (Since the 2026-08-06 pen cut caps the trained bonus at +3, the fifth is 0 at every
-			// level -- resonant stones ride pure vibro now; the "+1 at Lv10" note is superseded.)
-			if (Resonant)
-				scaledPens /= 5;
+			// FLAT PEN BONUS RETIRED (L20 pass, RULED 2026-08-09 "yeag, that sounds great"
+			// over the simmed menu): the mutation now raises the stone's Penetration CAP
+			// (1+L/3) and the thrower's Strength mod fills it -- ThrownWeapon.cs:122, PV =
+			// min(StrMod, Penetration) + bonus, the same build-investment grammar as
+			// Fissure's pulse PV. Vanilla thrown caps run 0-12, ours 1..7 by L20. Ego-lean
+			// casters throw PV-1 pebble artillery; the L20 spike costs Str 30. Attuned
+			// stones get NO trained pen at all (RULED same sitting: "attuning loses your PV
+			// bonus entirely") -- pure vibro, the fifth-of-the-bonus bookkeeping retired.
 			if (stone.TryGetPart(out MeleeWeapon mw))
 			{
 				mw.BaseDamage = scaledDamage;
-				mw.PenBonus = scaledPens;
+				mw.PenBonus = 0;
+				if (!Resonant)
+					mw.MaxStrengthBonus = GetPenetrationCap(Level); // melee mirrors the throw: Str fills a level-scaled cap
 			}
 			if (stone.TryGetPart(out ThrownWeapon tw))
 			{
 				tw.Damage = scaledDamage;
-				tw.PenetrationBonus = scaledPens;
+				tw.PenetrationBonus = 0;
+				if (!Resonant)
+					tw.Penetration = GetPenetrationCap(Level);
 			}
 			return stone;
 		}
@@ -569,13 +574,15 @@ namespace XRL.World.Parts.Mutation
 			return $"{diceSize + 1}d6{(bonus != 0 ? $"+{bonus}" : "")}";
 		}
 
-		public static int GetThrowPenetrations(int Lv)
+		/// <summary>The stone's Penetration CAP -- how much of the thrower's Strength mod the
+		/// stone can carry into PV (ThrownWeapon.cs:122: PV = min(StrMod, Penetration)).
+		/// History: flat bonus Lv/2 -&gt; Lv/3 (2026-08-06 pen cut, "I lean penetration cut") -&gt;
+		/// RETIRED as a bonus at the L20 pass (RULED 2026-08-09): the same 1+Lv/3 ladder now
+		/// scales the cap instead, so penetration is bought with Strength, not granted by
+		/// level. 2/4/7 at L3/9/18, inside the vanilla thrown range (0-12, cluster at 9).</summary>
+		public static int GetPenetrationCap(int Lv)
 		{
-			// REBALANCED 2026-08-06 (was Lv/2; user picked the pen cut from the simmed menu: "I lean
-			// penetration cut"): the L4 electrofuge one-shots came from pen multiplication vs soft
-			// armor, so the pen bonus slowed to thirds -- +1/+2/+3 at 3/6/9. Damage dice untouched.
-			// Sim: design/eb_damage_sim.py.
-			return Lv / 3;
+			return 1 + Lv / 3;
 		}
 
 		public static int MaxCharges(int Lv)
