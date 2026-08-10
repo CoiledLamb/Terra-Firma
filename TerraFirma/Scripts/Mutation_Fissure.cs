@@ -252,13 +252,22 @@ namespace XRL.World.Parts.Mutation
 			// is the damage mode (3 hits): the worth-casting gate tightened from the rim radius
 			// to the coverage radius, with fringe casts coin-flipped so the AI leans point-blank
 			// (CLAUDE PICK at port time, spec's AI note; the flip is a feel dial)
-			if (IsMyActivatedAbilityAIUsable(ActivatedAbilityID))
+			bool usable = IsMyActivatedAbilityAIUsable(ActivatedAbilityID);
+			bool added = false;
+			if (usable)
 			{
 				if (E.Distance <= 1)
-					E.Add(COMMAND_ID);
+					added = true;
 				else if (E.Distance <= PULSE_COUNT && Stat.Random(1, 100) <= 50)
+					added = true;
+				if (added)
 					E.Add(COMMAND_ID);
 			}
+			// gate telemetry (first pulse boot 2026-08-09: fis-npc 0 casts in 20 turns even
+			// from inside coverage -- this line answers whether advertisement fires and the
+			// failure is downstream, or never fires at all). NPC-only; rides the TF-VERIFY strip.
+			if (!ParentObject.IsPlayer())
+				Helpers.VerifyLog("FIS", $"AI gate: {ParentObject.Blueprint} dist {E.Distance}, usable={usable} -> {(added ? "ADVERTISED" : "held")}");
 			return base.HandleEvent(E);
 		}
 

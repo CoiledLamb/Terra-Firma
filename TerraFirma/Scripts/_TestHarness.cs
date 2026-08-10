@@ -2589,10 +2589,20 @@ namespace XRL.World.Parts
 		/// scenarios measure throw cadence and cast advertisement, not aggro persistence.</summary>
 		private void ReassertHostileLocks(GameObject owner)
 		{
+			// telemetry every 5th tick (second pulse boot 2026-08-09, still 0 casts / 0
+			// throws): dist + Kill-goal survival + top goal name per actor -- Brain.Target
+			// READS from the Kill goal stack (decomp Brain.cs:512), so target=NULL here means
+			// the Kill goal died since the last re-lock, and the top-goal name says what ate it
+			bool telemetry = TurnsRemaining % 5 == 0;
 			if (Scenario == "fis")
 			{
-				if (FisCaster?.Brain != null && FisCaster.Brain.Target == null)
-					FisCaster.Brain.Target = owner;
+				if (FisCaster?.Brain != null)
+				{
+					if (FisCaster.Brain.Target == null)
+						FisCaster.Brain.Target = owner;
+					if (telemetry)
+						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("FIS", $"npc telemetry: {FisCaster.Blueprint} dist {FisCaster.DistanceTo(owner)}, target={(FisCaster.Brain.Target?.Blueprint ?? "NULL")}, topGoal={(FisCaster.Brain.Goals.Count > 0 ? FisCaster.Brain.Goals.Peek().GetType().Name : "none")}");
+				}
 				return;
 			}
 			Zone z = owner?.CurrentZone;
@@ -2600,8 +2610,13 @@ namespace XRL.World.Parts
 				return;
 			foreach (GameObject o in z.GetObjects())
 			{
-				if (o.HasPart<Cleo_TerraFirma_TestThrowCounter>() && o.Brain != null && o.Brain.Target == null)
-					o.Brain.Target = owner;
+				if (o.HasPart<Cleo_TerraFirma_TestThrowCounter>() && o.Brain != null)
+				{
+					if (o.Brain.Target == null)
+						o.Brain.Target = owner;
+					if (telemetry)
+						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"telemetry: {o.Blueprint} dist {o.DistanceTo(owner)}, target={(o.Brain.Target?.Blueprint ?? "NULL")}, topGoal={(o.Brain.Goals.Count > 0 ? o.Brain.Goals.Peek().GetType().Name : "none")}");
+				}
 			}
 		}
 
