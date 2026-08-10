@@ -1285,15 +1285,18 @@ namespace Cleo.TerraFirma.Scripts
 		/// <summary>fis-npc: the first NPC-caster scenario — a Hulking Baboon granted Fissure L5,
 		/// hostile-locked, 20 turns to cast. PASS = the zone gained loose fissure stones (a cast
 		/// happened); living-fall allegiance is REPORTED (seam-dependent). A 0-cast result is
-		/// itself the fis-npc answer: no AI advertisement.</summary>
+		/// itself the fis-npc answer: no AI advertisement. SPAWN DISTANCE 4-6 -> 2-3 (first
+		/// pulse boot 2026-08-09): the pulse pass tightened the worth-casting gate to coverage
+		/// (adjacency always, rings 2-3 coin-flipped), so a caster at 4-6 correctly never
+		/// advertises — the scenario now spawns inside coverage to test that the gate FIRES.</summary>
 		internal static void SetupFis(GameObject ply, string queue)
 		{
 			Cell origin = ply?.CurrentCell;
 			if (origin == null)
 				return;
-			List<Cell> ring = origin.GetLocalAdjacentCells(6);
-			ring.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat") || c.DistanceTo(origin) < 4);
-			if (ring.Count == 0) { Report("fis", false, "SETUP FAIL - no open cell at distance 4-6"); RunNext(queue, ply); return; }
+			List<Cell> ring = origin.GetLocalAdjacentCells(3);
+			ring.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat") || c.DistanceTo(origin) < 2);
+			if (ring.Count == 0) { Report("fis", false, "SETUP FAIL - no open cell at distance 2-3"); RunNext(queue, ply); return; }
 			GameObject caster = GameObject.Create("Hulking Baboon");
 			caster.SetIntProperty(SPAWN_MARK, 1);
 			caster.GetStat("Hitpoints").BaseValue = 150;
@@ -1581,7 +1584,11 @@ namespace Cleo.TerraFirma.Scripts
 					continue;
 				GameObject b = GameObject.Create(BABOON_BP);
 				b.SetIntProperty(SPAWN_MARK, 1);
-				b.GetStat("Hitpoints").BaseValue = 60;
+				// 60 HP was the single-hit wave's era: the pulse churn at a Str-invested L5
+				// (PV 7, 3-5 pens/pulse) dealt 60-77 across the ride and KILLED two probes
+				// (first pulse boot 2026-08-09), which under-counted every assert. The probes
+				// must survive all three pulses to testify.
+				b.GetStat("Hitpoints").BaseValue = 400;
 				c1.AddObject(b);
 				victims.Add(b);
 				starts[b] = c1;
@@ -1749,7 +1756,11 @@ namespace Cleo.TerraFirma.Scripts
 			if (GameObject.Validate(b3) && b3.CurrentCell != null) fails.Add("L4: third glass-jaw sandstone NOT felled (pulse chain broken at ring 3)");
 			if (GameObject.Validate(b4) && b4.CurrentCell != null) fails.Add("L4: ring-4 glass-jaw sandstone NOT felled (dissipating front must bite rim walls once)");
 			if (!GameObject.Validate(survivor) || survivor.CurrentCell != s1 || survivor.GetStat("Hitpoints").Value != survivorHP) fails.Add("L4: AV-999 survivor fell or took damage");
-			if (!GameObject.Validate(metal) || metal.CurrentCell != w1 || metal.GetStat("Hitpoints").Value != metalHP) fails.Add("L4: native-AV METAL wall felled or damaged (AV 30 vs PV 18 must hold untouched on zero penetrations)");
+			// "untouched" retired with the clamp (first pulse boot 2026-08-09): exploding pen
+			// dice give PV 18 a ~12% chip per bite vs AV 30, and three bites a cast make chips
+			// ROUTINE -- the wall must STAND (felling needs ~3 pens in one cast, <1%), but
+			// damage is legal now. Chip-vs-clean is reported, not asserted.
+			if (!GameObject.Validate(metal) || metal.CurrentCell != w1) fails.Add("L4: native-AV METAL wall FELL (AV 30 vs PV 18 must stand; felling odds are sub-1%)");
 			RedoubtCleanup(NewSince(zone, before));
 			if (GameObject.Validate(metal)) metal.Obliterate();
 			if (GameObject.Validate(survivor)) survivor.Obliterate();
@@ -2552,6 +2563,8 @@ namespace XRL.World.Parts
 					LoggedReadiness = true;
 					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("AUTO", $"hopper tick 1: live mill turning={MillTurning(MillLive)}, dead mill turning={MillTurning(MillDead)}");
 				}
+				if (Scenario == "scav" || Scenario == "fis")
+					ReassertHostileLocks(ParentObject);
 				TurnsRemaining--;
 				E.PreventAction = true;
 				if (TurnsRemaining <= 0)
@@ -2567,6 +2580,29 @@ namespace XRL.World.Parts
 				}
 			}
 			return base.HandleEvent(E);
+		}
+
+		/// <summary>Live-fire find, first pulse boot 2026-08-09 (scav: 0 throws in 116
+		/// baboon-turns, moveGoal flapping): a one-time Brain.Target assignment DECAYS as the
+		/// AI re-evaluates, and a passive target dummy never re-earns aggro -- the armed
+		/// baboons drifted into wander. The lock is re-asserted every tick now; these
+		/// scenarios measure throw cadence and cast advertisement, not aggro persistence.</summary>
+		private void ReassertHostileLocks(GameObject owner)
+		{
+			if (Scenario == "fis")
+			{
+				if (FisCaster?.Brain != null && FisCaster.Brain.Target == null)
+					FisCaster.Brain.Target = owner;
+				return;
+			}
+			Zone z = owner?.CurrentZone;
+			if (z == null)
+				return;
+			foreach (GameObject o in z.GetObjects())
+			{
+				if (o.HasPart<Cleo_TerraFirma_TestThrowCounter>() && o.Brain != null && o.Brain.Target == null)
+					o.Brain.Target = owner;
+			}
 		}
 
 		private static bool MillTurning(GameObject mill)
