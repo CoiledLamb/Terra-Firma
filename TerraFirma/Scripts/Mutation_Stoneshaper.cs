@@ -104,7 +104,10 @@ namespace XRL.World.Parts.Mutation
 				"Statue hit points: {{rules|" + GetHP(Level) + "}}\n" +
 				"Statue AV: {{rules|" + GetAV(Level) + "}}\n" +
 				"Statue damage increment: {{rules|" + GetNaturalDamage(Level) + "}}\n" +
-				"Statue to-hit bonus: +{{rules|" + GetToHitBonus(Level) + "}}\n" +
+				// to-hit line REMOVED with the retired flat bonus (2026-08-09): accuracy and
+				// penetration now ride the inherited physique, which the text above already
+				// documents ("inherits the creature's body plan and physique")
+
 				(duration == INFINITE_DURATION_PLACEHOLDER
 					? "The statue lasts {{rules|until destroyed}}. Carving another releases it.\n"
 					: "The statue lasts for {{rules|" + duration + "}} rounds.\n") +
@@ -599,7 +602,9 @@ namespace XRL.World.Parts.Mutation
 				item.DefaultBehavior = GameObjectFactory.Factory.CreateUnmodifiedObject(DEFAULT_BEHAVIOR_BP);
 				MeleeWeapon wp = item.DefaultBehavior.RequirePart<MeleeWeapon>();
 				wp.BaseDamage = GetNaturalDamage(Lv);
-				wp.HitBonus = GetToHitBonus(Lv);
+				// flat HitBonus DROPPED at the statue identity audit (RULED 2026-08-09): it
+				// stacked redundantly on the muse's inherited Agility, which already carries
+				// accuracy -- the second muse-choice lever alongside Strength-driven pens
 				wp.Slot = item.Type;
 				if (item.Type != null && museWeapons.TryGetValue(item.Type, out GameObject museWeapon))
 				{
@@ -623,8 +628,9 @@ namespace XRL.World.Parts.Mutation
 			Statue.AddPart(statsPart);
 			if (WallProps != null)
 			{
-				if (WallProps.MaterialType == "metal")
-					Statue.AddBaseStat("AV", 2);
+				// the hardcoded metal +2 AV was a DOUBLE-DIP (identity audit 2026-08-09):
+				// Merges.xml already gives metal walls StatName="AV" StatShift="2", so metal
+				// statues got +4. The XML rider is the single source now.
 				if (WallProps.StatName != null)
 					Statue.AddBaseStat(WallProps.StatName, WallProps.StatShift);
 				if (WallProps.MutationName != null)
@@ -758,10 +764,10 @@ namespace XRL.World.Parts.Mutation
 			return $"{dice}d3";
 		}
 
-		public static int GetToHitBonus(int Lv)
-		{
-			return (int)MathF.Floor(Lv / 3);
-		}
+		// GetToHitBonus RETIRED (identity audit, RULED 2026-08-09): the flat +Lv/3 stacked on
+		// the muse's inherited Agility, which already carries the statue's accuracy. Alongside
+		// the vibro cut (fist pens ride Strength, natural-weapon idiom), the muse's physique
+		// IS the combat profile now -- pick your likeness with intent.
 		#endregion
 	}
 }

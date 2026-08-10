@@ -57,8 +57,12 @@
 	</object>
 	<object Name="Cleo_TerraFirma_StoneshaperStatueNaturalWeapon" Inherits="NaturalWeapon">
 		<part Name="Render" DisplayName="{{y|gravelly haymaker}}" Tile="Creatures/natural-weapon-fist.bmp" ColorString="&amp;K" />
+		<!-- VibroWeapon CUT at the statue identity audit (RULED 2026-08-09): armor-matching
+		     penetration erased both enemy AV and the muse's inherited Strength. The fist now
+		     penetrates off Strength alone, uncapped per the natural-weapon idiom (vanilla
+		     NaturalWeapon base is MaxStrengthBonus 1000, user-verified direction) - pick a
+		     strong muse, hit harder. -->
 		<part Name="MeleeWeapon" MaxStrengthBonus="1000" BaseDamage="1d3+1" Skill="Cudgel" Stat="Strength" />
-		<part Name="VibroWeapon" ChargeUse="0" />
 	</object>
 	<object Name="Cleo_TerraFirma_StabilizerBands" Inherits="BaseArmlet">
 		<part Name="Render" DisplayName="stabilizer bands" Tile="items/sw_leather_bracers.bmp" ColorString="&amp;y" DetailColor="w" /> <!-- tile is a base-game reuse (leather bracer); swap for bespoke art whenever -->
