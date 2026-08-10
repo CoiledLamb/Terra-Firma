@@ -101,15 +101,19 @@ namespace XRL.World.Parts.Mutation
 		#endregion
 
 		#region Scaling (all values = design/redoubt-numbers-draft.md dials)
-		/// <summary>Level band 1-4: L1-3 / L4-6 / L7-9 / L10+.</summary>
-		public static int GetBand(int Lv) => Math.Min(4, 1 + (Lv - 1) / 3);
+		/// <summary>Level band, every 3 levels, UNCAPPED (L20 pass, RULED 2026-08-09: the cap
+		/// at 4 froze the fabric dials at L10 by inertia -- rapid advancement reaches L20, and
+		/// the ring keeps maturing with it; bands 5/6/7 land at L13/16/19).</summary>
+		public static int GetBand(int Lv) => 1 + (Lv - 1) / 3;
 
 		public static int GetRingRadius(int Lv) => RING_RADIUS; // fixed (rebalance 2026-08-06); signature kept for the call sites
 
 		/// <summary>Gaps in the rim, FEEL ROUND 1 (user, 2026-08-02): more at low levels -- 6/5/4/3
 		/// by band. The ruled proportional-completeness now runs on both axes: circumference grows
-		/// AND gap count falls as you level.</summary>
-		public static int GetGapCount(int Lv) => 7 - GetBand(Lv);
+		/// AND gap count falls as you level. L20 pass (RULED 2026-08-09 "probably fine to fully
+		/// enclose"): the ladder continues past the old cap -- 2/1/0 at bands 5/6/7 -- so a
+		/// rapid-advanced L19+ cast raises a naturally SEALED ring, no recast-refresh required.</summary>
+		public static int GetGapCount(int Lv) => Math.Max(0, 7 - GetBand(Lv));
 
 		/// <summary>FEEL ROUND 1 (user): "the ring feels a bit too square" -- the disk and rim are
 		/// Euclidean circles now, not Chebyshev squares. Integer tests: disk = d2 &lt;= r²+r
@@ -146,16 +150,24 @@ namespace XRL.World.Parts.Mutation
 		/// step first ("maybe 3d4 instead of 4d3"), then counts, with stun levels interleaved
 		/// ("it could also go to 4d4 after the first stun level, and repeat that pattern");
 		/// waypoints ruled: base 3d3/2d3/1d3, tail step at L4, stun at L5, 4d4 at L6).
-		/// Cadence: pulse p upgrades at levels 4(s-1)+p+1 -- front L2/6/10/14..., middle
-		/// L3/7/11..., tail L4/8/12... -- step 1 is d3-&gt;d4, later steps +1 die. L10 = 5d4/
-		/// 3d4/2d4 (paper 25); Ego-boosted ranks keep climbing the same staircase. These are
-		/// PER-PENETRATION rolls (pen sim tables in the spec's v5 section). Cells stay feel
-		/// dials; pinned-tail variant rejected same sitting ("i don't like pinned tail").</summary>
+		/// Cadence: pulse p upgrades at levels 4(s-1)+p+1 -- front L2/6/10/14/18, middle
+		/// L3/7/11/15/19, tail L4/8/12/16/20 -- steps ALTERNATE die-size and die-count (L20
+		/// pass amendment, see the method body). L10 = 4d5/3d4/2d4 (paper 24.5), L20 = 5d6/
+		/// 4d6/3d6 (42); rapid-advanced and Ego-boosted ranks keep climbing the same
+		/// staircase. These are PER-PENETRATION rolls (pen sim tables in the spec's v5
+		/// section). Cells stay feel dials; pinned-tail variant rejected same sitting ("i
+		/// don't like pinned tail").</summary>
 		public static string GetPulseDice(int Lv, int pulse)
 		{
+			// ALTERNATING steps (L20 pass, RULED 2026-08-09; user: "why don't the dice...
+			// repeat the pattern of increasing the dice value as well as number of dice?"):
+			// each pulse cycles die-size, then die-count -- 3d3 > 3d4 > 4d4 > 4d5 > 5d5 > 5d6
+			// -- so "hits HARDER, not just more" recurs all the way up (d5 is engine-legal,
+			// six base-game precedents). Same step levels as before: 4(s-1)+p+1.
 			int steps = Lv >= pulse + 1 ? (Lv - pulse - 1) / 4 + 1 : 0;
-			int count = (4 - pulse) + Math.Max(0, steps - 1);
-			return count + (steps == 0 ? "d3" : "d4");
+			int count = (4 - pulse) + steps / 2;
+			int die = 3 + (steps + 1) / 2;
+			return count + "d" + die;
 		}
 
 		/// <summary>Creature-hit PV (RULED 2026-08-08): 4 + Strength mod -- the melee-weapon
@@ -172,16 +184,16 @@ namespace XRL.World.Parts.Mutation
 		/// boosted ranks keep climbing. Supersedes the band ladder (was 1/2/3/4 at 1/4/7/10).</summary>
 		public static int GetStunRounds(int Lv) => 1 + (Lv - 1) / 4;
 
-		/// <summary>Stun save DC, STEPPED on the stun levels (RULED 2026-08-09: "make sure the
+		/// <summary>Stun save DC, +2 on every stun level (RULED 2026-08-09: "make sure the
 		/// stun isn't as strong as stunning force (via saves)," steps as "the shape of the
-		/// upgrade pattern," not a rider; realigned to the staircase's stun levels at the
-		/// user's prompt, "why is the save DC not in level 9?"): 16 at L1-4, 18 at L5-8, 20 at
-		/// L9+ -- each stun level buys rounds AND save difficulty together, no per-level
-		/// creep, capped at 20 (boosts buy rounds, never DC). Anchor (decomp-verified
-		/// StunningForce.cs:265): SF is Toughness 15+Level, flat 3 rounds -- SF reaches DC 25
-		/// by L10 where ours tops at 20; weaker via saves as ruled. The same DC gates the
-		/// wall-rider slam save, unchanged.</summary>
-		public static int GetStunSaveDC(int Lv) => Lv >= 9 ? 20 : (Lv >= 5 ? 18 : 16);
+		/// upgrade pattern," not a rider; realigned to the stun levels at "why is the save DC
+		/// not in level 9?"; the L20 pass removed my cap at the user's prompt, "why doesn't
+		/// the DC scale?"): 16/18/20/22/24 at L1/5/9/13/17, uncapped -- each stun level buys
+		/// rounds AND save difficulty together, no per-level creep. Anchor (decomp-verified
+		/// StunningForce.cs:265): SF is Toughness 15+Level, flat 3 rounds -- DC 25 by L10 and
+		/// 35 by L20 vs our 20/24; weaker via saves holds all the way up. The same DC gates
+		/// the wall-rider slam save, unchanged.</summary>
+		public static int GetStunSaveDC(int Lv) => 16 + 2 * ((Lv - 1) / 4);
 
 		/// <summary>Engine push force: weight-vs-force does the thunderdome sort natively (heavy
 		/// creatures barely move; whatever stands its ground is locked in with you).</summary>
@@ -207,8 +219,10 @@ namespace XRL.World.Parts.Mutation
 			}
 		}
 
-		/// <summary>Omnigeyser tier by band (2->1, 3->2, 4->3).</summary>
-		public static string GetGeyserBlueprint(int Lv) => "Cleo_TerraFirma_Rock_Omnigeyser" + Math.Max(1, GetBand(Lv) - 1);
+		/// <summary>Omnigeyser tier by band (2->1, 3->2, 4->3), clamped at tier 3 -- only three
+		/// blueprints exist, and the uncapped band ladder (L20 pass) must not compose a
+		/// phantom Omnigeyser4.</summary>
+		public static string GetGeyserBlueprint(int Lv) => "Cleo_TerraFirma_Rock_Omnigeyser" + Math.Min(3, Math.Max(1, GetBand(Lv) - 1));
 
 		/// <summary>% chance the rim raises a stone figure (USER RULED into v1: "figurine can come
 		/// in first pass"): 0/2/4/6 by band, at most one per cast. A figure is an event, not a fixture.</summary>
@@ -792,7 +806,9 @@ namespace XRL.World.Parts.Mutation
 		/// <summary>Per-cast wall share of the rim fabric, FEEL ROUND 2 (user 2026-08-03:
 		/// "probably something like 10 going to 75 (with variance of 5-15 as you progress, so
 		/// 75 could be 90 or 60)"): base 10/30/55/75 by band, rolled once per cast with
-		/// variance 5/8/12/15.</summary>
+		/// variance 5/8/12/15. L20 pass (band uncap, RULED 2026-08-09): the ladder continues
+		/// 85/92/98 at bands 5/6/7 with tightening variance -- a rapid-advanced rim converges
+		/// on solid rampart. Extension rows are CLAUDE dials under the standing delegation.</summary>
 		public static int GetWallShare(int Lv)
 		{
 			int baseShare, variance;
@@ -801,7 +817,10 @@ namespace XRL.World.Parts.Mutation
 				case 1: baseShare = 10; variance = 5; break;
 				case 2: baseShare = 30; variance = 8; break;
 				case 3: baseShare = 55; variance = 12; break;
-				default: baseShare = 75; variance = 15; break;
+				case 4: baseShare = 75; variance = 15; break;
+				case 5: baseShare = 85; variance = 10; break;
+				case 6: baseShare = 92; variance = 6; break;
+				default: baseShare = 98; variance = 2; break;
 			}
 			return Math.Max(0, Math.Min(100, baseShare + Stat.Random(-variance, variance)));
 		}
@@ -911,15 +930,13 @@ namespace XRL.World.Parts.Mutation
 			return Cleo_TerraFirma_StoneshaperWallProperties.IsNaturalStone(wall?.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>());
 		}
 
-		/// <summary>The wave's material read (RULED 2026-08-05, superseding the corridor ruling's
-		/// silent refusal; user: "really i'd have it just make the attack on any wall --
-		/// machinery still gets hurt by the earth, it just doesn't get destroyed ... it'd maybe
-		/// be less effective on constructed stone in the sense of 'can't fully break it', but
-		/// that would apply less to things like brinestalk or fungus walls"). Three classes:
-		/// natural stone falls and feeds the ring (unchanged); soft organics (wallProps
-		/// MaterialType "other": plant, fungus, wood -- DRAFT boundary) take the full attack
-		/// and can fall; everything else (metal, machine walls, constructed stone, unmarked
-		/// fulcrete/brick/ruins) is hurt but never destroyed.</summary>
+		/// <summary>The wave's material read (RULED 2026-08-05: attack any wall; the Hard
+		/// class's never-destroyed clamp REMOVED at the L20 pass, RULED 2026-08-09 --
+		/// "potentially fine it destroys all wall types"). The classes survive as bookkeeping,
+		/// not protection: natural stone feeds the ring's mass credits and dressing; soft
+		/// organics (MaterialType "other": plant, fungus, wood -- DRAFT boundary) and hard
+		/// walls (metal, machine, constructed stone, unmarked fulcrete/brick/ruins) fall by
+		/// their own AV and hit points but never feed the ring.</summary>
 		private enum WaveWallClass { Stone, Soft, Hard }
 
 		private static WaveWallClass ClassifyWaveWall(GameObject wall)
@@ -938,10 +955,16 @@ namespace XRL.World.Parts.Mutation
 		/// penetration roll vs the wall's AV, each penetration tearing away a share of the
 		/// wall's MAX hit points -- percent-of-max is the Burrowing Claws wall grammar, so
 		/// granite's five-digit health means granite endurance, not granite bookkeeping. Zero
-		/// penetrations: the stone shrugs, no damage, and the wave breaks on it. Hard-class
-		/// walls (see ClassifyWaveWall) have the damage clamped to leave 1 HP -- hurt by the
-		/// earth, never felled by it. All feedback is dust, never messages (user 2026-08-05:
-		/// popup spam). Returns whether the wall fell.</summary>
+		/// penetrations: the stone shrugs, no damage, and the wave breaks on it. HARD-CLASS
+		/// CLAMP REMOVED at the L20 pass (RULED 2026-08-09: "i think it's fine if we remove
+		/// the 1HP clamp," clarified "potentially fine it destroys all wall types" --
+		/// supersedes the 2026-08-05 never-destroyed half of attack-any-wall): every wall
+		/// class now stands or falls by its own AV and hit points. The practical boundary
+		/// survives as armor -- machine walls (AV ~30+) shrug the wave until roughly L8 and
+		/// only crumble reliably deep into rapid-advancement territory. Class still gates
+		/// mass credit and dressing (stone only). FLAGGED FOR FEEL: watch machinery casts.
+		/// All feedback is dust, never messages (user 2026-08-05: popup spam). Returns
+		/// whether the wall fell.</summary>
 		private bool WaveBitesWall(GameObject wall, Cell c)
 		{
 			WaveWallClass cls = ClassifyWaveWall(wall);
@@ -956,16 +979,6 @@ namespace XRL.World.Parts.Mutation
 			}
 			int maxHP = wall.GetStat("Hitpoints").BaseValue;
 			int dmg = Math.Max(1, maxHP * pens * CARVE_PCT_PER_PEN / 100);
-			if (cls == WaveWallClass.Hard)
-			{
-				dmg = Math.Min(dmg, wall.GetStat("Hitpoints").Value - 1); // can't fully break it
-				if (dmg <= 0)
-				{
-					Helpers.VerifyLog("FIS", $"CARVE attack @({c.X},{c.Y}): {wall.Blueprint} [Hard] AV {av} vs PV {pv} -- already at the clamp floor, no further damage");
-					SmokePuff(c, 1);
-					return false;
-				}
-			}
 			wall.TakeDamage(dmg, "from the heaving earth!", "Crushing", null, null,
 				Attacker: ParentObject, Owner: ParentObject, Source: ParentObject);
 			bool died = !GameObject.Validate(wall) || wall.CurrentCell == null || wall.IsInGraveyard();

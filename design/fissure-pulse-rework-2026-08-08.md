@@ -211,6 +211,33 @@ run ~19–43 (L1, PV 4–5 vs AV 0–4) through ~28–64 (L10, PV 10 vs AV 8–1
 spikes only where high PV meets under-leveled AV, which is the pen system's own behavior.
 MaxStrengthBonus-style pen cap stays reserved as a feel dial — measured pens run hot.
 
+### L20 pass amendments (RULED 2026-08-09, late sitting; audit design/level-20-audit-2026-08-09.md)
+
+Context: rapid advancement reaches L20 on physicals (user), so every ladder was audited
+past the old cap. Four rulings landed, all framed by the user as "why doesn't it keep
+going" questions — the caps were Claude conservatism, not design:
+
+- **Dice steps ALTERNATE size and count** ("why don't the dice... repeat the pattern of
+  increasing the dice value as well as number of dice?"): each pulse runs 3d3 > 3d4 >
+  4d4 > 4d5 > 5d5 > 5d6 at the same step levels. L10 = 4d5/3d4/2d4 (24.5), L20 =
+  5d6/4d6/3d6 (42). d5 is engine-legal (six base-game dice strings).
+- **Stun DC scales forever** ("why doesn't the DC scale?"): 16 + 2 per stun level —
+  16/18/20/22/24 at L1/5/9/13/17, uncapped. SF comparison holds everywhere (SF: 35 by L20).
+- **Fabric bands uncapped** ("why is the fabric band frozen"): GetBand's cap at 4 removed;
+  gaps continue 3/2/1/0 at bands 4/5/6/7 — L19+ raises a naturally SEALED ring (RULED:
+  "probably fine to fully enclose"); wall share continues 85/92/98 with tightening
+  variance (extension rows = Claude dials under the delegation); geyser blueprint clamped
+  at tier 3 (only three exist).
+- **Hard-class 1-HP clamp REMOVED** ("i think it's fine if we remove the 1HP clamp,"
+  clarified "potentially fine it destroys all wall types" — supersedes the never-destroyed
+  half of attack-any-wall 2026-08-05): every wall class falls by its own AV and HP. The
+  boundary survives as ARMOR: machine walls (AV ~30+) shrug the wave until ~L8 and only
+  crumble reliably in rapid-advancement territory. Class still gates mass credit and
+  dressing (stone only). FLAGGED FOR FEEL: watch machinery casts.
+
+Still open from the audit: EB pen bonus past L10 (Lv/3 reaches +6) and Calcify wall count
+past L10 (reaches 14) — flagged, unruled.
+
 ### The rest of the table
 
 | Dial | Draft | Notes |

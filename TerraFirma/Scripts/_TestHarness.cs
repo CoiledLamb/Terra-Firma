@@ -1678,10 +1678,10 @@ namespace Cleo.TerraFirma.Scripts
 		/// entirely by pulse 3. A ring-4 glass-jaw probes the dissipating-front bite (CLAUDE
 		/// PICK at port time, flagged for feel: rim walls take ONE bite on the way out). The
 		/// armored survivor (AV 999, bitten up to 3 times, zero pens each) must STAND
-		/// untouched -- the leftover half of the ruling. ATTACK-ANY-WALL (RULED 2026-08-05)
-		/// carried: glass-jaw WOOD falls (Soft), AV-0 METAL is damaged but STANDS across all
-		/// three bites (the 1-HP clamp), native-AV metal holds untouched (PV 18 vs AV 30,
-		/// the zero-pen path).</summary>
+		/// untouched -- the leftover half of the ruling. CLAMP REMOVED (L20 pass, RULED
+		/// 2026-08-09 "potentially fine it destroys all wall types"): glass-jaw WOOD falls
+		/// (Soft), AV-0 METAL now FALLS too (armor, not class, is the boundary), native-AV
+		/// metal still holds untouched (PV 18 vs AV 30, the zero-pen path).</summary>
 		private static void RedoubtCarve(GameObject ply, Zone zone, Cell origin, XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure fis)
 		{
 			Cell e1 = origin.GetCellFromDirection("E");
@@ -1712,8 +1712,7 @@ namespace Cleo.TerraFirma.Scripts
 			GameObject sand2 = RedoubtRigWall(NATURAL_WALL_BP, e2, 0, 1);
 			GameObject survivor = RedoubtRigWall(NATURAL_WALL_BP, s1, 999);
 			int survivorHP = survivor.GetStat("Hitpoints").Value;
-			GameObject metal = RedoubtRigWall(METAL_WALL_BP, w1, 0); // AV 0: pens guaranteed, the Hard-clamp probe (3 clamped bites now)
-			int metalHP = metal.GetStat("Hitpoints").Value;
+			GameObject metal = RedoubtRigWall(METAL_WALL_BP, w1, 0); // AV 0: pens guaranteed -- clamp REMOVED (L20 pass), so it must FALL now
 			GameObject wood = RedoubtRigWall(WOOD_WALL_BP, n1, 0, 1); // glass-jaw Soft: must fall to the wave
 			HashSet<GameObject> before = SnapshotZone(zone);
 			RedoubtCast(ply, fis, 1);
@@ -1721,8 +1720,7 @@ namespace Cleo.TerraFirma.Scripts
 			if (GameObject.Validate(sand2) && sand2.CurrentCell != null) fails.Add("L1: second glass-jaw sandstone NOT felled (pulse 2 must surge the breach and bite ring 2)");
 			if (!GameObject.Validate(survivor) || survivor.CurrentCell != s1) fails.Add("L1: AV-999 survivor FELL (armor must hold)");
 			else if (survivor.GetStat("Hitpoints").Value != survivorHP) fails.Add("L1: AV-999 survivor took damage on zero penetrations");
-			if (!GameObject.Validate(metal) || metal.CurrentCell != w1) fails.Add("L1: AV-0 METAL wall FELL (Hard clamp must hold it at >=1 HP through all three bites)");
-			else if (metal.GetStat("Hitpoints").Value >= metalHP) fails.Add("L1: AV-0 METAL wall took no damage (Hard class must be attacked; AV 0 guarantees penetrations)");
+			if (GameObject.Validate(metal) && metal.CurrentCell != null) fails.Add("L1: AV-0 METAL wall STANDING (clamp removed 2026-08-09 -- all wall types fall by AV+HP, and AV 0 guarantees felling pens)");
 			if (GameObject.Validate(wood) && wood.CurrentCell != null) fails.Add("L1: glass-jaw WOOD wall NOT felled (Soft class takes the full attack)");
 			RedoubtCleanup(NewSince(zone, before));
 			if (GameObject.Validate(sand2)) sand2.Obliterate();
@@ -1738,7 +1736,7 @@ namespace Cleo.TerraFirma.Scripts
 			GameObject b3 = RedoubtRigWall(NATURAL_WALL_BP, e3, 0, 1);
 			GameObject b4 = RedoubtRigWall(NATURAL_WALL_BP, e4, 0, 1); // ring 4: the front-bite probe
 			metal = RedoubtRigWall(METAL_WALL_BP, w1);
-			metalHP = metal.GetStat("Hitpoints").Value;
+			int metalHP = metal.GetStat("Hitpoints").Value;
 			if (!GameObject.Validate(survivor) || survivor.CurrentCell != s1)
 			{
 				survivor = RedoubtRigWall(NATURAL_WALL_BP, s1, 999);
@@ -1757,7 +1755,7 @@ namespace Cleo.TerraFirma.Scripts
 			if (GameObject.Validate(survivor)) survivor.Obliterate();
 			Report("redoubt.carve", fails.Count == 0,
 				fails.Count == 0
-					? "per-pulse bites hold: the L1 two-file fell one wall per pulse, the L4 three-file fell entirely, the ring-4 wall fell to the front's single bite; the AV-999 survivor stood untouched at both bands (leftover walls); attack-any-wall carried -- glass-jaw wood FELL (Soft), AV-0 metal damaged but standing across three clamped bites (Hard), native-AV metal untouched on zero pens"
+					? "per-pulse bites hold: the L1 two-file fell one wall per pulse, the L4 three-file fell entirely, the ring-4 wall fell to the front's single bite; the AV-999 survivor stood untouched at both bands (armor is the boundary); clamp-removed rules verified -- glass-jaw wood AND AV-0 metal both FELL, native-AV metal untouched on zero pens"
 					: string.Join("; ", fails.ToArray()));
 		}
 
