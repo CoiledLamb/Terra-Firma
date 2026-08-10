@@ -18,11 +18,16 @@ namespace XRL.World.Parts.Mutation
 		private const int BASE_WALLS_CREATED = 4; // 4 at Lv1, exactly 9 at Lv10 -- Force Wall's count at full investment, in permanent stone
 
 		// RULED 2026-08-06 (rebalance pass, user: "we can try out cool down"): with true-copy walls,
-		// the every-level lattice interleaves -- even levels buy +1 wall, odd levels buy -10 cooldown.
-		// Base idiom precedent for declining cooldowns: Burgeoning 115-10L, Teleport Other 115-10L,
-		// Belcher 210-10L (all floor-clamped). Lv1 stays at the old 90.
+		// the every-level lattice interleaves -- even levels buy +1 wall, odd levels buy the
+		// cooldown step. RE-DIALED at the L20 pass (RULED 2026-08-09, user's own shape: "what if
+		// the cooldown was -5 each *other* level"): the step halved 10 -> 5, so the 100 -> 50
+		// budget spreads across ten odd-level steps and the floor lands EXACTLY at L19 -- every
+		// level through 20 buys something, no dead half past the old L9 plateau. Accepted with
+		// open eyes: the mid game slows (L9 waits 75 where it waited 50); the fortress comes
+		// slower unless you invest past 10. Declining-cooldown precedent: Burgeoning 115-10L,
+		// Teleport Other 115-10L, Belcher 210-10L (all floor-clamped).
 		private const int COOLDOWN_MAX = 100;
-		private const int COOLDOWN_STEP = 10;
+		private const int COOLDOWN_STEP = 5;
 		private const int COOLDOWN_FLOOR = 50;
 		#endregion
 
@@ -312,8 +317,9 @@ namespace XRL.World.Parts.Mutation
 		// GetWallHp RETIRED 2026-08-06 (user rebalance: "no longer gain HP scaling per level") --
 		// walls carry their source blueprint's own hit points; level buys count only.
 
-		/// <summary>90/90, 80/80, 70/70, 60/60, 50/50 by level pair -- each odd level past 1 shaves
-		/// 10 rounds, floor 50 (Stunning Force's flat; half Force Wall's 100).</summary>
+		/// <summary>95 at L1 falling 5 per odd level to the 50 floor at L19 (re-dial RULED
+		/// 2026-08-09; was -10/odd flooring at L9, which left the odd half of the lattice dead
+		/// through boost territory). 50 = Stunning Force's flat, half Force Wall's 100.</summary>
 		public static int GetCooldown(int Lv) => Math.Max(COOLDOWN_MAX - COOLDOWN_STEP * ((Lv + 1) / 2), COOLDOWN_FLOOR);
 		#endregion
 	}
