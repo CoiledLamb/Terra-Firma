@@ -1303,8 +1303,12 @@ namespace Cleo.TerraFirma.Scripts
 			Mutations mutations = caster.RequirePart<Mutations>();
 			mutations.AddMutation(new XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure(), 5);
 			ring[0].AddObject(caster);
-			if (caster.Brain != null)
-				caster.Brain.Target = ply;
+			// DIRECTED kill (root cause of the 0-cast boots, decomp Kill.cs:506): a plain
+			// Brain.Target assignment makes a NON-directed Kill goal, which pops itself
+			// every turn against a target the actor isn't hostile to -- and baboon REP on
+			// the test character (figurine scenarios) made the player exactly that. The
+			// Directed flag skips the hostility check; the harness orders the kill.
+			caster.Brain?.WantToKill(ply, "harness", Directed: true);
 			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "fis", TurnsRemaining = 20, TurnsTotal = 20, Queue = queue };
 			driver.InitFis(caster, CountRingPieces(ply.CurrentZone));
 			ply.AddPart(driver);
@@ -2339,10 +2343,11 @@ namespace Cleo.TerraFirma.Scripts
 				}
 				baboon.AddPart(new Cleo_TerraFirma_TestThrowCounter());
 				ring[i].AddObject(baboon);
-				// hostile-lock onto the player: a live run produced 0 throws in 118 turns because
-				// the baboons never acquired ANY target -- engagement is arena-dependent unless forced
-				if (baboon.Brain != null)
-					baboon.Brain.Target = ply; // direct target assignment; faction hostility does the rest
+				// DIRECTED kill (root cause found 2026-08-09, decomp Kill.cs:506): plain
+				// Brain.Target makes a NON-directed Kill goal that self-pops vs targets the
+				// baboon isn't feeling-hostile to (figurine rep!) -- "arena-dependent
+				// engagement" was this. Directed skips the hostility check.
+				baboon.Brain?.WantToKill(ply, "harness", Directed: true);
 				spawned++;
 			}
 			if (spawned == 0) { Report("scav", false, "SETUP FAIL - no open cells at distance 4-6 for baboons"); RunNext(queue, ply); return; }
@@ -2599,7 +2604,7 @@ namespace XRL.World.Parts
 				if (FisCaster?.Brain != null)
 				{
 					if (FisCaster.Brain.Target == null)
-						FisCaster.Brain.Target = owner;
+						FisCaster.Brain.WantToKill(owner, "harness", Directed: true); // Directed: survives the hostility check (Kill.cs:506)
 					if (telemetry)
 					{
 						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("FIS", $"npc telemetry: {FisCaster.Blueprint} dist {FisCaster.DistanceTo(owner)}, target={(FisCaster.Brain.Target?.Blueprint ?? "NULL")}, topGoal={(FisCaster.Brain.Goals.Count > 0 ? FisCaster.Brain.Goals.Peek().GetType().Name : "none")}");
@@ -2623,7 +2628,7 @@ namespace XRL.World.Parts
 				if (o.HasPart<Cleo_TerraFirma_TestThrowCounter>() && o.Brain != null)
 				{
 					if (o.Brain.Target == null)
-						o.Brain.Target = owner;
+						o.Brain.WantToKill(owner, "harness", Directed: true); // Directed: survives the hostility check (Kill.cs:506)
 					if (telemetry)
 						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCAV", $"telemetry: {o.Blueprint} dist {o.DistanceTo(owner)}, target={(o.Brain.Target?.Blueprint ?? "NULL")}, topGoal={(o.Brain.Goals.Count > 0 ? o.Brain.Goals.Peek().GetType().Name : "none")}");
 				}
