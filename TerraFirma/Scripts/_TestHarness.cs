@@ -2601,7 +2601,17 @@ namespace XRL.World.Parts
 					if (FisCaster.Brain.Target == null)
 						FisCaster.Brain.Target = owner;
 					if (telemetry)
+					{
 						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("FIS", $"npc telemetry: {FisCaster.Blueprint} dist {FisCaster.DistanceTo(owner)}, target={(FisCaster.Brain.Target?.Blueprint ?? "NULL")}, topGoal={(FisCaster.Brain.Goals.Count > 0 ? FisCaster.Brain.Goals.Peek().GetType().Name : "none")}");
+						// end-to-end probe (third pulse boot 2026-08-09: zero gate lines
+						// despite a live Kill goal inside coverage): call the event chain
+						// DIRECTLY. If the mutation's gate line fires here with a command in
+						// the list, the chain works and the AI's tactic loop simply never
+						// consults abilities for this actor; if it stays silent, the event
+						// never reaches the mutation part at all.
+						var cmds = AIGetOffensiveAbilityListEvent.GetFor(FisCaster, owner);
+						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("FIS", $"npc probe: direct GetFor -> {(cmds?.Count ?? -1)} command(s)");
+					}
 				}
 				return;
 			}
