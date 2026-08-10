@@ -1686,8 +1686,11 @@ namespace Cleo.TerraFirma.Scripts
 		/// fells them, and vs AV 0 the wave always penetrates) make the CHAIN asserts
 		/// deterministic: a two-file falls one wall per pulse at ANY level (pulse 1 fells ring
 		/// 1, pulse 2 surges the breach and fells ring 2), and at L4 a three-file falls
-		/// entirely by pulse 3. A ring-4 glass-jaw probes the dissipating-front bite (CLAUDE
-		/// PICK at port time, flagged for feel: rim walls take ONE bite on the way out). The
+		/// entirely by pulse 3 -- whose ring IS the rim since the radius-3 re-dial (RULED
+		/// 2026-08-10), so the three-file's last wall doubles as the rim-bite probe. The
+		/// ring-4 glass-jaw INVERTED same re-dial: it now sits BEYOND everything, and at 1 HP
+		/// any bite would fell it -- it must STAND, proving the front never bites past
+		/// coverage (the old front-bite window is empty at radius 3). The
 		/// armored survivor (AV 999, bitten up to 3 times, zero pens each) must STAND
 		/// untouched -- the leftover half of the ruling. CLAMP REMOVED (L20 pass, RULED
 		/// 2026-08-09 "potentially fine it destroys all wall types"): glass-jaw WOOD falls
@@ -1738,14 +1741,15 @@ namespace Cleo.TerraFirma.Scripts
 			if (GameObject.Validate(wood)) wood.Obliterate();
 			if (GameObject.Validate(metal)) metal.Obliterate(); // cast B wants the native-AV holds probe, not the clamp probe
 
-			// cast B -- L4: the three-file falls entirely (one wall per pulse), the ring-4
-			// glass-jaw falls to the dissipating front's single bite, the survivor stands for
-			// the at-all-levels claim, and a NATIVE-AV metal wall (AV 30 vs PV 18: zero pens
-			// ever) probes the attacked-but-untouched path of the Hard class
+			// cast B -- L4: the three-file falls entirely (one wall per pulse; ring 3 IS the
+			// rim now), the ring-4 glass-jaw sits beyond the radius-3 rim and must STAND
+			// untouched (no front overreach), the survivor stands for the at-all-levels claim,
+			// and a NATIVE-AV metal wall (AV 30 vs PV 18: zero pens ever) probes the
+			// attacked-but-untouched path of the Hard class
 			GameObject b1 = RedoubtRigWall(NATURAL_WALL_BP, e1, 0, 1);
 			GameObject b2 = RedoubtRigWall(NATURAL_WALL_BP, e2, 0, 1);
 			GameObject b3 = RedoubtRigWall(NATURAL_WALL_BP, e3, 0, 1);
-			GameObject b4 = RedoubtRigWall(NATURAL_WALL_BP, e4, 0, 1); // ring 4: the front-bite probe
+			GameObject b4 = RedoubtRigWall(NATURAL_WALL_BP, e4, 0, 1); // ring 4: BEYOND the radius-3 rim -- the no-overreach probe (1 HP: any bite fells it)
 			metal = RedoubtRigWall(METAL_WALL_BP, w1);
 			int metalHP = metal.GetStat("Hitpoints").Value;
 			if (!GameObject.Validate(survivor) || survivor.CurrentCell != s1)
@@ -1758,7 +1762,7 @@ namespace Cleo.TerraFirma.Scripts
 			if (GameObject.Validate(b1) && b1.CurrentCell != null) fails.Add("L4: first glass-jaw sandstone NOT felled");
 			if (GameObject.Validate(b2) && b2.CurrentCell != null) fails.Add("L4: second glass-jaw sandstone NOT felled (pulse chain broken at ring 2)");
 			if (GameObject.Validate(b3) && b3.CurrentCell != null) fails.Add("L4: third glass-jaw sandstone NOT felled (pulse chain broken at ring 3)");
-			if (GameObject.Validate(b4) && b4.CurrentCell != null) fails.Add("L4: ring-4 glass-jaw sandstone NOT felled (dissipating front must bite rim walls once)");
+			if (!GameObject.Validate(b4) || b4.CurrentCell == null) fails.Add("L4: ring-4 glass-jaw sandstone TOUCHED (it sits beyond the radius-3 rim -- the front must not bite past coverage)");
 			if (!GameObject.Validate(survivor) || survivor.CurrentCell != s1 || survivor.GetStat("Hitpoints").Value != survivorHP) fails.Add("L4: AV-999 survivor fell or took damage");
 			// "untouched" retired with the clamp (first pulse boot 2026-08-09): exploding pen
 			// dice give PV 18 a ~12% chip per bite vs AV 30, and three bites a cast make chips
@@ -1768,9 +1772,10 @@ namespace Cleo.TerraFirma.Scripts
 			RedoubtCleanup(NewSince(zone, before));
 			if (GameObject.Validate(metal)) metal.Obliterate();
 			if (GameObject.Validate(survivor)) survivor.Obliterate();
+			if (GameObject.Validate(b4)) b4.Obliterate(); // expected to STAND now (radius-3 re-dial) -- clear it
 			Report("redoubt.carve", fails.Count == 0,
 				fails.Count == 0
-					? "per-pulse bites hold: the L1 two-file fell one wall per pulse, the L4 three-file fell entirely, the ring-4 wall fell to the front's single bite; the AV-999 survivor stood untouched at both bands (armor is the boundary); clamp-removed rules verified -- glass-jaw wood AND AV-0 metal both FELL, native-AV metal untouched on zero pens"
+					? "per-pulse bites hold: the L1 two-file fell one wall per pulse, the L4 three-file fell entirely (ring 3 = the rim since the radius-3 re-dial), the ring-4 wall stood untouched beyond the rim (no front overreach); the AV-999 survivor stood untouched at both bands (armor is the boundary); clamp-removed rules verified -- glass-jaw wood AND AV-0 metal both FELL, native-AV metal untouched on zero pens"
 					: string.Join("; ", fails.ToArray()));
 		}
 

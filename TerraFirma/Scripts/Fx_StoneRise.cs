@@ -571,6 +571,11 @@ namespace Cleo.TerraFirma.Scripts
 					}
 				}
 			}
+			// the radius-3 re-dial (RULED 2026-08-10) folded pulse 3's ring into the rim itself:
+			// with two interior churn beats, the THIRD descending shake (concept B's ruled count)
+			// rides the rim punch-through -- the rim IS beat 3 now. (No-op at radius 4+.)
+			if (beats < BEAT_AMP.Length)
+				schedule.ShakeTimes.Add((rimStart, SHAKE_MAG_1 - beats * SHAKE_MAG_STEP));
 			// the rim: plates of rampart punching through together, held until the fabric lands
 			foreach (List<Cell> plate in rimPlates)
 			{

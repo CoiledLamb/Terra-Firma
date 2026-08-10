@@ -18,8 +18,9 @@ namespace XRL.World.Parts.Mutation
 	/// ring t (origin tile included, caster exempt) at attenuating dice, then pushes the hit
 	/// one ring outward (clamp ruled). Pulse hits are ATTACKS at PV 4 + Strength mod (the
 	/// BC-split fork, ruled); walls take one carve-as-attack bite per covering pulse
-	/// (repetition digs -- the depth ladder retired). The rim still rises at radius 4 as a
-	/// NON-EXPIRING ring; rim eviction bounces or slams whoever stands where it erupts.
+	/// (repetition digs -- the depth ladder retired). The rim rises at radius 3 (re-dialed
+	/// from 4 at the first live look, RULED 2026-08-10) as a NON-EXPIRING ring; rim
+	/// eviction bounces or slams whoever stands where it erupts.
 	/// Items are never destroyed and never moved (loot rule, ruled). Non-wave numbers per
 	/// design/redoubt-numbers-draft.md -- every constant is a feel dial. Prior casts
 	/// preserved at tags fissure-v2-grenade and fissure-v3-redoubt.
@@ -31,10 +32,15 @@ namespace XRL.World.Parts.Mutation
 		private const string COMMAND_ID = "Cleo_TerraFirma_CommandFissure";
 		// REBALANCED 2026-08-06 (user: "instead of fissure range expanding with level, it could
 		// get a bit more damage and stun increment"; radius 4 + ladders proposed, user: "sounds
-		// fine"): the ring is a FIXED radius 4 at every level -- the scaling budget moved into
-		// the damage and stun ladders below. Early-level side effect accepted: L1-3 rings grew
-		// from radius 2 to 4. Progression feel now rides gap count + wall share alone.
-		private const int RING_RADIUS = 4;
+		// fine"): the ring is a FIXED radius at every level -- the scaling budget moved into
+		// the damage and stun ladders below. Progression feel rides gap count + wall share.
+		// RE-DIALED 4 -> 3 (USER RULED 2026-08-10, first live look at the pulse build: "it
+		// looks like the new version is 1 radius too big? ... i think the ring radius should
+		// be 3"; supersedes the 08-06 radius-4 freeze): the rim now sits ON pulse 3's outer
+		// ring -- rim walls take their single bite from the third pulse itself, and the
+		// dissipating front's bite window goes empty (see the front pass), so nothing
+		// double-bites and the one-bite rim grammar holds.
+		private const int RING_RADIUS = 3;
 		// FEEL ROUND 1 (user, 2026-08-02): "walls feel too solid at lower levels - need more gaps"
 		// -- fixed 3 became a falling ladder; see GetGapCount. Crack-gates commented out same round.
 		// private const int CRACK_GATE_CHANCE = 50; // % per gap: the doors made of dice (BETA-HELD, feel round 1)
@@ -248,9 +254,9 @@ namespace XRL.World.Parts.Mutation
 
 		public override bool HandleEvent(AIGetOffensiveAbilityListEvent E)
 		{
-			// pulse coverage is rings 1-3 (a ring-4 target takes only the rim), and adjacency
-			// is the damage mode (3 hits): the worth-casting gate tightened from the rim radius
-			// to the coverage radius, with fringe casts coin-flipped so the AI leans point-blank
+			// pulse coverage is rings 1-3 (since the radius-3 re-dial that includes the rim
+			// ring itself), and adjacency is the damage mode (3 hits): the worth-casting gate
+			// rides the coverage radius, with fringe casts coin-flipped so the AI leans point-blank
 			// (CLAUDE PICK at port time, spec's AI note; the flip is a feel dial)
 			bool usable = IsMyActivatedAbilityAIUsable(ActivatedAbilityID);
 			bool added = false;
@@ -527,12 +533,14 @@ namespace XRL.World.Parts.Mutation
 				Helpers.VerifyLog("FIS", $"churn total: {kv.Key.Blueprint} took {kv.Value} pulse hit(s)");
 
 			// ---- the dissipating front (spec's OPEN item, CLAUDE PICK at port time -- log
-			// says so, flagged for feel): the wave still travels to radius 4 to place the rim
-			// (blocked rays shadow it, unchanged), and it bites each ring-4 wall it reaches
-			// ONCE on the way out. Reasoning: the old full-radius carve reached rim walls, and
-			// a rim wall that can never fall would shadow its own rim cell on every recast.
-			// Rings 1-3 got their pulse bites already; the window stops re-bites here.
-			HashSet<Cell> reached = Sweep(radius, radius, radius, null);
+			// says so, flagged for feel): the wave still travels to the rim radius to place the
+			// ring (blocked rays shadow it, unchanged). Bite window = only rings the pulses did
+			// NOT cover: at radius 3 (re-dial, RULED 2026-08-10) the rim ring IS pulse 3's outer
+			// ring, so the window is empty and every rim wall keeps its single pulse-3 bite --
+			// a wall that held still blocks and shadows, the old leftover grammar unchanged.
+			// (At any radius > PULSE_COUNT the window is [PULSE_COUNT+1, radius], the pre-re-dial
+			// behavior exactly.)
+			HashSet<Cell> reached = Sweep(radius, PULSE_COUNT + 1, radius, null);
 			int carvedMass = carved.Count; // the fallen reappear as ring fabric
 			Helpers.VerifyLog("FIS", $"front pass: {reached.Count} cell(s) reached to the rim, carvedMass={carvedMass}, ownFelled={ownFelled}");
 
