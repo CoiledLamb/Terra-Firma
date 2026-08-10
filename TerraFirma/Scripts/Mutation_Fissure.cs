@@ -16,8 +16,9 @@ namespace XRL.World.Parts.Mutation
 	/// PASS, spec design/fissure-pulse-rework-2026-08-08.md, every shape item RULED): the
 	/// single-hit wave became THREE PULSES in one action -- pulse t hits everything within
 	/// ring t (origin tile included, caster exempt) at attenuating dice, then pushes the hit
-	/// one ring outward (clamp ruled). Pulse hits are ATTACKS at PV 4 + Strength mod (the
-	/// BC-split fork, ruled); walls take one carve-as-attack bite per covering pulse
+	/// one ring outward (clamp ruled). Pulse hits are ATTACKS at PV = Strength mod (the
+	/// BC-split fork, ruled; corrected 2026-08-10 -- the engine's base 4 is display-only,
+	/// see GetCreaturePV); walls take one carve-as-attack bite per covering pulse
 	/// (repetition digs -- the depth ladder retired). The rim rises at radius 3 (re-dialed
 	/// from 4 at the first live look, RULED 2026-08-10) as a NON-EXPIRING ring; rim
 	/// eviction bounces or slams whoever stands where it erupts.
@@ -176,12 +177,17 @@ namespace XRL.World.Parts.Mutation
 			return count + "d" + die;
 		}
 
-		/// <summary>Creature-hit PV (RULED 2026-08-08): 4 + Strength mod -- the melee-weapon
-		/// grammar itself, BC's claws taking Str like any weapon. A level-scaled pen bonus was
-		/// REJECTED same sitting (user: "penetration bonus can be a slippery slope due to how
-		/// armor overpens work"); the armor curve is answered by build investment instead. A
-		/// MaxStrengthBonus-style cap stays reserved as a feel dial if overpen shows vs chaff.</summary>
-		public int GetCreaturePV() => 4 + ParentObject.StatMod("Strength");
+		/// <summary>Creature-hit PV (RULED 2026-08-08 as "4 + Strength mod, the melee-weapon
+		/// grammar itself"; CORRECTED 2026-08-10, user-confirmed after the first live churn
+		/// one-shot Joppa: the engine's base 4 is DISPLAY-ONLY). Decomp: displayed PV =
+		/// mechanical + RuleSettings.VISUAL_PENETRATION_BONUS (4), appended in name-lines and
+		/// stat text only -- MeleeWeapon.GetNormalPenetration rolls PenBonus (0 on ordinary
+		/// weapons) + capped Str mod, no 4 anywhere mechanical. The old 4+Str was a unit
+		/// error: display units fed to the roll, a weapon reading ~11, hence 3-5 guaranteed
+		/// pens vs chaff. Mechanical grammar now: Strength mod ALONE; any future user-facing
+		/// PV text must add the visual 4 back. The level-scaled bonus stays REJECTED
+		/// (2026-08-08 "slippery slope"); the MaxStrengthBonus-style cap stays reserved.</summary>
+		public int GetCreaturePV() => ParentObject.StatMod("Strength");
 
 		/// <summary>Stun rounds ride the staircase's stun levels (RULED 2026-08-09: "the stun
 		/// should hit at level 5" then the cadence repeats -- L5/9/13...): 1 at L1-4, 2 at
@@ -296,7 +302,7 @@ namespace XRL.World.Parts.Mutation
 			CooldownMyActivatedAbility(ActivatedAbilityID, GetCooldown(Level));
 			ParentObject.PlayWorldSound(SLAM_SOUND, 1f, Combat: true);
 			XDidY(ParentObject, "drive", "a wave through the earth", "!", ColorAsGoodFor: ParentObject);
-			Helpers.VerifyLog("FIS", $"PULSE cast by {ParentObject.Blueprint} Lv{Level}: radius={radius}, dice={GetPulseDice(Level, 1)}/{GetPulseDice(Level, 2)}/{GetPulseDice(Level, 3)}, creaturePV={creaturePV} (4+Str), wallPV={GetCarvePV(Level)}, stun={GetStunRounds(Level)}r DC{GetStunSaveDC(Level)}");
+			Helpers.VerifyLog("FIS", $"PULSE cast by {ParentObject.Blueprint} Lv{Level}: radius={radius}, dice={GetPulseDice(Level, 1)}/{GetPulseDice(Level, 2)}/{GetPulseDice(Level, 3)}, creaturePV={creaturePV} (Str mod; engine's +4 is display-only), wallPV={GetCarvePV(Level)}, stun={GetStunRounds(Level)}r DC{GetStunSaveDC(Level)}");
 
 			// ---- the three pulses (spec design/fissure-pulse-rework-2026-08-08.md, shape all
 			// RULED 2026-08-08/09): pulse t sweeps everything within ring t -- rays from the
