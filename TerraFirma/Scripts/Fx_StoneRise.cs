@@ -657,8 +657,24 @@ namespace Cleo.TerraFirma.Scripts
 				return null;
 			ResolveWallDressing(wall.Blueprint, out string paint, out string atlas, out string ext, out char fg, out char detail, out char _);
 			// the block wears the wall's OWN Render.Tile -- it exists and is already painted
-			// with its real connectivity mask, so the cover starts pixel-identical to the wall
-			// (colors still ride the blueprint resolve, the proven parse)
+			// with its real connectivity mask, so the cover starts pixel-identical to the wall.
+			// LIVE COLORS BEAT THE BLUEPRINT RESOLVE (user sighting 2026-08-10, Joppa
+			// outskirts: gray-fallback Fissure ring walls carved under a red/yellow cover --
+			// Fissure rewrites its deposits' Render colors at landing, so the reveal must wear
+			// what the wall wears NOW; the etch flavor's caller-captured grammar, applied
+			// here). Blueprint resolve stays the fallback for walls with no live colors.
+			string liveTc = wall.Render?.TileColor;
+			if (liveTc.IsNullOrEmpty())
+				liveTc = wall.Render?.ColorString;
+			if (!liveTc.IsNullOrEmpty())
+			{
+				int amp = liveTc.IndexOf('&');
+				if (amp >= 0 && amp + 1 < liveTc.Length)
+					fg = liveTc[amp + 1];
+			}
+			string liveDc = wall.Render?.DetailColor;
+			if (!liveDc.IsNullOrEmpty())
+				detail = liveDc[0];
 			string blockTile = wall.Render?.Tile;
 			if (blockTile.IsNullOrEmpty())
 				blockTile = ComposeTile(paint, atlas, ext, ISOLATED_MASK);
