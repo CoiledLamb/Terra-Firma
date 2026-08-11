@@ -60,7 +60,7 @@ namespace Cleo.TerraFirma.Scripts
 		[WishCommand(Command = "tfverify")]
 		public static void Help()
 		{
-			MessageQueue.AddPlayerMessage("TF harness (BETA TRIM 2026-08-02) -- instant: tfquick (pockets+rep), tffeedback (2026-08-07 batch: Husangeion name/bleed, statue popup tag, rough-vs-tier look-text, gaze-wall lockout belt), tfcarom, tfcrack, tfredoubt (8 scripted casts: ring census by band, push/stun, carve depth, water displacement -- chews nearby natural stone). Turn-driven: tfform (5t), tfshape (Stoneshaper, 3t; incl. shape.mourning swap-quiet stamp), tffis (NPC caster, 20t), tfscav (30t, you are the target). tfbatch = the surviving set, ~60 turns standing still, ends with ONE 'BATCH COMPLETE' verdict line for the quick boot-and-test loop. Stage-for-eyes: tfgazewall (plain + animated holo wall, you cast the gaze). Peek: tfspore (pure read). BETA-HELD dev doors (test held content, run by hand only): tfstreak, tfstrange, tfspill, tfpuddle, tfmine, tftar, tfhopper, tfdrain, tfdevour + tfeat (need kitchenrock's Lithovore grant), quickape/dull via queue.", "W");
+			MessageQueue.AddPlayerMessage("TF harness (BETA TRIM 2026-08-02) -- instant: tfquick (pockets+rep), tffeedback (2026-08-07 batch: Husangeion name/bleed, statue popup tag, rough-vs-tier look-text, gaze-wall lockout belt), tfcarom, tfcrack, tfredoubt (8 scripted casts: ring census by band, push/stun, carve depth, water displacement -- chews nearby natural stone). Turn-driven: tfform (5t), tfshape (Stoneshaper, 3t; incl. shape.mourning swap-quiet stamp), tffis (NPC caster, 20t), tfscav (30t, you are the target). tfbatch = the surviving set, ~60 turns standing still, ends with ONE 'BATCH COMPLETE' verdict line for the quick boot-and-test loop. Stage-for-eyes: tfgazewall (plain + animated holo wall, you cast the gaze). Diagnostic: tfstatueai (12t, statue-AI inertness repro: control + animated-wall + miner muses, snapshot + tick telemetry). Peek: tfspore (pure read). BETA-HELD dev doors (test held content, run by hand only): tfstreak, tfstrange, tfspill, tfpuddle, tfmine, tftar, tfhopper, tfdrain, tfdevour + tfeat (need kitchenrock's Lithovore grant), quickape/dull via queue.", "W");
 			if (!Helpers.VERIFY_WATCH)
 				MessageQueue.AddPlayerMessage("VERIFY_WATCH is OFF -- the harness is disabled.", "R");
 		}
@@ -981,6 +981,110 @@ namespace Cleo.TerraFirma.Scripts
 			driver.InitShape(entry, cdBeforeKill);
 			ply.AddPart(driver);
 			MessageQueue.AddPlayerMessage("Harness: shape cooldown-watch running -- 3 turns after the statue's destruction.", "W");
+		}
+
+		/// <summary>Statue-AI diagnostic (USER REPORT 2026-08-10: statues carved from an
+		/// animated wall and from a miner stood FULLY INERT -- no move, no attack, no follow).
+		/// Static analysis cleared every suspected channel: the statue is a fresh object (no
+		/// muse AI parts), its Brain is fresh (Mobile default), and zero body mobility is only
+		/// a -60 movespeed penalty (Body.cs:2427) -- so the dead dial is unknown. This battery
+		/// runs the REAL pipeline (the statics CarveFrom composes: MakeStatue + Animate +
+		/// ApplyStatueBuffs; no mutation or character requirement) on a control baboon plus
+		/// both reported muses, snapshots every AI-relevant dial at birth, then drives all
+		/// three with Directed kill goals for 12 turns with telemetry every 3rd tick. Run by
+		/// hand (not in tfbatch): it exists to answer ONE boot's question.</summary>
+		[WishCommand(Command = "tfstatueai")]
+		public static void StatueAI()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
+			SetupStatueAI(The.Player, "");
+		}
+
+		internal static void SetupStatueAI(GameObject ply, string queue)
+		{
+			Cell origin = ply?.CurrentCell;
+			Zone zone = origin?.ParentZone;
+			if (zone == null)
+				return;
+			// three lanes: statue at offset*2, its quarry at offset*5, one compass direction each
+			int[][] dirs = { new[] { 0, -1 }, new[] { 1, 0 }, new[] { 0, 1 }, new[] { -1, 0 }, new[] { 1, -1 }, new[] { -1, 1 } };
+			var statueCells = new List<Cell>();
+			var dummyCells = new List<Cell>();
+			foreach (int[] d in dirs)
+			{
+				if (statueCells.Count >= 3)
+					break;
+				Cell sc = zone.GetCell(origin.X + d[0] * 2, origin.Y + d[1] * 2);
+				Cell dc = zone.GetCell(origin.X + d[0] * 5, origin.Y + d[1] * 5);
+				if (sc == null || dc == null || sc.IsSolid() || dc.IsSolid() || sc.HasObjectWithPart("Combat") || dc.HasObjectWithPart("Combat"))
+					continue;
+				statueCells.Add(sc);
+				dummyCells.Add(dc);
+			}
+			if (statueCells.Count < 3) { Report("statueai", false, "SETUP FAIL - need three open statue/quarry lanes within 5"); RunNext(queue, ply); return; }
+
+			GameObject refWall = GameObject.Create("Sandstone");
+			Cleo_TerraFirma_StoneshaperWallProperties wallProps = refWall.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>();
+			if (wallProps == null) { Report("statueai", false, "SETUP FAIL - spawned Sandstone lacks StoneshaperWallProperties"); refWall.Obliterate(); RunNext(queue, ply); return; }
+
+			// muses: the control, the two reported breakers. The wall muse is ANIMATED first --
+			// the exact play path (BodyType tag "Wall" gives it the Wall anatomy on animation).
+			GameObject museControl = GameObject.Create(BABOON_BP);
+			GameObject museWall = GameObject.Create("Sandstone");
+			XRL.World.Parts.AnimateObject.Animate(museWall);
+			GameObject museMiner = GameObject.Create("Miner Mk I");
+			GameObject[] muses = { museControl, museWall, museMiner };
+			string[] keys = { "control", "wall", "miner" };
+
+			var statues = new GameObject[3];
+			var dummies = new GameObject[3];
+			var startCells = new Cell[3];
+			var dummyHp = new int[3];
+			for (int i = 0; i < 3; i++)
+			{
+				Helpers.VerifyLog("AUTO", $"statueai.{keys[i]} muse: {muses[i].Blueprint}, anatomy={muses[i].Body?.Anatomy ?? "NONE"}, IsCreature={muses[i].IsCreature}");
+				GameObject statue = XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper.MakeStatueOfCreatureFromWall(muses[i], refWall, keys[i], wallProps);
+				if (statue == null)
+				{
+					Report($"statueai.{keys[i]}", false, $"statue creation returned NULL for muse {muses[i].Blueprint} (IsCreature={muses[i].IsCreature})");
+					continue;
+				}
+				XRL.World.Parts.AnimateObject.Animate(statue);
+				XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper.ApplyStatueBuffs(ply, muses[i], statue, 5, wallProps);
+				statue.SetIntProperty(SPAWN_MARK, 1);
+				statueCells[i].AddObject(statue);
+				GameObject dummy = GameObject.Create(BABOON_BP);
+				dummy.GetStat("Hitpoints").BaseValue = 600; // must survive 12 turns of testimony
+				dummy.SetIntProperty(SPAWN_MARK, 1);
+				dummyCells[i].AddObject(dummy);
+				statues[i] = statue;
+				dummies[i] = dummy;
+				startCells[i] = statueCells[i];
+				dummyHp[i] = dummy.GetStat("Hitpoints").Value;
+				// the birth snapshot: every dial inertness could ride. A dead statue names its
+				// killer here or in the tick telemetry -- that is this battery's whole product.
+				var armed = new List<string>();
+				if (statue.Body != null)
+				{
+					foreach (BodyPart p in statue.Body.LoopParts())
+					{
+						if (p.DefaultBehavior != null)
+							armed.Add($"{p.Type}:{p.DefaultBehavior.Blueprint}");
+					}
+				}
+				bool anyDismembered;
+				int movePenalty = statue.Body?.CalculateMobilitySpeedPenalty(out anyDismembered) ?? -1;
+				Helpers.VerifyLog("AUTO", $"statueai.{keys[i]} snapshot: anatomy={statue.Body?.Anatomy ?? "NONE"}, mobility={statue.Body?.GetTotalMobility() ?? -1}, movePenalty={movePenalty}, Speed={statue.GetStatValue("Speed")}, MoveSpeed={statue.GetStatValue("MoveSpeed")}, Energy={statue.GetStatValue("Energy")}, weight={statue.Physics?.Weight ?? -1}, leader={statue.Brain?.PartyLeader?.Blueprint ?? "NONE"}, wanders={statue.Brain?.Wanders ?? false}, hostile={statue.Brain?.Hostile ?? false}, armed=[{string.Join("|", armed.ToArray())}]");
+			}
+			foreach (GameObject muse in muses)
+				muse.Obliterate();
+			refWall.Obliterate();
+
+			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "statueai", TurnsRemaining = 12, TurnsTotal = 12, Queue = queue };
+			driver.InitStatueAI(statues, dummies, keys, startCells, dummyHp);
+			ply.AddPart(driver);
+			MessageQueue.AddPlayerMessage("Harness: statue-AI diagnostic running -- 12 turns, three statues under Directed kill goals.", "W");
 		}
 
 		// ---------------------------------------------------------------- round 5
@@ -2489,6 +2593,12 @@ namespace XRL.World.Parts
 		[NonSerialized] private int ShapeCdBeforeKill;
 		[NonSerialized] private GameObject FisCaster;
 		[NonSerialized] private int FisRocksBaseline;
+		[NonSerialized] private GameObject[] AiStatues;
+		[NonSerialized] private GameObject[] AiDummies;
+		[NonSerialized] private string[] AiKeys;
+		[NonSerialized] private Cell[] AiStartCells;
+		[NonSerialized] private int[] AiDummyHpBase;
+		[NonSerialized] private bool[] AiEverMoved;
 
 		public void InitHopper(GameObject millLive, GameObject millDead, int stonesEach)
 		{
@@ -2549,6 +2659,17 @@ namespace XRL.World.Parts
 			LiveSetup = true;
 		}
 
+		public void InitStatueAI(GameObject[] statues, GameObject[] dummies, string[] keys, Cell[] startCells, int[] dummyHpBase)
+		{
+			AiStatues = statues;
+			AiDummies = dummies;
+			AiKeys = keys;
+			AiStartCells = startCells;
+			AiDummyHpBase = dummyHpBase;
+			AiEverMoved = new bool[statues.Length];
+			LiveSetup = true;
+		}
+
 		public override bool WantEvent(int ID, int cascade)
 		{
 			if (!base.WantEvent(ID, cascade))
@@ -2573,7 +2694,7 @@ namespace XRL.World.Parts
 					LoggedReadiness = true;
 					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("AUTO", $"hopper tick 1: live mill turning={MillTurning(MillLive)}, dead mill turning={MillTurning(MillDead)}");
 				}
-				if (Scenario == "scav" || Scenario == "fis")
+				if (Scenario == "scav" || Scenario == "fis" || Scenario == "statueai")
 					ReassertHostileLocks(ParentObject);
 				TurnsRemaining--;
 				E.PreventAction = true;
@@ -2604,6 +2725,28 @@ namespace XRL.World.Parts
 			// READS from the Kill goal stack (decomp Brain.cs:512), so target=NULL here means
 			// the Kill goal died since the last re-lock, and the top-goal name says what ate it
 			bool telemetry = TurnsRemaining % 5 == 0;
+			if (Scenario == "statueai")
+			{
+				// same Directed-kill idiom as fis/scav (Kill.cs:506 lesson), plus per-statue
+				// movement tracking -- a statue that roams and RETURNS still counts as mobile
+				for (int i = 0; i < AiStatues.Length; i++)
+				{
+					GameObject statue = AiStatues[i];
+					if (!GameObject.Validate(statue) || statue.CurrentCell == null)
+						continue;
+					if (statue.CurrentCell != AiStartCells[i])
+						AiEverMoved[i] = true;
+					GameObject quarry = AiDummies[i];
+					if (statue.Brain != null && GameObject.Validate(quarry) && statue.Brain.Target == null)
+						statue.Brain.WantToKill(quarry, "harness", Directed: true);
+					if (TurnsRemaining % 3 == 0)
+					{
+						string goal = statue.Brain != null && statue.Brain.Goals.Count > 0 ? statue.Brain.Goals.Peek().GetType().Name : "none";
+						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("AUTO", $"statueai.{AiKeys[i]} tick {TurnsTotal - TurnsRemaining}: cell=({statue.CurrentCell.X},{statue.CurrentCell.Y}), energy={statue.GetStatValue("Energy")}, target={(statue.Brain?.Target?.Blueprint ?? "NULL")}, topGoal={goal}, distToQuarry={(GameObject.Validate(quarry) ? statue.DistanceTo(quarry) : -1)}");
+					}
+				}
+				return;
+			}
 			if (Scenario == "fis")
 			{
 				if (FisCaster?.Brain != null)
@@ -2665,8 +2808,30 @@ namespace XRL.World.Parts
 				FinishShape();
 			else if (Scenario == "fis")
 				FinishFis(owner);
+			else if (Scenario == "statueai")
+				FinishStatueAI();
 			Cleo.TerraFirma.Scripts.TestHarnessWishes.SweepSpawns(owner.CurrentZone);
 			Cleo.TerraFirma.Scripts.TestHarnessWishes.RunNext(Queue, owner);
+		}
+
+		private void FinishStatueAI()
+		{
+			for (int i = 0; i < AiStatues.Length; i++)
+			{
+				GameObject statue = AiStatues[i];
+				if (!GameObject.Validate(statue))
+				{
+					Cleo.TerraFirma.Scripts.TestHarnessWishes.Report($"statueai.{AiKeys[i]}", false, "statue DIED or vanished mid-run (dummy fought back too hard?)");
+					continue;
+				}
+				bool moved = AiEverMoved[i] || statue.CurrentCell != AiStartCells[i];
+				GameObject quarry = AiDummies[i];
+				int dmg = GameObject.Validate(quarry) ? AiDummyHpBase[i] - quarry.GetStat("Hitpoints").Value : AiDummyHpBase[i];
+				bool attacked = dmg > 0;
+				Cleo.TerraFirma.Scripts.TestHarnessWishes.Report($"statueai.{AiKeys[i]}", moved && attacked,
+					$"{TurnsTotal} turns under a Directed kill goal 3 cells away: {(moved ? "MOVED" : "never left its tile")}, quarry damage {dmg}{(attacked ? "" : " (never attacked)")}. " +
+					(moved && attacked ? "statue acts -- this muse is fine" : "INERT REPRODUCED -- read this statue's snapshot + tick lines above for the dead dial"));
+			}
 		}
 
 		private void FinishFis(GameObject owner)
