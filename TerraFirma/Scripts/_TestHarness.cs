@@ -1015,12 +1015,23 @@ namespace Cleo.TerraFirma.Scripts
 			{
 				if (statueCells.Count >= 3)
 					break;
-				Cell sc = zone.GetCell(origin.X + d[0] * 2, origin.Y + d[1] * 2);
-				Cell dc = zone.GetCell(origin.X + d[0] * 5, origin.Y + d[1] * 5);
-				if (sc == null || dc == null || sc.IsSolid() || dc.IsSolid() || sc.HasObjectWithPart("Combat") || dc.HasObjectWithPart("Combat"))
+				// the WHOLE lane must be open, statue through quarry (first run 2026-08-10:
+				// the control lane froze statue AND quarry both -- unvalidated middle cells
+				// left an environment artifact indistinguishable from the bug under test)
+				bool laneOpen = true;
+				for (int step = 1; step <= 5; step++)
+				{
+					Cell c = zone.GetCell(origin.X + d[0] * step, origin.Y + d[1] * step);
+					if (c == null || c.IsSolid() || (step >= 2 && c.HasObjectWithPart("Combat")))
+					{
+						laneOpen = false;
+						break;
+					}
+				}
+				if (!laneOpen)
 					continue;
-				statueCells.Add(sc);
-				dummyCells.Add(dc);
+				statueCells.Add(zone.GetCell(origin.X + d[0] * 2, origin.Y + d[1] * 2));
+				dummyCells.Add(zone.GetCell(origin.X + d[0] * 5, origin.Y + d[1] * 5));
 			}
 			if (statueCells.Count < 3) { Report("statueai", false, "SETUP FAIL - need three open statue/quarry lanes within 5"); RunNext(queue, ply); return; }
 
@@ -1081,10 +1092,12 @@ namespace Cleo.TerraFirma.Scripts
 				muse.Obliterate();
 			refWall.Obliterate();
 
-			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "statueai", TurnsRemaining = 12, TurnsTotal = 12, Queue = queue };
+			// 20 turns, two phases: 12 of kill-drive, then 8 of NATURAL follow-back (no forced
+			// goals -- the reported play symptom is companion behavior, not forced combat)
+			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "statueai", TurnsRemaining = 20, TurnsTotal = 20, Queue = queue };
 			driver.InitStatueAI(statues, dummies, keys, startCells, dummyHp);
 			ply.AddPart(driver);
-			MessageQueue.AddPlayerMessage("Harness: statue-AI diagnostic running -- 12 turns, three statues under Directed kill goals.", "W");
+			MessageQueue.AddPlayerMessage("Harness: statue-AI diagnostic running -- 12 turns kill-drive, then 8 turns natural follow.", "W");
 		}
 
 		// ---------------------------------------------------------------- round 5
@@ -2599,6 +2612,9 @@ namespace XRL.World.Parts
 		[NonSerialized] private Cell[] AiStartCells;
 		[NonSerialized] private int[] AiDummyHpBase;
 		[NonSerialized] private bool[] AiEverMoved;
+		[NonSerialized] private bool[] AiKillMoved;
+		[NonSerialized] private int[] AiKillDmg;
+		[NonSerialized] private int[] AiFollowBaseDist;
 
 		public void InitHopper(GameObject millLive, GameObject millDead, int stonesEach)
 		{
@@ -2667,6 +2683,9 @@ namespace XRL.World.Parts
 			AiStartCells = startCells;
 			AiDummyHpBase = dummyHpBase;
 			AiEverMoved = new bool[statues.Length];
+			AiKillMoved = new bool[statues.Length];
+			AiKillDmg = new int[statues.Length];
+			AiFollowBaseDist = new int[statues.Length];
 			LiveSetup = true;
 		}
 
@@ -2727,8 +2746,11 @@ namespace XRL.World.Parts
 			bool telemetry = TurnsRemaining % 5 == 0;
 			if (Scenario == "statueai")
 			{
-				// same Directed-kill idiom as fis/scav (Kill.cs:506 lesson), plus per-statue
-				// movement tracking -- a statue that roams and RETURNS still counts as mobile
+				// phase 1 (12 ticks): Directed-kill drive (the fis/scav idiom, Kill.cs:506
+				// lesson). phase 2 (8 ticks): NATURAL follow-back -- goals cleared, quarries
+				// removed, nothing asserted; a companion 4-5 cells from its leader should
+				// close in on its own. The play symptom lives in phase 2's territory.
+				bool killPhase = TurnsRemaining > 8;
 				for (int i = 0; i < AiStatues.Length; i++)
 				{
 					GameObject statue = AiStatues[i];
@@ -2737,12 +2759,32 @@ namespace XRL.World.Parts
 					if (statue.CurrentCell != AiStartCells[i])
 						AiEverMoved[i] = true;
 					GameObject quarry = AiDummies[i];
-					if (statue.Brain != null && GameObject.Validate(quarry) && statue.Brain.Target == null)
-						statue.Brain.WantToKill(quarry, "harness", Directed: true);
-					if (TurnsRemaining % 3 == 0)
+					if (TurnsRemaining == 8)
+					{
+						// phase boundary: bank the kill verdict, strip the combat scaffolding
+						AiKillMoved[i] = AiEverMoved[i];
+						AiKillDmg[i] = GameObject.Validate(quarry) ? AiDummyHpBase[i] - quarry.GetStat("Hitpoints").Value : AiDummyHpBase[i];
+						AiFollowBaseDist[i] = statue.DistanceTo(owner);
+						statue.Brain?.Goals.Clear();
+						if (GameObject.Validate(quarry))
+							quarry.Obliterate();
+						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("AUTO", $"statueai.{AiKeys[i]} phase 2 begins: goals cleared, quarry removed, distToLeader={AiFollowBaseDist[i]}");
+						continue;
+					}
+					if (killPhase)
+					{
+						if (statue.Brain != null && GameObject.Validate(quarry) && statue.Brain.Target == null)
+							statue.Brain.WantToKill(quarry, "harness", Directed: true);
+						if (TurnsRemaining % 3 == 0)
+						{
+							string goal = statue.Brain != null && statue.Brain.Goals.Count > 0 ? statue.Brain.Goals.Peek().GetType().Name : "none";
+							Cleo.TerraFirma.Scripts.Helpers.VerifyLog("AUTO", $"statueai.{AiKeys[i]} kill tick {TurnsTotal - TurnsRemaining}: cell=({statue.CurrentCell.X},{statue.CurrentCell.Y}), energy={statue.GetStatValue("Energy")}, target={(statue.Brain?.Target?.Blueprint ?? "NULL")}, topGoal={goal}, distToQuarry={(GameObject.Validate(quarry) ? statue.DistanceTo(quarry) : -1)}");
+						}
+					}
+					else if (TurnsRemaining % 2 == 0)
 					{
 						string goal = statue.Brain != null && statue.Brain.Goals.Count > 0 ? statue.Brain.Goals.Peek().GetType().Name : "none";
-						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("AUTO", $"statueai.{AiKeys[i]} tick {TurnsTotal - TurnsRemaining}: cell=({statue.CurrentCell.X},{statue.CurrentCell.Y}), energy={statue.GetStatValue("Energy")}, target={(statue.Brain?.Target?.Blueprint ?? "NULL")}, topGoal={goal}, distToQuarry={(GameObject.Validate(quarry) ? statue.DistanceTo(quarry) : -1)}");
+						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("AUTO", $"statueai.{AiKeys[i]} follow tick {TurnsTotal - TurnsRemaining}: distToLeader={statue.DistanceTo(owner)}, topGoal={goal}");
 					}
 				}
 				return;
@@ -2809,28 +2851,28 @@ namespace XRL.World.Parts
 			else if (Scenario == "fis")
 				FinishFis(owner);
 			else if (Scenario == "statueai")
-				FinishStatueAI();
+				FinishStatueAI(owner);
 			Cleo.TerraFirma.Scripts.TestHarnessWishes.SweepSpawns(owner.CurrentZone);
 			Cleo.TerraFirma.Scripts.TestHarnessWishes.RunNext(Queue, owner);
 		}
 
-		private void FinishStatueAI()
+		private void FinishStatueAI(GameObject owner)
 		{
 			for (int i = 0; i < AiStatues.Length; i++)
 			{
 				GameObject statue = AiStatues[i];
 				if (!GameObject.Validate(statue))
 				{
-					Cleo.TerraFirma.Scripts.TestHarnessWishes.Report($"statueai.{AiKeys[i]}", false, "statue DIED or vanished mid-run (dummy fought back too hard?)");
+					Cleo.TerraFirma.Scripts.TestHarnessWishes.Report($"statueai.{AiKeys[i]}", false, "statue DIED or vanished mid-run (quarry fought back too hard?)");
 					continue;
 				}
-				bool moved = AiEverMoved[i] || statue.CurrentCell != AiStartCells[i];
-				GameObject quarry = AiDummies[i];
-				int dmg = GameObject.Validate(quarry) ? AiDummyHpBase[i] - quarry.GetStat("Hitpoints").Value : AiDummyHpBase[i];
-				bool attacked = dmg > 0;
-				Cleo.TerraFirma.Scripts.TestHarnessWishes.Report($"statueai.{AiKeys[i]}", moved && attacked,
-					$"{TurnsTotal} turns under a Directed kill goal 3 cells away: {(moved ? "MOVED" : "never left its tile")}, quarry damage {dmg}{(attacked ? "" : " (never attacked)")}. " +
-					(moved && attacked ? "statue acts -- this muse is fine" : "INERT REPRODUCED -- read this statue's snapshot + tick lines above for the dead dial"));
+				bool killOk = AiKillMoved[i] && AiKillDmg[i] > 0;
+				int endDist = statue.DistanceTo(owner);
+				bool followOk = endDist <= 2 || endDist < AiFollowBaseDist[i];
+				Cleo.TerraFirma.Scripts.TestHarnessWishes.Report($"statueai.{AiKeys[i]}", killOk && followOk,
+					$"kill phase (12t, Directed goal 3 away): {(AiKillMoved[i] ? "MOVED" : "never left its tile")}, quarry damage {AiKillDmg[i]}; " +
+					$"follow phase (8t, no goals): distToLeader {AiFollowBaseDist[i]}->{endDist} {(followOk ? "(follows)" : "(DOES NOT FOLLOW)")}. " +
+					(killOk && followOk ? "statue acts and follows -- this muse is fine" : "read this statue's snapshot + tick lines for the dead dial"));
 			}
 		}
 
