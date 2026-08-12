@@ -8,7 +8,7 @@
             <skill Name="ShortBlades" />
 	      <skill Name="Customs" />
 	      <skill Name="Discipline" />
-	      <skill Name="Survival_RuinsSurvival" />
+	      <skill Name="Survival_DesertCanyonSurvival" /> <!-- Wilderness Lore: Canyons (USER 2026-08-12; was RuinsSurvival) -->
       </skills>
 	</subtype>
 </class>

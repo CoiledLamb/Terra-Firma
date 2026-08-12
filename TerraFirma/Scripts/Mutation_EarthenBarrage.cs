@@ -494,10 +494,14 @@ namespace XRL.World.Parts.Mutation
 		/// Pickup re-arm (subscriber report 2026-08-12, fix shape ruled same day): grabbing one of
 		/// our own sculpted stones off the ground while the toggle is on and the thrown slot is
 		/// empty puts it straight back in hand -- the stoop IS the intent to throw. Called by
-		/// <see cref="Cleo_TerraFirma_StoneRearmOnTakePart"/> from the TakenEvent (take-from-world)
-		/// path only, so deliberate unequips never route here and the 2026-07-23 reabsorb ruling
-		/// keeps its narrow scope. Deliberately does NOT touch plain rocks (IsAnyStone): auto-wielding
-		/// ordinary loot would hijack scavenging; a dry thrower still self-heals on the regen tick.
+		/// <see cref="Cleo_TerraFirma_StoneRearmOnTakePart"/>, which gates on came-from-a-cell
+		/// (BeginBeingTaken snapshot) -- NOT on TakenEvent alone, because the unequip-to-inventory
+		/// flow also ends in the take machinery (eCommandFreeTakeObject IS CommandTakeObject; the
+		/// ungated version fought the engine's slot-clearing during swaps and the stone died --
+		/// user live-catch, same day). Deliberate unequips and swap displacements therefore never
+		/// route here; the 2026-07-23 end-of-turn reabsorb governs them. Deliberately does NOT
+		/// touch plain rocks (IsAnyStone): auto-wielding ordinary loot would hijack scavenging;
+		/// a dry thrower still self-heals on the regen tick.
 		/// </summary>
 		public void OnStoneTaken(GameObject Stone)
 		{
