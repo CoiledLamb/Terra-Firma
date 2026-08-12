@@ -364,6 +364,7 @@ namespace XRL.World.Parts.Mutation
 					}
 				}
 			}
+			SyncAbilityName(); // the "+1" armed suffix (2026-08-12) can go stale without a charge change -- e.g. a held stone lost to anything but a throw
 			SyncWhorl();
 			return base.HandleEvent(E);
 		}
@@ -390,6 +391,7 @@ namespace XRL.World.Parts.Mutation
 				Activate();
 				XDidY(ParentObject, "retrieve", $"another {GetStoneName(Level)}", Source: ParentObject);
 			}
+			SyncAbilityName(); // a dry throw drops the "+1" suffix with no Activate() to sync it (2026-08-12)
 			SyncWhorl();
 			return base.HandleEvent(E);
 		}
@@ -475,12 +477,42 @@ namespace XRL.World.Parts.Mutation
 
 		/// <summary>
 		/// Updates the name of this mutation's activated ability to reflect how many charges it has remaining.
+		/// Format RULED 2026-08-12 (user, from the subscriber's 0-but-can-still-throw report: "0/3+1
+		/// makes sense as like 'i have no stones in reserve and 1 equipped'"): reserve/max plus "+1"
+		/// while a sculpted stone rides the thrown slot, so 0 without the suffix always means dry.
 		/// </summary>
 		private void SyncAbilityName()
 		{
 			ActivatedAbilityEntry ent = MyActivatedAbility(ActivatedAbilityID);
-			if (ent != null)
-				ent.DisplayName = $"Take Stones ({Charges}/{MaxCharges(Level)})";
+			if (ent == null)
+				return;
+			bool armed = ParentObject?.FindEquippedItem(x => IsOurStone(x) && x.IsEquippedAsThrownWeapon()) != null;
+			ent.DisplayName = $"Take Stones ({Charges}/{MaxCharges(Level)}{(armed ? "+1" : "")})";
+		}
+
+		/// <summary>
+		/// Pickup re-arm (subscriber report 2026-08-12, fix shape ruled same day): grabbing one of
+		/// our own sculpted stones off the ground while the toggle is on and the thrown slot is
+		/// empty puts it straight back in hand -- the stoop IS the intent to throw. Called by
+		/// <see cref="Cleo_TerraFirma_StoneRearmOnTakePart"/> from the TakenEvent (take-from-world)
+		/// path only, so deliberate unequips never route here and the 2026-07-23 reabsorb ruling
+		/// keeps its narrow scope. Deliberately does NOT touch plain rocks (IsAnyStone): auto-wielding
+		/// ordinary loot would hijack scavenging; a dry thrower still self-heals on the regen tick.
+		/// </summary>
+		public void OnStoneTaken(GameObject Stone)
+		{
+			if (!GameObject.Validate(ParentObject) || !GameObject.Validate(Stone))
+				return;
+			if (!IsOurStone(Stone) || !IsMyActivatedAbilityToggledOn(ActivatedAbilityID))
+				return;
+			if (ParentObject.GetFirstThrownWeapon() != null || ParentObject.Body?.GetUnequippedPart("Thrown Weapon") == null)
+				return;
+			ParentObject.AutoEquip(Stone, true, Silent: true);
+			if (Stone.GetPart<Temporary>() is Temporary lease)
+				lease.Duration = HELD_SUSTAIN_LEASE; // back on the held lease immediately; EndTurn would catch it anyway
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("EB", $"pickup re-arm: {Stone.Blueprint} taken off the ground went straight back into the empty thrown slot");
+			SyncAbilityName();
+			SyncWhorl();
 		}
 		#endregion
 

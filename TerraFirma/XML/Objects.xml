@@ -7,6 +7,7 @@
 		<part Name="Temporary" Duration="30" /> <!-- Silent property removed from the Temporary part in a game update -->
 
 		<part Name="ThrownWeapon" Penetration="4" Damage="1d8" Attributes="Cudgel" /> <!-- these are just placeholder; actual damage is set in C# -->
+		<part Name="Cleo_TerraFirma_StoneRearmOnTakePart" /> <!-- pickup re-arm (2026-08-12): a stone taken off the ground goes straight back into an empty thrown slot; resonant child inherits -->
 		<stag Name="Thrown" />
 		<tag Name="ExcludeFromDynamicEncounters" />
 	</object>
