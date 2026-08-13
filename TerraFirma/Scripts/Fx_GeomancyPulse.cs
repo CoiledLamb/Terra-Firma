@@ -30,8 +30,7 @@ namespace Cleo.TerraFirma.Scripts
 	/// 4 dense text shimmer -> 5 pixel-cluster tile particles -> 6 brazier-style
 	/// emitter renewal -> 7 ruled back to classic -> 8 the TD warp wave (this build).
 	/// Rounds 3-6 machinery deleted; recoverable from the TODO record if ever wanted.
-	/// The fx_geomancy_spark1-3.png textures in Textures/ are orphaned by round 8 --
-	/// prune at a cleanup pass.
+	/// The fx_geomancy_spark1-3.png textures they used were pruned 2026-08-12.
 	/// </summary>
 	public static class Cleo_TerraFirma_GeomancyPulseFX
 	{

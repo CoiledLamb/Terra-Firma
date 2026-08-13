@@ -153,6 +153,7 @@ namespace XRL.World.Parts.Mutation
 		// AI's combat target; wall = nearest carvable within NPC_WALL_SCAN_RADIUS, validity
 		// mirroring the player picker's checks. ----
 		private const int NPC_WALL_SCAN_RADIUS = 8; // Claude dial
+		private const int PLAYER_WALL_SEED_RADIUS = 20; // Claude dial: covers the visible screen around the muse
 
 		public override bool HandleEvent(AIGetOffensiveAbilityListEvent E)
 		{
@@ -190,21 +191,23 @@ namespace XRL.World.Parts.Mutation
 			return best;
 		}
 
-		/// <summary>Nearest wall cell this caster could legally carve from: the player picker's
+		/// <summary>Nearest wall cell legally carveable from origin: the player picker's
 		/// validity checks (solid wall, no hologram/walltrap/forcefield, no refusal tag, audited
-		/// properties present, type within the level's reach), nearest-first.</summary>
-		private Cell FindCarvableWallCellFor(GameObject actor)
+		/// properties present, type within the level's reach), nearest-first. RequireVisible
+		/// gates on player sight -- pass it when the result seeds the player's own picker.</summary>
+		private Cell FindCarvableWallCell(Cell origin, int radius, bool RequireVisible = false)
 		{
-			Cell origin = actor?.CurrentCell;
 			if (origin == null)
 				return null;
 			WallType validWalls = GetValidWallsAtLevel(Level);
 			Cell best = null;
 			int bestDist = int.MaxValue;
-			foreach (Cell c in origin.GetLocalAdjacentCells(NPC_WALL_SCAN_RADIUS))
+			foreach (Cell c in origin.GetLocalAdjacentCells(radius))
 			{
 				int d = origin.DistanceTo(c);
 				if (d >= bestDist || !c.HasWall())
+					continue;
+				if (RequireVisible && !c.IsVisible())
 					continue;
 				List<GameObject> walls = c.GetWalls();
 				if (walls.Count == 0)
@@ -226,6 +229,9 @@ namespace XRL.World.Parts.Mutation
 			}
 			return best;
 		}
+
+		private Cell FindCarvableWallCellFor(GameObject actor)
+			=> FindCarvableWallCell(actor?.CurrentCell, NPC_WALL_SCAN_RADIUS);
 
 		public override bool HandleEvent(CommandEvent E)
 		{
@@ -283,7 +289,12 @@ namespace XRL.World.Parts.Mutation
 			WallType validWalls = GetValidWallsAtLevel(Level);
 
 		wallSelection:
-			targetWallCell = PickDestinationCell(RequireCombat: false, Label: "Choose a wall to carve the statue from.");
+			// snap QoL (user flag 2026-08-12): seed the picker at the nearest carveable wall to the
+			// muse instead of the caster's own cell. UseTarget must be off -- ShowPicker otherwise
+			// discards StartX/StartY in favor of the sidebar target, which is a creature, never a wall.
+			Cell wallSeed = FindCarvableWallCell(targetCreatureCell, PLAYER_WALL_SEED_RADIUS, RequireVisible: true) ?? E.Actor.CurrentCell;
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", $"wall picker seeded at ({wallSeed.X},{wallSeed.Y})" + (wallSeed == E.Actor.CurrentCell ? " (no eligible wall in range, caster fallback)" : ""));
+			targetWallCell = PickTarget.ShowPicker(PickTarget.PickStyle.EmptyCell, 1, 9999, wallSeed.X, wallSeed.Y, Label: "Choose a wall to carve the statue from.", UseTarget: false);
 			if (targetWallCell == null)
 			{ // cancelled
 			  //MessageQueue.AddPlayerMessage($"cancelled");
@@ -620,6 +631,25 @@ namespace XRL.World.Parts.Mutation
 			string[] statsInherited = { "Strength", "Agility", "Toughness" };
 			foreach (string stat in statsInherited)
 				Statue.GetStat(stat).BaseValue = Creature.GetStatValue(stat);
+
+			// copy-of-a-copy decay (RULED 2026-08-12: no malus on the first copy, "every time you
+			// copy the statue after that, the stats should get dinged"). Real creatures carry no
+			// gen property (reads 0) -> their statue is gen 1; a statue muse hands its gen down.
+			// The malus compounds through the Str/Agi/Tou inheritance above without any math here:
+			// gen 4 copies gen 3's already-dinged values before taking its own ding.
+			int museGen = Creature.GetIntProperty("Cleo_TerraFirma_StatueCopyGen");
+			Statue.SetIntProperty("Cleo_TerraFirma_StatueCopyGen", museGen + 1);
+			if (museGen >= 2)
+			{
+				string dingedStat = statsInherited[Stat.Random(0, statsInherited.Length - 1)];
+				Statistic st = Statue.GetStat(dingedStat);
+				int loss = Math.Min(Stat.Random(1, 3), st.BaseValue - 1); // floor at 1
+				if (loss > 0)
+					st.BaseValue -= loss;
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", $"copy decay: gen {museGen + 1} statue loses {loss} {dingedStat} (muse was gen {museGen})");
+				if (Sculptor.IsPlayer())
+					XRL.Messages.MessageQueue.AddPlayerMessage("Some of the likeness is lost in the copying."); // DRAFT
+			}
 
 			Statue.GetStat("Level").BaseValue = Sculptor.Level;
 			if (!infiniteDuration)
