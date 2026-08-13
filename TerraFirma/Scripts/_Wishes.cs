@@ -233,5 +233,188 @@ namespace Cleo.TerraFirma.Scripts
 			}
 			MessageQueue.AddPlayerMessage("tfpen: pen and damage distributions written to Player.log.", Capitalize: false);
 		}
+
+		/// <summary>Whorl VFX sampler (dev door, sitting 2026-08-12): fires all four outcome
+		/// beats at once, spatially separated so each reads. Devour swirl orbits the PLAYER
+		/// (palette-thieved from a freshly spawned torch -- red/white flecks prove the theft
+		/// at a glance); ricochet elbow 3 east; swat loot-pointer 3 west; fizzle grit 3 south;
+		/// refract second-leg track from 3 north heading up-right. Pure FX, no mechanics.</summary>
+		[WishCommand(Command = "tfwhorlfx")]
+		public static void WhorlFxSampler()
+		{
+			GameObject Ply = The.Player;
+			Cell origin = Ply?.CurrentCell;
+			Zone zone = origin?.ParentZone;
+			if (origin == null || zone == null)
+				return;
+			Cell At(int dx, int dy) => zone.GetCell(
+				System.Math.Max(0, System.Math.Min(zone.Width - 1, origin.X + dx)),
+				System.Math.Max(0, System.Math.Min(zone.Height - 1, origin.Y + dy)));
+			GameObject morsel = GameObject.Create("Torch");
+			Cleo_TerraFirma_GravelWhorlFX.PlayDevourSwirl(Ply, morsel);
+			morsel.Obliterate();
+			Cleo_TerraFirma_GravelWhorlFX.PlayRicochetElbow(At(3, 0));
+			Cell swatFrom = At(-3, 0);
+			Cell swatLanding = At(-4, -1) != swatFrom ? At(-4, -1) : At(-2, 1);
+			Cleo_TerraFirma_GravelWhorlFX.PlaySwatBeat(swatFrom, swatLanding);
+			Cleo_TerraFirma_GravelWhorlFX.PlaySwatBeat(At(0, 3), null);
+			Cleo_TerraFirma_GravelWhorlFX.PlayRefractTrack(At(0, -3), 135); // engine convention: x+=Sin, y+=Cos -> up-right
+			Cleo_TerraFirma_GravelWhorlFX.PlayDevourLight(At(3, -3), 'R', "beamColor0::#FF0000;;beamColor1::#FF8000"); // the light-devour beat in the laser rifle's beam colors
+			MessageQueue.AddPlayerMessage("tfwhorlfx: devour swirl on you (torch palette), elbow 3E, swat pointer 3W, fizzle 3S, refract track 3N, laser ember-catch 3NE.", Capitalize: false);
+		}
+
+		/// <summary>Live-fire devour gym (user request, VFX sitting 2026-08-12: "temporarily
+		/// turn devour chance to 100%, set idkfa to on, and spawn a pack of baboons so i can
+		/// see it as many times as i want"). TOGGLE: first call arms force-devour + godmode
+		/// and spawns the pack (6 baboons at throwing range, 5 Small Stones each = 30 devours
+		/// on tap); second call disarms force-devour and godmode, baboons are yours to keep.
+		/// Needs the whorl actually up (EB toggled on with stones) -- warns if it is not.</summary>
+		[WishCommand(Command = "tfwhorlgym")]
+		public static void WhorlGym()
+		{
+			GameObject Ply = The.Player;
+			Cell origin = Ply?.CurrentCell;
+			Zone zone = origin?.ParentZone;
+			if (origin == null || zone == null)
+				return;
+			bool arming = !XRL.World.Effects.Cleo_TerraFirma_GravelWhorl.DebugForceDeflect;
+			XRL.World.Effects.Cleo_TerraFirma_GravelWhorl.DebugForceDeflect = arming;
+			The.Core.IDKFA = arming;
+			Helpers.VerifyLog("GVW", $"tfwhorlgym: force-deflect {(arming ? "ON" : "OFF")}, godmode {(arming ? "ON" : "OFF")}");
+			if (!arming)
+			{
+				MessageQueue.AddPlayerMessage("tfwhorlgym: force-deflect and godmode OFF. The baboons are yours to keep.", Capitalize: false);
+				return;
+			}
+			List<Cell> ring = origin.GetLocalAdjacentCells(6);
+			ring.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat") || origin.DistanceTo(c) < 4);
+			int spawned = 0;
+			while (spawned < 6 && ring.Count > 0)
+			{
+				int idx = Stat.Random(0, ring.Count - 1);
+				GameObject baboon = GameObject.Create("Baboon");
+				ring[idx].AddObject(baboon);
+				baboon.MakeActive();
+				baboon.Brain.Target = Ply; // no warm-up: they open throwing
+				ring.RemoveAt(idx);
+				spawned++;
+			}
+			string whorlNote = Ply.HasEffect<XRL.World.Effects.Cleo_TerraFirma_GravelWhorl>()
+				? "" : " NOTE: your whorl is not up -- toggle Earthen Barrage with stones in reserve or nothing will deflect.";
+			MessageQueue.AddPlayerMessage($"tfwhorlgym: force-deflect ON, godmode ON, {spawned} baboons spawned at throwing range. Wish again to disarm; tfwhorloutcome picks the outcome.{whorlNote}", Capitalize: false);
+		}
+
+		/// <summary>Laser gym (user request 2026-08-12: "spawns a laser turret tinker, calls
+		/// idkfa, and makes sure earthen barrage is levelled to 10 so attune works"; round 2
+		/// same day, after a run of resonant=False pass-throughs in the log: character level
+		/// raised to 19 so the mutation ranks stick -- the user's own fix -- and the wish now
+		/// flips the whorl AND Attune Stones toggles itself through the mutation's command
+		/// path, gated on current state so a re-wish never flips them back OFF): EB ensured +
+		/// leveled to 10, reserve topped, godmode + force-devour armed (wish tfwhorlgym once
+		/// to disarm both), Laser Turret Tinker spawned at range and aimed at you.</summary>
+		[WishCommand(Command = "tfwhorllaser")]
+		public static void WhorlLaserGym()
+		{
+			GameObject Ply = The.Player;
+			Cell origin = Ply?.CurrentCell;
+			Zone zone = origin?.ParentZone;
+			if (origin == null || zone == null)
+				return;
+			Cleo_TerraFirma_EarthenBarrage eb = EnsureWhorlReady(Ply);
+			if (!eb.Resonant)
+				CommandEvent.Send(Ply, "Cleo_TerraFirma_CommandAttuneStones"); // resonant is the mode that eats lasers
+			XRL.World.Effects.Cleo_TerraFirma_GravelWhorl.DebugForceDeflect = true;
+			The.Core.IDKFA = true;
+			List<Cell> ring = origin.GetLocalAdjacentCells(9);
+			ring.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat") || origin.DistanceTo(c) < 6);
+			GameObject tinker = null;
+			if (ring.Count > 0)
+			{
+				tinker = GameObject.Create("Laser Turret Tinker");
+				ring[Stat.Random(0, ring.Count - 1)].AddObject(tinker);
+				tinker.MakeActive();
+				tinker.Brain.Target = Ply;
+			}
+			Helpers.VerifyLog("GVW", $"tfwhorllaser: char L{Ply.GetStatValue("Level")}, EB L{eb.Level} charges {eb.Charges}, whorl {(Ply.HasEffect<XRL.World.Effects.Cleo_TerraFirma_GravelWhorl>() ? "UP" : "DOWN?!")}, resonant={eb.Resonant}, force-deflect ON, godmode ON, tinker {(tinker != null ? "spawned" : "NO OPEN CELL")}");
+			MessageQueue.AddPlayerMessage($"tfwhorllaser: char level {Ply.GetStatValue("Level")}, EB {eb.Level}, reserve full, whorl {(Ply.HasEffect<XRL.World.Effects.Cleo_TerraFirma_GravelWhorl>() ? "up" : "DOWN -- something refused, check the log")} and {(eb.Resonant ? "attuned" : "NOT attuned?!")}, godmode + force-deflect ON{(tinker != null ? ", Laser Turret Tinker at range" : " -- no open cell for the tinker, move somewhere roomier and rewish")}. Wish tfwhorlgym to disarm; tfwhorloutcome to pick the outcome.", Capitalize: false);
+		}
+
+		/// <summary>Shared gym plumbing (extracted at the swat/rico-lock round): character
+		/// level to 19 (mutation ranks cap on character level; 19 carries rank 10), EB
+		/// ensured at level 10, reserve topped, whorl toggle flipped on through the
+		/// mutation's own command if it is down. Attune is deliberately NOT touched here --
+		/// callers and tfwhorlattune own the mode.</summary>
+		private static Cleo_TerraFirma_EarthenBarrage EnsureWhorlReady(GameObject Ply)
+		{
+			if (Ply.GetStatValue("Level") < 19)
+				Ply.GetStat("Level").BaseValue = 19;
+			Mutations muts = Ply.RequirePart<Mutations>();
+			Cleo_TerraFirma_EarthenBarrage eb = Ply.GetPart<Cleo_TerraFirma_EarthenBarrage>();
+			if (eb == null)
+			{
+				muts.AddMutation(new Cleo_TerraFirma_EarthenBarrage());
+				eb = Ply.GetPart<Cleo_TerraFirma_EarthenBarrage>();
+			}
+			if (eb.Level < 10)
+				muts.LevelMutation(eb, 10);
+			eb.Charges = Cleo_TerraFirma_EarthenBarrage.MaxCharges(eb.Level);
+			eb.SyncWhorl();
+			if (!Ply.HasEffect<XRL.World.Effects.Cleo_TerraFirma_GravelWhorl>())
+				CommandEvent.Send(Ply, "Cleo_TerraFirma_CommandEarthenBarrage"); // also auto-equips a stone
+			return eb;
+		}
+
+		/// <summary>Outcome locks (user: "a wish that lock the chance at 100 for swat, and
+		/// another to lock it at 100 for ricochet - make sure it's lvl 10 and i can swap
+		/// between attune and base"): full gym setup + force-deflect + the outcome pinned.
+		/// Mode swapping = tfwhorlattune. Attackers come from tfwhorlgym (throwers) or
+		/// tfwhorllaser (beams).</summary>
+		[WishCommand(Command = "tfwhorlswat")]
+		public static void WhorlSwatLock() => WhorlOutcomeLock(2, "SWAT");
+
+		[WishCommand(Command = "tfwhorlrico")]
+		public static void WhorlRicoLock() => WhorlOutcomeLock(3, "RICOCHET");
+
+		private static void WhorlOutcomeLock(int mode, string name)
+		{
+			GameObject Ply = The.Player;
+			if (Ply?.CurrentCell == null)
+				return;
+			Cleo_TerraFirma_EarthenBarrage eb = EnsureWhorlReady(Ply);
+			XRL.World.Effects.Cleo_TerraFirma_GravelWhorl.DebugForceDeflect = true;
+			XRL.World.Effects.Cleo_TerraFirma_GravelWhorl.DebugForcedOutcome = mode;
+			The.Core.IDKFA = true;
+			Helpers.VerifyLog("GVW", $"outcome lock: {name}, EB L{eb.Level}, resonant={eb.Resonant}");
+			MessageQueue.AddPlayerMessage($"every proc now rolls {name}. EB {eb.Level}, whorl up, currently {(eb.Resonant ? "ATTUNED (resonant): lasers" : "BASE (gravel): matter")} -- tfwhorlattune swaps. Godmode + force-deflect ON; tfwhorlgym disarms.", Capitalize: false);
+		}
+
+		/// <summary>The attune/base swapper: one wish flips the whorl's mode through the
+		/// mutation's own Attune Stones command (retune + resync side effects included),
+		/// setting up EB first so it always works.</summary>
+		[WishCommand(Command = "tfwhorlattune")]
+		public static void WhorlAttuneSwap()
+		{
+			GameObject Ply = The.Player;
+			if (Ply?.CurrentCell == null)
+				return;
+			Cleo_TerraFirma_EarthenBarrage eb = EnsureWhorlReady(Ply);
+			CommandEvent.Send(Ply, "Cleo_TerraFirma_CommandAttuneStones");
+			MessageQueue.AddPlayerMessage($"whorl now {(eb.Resonant ? "ATTUNED (resonant): deflects lasers, physical passes through" : "BASE (gravel): deflects matter, light passes through")}.", Capitalize: false);
+		}
+
+		/// <summary>Outcome picker for the gyms (user, VFX sitting 2026-08-12: "we still need
+		/// to verify the 50/30 animations"): cycles the forced-outcome pin devour -> swat ->
+		/// ricochet -> natural roll -> devour. Only bites while a gym has force-deflect
+		/// armed; wish repeatedly to land on the outcome under test.</summary>
+		[WishCommand(Command = "tfwhorloutcome")]
+		public static void WhorlOutcomeCycle()
+		{
+			int mode = (XRL.World.Effects.Cleo_TerraFirma_GravelWhorl.DebugForcedOutcome + 1) % 4;
+			XRL.World.Effects.Cleo_TerraFirma_GravelWhorl.DebugForcedOutcome = mode;
+			string name = mode == 1 ? "DEVOUR" : mode == 2 ? "SWAT" : mode == 3 ? "RICOCHET" : "natural 50/30/20 roll";
+			bool armed = XRL.World.Effects.Cleo_TerraFirma_GravelWhorl.DebugForceDeflect;
+			Helpers.VerifyLog("GVW", $"tfwhorloutcome: forced outcome -> {name} (force-deflect {(armed ? "armed" : "NOT armed")})");
+			MessageQueue.AddPlayerMessage($"tfwhorloutcome: every proc now rolls {name}.{(armed ? "" : " NOTE: force-deflect is not armed -- run tfwhorlgym or tfwhorllaser first.")}", Capitalize: false);
+		}
 	}
 }

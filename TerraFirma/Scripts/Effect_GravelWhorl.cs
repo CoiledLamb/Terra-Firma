@@ -40,6 +40,17 @@ namespace XRL.World.Effects
 		/// </summary>
 		public bool Resonant;
 
+
+		/// <summary>Dev doors (tfwhorlgym/tfwhorllaser/tfwhorloutcome wishes, VFX sitting
+		/// 2026-08-12; split from the original single force-devour flag once the swat and
+		/// ricochet animations needed verifying too): ForceDeflect procs every type-eligible
+		/// projectile, chance ignored; ForcedOutcome pins the 50/30/20 roll (0 natural,
+		/// 1 devour, 2 swat, 3 ricochet). Static and unserialized -- process-wide, survive
+		/// save/load in-session, off by default; ride the TF-VERIFY strip family. Type
+		/// gating (physical vs resonant) deliberately still applies.</summary>
+		public static bool DebugForceDeflect;
+		public static int DebugForcedOutcome = 1; // the wishes arm deflect; devour stays the default pin
+
 		#region Basic info
 		public Cleo_TerraFirma_GravelWhorl()
 		{
@@ -114,11 +125,14 @@ namespace XRL.World.Effects
 		{
 			if (E.ID == "RefractLight" && Resonant
 				&& E.GetGameObjectParameter("Projectile") == null
-				&& DeflectChance.in100())
+				&& (DebugForceDeflect || DeflectChance.in100()))
 			{
 				Helpers.VerifyLog("GVW", $"BEAM SCATTER: resonant whorl refracted a Lase-type beam (chance={DeflectChance}%)");
 				E.SetParameter("By", Object);
 				E.SetParameter("Verb", "scatter"); // RATIFIED 2026-07-23 (engine default "refract" is mirror-flavored; gravel scatters)
+				// second-leg light track (VFX sitting 2026-08-12): the pre-seeded Direction we
+				// leave untouched is exactly what the beam path consumes after we return false
+				Cleo_TerraFirma_GravelWhorlFX.PlayRefractTrack(Object.CurrentCell, E.GetIntParameter("Direction"));
 				return false;
 			}
 			return base.FireEvent(E);
@@ -159,14 +173,16 @@ namespace XRL.World.Effects
 		public override bool HandleEvent(DefenderMissileHitEvent E)
 		{
 			bool deflectable = Resonant ? IsLightProjectile(E.Projectile) : IsPhysicalProjectile(E.Projectile);
-			bool procs = deflectable && DeflectChance.in100();
+			bool procs = deflectable && (DebugForceDeflect || DeflectChance.in100());
 			Helpers.VerifyLog("GVW", $"incoming {E.Projectile?.Blueprint ?? "projectile"} (resonant={Resonant}): {(deflectable ? (procs ? "deflect PROC" : $"deflectable, no proc ({DeflectChance}%)") : "wrong type, passes through")}");
 			if (procs)
 			{
 				// three-stage deflection (RE-RULED 2026-07-22: 50/30/20, supersedes even thirds --
 				// devour common, swat mundane, ricochet the rare story): the whorl devours the
 				// projectile, swats it aside, or sends it careening with its inertia preserved
-				int outcome = Stat.Random(1, 100);
+				int outcome = DebugForceDeflect && DebugForcedOutcome > 0
+					? (DebugForcedOutcome == 1 ? 1 : DebugForcedOutcome == 2 ? 51 : 81)
+					: Stat.Random(1, 100);
 				Helpers.VerifyLog("GVW", $"outcome roll {outcome} -> {(outcome <= 50 ? "DEVOUR" : outcome <= 80 ? "SWAT" : "RICOCHET")}");
 				if (outcome <= 50)
 					Devour(E.Projectile, E.Attacker);
@@ -198,7 +214,10 @@ namespace XRL.World.Effects
 			string whorlName = Object.Poss(DisplayName.Strip());
 			if (projectile == null)
 			{
-				XDidY(whorlName, "devours", "the projectile", EndMark: "!", Source: Object);
+				// resonant verb set (RULED 2026-08-12: snuffs/diffuses accepted from draft,
+				// refract the user's own word): resonance unmakes light, mass gets ground
+				XDidY(whorlName, Resonant ? "snuffs" : "devours", "the projectile", EndMark: "!", Source: Object);
+				Cleo_TerraFirma_GravelWhorlFX.PlayDevourSwirl(Object, null, attacker); // renderless: whorl-gray flecks
 				return;
 			}
 			XRL.World.Parts.IGrenade grenade = projectile.GetFirstPartDescendedFrom<XRL.World.Parts.IGrenade>();
@@ -221,6 +240,7 @@ namespace XRL.World.Effects
 			if (projectile.HasTag("Cleo_TerraFirma_IsAnyStone"))
 			{
 				XDidYToZ(whorlName, "devours", projectile, EndMark: "!", Source: Object);
+				Cleo_TerraFirma_GravelWhorlFX.PlayDevourSwirl(Object, projectile, attacker); // before Obliterate: palette theft needs the live Render
 				Cleo_TerraFirma_EarthenBarrage eb = Object.GetPart<Cleo_TerraFirma_EarthenBarrage>();
 				if (eb != null && eb.Charges < Cleo_TerraFirma_EarthenBarrage.MaxCharges(eb.Level))
 				{
@@ -236,7 +256,8 @@ namespace XRL.World.Effects
 				return;
 			}
 			Helpers.VerifyLog("GVW", $"devour: non-stone {projectile.Blueprint} OBLITERATED (RULED KEPT 2026-07-23)");
-			XDidYToZ(whorlName, "devours", projectile, EndMark: "!", Source: Object);
+			XDidYToZ(whorlName, Resonant ? "snuffs" : "devours", projectile, EndMark: "!", Source: Object);
+			Cleo_TerraFirma_GravelWhorlFX.PlayDevourSwirl(Object, projectile, attacker);
 			projectile.Obliterate();
 		}
 
@@ -264,12 +285,13 @@ namespace XRL.World.Effects
 		{
 			string whorlName = Object.Poss(DisplayName.Strip());
 			if (projectile == null)
-				XDidY(whorlName, "deflects", "the projectile", EndMark: "!", Source: Object);
+				XDidY(whorlName, Resonant ? "diffuses" : "deflects", "the projectile", EndMark: "!", Source: Object);
 			else if (projectile.HasPart<XRL.World.Parts.Projectile>())
 			{
 				// ephemeral munition (bullet, laser bolt) -- nothing real to preserve
 				Helpers.VerifyLog("GVW", $"swat: munition {projectile.Blueprint} fizzled");
-				XDidYToZ(whorlName, "deflects", projectile, EndMark: "!", Source: Object);
+				XDidYToZ(whorlName, Resonant ? "diffuses" : "deflects", projectile, EndMark: "!", Source: Object);
+				Cleo_TerraFirma_GravelWhorlFX.PlaySwatBeat(Object.CurrentCell, null); // grit pinch: ground to nothing
 				projectile.Obliterate();
 			}
 			else
@@ -280,6 +302,7 @@ namespace XRL.World.Effects
 				Helpers.VerifyLog("GVW", $"swat: real item {projectile.Blueprint} batted to ({landing?.X},{landing?.Y}), loot preserved");
 				landing?.AddObject(projectile);
 				MarkDeflected(projectile, landing);
+				Cleo_TerraFirma_GravelWhorlFX.PlaySwatBeat(Object.CurrentCell, landing); // dust + blip: the loot pointer
 			}
 		}
 
@@ -310,9 +333,17 @@ namespace XRL.World.Effects
 				? projectile?.GetPart<XRL.World.Parts.Projectile>()?.BaseDamage
 				: (projectile.GetPart<XRL.World.Parts.ThrownWeapon>()?.Damage ?? "1d2");
 			if (projectile == null)
-				XDidY(whorlName, "sends", "the projectile careening", EndMark: "!", Source: Object);
+			{
+				if (Resonant)
+					XDidY(whorlName, "refracts", "the projectile", EndMark: "!", Source: Object);
+				else
+					XDidY(whorlName, "sends", "the projectile careening", EndMark: "!", Source: Object);
+			}
+			else if (Resonant)
+				XDidYToZ(whorlName, "refracts", projectile, EndMark: "!", Source: Object);
 			else
 				XDidYToZ(whorlName, "sends", projectile, "careening", EndMark: "!", Source: Object);
+			Cleo_TerraFirma_GravelWhorlFX.PlayRicochetElbow(origin); // the bend gets a joint (go-ahead 2026-08-12)
 			double rad = Stat.Random(0, 359) * Math.PI / 180.0;
 			int ex = Math.Max(0, Math.Min(zone.Width - 1, origin.X + (int)Math.Round(Math.Cos(rad) * RICOCHET_RANGE)));
 			int ey = Math.Max(0, Math.Min(zone.Height - 1, origin.Y + (int)Math.Round(Math.Sin(rad) * RICOCHET_RANGE)));
@@ -357,7 +388,7 @@ namespace XRL.World.Effects
 			}
 			Helpers.VerifyLog("GVW", $"ricochet: {projectile?.Blueprint ?? "munition"} carom ended at ({landing.X},{landing.Y}); {(projectile == null || ephemeral ? "munition spent" : "item lands there")}");
 			if (landing != origin)
-				landing.DustPuff();
+				Cleo_TerraFirma_GravelWhorlFX.PlayCaromLanding(landing); // grit in tiles, dust in text (less-smoke round 2026-08-12)
 			if (projectile != null)
 			{
 				if (ephemeral)
