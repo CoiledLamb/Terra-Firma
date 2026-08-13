@@ -171,6 +171,56 @@ into the painter (bite merging can create diagonal pinches); keep the ≥N-reach
 hard validation. Ruiner-style real-explosion weathering: tempting for a "collapsed
 working" variant, note the mod already owns wall→rubble machinery.
 
+## Ruins SHAPING recon (2026-08-12 — full decompile of Ruins/Ruiner/BuildingTemplate, pre-dress-phase; the 08-07 section covered the table side, this is the geometry side)
+
+**How a ruin actually gets its shape (`BuildingTemplate`):**
+1. **Mass-first, hollow-second.** N random rectangles stamp SOLID wall mass (overlapping
+   freely), an 8-dir flood from the zone border classifies Outside vs OutsideWall (the
+   skin), then interior cells hollow to Inside. The building's footprint is whatever the
+   overlaps made — irregular silhouettes for free, no outline drawing anywhere.
+2. **Recursive partition with validated doors (`FillRoom`).** Any room over 24 cells
+   (and >3 per axis) gets a partition across its narrower axis (75%; flipped 25%),
+   placement validated so the partition butts open cells at both ends, ONE door punched
+   at a validated spot in it, then RECURSE into both halves. Big spaces subdivide until
+   den-sized organically. This is the suite's grown-up cousin.
+3. **Doors at perimeter intervals:** a walk along OutsideWall punches area/n doors with
+   random phase — 1-2 usually, 10% chance of 1d2 more.
+4. **`RoomList` falls out of the shaper** — every room flood-enumerated with bbox +
+   size DURING generation. The engine's own idiom is the warren-lab dress registry:
+   spaces know what they are at birth; nothing is inferred later.
+5. Multi-zone coherence: the template is a zone-COLUMN property spanning 1d3 x 1d2
+   zones. (No warren application yet — single-zone — noted for someday.)
+
+**How it gets its age (`Ruiner`) — the tense machine:**
+- 0-3 + RuinLevel/5 REAL explosions (`LegacyApplyExplosion`) at random points — decay is
+  SIMULATED, not painted; walls crumble through the engine's own destruction physics.
+- Then the grammar passes: `CleanNarrowConnections` (diagonal pinch opener — already in
+  the legacy police) and **`CleanOrphanDoors`** (a door not flanked by exactly one
+  parallel wall PAIR dies — doors whose walls were blown away don't linger as noise).
+- Then HARD validation: >=400 cells reachable from a connection or the builder returns
+  false and the whole zone rebuilds. Honest failure at zone scale.
+
+**Semantic-tag theme layer (`Ruins.BuildZone`):** every cell tagged from its template
+tile (Inside/Room/Perimeter · Wall/Inner · Door · Wall/Outer · Connection/Stairs ·
+Void→Inside+Isolated — sealed voids are TAGGED for deliberate treatment, the engine's
+own endorsement of the wet-pocket breach-reward idea), then a THEME rolls once from a
+population table onto the zone column and per-tag Replace tables mutate it. One roll
+recolors the whole site's dressing; the geometry never changes.
+
+**Steal verdict for the warren (proposals, unruled):**
+- **NOW (dress phase): the theme layer.** A warren-level theme roll at dress time
+  swapping table VARIANTS per space-kind while the registry stays fixed — one roll
+  makes a prosperous dig vs a lean one vs a fresh cut. Cheap (a lookup key), and it is
+  exactly how the game gets site-level personality without new geometry.
+- **LATER (the "progress from there" tense flip): Ruiner's simulate-don't-paint.** The
+  abandoned-warren variant should be collapse EVENTS (rubble splats + wall crumble —
+  the mod already owns wall→rubble machinery from Fissure) followed by the police and
+  a reach validation, not hand-placed decay items. Geometry-level past tense.
+- **C# PORT: `CleanOrphanDoors`** joins the police when real Door objects exist.
+- Confirmations, no action: dress registry ≈ RoomList (engine-idiomatic); spawn-nothing
+  ≈ the >=400 hard fail; FillRoom subdivision available if communal wants a
+  multi-room block grown from one footprint instead of suite stamps.
+
 ## Decompile dumps
 
 Raw sources cached this session at

@@ -88,6 +88,8 @@
   .gbar { display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
   .draftnote { background:#2a2410; border:1px solid #5a4a1e; color:#e0c880; border-radius:6px; padding:6px 9px; font-size:11px; margin-bottom:10px; }
   .noisecell { box-shadow: inset 0 0 0 1px rgba(224,108,48,.55); }
+  /* mossy walls are recolored per-cell through the Qud palette (SVG filter,
+     built in ensureQudFilter) — no static class rule needed */
 </style>
 </head>
 <body>
@@ -140,10 +142,11 @@ window.onerror = function (msg, src, line) {
       <label>seed <input type="number" id="genseed" value="1"></label>
       <button id="gen-warren" title="STAGE 1: the honed language alone on solid rock — no canyon, no camp chain; winding halls + small parts + loop-backs">Warren</button>
       <button id="gen-canyon" title="Qud CanyonBuilder, ported from the decompiled source: NoiseMap-blocked Drillbot paths from a hub to canyon mouths and stairs, per-cell Stat.Random(1,high) box widening">Canyon</button>
+      <button id="gen-cwarren" title="STAGE 2: the warren constrained by a real canyon — one mouth on the canyon's wall skin (mild stair-spur preference, the pilgrim road), halls refuse canyon floor everywhere else, ~30% back door. Attachment rules RULED 2026-08-11">Canyon Warren</button>
       <button id="gen-reroll" title="bump the seed, redo the last generator (Space)">Reroll</button>
       <label title="run the dress phase after carving — off by default in v2; this fork is about carving"><input type="checkbox" id="gendress"> dress</label>
       <label title="tint the cells that sat at or below the NoiseMap cutoff on the last canyon roll — these are what the Drillbot's path had to bend around"><input type="checkbox" id="shownoise"> drillbot obstacles</label>
-      <label title="draw with Qud's own sprites: walls picked by the same 8-neighbour mask ZoneManager.PaintWall uses, floors rolling one of four sw_ground_dots variants like DirtFloor's RandomTileOnMove. This is what the game will actually draw."><input type="checkbox" id="connwalls" checked> Qud tiles</label>
+      <label title="draw with Qud's own sprites: walls picked by the same 8-neighbour mask ZoneManager.PaintWall uses, floors painted per the Dirty widget's d8 (dirt/grass — decomp 2026-08-12; the old sw_ground_dots stand-in lives behind the floor-look knob). This is what the game will actually draw."><input type="checkbox" id="connwalls" checked> Qud tiles</label>
       <label>zoom <select id="genzoom"><option value="20,30">L</option><option value="14,21">M</option><option value="10,15" selected>S (whole zone)</option></select></label>
       <details style="width:100%;margin:2px 0 0;"><summary style="font-size:11px;color:var(--ink2);cursor:pointer;">legacy track (the old camp chain, kept for comparison)</summary>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;">
@@ -205,6 +208,7 @@ window.onerror = function (msg, src, line) {
     { id:"wall",      c:"#", g:"▓", fg:"#7d7d6e", bg:"#33332c", n:"wall (shale)",        grp:"Terrain", img:"tiles/wall.png" },
     { id:"water", c:":", g:"≈", fg:"#7db4e8", bg:"#1a4a80", n:"river water", grp:"Terrain" },
     { id:"floor",     c:".", g:"·", fg:"#5b5b52", bg:"#101010", n:"carved floor",        grp:"Terrain" },
+    { id:"padfloor",  c:"_", g:"·", fg:"#98875f", bg:"#131110", n:"padded earth (lived floor)", grp:"Terrain" },
     { id:"mouth",     c:">", g:">",      fg:"#e8e9ee", bg:"#101010", n:"mouth / entrance",    grp:"Terrain" },
     { id:"stack1", c:"=", g:"▂", fg:"#a64a2e", bg:"#22221e", n:"quarried stack 1 (low wall)", grp:"Terrain", img:"tiles/stack1.png" },
     { id:"stack2", c:"q", g:"▄", fg:"#a64a2e", bg:"#22221e", n:"quarried stack 2 (low wall)", grp:"Terrain", img:"tiles/stack2.png" },
@@ -223,6 +227,22 @@ window.onerror = function (msg, src, line) {
     { id:"torch",     c:"t", g:"!",      fg:"#e0b040", bg:"#101010", n:"torchpost",           grp:"Objects", img:"tiles/torch.png" },
     { id:"figurine",  c:"f", g:"☺", fg:"#c87f3a", bg:"#101010", n:"figurine (effects)",  grp:"Objects", img:"tiles/figurine.png" },
     { id:"stele",     c:"I", g:"║", fg:"#8fa3b8", bg:"#101010", n:"eye stele",           grp:"Objects", img:"tiles/stele.png" },
+    // work tools (USER 2026-08-12: "i would add pickaxes, and stray torches, not
+    // torchposts") — real item renders: Torch * &w/R, Pickaxe ♦ Tool-base y/w
+    { id:"straytorch", c:"^", g:"*", fg:"#98875f", bg:"#101010", n:"stray torch (work light)", grp:"Objects", qtiles:["sw_torch"], qtc:"w", qdc:"R" },
+    { id:"pickaxe",    c:"}", g:"♦", fg:"#b1c9c3", bg:"#101010", n:"pickaxe",            grp:"Objects", qtiles:["sw_pickaxe"], qtc:"y", qdc:"w" },
+    // natural rock (USER RULED 2026-08-12: natural rocks live IN the warren;
+    // boulders CUT same sitting — "just do stones, small stones, and pebbles").
+    // Renders: Large Stone sw_stone_large + Small Stone sw_smallstone, both
+    // `.` &y/Y (Items.xml). PEBBLE HAS NO BASE BLUEPRINT — it's the mod's own
+    // at port time (blueprint debt flagged in TODO); sketch = the smallstone
+    // mask in a dimmer tint. PORT FLAG stands: stones are Takeable BaseStone —
+    // literal EB reserve ammo; the forage-ground economy is a ruling owed.
+    // The boulder palette entry survives for hand-painting only.
+    { id:"boulder", c:"{", g:"•", fg:"#cfc041", bg:"#101010", n:"boulder (hand-paint only)", grp:"Objects", qtiles:["sw_smallboulder","sw_mediumboulder","sw_largeboulder"], qtc:"W", qdc:"Y" },
+    { id:"stone", c:"\"", g:".", fg:"#b1c9c3", bg:"#101010", n:"stone (natural)", grp:"Objects", qtiles:["sw_stone_large"], qtc:"y", qdc:"Y" },
+    { id:"loosestone", c:"`", g:".", fg:"#b1c9c3", bg:"#101010", n:"small stone (natural)", grp:"Objects", qtiles:["sw_smallstone"], qtc:"y", qdc:"Y" },
+    { id:"pebble", c:"@", g:"·", fg:"#155352", bg:"#101010", n:"pebble (natural, mod blueprint TBD)", grp:"Objects", qtiles:["sw_smallstone"], qtc:"K", qdc:"y" },
     { id:"chest",     c:"C", g:"■", fg:"#a0763a", bg:"#101010", n:"chest",               grp:"Objects", img:"tiles/chest.png" },
     { id:"millstone", c:"M", g:"⊙", fg:"#9a9a88", bg:"#101010", n:"millstone",           grp:"Objects", img:"tiles/millstone.png" },
     { id:"lick",      c:"L", g:"▄", fg:"#d8d0c0", bg:"#101010", n:"mineral lick",        grp:"Objects" },
@@ -270,10 +290,16 @@ window.onerror = function (msg, src, line) {
     { id:"bg.metal_door", c:"(", g:"+", fg:"#b1c9c3", bg:"#101010", n:"door", grp:"Base Furniture", img:"tiles/bg_metal_door.png" },
     { id:"bg.double_door", c:")", g:"+", fg:"#b1c9c3", bg:"#101010", n:"door", grp:"Base Furniture", img:"tiles/bg_double_door.png" },
     { id:"bg.alchemist_table", c:"[", g:"π", fg:"#b1c9c3", bg:"#101010", n:"alchemist's table", grp:"Base Furniture", img:"tiles/bg_alchemist_table.png" },
-    { id:"bg.witchwood_tree", c:"T", g:"\u00a5", fg:"#b1c9c3", bg:"#101010", n:"witchwood tree", grp:"Plants", img:"tiles/bg_witchwood_tree.png" },
-    { id:"bg.starapple_tree", c:"U", g:"\u00a5", fg:"#b1c9c3", bg:"#101010", n:"starapple tree", grp:"Plants", img:"tiles/bg_starapple_tree.png" },
+    // the three canyon species wear their blueprint glyph colors (ZoneTerrain.xml
+    // ColorString: witchwood &W, starapple &R, dogthorn &G) \u2014 they're what the
+    // DesertCanyonZoneGlobals scatter places, so text mode should read true
+    // qtiles/qtc/qdc: in Qud-tiles mode these draw the game's own extracted masks
+    // (the blueprint's RandomTile variants, rolled by coord hash) recolored to the
+    // blueprint's true TileColor/DetailColor \u2014 the bg_ png stays as the fallback
+    { id:"bg.witchwood_tree", c:"T", g:"\u00a5", fg:"#cfc041", bg:"#101010", n:"witchwood tree", grp:"Plants", img:"tiles/bg_witchwood_tree.png", qtiles:["sw_talltree1","sw_talltree2"], qtc:"W", qdc:"g" },
+    { id:"bg.starapple_tree", c:"U", g:"\u00a5", fg:"#d74200", bg:"#101010", n:"starapple tree", grp:"Plants", img:"tiles/bg_starapple_tree.png", qtiles:["sw_starappletree"], qtc:"g", qdc:"R" },
     { id:"bg.swarmshade_tree", c:"V", g:"♣", fg:"#b1c9c3", bg:"#101010", n:"swarmshade tree", grp:"Plants", img:"tiles/bg_swarmshade_tree.png" },
-    { id:"bg.dogthorn_tree", c:"W", g:"\u00a5", fg:"#b1c9c3", bg:"#101010", n:"dogthorn tree", grp:"Plants", img:"tiles/bg_dogthorn_tree.png" },
+    { id:"bg.dogthorn_tree", c:"W", g:"\u00a5", fg:"#00c420", bg:"#101010", n:"dogthorn tree", grp:"Plants", img:"tiles/bg_dogthorn_tree.png", qtiles:["sw_fattree1","sw_fattree2"], qtc:"G", qdc:"w" },
     { id:"bg.dicalyptus_tree", c:"X", g:"\u00a5", fg:"#b1c9c3", bg:"#101010", n:"diacalyptus tree", grp:"Plants", img:"tiles/bg_dicalyptus_tree.png" },
     { id:"bg.sunflower", c:"]", g:"☼", fg:"#b1c9c3", bg:"#101010", n:"sunflower", grp:"Plants", img:"tiles/bg_sunflower.png" },
     { id:"flower_r", c:"%", g:"*", fg:"#d74200", bg:"#101010", n:"painted flowers (red)", grp:"Plants", img:"tiles/flower_r.png" },
@@ -291,8 +317,17 @@ window.onerror = function (msg, src, line) {
   // one place and made editable. `def` is the value the sim shipped with on 2026-08-08 —
   // "Reset all" always returns here, so no amount of fiddling loses the tuned baseline.
   var KNOBSPEC = [
-    { g: "warren — size", k: "partsMin", n: "parts min", def: 12, min: 2, max: 40, step: 1, h: "lower bound on parts placed per warren" },
-    { g: "warren — size", k: "partsMax", n: "parts max", def: 18, min: 2, max: 60, step: 1, h: "upper bound on parts placed per warren" },
+    { g: "warren — size", k: "partsMin", n: "parts min (medium)", def: 12, min: 2, max: 40, step: 1, h: "the MEDIUM class part band — the calibrated 12-18 range from the drawing rounds. Small/large classes have their own bands below (USER 2026-08-12: classify warrens small / medium / large)" },
+    { g: "warren — size", k: "partsMax", n: "parts max (medium)", def: 18, min: 2, max: 60, step: 1, h: "" },
+    { g: "warren — size", k: "wtSmall", n: "weight: small", def: 25, min: 0, max: 100, step: 1, h: "size class roll (USER 2026-08-12: \"start classifying warrens by small, medium, and large\"). Weights + the small/large bands are CLAUDE dials awaiting feel rounds" },
+    { g: "warren — size", k: "wtMedium", n: "weight: medium", def: 50, min: 0, max: 100, step: 1, h: "" },
+    { g: "warren — size", k: "wtLarge", n: "weight: large", def: 25, min: 0, max: 100, step: 1, h: "" },
+    { g: "warren — size", k: "smallMin", n: "small parts min", def: 7, min: 2, max: 40, step: 1, h: "a hermit hole with a few workings" },
+    { g: "warren — size", k: "smallMax", n: "small parts max", def: 11, min: 2, max: 40, step: 1, h: "" },
+    { g: "warren — size", k: "largeMin", n: "large parts min", def: 20, min: 2, max: 60, step: 1, h: "a proper settlement-scale dig" },
+    { g: "warren — size", k: "largeMax", n: "large parts max", def: 28, min: 2, max: 60, step: 1, h: "" },
+    { g: "warren — size", k: "galleryChance", n: "gallery chance", def: 0.4, min: 0, max: 1, step: 0.01, h: "chance a MEDIUM or LARGE warren carries one pillared gallery (USER RULING 2026-08-12: medium rarity, medium+ warrens only; drawing 11 is the spec — open span, lone pillars shadowing the perimeter, notched walls, blind slots, budded chambers, multiple ways in). Small warrens never roll one" },
+    { g: "warren — size", k: "galleryShape", n: "gallery silhouette", def: 1, min: 0, max: 1, step: 1, h: "A/B (2026-08-12, user: \"let's try both\"): 1 = overlap-hollow, the ruins BuildingTemplate idiom — 2-3 rects stamped overlapping and the union hollowed, silhouette emerges instead of being decorated on; 0 = drawing 11's rectangle with jogged corners + carved bays. Pillars/slots/buds identical in both", sel: [[1, "overlap-hollow (ruins idiom)"], [0, "rect + bays (drawing 11)"]] },
     { g: "warren — size", k: "portCap", n: "port pool cap", def: 14, min: 3, max: 40, step: 1, h: "how many open frontier cells stay in play; small = the warren folds back on itself, large = it sprawls" },
     { g: "warren — size", k: "attempts", n: "attempts x parts", def: 4, min: 1, max: 12, step: 1, h: "how many tries the loop gets per wanted part before giving up" },
 
@@ -322,10 +357,31 @@ window.onerror = function (msg, src, line) {
     { g: "warren — part table", k: "wWrap", n: "mini wrap", def: 14, min: 0, max: 60, step: 1, h: "3x3 ring around a kept core" },
     { g: "warren — part table", k: "wUnit", n: "ring unit", def: 12, min: 0, max: 60, step: 1, h: "one rank unit — ring or C-bracket with a standing core" },
     { g: "warren — part table", k: "wComb", n: "mini comb", def: 10, min: 0, max: 60, step: 1, h: "small lattice maze block" },
-    { g: "warren — part table", k: "wPocket", n: "pocket", def: 12, min: 0, max: 60, step: 1, h: "the den-sized elliptical blob" },
+    { g: "warren — part table", k: "wPocket", n: "pocket", def: 0, min: 0, max: 60, step: 1, h: "the den-sized elliptical blob — CUT from the language (USER RULING 2026-08-12: \"can we cut the pocket from the warren sim\"); weight kept as a knob so the cut is A/B-able, carvePocket survives for the legacy digger track" },
     { g: "warren — part table", k: "wSockets", n: "socket pair", def: 10, min: 0, max: 60, step: 1, h: "two facing bites either side of the hall end" },
     { g: "warren — part table", k: "wHook", n: "hook", def: 6, min: 0, max: 60, step: 1, h: "G-spiral stub curling around a wall pocket" },
+    { g: "warren — part table", k: "wBlock", n: "communal block", def: 10, min: 0, max: 60, step: 1, h: "TRIAL 2026-08-12 (user: \"let's try both\"): irregular two-rect footprint recursively partitioned into den-sized rooms behind doors — the ruins FillRoom idiom, grown to fit instead of stamped. Partitions read as BUILT walls inside dug space (mason work inside hewer work). Weight is a CLAUDE dial" },
     { g: "warren — part table", k: "wFoot", n: "footed dead-end", def: 6, min: 0, max: 60, step: 1, h: "stub that turns once at its tip" },
+
+    { g: "warren — grammar", k: "sealDiag", n: "diagonal seal", def: 1, min: 0, max: 1, step: 1, h: "seal accidental diagonal entrances into chambers from the ROOM side — the hall keeps its line, the room goes quiet behind its real door. 0 = old behavior (corner kisses stay walkable)", sel: [[1, "on"], [0, "off"]] },
+    { g: "warren — grammar", k: "shardSweep", n: "shard sweep", def: 1, min: 0, max: 1, step: 1, h: "clear accidental LONE wall cells (all 8 neighbours open) left where carves merged — debris that dilutes the kept-core vocabulary. Kept cores, comb posts, and every protected shell are exempt; 2+ cell remnants stay (they read as stubs of something). 0 = pre-2026-08-12 behavior", sel: [[1, "on"], [0, "off"]] },
+
+    { g: "warren — geology", k: "wetChance", n: "wet pocket chance", def: 0.45, min: 0, max: 1, step: 0.01, h: "chance a warren carries one sealed brine pocket — a pool the player never sees directly, read only through the symptoms around it. 0 = off" },
+    { g: "warren — geology", k: "wetSizeMin", n: "pocket size min", def: 2, min: 1, max: 5, step: 1, h: "pool dimensions roll min..max per axis" },
+    { g: "warren — geology", k: "wetSizeMax", n: "pocket size max", def: 3, min: 1, max: 6, step: 1, h: "" },
+    { g: "warren — geology", k: "wetAvoid", n: "avoidance cost", def: 8, min: 0, max: 40, step: 1, h: "extra tunnel cost within 2 cells of the pocket shell — the network conspicuously bends around the wet ground (diggers don't breach aquifers). 0 = halls ignore it" },
+    { g: "warren — geology", k: "natMin", n: "natural rocks min", def: 2, min: 0, max: 20, step: 1, h: "natural-table scatter attempts per warren (USER RULED 2026-08-12: natural rocks live IN the warren) — each attempt rolls Nothing 55 / boulder 30 / loose stone 15 onto random warren floor. CLAUDE dials throughout" },
+    { g: "warren — geology", k: "natMax", n: "natural rocks max", def: 5, min: 0, max: 20, step: 1, h: "" },
+    { g: "warren — geology", k: "wetHalo", n: "symptom reach", def: 2, min: 1, max: 5, step: 1, h: "how far from the shell the symptoms spread (moss / mud / seep / puddles on the accessible side). Dress-toggle only — bare geometry shows just the sealed pool and the bend" },
+    { g: "warren — geology", k: "mossTile", n: "moss TileColor", def: "K", min: 0, max: 0, step: 1, str: true, h: "the mossy wall's body color, as a Qud palette CODE — what goes in the blueprint's TileColor. User pick: K (#155352, greyish)", sel: [["K", "K — dark gray"], ["k", "k — black"], ["y", "y — gray"], ["g", "g — dark green"], ["G", "G — green"], ["c", "c — dark cyan"], ["C", "C — cyan"], ["w", "w — brown"], ["W", "W — gold"], ["r", "r — dark red"], ["R", "R — red"], ["o", "o — dark orange"], ["O", "O — orange"], ["b", "b — dark blue"], ["B", "B — blue"], ["m", "m — dark magenta"], ["M", "M — magenta"], ["Y", "Y — white"]] },
+    { g: "warren — geology", k: "mossDetail", n: "moss DetailColor", def: "g", min: 0, max: 0, step: 1, str: true, h: "the mossy wall's detail/highlight color, as a Qud palette CODE. User pick: g (#009403, dark green)", sel: [["g", "g — dark green"], ["G", "G — green"], ["K", "K — dark gray"], ["k", "k — black"], ["y", "y — gray"], ["c", "c — dark cyan"], ["C", "C — cyan"], ["w", "w — brown"], ["W", "W — gold"], ["r", "r — dark red"], ["R", "R — red"], ["o", "o — dark orange"], ["O", "O — orange"], ["b", "b — dark blue"], ["B", "B — blue"], ["m", "m — dark magenta"], ["M", "M — magenta"], ["Y", "Y — white"]] },
+
+    { g: "warren — canyon (stage 2)", k: "spurPull", n: "spur mouth pull", def: 2, min: 0, max: 8, step: 0.5, h: "mouth-candidate weight multiplier when the candidate fronts a stair spur instead of the main corridor — the ruled pilgrim-road habit (~2:1, CLAUDE DIAL). 1 = no preference, 0 = spurs never chosen" },
+    { g: "warren — canyon (stage 2)", k: "backDoor", n: "back door chance", def: 0.30, min: 0, max: 1, step: 0.01, h: "chance the warren opens a SECOND door onto the canyon, far from the mouth — lived-in burrows have two exits (carried from the articulation ruling). With a spur mouth this can make the warren a through-route to the stairs" },
+    { g: "warren — canyon (stage 2)", k: "backDoorMin", n: "back door min dist", def: 10, min: 2, max: 40, step: 1, h: "minimum Chebyshev distance from the mouth for a back-door site — too close and the two doors read as one ragged opening" },
+    { g: "warren — canyon (stage 2)", k: "mouthDepth", n: "mouth solid depth", def: 3, min: 1, max: 8, step: 1, h: "solid unprotected rock required straight behind a mouth candidate before the warren will start there — keeps mouths off slivers between two canyon arms" },
+    { g: "warren — canyon (stage 2)", k: "mouthMassR", n: "mouth mass radius", def: 7, min: 0, max: 12, step: 1, h: "mouth candidates are weighted by the carvable wall mass within this Chebyshev radius behind them (BFS through wall, skin refused) — deep rock outdraws thin bands, so the warren stops choosing the sparsest section when full areas exist. A thin-band mouth still happens when the zone offers nothing better. 0 = flat weights (pre-2026-08-12 behavior) AND disables class-aware mouth fitting" },
+    { g: "warren — canyon (stage 2)", k: "mouthMassPerPart", n: "mass per part", def: 7, min: 1, max: 20, step: 1, h: "class-aware mouth fitting (RULED 2026-08-12 after the seed-16 verdict): a mouth is eligible for a class only if its mass >= parts wanted x this. No eligible mouth = the class degrades toward small before carving — the rock decides what fits. CLAUDE dial: ~7 cells of rock consumed per part is the observed footprint" },
 
     { g: "canyon — shape", k: "canyonTerrain", n: "terrain", def: 1, min: 1, max: 3, step: 2, h: "widening radius cap: Qud rolls Stat.Random(1,3) in Mountains/Hills and Stat.Random(1,1) everywhere else. Desert canyon (our habitat) = 1", sel: [[1, "desert / other (r=1)"], [3, "mountains / hills (r=1-3)"]] },
     { g: "canyon — shape", k: "cw1", n: "weight: 1 mouth", def: 10, min: 0, max: 100, step: 1, h: "box canyon" },
@@ -345,8 +401,36 @@ window.onerror = function (msg, src, line) {
     { g: "canyon — drillbot noise", k: "nmCutoff", n: "cutoff", def: 1, min: 0, max: 20, step: 1, h: "cells ABOVE this get flat nav weight 98; cells at or below keep terrain weight and become the obstacles the path bends around" },
     { g: "canyon — drillbot noise", k: "navBlocked", n: "obstacle cost", def: 400, min: 99, max: 5000, step: 1, h: "cost of a below-cutoff wall cell. Qud treats weight>=MaxWeight as impassable; a large finite cost keeps a path guaranteed" },
 
-    { g: "canyon — water", k: "riverChance", n: "river chance", def: 0.35, min: 0, max: 1, step: 0.01, h: "not part of CanyonBuilder — a separate builder in the zone's list. Proposal, not ground truth" },
-    { g: "canyon — water", k: "marshChance", n: "marsh instead", def: 0.25, min: 0, max: 1, step: 0.01, h: "share of rivers that become a CA marsh splat instead" }
+    { g: "canyon — water", k: "riverChance", n: "river chance", def: 0.35, min: 0, max: 1, step: 0.01, h: "stand-in for 'this zone sits on a world-map river' — RiverBuilder itself is decomp-verified 2026-08-12, but which zones it runs in is world-map topology the sim doesn't model" },
+    { g: "canyon — water", k: "marshChance", n: "marsh (lone mouth)", def: 0.25, min: 0, max: 1, step: 0.01, h: "stand-in for 'the river DEAD-ENDS here' (exactly one river connection). Decomp truth: the marsh zone gets the zone-wide CA splat AND a channel from a random interior point out to the lone mouth — the river rises out of the marsh" },
+
+    // padded earth (USER RULING 2026-08-12: "lived floor sounds interesting") —
+    // the VillageMaker idiom (DirtPath on every hut interior) worn by burrow
+    // folk: LIVED floor pads, work bites stay raw cut. The floor object masks
+    // the Dirty paint underneath, same as village huts mask theirs.
+    { g: "warren — floor", k: "padFloor", n: "padded earth", def: 1, min: 0, max: 1, step: 1, h: "warren floor becomes padded earth (USER RULED 2026-08-12, corrected same sitting to WHOLE warren — the strict VillageMaker idiom). 0 = everything stays Dirty-paint floor", sel: [[1, "on"], [0, "off"]] },
+    { g: "warren — floor", k: "padScope", n: "pad scope", def: 0, min: 0, max: 1, step: 1, h: "0 = WHOLE warren, every carved cell (the ruling: \"actually - let's do whole warren\"); 1 = lived-only — work bites (sockets, feet, trunk bays) keep the raw cut, the earlier reading kept for A/B", sel: [[0, "whole warren (ruled)"], [1, "lived only (A/B)"]] },
+    { g: "warren — floor", k: "padTile", n: "pad TileColor", def: "w", min: 0, max: 0, step: 1, str: true, h: "the padded-earth body color as a Qud palette CODE (blueprint TileColor at port time). CLAUDE default: w, brown earth", sel: [["w", "w — brown"], ["y", "y — gray"], ["K", "K — dark gray"], ["k", "k — black"], ["r", "r — dark red"], ["o", "o — dark orange"], ["g", "g — dark green"], ["c", "c — dark cyan"], ["W", "W — gold"]] },
+    { g: "warren — floor", k: "padDetail", n: "pad DetailColor", def: "k", min: 0, max: 0, step: 1, str: true, h: "padded-earth detail color CODE. CLAUDE default: k", sel: [["k", "k — black"], ["K", "K — dark gray"], ["w", "w — brown"], ["y", "y — gray"], ["r", "r — dark red"], ["g", "g — dark green"]] },
+
+    // stage 3, first bite (2026-08-12): the canyon's grass + trees, ported from
+    // ground truth — Dirty.PaintCell (decomp) for the floor, PopulationTables.xml
+    // DesertCanyonZoneGlobals for the tree scatter. Defaults ARE the game's numbers.
+    { g: "canyon — flora (stage 3)", k: "floorMode", n: "floor look", def: 1, min: 0, max: 1, step: 1, h: "1 = the Dirty widget's floor paint, what every surface canyon zone actually shows (decomp Dirty.PaintCell 2026-08-12); 0 = the pre-2026-08-12 sw_ground_dots stand-in (DirtPath's village-hut idiom, kept for comparison)", sel: [[1, "Dirty paint (ground truth)"], [0, "ground dots (legacy)"]] },
+    { g: "canyon — flora (stage 3)", k: "fpDirtW", n: "dirt (&w) weight", def: 5, min: 0, max: 20, step: 1, h: "Dirty.PaintCell rolls d8 per cell: 1-5 = brown dirt (tile-dirt1, &w, detail k). These four weights ARE that d8 — 5/1/1/1" },
+    { g: "canyon — flora (stage 3)", k: "fpGrassg", n: "grass (&g) weight", def: 1, min: 0, max: 20, step: 1, h: "roll 6 = dark-green grass, one of DirtPicker's four tiles (tile-grass1 / sw_grass1-3)" },
+    { g: "canyon — flora (stage 3)", k: "fpGrassG", n: "grass (&G) weight", def: 1, min: 0, max: 20, step: 1, h: "roll 7 = bright-green grass, same four tiles" },
+    { g: "canyon — flora (stage 3)", k: "fpDirtY", n: "dirt (&y) weight", def: 1, min: 0, max: 20, step: 1, h: "roll 8 = pale dirt" },
+    { g: "canyon — flora (stage 3)", k: "fpGlyph", n: "glyph chance", def: 0.8, min: 0, max: 1, step: 0.05, h: "text-mode ground speckle: Dirty rolls d5 over . , ` ' / nothing — 4-in-5 cells get a mark, drawn in the cell's paint color" },
+    { g: "canyon — flora (stage 3)", k: "dogChance", n: "dogthorn chance", def: 0.95, min: 0, max: 1, step: 0.01, h: "DesertCanyonZoneGlobals: Chance 95, Number 30-80 — the canyon's whole tree line rides this one object row" },
+    { g: "canyon — flora (stage 3)", k: "dogMin", n: "dogthorn min", def: 30, min: 0, max: 120, step: 1, h: "" },
+    { g: "canyon — flora (stage 3)", k: "dogMax", n: "dogthorn max", def: 80, min: 0, max: 120, step: 1, h: "" },
+    { g: "canyon — flora (stage 3)", k: "witchChance", n: "witchwood chance", def: 0.25, min: 0, max: 1, step: 0.01, h: "Chance 25, Number 5-20" },
+    { g: "canyon — flora (stage 3)", k: "witchMin", n: "witchwood min", def: 5, min: 0, max: 60, step: 1, h: "" },
+    { g: "canyon — flora (stage 3)", k: "witchMax", n: "witchwood max", def: 20, min: 0, max: 60, step: 1, h: "" },
+    { g: "canyon — flora (stage 3)", k: "starChance", n: "starapple chance", def: 0.05, min: 0, max: 1, step: 0.01, h: "Chance 5, Number 5-20 — the rare orchard roll" },
+    { g: "canyon — flora (stage 3)", k: "starMin", n: "starapple min", def: 5, min: 0, max: 60, step: 1, h: "" },
+    { g: "canyon — flora (stage 3)", k: "starMax", n: "starapple max", def: 20, min: 0, max: 60, step: 1, h: "" }
   ];
   var K = {}, KDEF = {};
   KNOBSPEC.forEach(function (s) { KDEF[s.k] = s.def; K[s.k] = s.def; });
@@ -354,12 +438,19 @@ window.onerror = function (msg, src, line) {
     try {
       var s = JSON.parse(localStorage.getItem("tfwarren_knobs"));
       if (s) Object.keys(s).forEach(function (k) { if (k in KDEF) K[k] = s[k]; });
+      // pocket cut (USER RULING 2026-08-12): knob stores saved before the cut
+      // carry the old baseline 12 — migrate once, flag-guarded so a deliberate
+      // future A/B back to any value (12 included) sticks across reloads
+      if (!localStorage.getItem("tfwarren_mig_pocketcut")) {
+        if (K.wPocket === 12) K.wPocket = 0;
+        localStorage.setItem("tfwarren_mig_pocketcut", "1");
+      }
     } catch (e) {}
   }
   function knobsSave() { try { localStorage.setItem("tfwarren_knobs", JSON.stringify(K)); } catch (e) {} }
   // pick from the part table by weight — the old code was a cumulative if-chain on
   // R(1,100), which made the weights unreachable from outside
-  var PARTKEYS = ["wRoom", "wSuite", "wWrap", "wUnit", "wComb", "wPocket", "wSockets", "wHook", "wFoot"];
+  var PARTKEYS = ["wRoom", "wSuite", "wWrap", "wUnit", "wComb", "wPocket", "wSockets", "wHook", "wFoot", "wBlock"];
   function pickPart() {
     var tot = 0, i;
     for (i = 0; i < PARTKEYS.length; i++) tot += Math.max(0, K[PARTKEYS[i]]);
@@ -409,6 +500,37 @@ window.onerror = function (msg, src, line) {
   function floorVariant(x, y) {
     return FLOORSET[(((x * 73856093) ^ (y * 19349663)) >>> 0) % FLOORSET.length];
   }
+  // ---- Dirty floor paint (stage 3 first bite, decomp 2026-08-12) ----
+  // Ground truth: every surface zone's population drops a "Dirty" FloorPainter
+  // widget, and Dirty.PaintCell runs over EVERY cell in the zone — walls included,
+  // so ground carved open later already has its paint waiting underneath. Per cell:
+  // d8 -> 1-5 brown dirt (&w tile-dirt1, detail k) / 6 dark grass (&g) / 7 bright
+  // grass (&G) / 8 pale dirt (&y); grass rolls one of DirtPicker's four tiles.
+  // Grass never sets a detail color, which lands on Cell.Render's explored-cell
+  // default "k" — same detail as dirt, so k across the board. Text mode: d5 over
+  // . , ` ' / nothing. The game rerolls this per zone build; here it hashes off
+  // the roll's seed so a design never shimmers but every reroll gets fresh ground.
+  // Tiles are extracted as black/white masks and recolored live through
+  // ensureQudFilter — same path as the mossy walls.
+  var GRASSTILES = ["tile-grass1", "sw_grass1", "sw_grass2", "sw_grass3"];
+  var paintSeed = 1;
+  function cellHash(x, y, salt) {
+    var h = (x * 73856093) ^ (y * 19349663) ^ Math.imul(paintSeed, 83492791) ^ Math.imul(salt, 2654435761);
+    h = Math.imul(h ^ (h >>> 15), 0x2c1b3c6d); h = Math.imul(h ^ (h >>> 12), 0x297a2d39);
+    return ((h ^ (h >>> 15)) >>> 0) / 4294967296;
+  }
+  function floorPaint(x, y) {
+    var w = [Math.max(0, K.fpDirtW), Math.max(0, K.fpGrassg), Math.max(0, K.fpGrassG), Math.max(0, K.fpDirtY)];
+    var tot = w[0] + w[1] + w[2] + w[3], pick = 0;
+    if (tot > 0) {
+      var r = cellHash(x, y, 1) * tot;
+      for (pick = 0; pick < 3; pick++) { r -= w[pick]; if (r < 0) break; }
+    }
+    var grass = pick === 1 || pick === 2;
+    var tile = grass ? GRASSTILES[(cellHash(x, y, 2) * GRASSTILES.length) | 0] : "tile-dirt1";
+    var glyph = cellHash(x, y, 3) < K.fpGlyph ? [".", ",", "`", "'"][(cellHash(x, y, 4) * 4) | 0] : "";
+    return { tile: tile, code: ["w", "g", "G", "y"][pick], glyph: glyph };
+  }
   function wallMask(x, y) {
     var s = "";
     for (var i = 0; i < 8; i++) {
@@ -436,13 +558,115 @@ window.onerror = function (msg, src, line) {
     }
     return im;
   }
+  // ---- Qud palette recoloring (user direction: "just add support for these
+  // colors in our tester") ----
+  // The engine's 16-color code palette (Modding: Colors & Object Rendering;
+  // K and g corroborated against the user's picked hexes). Recolors are specified
+  // as CODES, never loose hex — what the tester shows is what a blueprint's
+  // TileColor/DetailColor can actually say.
+  var QUDCOLORS = {
+    k: "#0f3b3a", K: "#155352", y: "#b1c9c3", Y: "#ffffff",
+    r: "#a64a2e", R: "#d74200", o: "#f15f22", O: "#e99f10",
+    w: "#98875f", W: "#cfc041", g: "#009403", G: "#00c420",
+    b: "#0048c0", B: "#0096ff", c: "#40a4b9", C: "#77bfcf",
+    m: "#b154cf", M: "#da5bd6"
+  };
+  // Recolor the ACTUAL sprite via an SVG filter: the baked two-tone read
+  // (dark = body, light = detail) becomes a luminance threshold, and a discrete
+  // component transfer maps each side to its exact target hex — the file://
+  // canvas-taint wall never enters into it. One filter per (tile, detail) pair.
+  var _qudFilters = {};
+  function hexParts(h) { h = h.replace("#", ""); return [0, 2, 4].map(function (i) { return (parseInt(h.slice(i, i + 2), 16) / 255).toFixed(4); }); }
+  function ensureQudFilter(tileCode, detailCode) {
+    var fid = "qf-" + tileCode + "-" + detailCode;
+    if (_qudFilters[fid]) return fid;
+    var svgNS = "http://www.w3.org/2000/svg";
+    var host = document.getElementById("qudfilters");
+    if (!host) {
+      host = document.createElementNS(svgNS, "svg");
+      host.id = "qudfilters";
+      host.setAttribute("width", "0"); host.setAttribute("height", "0");
+      host.style.position = "absolute";
+      document.body.appendChild(host);
+    }
+    var t = hexParts(QUDCOLORS[tileCode] || QUDCOLORS.K), d = hexParts(QUDCOLORS[detailCode] || QUDCOLORS.g);
+    var f = document.createElementNS(svgNS, "filter");
+    f.id = fid; f.setAttribute("color-interpolation-filters", "sRGB");
+    var cm = document.createElementNS(svgNS, "feColorMatrix");
+    cm.setAttribute("type", "matrix");
+    cm.setAttribute("values", "0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0 0 0 1 0");
+    f.appendChild(cm);
+    var ct = document.createElementNS(svgNS, "feComponentTransfer");
+    [["feFuncR", t[0], d[0]], ["feFuncG", t[1], d[1]], ["feFuncB", t[2], d[2]]].forEach(function (fn) {
+      var e = document.createElementNS(svgNS, fn[0]);
+      e.setAttribute("type", "discrete");
+      e.setAttribute("tableValues", fn[1] + " " + fn[2]);
+      ct.appendChild(e);
+    });
+    f.appendChild(ct);
+    host.appendChild(f);
+    _qudFilters[fid] = 1;
+    return fid;
+  }
   function cellStyle(el, id, x, y) {
     var p = id ? byId[id] : null;
     el.textContent = ""; el.style.backgroundImage = "";
-    if (qudTiles && x !== undefined && (id === "wall" || id === "floor")) {
-      el.style.backgroundImage = "url(tiles/walls/"
-        + (id === "wall" ? WALLSET + "-" + wallMask(x, y) : floorVariant(x, y)) + ".png)";
-      el.style.backgroundColor = "#0b0c10";
+    // wall-mounted moss: the SAME wall sprite recolored through the Qud palette
+    // (user ruling) — the C# twin is a TileColor/DetailColor swap on one blueprint
+    if (x !== undefined && id === "wall" && mossyWalls[key(x, y)])
+      el.style.filter = "url(#" + ensureQudFilter(K.mossTile || "K", K.mossDetail || "g") + ")";
+    else el.style.filter = "";
+    el.style.outline = "";                 // Dirty floors blank theirs; everyone else keeps the grid line
+    if (qudTiles && x !== undefined && (id === "wall" || id === "floor" || id === "padfloor")) {
+      if (id === "padfloor") {
+        // padded earth: the village ground-dots idiom in the burrow's own tint,
+        // recolored live like every other mask (transparent bg — the slab lesson)
+        el.style.backgroundImage = "url(tiles/walls/" + floorVariant(x, y) + ".png)";
+        el.style.filter = "url(#" + ensureQudFilter(K.padTile || "w", K.padDetail || "k") + ")";
+        el.style.backgroundColor = "transparent";
+        el.style.outline = "1px solid transparent";
+      } else if (id === "floor" && K.floorMode == 1) {
+        // Dirty paint: the mask recolored to its rolled palette code over detail k.
+        // Background stays TRANSPARENT — CSS filter recolors the element's whole
+        // painted output, and a dark background fill would threshold to the body
+        // color and render as a solid slab (the 2026-08-12 "not loading tiles"
+        // bug). Walls never hit this: their sprites are full-bleed opaque.
+        var fp = floorPaint(x, y);
+        el.style.backgroundImage = "url(tiles/walls/" + fp.tile + ".png)";
+        el.style.filter = "url(#" + ensureQudFilter(fp.code, "k") + ")";
+        el.style.backgroundColor = "transparent";
+        // the class outline is dark like the background — same slab math, box-shaped
+        el.style.outline = "1px solid transparent";
+      } else {
+        el.style.backgroundImage = "url(tiles/walls/"
+          + (id === "wall" ? WALLSET + "-" + wallMask(x, y) : floorVariant(x, y)) + ".png)";
+        el.style.backgroundColor = "#0b0c10";
+      }
+      return;
+    }
+    // text mode: padded earth reads as a quiet · in its own tint
+    if (x !== undefined && id === "padfloor") {
+      el.textContent = "·"; el.style.color = QUDCOLORS[K.padTile || "w"];
+      el.style.backgroundColor = "#131110";
+      return;
+    }
+    // text mode: Dirty's ground speckle — . , ` ' in the cell's paint color
+    if (x !== undefined && id === "floor" && K.floorMode == 1) {
+      var fp2 = floorPaint(x, y);
+      el.textContent = fp2.glyph; el.style.color = QUDCOLORS[fp2.code];
+      el.style.backgroundColor = "#101010";
+      return;
+    }
+    // Qud-tiles mode objects that know their masks (trees): the game's own sprite,
+    // variant rolled by coord hash (the RandomTile idiom), recolored to the
+    // blueprint's TileColor/DetailColor. Transparent bg + outline — the filter
+    // must only ever see the mask (the floor-slab lesson).
+    if (qudTiles && x !== undefined && p && p.qtiles) {
+      var qt = p.qtiles[(((x * 73856093) ^ (y * 19349663)) >>> 0) % p.qtiles.length];
+      el.style.backgroundImage = "url(tiles/walls/" + qt + ".png)";
+      el.style.filter = "url(#" + ensureQudFilter(p.qtc, p.qdc) + ")";
+      el.style.backgroundColor = "transparent";
+      el.style.outline = "1px solid transparent";
       return;
     }
     if (!p) { el.style.backgroundColor = "#0b0c10"; return; }
@@ -652,7 +876,7 @@ window.onerror = function (msg, src, line) {
   document.getElementById("clear").addEventListener("click", function () { checkpoint(); blank(); render(); save(); });
 
   function save() {
-    try { localStorage.setItem("tfwarren", JSON.stringify({ W: W, H: H, grid: grid })); } catch (e) {}
+    try { localStorage.setItem("tfwarren", JSON.stringify({ W: W, H: H, grid: grid, paintSeed: paintSeed })); } catch (e) {}
     // painting on a roll updates that roll in place — it is never orphaned, and the
     // rolls on either side of it stay reachable
     if (typeof histMarkEdited === "function") histMarkEdited();
@@ -660,7 +884,7 @@ window.onerror = function (msg, src, line) {
   function load() {
     try {
       var s = JSON.parse(localStorage.getItem("tfwarren"));
-      if (s && s.grid) { W = s.W; H = s.H; grid = s.grid; document.getElementById("gw").value = W; document.getElementById("gh").value = H; return; }
+      if (s && s.grid) { W = s.W; H = s.H; grid = s.grid; if (s.paintSeed) paintSeed = s.paintSeed; document.getElementById("gw").value = W; document.getElementById("gh").value = H; return; }
     } catch (e) {}
     blank();
   }
@@ -683,6 +907,7 @@ window.onerror = function (msg, src, line) {
     var n = document.getElementById("clist").value, l = libGet();
     if (!n || !l[n]) return;
     W = l[n].W; H = l[n].H; grid = l[n].grid;
+    if (l[n].seed) paintSeed = l[n].seed;   // kept rolls carry their seed — same ground on reload
     document.getElementById("gw").value = W; document.getElementById("gh").value = H;
     document.getElementById("cname").value = n;
     render(); save(); status.textContent = "loaded \"" + n + "\"";
@@ -703,6 +928,13 @@ window.onerror = function (msg, src, line) {
   var rng = Math.random, corridor = [], lastGen = null, genFocus = null;
   var keepWalls = {};                       // intentional remnants (island notches) the police must not clear
   var protectedFloor = {}, protectedShell = {};  // camp-chain interiors + their load-bearing wall shell
+  var wetPockets = {}, wetShell = {}, wetAvoidMap = {};  // hidden geology: sealed brine pools + their secure wall shell + soft-avoidance ring
+  var mossyWalls = {};   // wall-mounted growth (user ruling: moss lives ON the wall — harvest = cheap recolor, the Harvestable idiom); render tint, wall stays a wall
+  // stage 2 (warren in canyon, attachment rules RULED 2026-08-11): canyon floor is
+  // its own cell class, and every wall touching it (8-dir — Qud walks diagonals) is
+  // SKIN, registered exactly like the wet-pocket shell. One law, bigger surface:
+  // halls refuse canyon floor except at deliberate mouths.
+  var canyonFloor = {}, canyonSkin = {}, spurFloor = {};
   var campCells = null;                          // collector for the current camp's carved cells
   var logEl = document.getElementById("carvelog");
   function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -712,7 +944,10 @@ window.onerror = function (msg, src, line) {
   function inB(x, y) { return x >= 1 && x <= W - 2 && y >= 1 && y <= H - 2; }
   function isWall(x, y) { return !!(grid[y] && grid[y][x] === "wall"); }
   function isOpen(x, y) { return grid[y] !== undefined && grid[y][x] !== undefined && !isWall(x, y); }
-  function clearCell(x, y) { grid[y][x] = "floor"; }
+  // warren-floor tracking for the padded-earth pass: growWarren raises the flag,
+  // every cell carved under it is warren territory (gallery, probes, buds incl.)
+  var carvingWarren = false, warrenFloor = {};
+  function clearCell(x, y) { grid[y][x] = "floor"; if (carvingWarren) warrenFloor[key(x, y)] = 1; }
   function key(x, y) { return x + "," + y; }
 
   function findMouths(near) {
@@ -740,6 +975,7 @@ window.onerror = function (msg, src, line) {
         if (e > 1.3) continue;
         var fx = cx + dx * dep + px * lat, fy = cy + dy * dep + py * lat;
         if (!inB(fx, fy) || !isWall(fx, fy)) return null;
+        if (protectedShell[key(fx, fy)] || protectedFloor[key(fx, fy)]) return null;
         cells.push({ x: fx, y: fy });
       }
     cells.forEach(function (c) { clearCell(c.x, c.y); });
@@ -972,7 +1208,7 @@ window.onerror = function (msg, src, line) {
     var w = 2 * latW - 1, h = 2 * latH - 1;
     for (var vy = gy0 - 1; vy <= gy0 + h; vy++)
       for (var vx = gx0 - 1; vx <= gx0 + w; vx++)
-        if (!inB(vx, vy) || !isWall(vx, vy)) return null;
+        if (!inB(vx, vy) || !isWall(vx, vy) || keepWalls[key(vx, vy)] || protectedShell[key(vx, vy)]) return null;
     var gx = function (i) { return gx0 + 2 * i; }, gy = function (j) { return gy0 + 2 * j; };
     var combCells = [];
     var cc = function (cx4, cy4) { clearCell(cx4, cy4); combCells.push({ x: cx4, y: cy4 }); };
@@ -1194,7 +1430,15 @@ window.onerror = function (msg, src, line) {
       for (var st2 = 1; st2 <= 4; st2++) {
         var hx = s2.x + s2.dx * st2, hy = s2.y + s2.dy * st2;
         if (!inB(hx, hy)) break;
-        if (!isWall(hx, hy)) { hit2 = st2; break; }
+        // probe-breach fix (2026-08-11, caught by the stage-2 breach tripwire,
+        // seed 117): the connector carved UNGUARDED — through canyon skin to
+        // canyon "daylight", through the wet shell to pool water, through kept
+        // posts. Guarded wall = not this way; canyon/pool floor = not daylight.
+        if (keepWalls[key(hx, hy)] || protectedShell[key(hx, hy)]) break;
+        if (!isWall(hx, hy)) {
+          if (!canyonFloor[key(hx, hy)] && !wetPockets[key(hx, hy)]) hit2 = st2;
+          break;
+        }
       }
       if (hit2 >= 1) {
         for (var st3 = 1; st3 < hit2; st3++) cc(s2.x + s2.dx * st3, s2.y + s2.dy * st3);
@@ -1252,7 +1496,11 @@ window.onerror = function (msg, src, line) {
     for (var pb = 1; pb <= 4; pb++) {
       var ax2 = lx - ldx * pb, ay2 = ly - ldy * pb;
       if (!inB(ax2, ay2)) break;
+      // same probe-breach fix as the comb (2026-08-11): no drilling through
+      // guarded walls, and canyon/pool floor is not legal daylight
+      if (keepWalls[key(ax2, ay2)] || protectedShell[key(ax2, ay2)]) break;
       if (!isWall(ax2, ay2)) {
+        if (canyonFloor[key(ax2, ay2)] || wetPockets[key(ax2, ay2)]) break;
         for (var pb2 = 1; pb2 < pb; pb2++) {
           var c6x = lx - ldx * pb2, c6y = ly - ldy * pb2;
           clearCell(c6x, c6y); cells.push({ x: c6x, y: c6y });
@@ -1272,11 +1520,35 @@ window.onerror = function (msg, src, line) {
     var nfT = new Float64Array(W * H);
     for (var i = 0; i < nfT.length; i++) nfT[i] = rng();
     var path = noisyPath(ax, ay, bx, by, true, function (x, y) {
+      // the border ring is out of bounds to every carver (inB), but noisyPath
+      // serves the canyon too, whose mouths LIVE on the border — so the ring is
+      // priced out here and belt-rejected below (seed 464: a hall snuck along
+      // y=H-1 under the reach tripwire's floor, 2026-08-12)
+      if (x === 0 || x === W - 1 || y === 0 || y === H - 1) return 4000;
+      if (wetPockets[key(x, y)] || wetShell[key(x, y)]) return 4000;  // never through the pool, never breach the shell
+      if (canyonFloor[key(x, y)]) return 4000;   // stage 2: the corridor is not a shortcut
       if (keepWalls[key(x, y)]) return 4000;
       if (protectedShell[key(x, y)]) return 40;
-      return 1 + (isWall(x, y) ? K.windWallBias : 0) + nfT[y * W + x] * K.windRough;
+      return 1 + (isWall(x, y) ? K.windWallBias : 0) + nfT[y * W + x] * K.windRough
+        + (wetAvoidMap[key(x, y)] ? K.wetAvoid : 0);   // the bend: wet ground costs extra
     });
     if (!path) return [];
+    // stage 2 belt: with every legal route exhausted a path CAN still cross canyon
+    // floor at the 4000s (Dijkstra guarantees an answer, not a legal one). The skin
+    // wouldn't carve either way — the result would be a dead fragment stranded on
+    // the far side — so a crossing path carves NOTHING and reports failure
+    for (var pi = 0; pi < path.length; pi++)
+      if (canyonFloor[key(path[pi].x, path[pi].y)] || canyonSkin[key(path[pi].x, path[pi].y)]) return [];
+    // same class as the canyon belt (seed 304, 2026-08-12): a path can also
+    // thread KEPT walls or pool water at the 4000s — the carve step below skips
+    // kept walls, so the tunnel would open on BOTH SIDES of an intact wall: a
+    // sealed fragment with zero breaches. A path that must pass a pool or a
+    // kept wall to reach its target carves NOTHING and reports failure
+    for (var pi2 = 0; pi2 < path.length; pi2++) {
+      var bp2 = path[pi2], bk2 = key(bp2.x, bp2.y);
+      if (bp2.x === 0 || bp2.x === W - 1 || bp2.y === 0 || bp2.y === H - 1) return [];
+      if ((keepWalls[bk2] && isWall(bp2.x, bp2.y)) || wetPockets[bk2] || wetShell[bk2]) return [];
+    }
     path.forEach(function (p) {
       if (isWall(p.x, p.y) && !keepWalls[key(p.x, p.y)]) clearCell(p.x, p.y);
     });
@@ -1400,12 +1672,22 @@ window.onerror = function (msg, src, line) {
     for (var ts2 = 0; ts2 < tl2; ts2++) {
       if (rng() < K.trunkJog) { var js2 = rng() < 0.5 ? 1 : -1; tx5 += tpx * js2; ty5 += tpy * js2; }
       else { tx5 += hd[0]; ty5 += hd[1]; }
-      if (!inB(tx5, ty5) || keepWalls[key(tx5, ty5)] || protectedShell[key(tx5, ty5)]) break;
+      // canyon floor and pool water are OPEN, so the wall guards never fired: a
+      // trunk could stroll out the mouth across the corridor (or wade the pool)
+      // and resume carving on the far side — a stranded fragment (seed 304's
+      // sibling hole, 2026-08-12). The walk now breaks at any cell it may
+      // neither carve nor claim
+      if (!inB(tx5, ty5) || keepWalls[key(tx5, ty5)] || protectedShell[key(tx5, ty5)]
+        || canyonFloor[key(tx5, ty5)] || wetPockets[key(tx5, ty5)]) break;
       if (isWall(tx5, ty5)) clearCell(tx5, ty5);
       tpath.push({ x: tx5, y: ty5 });
       if (ts2 > 2 && rng() < K.trunkBite) {
         var sb = rng() < 0.5 ? 1 : -1;
-        if (carveNotch(tx5 + tpx * sb, ty5 + tpy * sb, tpx * sb, tpy * sb, 0, R(1, 2), false, 0.9) && made) made.sockets++;
+        var bayCells = carveNotch(tx5 + tpx * sb, ty5 + tpy * sb, tpx * sb, tpy * sb, 0, R(1, 2), false, 0.9);
+        if (bayCells) {
+          if (made) made.sockets++;
+          dressSpaces.push({ kind: "bay", cells: bayCells });
+        }
       }
     }
     return tpath;
@@ -1415,15 +1697,23 @@ window.onerror = function (msg, src, line) {
     var wcx = ex + hd[0] * 2, wcy = ey + hd[1] * 2, wok = true;
     for (var wy2 = -1; wy2 <= 1 && wok; wy2++)
       for (var wx2 = -1; wx2 <= 1; wx2++)
-        if (!inB(wcx + wx2, wcy + wy2)) { wok = false; break; }
+        if (!inB(wcx + wx2, wcy + wy2) || protectedShell[key(wcx + wx2, wcy + wy2)] || protectedFloor[key(wcx + wx2, wcy + wy2)]) { wok = false; break; }
+    // the DOOR cell was carved unguarded (latent hole found at the stage-2 build,
+    // 2026-08-11): a wrap whose ring validated clean could still punch its door
+    // through a protected shell — wet-pocket or canyon skin alike
+    var wdoX = ex + hd[0], wdoY = ey + hd[1];
+    if (!inB(wdoX, wdoY) || keepWalls[key(wdoX, wdoY)] || protectedShell[key(wdoX, wdoY)]) return false;
     if (!wok) return false;
+    var wcells = [];
     for (var wy3 = -1; wy3 <= 1; wy3++)
       for (var wx3 = -1; wx3 <= 1; wx3++) {
         if (wx3 === 0 && wy3 === 0) { keepWalls[key(wcx, wcy)] = 1; continue; }
         if (isWall(wcx + wx3, wcy + wy3)) clearCell(wcx + wx3, wcy + wy3);
+        wcells.push({ x: wcx + wx3, y: wcy + wy3 });
       }
     clearCell(ex + hd[0], ey + hd[1]);
-    return true;
+    wcells.push({ x: ex + hd[0], y: ey + hd[1] });
+    return { cells: wcells };   // object is truthy — boolean call sites unaffected
   }
   // hook (drawing 8): a G-spiral stub curling around a pocket of wall
   function carveHook(ex, ey, hd) {
@@ -1440,79 +1730,611 @@ window.onerror = function (msg, src, line) {
     });
     return carvedH >= 4;
   }
+  // diagonal seal (user ruling 2026-08-11): a chamber corner diagonally kissing
+  // outside floor is an accidental entrance — Qud walks diagonals, so the corner
+  // IS a door nobody dug. Seal it from the CHAMBER side: the hall keeps its line,
+  // the room goes quiet behind its real entrance ("you can walk down the hallway
+  // without even noticing it was there"). Inverts the legacy police, which OPENS
+  // pinches — the legacy track keeps its law; this rule is warren-only.
+  // A doorway cell (orthogonally open to outside floor) is never sealed, and a
+  // fill that would strand any open cell reverts (8-dir flood = Qud movement).
+  function sealChamberDiagonals(cells, ox, oy) {
+    if (!K.sealDiag) return 0;
+    var inPart = {};
+    cells.forEach(function (c) { inPart[key(c.x, c.y)] = 1; });
+    var sealed = 0;
+    cells.forEach(function (c) {
+      if (!inB(c.x, c.y) || isWall(c.x, c.y)) return;
+      var d4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+      for (var i = 0; i < 4; i++) {
+        var nx = c.x + d4[i][0], ny = c.y + d4[i][1];
+        if (inB(nx, ny) && isOpen(nx, ny) && !inPart[key(nx, ny)]) return; // doorway — never seal
+      }
+      var leak = false;
+      [[1, 1], [1, -1], [-1, 1], [-1, -1]].forEach(function (dg) {
+        var dx2 = c.x + dg[0], dy2 = c.y + dg[1];
+        if (!inB(dx2, dy2) || !isOpen(dx2, dy2) || inPart[key(dx2, dy2)]) return;
+        if (isWall(c.x + dg[0], c.y) && isWall(c.x, c.y + dg[1])) leak = true;
+      });
+      if (!leak) return;
+      var before = reachCount(ox, oy);
+      grid[c.y][c.x] = "wall";
+      // a clean fill removes exactly the filled cell from the origin's reach;
+      // anything less means the fill stranded cells behind it — revert
+      if (reachCount(ox, oy) !== before - 1) { clearCell(c.x, c.y); return; }
+      sealed++;
+    });
+    return sealed;
+  }
+  // hidden geology (user concept 2026-08-11, camp jam): a sealed pocket of salty
+  // water the player never sees directly — cave walls are high — read only through
+  // what surrounds it: cave moss, muddy soil, wall seeps, puddles. The pool cells
+  // and their 1-ring shell are registered protected (nothing carves in, tunnels
+  // refuse the shell at hard cost) and the network pays extra to walk near it —
+  // the "avoided mass" bend. Symptoms are dress-phase; bare geometry shows only
+  // the sealed water and the way the halls shy off it.
+  function placeWetPockets(ax0, ay0, guard) {
+    if (K.wetChance <= 0 || rng() >= K.wetChance) return null;
+    for (var t = 0; t < 40; t++) {
+      var pw = R(K.wetSizeMin, Math.max(K.wetSizeMin, K.wetSizeMax));
+      var ph = R(K.wetSizeMin, Math.max(K.wetSizeMin, K.wetSizeMax));
+      // anchored 6-14 cells off the warren's start: far enough that the network
+      // must grow toward it, near enough that it usually does — a pocket the
+      // warren never approaches has no symptoms and exists only in god-view
+      var ang = rng() * Math.PI * 2, rad = R(6, 14);
+      var px0 = Math.round(ax0 + Math.cos(ang) * rad), py0 = Math.round(ay0 + Math.sin(ang) * rad * 0.5);
+      if (px0 < 4 || px0 > W - pw - 5 || py0 < 3 || py0 > H - ph - 4) continue;
+      // stage 2 passes a guard rejecting cross-corridor anchors (same god-view
+      // logic: the warren can't cross the canyon, so it could never approach)
+      if (guard && !guard(px0, py0, pw, ph)) continue;
+      var ok = true;
+      for (var vy = py0 - 1; vy <= py0 + ph && ok; vy++)
+        for (var vx = px0 - 1; vx <= px0 + pw; vx++)
+          if (!inB(vx, vy) || !isWall(vx, vy)) { ok = false; break; }
+      if (!ok) continue;
+      // irregular interior (user, same sitting: "the avoidance pockets, internally,
+      // do not need to be a perfect square") — the bbox rolls, then corners drop
+      // 40% each; dropping rect corners can never disconnect the pool
+      var pool = [];
+      for (var iy = py0; iy < py0 + ph; iy++)
+        for (var ix = px0; ix < px0 + pw; ix++) pool.push({ x: ix, y: iy });
+      if (pw >= 2 && ph >= 2 && pool.length > 3) {
+        var trimmed = pool.filter(function (c) {
+          var corner = (c.x === px0 || c.x === px0 + pw - 1) && (c.y === py0 || c.y === py0 + ph - 1);
+          return !(corner && rng() < 0.4);
+        });
+        if (trimmed.length >= 3) pool = trimmed;   // a 2x2 is all corners — never gut the pool
+      }
+      pool.forEach(function (c) {
+        grid[c.y][c.x] = "water";
+        wetPockets[key(c.x, c.y)] = 1; protectedFloor[key(c.x, c.y)] = 1;
+      });
+      pool.forEach(function (c) {
+        for (var oy = -1; oy <= 1; oy++) for (var ox = -1; ox <= 1; ox++) {
+          var k2 = key(c.x + ox, c.y + oy);
+          if (!wetPockets[k2]) { wetShell[k2] = 1; protectedShell[k2] = 1; keepWalls[k2] = 1; }
+        }
+      });
+      pool.forEach(function (c) {
+        for (var oy2 = -3; oy2 <= 3; oy2++) for (var ox2 = -3; ox2 <= 3; ox2++) {
+          var axx = c.x + ox2, ayy = c.y + oy2, k3 = key(axx, ayy);
+          if (inB(axx, ayy) && !wetPockets[k3] && !wetShell[k3]) wetAvoidMap[k3] = 1;
+        }
+      });
+      G("  wet pocket: " + pool.length + " cells in " + pw + "x" + ph + " at (" + px0 + "," + py0 + "), sealed");
+      return { x: px0, y: py0, w: pw, h: ph };
+    }
+    G("  wet pocket: no deep spot found in 40 tries");
+    return null;
+  }
+  function wetHaloDress(pocket) {
+    if (!pocket || !document.getElementById("gendress").checked) return;
+    // dampness travels further than the diggers' caution: the avoidance bend keeps
+    // the nearest passages 2-3 cells off the shell, so symptoms gradient outward —
+    // full kit pressed near the water, thinning to stray mud at the halo's edge
+    // moss lives ON the wall (user ruling, same sitting): tint walls that show an
+    // open face, gradient by distance; the floor keeps mud / seeps / puddles
+    var mossy = 0, symptoms = 0, puddles = 0;
+    var nearFloor = null, nearFloorD = 99, nearWall = null, nearWallD = 99;
+    var reach = K.wetHalo + 2;   // measured from the pool itself (shell is ring 1)
+    var d4h = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+    for (var y = pocket.y - reach; y <= pocket.y + pocket.h - 1 + reach; y++)
+      for (var x = pocket.x - reach; x <= pocket.x + pocket.w - 1 + reach; x++) {
+        if (!inB(x, y)) continue;
+        var ddx = Math.max(0, pocket.x - x, x - (pocket.x + pocket.w - 1));
+        var ddy = Math.max(0, pocket.y - y, y - (pocket.y + pocket.h - 1));
+        var d = Math.max(ddx, ddy);
+        if (d > reach) continue;
+        var r2 = rng();
+        if (isWall(x, y)) {
+          var faceOpen = false;
+          // padfloor counts as an open face — the halo runs AFTER the padded-earth
+          // pass, and a "floor"-only check silently blinded every tell on padded
+          // ground (regression caught 2026-08-12, the mud-cut batch's 0-tell rolls)
+          for (var i = 0; i < 4; i++) {
+            var fv = grid[y + d4h[i][1]] && grid[y + d4h[i][1]][x + d4h[i][0]];
+            if (fv === "floor" || fv === "padfloor") faceOpen = true;
+          }
+          if (!faceOpen) continue;   // moss on an unseen face tells nothing
+          if (d < nearWallD) { nearWallD = d; nearWall = { x: x, y: y }; }
+          if (r2 < (d <= 2 ? 0.55 : d === 3 ? 0.25 : 0.08)) { mossyWalls[key(x, y)] = 1; mossy++; }
+        } else if (grid[y][x] === "floor" || grid[y][x] === "padfloor") {
+          if (d < nearFloorD) { nearFloorD = d; nearFloor = { x: x, y: y }; }
+          // muddy soil CUT (USER 2026-08-12), then seeps/runnels REPLACED WITH
+          // PUDDLES (USER same day: "let's replace the runnels/seeps with
+          // puddles instead") — the halo speaks moss and puddles now. The old
+          // seep + puddle bands merge (0.15 + 0.10) and the cap rises 2 -> 3 so
+          // the replacement breathes instead of vanishing into the old cap
+          // (CLAUDE dial). The runnel palette entry survives for the sty.
+          if (d <= 2) {
+            if (puddles < 3 && r2 < 0.25) { grid[y][x] = "water"; puddles++; symptoms++; }
+          } else if (d === 3) {
+            if (puddles < 3 && r2 < 0.07) { grid[y][x] = "water"; puddles++; symptoms++; }
+          }
+        }
+      }
+    // a pocket with no tell is indistinguishable from solid rock — guarantee one
+    if (!mossy && nearWall) { mossyWalls[key(nearWall.x, nearWall.y)] = 1; mossy++; }
+    if (!mossy && !symptoms && nearFloor) { grid[nearFloor.y][nearFloor.x] = "water"; symptoms++; }   // guaranteed tell = a puddle (seeps replaced 2026-08-12)
+    G("  wet halo: " + mossy + " mossy walls, " + symptoms + " floor symptoms (" + puddles + " puddles)");
+  }
+  // Rewritten at the stage-2 build (2026-08-11): the old check compared the flood
+  // against a count of ALL open cells (minus wet pools). A canyon marsh's CA ponds
+  // are legitimately isolated water — under the old law they'd fail every
+  // comparison and silently revert every seal in the zone. The honest question is
+  // relative, not global: did THIS fill strand anything reachable from the origin?
+  function reachCount(ox, oy) {
+    if (!inB(ox, oy) || !isOpen(ox, oy)) return 0;
+    var seen = {}, stack = [{ x: ox, y: oy }], n = 0;
+    seen[key(ox, oy)] = 1;
+    while (stack.length) {
+      var c = stack.pop(); n++;
+      for (var dy = -1; dy <= 1; dy++) for (var dx = -1; dx <= 1; dx++) {
+        if (!dx && !dy) continue;
+        var nx = c.x + dx, ny = c.y + dy;
+        if (!inB(nx, ny) || seen[key(nx, ny)] || !isOpen(nx, ny)) continue;
+        seen[key(nx, ny)] = 1; stack.push({ x: nx, y: ny });
+      }
+    }
+    return n;
+  }
   // footed dead-end (drawing 8): the stub turns once at its tip
   function carveFoot(ex, ey, hd, len) {
     var fh = rng() < 0.5 ? 1 : -1;
-    var fd = [-hd[1] * fh, hd[0] * fh], flen = len || R(1, 2);
+    var fd = [-hd[1] * fh, hd[0] * fh], flen = len || R(1, 2), fcells = [];
     for (var fc = 1; fc <= flen; fc++) {
       var fx3 = ex + fd[0] * fc, fy3 = ey + fd[1] * fc;
       if (!inB(fx3, fy3) || keepWalls[key(fx3, fy3)]) break;
       if (isWall(fx3, fy3)) clearCell(fx3, fy3);
+      fcells.push({ x: fx3, y: fy3 });
     }
-    return true;
+    return fcells;   // array is truthy either way — boolean call sites unaffected
+  }
+  // ---- dress registry + pass v1: WORK EVIDENCE, lived-in tense ----
+  // (USER RULINGS 2026-08-12: fiction = lived-in first, "progress from there";
+  // order = work evidence first, gallery/communal second.) The fresh warren
+  // needs no space-classification machinery — carvers REGISTER each space's
+  // identity at birth and the dress pass walks the registry. Table laws from
+  // the redrock recon: heavy Nothing weights (density variance IS the
+  // freshness), one rare jackpot beside the mundane rows, one item per space.
+  // Weights are CLAUDE dials, feel-round fodder. Rides the "dress" checkbox
+  // like the wet-pocket halo — bare geometry stays judgeable on its own.
+  var dressSpaces = [];
+  var STACKSETS = { stack1: ["stack1", "stack1a", "stack1b"], stack2: ["stack2", "stack2a", "stack2b"], stack3: ["stack3", "stack3a", "stack3b"] };
+  // rows are [weight, item] — item may be {i, hint}; hint "face" places at the
+  // space's DEEPEST floor cell (carvers push cells depth-major, so the end of
+  // the list is the working face). USER 2026-08-12: pickaxes + STRAY torches
+  // (not torchposts) in the work areas, "maybe with adjacency" — the face hint
+  // is that adjacency at bite scale: light and tools rest where work stopped.
+  var DRESSTABLES = {
+    // an active working bite: usually nothing, sometimes staged stone, tool and
+    // light at the face, and the w2 jackpot — a tool stash
+    socket: [[55, null], [18, "stack1"], [8, { i: "straytorch", hint: "face" }], [5, { i: "pickaxe", hint: "face" }], [2, "chest"]],
+    // a prospector's test dig: mostly honest emptiness; the figurine jackpot is
+    // someone's maquette left at a dead end (the calling's own gear echo)
+    foot: [[66, null], [10, "stack1"], [10, { i: "straytorch", hint: "face" }], [6, { i: "pickaxe", hint: "face" }], [3, "figurine"]],
+    // a trunk loading bay: staged product in grades, a chalk claim-line, a
+    // stored tool, a chest
+    bay: [[40, null], [18, "stack1"], [15, "stack2"], [12, "stack3"], [5, "chalkline"], [4, { i: "pickaxe", hint: "face" }], [3, "chest"]]
+  };
+  // the natural table (USER RULED 2026-08-12, correcting the canyon-only lean:
+  // "i'd rather have the natural rocks be *in* the warren") — geology showing
+  // through the dwelling. OBJECTS on the floor, so the shard-sweep credibility
+  // law is untouched: that law governs WALL cells; a boulder on padded earth
+  // reads as a boulder. Nothing-heavy like every table; scatter is warren-wide
+  // (not registry-bound), rolled per warren after padding.
+  // boulders CUT (USER same sitting) — the natural voice is three small sizes,
+  // smaller = commoner (CLAUDE dials)
+  var NATURALTABLE = [[55, null], [10, "stone"], [15, "loosestone"], [20, "pebble"]];
+  function dressWarren() {
+    if (!document.getElementById("gendress").checked || !dressSpaces.length) return;
+    var placed = {}, nothing = 0, dressable = 0;
+    dressSpaces.forEach(function (sp) {
+      var tbl = DRESSTABLES[sp.kind];
+      if (!tbl) return;   // registered for a future pass (blockrooms wait on communal tables)
+      dressable++;
+      var tot = 0; tbl.forEach(function (r) { tot += r[0]; });
+      var roll = rng() * tot, item = null;
+      for (var i = 0; i < tbl.length; i++) { roll -= tbl[i][0]; if (roll < 0) { item = tbl[i][1]; break; } }
+      if (!item) { nothing++; return; }
+      var hint = null;
+      if (typeof item === "object") { hint = item.hint; item = item.i; }
+      if (STACKSETS[item]) item = STACKSETS[item][R(0, 2)];
+      var isFloor = function (c) { return grid[c.y] && (grid[c.y][c.x] === "floor" || grid[c.y][c.x] === "padfloor"); };
+      var c = null;
+      if (hint === "face") {
+        for (var fi = sp.cells.length - 1; fi >= 0; fi--)
+          if (isFloor(sp.cells[fi])) { c = sp.cells[fi]; break; }
+      }
+      if (!c) {
+        var floors = sp.cells.filter(isFloor);
+        if (!floors.length) { nothing++; return; }
+        c = floors[R(0, floors.length - 1)];
+      }
+      grid[c.y][c.x] = item;
+      placed[item] = (placed[item] || 0) + 1;
+    });
+    var bits = Object.keys(placed).map(function (k) { return placed[k] + " " + k; });
+    G("  dress: " + dressable + " work spaces — " + (bits.length ? bits.join(", ") : "nothing placed") + " (" + nothing + " rolled Nothing"
+      + (dressSpaces.length > dressable ? "; " + (dressSpaces.length - dressable) + " awaiting future tables" : "") + ")");
   }
 
-  function growWarren(startX, startY, partsWanted) {
+  // ---- pillared gallery (USER RULING 2026-08-12, drawing 11) ----
+  // The one sanctioned LARGE room — the explicit exception to the den-size
+  // ruling. Spec from the drawing: open span, 4-7 LONE kept pillars loosely
+  // shadowing the perimeter (not a grid — gridding is the comb's job; these
+  // read as what they didn't dare take), walls notched bay by bay (the bigness
+  // is earned), THREE blind 1-wide slots in one wall (ruled: blind, not
+  // entries), small chambers budding off the outside, multiple ways in.
+  // PUBLIC by design: interior is never registered as sealable chamber cells —
+  // dens go quiet behind one door, the gallery is a crossroads. Placed BEFORE
+  // growth (the wet-pocket idiom inverted): tunnels prefer open space, so the
+  // network gets drawn through it with zero steering code.
+  // Interior geometry numbers are CLAUDE dials, feel-round fodder.
+  function placeGallery(ax, ay) {
+    for (var t = 0; t < 40; t++) {
+      var gw = R(10, 14), gh = R(5, 7);
+      var dir = [[1, 0], [-1, 0], [0, 1], [0, -1]][R(0, 3)], dist = R(5, 12);
+      var cx0 = ax + dir[0] * dist, cy0 = ay + dir[1] * dist;
+      var x0 = cx0 - (gw >> 1), y0 = cy0 - (gh >> 1);
+      // ---- footprint, two voices behind the galleryShape knob ----
+      var plan = {}, planCells = [], nRects = 0;
+      var stampP = function (rx, ry, rw, rh) {
+        for (var sy2 = ry; sy2 < ry + rh; sy2++) for (var sx2 = rx; sx2 < rx + rw; sx2++) {
+          var pk2 = key(sx2, sy2);
+          if (!plan[pk2]) { plan[pk2] = 1; planCells.push({ x: sx2, y: sy2 }); }
+        }
+      };
+      if (K.galleryShape == 1) {
+        // overlap-hollow (ruins BuildingTemplate idiom, 2026-08-12): 2-3 rects
+        // stamped overlapping, the union hollowed. Nobody draws the outline —
+        // the silhouette emerges from the overlaps, like a ruin's footprint
+        nRects = R(2, 3);
+        stampP(cx0 - (R(6, 9) >> 1), cy0 - (R(4, 6) >> 1), R(6, 9), R(4, 6));
+        for (var nr = 1; nr < nRects; nr++) {
+          var anc = planCells[R(0, planCells.length - 1)];
+          var rw2 = R(5, 8), rh2 = R(3, 5);
+          stampP(anc.x - R(0, rw2 - 1), anc.y - R(0, rh2 - 1), rw2, rh2);
+        }
+      } else {
+        stampP(x0, y0, gw, gh);   // drawing 11's articulated rectangle
+      }
+      // footprint + 8-ring: solid unclaimed rock only — every guarded map refused
+      var ok = true;
+      for (var pc = 0; pc < planCells.length && ok; pc++) {
+        var pcc = planCells[pc];
+        for (var ry2 = -1; ry2 <= 1 && ok; ry2++)
+          for (var rx2 = -1; rx2 <= 1; rx2++) {
+            var qx2 = pcc.x + rx2, qy2 = pcc.y + ry2, qk2 = key(qx2, qy2);
+            if (!inB(qx2, qy2) || keepWalls[qk2] || protectedShell[qk2] || protectedFloor[qk2]
+              || (!plan[qk2] && !isWall(qx2, qy2)) || (plan[qk2] && !isWall(qx2, qy2))) { ok = false; break; }
+          }
+      }
+      if (!ok) continue;
+      var cells = [];
+      var open = function (x, y) { clearCell(x, y); cells.push({ x: x, y: y }); };
+      planCells.forEach(function (c) { open(c.x, c.y); });
+      if (K.galleryShape == 1) {
+        // bbox replaces the rect frame for everything downstream (pillars, slots,
+        // buds, probes) — their grid-floor validation makes them union-safe
+        x0 = 1e9; y0 = 1e9; var xm = -1e9, ym = -1e9;
+        planCells.forEach(function (c) { if (c.x < x0) x0 = c.x; if (c.x > xm) xm = c.x; if (c.y < y0) y0 = c.y; if (c.y > ym) ym = c.y; });
+        gw = xm - x0 + 1; gh = ym - y0 + 1;
+      }
+      var bays = 0;
+      if (K.galleryShape != 1) {
+      // jogged corners: 2-4 corners fill back in — the rect stops being a stamp
+      var corners = [[x0, y0], [x0 + gw - 1, y0], [x0, y0 + gh - 1], [x0 + gw - 1, y0 + gh - 1]];
+      var nIns = R(2, 4);
+      for (var ci = 0; ci < nIns; ci++) {
+        var cc = corners[ci];
+        grid[cc[1]][cc[0]] = "wall";
+        if (rng() < 0.5) grid[cc[1]][cc[0] + (cc[0] === x0 ? 1 : -1)] = "wall";
+      }
+      // bays: the perimeter remembers where stone came out. Outward bites,
+      // validated like everything else — a bay never breaches a shell
+      var wantBays = R(3, 5);
+      for (var bt = 0; bt < 20 && bays < wantBays; bt++) {
+        var bside = R(0, 3), bd = [[0, -1], [0, 1], [-1, 0], [1, 0]][bside];
+        var bw = R(2, 4), bdep = R(1, 2), bx0, by0, stepx, stepy;
+        if (bd[1] !== 0) { bx0 = x0 + R(0, gw - bw); by0 = bd[1] < 0 ? y0 - bdep : y0 + gh; stepx = 1; stepy = 0; }
+        else { by0 = y0 + R(0, gh - Math.min(bw, gh)); bx0 = bd[0] < 0 ? x0 - bdep : x0 + gw; stepx = 0; stepy = 1; bw = Math.min(bw, gh); }
+        var bok = true, bcells = [];
+        for (var bi = 0; bi < bw && bok; bi++)
+          for (var bj = 0; bj < bdep; bj++) {
+            // bi walks along the wall, bj walks outward into it
+            var bx = bd[1] !== 0 ? bx0 + stepx * bi : bx0 + bj;
+            var by = bd[1] !== 0 ? by0 + bj : by0 + stepy * bi;
+            var bk = key(bx, by);
+            if (!inB(bx, by) || !isWall(bx, by) || keepWalls[bk] || protectedShell[bk]) { bok = false; break; }
+            bcells.push({ x: bx, y: by });
+            var ox2 = bx + bd[0], oy2 = by + bd[1];
+            if (!inB(ox2, oy2) || !isWall(ox2, oy2) || protectedShell[key(ox2, oy2)]) { bok = false; break; }
+          }
+        if (!bok) continue;
+        bcells.forEach(function (c) { open(c.x, c.y); });
+        bays++;
+      }
+      }   // end rect-only articulation (mode 1's silhouette needs no decoration)
+      // lone pillars, loosely shadowing the perimeter: inset 2 with jitter,
+      // never within 2 of each other. keepWalls = the shard sweep's exemption —
+      // inside this room a lone block is now a guaranteed-deliberate read
+      var pillarKeys = [], want = R(4, 7);
+      for (var pt = 0; pt < 40 && pillarKeys.length < want; pt++) {
+        var ring = R(0, 3), px, py;
+        if (ring === 0) { px = x0 + 2 + R(0, gw - 5); py = y0 + 2 + R(0, 0); }
+        else if (ring === 1) { px = x0 + 2 + R(0, gw - 5); py = y0 + gh - 3; }
+        else if (ring === 2) { px = x0 + 2; py = y0 + 2 + R(0, Math.max(0, gh - 5)); }
+        else { px = x0 + gw - 3; py = y0 + 2 + R(0, Math.max(0, gh - 5)); }
+        px += R(-1, 1); py += R(-1, 1);
+        if (px < x0 + 1 || px > x0 + gw - 2 || py < y0 + 1 || py > y0 + gh - 2) continue;
+        if (!isOpen(px, py) || grid[py][px] !== "floor") continue;
+        var clash = false;
+        for (var pk = 0; pk < pillarKeys.length && !clash; pk++)
+          if (Math.max(Math.abs(pillarKeys[pk].x - px), Math.abs(pillarKeys[pk].y - py)) < 2) clash = true;
+        if (clash) continue;
+        grid[py][px] = "wall"; keepWalls[key(px, py)] = 1;
+        pillarKeys.push({ x: px, y: py });
+      }
+      // three blind slots (RULED: blind, not entries): 1-wide, 2-3 deep, cut
+      // into one wall band with a cell of rock between — storage/divot read
+      var slots = 0, sside = R(0, 3), sd = [[0, -1], [0, 1], [-1, 0], [1, 0]][sside];
+      var sdep = R(2, 3);
+      for (var so = 0; so < 3; so++) {
+        var sx, sy;
+        if (sd[1] !== 0) { sx = x0 + 2 + so * 2; sy = sd[1] < 0 ? y0 - 1 : y0 + gh; }
+        else { sy = y0 + 1 + so * 2; sx = sd[0] < 0 ? x0 - 1 : x0 + gw; }
+        // the slot's mouth must open into gallery FLOOR — a corner inset or an
+        // unlucky pillar at the adjacent cell would make it a sealed void
+        var sok = grid[sy - sd[1]] !== undefined && grid[sy - sd[1]][sx - sd[0]] === "floor";
+        var scells = [];
+        for (var sk = 0; sk < sdep && sok; sk++) {
+          var qx = sx + sd[0] * sk, qy = sy + sd[1] * sk, qk = key(qx, qy);
+          if (!inB(qx, qy) || !isWall(qx, qy) || keepWalls[qk] || protectedShell[qk]) { sok = false; break; }
+          scells.push({ x: qx, y: qy });
+          var ex2 = qx + sd[0], ey2 = qy + sd[1];
+          if (sk === sdep - 1 && (!inB(ex2, ey2) || !isWall(ex2, ey2))) sok = false;   // blind means blind
+        }
+        if (!sok) continue;
+        // the mouth cell of the slot must open into the gallery, not rock
+        scells.forEach(function (c) { open(c.x, c.y); });
+        slots++;
+      }
+      G("  gallery: " + gw + "x" + gh + " at (" + x0 + "," + y0 + ") — "
+        + (K.galleryShape == 1 ? nRects + "-rect union (" + cells.length + " cells)" : bays + " bays") + ", "
+        + pillarKeys.length + " pillars, " + slots + " blind slots (" + "NSWE"[sside] + " wall)");
+      return { x0: x0, y0: y0, w: gw, h: gh, cells: cells, pillars: pillarKeys };
+    }
+    G("  gallery: no clean footprint in 40 tries — none this warren");
+    return null;
+  }
+  // communal block (ruins FillRoom idiom, TRIAL 2026-08-12, user: "let's try
+  // both"): ONE irregular footprint — two overlapping rects hollowed — then
+  // RECURSIVELY partitioned into den-sized rooms behind doors, grown to fit
+  // rather than stamped. Fiction earns its keep: the partitions are BUILT walls
+  // inside dug space — mason work inside hewer work, two hands in one room.
+  // Doored from the hall like the suite; whole block seals as private chambers.
+  function carveBlock(ex, ey, hd) {
+    var pdx = hd[0], pdy = hd[1];
+    var w1 = R(6, 9), h1 = R(4, 6), x0, y0;
+    if (pdx === 1) { x0 = ex + 2; y0 = ey - (h1 >> 1); }
+    else if (pdx === -1) { x0 = ex - 1 - w1; y0 = ey - (h1 >> 1); }
+    else if (pdy === 1) { y0 = ey + 2; x0 = ex - (w1 >> 1); }
+    else { y0 = ey - 1 - h1; x0 = ex - (w1 >> 1); }
+    var uni = {}, cells = [];
+    var stampB = function (rx, ry, rw, rh) {
+      for (var y = ry; y < ry + rh; y++) for (var x = rx; x < rx + rw; x++) {
+        var k2 = key(x, y);
+        if (!uni[k2]) { uni[k2] = 1; cells.push({ x: x, y: y }); }
+      }
+    };
+    stampB(x0, y0, w1, h1);
+    var anc = cells[R(0, cells.length - 1)], w2 = R(4, 7), h2 = R(3, 5);
+    stampB(anc.x - R(0, w2 - 1), anc.y - R(0, h2 - 1), w2, h2);
+    // union + 8-ring: solid unclaimed rock (the second rect can wander back
+    // toward the hall — the ring check catches that and the part just fails)
+    for (var i = 0; i < cells.length; i++) {
+      for (var oy = -1; oy <= 1; oy++) for (var ox = -1; ox <= 1; ox++) {
+        var nx = cells[i].x + ox, ny = cells[i].y + oy, nk = key(nx, ny);
+        if (!inB(nx, ny) || keepWalls[nk] || protectedShell[nk] || protectedFloor[nk]) return null;
+        if (!isWall(nx, ny)) return null;
+      }
+    }
+    // the neck: one wall cell between hall end and the union's near face
+    var nkx = ex + pdx, nky = ey + pdy;
+    if (!uni[key(nkx + pdx, nky + pdy)]) return null;
+    if (!isWall(nkx, nky) || keepWalls[key(nkx, nky)] || protectedShell[key(nkx, nky)]) return null;
+    cells.forEach(function (c) { clearCell(c.x, c.y); });
+    clearCell(nkx, nky);
+    // recursive partition, den-size threshold (ruins uses 24 — ours is 14, the
+    // den-size ruling's number pressure): cut across the narrow axis (25% flip),
+    // the cut line keeps ONE door cell whose cross-neighbours are both floor
+    var rooms = [], queue = [cells.slice()], guard = 0;
+    while (queue.length && guard++ < 30) {
+      var rm = queue.pop();
+      var L = 1e9, Rt = -1e9, T = 1e9, B = -1e9;
+      rm.forEach(function (c) { if (c.x < L) L = c.x; if (c.x > Rt) Rt = c.x; if (c.y < T) T = c.y; if (c.y > B) B = c.y; });
+      if (rm.length <= 14 || Rt - L < 3 || B - T < 3) { if (rm.length) rooms.push(rm); continue; }
+      var vert = Rt - L >= B - T; if (rng() < 0.25) vert = !vert;
+      var placedCut = false;
+      for (var ct = 0; ct < 10 && !placedCut; ct++) {
+        var cut = vert ? R(L + 2, Rt - 2) : R(T + 2, B - 2);
+        var line = rm.filter(function (c) { return vert ? c.x === cut : c.y === cut; });
+        if (line.length < 2) continue;
+        var doorCands = line.filter(function (c) {
+          var a = vert ? grid[c.y][c.x - 1] : grid[c.y - 1] && grid[c.y - 1][c.x];
+          var b = vert ? grid[c.y][c.x + 1] : grid[c.y + 1] && grid[c.y + 1][c.x];
+          return a === "floor" && b === "floor";
+        });
+        if (!doorCands.length) continue;
+        var door = doorCands[R(0, doorCands.length - 1)];
+        line.forEach(function (c) { if (c !== door) grid[c.y][c.x] = "wall"; });
+        var A = [], Bb = [];
+        rm.forEach(function (c) {
+          if (c === door || (vert ? c.x === cut : c.y === cut)) return;
+          (vert ? (c.x < cut ? A : Bb) : (c.y < cut ? A : Bb)).push(c);
+        });
+        if (A.length) queue.push(A);
+        if (Bb.length) queue.push(Bb);
+        placedCut = true;
+      }
+      if (!placedCut) rooms.push(rm);
+    }
+    cells.push({ x: nkx, y: nky });   // the neck rides the seal registry with the rest
+    return { cells: cells, rooms: rooms };
+  }
+  // size class (USER 2026-08-12: "start classifying warrens by small, medium,
+  // and large") — the class gates the gallery, and in canyon zones it now also
+  // gates the MOUTH (class-aware placement, see genCanyonWarren).
+  function classFromBand(cls) {
+    var partsWanted = cls === 0 ? R(lo("smallMin", "smallMax"), hi("smallMin", "smallMax"))
+      : cls === 2 ? R(lo("largeMin", "largeMax"), hi("largeMin", "largeMax"))
+        : R(lo("partsMin", "partsMax"), hi("partsMin", "partsMax"));
+    return { cls: cls, clsName: ["small", "medium", "large"][cls], partsWanted: partsWanted };
+  }
+  function rollWarrenClass() {
+    var cwts = [Math.max(0, K.wtSmall), Math.max(0, K.wtMedium), Math.max(0, K.wtLarge)];
+    var ctot2 = cwts[0] + cwts[1] + cwts[2], cls = 1;
+    if (ctot2 > 0) { var crr = rng() * ctot2; for (cls = 0; cls < 2; cls++) { crr -= cwts[cls]; if (crr < 0) break; } }
+    return classFromBand(cls);
+  }
+  function growWarren(startX, startY, classInfo) {
+    var ci = classInfo || rollWarrenClass();
+    var cls = ci.cls, clsName = ci.clsName, partsWanted = ci.partsWanted;
+    G("  class: " + clsName + " — " + partsWanted + " parts wanted" + (classInfo ? " (mouth-fitted)" : ""));
+    carvingWarren = true;   // every cell carved from here is warren territory
+    var gallery = (cls > 0 && rng() < K.galleryChance) ? placeGallery(startX, startY) : null;
     var ports = [{ x: startX, y: startY }];
     clearCell(startX, startY);
-    var made = { halls: 0, rooms: 0, wraps: 0, units: 0, combs: 0, pockets: 0, sockets: 0, loops: 0 };
+    var made = { halls: 0, rooms: 0, wraps: 0, units: 0, combs: 0, pockets: 0, sockets: 0, loops: 0, sealed: 0 };
     var partsPlaced = 0;
+    // every chamber-family part registers its cells; sealed at birth against
+    // pre-existing floor, then one final sweep catches halls carved past older
+    // rooms. Work-bites (sockets/hooks/feet) stay open to the hall by design.
+    var chamberCells = [];
+    var sealHere = function (cells) {
+      made.sealed += sealChamberDiagonals(cells, startX, startY);
+      chamberCells.push.apply(chamberCells, cells);
+    };
     for (var i = 0; i < partsWanted * K.attempts && partsPlaced < partsWanted; i++) {
       var port = ports[R(0, ports.length - 1)];
       if (ports.length >= K.loopMinPorts && rng() < K.loopChance) {
         var other = ports[R(0, ports.length - 1)];
         var pd3 = Math.abs(other.x - port.x) + Math.abs(other.y - port.y);
         if (other !== port && pd3 >= lo("loopMinDist", "loopMaxDist") && pd3 <= hi("loopMinDist", "loopMaxDist")) {
-          windingTunnel(port.x, port.y, other.x, other.y);
-          made.loops++;
+          // count only loops that actually carved — the canyon crossing belt can
+          // return an empty path, which used to log a phantom loop
+          if (windingTunnel(port.x, port.y, other.x, other.y).length) made.loops++;
         }
         continue;
       }
       var hd = [[1, 0], [-1, 0], [0, 1], [0, -1]][R(0, 3)];
-      var ex, ey;
+      var ex, ey, gotTrunk = false;
+      // canyon attempt economy (2026-08-11, user verdicts ex1 "too small" / ex2
+      // "too much empty space"): in a canyon most naive targets are doomed (out of
+      // bounds, across the corridor, into skin) and each one used to burn a whole
+      // attempt — the warren starved with rock to spare. Canyon zones now RETRY
+      // inside the attempt: blocked trunk falls through to a local hall, hall
+      // targeting re-rolls direction/length up to 4x. Stage-1 (no canyon) keeps
+      // the exact original rng sequence — the drawing calibration is not re-rolled.
+      var inCanyon = false; for (var ck in canyonFloor) { inCanyon = true; break; }
       if (rng() < K.trunkChance) {
         var tpath = carveTrunk(port.x, port.y, hd, made);
-        if (tpath.length < K.trunkMinKeep) continue;
-        ex = tpath[tpath.length - 1].x; ey = tpath[tpath.length - 1].y;
-        made.trunks = (made.trunks || 0) + 1;
-      } else {
-        var hlen = R(lo("hallMin", "hallMax"), hi("hallMin", "hallMax"));
-        ex = port.x + hd[0] * hlen + R(-K.hallDrift, K.hallDrift); ey = port.y + hd[1] * hlen + R(-K.hallDrift, K.hallDrift);
-        if (!inB(ex, ey)) continue;
-        var hp = windingTunnel(port.x, port.y, ex, ey);
-        if (!hp.length) continue;
+        if (tpath.length >= K.trunkMinKeep) {
+          ex = tpath[tpath.length - 1].x; ey = tpath[tpath.length - 1].y;
+          made.trunks = (made.trunks || 0) + 1;
+          gotTrunk = true;
+        } else if (!inCanyon) continue;
+      }
+      if (!gotTrunk) {
+        var hallTries = inCanyon ? 4 : 1, gotHall = false;
+        for (var htx = 0; htx < hallTries && !gotHall; htx++) {
+          if (htx > 0) hd = [[1, 0], [-1, 0], [0, 1], [0, -1]][R(0, 3)];
+          var hlen = R(lo("hallMin", "hallMax"), hi("hallMin", "hallMax"));
+          ex = port.x + hd[0] * hlen + R(-K.hallDrift, K.hallDrift); ey = port.y + hd[1] * hlen + R(-K.hallDrift, K.hallDrift);
+          if (!inB(ex, ey)) continue;
+          var hp = windingTunnel(port.x, port.y, ex, ey);
+          if (hp.length) gotHall = true;
+        }
+        if (!gotHall) continue;
         made.halls++;
       }
       var pr2 = pickPart(), ok2 = false;
+      // canyon payoff economy (2026-08-11, same sitting as the attempt economy —
+      // measured after it: chambers min 0, feet avg 9.5 vs stage-1's 6.2): a
+      // chamber part only ever tried FACING THE HALL, and chunky footprints facing
+      // skin just fail, so the ladder degraded everything to feet. In canyon the
+      // ROLLED part now tries all four rotations before the ladder starts.
+      // Stage-1 keeps the single ahead-only try (pdirs length 1, rng untouched).
+      var pdirs = inCanyon
+        ? [hd, [hd[1], hd[0]], [-hd[1], -hd[0]], [-hd[0], -hd[1]]]
+        : [hd];
+      for (var pdi = 0; pdi < pdirs.length && !ok2; pdi++) {
+      var pd = pdirs[pdi];
       if (pr2 === "wRoom") {
-        ok2 = !!carveNotch(ex, ey, hd[0], hd[1], R(1, 2), R(2, 3), rng() < 0.3, 0.8);
-        if (ok2) made.rooms++;
+        var rcells = carveNotch(ex, ey, pd[0], pd[1], R(1, 2), R(2, 3), rng() < 0.3, 0.8);
+        ok2 = !!rcells;
+        if (ok2) { made.rooms++; sealHere(rcells); }
       } else if (pr2 === "wSuite") {
         // suite: constrained rooms behind one entrance
         var sw7 = R(7, 10), sh7 = R(5, 7), sx7, sy7, dX, dY;
-        if (hd[0] === 1) { sx7 = ex + 1; sy7 = ey - (sh7 >> 1); dX = sx7; dY = ey; }
-        else if (hd[0] === -1) { sx7 = ex - sw7; sy7 = ey - (sh7 >> 1); dX = sx7 + sw7 - 1; dY = ey; }
-        else if (hd[1] === 1) { sy7 = ey + 1; sx7 = ex - (sw7 >> 1); dY = sy7; dX = ex; }
+        if (pd[0] === 1) { sx7 = ex + 1; sy7 = ey - (sh7 >> 1); dX = sx7; dY = ey; }
+        else if (pd[0] === -1) { sx7 = ex - sw7; sy7 = ey - (sh7 >> 1); dX = sx7 + sw7 - 1; dY = ey; }
+        else if (pd[1] === 1) { sy7 = ey + 1; sx7 = ex - (sw7 >> 1); dY = sy7; dX = ex; }
         else { sy7 = ey - sh7; sx7 = ex - (sw7 >> 1); dY = sy7 + sh7 - 1; dX = ex; }
-        if (hd[0] !== 0) dY = Math.max(sy7 + 1, Math.min(sy7 + sh7 - 2, dY));
+        if (pd[0] !== 0) dY = Math.max(sy7 + 1, Math.min(sy7 + sh7 - 2, dY));
         else dX = Math.max(sx7 + 1, Math.min(sx7 + sw7 - 2, dX));
         var sres = carveSuite(sx7, sy7, sw7, sh7, dX, dY);
-        if (sres) { ok2 = true; made.suites = (made.suites || 0) + 1; }
+        if (sres) {
+          ok2 = true; made.suites = (made.suites || 0) + 1;
+          var scells = [];
+          for (var syy = sy7; syy < sy7 + sh7; syy++)
+            for (var sxx = sx7; sxx < sx7 + sw7; sxx++) scells.push({ x: sxx, y: syy });
+          sealHere(scells);   // seal fn skips wall cells, so partitions are inert
+        }
+      } else if (pr2 === "wBlock") {
+        var blk = carveBlock(ex, ey, pd);
+        if (blk) {
+          ok2 = true; made.blocks = (made.blocks || 0) + 1;
+          sealHere(blk.cells);   // seal fn skips wall cells, so partitions are inert
+          blk.rooms.forEach(function (rm2) { dressSpaces.push({ kind: "blockroom", cells: rm2 }); });
+        }
       } else if (pr2 === "wWrap") {
-        if (carveWrap(ex, ey, hd)) { ok2 = true; made.wraps++; }
+        var wres = carveWrap(ex, ey, pd);
+        if (wres) { ok2 = true; made.wraps++; sealHere(wres.cells); }
       } else if (pr2 === "wUnit") {
-        // v2 FIX (2026-08-08) — carveRanks reports whether its lane reached open
+        // v2 FIX (2026-08-11) — carveRanks reports whether its lane reached open
         // floor, and growWarren was ignoring that flag: measured over 15 unit-only
         // warrens, 66% of accepted units were ones carveRanks had itself logged as
         // UNATTACHED. That is the "non-linking" read — two thirds of them are
         // sealed rooms with no way in. Reverted now, matching the comb.
         var usnap = grid.map(function (r2) { return r2.slice(); });
         var ukeep = JSON.parse(JSON.stringify(keepWalls));
-        var ru = carveRanks(ex, ey, hd[1] !== 0 ? 1 : 0, hd[0] !== 0 ? 1 : 0, hd[0], hd[1], 1);
-        if (ru && ru.attached && ru.cells.length) { ok2 = true; made.units++; }
+        var ru = carveRanks(ex, ey, pd[1] !== 0 ? 1 : 0, pd[0] !== 0 ? 1 : 0, pd[0], pd[1], 1);
+        if (ru && ru.attached && ru.cells.length) { ok2 = true; made.units++; sealHere(ru.cells); }
         else { grid = usnap; keepWalls = ukeep; }
       } else if (pr2 === "wComb") {
-        // v2 FIX (2026-08-08) — the mini comb had never once fired. carveComb
+        // v2 FIX (2026-08-11) — the mini comb had never once fired. carveComb
         // requires its ENTIRE footprint to be solid wall, but the call site placed
         // that footprint centred on (ex,ey), the cell the hall had just carved, so
         // the wall check failed on the hall itself and it returned null every time.
@@ -1521,47 +2343,60 @@ window.onerror = function (msg, src, line) {
         // carveComb's own perimeter probe (<=4 cells) doors it back to the hall.
         // Unattached results revert, per the ruled comb behaviour.
         var clw = 3, clh = 2, cbw = 2 * clw - 1, cbh = 2 * clh - 1, cgx, cgy;
-        if (hd[0] === 1)       { cgx = ex + 3;       cgy = ey - 1; }
-        else if (hd[0] === -1) { cgx = ex - 2 - cbw; cgy = ey - 1; }
-        else if (hd[1] === 1)  { cgx = ex - 2;       cgy = ey + 3; }
+        if (pd[0] === 1)       { cgx = ex + 3;       cgy = ey - 1; }
+        else if (pd[0] === -1) { cgx = ex - 2 - cbw; cgy = ey - 1; }
+        else if (pd[1] === 1)  { cgx = ex - 2;       cgy = ey + 3; }
         else                   { cgx = ex - 2;       cgy = ey - 2 - cbh; }
         var csnap = grid.map(function (r2) { return r2.slice(); });
         var ckeep = JSON.parse(JSON.stringify(keepWalls));
         var cres = carveComb(cgx, cgy, clw, clh);
-        if (cres && cres.attached) { ok2 = true; made.combs++; }
+        if (cres && cres.attached) { ok2 = true; made.combs++; sealHere(cres.cells); }
         else { grid = csnap; keepWalls = ckeep; }
       } else if (pr2 === "wPocket") {
-        var pk2 = carvePocket(ex, ey, hd);
+        var pk2 = carvePocket(ex, ey, pd);
         if (pk2) {
-          ok2 = true; made.pockets++;
+          ok2 = true; made.pockets++; sealHere(pk2.cells);
           made.pkSizes = (made.pkSizes || []); made.pkSizes.push((2 * pk2.hw + 1) + "x" + (2 * pk2.hd + 1));
         }
       } else if (pr2 === "wSockets") {
-        var px5 = hd[1] !== 0 ? 1 : 0, py5 = hd[0] !== 0 ? 1 : 0;
-        if (carveNotch(ex + px5, ey + py5, px5, py5, 1, 3, false, 0.85)) { made.sockets++; ok2 = true; }
-        if (carveNotch(ex - px5, ey - py5, -px5, -py5, 1, 3, false, 0.85)) { made.sockets++; ok2 = true; }
+        var px5 = pd[1] !== 0 ? 1 : 0, py5 = pd[0] !== 0 ? 1 : 0;
+        var skA = carveNotch(ex + px5, ey + py5, px5, py5, 1, 3, false, 0.85);
+        if (skA) { made.sockets++; ok2 = true; dressSpaces.push({ kind: "socket", cells: skA }); }
+        var skB = carveNotch(ex - px5, ey - py5, -px5, -py5, 1, 3, false, 0.85);
+        if (skB) { made.sockets++; ok2 = true; dressSpaces.push({ kind: "socket", cells: skB }); }
       } else if (pr2 === "wHook") {
-        if (carveHook(ex, ey, hd)) { ok2 = true; made.hooks = (made.hooks || 0) + 1; }
+        if (carveHook(ex, ey, pd)) { ok2 = true; made.hooks = (made.hooks || 0) + 1; }
       } else {
-        carveFoot(ex, ey, hd);
+        var ftA = carveFoot(ex, ey, pd);
+        if (ftA.length) dressSpaces.push({ kind: "foot", cells: ftA });
         ok2 = true;
         made.feet = (made.feet || 0) + 1;
+      }
       }
       // no hall without a reason: if the rolled part didn't fit, fall back —
       // small room, then a socket, then a prospector's foot. Every hall ends in
       // WORK (a quarry has no purposeless tunnels; every foot cost labor)
       if (!ok2) {
-        ok2 = !!carveNotch(ex, ey, hd[0], hd[1], 1, 2, false, 0.8);
-        if (ok2) made.rooms++;
+        // canyon: a chamber that will not fit ahead may fit sideways or backward —
+        // try the rotations before giving the hall up to a foot (stage-1 keeps the
+        // single ahead-only try)
+        var fdirs = inCanyon
+          ? [hd, [hd[1], hd[0]], [-hd[1], -hd[0]], [-hd[0], -hd[1]]]
+          : [hd];
+        for (var fdi = 0; fdi < fdirs.length && !ok2; fdi++) {
+          var fcells = carveNotch(ex, ey, fdirs[fdi][0], fdirs[fdi][1], 1, 2, false, 0.8);
+          if (fcells) { ok2 = true; made.rooms++; sealHere(fcells); }
+        }
       }
       if (!ok2) {
         var px6 = hd[1] !== 0 ? 1 : 0, py6 = hd[0] !== 0 ? 1 : 0;
         var s6 = rng() < 0.5 ? 1 : -1;
-        ok2 = !!carveNotch(ex + px6 * s6, ey + py6 * s6, px6 * s6, py6 * s6, 1, 3, false, 0.85);
-        if (ok2) made.sockets++;
+        var skF = carveNotch(ex + px6 * s6, ey + py6 * s6, px6 * s6, py6 * s6, 1, 3, false, 0.85);
+        if (skF) { ok2 = true; made.sockets++; dressSpaces.push({ kind: "socket", cells: skF }); }
       }
       if (!ok2) {
-        carveFoot(ex, ey, hd, 2);
+        var ftB = carveFoot(ex, ey, hd, 2);
+        if (ftB.length) dressSpaces.push({ kind: "foot", cells: ftB });
         made.feet = (made.feet || 0) + 1;
         ok2 = true;
       }
@@ -1569,8 +2404,147 @@ window.onerror = function (msg, src, line) {
       ports.push({ x: ex, y: ey });
       if (ports.length > K.portCap) ports.splice(R(0, Math.min(3, ports.length - 1)), 1);
     }
-    G("  warren: " + partsPlaced + " parts — " + made.halls + " halls, " + (made.trunks || 0) + " trunks, " + made.rooms + " rooms, " + (made.suites || 0) + " suites, " + made.wraps + " wraps, " + made.units + " units, " + made.combs + " combs, " + made.pockets + " pockets, " + made.sockets + " sockets, " + (made.hooks || 0) + " hooks, " + (made.feet || 0) + " feet, " + made.loops + " loops"
+    // gallery resolve (drawing 11): did the network find it? Tunnels prefer open
+    // space so pass-through attachment is the common case; if every hall missed,
+    // probe guarded 1-wide doors from up to two different sides; still nothing =
+    // honest revert to rock. Then buds (RULED: "small chambers that can bud on
+    // to it") — the existing room carver doored through the perimeter, sealed as
+    // private dens; the gallery itself stays public (never in chamberCells).
+    if (gallery) {
+      var gset = {};
+      gallery.cells.forEach(function (c) { gset[key(c.x, c.y)] = 1; });
+      var reached = false, fq = [[startX, startY]], fseen = {};
+      fseen[key(startX, startY)] = 1;
+      while (fq.length && !reached) {
+        var fc = fq.pop();
+        for (var fd = 0; fd < 4; fd++) {
+          var fx = fc[0] + [1, -1, 0, 0][fd], fy = fc[1] + [0, 0, 1, -1][fd], fk = key(fx, fy);
+          if (fseen[fk] || fx < 0 || fx >= W || fy < 0 || fy >= H || isWall(fx, fy)) continue;
+          if (gset[fk]) { reached = true; break; }
+          fseen[fk] = 1; fq.push([fx, fy]);
+        }
+      }
+      var doors = 0;
+      if (!reached) {
+        var sideDefs = [[0, -1], [0, 1], [-1, 0], [1, 0]];
+        for (var sdI = 0; sdI < 4 && doors < 2; sdI++) {
+          var dd = sideDefs[sdI], landed = false;
+          for (var dtry = 0; dtry < 10 && !landed; dtry++) {
+            var wx, wy;   // a wall cell on this side whose inner face is gallery floor
+            if (dd[1] !== 0) { wx = gallery.x0 + R(0, gallery.w - 1); wy = dd[1] < 0 ? gallery.y0 - 1 : gallery.y0 + gallery.h; }
+            else { wy = gallery.y0 + R(0, gallery.h - 1); wx = dd[0] < 0 ? gallery.x0 - 1 : gallery.x0 + gallery.w; }
+            if (grid[wy - dd[1]] === undefined || grid[wy - dd[1]][wx - dd[0]] !== "floor") continue;
+            var ray = [], hit = false;
+            for (var rs = 0; rs < 6; rs++) {
+              var rx = wx + dd[0] * rs, ry = wy + dd[1] * rs, rk = key(rx, ry);
+              if (!inB(rx, ry)) break;
+              if (isWall(rx, ry)) {
+                if (keepWalls[rk] || protectedShell[rk]) break;   // guarded wall = not this way
+                ray.push({ x: rx, y: ry });
+              } else {
+                // daylight must be WARREN floor: canyon floor would be a second
+                // canyon mouth, pool water is not daylight (the probe lesson)
+                if (!canyonFloor[rk] && !wetPockets[rk] && ray.length) hit = true;
+                break;
+              }
+            }
+            if (hit) { ray.forEach(function (c) { clearCell(c.x, c.y); }); doors++; landed = true; }
+          }
+        }
+        reached = doors > 0;
+      }
+      if (!reached) {
+        gallery.cells.forEach(function (c) { grid[c.y][c.x] = "wall"; });
+        gallery.pillars.forEach(function (p) { delete keepWalls[key(p.x, p.y)]; });
+        G("  gallery: network never arrived and no door could be probed — reverted to rock");
+        gallery = null;
+      } else {
+        var buds = 0, wantBuds = R(1, 2);
+        for (var bt2 = 0; bt2 < 14 && buds < wantBuds; bt2++) {
+          var bdd = [[0, -1], [0, 1], [-1, 0], [1, 0]][R(0, 3)];
+          var nwx, nwy;
+          if (bdd[1] !== 0) { nwx = gallery.x0 + R(0, gallery.w - 1); nwy = bdd[1] < 0 ? gallery.y0 - 1 : gallery.y0 + gallery.h; }
+          else { nwy = gallery.y0 + R(0, gallery.h - 1); nwx = bdd[0] < 0 ? gallery.x0 - 1 : gallery.x0 + gallery.w; }
+          if (grid[nwy - bdd[1]] === undefined || grid[nwy - bdd[1]][nwx - bdd[0]] !== "floor") continue;
+          if (!isWall(nwx, nwy) || keepWalls[key(nwx, nwy)] || protectedShell[key(nwx, nwy)]) continue;
+          var bc = carveNotch(nwx + bdd[0], nwy + bdd[1], bdd[0], bdd[1], 1, R(2, 3), false, 0.85);
+          if (bc) { clearCell(nwx, nwy); sealHere(bc); buds++; }
+        }
+        G("  gallery: " + (doors ? doors + " probed door(s)" : "attached by pass-through")
+          + (buds ? ", " + buds + " budded chamber(s)" : ""));
+      }
+    }
+    // shard sweep (USER RULING 2026-08-12 "let's try that": accidental lone wall
+    // cells inside merged carves read as debris and spend the kept-core
+    // vocabulary's credibility — a deliberate pillar only reads as deliberate
+    // when random lumps are rare). The legacy police's lone-shard half ONLY; the
+    // pinch-opening half stays legacy-only (inverted by the diagonal-seal
+    // ruling). keepWalls/protectedShell exempt — which includes canyon skin, so
+    // the drillbot's own corridor islets are untouchable for free. Runs BEFORE
+    // the seal union so a seal fill can never be sweep bait; clearing a cell
+    // whose 8 neighbours are already open cannot create a new corner kiss.
+    var shards = 0;
+    if (K.shardSweep) {
+      for (var shy = 1; shy < H - 1; shy++)
+        for (var shx = 1; shx < W - 1; shx++) {
+          if (!isWall(shx, shy) || keepWalls[key(shx, shy)] || protectedShell[key(shx, shy)]) continue;
+          var lone = true;
+          for (var soy = -1; soy <= 1 && lone; soy++)
+            for (var sox = -1; sox <= 1; sox++)
+              if ((sox || soy) && isWall(shx + sox, shy + soy)) { lone = false; break; }
+          if (lone) { clearCell(shx, shy); shards++; }
+        }
+    }
+    // final sweep: halls carved after a chamber can kiss its corner from the
+    // outside — the union registry catches those; chamber-vs-chamber contacts
+    // were already settled at the newer part's birth
+    made.sealed += sealChamberDiagonals(chamberCells, startX, startY);
+    G("  warren: " + partsPlaced + " parts — " + made.halls + " halls, " + (made.trunks || 0) + " trunks, " + made.rooms + " rooms, " + (made.suites || 0) + " suites, " + (made.blocks || 0) + " blocks, " + made.wraps + " wraps, " + made.units + " units, " + made.combs + " combs, " + made.pockets + " pockets, " + made.sockets + " sockets, " + (made.hooks || 0) + " hooks, " + (made.feet || 0) + " feet, " + made.loops + " loops, " + made.sealed + " leaks sealed, " + shards + " shards swept"
       + (made.pkSizes && made.pkSizes.length ? "\n  pocket sizes: " + made.pkSizes.join(", ") : ""));
+    dressWarren();   // work-evidence pass v1 — no-op unless the dress box is checked
+    // padded earth (USER RULED 2026-08-12, corrected same sitting: "actually -
+    // let's do whole warren"): every carved warren cell pads — the strict
+    // VillageMaker idiom. padScope 1 keeps the lived-only reading (work bites
+    // raw) for A/B. Runs after dress so items sat on plain floor; conversion is
+    // a grid id, so history/export/undo carry it for free.
+    carvingWarren = false;
+    if (K.padFloor == 1) {
+      var rawKeys = {};
+      if (K.padScope == 1)
+        dressSpaces.forEach(function (sp) {
+          if (sp.kind === "socket" || sp.kind === "foot" || sp.kind === "bay")
+            sp.cells.forEach(function (c) { rawKeys[key(c.x, c.y)] = 1; });
+        });
+      var padded = 0;
+      Object.keys(warrenFloor).forEach(function (k2) {
+        if (rawKeys[k2]) return;
+        var p2 = k2.split(","), pxx = +p2[0], pyy = +p2[1];
+        if (grid[pyy] && grid[pyy][pxx] === "floor") { grid[pyy][pxx] = "padfloor"; padded++; }
+      });
+      G("  padded earth: " + padded + " cells"
+        + (K.padScope == 1 ? " (lived only; " + Object.keys(rawKeys).length + " work-bite cells raw)" : " (whole warren)"));
+    }
+    // natural rocks (dress-gated like every table): geology showing through the
+    // dwelling — scatter attempts over the whole warren floor, not the registry
+    if (document.getElementById("gendress").checked) {
+      var natWant = R(lo("natMin", "natMax"), hi("natMin", "natMax")), natPlaced = {}, natN = 0;
+      var natFloors = [];
+      Object.keys(warrenFloor).forEach(function (k3) {
+        var p3 = k3.split(","), nx3 = +p3[0], ny3 = +p3[1];
+        if (grid[ny3] && (grid[ny3][nx3] === "padfloor" || grid[ny3][nx3] === "floor")) natFloors.push({ x: nx3, y: ny3 });
+      });
+      for (var na = 0; na < natWant && natFloors.length; na++) {
+        var ntot = 0; NATURALTABLE.forEach(function (r3) { ntot += r3[0]; });
+        var nroll = rng() * ntot, nitem = null;
+        for (var ni = 0; ni < NATURALTABLE.length; ni++) { nroll -= NATURALTABLE[ni][0]; if (nroll < 0) { nitem = NATURALTABLE[ni][1]; break; } }
+        if (!nitem) continue;
+        var nc = natFloors.splice((rng() * natFloors.length) | 0, 1)[0];
+        grid[nc.y][nc.x] = nitem;
+        natPlaced[nitem] = (natPlaced[nitem] || 0) + 1; natN++;
+      }
+      if (natWant) G("  natural: " + natN + " of " + natWant + " attempts placed"
+        + (natN ? " — " + Object.keys(natPlaced).map(function (k4) { return natPlaced[k4] + " " + k4; }).join(", ") : ""));
+    }
   }
   function genWarren() {
     W = 80; H = 25;
@@ -1579,8 +2553,174 @@ window.onerror = function (msg, src, line) {
     for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) grid[y][x] = "wall";
     corridor = [];
     var wsx = R(20, W - 21), wsy = R(8, H - 9);
-    growWarren(wsx, wsy, R(lo("partsMin", "partsMax"), hi("partsMin", "partsMax")));
+    var pocket = placeWetPockets(wsx, wsy);   // geology first — the network grows around it
+    growWarren(wsx, wsy);   // size class + part budget roll inside (2026-08-12)
+    wetHaloDress(pocket);
     genFocus = { x: wsx, y: wsy };
+  }
+
+  // ==================== stage 2: the warren in a canyon ====================
+  // Attachment rules RULED 2026-08-11: one mouth + ~30% back door; a warren never
+  // crosses the corridor (a band is one warren's territory); wet pockets fail
+  // honestly in thin bands; spurs are ATTACHMENT SURFACE (mouth candidates =
+  // wall skin of the whole canyon system, mild spur preference — the pilgrim
+  // road). growWarren learns nothing about canyons: the canyon is a mask, the
+  // one new law is refusal, and the fold along the seam is expected to EMERGE.
+  function genCanyonWarren() {
+    genCanyon();
+    var x, y, oy, ox;
+    // every open cell is canyon floor; every wall touching it (8-dir) is skin,
+    // registered like the wet-pocket shell so every carver refuses it for free
+    for (y = 0; y < H; y++) for (x = 0; x < W; x++) if (isOpen(x, y)) canyonFloor[key(x, y)] = 1;
+    for (y = 1; y < H - 1; y++) for (x = 1; x < W - 1; x++) {
+      if (!isWall(x, y)) continue;
+      var touches = false;
+      for (oy = -1; oy <= 1 && !touches; oy++) for (ox = -1; ox <= 1; ox++)
+        if (canyonFloor[key(x + ox, y + oy)]) { touches = true; break; }
+      if (touches) { canyonSkin[key(x, y)] = 1; keepWalls[key(x, y)] = 1; protectedShell[key(x, y)] = 1; }
+    }
+    // mouth candidates: skin with WALKABLE canyon floor at its face (never water —
+    // the standing "camp mouths never stand in water" rule) and mouthDepth solid
+    // unprotected rock straight behind
+    var d4m = [[1, 0], [-1, 0], [0, 1], [0, -1]], cands = [];
+    Object.keys(canyonSkin).forEach(function (k) {
+      var p = k.split(","), cx = +p[0], cy = +p[1];
+      for (var d = 0; d < 4; d++) {
+        var fx = cx + d4m[d][0], fy = cy + d4m[d][1];
+        if (!grid[fy] || (grid[fy][fx] !== "floor" && grid[fy][fx] !== "mouth")) continue;
+        var deepOk = true;
+        for (var s = 1; s <= K.mouthDepth; s++) {
+          var ix = cx - d4m[d][0] * s, iy = cy - d4m[d][1] * s;
+          if (!inB(ix, iy) || !isWall(ix, iy) || canyonSkin[key(ix, iy)]) { deepOk = false; break; }
+        }
+        if (!deepOk) continue;
+        var spur = false;
+        for (var sy = -1; sy <= 1 && !spur; sy++) for (var sx = -1; sx <= 1; sx++)
+          if (spurFloor[key(cx + sx, cy + sy)]) { spur = true; break; }
+        // mass behind the mouth (anti-example ruling 2026-08-12): a mouth is
+        // worth the rock the warren could actually reach through it, so weight
+        // by BFS-reachable wall within mouthMassR — through carvable wall only
+        // (skin refused, same as every carver). Flat weights let a long thin
+        // band out-ticket a deep mass on skin length alone.
+        var mass = 1;
+        if (K.mouthMassR > 0) {
+          mass = 0;
+          var mq = [[cx - d4m[d][0], cy - d4m[d][1]]], seenM = {};
+          seenM[key(mq[0][0], mq[0][1])] = 1;
+          while (mq.length) {
+            var mc = mq.pop(); mass++;
+            for (var my = -1; my <= 1; my++) for (var mx = -1; mx <= 1; mx++) {
+              if (!mx && !my) continue;
+              var nx = mc[0] + mx, ny = mc[1] + my, nk = key(nx, ny);
+              if (seenM[nk] || !inB(nx, ny) || !isWall(nx, ny) || canyonSkin[nk]) continue;
+              if (Math.max(Math.abs(nx - cx), Math.abs(ny - cy)) > K.mouthMassR) continue;
+              seenM[nk] = 1; mq.push([nx, ny]);
+            }
+          }
+        }
+        cands.push({ x: cx, y: cy, spur: spur, mass: mass, w: Math.max(1, mass) * (spur ? K.spurPull : 1) });
+        break;   // one entry per skin cell — the face direction only had to exist
+      }
+    });
+    if (!cands.length) { G("canyon warren: NO VIABLE MOUTH (no skin cell with " + K.mouthDepth + " solid cells behind) — honest spawn-nothing"); return; }
+    // class-aware placement (USER RULED 2026-08-12, picking the Claude lean after
+    // the seed-16 negative-space verdict — a "mass 16 of max 169" mouth starved a
+    // medium warren into a 90-cell scribble): the size class rolls FIRST and the
+    // mouth must hold it — mass >= parts x mouthMassPerPart. No candidate feeds
+    // the class -> the class DEGRADES large -> medium -> small before anything
+    // carves: the rock decides what fits. A small warren in a sliver is a hermit
+    // hole; a medium one is a bug. Slivers stay legal for the class that belongs
+    // in them, and all-thin zones still dig honestly.
+    var clsInfo = rollWarrenClass(), eligible = cands;
+    if (K.mouthMassR > 0) {
+      while (true) {
+        var need = clsInfo.partsWanted * K.mouthMassPerPart;
+        eligible = cands.filter(function (c) { return c.mass >= need; });
+        if (eligible.length || clsInfo.cls === 0) break;
+        G("  class: " + clsInfo.clsName + " found no mouth with mass >= " + need + " — degrading");
+        clsInfo = classFromBand(clsInfo.cls - 1);
+      }
+      if (!eligible.length) {
+        // even small fits nowhere — dig the best pocket anyway, a cramped
+        // hermit hole (CLAUDE call: spawn-nothing stays reserved for zero
+        // candidates; a zone with rock gets dug where the rock is)
+        var bestC = cands[0];
+        cands.forEach(function (c) { if (c.mass > bestC.mass) bestC = c; });
+        eligible = [bestC];
+        G("  class: even small found no fitting mouth — best pocket (mass " + bestC.mass + ") taken as a cramped dig");
+      }
+    }
+    var wtot = 0; eligible.forEach(function (c) { wtot += c.w; });
+    var wr = rng() * wtot, mouth = eligible[eligible.length - 1];
+    for (var mi = 0; mi < eligible.length; mi++) { wr -= eligible[mi].w; if (wr < 0) { mouth = eligible[mi]; break; } }
+    delete canyonSkin[key(mouth.x, mouth.y)]; delete keepWalls[key(mouth.x, mouth.y)]; delete protectedShell[key(mouth.x, mouth.y)];
+    var nSpur = 0, maxMass = 0;
+    cands.forEach(function (c) { if (c.spur) nSpur++; if (c.mass > maxMass) maxMass = c.mass; });
+    G("  mouth (" + mouth.x + "," + mouth.y + ") on the " + (mouth.spur ? "STAIR SPUR" : "main corridor")
+      + " — " + cands.length + " candidates, " + nSpur + " spur-facing, pull x" + K.spurPull
+      + (K.mouthMassR > 0 ? ", mass " + mouth.mass + " of max " + maxMass + " (r" + K.mouthMassR + ")" : ""));
+    // geology first, same band only: reject anchors whose L-path from the mouth
+    // crosses canyon floor — the warren can't cross, so it could never approach
+    var pocket = placeWetPockets(mouth.x, mouth.y, function (px0, py0, pw2, ph2) {
+      var tx = px0 + (pw2 >> 1), ty = py0 + (ph2 >> 1), lx = mouth.x, ly = mouth.y;
+      while (lx !== tx) { lx += Math.sign(tx - lx); if (canyonFloor[key(lx, ly)]) return false; }
+      while (ly !== ty) { ly += Math.sign(ty - ly); if (canyonFloor[key(lx, ly)]) return false; }
+      return true;
+    });
+    growWarren(mouth.x, mouth.y, clsInfo);   // class pre-rolled, mouth fitted to it (2026-08-12)
+    // back door (ruled ~30%): a second opening far from the mouth, only where the
+    // warren actually grew back against the skin — never carved speculatively
+    var doors = 1;
+    if (rng() < K.backDoor) {
+      var bds = [];
+      Object.keys(canyonSkin).forEach(function (k) {
+        var p = k.split(","), cx = +p[0], cy = +p[1];
+        if (!isWall(cx, cy)) return;
+        if (Math.max(Math.abs(cx - mouth.x), Math.abs(cy - mouth.y)) < K.backDoorMin) return;
+        var toCanyon = false, toWarren = false;
+        for (var d = 0; d < 4; d++) {
+          var nx = cx + d4m[d][0], ny = cy + d4m[d][1];
+          if (canyonFloor[key(nx, ny)]) { if (grid[ny] && grid[ny][nx] !== "water") toCanyon = true; }
+          else if (isOpen(nx, ny) && !wetPockets[key(nx, ny)]) toWarren = true;
+        }
+        if (toCanyon && toWarren) bds.push({ x: cx, y: cy });
+      });
+      if (bds.length) {
+        var bd = bds[R(0, bds.length - 1)];
+        delete canyonSkin[key(bd.x, bd.y)]; delete keepWalls[key(bd.x, bd.y)]; delete protectedShell[key(bd.x, bd.y)];
+        clearCell(bd.x, bd.y); grid[bd.y][bd.x] = "mouth"; doors++;
+        G("  back door (" + bd.x + "," + bd.y + ") — the warren is a through-route now (" + bds.length + " legal sites)");
+      } else G("  back door rolled, no legal site — the network never grew back against distant skin");
+    }
+    wetHaloDress(pocket);
+    grid[mouth.y][mouth.x] = "mouth";
+    // ---- tripwires (the orphan-tripwire idiom: this class of bug never ships silent) ----
+    // breach: every remaining skin cell must still be wall (mouth + door were unregistered)
+    var breaches = 0;
+    Object.keys(canyonSkin).forEach(function (k) { var p = k.split(","); if (isOpen(+p[0], +p[1])) breaches++; });
+    // warren connectivity WITHOUT the canyon: flood from the mouth refusing canyon
+    // floor must reach every warren-side open cell
+    var totW = 0;
+    for (y = 1; y < H - 1; y++) for (x = 1; x < W - 1; x++)
+      if (isOpen(x, y) && !canyonFloor[key(x, y)] && !wetPockets[key(x, y)]) totW++;
+    var seenT = {}, stackT = [{ x: mouth.x, y: mouth.y }], reached = 0;
+    seenT[key(mouth.x, mouth.y)] = 1;
+    while (stackT.length) {
+      var ct = stackT.pop(); reached++;
+      for (var dy2 = -1; dy2 <= 1; dy2++) for (var dx2 = -1; dx2 <= 1; dx2++) {
+        if (!dx2 && !dy2) continue;
+        var nx2 = ct.x + dx2, ny2 = ct.y + dy2, k2 = key(nx2, ny2);
+        if (!inB(nx2, ny2) || seenT[k2] || !isOpen(nx2, ny2) || canyonFloor[k2] || wetPockets[k2]) continue;
+        seenT[k2] = 1; stackT.push({ x: nx2, y: ny2 });
+      }
+    }
+    var strand = [];
+    if (reached !== totW)
+      for (y = 1; y < H - 1 && strand.length < 12; y++) for (x = 1; x < W - 1; x++)
+        if (isOpen(x, y) && !canyonFloor[key(x, y)] && !wetPockets[key(x, y)] && !seenT[key(x, y)]) strand.push(x + "," + y);
+    G("  tripwires: " + breaches + " breaches (expect 0) · warren reach " + reached + "/" + totW
+      + (breaches === 0 && reached === totW ? " — clean" : "  *** FAILURE ***" + (strand.length ? " stranded @ " + strand.join(" ") : "")));
+    genFocus = { x: mouth.x, y: mouth.y };
   }
 
   // ---- deep pass: the plain stone gets worked ----
@@ -1739,7 +2879,7 @@ window.onerror = function (msg, src, line) {
   }
 
   // ---- generators ----
-  // CANYON GROUND TRUTH, re-decompiled 2026-08-08 against the current Steam install
+  // CANYON GROUND TRUTH, re-decompiled 2026-08-11 against the current Steam install
   // (XRL.World.ZoneBuilders.CanyonBuilder, Cell.GetLocalAdjacentCells,
   // Zone.CalculateNavigationMap, ZoneBuilders.Utility.NoiseMap). Corrections to the
   // 2026-08-07 reconstruction, all of which change the shape:
@@ -1896,8 +3036,10 @@ window.onerror = function (msg, src, line) {
       var path = noisyPath(hub.x, hub.y, mo.x, mo.y, false, navCost);
       if (!path) return;
       pathsRun++;
-      // pass 1: carve the path itself
-      path.forEach(function (p) { clearCell(p.x, p.y); corridor.push(p); markers++; });
+      // pass 1: carve the path itself. Stair paths tag the cells they carve FRESH
+      // as spur floor (stage 2 mouth weighting) — cells the mouth paths already
+      // opened stay plain corridor, so the near-hub overlap doesn't read as spur
+      path.forEach(function (p) { if (mo.stair && isWall(p.x, p.y)) spurFloor[key(p.x, p.y)] = 1; clearCell(p.x, p.y); corridor.push(p); markers++; });
       // pass 2: widening. Stat.Random(1, high) PER PATH CELL, then a filled
       // Chebyshev box of that radius clamped to the zone (edges included)
       path.forEach(function (p) {
@@ -1907,6 +3049,7 @@ window.onerror = function (msg, src, line) {
             var wx = p.x + ox, wy = p.y + oy;
             if (wx < 0 || wx >= W || wy < 0 || wy >= H) continue;
             if (wx === p.x && wy === p.y) continue;
+            if (mo.stair && isWall(wx, wy)) spurFloor[key(wx, wy)] = 1;
             clearCell(wx, wy); corridor.push({ x: wx, y: wy }); markers++;
           }
       });
@@ -1914,42 +3057,34 @@ window.onerror = function (msg, src, line) {
     // mark the mouths + stairs so the shape reads at a glance
     conns.forEach(function (mo) { if (!mo.stair && isOpen(mo.x, mo.y)) grid[mo.y][mo.x] = "mouth"; });
     stairs.forEach(function (so) { if (isOpen(so.x, so.y)) grid[so.y][so.x] = "slot"; });
-    // --- river: NOT CanyonBuilder. A separate builder in the zone's list; this is
-    // the 2026-08-07 reconstruction, kept as a proposal and knob-gated ---
+    // --- river: NOT CanyonBuilder. A separate builder in the zone's list.
+    // DECOMP-VERIFIED 2026-08-12 (RiverBuilder + Genkit.CellularGrid): the marsh
+    // fires when the zone has EXACTLY ONE river connection (a river dead-ending
+    // here); CA = seed R(1,99)<=40 over an 80x30 grid (zone stamps rows 1..23),
+    // borders forced DEAD each of 4 passes, born {6,7,8} / survive {5,6,7,8};
+    // and the lone-mouth zone STILL gets its channel — random interior origin
+    // (5-75, 5-20) pathed out to the mouth: the river rises out of the marsh.
+    // Channel cost = |simplex(x/3, y)|*190 + 20 per wall, cardinal-only, path
+    // stamped 3x3 (ClearTerrain removes walls — checked, walls re-listed in
+    // Cell.ClearTerrain). Stand-ins that remain: riverChance/marshChance knobs
+    // for the world-map river topology, folded value noise for FastNoise
+    // simplex, random side for where the world river enters.
     var river = rng() < K.riverChance, marsh = false;
     if (river) {
       marsh = rng() < K.marshChance;
-      if (marsh) {
-        var alive = [];
-        for (var my = 0; my < H; my++) { var row = []; for (var mx = 0; mx < W; mx++) row.push(rng() < 0.4 ? 1 : 0); alive.push(row); }
-        for (var pass = 0; pass < 4; pass++) {
-          var next = alive.map(function (r2) { return r2.slice(); });
-          for (var yy = 1; yy < H - 1; yy++)
-            for (var xx = 1; xx < W - 1; xx++) {
-              var n = 0;
-              for (var oy2 = -1; oy2 <= 1; oy2++) for (var ox2 = -1; ox2 <= 1; ox2++) if (ox2 || oy2) n += alive[yy + oy2][xx + ox2];
-              next[yy][xx] = n >= 5 ? 1 : (n <= 3 ? 0 : alive[yy][xx]);
-            }
-          alive = next;
-        }
-        for (var wy2 = 1; wy2 < H - 1; wy2++)
-          for (var wx2 = 1; wx2 < W - 1; wx2++)
-            if (alive[wy2][wx2]) grid[wy2][wx2] = "water";
-      } else {
-        // smooth value noise stands in for FastNoise simplex
-        var gs = 10, gw2 = Math.ceil(W / gs) + 2, gh2 = Math.ceil(H / gs) + 2, vg = [];
-        for (var vi = 0; vi < gw2 * gh2; vi++) vg.push(rng());
-        var vnoise = function (x, y) {
-          var fx = x / gs, fy = y / gs, ix = fx | 0, iy = fy | 0, tx = fx - ix, ty = fy - iy;
-          var a = vg[iy * gw2 + ix], b = vg[iy * gw2 + ix + 1], c = vg[(iy + 1) * gw2 + ix], d = vg[(iy + 1) * gw2 + ix + 1];
-          return (a * (1 - tx) + b * tx) * (1 - ty) + (c * (1 - tx) + d * tx) * ty;
-        };
-        // bias toward opposite-side pairs so rivers usually run through, not corner-cut
-        var rpair = rng() < 0.7
-          ? (rng() < 0.5 ? ["N", "S"] : ["E", "W"])
-          : [["N", "E"], ["N", "W"], ["S", "E"], ["S", "W"]][R(0, 3)];
-        var ra = mouthAt(rpair[0]), rb = mouthAt(rpair[1]);
-        var rpath = noisyPath(ra.x, ra.y, rb.x, rb.y, true, function (x, y) { return 1 + (isWall(x, y) ? 2 : 0) + vnoise(x, y) * 8; });
+      // smooth value noise stands in for FastNoise simplex; |2v-1| folds it so
+      // paths follow valleys the way |simplex| does, x/3 = the real call's stretch
+      var gs = 10, gw2 = Math.ceil(W / gs) + 2, gh2 = Math.ceil(H / gs) + 2, vg = [];
+      for (var vi = 0; vi < gw2 * gh2; vi++) vg.push(rng());
+      var vnoise = function (x, y) {
+        var fx = x / gs, fy = y / gs, ix = fx | 0, iy = fy | 0, tx = fx - ix, ty = fy - iy;
+        var a = vg[iy * gw2 + ix], b = vg[iy * gw2 + ix + 1], c = vg[(iy + 1) * gw2 + ix], d = vg[(iy + 1) * gw2 + ix + 1];
+        return (a * (1 - tx) + b * tx) * (1 - ty) + (c * (1 - tx) + d * tx) * ty;
+      };
+      var stampRiver = function (ra, rb) {
+        var rpath = noisyPath(ra.x, ra.y, rb.x, rb.y, true, function (x, y) {
+          return 1 + Math.abs(vnoise(x / 3, y) * 2 - 1) * 19 + (isWall(x, y) ? 2 : 0);
+        });
         if (rpath)
           rpath.forEach(function (p) {
             for (var roy = -1; roy <= 1; roy++)
@@ -1959,6 +3094,37 @@ window.onerror = function (msg, src, line) {
                 grid[ry][rx] = "water";
               }
           });
+      };
+      if (marsh) {
+        var MH = 30;   // the real grid is 80x30; rows 24+ simulate but never stamp
+        var alive = [];
+        for (var my = 0; my < MH; my++) { var row = []; for (var mx = 0; mx < W; mx++) row.push(R(1, 99) <= 40 ? 1 : 0); alive.push(row); }
+        for (var pass = 0; pass < 4; pass++) {
+          var next = [];
+          for (var yy = 0; yy < MH; yy++) {
+            var nrow = [];
+            for (var xx = 0; xx < W; xx++) {
+              if (xx === 0 || xx === W - 1 || yy === 0 || yy === MH - 1) { nrow.push(0); continue; }   // SeedBorders=false: the ring dies every pass
+              var n = alive[yy - 1][xx - 1] + alive[yy - 1][xx] + alive[yy - 1][xx + 1]
+                + alive[yy][xx - 1] + alive[yy][xx + 1]
+                + alive[yy + 1][xx - 1] + alive[yy + 1][xx] + alive[yy + 1][xx + 1];
+              nrow.push(alive[yy][xx] ? (n >= 5 ? 1 : 0) : (n >= 6 ? 1 : 0));
+            }
+            next.push(nrow);
+          }
+          alive = next;
+        }
+        for (var wy2 = 1; wy2 < H - 1; wy2++)
+          for (var wx2 = 1; wx2 < W - 1; wx2++)
+            if (alive[wy2][wx2]) grid[wy2][wx2] = "water";
+        // the terminus channel: the marsh zone is not channel-less
+        stampRiver({ x: R(5, 75), y: R(5, 20) }, mouthAt(["N", "S", "E", "W"][R(0, 3)]));
+      } else {
+        // bias toward opposite-side pairs so rivers usually run through, not corner-cut
+        var rpair = rng() < 0.7
+          ? (rng() < 0.5 ? ["N", "S"] : ["E", "W"])
+          : [["N", "E"], ["N", "W"], ["S", "E"], ["S", "W"]][R(0, 3)];
+        stampRiver(mouthAt(rpair[0]), mouthAt(rpair[1]));
       }
     }
     var shape = nMouths === 1 ? "box canyon" : nMouths === 2 ? "through canyon" : nMouths === 3 ? "Y-canyon" : "crossroads";
@@ -1970,7 +3136,39 @@ window.onerror = function (msg, src, line) {
       + (marsh ? " + marsh" : river ? " + river" : ""));
     G("  drillbot: " + pathsRun + " paths, " + blocked + "/" + (W * H) + " cells below cutoff ("
       + (100 * blocked / (W * H)).toFixed(0) + "% obstacle), corridor " + corridor.length + " cells");
+    // stage 3, first bite: the tree scatter rides HERE because this is where it
+    // rides in game — ZoneTemplate:DesertCanyon is a postbuilder that runs after
+    // the carve + river and before any mod post-builder, so trees stand on canyon
+    // floor only and the warren (carved after, in genCanyonWarren) never gets any.
+    // VERIFY at C# port time: our painter's slot in the postbuilder order.
+    scatterFlora();
     genFocus = { x: hub.x, y: hub.y };
+  }
+  // DesertCanyonZoneGlobals' three tree rows (PopulationTables.xml, read
+  // 2026-08-12): each rolls its Chance gate once, then places Number trees on
+  // random empty floor. Water is excluded for free — a river cell is not "floor"
+  // by the time the template runs. Mouths/stairs markers are skipped the same way.
+  var FLORA = [
+    { id: "bg.dogthorn_tree", n: "dogthorn", chance: "dogChance", min: "dogMin", max: "dogMax" },
+    { id: "bg.witchwood_tree", n: "witchwood", chance: "witchChance", min: "witchMin", max: "witchMax" },
+    { id: "bg.starapple_tree", n: "starapple", chance: "starChance", min: "starMin", max: "starMax" }
+  ];
+  function scatterFlora() {
+    var cells = [];
+    for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) if (grid[y][x] === "floor") cells.push([x, y]);
+    var placed = [];
+    FLORA.forEach(function (f) {
+      var n = 0;
+      if (rng() < K[f.chance]) {
+        var want = R(lo(f.min, f.max), hi(f.min, f.max));
+        while (n < want && cells.length) {
+          var i = (rng() * cells.length) | 0, c = cells.splice(i, 1)[0];
+          grid[c[1]][c[0]] = f.id; n++;
+        }
+      }
+      placed.push(f.n + " " + n);
+    });
+    G("  flora: " + placed.join(", ") + " — " + cells.length + " open cells left bare");
   }
   function rebuildCorridor() {
     // after import/hand-paint, any open cell can host; corridor = all open cells
@@ -2386,6 +3584,7 @@ window.onerror = function (msg, src, line) {
     rollAt = i;
     var r = rolls[i];
     restoring = true;
+    paintSeed = r.seed;               // floor paint flips back with the roll
     restoreState(r.grid);
     Object.keys(r.knobs).forEach(function (k) { if (k in KDEF) K[k] = r.knobs[k]; });
     knobsRefresh(); knobsSave();
@@ -2423,9 +3622,12 @@ window.onerror = function (msg, src, line) {
     var seedEl = document.getElementById("genseed");
     var seed = +seedEl.value || 1;
     rng = mulberry32((seed * 2654435761) >>> 0);
+    paintSeed = seed;                 // the Dirty floor paint rerolls with the roll
     checkpoint();
     genFocus = null;
     keepWalls = {}; protectedFloor = {}; protectedShell = {};
+    wetPockets = {}; wetShell = {}; wetAvoidMap = {}; mossyWalls = {};
+    canyonFloor = {}; canyonSkin = {}; spurFloor = {}; dressSpaces = []; warrenFloor = {}; carvingWarren = false;
     logEl.textContent = "";
     G("== " + name + " (seed " + seed + ") ==");
     fn();
@@ -2476,7 +3678,8 @@ window.onerror = function (msg, src, line) {
   wrapEl.addEventListener("auxclick", function (e) { if (e.button === 1) e.preventDefault(); });
 
   GENS = { zone: genZone, canyon: genCanyon, quarry: genQuarry, face: genFace, gallery: genGallery,
-           bore: genBore, sprawl: genSprawl, comb: genComb, ranks: genRanks, digger: genDigger, warren: genWarren };
+           bore: genBore, sprawl: genSprawl, comb: genComb, ranks: genRanks, digger: genDigger,
+           warren: genWarren, cwarren: genCanyonWarren };
   Object.keys(GENS).forEach(function (n) {
     var b = document.getElementById("gen-" + n);
     if (b) b.addEventListener("click", function () { runGen(n, GENS[n]); });
@@ -2512,8 +3715,9 @@ window.onerror = function (msg, src, line) {
         }
         row.appendChild(main); if (num) row.appendChild(num);
         function set(v, from) {
-          v = s.sel ? +v : Math.min(s.max, Math.max(s.min, +v));
-          if (isNaN(v)) return;
+          // s.str knobs carry string values (Qud color codes) — no numeric coercion
+          v = s.str ? v : s.sel ? +v : Math.min(s.max, Math.max(s.min, +v));
+          if (!s.str && isNaN(v)) return;
           K[s.k] = v;
           if (from !== "r" && main.type === "range") main.value = v;
           if (from !== "n" && num) num.value = v;
@@ -2572,6 +3776,8 @@ window.onerror = function (msg, src, line) {
     var sW = W, sH = H, sGrid = grid, sKeep = keepWalls, sPF = protectedFloor,
         sPS = protectedShell, sCorr = corridor, sMute = logMuted, sCamp = campCells;
     W = gw; H = gh; keepWalls = {}; protectedFloor = {}; protectedShell = {};
+    wetPockets = {}; wetShell = {}; wetAvoidMap = {}; mossyWalls = {};
+    canyonFloor = {}; canyonSkin = {}; spurFloor = {};
     corridor = []; campCells = null; logMuted = true;
     blank();
     for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) grid[y][x] = "wall";

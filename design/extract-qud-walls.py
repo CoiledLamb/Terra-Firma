@@ -109,13 +109,27 @@ for o in env.objects:
     if key.startswith("Assets_Content_Textures_"):
         rest = key[len("Assets_Content_Textures_"):]
         key = rest.split("_", 1)[1] if "_" in rest else rest
+    # atlas names carry mixed case (Tile-Dirt1); the lab requests lowercase, and
+    # only Windows forgives the difference — normalize on save
+    key = key.lower()
     piece.save(os.path.join(OUT, key + ".png"))
     manifest[key] = {"w": piece.width, "h": piece.height}
     found[hit] += 1
 
-json.dump({"tint": {"body": body, "detail": detail, "swapped": swap},
-           "tiles": manifest}, open(os.path.join(OUT, "manifest.json"), "w"),
-          indent=1, sort_keys=True)
+# manifest MERGES across runs (different runs may bake different tints — e.g. the
+# floor tiles are extracted black/white so warren-lab's SVG filters can recolor
+# them live), so each tile records the tint it was actually baked with.
+mpath = os.path.join(OUT, "manifest.json")
+old = json.load(open(mpath)) if os.path.exists(mpath) else {}
+tiles = old.get("tiles", {})
+oldtint = old.get("tint")
+for k in tiles:                       # migrate legacy entries to per-tile tint
+    if oldtint and "tint" not in tiles[k]:
+        tiles[k]["tint"] = oldtint
+for k, v in manifest.items():
+    v["tint"] = {"body": body, "detail": detail, "swapped": swap}
+    tiles[k] = v
+json.dump({"tiles": tiles}, open(mpath, "w"), indent=1, sort_keys=True)
 for k in sorted(found):
     print(f"  {k}: {found[k]}")
 print("wrote", OUT)
