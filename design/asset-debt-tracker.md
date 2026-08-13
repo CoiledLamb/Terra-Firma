@@ -38,14 +38,16 @@ base-game or mod tile as-is · `CHECK` verify a base-game object/tile exists to 
 
 ## 1. NPC roster (all RULED 2026-07-22)
 
+**SPRITE DEBT COLLAPSED 2026-08-11 (user: "the two sprites for them are done and can be thrown into the game whenever"):** under the compressed faction shape (TODO.md tile-condensing entry + banked color map, same day), the roster runs on TWO base sprites + DetailColor per role — and both bases are DRAWN. The six NEW rows below are SUPERSEDED as the operative debt (kept for the eventual bespoke-six bar, which stands per the "for the time being" framing). **MAPPING CONFIRMED same day (user): the two bodies ARE the species split — human base = REUSE of the player Stonecarver calling tile (`stonecarver.png`, "we'll just use the player icon that's already made!"), mole-folk base = user sprite — LANDED same day, evening drop: `TerraFirma/Textures/stonerat.png` (16x24; user: "a bit more ratlike than expected, yeag" — no consequences: descs are ruled body-agnostic, so mole-vs-rat lives only in the pixels).** Net new files owed: ZERO — the faction's personnel art is fully in hand. **Gear consequence banked (user, same message): sharing the calling's face "handily answers some 'what items would they have' questions" — NPC carver inventories seed from the Stonecarver calling kit; USER DIRECTION: "we can keep their packs light for now."** (Claude note, factual: the calling kit includes chisel + mallet, so pack carvers pass the `Cleo_TerraFirma_EtchTool` gate by construction — etched stones stop being player-only artifacts; loot-side, downed carvers drop etch-capable tools.)
+
 | Blueprint | Status | Sprite | Text | Notes |
 |---|---|---|---|---|
-| Hewer (Fissure) | RULED | NEW | desc + greeting | |
-| Mason (Stoneshaper) | RULED | NEW | desc + greeting | strange-mood variant reuses this tile |
-| Outrider (EB) | RULED | NEW | desc + greeting | stationed at camp mouth |
-| Drover (beast-tender) | RULED | NEW | desc + greeting | design meat still open (beast-bound) |
-| Provisioner (trade) | RULED | NEW | desc + greeting | trade = engine (restocker table), no script |
-| Overseer (legendary) | RULED | NEW or VAR of a base type | desc + greeting | water ritual = engine (GivesRep); hero builder adds name |
+| Hewer (Fissure) | RULED | ~~NEW~~ base ×2 + rust DetailColor (see note) | desc + greeting | |
+| Mason (Stoneshaper) | RULED | ~~NEW~~ base ×2 + grey DetailColor (Claude lean, unruled) | desc + greeting | strange-mood variant reuses this tile |
+| Outrider (EB) | RULED | ~~NEW~~ base ×2 + warden blue | desc + greeting | stationed at camp mouth |
+| Drover (beast-tender) | RULED | ~~NEW~~ base ×2 + brown (Claude float, unruled) | desc + greeting | design meat still open (beast-bound) |
+| Provisioner (trade) | RULED (cut pending — compression ruling) | — | — | trade role moved to vine merchant 2026-08-11; formal cut rides the open compression ruling |
+| Overseer (legendary) | RULED | ~~NEW~~ same blueprint + hero builder (engine `&M` pink, free) | desc + greeting | water ritual = engine (GivesRep); hero builder adds name |
 
 ## 2. Creatures
 
@@ -55,6 +57,8 @@ base-game or mod tile as-is · `CHECK` verify a base-game object/tile exists to 
 | Malformed cragmensch | IDEA (commitment OPEN) | VAR (cragmensch recolor) | desc | pure-XML build per recon |
 | Stonefrog | PARKED | — | — | six calls queued; not this pass |
 | Burrowing Urchin | DONE (companion mod) | REUSE | — | verify encounter-table Q only |
+| Snapjaw miner | IDEA (art-first, confirm owed) | DONE — `snapjaw miner.png` on disk 2026-08-12, unwired | desc | snapjaw variant idiom = pure XML; see TODO roster entry |
+| Rockhound | IDEA (art-first, confirm owed) | DONE — `rockhound.png` on disk 2026-08-12, unwired | desc | quarrier-kept pet; Herding Dog dual-faction precedent; see TODO roster entry |
 
 ## 3. Camp recipes — furniture & fixtures by room
 
