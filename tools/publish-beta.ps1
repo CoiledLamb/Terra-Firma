@@ -33,8 +33,13 @@ if (-not (Test-Path $src)) { throw "source folder not found: $src" }
 # numbers you can go fix. Rule 1 (no em dashes in shipped text) would otherwise survive the
 # strip and ship; rule 2 ("--" in an XML comment) would abort the strict-validate step later
 # with a parse error and no context. Added 2026-08-15 at the user's direction.
-& (Join-Path $PSScriptRoot "check-text-rules.ps1") -RepoRoot $RepoRoot
-if ($LASTEXITCODE -ne 0) { throw "text-rule check FAILED -- publish aborted, nothing zipped" }
+# Run as its OWN PROCESS on purpose: a &-invoked .ps1 does not set $LASTEXITCODE (it reflects
+# the last NATIVE command), so the in-process form read a stale code and aborted a clean tree
+# on its first real run. Failing closed was the right direction to be wrong in, but wrong.
+$checkOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "check-text-rules.ps1") -RepoRoot $RepoRoot
+$checkCode = $LASTEXITCODE
+$checkOutput | ForEach-Object { Write-Host $_ }
+if ($checkCode -ne 0) { throw "text-rule check FAILED -- publish aborted, nothing zipped" }
 
 # ---------------------------------------------------------------- C# comment lexer
 Add-Type -TypeDefinition @'
