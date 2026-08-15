@@ -102,14 +102,13 @@
        yet either. Faction is inherited Humanoids-100 because the carver faction entry is
        scheduled AFTER the NPC build by ruling. ExcludeFromDynamicEncounters: wish-door only. -->
   <object Name="Cleo_TerraFirma_Stonecarver" Inherits="BaseHumanoid">
-    <!-- COLORS, corrected 2026-08-15 after the user saw a pack render entirely grey. Cause: the
-         first pass set ColorString "&y" (Colors.xml: GRAY) with DetailColor "K" (DARK GRAY), i.e.
-         grey twice. The deeper fact, measured off the png: stonecarver.png is 66 black pixels to
-         28 white, so roughly 70% of the sprite draws in the DETAIL channel. DetailColor is the
-         body mass on this art, not an accent. Base body now reads brown-with-white, deliberately
-         far from grey; still a PLACEHOLDER, and the real call is the user's now that the channel
-         split is known. -->
-    <part Name="Render" DisplayName="stonecarver" Tile="stonecarver.png" ColorString="&amp;Y" DetailColor="w" />
+    <!-- COLORS ACCEPTED BY THE USER 2026-08-15 ("these are fine for base colors"): grey body,
+         dark grey detail. An interim brown/white pass lived and died the same sitting; it was
+         Claude misreading a report about the LEGENDARIES as a complaint about the base.
+         Channel fact worth keeping, measured off the art: stonecarver.png is 66 black pixels to
+         28 white, and Qud draws the black channel in DetailColor, so roughly 70% of this body is
+         DetailColor. Whatever goes in DetailColor is the creature's read; ColorString is trim. -->
+    <part Name="Render" DisplayName="stonecarver" Tile="stonecarver.png" ColorString="&amp;y" DetailColor="K" />
     <part Name="Description" Short="Chalk dust has worked so far into the creases of =pronouns.possessive= hands that the lines read like a map of somewhere quarried." /> <!-- DRAFT, and deliberately identity-neutral: the professions carry who these people are, and they are not built yet -->
     <stat Name="Level" Value="10" /> <!-- CLAUDE PLACEHOLDER, numbers sitting owed -->
     <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />

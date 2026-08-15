@@ -204,6 +204,21 @@ namespace Cleo.TerraFirma.Scripts
 			GO.SetIntProperty("Hero", 1);
 			GO.SetStringProperty("Role", "Hero");
 			GO.RequirePart<DisplayNameColor>().SetColorByPriority("M", 30);
+			// The PINK BODY, not just the pink name (user 2026-08-15, seeing the first pack: "i
+			// expected the legendaries to be pink and dark grey"). It is the ruled overseer color,
+			// and it is free: HeroMaker resolves HeroColorString/HeroTileColor to "&M" by default,
+			// so a legendary carver costs zero bespoke art. We paint it here because we skip
+			// MakeHero on purpose (it would roll its own honorific/epithet/title over our byname),
+			// and the tile color rode along with the machinery we skipped.
+			// DetailColor is left alone: the blueprint's dark grey IS the "and dark grey" half.
+			// Worth knowing before dialling this: ~70% of stonecarver.png draws in the DETAIL
+			// channel, so this reads as a dark grey body with pink trim. Putting "M" in
+			// DetailColor instead would make the pink dominant.
+			if (GO.Render != null)
+			{
+				GO.Render.ColorString = "&M";
+				GO.Render.TileColor = "&M";
+			}
 			GO.MultiplyStat("Hitpoints", 2);
 		}
 
