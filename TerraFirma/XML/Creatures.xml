@@ -111,6 +111,75 @@
     <part Name="Render" DisplayName="stonecarver" Tile="stonecarver.png" ColorString="&amp;y" DetailColor="K" />
     <part Name="Description" Short="Chalk dust has worked so far into the creases of =pronouns.possessive= hands that the lines read like a map of somewhere quarried." /> <!-- DRAFT, and deliberately identity-neutral: the professions carry who these people are, and they are not built yet -->
     <stat Name="Level" Value="10" /> <!-- CLAUDE PLACEHOLDER, numbers sitting owed -->
-    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+    <!-- NOTE the missing "*noinherit" here, unlike every other creature in this file: that marker
+         stops a tag reaching children, and the whole point on this blueprint is that every role
+         built on top INHERITS the spawn gate. Caught while adding the roster: with the marker in
+         place the roles would have shipped ungated, ahead of any spawn wiring ruling. -->
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
+
+  <!-- THE ROSTER, built 2026-08-15. Roles were RULED 2026-07-22 (hewer / mason / outrider /
+       drover / provisioner / overseer); this pass builds three of them, per the user's rulings
+       the same day: PROVISIONER CUT (its trade role moved to the vine merchant 08-11 and packs
+       no longer trade, so nothing was left for it to do), DROVER OUT OF THIS PASS (still bounded
+       by the open beast design), and OVERSEER needs no blueprint at all because it was ruled as
+       "same blueprint, legendary" back at the color map: any carver the hero builder touches
+       becomes one, and the pink comes with it.
+       Profession-first structure is RULED 2026-08-15 ("it's a qud idiom"): the profession is the
+       face (name, description, camp presence), the mutation is the engine it works with, and the
+       Role tag is the AI layer. DetailColor carries the role, and note that on this art DetailColor
+       is roughly 70% of the body, so the role color IS the creature's read.
+       Mason grey RULED 2026-08-15 with its consequence accepted: it overlaps the grey-creature-
+       means-statue register the stonefrog uses. The user took the product rhyme (a mason makes
+       statues, statues are grey) over the exclusivity.
+       DRAFT and owed: every mutation LEVEL (numbers sitting), every Role tag, all descriptions,
+       and the mole variants' display names. NO GEAR: kits are the next pass by the user's own
+       sequencing, so a role currently carries its mutation and nothing else. -->
+
+  <object Name="Cleo_TerraFirma_Hewer" Inherits="Cleo_TerraFirma_Stonecarver">
+    <part Name="Render" DisplayName="hewer" DetailColor="r" />
+    <part Name="Description" Short="=pronouns.Subjective= =verb:read:afterpronoun= the rock face the way a reader finds a paragraph break, and =pronouns.subjective= =verb:open:afterpronoun= it there." /> <!-- DRAFT, signoff owed -->
+    <mutation Name="Cleo_TerraFirma_Fissure" Level="4" /> <!-- level DRAFT -->
+    <tag Name="Role" Value="Brute" /> <!-- DRAFT -->
+  </object>
+
+  <object Name="Cleo_TerraFirma_Mason" Inherits="Cleo_TerraFirma_Stonecarver">
+    <part Name="Render" DisplayName="mason" DetailColor="y" />
+    <part Name="Description" Short="Stone dust has settled into =pronouns.possessive= sleeves so thoroughly that =pronouns.subjective= =verb:carry:afterpronoun= the quarry around with =pronouns.objective=." /> <!-- DRAFT, signoff owed -->
+    <mutation Name="Cleo_TerraFirma_Stoneshaper" Level="4" /> <!-- level DRAFT -->
+    <tag Name="Role" Value="Minion" /> <!-- DRAFT -->
+  </object>
+
+  <object Name="Cleo_TerraFirma_Outrider" Inherits="Cleo_TerraFirma_Stonecarver">
+    <part Name="Render" DisplayName="outrider" DetailColor="B" />
+    <part Name="Description" Short="=pronouns.Subjective= =verb:walk:afterpronoun= the edge of the claim with stones already circling =pronouns.possessive= shoulders, waiting." /> <!-- DRAFT, signoff owed -->
+    <mutation Name="Cleo_TerraFirma_EarthenBarrage" Level="4" /> <!-- level DRAFT -->
+    <tag Name="Role" Value="Artillery" /> <!-- DRAFT -->
+  </object>
+
+  <!-- MOLE HALF of the two-body shape. The mole-folk species axis had sat as an unratified user
+       float since 2026-08-07; RATIFIED BY BUILDING 2026-08-15 at the user's direction (they chose
+       both bodies for this pass). Each variant is a thin child of its own role, so the profession
+       stays the identity and only the body changes: stonerat.png plus Burrowing Claws.
+       PathAsBurrower is OFF, a CLAUDE PICK: with it on they path THROUGH walls, and a warren is
+       a hand painted thing they would tunnel straight out of. The claws still dig and still hit.
+       Species tag left inherited on purpose. Building the body does not require claiming the
+       species string, and what these people ARE is the user's lore call, not a side effect.
+       Display names are Claude DRAFT: they exist only so the two bodies are tellable apart in a
+       log. If the profession alone should name both, say so and they collapse. -->
+
+  <object Name="Cleo_TerraFirma_Mole Hewer" Inherits="Cleo_TerraFirma_Hewer">
+    <part Name="Render" DisplayName="mole hewer" Tile="stonerat.png" /> <!-- name DRAFT -->
+    <mutation Name="BurrowingClaws" Level="4" PathAsBurrower="false" />
+  </object>
+
+  <object Name="Cleo_TerraFirma_Mole Mason" Inherits="Cleo_TerraFirma_Mason">
+    <part Name="Render" DisplayName="mole mason" Tile="stonerat.png" /> <!-- name DRAFT -->
+    <mutation Name="BurrowingClaws" Level="4" PathAsBurrower="false" />
+  </object>
+
+  <object Name="Cleo_TerraFirma_Mole Outrider" Inherits="Cleo_TerraFirma_Outrider">
+    <part Name="Render" DisplayName="mole outrider" Tile="stonerat.png" /> <!-- name DRAFT -->
+    <mutation Name="BurrowingClaws" Level="4" PathAsBurrower="false" />
   </object>
 </objects>

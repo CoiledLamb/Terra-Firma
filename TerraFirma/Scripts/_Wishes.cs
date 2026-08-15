@@ -656,28 +656,24 @@ namespace Cleo.TerraFirma.Scripts
 			foreach (string line in trouble)
 				MessageQueue.AddPlayerMessage("tfcreatures TROUBLE: " + line, Capitalize: false);
 		}
-		/// <summary>Stonecarver pack stager (user 2026-08-15: "i want a wish that spawns a pack of
-		/// legendary stonecarvers and prints rolls to chat", corrected same sitting after the first
-		/// version made ALL SIX legendary: "i imagined the pack would spawn a mix of each type from
-		/// a poptable, with one leader"). Now ONE legendary leader plus rank and file.
+		/// <summary>Stonecarver pack stager. Shape is the user's, 2026-08-15: "i imagined the pack
+		/// would spawn a mix of each type from a poptable, with one leader." It now does exactly
+		/// that, because the roles finally exist to mix.
 		///
-		/// The leader runs through the real builder, `StonecarverEpithet`, the same class a
-		/// blueprint will carry when the roster lands, so tuning this tunes the shipped thing. Its
-		/// roll prints in full: personal name with junction pieces, byname, and what each half of
-		/// the byname paid out.
+		/// Rank and file roll from `Cleo_TerraFirma_Stonecarver Pack` (SnapjawParty1 idiom), so the
+		/// composition varies per wish and the rockhound turns up SOMETIMES, per its own ruling.
+		/// The leader is spawned separately: a PLAIN carver chassis run through the epithet builder.
+		/// That is not a shortcut, it is the ruled structure showing its shape. Rank and file take
+		/// their mutation from their PROFESSION; the overseer takes its mutation from its NAME. It
+		/// needs no profession blueprint for the same reason it needs no bespoke art.
 		///
-		/// THE RANK AND FILE ARE ALL IDENTICAL, and that is the honest state of the branch: the
-		/// role blueprints do not exist yet. Profession-first is RULED (2026-08-15) but which
-		/// professions, their gear, and their remaining DetailColors are not, so there is nothing
-		/// to draw a mix FROM. The population table this wants to be is the roster build's job.
-		/// Bynames stay leader-only by ruling: byname delivery is the HERO EPITHET.
-		///
-		/// Reading the leader's roll: word count per column IS spawn weight (Fissure 3 :
-		/// Stoneshaper 3 : EB 3 : Geomancy 2 : office 2). Gorgon's Gaze can never appear, no craft
-		/// word vouches for it yet. Office rolls grant stats and no mutation, on purpose.
+		/// Printed to chat: the leader's full roll, then the actual composition of the pack that
+		/// spawned, so the table's weights can be judged from real draws rather than from the XML.
 		///
 		/// Pacified and frozen, sharing the tfcreatures staging list, so either wish's second call
 		/// releases everything. BRANCH-ONLY.</summary>
+		private const string CarverPackTable = "Cleo_TerraFirma_Stonecarver Pack";
+
 		[WishCommand(Command = "tfcarverpack")]
 		public static void CarverPack()
 		{
@@ -693,73 +689,98 @@ namespace Cleo.TerraFirma.Scripts
 				return;
 			}
 
-			const int PackSize = 6; // 1 leader + 5 rank and file
 			List<Cell> ring = origin.GetLocalAdjacentCells(6);
 			ring.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat") || origin.DistanceTo(c) < 3);
 
-			int placed = 0;
-			StonecarverEpithet.Roll leaderRoll = default(StonecarverEpithet.Roll);
-			bool haveLeader = false;
-
-			while (placed < PackSize && ring.Count > 0)
+			Cell TakeCell()
 			{
+				if (ring.Count == 0)
+					return null;
 				int idx = Stat.Random(0, ring.Count - 1);
-				Cell where = ring[idx];
+				Cell c = ring[idx];
 				ring.RemoveAt(idx);
-
-				GameObject carver = null;
-				try
-				{
-					carver = GameObject.Create("Cleo_TerraFirma_Stonecarver");
-				}
-				catch (System.Exception ex)
-				{
-					MessageQueue.AddPlayerMessage($"tfcarverpack: stonecarver blueprint would not create ({ex.GetType().Name}).", Capitalize: false);
-					return;
-				}
-				if (carver == null)
-				{
-					MessageQueue.AddPlayerMessage("tfcarverpack: stonecarver blueprint came back null.", Capitalize: false);
-					return;
-				}
-
-				bool isLeader = !haveLeader;
-				if (isLeader)
-				{
-					leaderRoll = StonecarverEpithet.Build(carver);
-					haveLeader = true;
-					Helpers.VerifyLog("CARVER", $"leader: name={leaderRoll.PersonalName} ({leaderRoll.NamePieces}) byname={leaderRoll.Byname} material={leaderRoll.Material} -> {leaderRoll.PerkText} craft={leaderRoll.Craft} -> {leaderRoll.KitText}");
-				}
-
-				where.AddObject(carver);
-				carver.MakeActive();
-				if (carver.Brain != null)
-				{
-					StagedRoster.Add((carver, carver.Brain.Mobile, carver.Brain.Wanders, carver.Brain.Hostile));
-					carver.Brain.Mobile = false;
-					carver.Brain.Wanders = false;
-					carver.Brain.Hostile = false;
-				}
-				placed++;
+				return c;
 			}
 
-			if (placed == 0)
+			void Freeze(GameObject who)
+			{
+				who.MakeActive();
+				if (who.Brain == null)
+					return;
+				StagedRoster.Add((who, who.Brain.Mobile, who.Brain.Wanders, who.Brain.Hostile));
+				who.Brain.Mobile = false;
+				who.Brain.Wanders = false;
+				who.Brain.Hostile = false;
+			}
+
+			// the leader first, so a cramped spot still gets the thing worth looking at
+			Cell leaderCell = TakeCell();
+			if (leaderCell == null)
 			{
 				MessageQueue.AddPlayerMessage("tfcarverpack: no open cell at range 3-6, move somewhere roomier.", Capitalize: false);
 				return;
 			}
+			GameObject overseer = GameObject.Create("Cleo_TerraFirma_Stonecarver");
+			if (overseer == null)
+			{
+				MessageQueue.AddPlayerMessage("tfcarverpack: stonecarver chassis came back null.", Capitalize: false);
+				return;
+			}
+			StonecarverEpithet.Roll roll = StonecarverEpithet.Build(overseer);
+			leaderCell.AddObject(overseer);
+			Freeze(overseer);
+			Helpers.VerifyLog("CARVER", $"overseer: name={roll.PersonalName} ({roll.NamePieces}) byname={roll.Byname} material={roll.Material} -> {roll.PerkText} craft={roll.Craft} -> {roll.KitText}");
+
+			var census = new Dictionary<string, int>();
+			int spawned = 0;
+			List<string> trouble = new List<string>();
+			foreach (var entry in PopulationManager.Generate(CarverPackTable))
+			{
+				for (int n = 0; n < entry.Number; n++)
+				{
+					Cell where = TakeCell();
+					if (where == null)
+					{
+						trouble.Add("ran out of open cells, pack truncated");
+						break;
+					}
+					GameObject member = null;
+					try
+					{
+						member = GameObject.Create(entry.Blueprint);
+					}
+					catch (System.Exception ex)
+					{
+						trouble.Add($"{entry.Blueprint} would not create ({ex.GetType().Name})");
+						continue;
+					}
+					if (member == null)
+					{
+						trouble.Add($"{entry.Blueprint} came back null");
+						continue;
+					}
+					where.AddObject(member);
+					Freeze(member);
+					string label = member.DisplayNameOnlyDirect;
+					census[label] = (census.ContainsKey(label) ? census[label] : 0) + 1;
+					spawned++;
+				}
+			}
 
 			The.Core.IDKFA = true;
-			MessageQueue.AddPlayerMessage($"tfcarverpack: {placed} staged, frozen and pacified, godmode ON. Wish again (or tfcreatures) to release.", Capitalize: false);
-			if (haveLeader)
-			{
-				MessageQueue.AddPlayerMessage($"leader: {{{{W|{leaderRoll.PersonalName} {leaderRoll.Byname}}}}} (legendary, pink name)", Capitalize: false);
-				MessageQueue.AddPlayerMessage($"  craft \"{leaderRoll.Craft}\" grants {leaderRoll.KitText}; material \"{leaderRoll.Material}\" grants {leaderRoll.PerkText}", Capitalize: false);
-				MessageQueue.AddPlayerMessage($"  name assembled from {leaderRoll.NamePieces}", Capitalize: false);
-			}
-			MessageQueue.AddPlayerMessage($"the other {placed - 1} are IDENTICAL plain carvers, and that is the real state of things: no role blueprints exist yet, so there is no mix to draw from. That population table is the roster build.", Capitalize: false);
-			MessageQueue.AddPlayerMessage("bank weights, for reading the leader roll: Fissure 3 : Stoneshaper 3 : EB 3 : Geomancy 2 : office 2. No Gorgon's Gaze can roll, it has no craft word yet.", Capitalize: false);
-			Helpers.VerifyLog("CARVER", $"tfcarverpack: {placed} staged, 1 legendary leader + {placed - 1} rank and file");
+			MessageQueue.AddPlayerMessage($"tfcarverpack: 1 overseer + {spawned} rank and file, frozen and pacified, godmode ON. Wish again (or tfcreatures) to release.", Capitalize: false);
+			MessageQueue.AddPlayerMessage($"overseer: {{{{W|{roll.PersonalName} {roll.Byname}}}}} (legendary, pink)", Capitalize: false);
+			MessageQueue.AddPlayerMessage($"  craft \"{roll.Craft}\" grants {roll.KitText}; material \"{roll.Material}\" grants {roll.PerkText}", Capitalize: false);
+			MessageQueue.AddPlayerMessage($"  name assembled from {roll.NamePieces}", Capitalize: false);
+			List<string> lines = new List<string>();
+			foreach (var pair in census)
+				lines.Add($"{pair.Value}x {pair.Key}");
+			MessageQueue.AddPlayerMessage(spawned > 0
+				? $"this draw: {string.Join(", ", lines)}. Weights are DRAFT, judge them from a few draws."
+				: "this draw came up empty, which the table allows. Wish again.", Capitalize: false);
+			foreach (string line in trouble)
+				MessageQueue.AddPlayerMessage("tfcarverpack TROUBLE: " + line, Capitalize: false);
+			Helpers.VerifyLog("CARVER", $"tfcarverpack: overseer + {spawned} rank and file [{string.Join("/", lines)}]");
 		}
 	}
 }

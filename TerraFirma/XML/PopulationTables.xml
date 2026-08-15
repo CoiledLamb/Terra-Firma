@@ -33,4 +33,27 @@
 		<object Blueprint="Cleo_TerraFirma_Cobblefur Cloak" Number="1" Weight="20"/>
 	 </group>
 	</population>
+
+	<!-- Stonecarver pack (built 2026-08-15, SnapjawParty1 idiom). The mix the user asked for:
+	     "i imagined the pack would spawn a mix of each type from a poptable, with one leader."
+	     The LEADER IS NOT IN HERE. An overseer is any carver the hero builder touches (ruled at
+	     the color map: "same blueprint, legendary"), so whoever spawns it makes one and the
+	     table only supplies rank and file.
+	     ROCKHOUND RULED IN 2026-08-15 (user: "once we make packs spawn in base game, they should
+	     include a rockhound sometimes"), sometimes being the operative word: chance entry, not a
+	     fixture. ALL WEIGHTS ARE DRAFT. Mole variants sit lower than their human twins purely so
+	     the split is visible while testing, which is not a design position on how many there are.
+	     Nothing references this table outside the tfcarverpack wish yet. Real placement waits on
+	     the spawn wiring ruling. -->
+	<population Name="Cleo_TerraFirma_Stonecarver Pack">
+		<group Name="Creatures" Style="pickeach">
+			<object Chance="100" Number="1-2" Blueprint="Cleo_TerraFirma_Hewer" />
+			<object Chance="75" Number="1-2" Blueprint="Cleo_TerraFirma_Outrider" />
+			<object Chance="60" Number="1" Blueprint="Cleo_TerraFirma_Mason" />
+			<object Chance="35" Number="1" Blueprint="Cleo_TerraFirma_Mole Hewer" />
+			<object Chance="30" Number="1" Blueprint="Cleo_TerraFirma_Mole Outrider" />
+			<object Chance="25" Number="1" Blueprint="Cleo_TerraFirma_Mole Mason" />
+			<object Chance="15" Number="1" Blueprint="Cleo_TerraFirma_Rockhound" />
+		</group>
+	</population>
 </populations>
