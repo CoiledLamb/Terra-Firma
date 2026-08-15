@@ -481,5 +481,180 @@ namespace Cleo.TerraFirma.Scripts
 			Helpers.VerifyLog("GEOSCAN", $"wall={wall.Blueprint} compiled={compiled} reflected={reflected}({reflectNote}) wound=\"{wound}\" -> {verdict}");
 			MessageQueue.AddPlayerMessage($"tfgeoscan [{wall.Blueprint}]: compiled={compiled}, reflected={reflected}, WoundLevel {(woundNumeric ? "NUMERIC" : "bare")}. {verdict} Scan part left on the wall (50 turns) -- look at it now: exact HP visible?", Capitalize: false);
 		}
+		/// <summary>Creature staging wish (user 2026-08-15, opening the creatures branch: a
+		/// branch "for the creatures, including stonecarvers, so i can generate them in game";
+		/// staging-wish-first chosen at the same sitting, the real spawn wiring deliberately
+		/// after). Lines the whole roster up east of the player -- brains pacified and frozen,
+		/// godmode on -- so they can be walked past and looked at instead of fought. The
+		/// tfgazewall idiom: one wish, the subjects side by side.
+		///
+		/// Every spawn logs its Render tile string, so art the deploy never carried shows in
+		/// the log as well as on screen (rockhound and snapjaw miner both sat on undeployed
+		/// sprites from 2026-08-11 until the 0.1.2 deploy).
+		///
+		/// The last two entries are SPRITE CHECKS, NOT CREATURES: no stonecarver NPC blueprint
+		/// exists yet -- the roster build is this branch's real job and its color map still has
+		/// unruled slots -- so the wish paints stonecarver.png and stonerat.png onto plain
+		/// WatervineFarmer bodies at runtime. Nothing about the roster is committed by that; it
+		/// is the art standing in the world at true scale, and it ships no design.
+		///
+		/// Wish again to release: brains restored exactly as they were, godmode off.
+		/// BRANCH-ONLY -- this does not ride 0.1.2.</summary>
+		private static readonly (string Blueprint, string Note)[] CreatureRoster = new[]
+		{
+			("Cleo_TerraFirma_Cobble Baboon", "EB 4: orbiting pebbles, thrown stones, visible whorl. Butchers into cobblefur."),
+			("Cleo_TerraFirma_Rockhound", "RockSweeper gut -- swallow and spill."),
+			("Cleo_TerraFirma_Snapjaw Miner", "the pickaxe IS the AI: Digging installed, PathAsBurrower answered."),
+			("Cleo_TerraFirma_Burrowing Urchin", "wall-walker, Burrowing 5, aculei in the belly."),
+			("Cleo_TerraFirma_BoarVessel", "Husangeion -- passive, 64-dram tank, glaze tracks the liquid."),
+		};
+
+		private static readonly (string Tile, string Label)[] CarverSpriteChecks = new[]
+		{
+			("stonecarver.png", "STONECARVER SPRITE -- human base, no blueprint yet"),
+			("stonerat.png", "STONERAT SPRITE -- mole base, no blueprint yet"),
+		};
+
+		private static readonly List<(GameObject Object, bool Mobile, bool Wanders, bool Hostile)> StagedRoster =
+			new List<(GameObject, bool, bool, bool)>();
+
+		[WishCommand(Command = "tfcreatures")]
+		public static void CreatureStage()
+		{
+			GameObject Ply = The.Player;
+			Cell origin = Ply?.CurrentCell;
+			Zone zone = origin?.ParentZone;
+			if (origin == null || zone == null)
+				return;
+
+			if (StagedRoster.Count > 0)
+			{
+				int released = 0;
+				foreach (var staged in StagedRoster)
+				{
+					if (staged.Object == null || !staged.Object.IsValid() || staged.Object.Brain == null)
+						continue;
+					staged.Object.Brain.Mobile = staged.Mobile;
+					staged.Object.Brain.Wanders = staged.Wanders;
+					staged.Object.Brain.Hostile = staged.Hostile;
+					released++;
+				}
+				StagedRoster.Clear();
+				The.Core.IDKFA = false;
+				Helpers.VerifyLog("STAGE", $"tfcreatures: released {released}, godmode OFF");
+				MessageQueue.AddPlayerMessage($"tfcreatures: {released} released -- brains restored as they were, godmode OFF. The menagerie is yours.", Capitalize: false);
+				return;
+			}
+
+			int slot = 0;
+			Cell NextCell()
+			{
+				while (slot < 25)
+				{
+					int dx = 2 + slot;
+					slot++;
+					foreach (int dy in new int[] { 0, -1, 1, -2, 2 })
+					{
+						int x = origin.X + dx;
+						int y = origin.Y + dy;
+						if (x < 0 || y < 0 || x >= zone.Width || y >= zone.Height)
+							continue;
+						Cell candidate = zone.GetCell(x, y);
+						if (candidate == null || candidate.IsSolid() || candidate.HasObjectWithPart("Combat"))
+							continue;
+						return candidate;
+					}
+				}
+				return null;
+			}
+
+			void Stage(GameObject subject, Cell where, string label)
+			{
+				where.AddObject(subject);
+				subject.MakeActive();
+				if (subject.Brain != null)
+				{
+					StagedRoster.Add((subject, subject.Brain.Mobile, subject.Brain.Wanders, subject.Brain.Hostile));
+					subject.Brain.Mobile = false;   // stand still and be looked at
+					subject.Brain.Wanders = false;
+					subject.Brain.Hostile = false;
+				}
+				string tile = subject.Render?.Tile;
+				Helpers.VerifyLog("STAGE", $"{label} at {where.X},{where.Y}: blueprint={subject.Blueprint} tile=\"{(tile.IsNullOrEmpty() ? "(none -- renders as its glyph)" : tile)}\" name=\"{subject.DisplayNameOnlyDirect}\"");
+			}
+
+			The.Core.IDKFA = true;
+			int placed = 0;
+			List<string> legend = new List<string>();
+			List<string> trouble = new List<string>();
+
+			foreach (var entry in CreatureRoster)
+			{
+				GameObject subject = null;
+				try
+				{
+					subject = GameObject.Create(entry.Blueprint);
+				}
+				catch (System.Exception ex)
+				{
+					trouble.Add($"{entry.Blueprint} would not create ({ex.GetType().Name})");
+					Helpers.VerifyLog("STAGE", $"{entry.Blueprint}: CREATE FAILED ({ex.GetType().Name}) -- blueprint missing or malformed");
+					continue;
+				}
+				if (subject == null)
+				{
+					trouble.Add($"{entry.Blueprint} came back null -- blueprint missing?");
+					Helpers.VerifyLog("STAGE", $"{entry.Blueprint}: CREATE returned null");
+					continue;
+				}
+				Cell where = NextCell();
+				if (where == null)
+				{
+					subject.Obliterate();
+					trouble.Add($"{entry.Blueprint}: no open cell left in the row");
+					continue;
+				}
+				Stage(subject, where, entry.Blueprint);
+				placed++;
+				legend.Add($"{placed}. {subject.DisplayNameOnlyDirect} -- {entry.Note}");
+			}
+
+			foreach (var check in CarverSpriteChecks)
+			{
+				GameObject subject = null;
+				try
+				{
+					subject = GameObject.Create("WatervineFarmer");
+				}
+				catch (System.Exception ex)
+				{
+					trouble.Add($"sprite check {check.Tile}: no chassis ({ex.GetType().Name})");
+					continue;
+				}
+				if (subject == null)
+				{
+					trouble.Add($"sprite check {check.Tile}: WatervineFarmer chassis came back null");
+					continue;
+				}
+				Cell where = NextCell();
+				if (where == null)
+				{
+					subject.Obliterate();
+					trouble.Add($"sprite check {check.Tile}: no open cell left in the row");
+					continue;
+				}
+				subject.Render.Tile = check.Tile;
+				subject.Render.DisplayName = check.Label;
+				Stage(subject, where, check.Label);
+				placed++;
+				legend.Add($"{placed}. {check.Label} -- art only, on a plain human body.");
+			}
+
+			MessageQueue.AddPlayerMessage($"tfcreatures: {placed} staged in a row east of you, frozen and pacified, godmode ON. Wish again to release them.", Capitalize: false);
+			foreach (string line in legend)
+				MessageQueue.AddPlayerMessage(line, Capitalize: false);
+			foreach (string line in trouble)
+				MessageQueue.AddPlayerMessage("tfcreatures TROUBLE: " + line, Capitalize: false);
+		}
 	}
 }
