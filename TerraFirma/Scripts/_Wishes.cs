@@ -656,5 +656,100 @@ namespace Cleo.TerraFirma.Scripts
 			foreach (string line in trouble)
 				MessageQueue.AddPlayerMessage("tfcreatures TROUBLE: " + line, Capitalize: false);
 		}
+		/// <summary>Legendary stonecarver roller (user 2026-08-15: "i want a wish that spawns a
+		/// pack of legendary stonecarvers and prints rolls to chat"). Spawns a pack, runs each one
+		/// through the real builder -- the same `StonecarverEpithet` a blueprint will carry when
+		/// the roster lands, not a parallel copy that could drift -- and prints every roll: the
+		/// personal name with its junction pieces, the byname, and what each half of the byname
+		/// paid out.
+		///
+		/// Reading the output: word count per column IS spawn weight (Fissure 3 : Stoneshaper 3 :
+		/// EB 3 : Geomancy 2 : office 2), so a column that feels over- or under-represented is a
+		/// vocabulary edit, not a code edit. Gorgon's Gaze can never appear -- it has no craft
+		/// word yet. Office rolls (reeve/scribe) grant stats and NO mutation on purpose.
+		///
+		/// They arrive pacified and frozen, sharing the tfcreatures staging list, so either wish's
+		/// second call releases everything. BRANCH-ONLY.</summary>
+		[WishCommand(Command = "tfcarverpack")]
+		public static void CarverPack()
+		{
+			GameObject Ply = The.Player;
+			Cell origin = Ply?.CurrentCell;
+			Zone zone = origin?.ParentZone;
+			if (origin == null || zone == null)
+				return;
+
+			if (StagedRoster.Count > 0)
+			{
+				CreatureStage(); // one release path for both wishes
+				return;
+			}
+
+			const int PackSize = 6;
+			List<Cell> ring = origin.GetLocalAdjacentCells(6);
+			ring.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat") || origin.DistanceTo(c) < 3);
+
+			int rolled = 0;
+			List<string> sheet = new List<string>();
+			var columns = new Dictionary<string, int>();
+
+			while (rolled < PackSize && ring.Count > 0)
+			{
+				int idx = Stat.Random(0, ring.Count - 1);
+				Cell where = ring[idx];
+				ring.RemoveAt(idx);
+
+				GameObject carver = null;
+				try
+				{
+					carver = GameObject.Create("Cleo_TerraFirma_Stonecarver");
+				}
+				catch (System.Exception ex)
+				{
+					MessageQueue.AddPlayerMessage($"tfcarverpack: stonecarver blueprint would not create ({ex.GetType().Name}).", Capitalize: false);
+					return;
+				}
+				if (carver == null)
+				{
+					MessageQueue.AddPlayerMessage("tfcarverpack: stonecarver blueprint came back null.", Capitalize: false);
+					return;
+				}
+
+				StonecarverEpithet.Roll roll = StonecarverEpithet.Build(carver);
+				where.AddObject(carver);
+				carver.MakeActive();
+				if (carver.Brain != null)
+				{
+					StagedRoster.Add((carver, carver.Brain.Mobile, carver.Brain.Wanders, carver.Brain.Hostile));
+					carver.Brain.Mobile = false;
+					carver.Brain.Wanders = false;
+					carver.Brain.Hostile = false;
+				}
+
+				rolled++;
+				string column = roll.KitText.StartsWith("office") ? "office" : roll.KitText;
+				columns[column] = (columns.ContainsKey(column) ? columns[column] : 0) + 1;
+				sheet.Add($"{rolled}. {{{{W|{roll.PersonalName} {roll.Byname}}}}} -- {roll.KitText} | {roll.Material}: {roll.PerkText}");
+				Helpers.VerifyLog("CARVER", $"roll {rolled}: name={roll.PersonalName} ({roll.NamePieces}) byname={roll.Byname} material={roll.Material} -> {roll.PerkText} craft={roll.Craft} -> {roll.KitText}");
+			}
+
+			if (rolled == 0)
+			{
+				MessageQueue.AddPlayerMessage("tfcarverpack: no open cell at range 3-6 -- move somewhere roomier.", Capitalize: false);
+				return;
+			}
+
+			The.Core.IDKFA = true;
+			MessageQueue.AddPlayerMessage($"tfcarverpack: {rolled} legendary stonecarvers rolled, frozen and pacified, godmode ON. Wish again (or tfcreatures) to release.", Capitalize: false);
+			foreach (string line in sheet)
+				MessageQueue.AddPlayerMessage(line, Capitalize: false);
+
+			List<string> spread = new List<string>();
+			foreach (var pair in columns)
+				spread.Add($"{pair.Key} {pair.Value}");
+			MessageQueue.AddPlayerMessage($"this pack's kit spread: {string.Join(", ", spread)}. Bank weights are Fissure 3 : Stoneshaper 3 : EB 3 : Geomancy 2 : office 2 -- re-weighting is a vocabulary edit.", Capitalize: false);
+			MessageQueue.AddPlayerMessage("no Gorgon's Gaze can roll: it has no craft word yet. Baseline kit under the grant is still open, so these carry only what their bynames paid for.", Capitalize: false);
+			Helpers.VerifyLog("CARVER", $"tfcarverpack: {rolled} rolled, spread {string.Join("/", spread)}");
+		}
 	}
 }
