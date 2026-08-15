@@ -105,10 +105,13 @@
     <!-- COLORS ACCEPTED BY THE USER 2026-08-15 ("these are fine for base colors"): grey body,
          dark grey detail. An interim brown/white pass lived and died the same sitting; it was
          Claude misreading a report about the LEGENDARIES as a complaint about the base.
-         Channel fact worth keeping, measured off the art: stonecarver.png is 66 black pixels to
-         28 white, and Qud draws the black channel in DetailColor, so roughly 70% of this body is
-         DetailColor. Whatever goes in DetailColor is the creature's read; ColorString is trim. -->
-    <part Name="Render" DisplayName="stonecarver" Tile="stonecarver.png" ColorString="&amp;y" DetailColor="K" />
+         CHANNEL MAPPING CORRECTED 2026-08-15 by the user's eyes (they saw the role colors
+         "recoloring the wrong bits" and called the flip). Claude had inferred from a pixel count
+         (66 black to 28 white) that DetailColor paints the black majority. Observation says
+         otherwise, so the pair is swapped: the ROLE color now rides ColorString and the shared
+         grey sits in DetailColor. The pixel count was real; the channel it maps to was a guess,
+         and a guess is not a measurement. -->
+    <part Name="Render" DisplayName="stonecarver" Tile="stonecarver.png" ColorString="&amp;K" DetailColor="y" />
     <part Name="Description" Short="Chalk dust has worked so far into the creases of =pronouns.possessive= hands that the lines read like a map of somewhere quarried." /> <!-- DRAFT, and deliberately identity-neutral: the professions carry who these people are, and they are not built yet -->
     <stat Name="Level" Value="10" /> <!-- CLAUDE PLACEHOLDER, numbers sitting owed -->
     <!-- NOTE the missing "*noinherit" here, unlike every other creature in this file: that marker
@@ -127,8 +130,10 @@
        becomes one, and the pink comes with it.
        Profession-first structure is RULED 2026-08-15 ("it's a qud idiom"): the profession is the
        face (name, description, camp presence), the mutation is the engine it works with, and the
-       Role tag is the AI layer. DetailColor carries the role, and note that on this art DetailColor
-       is roughly 70% of the body, so the role color IS the creature's read.
+       Role tag is NOT the AI layer (see the Role recon in TODO; it is difficulty, spawn weight,
+       XP and a Minion stat penalty). COLOR CARRIER FLIPPED 2026-08-15 at the user's call: the
+       role rides ColorString, the shared grey sits in DetailColor. Legendaries are deliberately
+       NOT flipped, their pink stays where the hero convention puts it.
        Mason grey RULED 2026-08-15 with its consequence accepted: it overlaps the grey-creature-
        means-statue register the stonefrog uses. The user took the product rhyme (a mason makes
        statues, statues are grey) over the exclusivity.
@@ -137,14 +142,14 @@
        sequencing, so a role currently carries its mutation and nothing else. -->
 
   <object Name="Cleo_TerraFirma_Hewer" Inherits="Cleo_TerraFirma_Stonecarver">
-    <part Name="Render" DisplayName="hewer" DetailColor="r" />
+    <part Name="Render" DisplayName="hewer" ColorString="&amp;r" />
     <part Name="Description" Short="=pronouns.Subjective= =verb:read:afterpronoun= the rock face the way a reader finds a paragraph break, and =pronouns.subjective= =verb:open:afterpronoun= it there." /> <!-- DRAFT, signoff owed -->
     <mutation Name="Cleo_TerraFirma_Fissure" Level="4" /> <!-- level DRAFT -->
     <tag Name="Role" Value="Brute" /> <!-- DRAFT -->
   </object>
 
   <object Name="Cleo_TerraFirma_Mason" Inherits="Cleo_TerraFirma_Stonecarver">
-    <part Name="Render" DisplayName="mason" DetailColor="y" />
+    <part Name="Render" DisplayName="mason" ColorString="&amp;y" />
     <part Name="Description" Short="Stone dust has settled into =pronouns.possessive= sleeves so thoroughly that =pronouns.subjective= =verb:carry:afterpronoun= the quarry around with =pronouns.objective=." /> <!-- DRAFT, signoff owed -->
     <mutation Name="Cleo_TerraFirma_Stoneshaper" Level="4" /> <!-- level DRAFT -->
     <!-- Role RECON 2026-08-15 (user: "we should investigate creature AI roles more thoroughly").
@@ -159,7 +164,7 @@
   </object>
 
   <object Name="Cleo_TerraFirma_Outrider" Inherits="Cleo_TerraFirma_Stonecarver">
-    <part Name="Render" DisplayName="outrider" DetailColor="B" />
+    <part Name="Render" DisplayName="outrider" ColorString="&amp;B" />
     <part Name="Description" Short="=pronouns.Subjective= =verb:walk:afterpronoun= the edge of the claim with stones already circling =pronouns.possessive= shoulders, waiting." /> <!-- DRAFT, signoff owed -->
     <mutation Name="Cleo_TerraFirma_EarthenBarrage" Level="4" /> <!-- level DRAFT -->
     <tag Name="Role" Value="Artillery" /> <!-- DRAFT -->
