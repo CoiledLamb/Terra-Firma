@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Cleo.TerraFirma.Scripts;
 using XRL;
@@ -424,6 +424,30 @@ namespace Cleo.TerraFirma.Scripts
 			Report("feedback.gazewall", released, gazeDetail);
 			if (GameObject.Validate(holoWall)) holoWall.Obliterate();
 			if (GameObject.Validate(gorgon)) gorgon.Obliterate();
+
+			// entombment regression (user report 2026-08-15: "armor should be lootable"). The old
+			// code cleared the equip SLOT and handed the item to nobody, so worn gear was destroyed
+			// by petrification while the backpack survived. Worn item must end up inside the statue.
+			GameObject victim = GameObject.Create("Snapjaw");
+			victim.SetIntProperty(SPAWN_MARK, 1);
+			GameObject worn = GameObject.Create("Leather Armor");
+			GameObject carried = GameObject.Create("Leather Boots");
+			GameObject tomb = GameObject.Create("Cleo_TerraFirma_QuarriedBlock");
+			tomb.SetIntProperty(SPAWN_MARK, 1);
+			victim.ReceiveObject(worn);
+			victim.ReceiveObject(carried);
+			bool equipped = victim.ForceEquipObject(worn, "Body", Silent: true);
+			StatueHelpers.EntombPossessions(victim, tomb);
+			bool wornInTomb = tomb.Inventory != null && tomb.Inventory.GetObjectsDirect().Contains(worn);
+			bool carriedInTomb = tomb.Inventory != null && tomb.Inventory.GetObjectsDirect().Contains(carried);
+			string entombDetail =
+				!equipped ? "SETUP FAIL - could not equip the test armor on a Snapjaw body" :
+				(wornInTomb && carriedInTomb) ? "worn armor AND carried boots both entombed (the orphaning bug stays fixed)" :
+				!wornInTomb ? "WORN ARMOR LOST - it never reached the statue, the slot-clear orphan is back" :
+				"carried item lost - the inventory sweep broke";
+			Report("feedback.entomb", equipped && wornInTomb && carriedInTomb, entombDetail);
+			if (GameObject.Validate(tomb)) tomb.Obliterate();
+			if (GameObject.Validate(victim)) victim.Obliterate();
 		}
 
 		private static string Snip(string s) => s.IsNullOrEmpty() ? "(empty)" : (s.Length > 90 ? s.Substring(0, 90) + "..." : s);
