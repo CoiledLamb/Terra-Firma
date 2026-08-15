@@ -147,7 +147,15 @@
     <part Name="Render" DisplayName="mason" DetailColor="y" />
     <part Name="Description" Short="Stone dust has settled into =pronouns.possessive= sleeves so thoroughly that =pronouns.subjective= =verb:carry:afterpronoun= the quarry around with =pronouns.objective=." /> <!-- DRAFT, signoff owed -->
     <mutation Name="Cleo_TerraFirma_Stoneshaper" Level="4" /> <!-- level DRAFT -->
-    <tag Name="Role" Value="Minion" /> <!-- DRAFT -->
+    <!-- Role RECON 2026-08-15 (user: "we should investigate creature AI roles more thoroughly").
+         Role is NOT an AI layer, whatever the tracker said: nothing under XRL.World.Parts or
+         XRL.World.AI reads it. It feeds difficulty rating, dynamic spawn weight, XP value, and a
+         stat penalty. The first draft here said Minion, which was actively wrong: Minion docks a
+         boost step off ALL SIX attributes, reads 5 levels weaker than it is, quarters its own
+         level in a threat check, and pays 20x XP instead of 50x. A mason is a peer profession,
+         not a mook. Summoner is the honest tag AND the literal truth (Stoneshaper summons statue
+         companions); it rates +4 difficulty, so the con warning matches what the fight becomes. -->
+    <tag Name="Role" Value="Summoner" />
   </object>
 
   <object Name="Cleo_TerraFirma_Outrider" Inherits="Cleo_TerraFirma_Stonecarver">
