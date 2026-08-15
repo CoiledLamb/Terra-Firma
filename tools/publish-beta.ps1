@@ -28,6 +28,14 @@ $dst = Join-Path $pubRoot "TerraFirma"
 
 if (-not (Test-Path $src)) { throw "source folder not found: $src" }
 
+# ---------------------------------------------------------------- text rules (fail closed)
+# Runs against the REPO source, not the stripped copy, so violations report real file/line
+# numbers you can go fix. Rule 1 (no em dashes in shipped text) would otherwise survive the
+# strip and ship; rule 2 ("--" in an XML comment) would abort the strict-validate step later
+# with a parse error and no context. Added 2026-08-15 at the user's direction.
+& (Join-Path $PSScriptRoot "check-text-rules.ps1") -RepoRoot $RepoRoot
+if ($LASTEXITCODE -ne 0) { throw "text-rule check FAILED -- publish aborted, nothing zipped" }
+
 # ---------------------------------------------------------------- C# comment lexer
 Add-Type -TypeDefinition @'
 using System.Text;

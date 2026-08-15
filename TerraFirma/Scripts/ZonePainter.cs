@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using XRL;
@@ -253,7 +253,7 @@ namespace Cleo.TerraFirma.Scripts
 					break;
 				if (!lead.HasWall() && step > 3)
 				{
-					Helpers.VerifyLog("PAINT", $"bore breakthrough at step {step} — the beast moved on");
+					Helpers.VerifyLog("PAINT", $"bore breakthrough at step {step}: the beast moved on");
 					break;
 				}
 				for (int w = 0; w <= 1; w++)   // 2-wide: the beast is broad
@@ -516,7 +516,7 @@ namespace Cleo.TerraFirma.Scripts
 			if (a == null) { MessageQueue.AddPlayerMessage("tftunnel: no viable wall mass here (try tfslab)."); return; }
 			DressCommunal(a);
 			Carve b = CarveNeighborNode(Z, a);
-			if (b == null) { MessageQueue.AddPlayerMessage("tftunnel: {{R|DEGRADED}} — node B did not fit (wall mass too thin or already carved). This result is just tfpaint; use a fresh tfslab."); return; }
+			if (b == null) { MessageQueue.AddPlayerMessage("tftunnel: {{R|DEGRADED}}, node B did not fit (wall mass too thin or already carved). This result is just tfpaint; use a fresh tfslab."); return; }
 			var spine = CarveSpine(Z, a.CX, a.CY, b.CX, b.CY);
 			int divots = DressSpineDivots(Z, spine, 3);
 			var open = b.Region.Where(c => !c.IsSolid()).Take(2).ToList();
@@ -578,7 +578,7 @@ namespace Cleo.TerraFirma.Scripts
 			List<Cell> open = CarveGallery(Z, mouth, dx, dy);
 			MessageQueue.AddPlayerMessage(open != null
 				? $"tfgallery: {open.Count} cells at ({mouth.X},{mouth.Y}), pillars standing."
-				: "tfgallery: {{R|no variant fit}} — wall mass too thin.");
+				: "tfgallery: {{R|no variant fit}}, wall mass too thin.");
 		}
 
 		[WishCommand(Command = "tfbore")]
