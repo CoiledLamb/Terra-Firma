@@ -656,20 +656,28 @@ namespace Cleo.TerraFirma.Scripts
 			foreach (string line in trouble)
 				MessageQueue.AddPlayerMessage("tfcreatures TROUBLE: " + line, Capitalize: false);
 		}
-		/// <summary>Legendary stonecarver roller (user 2026-08-15: "i want a wish that spawns a
-		/// pack of legendary stonecarvers and prints rolls to chat"). Spawns a pack, runs each one
-		/// through the real builder -- the same `StonecarverEpithet` a blueprint will carry when
-		/// the roster lands, not a parallel copy that could drift -- and prints every roll: the
-		/// personal name with its junction pieces, the byname, and what each half of the byname
-		/// paid out.
+		/// <summary>Stonecarver pack stager (user 2026-08-15: "i want a wish that spawns a pack of
+		/// legendary stonecarvers and prints rolls to chat", corrected same sitting after the first
+		/// version made ALL SIX legendary: "i imagined the pack would spawn a mix of each type from
+		/// a poptable, with one leader"). Now ONE legendary leader plus rank and file.
 		///
-		/// Reading the output: word count per column IS spawn weight (Fissure 3 : Stoneshaper 3 :
-		/// EB 3 : Geomancy 2 : office 2), so a column that feels over- or under-represented is a
-		/// vocabulary edit, not a code edit. Gorgon's Gaze can never appear -- it has no craft
-		/// word yet. Office rolls (reeve/scribe) grant stats and NO mutation on purpose.
+		/// The leader runs through the real builder, `StonecarverEpithet`, the same class a
+		/// blueprint will carry when the roster lands, so tuning this tunes the shipped thing. Its
+		/// roll prints in full: personal name with junction pieces, byname, and what each half of
+		/// the byname paid out.
 		///
-		/// They arrive pacified and frozen, sharing the tfcreatures staging list, so either wish's
-		/// second call releases everything. BRANCH-ONLY.</summary>
+		/// THE RANK AND FILE ARE ALL IDENTICAL, and that is the honest state of the branch: the
+		/// role blueprints do not exist yet. Profession-first is RULED (2026-08-15) but which
+		/// professions, their gear, and their remaining DetailColors are not, so there is nothing
+		/// to draw a mix FROM. The population table this wants to be is the roster build's job.
+		/// Bynames stay leader-only by ruling: byname delivery is the HERO EPITHET.
+		///
+		/// Reading the leader's roll: word count per column IS spawn weight (Fissure 3 :
+		/// Stoneshaper 3 : EB 3 : Geomancy 2 : office 2). Gorgon's Gaze can never appear, no craft
+		/// word vouches for it yet. Office rolls grant stats and no mutation, on purpose.
+		///
+		/// Pacified and frozen, sharing the tfcreatures staging list, so either wish's second call
+		/// releases everything. BRANCH-ONLY.</summary>
 		[WishCommand(Command = "tfcarverpack")]
 		public static void CarverPack()
 		{
@@ -685,15 +693,15 @@ namespace Cleo.TerraFirma.Scripts
 				return;
 			}
 
-			const int PackSize = 6;
+			const int PackSize = 6; // 1 leader + 5 rank and file
 			List<Cell> ring = origin.GetLocalAdjacentCells(6);
 			ring.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat") || origin.DistanceTo(c) < 3);
 
-			int rolled = 0;
-			List<string> sheet = new List<string>();
-			var columns = new Dictionary<string, int>();
+			int placed = 0;
+			StonecarverEpithet.Roll leaderRoll = default(StonecarverEpithet.Roll);
+			bool haveLeader = false;
 
-			while (rolled < PackSize && ring.Count > 0)
+			while (placed < PackSize && ring.Count > 0)
 			{
 				int idx = Stat.Random(0, ring.Count - 1);
 				Cell where = ring[idx];
@@ -715,7 +723,14 @@ namespace Cleo.TerraFirma.Scripts
 					return;
 				}
 
-				StonecarverEpithet.Roll roll = StonecarverEpithet.Build(carver);
+				bool isLeader = !haveLeader;
+				if (isLeader)
+				{
+					leaderRoll = StonecarverEpithet.Build(carver);
+					haveLeader = true;
+					Helpers.VerifyLog("CARVER", $"leader: name={leaderRoll.PersonalName} ({leaderRoll.NamePieces}) byname={leaderRoll.Byname} material={leaderRoll.Material} -> {leaderRoll.PerkText} craft={leaderRoll.Craft} -> {leaderRoll.KitText}");
+				}
+
 				where.AddObject(carver);
 				carver.MakeActive();
 				if (carver.Brain != null)
@@ -725,31 +740,26 @@ namespace Cleo.TerraFirma.Scripts
 					carver.Brain.Wanders = false;
 					carver.Brain.Hostile = false;
 				}
-
-				rolled++;
-				string column = roll.KitText.StartsWith("office") ? "office" : roll.KitText;
-				columns[column] = (columns.ContainsKey(column) ? columns[column] : 0) + 1;
-				sheet.Add($"{rolled}. {{{{W|{roll.PersonalName} {roll.Byname}}}}} -- {roll.KitText} | {roll.Material}: {roll.PerkText}");
-				Helpers.VerifyLog("CARVER", $"roll {rolled}: name={roll.PersonalName} ({roll.NamePieces}) byname={roll.Byname} material={roll.Material} -> {roll.PerkText} craft={roll.Craft} -> {roll.KitText}");
+				placed++;
 			}
 
-			if (rolled == 0)
+			if (placed == 0)
 			{
-				MessageQueue.AddPlayerMessage("tfcarverpack: no open cell at range 3-6 -- move somewhere roomier.", Capitalize: false);
+				MessageQueue.AddPlayerMessage("tfcarverpack: no open cell at range 3-6, move somewhere roomier.", Capitalize: false);
 				return;
 			}
 
 			The.Core.IDKFA = true;
-			MessageQueue.AddPlayerMessage($"tfcarverpack: {rolled} legendary stonecarvers rolled, frozen and pacified, godmode ON. Wish again (or tfcreatures) to release.", Capitalize: false);
-			foreach (string line in sheet)
-				MessageQueue.AddPlayerMessage(line, Capitalize: false);
-
-			List<string> spread = new List<string>();
-			foreach (var pair in columns)
-				spread.Add($"{pair.Key} {pair.Value}");
-			MessageQueue.AddPlayerMessage($"this pack's kit spread: {string.Join(", ", spread)}. Bank weights are Fissure 3 : Stoneshaper 3 : EB 3 : Geomancy 2 : office 2 -- re-weighting is a vocabulary edit.", Capitalize: false);
-			MessageQueue.AddPlayerMessage("no Gorgon's Gaze can roll: it has no craft word yet. Baseline kit under the grant is still open, so these carry only what their bynames paid for.", Capitalize: false);
-			Helpers.VerifyLog("CARVER", $"tfcarverpack: {rolled} rolled, spread {string.Join("/", spread)}");
+			MessageQueue.AddPlayerMessage($"tfcarverpack: {placed} staged, frozen and pacified, godmode ON. Wish again (or tfcreatures) to release.", Capitalize: false);
+			if (haveLeader)
+			{
+				MessageQueue.AddPlayerMessage($"leader: {{{{W|{leaderRoll.PersonalName} {leaderRoll.Byname}}}}} (legendary, pink name)", Capitalize: false);
+				MessageQueue.AddPlayerMessage($"  craft \"{leaderRoll.Craft}\" grants {leaderRoll.KitText}; material \"{leaderRoll.Material}\" grants {leaderRoll.PerkText}", Capitalize: false);
+				MessageQueue.AddPlayerMessage($"  name assembled from {leaderRoll.NamePieces}", Capitalize: false);
+			}
+			MessageQueue.AddPlayerMessage($"the other {placed - 1} are IDENTICAL plain carvers, and that is the real state of things: no role blueprints exist yet, so there is no mix to draw from. That population table is the roster build.", Capitalize: false);
+			MessageQueue.AddPlayerMessage("bank weights, for reading the leader roll: Fissure 3 : Stoneshaper 3 : EB 3 : Geomancy 2 : office 2. No Gorgon's Gaze can roll, it has no craft word yet.", Capitalize: false);
+			Helpers.VerifyLog("CARVER", $"tfcarverpack: {placed} staged, 1 legendary leader + {placed - 1} rank and file");
 		}
 	}
 }
