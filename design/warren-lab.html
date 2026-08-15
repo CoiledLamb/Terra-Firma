@@ -226,6 +226,20 @@ window.onerror = function (msg, src, line) {
     { id:"bedroll",   c:"b", g:"=",      fg:"#a08662", bg:"#101010", n:"bedroll",             grp:"Objects", img:"tiles/bedroll.png" },
     { id:"torch",     c:"t", g:"!",      fg:"#e0b040", bg:"#101010", n:"torchpost",           grp:"Objects", img:"tiles/torch.png" },
     { id:"figurine",  c:"f", g:"☺", fg:"#c87f3a", bg:"#101010", n:"figurine (effects)",  grp:"Objects", img:"tiles/figurine.png" },
+    // stone maquette (USER RULED 2026-08-14: floor figurines roll a cheap material
+    // — "still giving rep, but very little value"). Ground truth makes this a
+    // one-blueprint item: RandomFigurine reads Material through a hardcoded
+    // switch and any UNKNOWN material takes the default arm = 60 rep, copper's
+    // exact value — so Material="stone" keeps full carried-rep while Commerce
+    // is whatever we write (copper is 60; "very little" is the user's word,
+    // number owed at port). Mod blueprint TBD. Tint y/K = pale stone over dark
+    // detail, CLAUDE sketch.
+    { id:"stonefig", c:"m", g:"☺", fg:"#b1a98e", bg:"#101010", n:"stone figurine (maquette, mod blueprint TBD)", grp:"Objects", qtiles:["figurine"], qtc:"y", qdc:"K" },
+    // trash (USER 2026-08-14: "include trash in the work dressing pool") — the
+    // base Garbage blueprint verbatim: % &K^k, RandomTile over sw_trash_1-4
+    // (Items.xml:12425), rummageable via the Garbage part at zero mod cost.
+    // DetailColor unset in the blueprint; k here is inference, not decomp.
+    { id:"trash", c:"O", g:"%", fg:"#155352", bg:"#101010", n:"trash (Garbage)", grp:"Objects", qtiles:["sw_trash_1","sw_trash_2","sw_trash_3","sw_trash_4"], qtc:"K", qdc:"k" },
     { id:"stele",     c:"I", g:"║", fg:"#8fa3b8", bg:"#101010", n:"eye stele",           grp:"Objects", img:"tiles/stele.png" },
     // work tools (USER 2026-08-12: "i would add pickaxes, and stray torches, not
     // torchposts") — real item renders: Torch * &w/R, Pickaxe ♦ Tool-base y/w
@@ -679,6 +693,8 @@ window.onerror = function (msg, src, line) {
     }
   }
 
+  // (torchlight glow sketch CUT 2026-08-14, user: "we'll see it all in game" —
+  // the posts place, the game's own LightSource renders the light)
   function render() {
     gridEl.style.gridTemplateColumns = "repeat(" + W + ", var(--cw,20px))";
     gridEl.innerHTML = "";
@@ -1928,14 +1944,20 @@ window.onerror = function (msg, src, line) {
   // is that adjacency at bite scale: light and tools rest where work stopped.
   var DRESSTABLES = {
     // an active working bite: usually nothing, sometimes staged stone, tool and
-    // light at the face, and the w2 jackpot — a tool stash
-    socket: [[55, null], [18, "stack1"], [8, { i: "straytorch", hint: "face" }], [5, { i: "pickaxe", hint: "face" }], [2, "chest"]],
-    // a prospector's test dig: mostly honest emptiness; the figurine jackpot is
-    // someone's maquette left at a dead end (the calling's own gear echo)
-    foot: [[66, null], [10, "stack1"], [10, { i: "straytorch", hint: "face" }], [6, { i: "pickaxe", hint: "face" }], [3, "figurine"]],
+    // light at the face, and the w2 jackpot — a tool stash. Trash joined the
+    // pool 2026-08-14 (user) — workers eat and break things where they work;
+    // weights are CLAUDE dials
+    socket: [[55, null], [18, "stack1"], [8, { i: "straytorch", hint: "face" }], [5, { i: "pickaxe", hint: "face" }], [5, "trash"], [2, "chest"]],
+    // a prospector's test dig: mostly honest emptiness; the figurine roll is
+    // someone's maquette left at a dead end (the calling's own gear echo).
+    // Material ladder RULED 2026-08-14: the world mostly leaves STONE maquettes
+    // (full rep, near-no value — the default rep arm makes it one blueprint);
+    // copper stays as the rare real-money find. 2:1 split is a CLAUDE dial,
+    // total figurine weight unchanged at 3
+    foot: [[66, null], [10, "stack1"], [10, { i: "straytorch", hint: "face" }], [6, { i: "pickaxe", hint: "face" }], [4, "trash"], [2, "stonefig"], [1, "figurine"]],
     // a trunk loading bay: staged product in grades, a chalk claim-line, a
     // stored tool, a chest
-    bay: [[40, null], [18, "stack1"], [15, "stack2"], [12, "stack3"], [5, "chalkline"], [4, { i: "pickaxe", hint: "face" }], [3, "chest"]]
+    bay: [[40, null], [18, "stack1"], [15, "stack2"], [12, "stack3"], [5, "chalkline"], [4, { i: "pickaxe", hint: "face" }], [4, "trash"], [3, "chest"]]
   };
   // the natural table (USER RULED 2026-08-12, correcting the canyon-only lean:
   // "i'd rather have the natural rocks be *in* the warren") — geology showing
@@ -1973,6 +1995,27 @@ window.onerror = function (msg, src, line) {
       }
       grid[c.y][c.x] = item;
       placed[item] = (placed[item] || 0) + 1;
+      // trash accumulates (USER 2026-08-14: "adjacency for trash to potentially
+      // have piles rather than stray clumps") — one dress roll may grow a
+      // midden: extras blob onto adjacent floor of the SAME space, so a spent
+      // bite can fill with junk while the one-item-per-space law keeps its
+      // meaning (one ROLL per space; the pile is that roll's size). Coord-hash
+      // variants give a pile mixed sprites for free. Odds are CLAUDE dials:
+      // 55% lone, else 1-3 more, 8-dir, space-contained (spill into the hall
+      // is a dial if piles read too boxed).
+      if (item === "trash") {
+        var pile = [c], extra = rng() < 0.55 ? 0 : R(1, 3);
+        for (var pe = 0; pe < extra; pe++) {
+          var ps = pile[R(0, pile.length - 1)];
+          var adj = sp.cells.filter(function (a) {
+            return isFloor(a) && Math.abs(a.x - ps.x) <= 1 && Math.abs(a.y - ps.y) <= 1;
+          });
+          if (!adj.length) continue;
+          var nc = adj[R(0, adj.length - 1)];
+          grid[nc.y][nc.x] = "trash";
+          pile.push(nc); placed.trash++;
+        }
+      }
     });
     var bits = Object.keys(placed).map(function (k) { return placed[k] + " " + k; });
     G("  dress: " + dressable + " work spaces — " + (bits.length ? bits.join(", ") : "nothing placed") + " (" + nothing + " rolled Nothing"
@@ -2502,6 +2545,81 @@ window.onerror = function (msg, src, line) {
     G("  warren: " + partsPlaced + " parts — " + made.halls + " halls, " + (made.trunks || 0) + " trunks, " + made.rooms + " rooms, " + (made.suites || 0) + " suites, " + (made.blocks || 0) + " blocks, " + made.wraps + " wraps, " + made.units + " units, " + made.combs + " combs, " + made.pockets + " pockets, " + made.sockets + " sockets, " + (made.hooks || 0) + " hooks, " + (made.feet || 0) + " feet, " + made.loops + " loops, " + made.sealed + " leaks sealed, " + shards + " shards swept"
       + (made.pkSizes && made.pkSizes.length ? "\n  pocket sizes: " + made.pkSizes.join(", ") : ""));
     dressWarren();   // work-evidence pass v1 — no-op unless the dress box is checked
+    // ---- lighting pass (USER BLESSED 2026-08-14, Claude shape ruled in) ----
+    // The engine's own grammar, stolen whole: VillageBase places ONE light type
+    // per village, in pairs FLANKING THE TOWN SQUARE'S ENTRANCES — paths unlit,
+    // hut doors unlit. Our town square is the gallery; posts flank each
+    // entrance from the INSIDE (sconces hug the wall beside the door, glow
+    // spills out). One sanctioned extension: a single post inside the canyon
+    // mouth (pilgrim-road front door). Trunks, halls, dens: dark — underground
+    // the glow is choreography, and blanket light would spend it. Torchpost
+    // ground truth: MountedFurniture sconce, LightSource Radius=6 (Furniture
+    // .xml:4075); `Unlit Torchpost` exists for the abandoned flip later.
+    if (document.getElementById("gendress").checked) {
+      var posts = 0, mouthPosts = 0, entrancesLit = 0;
+      var floorish = function (fx2, fy2) { var fid = grid[fy2] && grid[fy2][fx2]; return fid === "floor" || fid === "padfloor"; };
+      if (gallery) {
+        var gset3 = {}, chSet = {};
+        gallery.cells.forEach(function (c) { gset3[key(c.x, c.y)] = 1; });
+        chamberCells.forEach(function (c) { chSet[key(c.x, c.y)] = 1; });
+        // entrances: open non-gallery cells 4-touching gallery floor, clustered
+        // (a wide breach is one entrance); bud doors excluded by their far side
+        // opening into a sealed den (dens stay dark)
+        var cand = {}, candList = [];
+        gallery.cells.forEach(function (c) {
+          [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) {
+            var ex2 = c.x + d[0], ey2 = c.y + d[1], ek = key(ex2, ey2);
+            if (cand[ek] || gset3[ek] || !inB(ex2, ey2) || isWall(ex2, ey2)) return;
+            var ox = ex2 + d[0], oy = ey2 + d[1];   // one step beyond the doorway
+            if (chSet[key(ox, oy)]) return;          // bud door — den side stays dark
+            cand[ek] = 1; candList.push({ x: ex2, y: ey2, gx: c.x, gy: c.y });
+          });
+        });
+        var used = {};
+        candList.forEach(function (e) {
+          var ek2 = key(e.x, e.y);
+          if (used[ek2]) return;
+          // flood this cluster of doorway cells so a 2-wide gap lights once
+          var cq = [e], ci = 0; used[ek2] = 1;
+          while (ci < cq.length) {
+            var cc = cq[ci++];
+            candList.forEach(function (o) {
+              var ok3 = key(o.x, o.y);
+              if (!used[ok3] && Math.abs(o.x - cc.x) <= 1 && Math.abs(o.y - cc.y) <= 1) { used[ok3] = 1; cq.push(o); }
+            });
+          }
+          // flank from inside: the two gallery cells perpendicular to the
+          // door axis, beside the inner threshold
+          var ax = e.gx - e.x, ay = e.gy - e.y, lit = 0;
+          [[e.gx - ay, e.gy - ax], [e.gx + ay, e.gy + ax]].forEach(function (f) {
+            if (gset3[key(f[0], f[1])] && floorish(f[0], f[1])) { grid[f[1]][f[0]] = "torch"; posts++; lit++; }
+          });
+          if (lit) entrancesLit++;
+        });
+      }
+      // mouth post, stage 2 only (canyonFloor is empty on a blank slate): first
+      // wall-hugging floor cell within 2 steps of the start — the light you
+      // steer by from the canyon. The back door stays dark by the same ruling
+      // that keeps dens quiet.
+      var hasCanyon = false;
+      for (var ck in canyonFloor) { hasCanyon = true; break; }
+      if (hasCanyon) {
+        var mq = [[startX, startY, 0]], mseen = {}; mseen[key(startX, startY)] = 1;
+        while (mq.length && !mouthPosts) {
+          var mc = mq.shift();
+          if (floorish(mc[0], mc[1])) {
+            var hug = false;
+            [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) { if (isWall(mc[0] + d[0], mc[1] + d[1])) hug = true; });
+            if (hug) { grid[mc[1]][mc[0]] = "torch"; posts++; mouthPosts++; break; }
+          }
+          if (mc[2] < 2) [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) {
+            var nx2 = mc[0] + d[0], ny2 = mc[1] + d[1], nk2 = key(nx2, ny2);
+            if (!mseen[nk2] && inB(nx2, ny2) && !isWall(nx2, ny2)) { mseen[nk2] = 1; mq.push([nx2, ny2, mc[2] + 1]); }
+          });
+        }
+      }
+      if (posts) G("  light: " + posts + " torchpost(s) — " + entrancesLit + " gallery entrance(s) flanked" + (mouthPosts ? ", 1 at the mouth" : ""));
+    }
     // padded earth (USER RULED 2026-08-12, corrected same sitting: "actually -
     // let's do whole warren"): every carved warren cell pads — the strict
     // VillageMaker idiom. padScope 1 keeps the lived-only reading (work bites

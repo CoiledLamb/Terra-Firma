@@ -1443,7 +1443,7 @@ namespace Cleo.TerraFirma.Scripts
 		}
 
 		/// <summary>Redoubt census: every mod rock-family object standing in the zone -- fabric
-		/// (rubble/crumbled/wall/crack), salvage keepers, geysers, debris, and the figure.</summary>
+		/// (rubble/crumbled/wall/crack), salvage keepers, debris, and the figure.</summary>
 		internal static int CountRingPieces(Zone zone)
 		{
 			int n = 0;
@@ -1606,7 +1606,7 @@ namespace Cleo.TerraFirma.Scripts
 
 		/// <summary>Ring census, one cast per band (L1/4/7/10): fabric confined to the Euclidean
 		/// rim, gap count exact on a clear disk, wake scatter interior-only, and NO beta-held
-		/// content (crack/geyser/salvage/figure) leaking out of the marked blocks. Wall share is
+		/// content (crack/salvage/figure) leaking out of the marked blocks. Wall share is
 		/// reported, not asserted -- rolled variance on small rims is too noisy to pin.</summary>
 		private static void RedoubtRingCensus(GameObject ply, Zone zone, Cell origin, XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure fis)
 		{
@@ -1705,15 +1705,20 @@ namespace Cleo.TerraFirma.Scripts
 					continue;
 				GameObject b = GameObject.Create(BABOON_BP);
 				b.SetIntProperty(SPAWN_MARK, 1);
-				// 60 HP was the single-hit wave's era: the pulse churn at a Str-invested L5
-				// (PV 7, 3-5 pens/pulse) dealt 60-77 across the ride and KILLED two probes
-				// (first pulse boot 2026-08-09), which under-counted every assert. The probes
-				// must survive all three pulses to testify.
-				b.GetStat("Hitpoints").BaseValue = 400;
 				c1.AddObject(b);
+				// 60 HP was the single-hit wave's era: the pulse churn KILLED two probes (first
+				// pulse boot 2026-08-09), under-counting every assert. The 400-HP fix then
+				// SILENTLY FAILED for a boot era (caught at the 2026-08-15 batch, all four
+				// probes DOWN to 7-17 dmg): the engine finalizes Hitpoints from Toughness at
+				// zone entry, so a BaseValue set BEFORE AddObject is clobbered by the recalc.
+				// Set AFTER placement, and log if it ever fails to stick again.
+				b.GetStat("Hitpoints").BaseValue = 400;
+				b.GetStat("Hitpoints").Penalty = 0;
 				victims.Add(b);
 				starts[b] = c1;
 				hp[b] = b.GetStat("Hitpoints").Value;
+				if (hp[b] < 300)
+					Helpers.VerifyLog("AUTO", $"redoubt.push SETUP WARN: probe HP set did not stick (Value {hp[b]}) -- census will under-count");
 			}
 			if (victims.Count < 2)
 			{

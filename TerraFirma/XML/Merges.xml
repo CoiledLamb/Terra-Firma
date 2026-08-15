@@ -205,6 +205,14 @@
 	     wall; the part's own gate then requires the audited StoneshaperWallProperties merge and
 	     refuses MaterialType "metal" (user: metal walls excluded). Statue + Random Statue roots
 	     cover base statues, the redoubt figure, and Stoneshaper statues by inheritance. -->
+	<!-- Cobblefur cloak cover (RULED 2026-08-13, adjacent-scope sitting): base Rubble is a
+	     solid wall-layer heap outside the BaseStone tree, so the cloak's "amid rubble" check
+	     can't see it via IsAnyStone, and widening IsAnyStone is off the table (load-bearing;
+	     the trade-goods narrow-tag precedent above). Narrow cover tag instead; the cloak
+	     accepts either. Loose stones and all boulders already qualify through BaseStone. -->
+	<object Name="Rubble" Load="Merge">
+		<tag Name="Cleo_TerraFirma_IsRubbleCover" />
+	</object>
 	<object Name="Wall" Load="Merge">
 		<part Name="Cleo_TerraFirma_Etchable" />
 	</object>

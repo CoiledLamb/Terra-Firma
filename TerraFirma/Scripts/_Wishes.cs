@@ -127,9 +127,7 @@ namespace Cleo.TerraFirma.Scripts
 			"Cleo_TerraFirma_Rock_Rubber",
 			"Cleo_TerraFirma_Rock_Vantabsidian",
 			"Cleo_TerraFirma_Rock_Shunting",
-			"Cleo_TerraFirma_Rock_Omnigeyser1",
-			"Cleo_TerraFirma_Rock_Omnigeyser2",
-			"Cleo_TerraFirma_Rock_Omnigeyser3",
+			// Omnigeysers 1-3 scrubbed at the 2026-08-13 geyser cut
 			// structural fabric (incl. the ambiguity-1 promotions)
 			"Cleo_TerraFirma_Rock_Pebbles",
 			"Cleo_TerraFirma_Rock_Generic",
@@ -234,11 +232,13 @@ namespace Cleo.TerraFirma.Scripts
 			MessageQueue.AddPlayerMessage("tfpen: pen and damage distributions written to Player.log.", Capitalize: false);
 		}
 
-		/// <summary>Whorl VFX sampler (dev door, sitting 2026-08-12): fires all four outcome
-		/// beats at once, spatially separated so each reads. Devour swirl orbits the PLAYER
-		/// (palette-thieved from a freshly spawned torch -- red/white flecks prove the theft
-		/// at a glance); ricochet elbow 3 east; swat loot-pointer 3 west; fizzle grit 3 south;
-		/// refract second-leg track from 3 north heading up-right. Pure FX, no mechanics.</summary>
+		/// <summary>Whorl VFX sampler (dev door, sitting 2026-08-12; rico beat swapped at the
+		/// 2026-08-14 redesign ruling): fires all outcome beats at once, spatially separated
+		/// so each reads. Devour swirl orbits the PLAYER (palette-thieved from a freshly
+		/// spawned torch -- red/white flecks prove the theft at a glance); rico bounce+flight
+		/// 3 east flying to 6 east (no leg-1 delay -- the bounce fires immediately here); swat
+		/// loot-pointer 3 west; fizzle grit 3 south; refract second-leg track from 3 north
+		/// heading up-right. Pure FX, no mechanics.</summary>
 		[WishCommand(Command = "tfwhorlfx")]
 		public static void WhorlFxSampler()
 		{
@@ -252,15 +252,17 @@ namespace Cleo.TerraFirma.Scripts
 				System.Math.Max(0, System.Math.Min(zone.Height - 1, origin.Y + dy)));
 			GameObject morsel = GameObject.Create("Torch");
 			Cleo_TerraFirma_GravelWhorlFX.PlayDevourSwirl(Ply, morsel);
+			GameObject stone = GameObject.Create("Small Stone");
+			Cleo_TerraFirma_GravelWhorlFX.PlayRicochetFlight(stone, At(3, 0), At(6, 0), 0f);
+			stone.Obliterate();
 			morsel.Obliterate();
-			Cleo_TerraFirma_GravelWhorlFX.PlayRicochetElbow(At(3, 0));
 			Cell swatFrom = At(-3, 0);
 			Cell swatLanding = At(-4, -1) != swatFrom ? At(-4, -1) : At(-2, 1);
 			Cleo_TerraFirma_GravelWhorlFX.PlaySwatBeat(swatFrom, swatLanding);
 			Cleo_TerraFirma_GravelWhorlFX.PlaySwatBeat(At(0, 3), null);
 			Cleo_TerraFirma_GravelWhorlFX.PlayRefractTrack(At(0, -3), 135); // engine convention: x+=Sin, y+=Cos -> up-right
 			Cleo_TerraFirma_GravelWhorlFX.PlayDevourLight(At(3, -3), 'R', "beamColor0::#FF0000;;beamColor1::#FF8000"); // the light-devour beat in the laser rifle's beam colors
-			MessageQueue.AddPlayerMessage("tfwhorlfx: devour swirl on you (torch palette), elbow 3E, swat pointer 3W, fizzle 3S, refract track 3N, laser ember-catch 3NE.", Capitalize: false);
+			MessageQueue.AddPlayerMessage("tfwhorlfx: devour swirl on you (torch palette), rico bounce 3E flying to 6E, swat pointer 3W, fizzle 3S, refract track 3N, laser ember-catch 3NE.", Capitalize: false);
 		}
 
 		/// <summary>Live-fire devour gym (user request, VFX sitting 2026-08-12: "temporarily
@@ -415,6 +417,69 @@ namespace Cleo.TerraFirma.Scripts
 			bool armed = XRL.World.Effects.Cleo_TerraFirma_GravelWhorl.DebugForceDeflect;
 			Helpers.VerifyLog("GVW", $"tfwhorloutcome: forced outcome -> {name} (force-deflect {(armed ? "armed" : "NOT armed")})");
 			MessageQueue.AddPlayerMessage($"tfwhorloutcome: every proc now rolls {name}.{(armed ? "" : " NOTE: force-deflect is not armed -- run tfwhorlgym or tfwhorllaser first.")}", Capitalize: false);
+		}
+
+		/// <summary>Geomancy wall-HP regression probe (user flag 2026-08-12: "the harmony patch we
+		/// used for geomancy stopped letting us see wall HP when a rock is thrown"). Static analysis
+		/// cleared every layer (patch code unchanged since the 1.1 era, target signature alive,
+		/// Strings.WoundLevel calls the patched (GameObject, GameObject) overload, walls carry no
+		/// NoDamageReadout, Gemstone merge intact) -- the remaining suspect is JIT INLINING of the
+		/// one-line HasScanningFor delegator, which a static read cannot see. This wish attaches the
+		/// scan part to the nearest wall and asks the same question three ways:
+		///   compiled call  -- can itself be inlined (same blind spot as the engine's callers)
+		///   reflection call -- NEVER inlined; answers "did the patch apply at all"
+		///   Strings.WoundLevel -- the actual display path; numbers present = the UI would show HP
+		/// Matrix: reflect FALSE = patch never applied (check buildLog / PatchAll gating).
+		/// reflect TRUE + WoundLevel bare = the display path's call is inlined past the detour.
+		/// reflect TRUE + WoundLevel numeric = engine chain fine; the bug is upstream (the part
+		/// never attaches in real play -- next probe is a live gemstone throw). Run by hand, not
+		/// in tfbatch; the part is left on the wall (Duration 50) so the look UI can be eyeballed.</summary>
+		[WishCommand(Command = "tfgeoscan")]
+		public static void GeoScanProbe()
+		{
+			GameObject Ply = The.Player;
+			if (Ply?.CurrentCell == null)
+				return;
+			GameObject wall = null;
+			foreach (Cell c in Ply.CurrentCell.GetLocalAdjacentCellsCircular(3, true))
+			{
+				wall = c.GetObjects(x => x.IsWall())?.Find(x => true);
+				if (wall != null)
+					break;
+			}
+			if (wall == null)
+			{
+				MessageQueue.AddPlayerMessage("tfgeoscan: no wall within 3 cells -- stand near one.", Capitalize: false);
+				return;
+			}
+			if (wall.TryGetPart<XRL.World.Parts.Cleo_TerraFirma_PartGeomancyScan>(out var scan))
+				scan.Duration = 50;
+			else
+			{
+				wall.AddPart<XRL.World.Parts.Cleo_TerraFirma_PartGeomancyScan>();
+				wall.GetPart<XRL.World.Parts.Cleo_TerraFirma_PartGeomancyScan>().Duration = 50;
+			}
+			bool compiled = XRL.World.Capabilities.Scanning.HasScanningFor(Ply, wall);
+			bool reflected = false;
+			string reflectNote = "ok";
+			try
+			{
+				var mi = typeof(XRL.World.Capabilities.Scanning).GetMethod("HasScanningFor",
+					new System.Type[] { typeof(GameObject), typeof(GameObject) });
+				reflected = (bool)mi.Invoke(null, new object[] { Ply, wall });
+			}
+			catch (System.Exception ex)
+			{
+				reflectNote = ex.GetType().Name;
+			}
+			string wound = Strings.WoundLevel(wall) ?? "";
+			bool woundNumeric = wound.Contains("/");
+			string verdict =
+				!reflected ? "PATCH NOT APPLIED (reflection path saw no detour -- check PatchAll/buildLog)" :
+				!woundNumeric ? "INLINING CONFIRMED (patch alive via reflection, but WoundLevel's internal call bypasses it)" :
+				"ENGINE CHAIN FINE (WoundLevel shows numbers -- the bug is upstream: does the part attach on real gemstone throws?)";
+			Helpers.VerifyLog("GEOSCAN", $"wall={wall.Blueprint} compiled={compiled} reflected={reflected}({reflectNote}) wound=\"{wound}\" -> {verdict}");
+			MessageQueue.AddPlayerMessage($"tfgeoscan [{wall.Blueprint}]: compiled={compiled}, reflected={reflected}, WoundLevel {(woundNumeric ? "NUMERIC" : "bare")}. {verdict} Scan part left on the wall (50 turns) -- look at it now: exact HP visible?", Capitalize: false);
 		}
 	}
 }

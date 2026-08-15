@@ -21,10 +21,10 @@ an equipment slot.** The set tiles the body.
 
 | Slot | Item | Concept provenance | Tier lean |
 |---|---|---|---|
-| Hands | Catch gloves | USER, 2026-08-02 ("definitely leaning gloves") | LOW (USER LEAN) |
+| Hands | Catch gloves | USER, 2026-08-02 ("definitely leaning gloves") — **LANDED 2026-08-13 as Cobblefur Gloves (cobble baboon butchery); see TODO roster entry** | LOW (USER LEAN) |
 | Feet | Wall-kick boots | USER RULED gear-not-rider, 2026-08-02 | mid (Claude, unruled) |
 | Body | Socket armor (the feedable breastplate) | USER, 2026-08-04 shape | scales (unruled) |
-| Arms | Baboon-skin throw bracers | USER, 2026-08-04 | low (Claude, unruled) |
+| Arms | Baboon-skin throw bracers | USER, 2026-08-04 — **LANDED 2026-08-13 as Cobblefur Bracer (cobble baboon butchery, buff shape RULED close-range accuracy); see TODO roster entry** | low (Claude, unruled) |
 | Weapon | Pulling weapon | USER, 2026-08-02 | mid-high (Claude, unruled) |
 | Missile weapon | Gravel shotgun | USER, 2026-08-02 | gated on mill's return |
 | Tools (carried) | Chisel + mallet carving verb | USER, 2026-08-04 (item-gated ruling) | tier 0, already ships |

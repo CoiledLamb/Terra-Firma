@@ -757,56 +757,11 @@
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d6" />
 	</object>
 
-	<!-- Tiered omnigeysers (user ruling 2026-07-22): each shot re-rolls the throwable-only mirror
-	     of its band, whose nested "Deeper" groups give the chance to spit a rank up (the mutation's
-	     own escalation, from the same data). Every shot costs it HP (FabricateFromSelf, threshold 0)
-	     until it collapses. Falls as a living creature: DropRock's brain-branch allies it to the caster. -->
-	<object Name="Cleo_TerraFirma_Rock_Omnigeyser1" Inherits="Creature">
-		<part Name="Render" DisplayName="spitting geyser" RenderString="4" Tile="Items/sw_stalag2.bmp" ColorString="&amp;y" DetailColor="c" />
-		<!-- BETA-HELD (DRAFT; tile is a stalagmite reuse, bespoke art whenever): <part Name="Description" Short="A vent of restless stone. Every so often the earth below clears its throat." /> -->
-		<part Name="Brain" Hostile="false" Wanders="false" Mobile="false" Factions="Beasts-100" />
-		<part Name="Body" Anatomy="Fungus" />
-		<stat Name="Level" Value="8" />
-		<stat Name="Hitpoints" Value="50" />
-		<stat Name="AV" Value="4" />
-		<stat Name="DV" Value="-5" />
-		<stat Name="Strength" Value="16" />
-		<stat Name="Agility" Value="16" />
-		<part Name="Cleo_TerraFirma_OmniFabricate" ChargeUse="0" RockTable="Cleo_TerraFirma_ThrowableRocks1" FabricateBlueprint="Cleo_TerraFirma_Rock_Generic" FabricateVerb="spit" BatchSize="1" HitpointsPer="3" AIUseForThrowing="true" HitpointsThreshold="0" AIHitpointsThreshold="0" EnergyCost="100" Cooldown="1d2+1" />
-		<part Name="MentalShield" />
-		<part Name="NoBleed" />
-		<tag Name="Role" Value="Artillery" />
-		<tag Name="Noswap" />
-		<tag Name="ExcludeFromDynamicEncounters" />
-		<tag Name="Species" Value="geyser" />
-		<tag Name="DeathSounds" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_die" />
-		<tag Name="TakeDamageSound" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_hurt" />
-		<tag Name="AmbientIdleSound" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_idle" />
-	</object>
-	<object Name="Cleo_TerraFirma_Rock_Omnigeyser2" Inherits="Cleo_TerraFirma_Rock_Omnigeyser1">
-		<part Name="Render" DisplayName="spewing geyser" ColorString="&amp;Y" DetailColor="c" />
-		<stat Name="Level" Value="16" />
-		<stat Name="Hitpoints" Value="100" />
-		<stat Name="AV" Value="6" />
-		<stat Name="Strength" Value="20" />
-		<stat Name="Agility" Value="20" />
-		<part Name="Cleo_TerraFirma_OmniFabricate" RockTable="Cleo_TerraFirma_ThrowableRocks2" FabricateVerb="spew" HitpointsPer="4" />
-	</object>
-	<object Name="Cleo_TerraFirma_Rock_Omnigeyser3" Inherits="Cleo_TerraFirma_Rock_Omnigeyser1">
-		<part Name="Render" DisplayName="heaving geyser" ColorString="&amp;W" DetailColor="b" />
-		<stat Name="Level" Value="24" />
-		<stat Name="Hitpoints" Value="175" />
-		<stat Name="AV" Value="8" />
-		<stat Name="Strength" Value="24" />
-		<stat Name="Agility" Value="24" />
-		<!-- retargeted to the deep band 2026-07-22 (user ruling): the top geyser shoots T2 elemental
-		     rocks, restoring the catalog's original intent. Geysers spit, they don't hold - but the
-		     fabricated stone sits in its thrown slot between shots, so the holding burn nicks it
-		     (1/5 turns on top of HitpointsPer): the heaving geyser pays for its ammunition. Accepted. -->
-		<part Name="Cleo_TerraFirma_OmniFabricate" RockTable="Cleo_TerraFirma_ThrowableRocks4" FabricateVerb="heave" HitpointsPer="5" />
-	</object>
+	<!-- Omnigeysers 1-3 SCRUBBED 2026-08-14 (geysers CUT for good, user ruling 2026-08-13: "geysers
+	     confirmed cut as old fissure is totally out"); pre-cut blueprints recoverable at git tag
+	     fissure-v2-grenade. Part_OmniFabricate.cs died with them. -->
 
-	<!-- ============ v2 wave, band 3 (built 2026-07-22) ============ -->
+<!-- ============ v2 wave, band 3 (built 2026-07-22) ============ -->
 
 	<object Name="Cleo_TerraFirma_Rock_Mullstone" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="mullstone" Tile="Items/sw_smallstone.bmp" ColorString="&amp;y" DetailColor="K" />

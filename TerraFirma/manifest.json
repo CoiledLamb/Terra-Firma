@@ -1,7 +1,7 @@
 {
     "id": "Cleo_TerraFirma",
     "title": "Terra Firma",
-    "description": "Six earth mutations: Gorgon's Gaze, Earthen Barrage, Stoneshaper, Geomancy, Calcify, and Fissure, plus the Stonecarver calling and assorted stone themed extras. Credits: cleo (concept), ceres (code), ontoclasm (mutation sprites), and billy checkers (other sprites).",
-    "version": "0.1",
+    "description": "Six earth mutations: Gorgon's Gaze, Earthen Barrage, Stoneshaper, Geomancy, Calcify, and Fissure, plus the Stonecarver calling and assorted stone themed extras. credits: cleo (concept), ceres (code), ontoclasm (mutation sprites), and billy checkers (other sprites). also thanks to our beta testers: birdy, euclid, and wrbrgrgl!",
+    "version": "0.1.2",
     "author": "Cleo, Ceres et al."
 }

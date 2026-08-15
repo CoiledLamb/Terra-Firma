@@ -224,6 +224,11 @@ namespace XRL.World.Parts.Mutation
 				planBps.Add(bp ?? "Cleo_TerraFirma_WallCalcify");
 			}
 			PlayWorldSound("Sounds/Throw/sfx_throwing_stone_large_impact", 1f, Combat: true); // the slam covers the rise
+			// USER 2026-08-05 ("possible screen shake add for calcify"), RULED + BUILT 2026-08-14: one
+			// small shake beside the slam -- gentler than the redoubt's descending beats (0.3+); visibility
+			// gate keeps an off-screen NPC calcifier from rattling the player's screen.
+			if (ParentObject.IsVisible())
+				CombatJuice.cameraShake(0.15f);
 			void PlaceWall(int i)
 			{
 				GameObject wall = GameObject.Create(planBps[i]);

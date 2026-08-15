@@ -5,8 +5,9 @@
 	     Escalation (user ruling 2026-07-22, base-game loot-table mechanic): every roll has a
 	     small chance to reach a band up — the "Deeper" groups — and rarely two bands at once.
 	     Escalations land on band-exclusive content (the *New tables) so they're always visible. ====== -->
-	<!-- Throwable-only mirrors of the fissure bands. Shared by omnigeyser shots and baboon
-	     pocket-stones (2026-07-22). BETA-HELD TRIM (redoubt pivot, RULED 2026-08-02): mirrors
+	<!-- Throwable-only mirrors of the fissure bands. Used by baboon pocket-stones (2026-07-22;
+	     the omnigeyser shots that shared them were scrubbed at the 2026-08-13 geyser cut).
+	     BETA-HELD TRIM (redoubt pivot, RULED 2026-08-02): mirrors
 	     pruned to the six keepers + inert plain stones; the strange-rock bell rides (RULED
 	     2026-07-30) retired with strange itself. Full pre-trim tables recoverable at git tag
 	     fissure-v2-grenade. -->
@@ -157,7 +158,9 @@
 			<group Name="Headliners" Weight="75" Style="pickone">
 				<!-- BETA-HELD: volatile, mullstone, glowing twins (and their 2026-07-25 move
 				     notes) held -->
-				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Omnigeyser1" />
+				<!-- Omnigeyser1 SCRUBBED at the 2026-08-13 geyser cut. GROUP IS EMPTY until held
+				     headliners return; a roll here yields null. Do not un-quarantine this table
+				     without restoring content or removing the group. -->
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="20" Blueprint="Cleo_TerraFirma_Rock_CrumbledWall" />
@@ -187,7 +190,7 @@
 				<!-- BETA-HELD: drainstone, hexstone, hypersonic, pulsestone, shieldstone,
 				     lodestone held -->
 				<object Weight="10" Blueprint="Cleo_TerraFirma_Rock_Ajistone" />
-				<object Weight="8" Blueprint="Cleo_TerraFirma_Rock_Omnigeyser2" />
+				<!-- Omnigeyser2 SCRUBBED at the 2026-08-13 geyser cut -->
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
 				<object Weight="20" Blueprint="Cleo_TerraFirma_Rock_Wall" />
@@ -200,7 +203,8 @@
 		<group Name="Rocks" Style="pickone">
 			<group Name="Headliners" Weight="75" Style="pickone">
 				<!-- BETA-HELD: blurring, lovestone, drifting, gyrestone, deep four held -->
-				<object Weight="6" Blueprint="Cleo_TerraFirma_Rock_Omnigeyser3" />
+				<!-- Omnigeyser3 SCRUBBED at the 2026-08-13 geyser cut. GROUP IS EMPTY until held
+				     headliners return; same null-roll caution as FissureTier6. -->
 			</group>
 			<group Name="Generics" Weight="25" Style="pickone">
 				<!-- chasm CUT from play (ruling 2026-07-24: "chasms should get cut but pits are too
@@ -215,7 +219,7 @@
 	</population>
 	<!-- Strange rock's mimic + the Lithovore strange-eat: the CURATED pool (audit RULED 2026-07-24,
 	     "everything it does should actually happen, no null"). Payload and grenade rocks only.
-	     EXCLUDED, on purpose: creatures (ape, statuette, all three geysers), terrain and generics
+	     EXCLUDED, on purpose: creatures (ape, statuette; the three geysers pre-dated their cut), terrain and generics
 	     (pebbles, generic, rubble, crumbled walls, walls, chasm, stalagmite), the payloadless
 	     flight rock (streakschorl), the caromcobble (its payload is a post-throw bounce that
 	     cannot fire in mimicry), strange itself (no mirrors), and the HOLOGRAPHIC ROCK

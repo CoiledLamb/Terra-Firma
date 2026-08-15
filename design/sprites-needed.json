@@ -118,5 +118,25 @@
     "file": "quarrystones1a-3b.png (x6)",
     "for": "stack art variants within each fill stage (user 2026-07-26) - unwired until the stack low-wall blueprint exists; its RandomTile per stage = {base,a,b}",
     "source": "user 2026-07-26"
+  },
+  {
+    "file": "cobble baboon.png",
+    "for": "creature roster - cobble baboon (EB wild representative; BUILT 2026-08-13 wearing recolored base baboon tile as placeholder; name locked cobble same day, was briefly gravel)",
+    "source": "ruled 2026-08-13"
+  },
+  {
+    "file": "cobblefur bracer.png",
+    "for": "cobblefur family - bracer (arm, close-throw accuracy; BUILT 2026-08-13 wearing recolored sw_armlet as placeholder)",
+    "source": "user 2026-08-13 (home for the 2026-08-04 baboon-skin throw bracers)"
+  },
+  {
+    "file": "cobblefur gloves.png",
+    "for": "cobblefur family - gloves (hands, rock catch; BUILT 2026-08-13 wearing recolored quartzfur gloves tile as placeholder - worst offender, wants its own art soon)",
+    "source": "user 2026-08-13 (the 2026-08-02 catch gloves landed)"
+  },
+  {
+    "file": "cobblefur cloak.png",
+    "for": "cobblefur family - cloak (back, DV amid rubble; BUILT 2026-08-13 wearing recolored yurtmat tile as placeholder; user flagged the sprite need at concept)",
+    "source": "user 2026-08-13"
   }
 ]

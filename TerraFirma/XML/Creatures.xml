@@ -10,28 +10,82 @@
     <inventoryobject Blueprint="Cleo_TerraFirma_Aculei" Number="1" />
   </object>
 
-  <!-- Malformed cragmensch (user concept 2026-07-22, committed 2026-07-27): frailer than its kin,
-       but its self-fabricate wrenches out STRANGE ROCKS, so every throw rolls the full payload
-       lottery. Stock FabricateFromSelf (Boulderer knobs) suffices; OmniFabricate not needed.
-       Stats all RULED/ratified by the user 2026-07-27: HP 25->15, Toughness Boost 2->1,
-       AV 15->10; strange-rock death-drop ratified same day. Tile = base cragmensch recolored as PLACEHOLDER; sprite is the user's.
-       Blueprint-only for now (wish-spawnable); world placement is an open design call.
-       BETA-HELD (redoubt pivot, RULED 2026-08-02): "malformed cragmensch is out" — it rides
-       the strange rock, which is held. Verified: zero population/encounter entries exist, so
-       the blueprint below is already unreachable in play (wish-only dev door, same policy as
-       kitchenrock). No world placement until the catalog returns. -->
-  <object Name="Cleo_TerraFirma_Malformed Cragmensch" Inherits="Cragmensch">
-    <part Name="Render" DisplayName="malformed cragmensch" ColorString="&amp;m" DetailColor="M" />
-    <part Name="Description" Short="A cragmensch whose strata never knit true. Its hide sits thin over veins of shifting color, and the stones it wrenches loose from itself refuse to be the same stone twice." /> <!-- DRAFT, signoff owed -->
+  <!-- Rockhound (user sprite 2026-08-12; build green-lit 2026-08-13: "we can start building
+       creatures so they're ready with the stonecarver pass"). Wild-stray form; the kept camp
+       variant is one faction entry later (Dogs-100 + carver faction at 99, Herding Dog idiom,
+       waits on the post-NPCs faction debt; probably wants base's Grazer tag then too).
+       Chassis: BaseDog (Pettable and Dogs-100 arrive free). Gut: Cleo_TerraFirma_RockSweeper,
+       swallow-and-spill (see the part for provenance). STATS ARE DRAFT, numbers sitting owed.
+       Name lock owed ("rockhound" working; candidate list in TODO). Render colors PLACEHOLDER,
+       user's sprite palette to rule. ExcludeFromDynamicEncounters = controlled debut; remove
+       or replace with real table tags at the spawn-wiring pass. -->
+  <object Name="Cleo_TerraFirma_Rockhound" Inherits="BaseDog">
+    <part Name="Render" DisplayName="rockhound" Tile="rockhound.png" RenderString="d" ColorString="&amp;w" DetailColor="y" />
+    <part Name="Corpse" CorpseChance="100" CorpseBlueprint="Dog Corpse" />
+    <stat Name="Level" Value="8" />
+    <stat Name="Hitpoints" Value="18" />
+    <stat Name="AV" Value="2" />
+    <part Name="Cleo_TerraFirma_RockSweeper" />
+    <inventoryobject Blueprint="BigDog_Bite" Number="1" />
+    <part Name="Description" Short="Dust grays =pronouns.possessive= coat and =pronouns.possessive= muzzle is worn smooth as riverstone. When =pronouns.subjective= =verb:trot:afterpronoun=, something in =pronouns.possessive= belly clicks and settles, stone against swallowed stone." /> <!-- DRAFT, signoff owed -->
+    <tag Name="Role" Value="Brute" />
+    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+  </object>
+
+  <!-- Snapjaw miner (user sprite 2026-08-12; build green-lit 2026-08-13). Behavior PARENT in
+       the base two-layer idiom (Snapjaw Scavenger precedent): tier children, if ruled in at
+       wiring, are pure InventoryPopulationTable swaps on top of this. The pickaxe IS the AI
+       (recon 2026-08-13, banked in TODO): DiggingTool installs Digging on the wielder, Drill
+       answers PathAsBurrowerEvent, so he tunnels while traveling and fights through walls to
+       reach a target with zero C#. Placement leans banked (any snapjaw group + sometimes
+       canyon-wild); ExcludeFromDynamicEncounters = controlled debut (Snapjaw parent tags would
+       otherwise seed him into canyon, saltmarsh, and hills pools TODAY, ahead of the wiring
+       pass and the party-table merge). HP is DRAFT (Hunter-grade 6 over base 3, he swings a
+       real tool); Role DRAFT Minion; render colors PLACEHOLDER. Description identity kept
+       NEUTRAL on purpose: what a miner snapjaw wants is still the user's open call. -->
+  <!-- Cobble baboon (settled 2026-08-13 sitting; user structure ruling: creature plain,
+       "-fur" reserved for the pelt items, quartz/quartzfur grammar. NAME LOCKED cobble
+       same day, superseding Claude's gravel pick: "gravel baboon" + the Gravel Whorl effect
+       title colliding in every combat sentence of his signature moment was the user's
+       (correct) log-legibility fear; gravel = considered-and-passed alternate. Chassis:
+       Baboon child, so the StoneScavenger merge, pocket Small Stones, AIThrowAndScoot,
+       Skirmisher role, and the Hills/DesertCanyon table tags all arrive by inheritance
+       (canyon habitat = user lean, confirmed at this sitting by silence on the alternative).
+       Signature: Earthen Barrage — NPC auto-arm shipped 2026-08-06 (mutation re-sculpts
+       every EndTurn, base AI throws the slot natively), so the whole creature is this one
+       XML block. Differentiation from base Quartz Baboon on file: quartz = stone SKIN
+       (armor/reflect, L22 subterrane); gravel = stone THROWN (barrage/whorl, early canyon).
+       STATS + EB LEVEL DRAFT (Hulking-grade body, EB 4 for a visible whorl), numbers
+       sitting owed. Tile = recolored base baboon PLACEHOLDER, sprite debt filed.
+       Corpse: custom, CorpseChance 15 DRAFT (down from the inherited 40; he will be a
+       common canyon spawn and 40% would carpet the canyon in pelts; quartz ships at 6).
+       Butchery = the cobblefur family (bracer/gloves/cloak, quartzfur three-piece idiom),
+       table in PopulationTables.xml. ExcludeFromDynamicEncounters = controlled debut,
+       lift at the spawn-wiring pass. -->
+  <object Name="Cleo_TerraFirma_Cobble Baboon" Inherits="Baboon">
+    <part Name="Render" DisplayName="cobble baboon" Tile="Assets_Content_Textures_Creatures_sw_baboon.bmp" ColorString="&amp;y" DetailColor="K" />
     <stat Name="Hitpoints" Value="15" />
-    <stat Name="Toughness" Boost="1" />
-    <stat Name="AV" Value="10" />
-    <part Name="FabricateFromSelf" ChargeUse="0" FabricateBlueprint="Cleo_TerraFirma_Rock_Strange" FabricateVerb="excavate" BatchSize="1" HitpointsPer="1" AIUseForThrowing="true" AIHitpointsThreshold="10" HitpointsThreshold="5" EnergyCost="100" Cooldown="1d2+1" IsBioScannable="true" />
-    <!-- malformed innards: the death-drop boulder is strange too (Claude pick, flagged) -->
-    <part Name="DropOnDeath" Blueprints="Cleo_TerraFirma_Rock_Strange" />
-    <inventoryobject Blueprint="Cleo_TerraFirma_Rock_Strange" Number="1" />
-    <inventoryobject Blueprint="Cragmensch Fist" Number="2" />
-    <skill Name="Cudgel_Bludgeon" />
-    <tag Name="Role" Value="Artillery" />
+    <stat Name="Strength" Boost="2" />
+    <stat Name="AV" Value="3" />
+    <!-- mutation nodes resolve by CLASS name, not display name (caught 2026-08-14: the display
+         name loaded as a MODERROR + unnamed-node warn and the baboon spawned barrage-less) -->
+    <mutation Name="Cleo_TerraFirma_EarthenBarrage" Level="4" />
+    <part Name="Corpse" CorpseChance="15" CorpseBlueprint="Cleo_TerraFirma_Cobble Baboon Corpse" />
+    <part Name="Description" Short="Grit clings to =pronouns.possessive= coat in dun sheets, and around =pronouns.objective= the air is never quite still: pebbles circle =pronouns.possessive= shoulders in a lazy orbit, waiting to be thrown." /> <!-- DRAFT, signoff owed -->
+    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+  </object>
+  <object Name="Cleo_TerraFirma_Cobble Baboon Corpse" Inherits="Baboon Corpse">
+    <part Name="Render" DisplayName="cobble baboon corpse" />
+    <part Name="Butcherable" OnSuccess="@Cleo_TerraFirma_Cobblefur Items" />
+    <tag Name="Tier" Value="2" />
+  </object>
+
+  <object Name="Cleo_TerraFirma_Snapjaw Miner" Inherits="Snapjaw">
+    <part Name="Render" DisplayName="snapjaw miner" Tile="snapjaw miner.png" ColorString="&amp;w" DetailColor="y" />
+    <stat Name="Hitpoints" Value="6" />
+    <inventoryobject Blueprint="Pickaxe" Number="1" />
+    <part Name="Description" Short="Quarry dust grays =pronouns.possessive= tussocked fur, and =pronouns.possessive= knuckles are chipped white from wall-work. =pronouns.Subjective= =verb:eye:afterpronoun= every rockface like a shut door." /> <!-- DRAFT, signoff owed -->
+    <tag Name="Role" Value="Minion" />
+    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
   </object>
 </objects>

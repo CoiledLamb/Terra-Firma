@@ -95,7 +95,7 @@ namespace XRL.World.Parts
 
 		/// <summary>While a self-harming rock is EQUIPPED (hand or thrown slot — pack storage is safe wrapping),
 		/// the holder takes 1 point of typed damage every this-many turns ("small burn while holding", user add
-		/// 2026-07-22). 0 = no holding burn. Applies to anyone holding it: baboons and geysers included.</summary>
+		/// 2026-07-22). 0 = no holding burn. Applies to anyone holding it: baboons included.</summary>
 		public int HoldHarmEvery = 5;
 
 		/// <summary>Blueprint scattered near the impact/step cell as lingering terrain (lava patches,

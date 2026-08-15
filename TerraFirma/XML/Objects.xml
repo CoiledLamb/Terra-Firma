@@ -65,17 +65,6 @@
 		     strong muse, hit harder. -->
 		<part Name="MeleeWeapon" MaxStrengthBonus="1000" BaseDamage="1d3+1" Skill="Cudgel" Stat="Strength" />
 	</object>
-	<object Name="Cleo_TerraFirma_StabilizerBands" Inherits="BaseArmlet">
-		<part Name="Render" DisplayName="stabilizer bands" Tile="items/sw_leather_bracers.bmp" ColorString="&amp;y" DetailColor="w" /> <!-- tile is a base-game reuse (leather bracer); swap for bespoke art whenever -->
-		<part Name="Armor" AV="0" DV="1" WornOn="Arm" />
-		<part Name="Physics" Weight="1" />
-		<part Name="Commerce" Value="15" />
-		<part Name="Description" Short="Strips of woven fabric wind about the wrist and elbow, holding tendon and muscle in line against the wrench of a long throw." /> <!-- DRAFT - awaiting user approval -->
-		<part Name="IntPropertyChanger" AffectedProperty="ThrowRangeBonus" Amount="1" ChargeUse="0" IsEMPSensitive="false" IsBootSensitive="false" IsTechScannable="false" WorksOnWearer="true" NameForStatus="Stabilizers" BehaviorDescription="Wearer's throw range is increased by 1." />
-		<tag Name="EquipSound" Value="sfx_equip_material_generic_cloth" />
-		<tag Name="Gender" Value="plural" />
-		<tag Name="Tier" Value="2" />
-	</object>
 	<object Name="Cleo_TerraFirma_StatueMaker" Inherits="Tool">
 		<part Name="Render" DisplayName="claysculpting loop" RenderString="004" ColorString="&amp;C" TileColor="&amp;b" DetailColor="C" Tile="Items/portable-wall.png" />
 		<part Name="Commerce" Value="25" />

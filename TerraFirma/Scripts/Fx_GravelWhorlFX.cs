@@ -37,8 +37,7 @@ namespace Cleo.TerraFirma.Scripts
 		private const float FLECK_SCALE_MIN = 0.22f; // feel rounds 2-3 (user), up from 0.10-0.18 then a nudge;
 		private const float FLECK_SCALE_MAX = 0.34f; // round 3 "*slightly* bigger, then that's good" -- SIZE SETTLED
 		private const string FLECK_TILE = "Items/sw_smallstone.bmp"; // guaranteed atlas resident (petrify-chunk precedent)
-		// elbow / track dials
-		private const int ELBOW_PARTICLES = 8;
+		// track dials (the rico elbow's ELBOW_PARTICLES died with the beat, ruling 2026-08-14)
 		private const int REFRACT_TRACK_CELLS = 5;
 		// laser ember-catch dials (feel round 8, user concept: "utilize the pixels produced
 		// by the end of the laser shot effect itself" -- flecks are born AT the beam's
@@ -150,19 +149,83 @@ namespace Cleo.TerraFirma.Scripts
 			}
 		}
 
-		/// <summary>Ricochet elbow (user go-ahead 2026-08-12: "the elbow flash is a good
-		/// instinct"): a sharp chip burst at the carom's turn point, StunningForce's radial
-		/// ring idiom in the trace's own gravel register. The bend gets a joint.</summary>
-		public static void PlayRicochetElbow(Cell origin)
+		/// <summary>Ricochet rock flight (RULED 2026-08-14, user: the rock should "bounce" on us
+		/// "and then do a thrown animation in the direction it's ricocheting"; same ruling retired
+		/// the elbow chip burst and the staggered blip trace -- "bounce redraw carries the whole
+		/// beat"): a short hop at the whorl the moment the engine's own (re-pathed) flight
+		/// arrives, then a real thrown-arc leg to the carom's endpoint in the engine's flight
+		/// grammar. Enqueued from the deflect mark's ConfigureMissileVisualEffectEvent handler,
+		/// so it exists exactly when the engine juice does; the delay hands leg 1 the frame
+		/// first. Classic display mode keeps the text-side blip trace instead (gated at the
+		/// call site in Effect_GravelWhorl).</summary>
+		public static void PlayRicochetFlight(XRL.World.GameObject weapon, Cell bounce, Cell landing, float delaySec)
 		{
-			if (origin == null || !origin.InActiveZone)
+			if (weapon == null || bounce == null || landing == null || landing == bounce
+				|| GameManager.Instance == null || !bounce.InActiveZone)
 				return;
-			for (int i = 0; i < ELBOW_PARTICLES; i++)
+			char fg = 'y', dt = 'Y';
+			string tile = null;
+			XRL.World.Parts.Render r = weapon.Render;
+			if (r != null)
 			{
-				float a = i * 2f * Mathf.PI / ELBOW_PARTICLES;
-				string glyph = i % 2 == 0 ? "&Y±" : "&W±";
-				XRLCore.ParticleManager.Add(glyph, origin.X, origin.Y,
-					Mathf.Sin(a) / 8f, Mathf.Cos(a) / 8f, 14, 0f, 0f, 0L);
+				string cs = !r.TileColor.IsNullOrEmpty() ? r.TileColor : r.ColorString;
+				if (!cs.IsNullOrEmpty())
+				{
+					int amp = cs.IndexOf('&');
+					if (amp >= 0 && amp + 1 < cs.Length)
+						fg = cs[amp + 1];
+				}
+				dt = r.DetailColor.IsNullOrEmpty() ? fg : r.DetailColor[0];
+				tile = r.Tile;
+			}
+			if (tile.IsNullOrEmpty())
+				tile = FLECK_TILE;
+			Cleo_TerraFirma_CreatureSnapshotRenderable look = new Cleo_TerraFirma_CreatureSnapshotRenderable(
+				tile, fg, dt, 'k', false, false);
+			Vector3 b = GameManager.Instance.getTileCenter(bounce.X, bounce.Y);
+			Vector3 e = GameManager.Instance.getTileCenter(landing.X, landing.Y);
+			Helpers.VerifyLog("GVW", $"rico flight: bounce at ({bounce.X},{bounce.Y}) then thrown leg to ({landing.X},{landing.Y}), delay {delaySec:0.00}s");
+			CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceStoneBounce(look, b, e, delaySec), async: true);
+		}
+
+		/// <summary>Ricochet beam redraw (RULED 2026-08-14, user: "i want to redraw the animation
+		/// of the laser line when it ricochets"): the carom's second leg drawn with the bolt's
+		/// OWN beam prefab -- ProjectileVFX + configuration lifted straight off the projectile,
+		/// the engine's own wiring grammar from MissileWeapon -- so a refracted laser shows a
+		/// real laser line along the new direction. Particle-VFX mode only; a VFX-less
+		/// projectile is a clean no-op.
+		/// TIMING (feel round 1, user: "the delay on the beam redirect should be a bit
+		/// tighter"; decomp diagnosis): missile fire wraps resolution in the juice manager's
+		/// DELAY BATCH, so anything enqueued mid-resolution -- this redraw included -- gets
+		/// chained onto the engine's own beam entry and released only at its finish() (whose
+		/// duration can sit at the 1.5s default thanks to an engine-side Duration/duration
+		/// case mismatch). Fix: add the entry STRAIGHT to the manager's public waiting list,
+		/// skipping enqueueEntry's delay-batch check -- the waiting list promotes at the same
+		/// frame pump that starts the engine's beam, so both legs light together and read as
+		/// one bent path. All-public access, no Harmony. (The devour ember-catch deliberately
+		/// KEEPS the delay-batch ride -- starting as the beam fades is its design.)</summary>
+		public static void PlayBeamRedraw(Cell origin, Cell landing, XRL.World.GameObject projectile)
+		{
+			if (origin == null || landing == null || landing == origin || projectile == null || !Options.UseParticleVFX)
+				return;
+			if (CombatJuiceManager.instance == null)
+				return;
+			string vfx = projectile.GetPropertyOrTag("ProjectileVFX");
+			if (vfx.IsNullOrEmpty())
+				return;
+			MissileWeaponVFXConfiguration cfg = MissileWeaponVFXConfiguration.next();
+			MissileWeaponVFXConfiguration.MissileVFXPathDefinition path = cfg.GetPath(0);
+			path.addStep(origin.Location);
+			path.addStep(landing.Location);
+			cfg.setPathProjectileVFX(0, vfx, projectile.GetPropertyOrTag("ProjectileVFXConfiguration"));
+			Helpers.VerifyLog("GVW", $"rico beam redraw: {vfx} from ({origin.X},{origin.Y}) to ({landing.X},{landing.Y})");
+			CombatJuiceEntryMissileWeaponVFX entry = new CombatJuiceEntryMissileWeaponVFX();
+			entry.configure(cfg);
+			entry.turn = CombatJuice.juiceTurn;
+			entry.async = true;
+			lock (CombatJuiceManager.instance.queue)
+			{
+				CombatJuiceManager.instance.waiting.Add(entry);
 			}
 		}
 
@@ -334,6 +397,90 @@ namespace Cleo.TerraFirma.Scripts
 			if (Target != null)
 			{
 				Target.gameObject.transform.localScale = OrigScale; // pool state restore
+				SpriteManager.Return(Target);
+				Target = null;
+			}
+			base.finish();
+		}
+	}
+
+	/// <summary>
+	/// The ricochet's rock presentation (ruling 2026-08-14; feel round 1 same evening, user
+	/// sketch: "there's one extra bounce on the player's tile that's unnecessary - it just
+	/// needs to draw the bounce" -- the standalone hop-in-place at the whorl was a double
+	/// touch, so it died; the outgoing ARC is the bounce, one continuous contact): one pooled
+	/// sprite wearing the deflected weapon's own tile, hidden while the engine's re-pathed
+	/// leg-1 flight plays, then launching straight off the contact moment into a thrown-arc
+	/// leg to the carom endpoint in the engine's flight grammar (350 px/s, spin, arc).
+	/// Petrify-chunk lifecycle: turn sweep declined, park-behind-map outside its window, pool
+	/// scale AND rotation restored at finish (this entry spins its sprite -- a stale rotation
+	/// leak would tilt some future petrify chunk).
+	/// </summary>
+	public class Cleo_TerraFirma_JuiceStoneBounce : CombatJuiceEntry
+	{
+		private IRenderable Tile;
+		private ex3DSprite2 Target;
+		private Vector3 Bounce;
+		private Vector3 End;
+		private float Delay;
+		private float Travel;
+		private Vector3 OrigScale;
+		private Quaternion OrigRotation;
+		private float SpinDegPerSec;
+		private const float ARC_PX = 10f;  // the outgoing arc IS the bounce (user sketch); raised from 6 with the hop's departure
+		private const float SPEED = 350f;  // px/s, matching the engine thrown-flight Speed parameter
+
+		public Cleo_TerraFirma_JuiceStoneBounce(IRenderable tile, Vector3 bounce, Vector3 end, float delaySec)
+		{
+			Tile = tile;
+			Bounce = bounce;
+			End = end;
+			Delay = Mathf.Max(0f, delaySec);
+			Travel = Vector3.Distance(bounce, end) / SPEED;
+			SpinDegPerSec = (Stat.Random(0, 1) == 0 ? 1f : -1f) * Stat.Random(240, 480);
+			duration = Delay + Travel + 0.02f;
+		}
+
+		public override bool canFinishUpToTurn() => false;
+
+		public override void start()
+		{
+			Target = SpriteManager.GetPooledSprite(Tile, Transparent: true);
+			Transform transform = Target.gameObject.transform;
+			transform.SetParent(GameManager.Instance.TileRoot.transform);
+			OrigScale = transform.localScale;
+			OrigRotation = transform.localRotation;
+			transform.position = Bounce + new Vector3(0f, 0f, Cleo_TerraFirma_GorgonPetrifyFX.Z_PARKED);
+		}
+
+		public override void update()
+		{
+			if (Target == null)
+				return;
+			Transform transform = Target.transform;
+			if (t < Delay || t >= Delay + Travel)
+			{
+				transform.position = Bounce + new Vector3(0f, 0f, Cleo_TerraFirma_GorgonPetrifyFX.Z_PARKED);
+				return;
+			}
+			float u = t - Delay;
+			float v = Mathf.Clamp01(u / Mathf.Max(0.01f, Travel));
+			Vector3 p = Vector3.Lerp(Bounce, End, v);
+			p.y += Mathf.Sin(v * Mathf.PI) * ARC_PX;
+			// z is RELATIVE to the tile plane, which sits at z=100 (getTileCenter returns 100-z)
+			// -- an absolute Z_CHUNK here put the sprite 111 units off-plane and the flight never
+			// rendered once (caught live 2026-08-15: "i'm not seeing the second leg")
+			p.z = Bounce.z + Cleo_TerraFirma_GorgonPetrifyFX.Z_CHUNK;
+			transform.position = p;
+			transform.localRotation = Quaternion.Euler(0f, 0f, SpinDegPerSec * u);
+		}
+
+		public override void finish()
+		{
+			if (Target != null)
+			{
+				Target.gameObject.transform.localScale = OrigScale;
+				Target.gameObject.transform.localRotation = OrigRotation;
 				SpriteManager.Return(Target);
 				Target = null;
 			}

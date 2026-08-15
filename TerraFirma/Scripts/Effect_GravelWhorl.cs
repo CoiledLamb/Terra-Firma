@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Cleo.TerraFirma.Scripts;
 using XRL.Rules;
+using XRL.UI;
 using XRL.World.Parts.Mutation;
 
 namespace XRL.World.Effects
@@ -301,8 +302,8 @@ namespace XRL.World.Effects
 				Cell landing = (open != null && open.Count > 0) ? open[Stat.Random(0, open.Count - 1)] : Object.CurrentCell;
 				Helpers.VerifyLog("GVW", $"swat: real item {projectile.Blueprint} batted to ({landing?.X},{landing?.Y}), loot preserved");
 				landing?.AddObject(projectile);
-				MarkDeflected(projectile, landing);
-				Cleo_TerraFirma_GravelWhorlFX.PlaySwatBeat(Object.CurrentCell, landing); // dust + blip: the loot pointer
+				MarkDeflected(projectile, landing); // also ends the flight juice at the whorl + strips its dust
+				Cleo_TerraFirma_GravelWhorlFX.PlaySwatBeat(Object.CurrentCell, landing); // grit blip: the loot pointer
 			}
 		}
 
@@ -314,9 +315,11 @@ namespace XRL.World.Effects
 		/// damage; the carom ends at the first body, hit or flinched. Walls stop it. Real items land
 		/// where the carom ends; munitions spend themselves. Kill attribution: the whorl's owner.
 		/// Payload channels deliberately do NOT fire (the whorl redirects mass, not triggers).
-		/// VFX (RULED 2026-07-23, "a good one to implement now"): staggered gravel blips along the
-		/// carom line + a dust puff where it ends; richer animations parked for a later pass.
-		/// All numbers DRAFT.
+		/// VFX (RULED 2026-08-14, superseding the 2026-07-23 trace+elbow: "bounce redraw carries
+		/// the whole beat"): rocks bounce on the whorl then fly a real thrown leg to the carom's
+		/// end (deflect mark chains it after the re-pathed engine flight); laser bolts get their
+		/// own beam prefab redrawn along the new leg. The staggered blip trace survives only in
+		/// classic display mode, where the sprite flights can't render. All numbers DRAFT.
 		/// </summary>
 		private void Ricochet(GameObject projectile)
 		{
@@ -343,7 +346,6 @@ namespace XRL.World.Effects
 				XDidYToZ(whorlName, "refracts", projectile, EndMark: "!", Source: Object);
 			else
 				XDidYToZ(whorlName, "sends", projectile, "careening", EndMark: "!", Source: Object);
-			Cleo_TerraFirma_GravelWhorlFX.PlayRicochetElbow(origin); // the bend gets a joint (go-ahead 2026-08-12)
 			double rad = Stat.Random(0, 359) * Math.PI / 180.0;
 			int ex = Math.Max(0, Math.Min(zone.Width - 1, origin.X + (int)Math.Round(Math.Cos(rad) * RICOCHET_RANGE)));
 			int ey = Math.Max(0, Math.Min(zone.Height - 1, origin.Y + (int)Math.Round(Math.Sin(rad) * RICOCHET_RANGE)));
@@ -357,7 +359,9 @@ namespace XRL.World.Effects
 				if (step.IsSolid())
 					break;
 				landing = step;
-				if (step.InActiveZone)
+				// classic display mode only: sprite flights can't render there, the blip trace
+				// stays its carom language (tiles mode: the bounce/redraw carries the whole beat)
+				if (!Options.UseParticleVFX && step.InActiveZone)
 					The.ParticleManager.Add("&y±", step.X, step.Y, 0f, 0f, 12, 0f, 0f, traceStep * 40L);
 				traceStep++;
 				GameObject victim = null;
@@ -387,8 +391,11 @@ namespace XRL.World.Effects
 				}
 			}
 			Helpers.VerifyLog("GVW", $"ricochet: {projectile?.Blueprint ?? "munition"} carom ended at ({landing.X},{landing.Y}); {(projectile == null || ephemeral ? "munition spent" : "item lands there")}");
-			if (landing != origin)
-				Cleo_TerraFirma_GravelWhorlFX.PlayCaromLanding(landing); // grit in tiles, dust in text (less-smoke round 2026-08-12)
+			bool light = projectile != null && IsLightProjectile(projectile);
+			if (landing != origin && !light)
+				Cleo_TerraFirma_GravelWhorlFX.PlayCaromLanding(landing); // grit where mass comes to rest; light leaves none
+			if (light)
+				Cleo_TerraFirma_GravelWhorlFX.PlayBeamRedraw(origin, landing, projectile); // the bolt's own line, new leg (RULED 2026-08-14)
 			if (projectile != null)
 			{
 				if (ephemeral)
@@ -396,7 +403,7 @@ namespace XRL.World.Effects
 				else
 				{
 					landing.AddObject(projectile);
-					MarkDeflected(projectile, landing);
+					MarkDeflected(projectile, landing, ricochet: true); // bounce + thrown leg chain after the engine flight
 				}
 			}
 		}
@@ -408,13 +415,18 @@ namespace XRL.World.Effects
 		/// deflected thrown weapons get marked: the mark restores the outcome's placement at
 		/// AfterThrownEvent, and FallenRockPart skips its fragility roll while marked.
 		/// </summary>
-		private void MarkDeflected(GameObject projectile, Cell landing)
+		private void MarkDeflected(GameObject projectile, Cell landing, bool ricochet = false)
 		{
 			if (projectile == null || landing == null)
 				return;
 			XRL.World.Parts.Cleo_TerraFirma_WhorlDeflectedPart mark =
 				projectile.RequirePart<XRL.World.Parts.Cleo_TerraFirma_WhorlDeflectedPart>();
 			mark.Intended = landing;
+			// presentation half (2026-08-14): the mark also intercepts the engine's flight juice --
+			// ends leg 1 at the whorl, strips the ThrowVFX dust cluster, and for ricochets chains
+			// the bounce + thrown-leg entry (see Part_WhorlDeflected / Fx_GravelWhorlFX)
+			mark.Bounce = Object.CurrentCell;
+			mark.Ricochet = ricochet;
 		}
 		#endregion
 	}

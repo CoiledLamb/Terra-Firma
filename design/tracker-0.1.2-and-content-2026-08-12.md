@@ -82,8 +82,8 @@ eyes-on items.
 
 ### 1b. Open balance calls in the lane
 
-- [ ] **Discharge-law final ratify** — liquids 50→100, house 25→100; explicitly held for a
-      REAL play session (a friends-beta session counts) — TODO:94
+- ~~**Discharge-law final ratify**~~ — CUT from the queue 2026-08-14 (user: fissure rocks not
+      spawnable); rides with the catalog's return — TODO:94
 - [ ] **Fissure feel session** — the v5 staircase ladder + the flagged CLAUDE dials
       (dissipating-front rim bite, AI coverage gate) judged against tfpen + live casts — TODO:88
 - [ ] **Calcify cooldown try-out revisit** — the scaling cooldown was framed try-out;

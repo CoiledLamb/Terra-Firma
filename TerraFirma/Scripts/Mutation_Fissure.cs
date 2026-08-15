@@ -219,24 +219,7 @@ namespace XRL.World.Parts.Mutation
 		/// <summary>Keeper-salvage rolls per cast ("additional small spawns", ruled): 1 roll at bands 1-2, 2 at bands 3-4, each 50%.</summary>
 		public static int GetSalvageRolls(int Lv) => GetBand(Lv) >= 3 ? 2 : 1;
 
-		/// <summary>% chance a gap holds a geyser (the door that shoots back): 0/10/15/20 by band.</summary>
-		public static int GetGeyserChance(int Lv)
-		{
-			switch (GetBand(Lv))
-			{
-				case 1: return 0;
-				case 2: return 10;
-				case 3: return 15;
-				default: return 20;
-			}
-		}
-
-		/// <summary>Omnigeyser tier by band (2->1, 3->2, 4->3), clamped at tier 3 -- only three
-		/// blueprints exist, and the uncapped band ladder (L20 pass) must not compose a
-		/// phantom Omnigeyser4.</summary>
-		public static string GetGeyserBlueprint(int Lv) => "Cleo_TerraFirma_Rock_Omnigeyser" + Math.Min(3, Math.Max(1, GetBand(Lv) - 1));
-
-		/// <summary>% chance the rim raises a stone figure (USER RULED into v1: "figurine can come
+/// <summary>% chance the rim raises a stone figure (USER RULED into v1: "figurine can come
 		/// in first pass"): 0/2/4/6 by band, at most one per cast. A figure is an event, not a fixture.</summary>
 		public static int GetFigureChance(int Lv)
 		{
@@ -609,19 +592,13 @@ namespace XRL.World.Parts.Mutation
 				deposited++;
 			}
 			/* BETA-HELD (feel round 2, user 2026-08-03: "all salvage + baboon and geyser, for
-			   now" -- reconsider once the mutation is functioning). The geyser-in-gap and the
-			   keeper-salvage rolls, cut together; the figure survives (lore-bearing, not loot).
-			   Feel round 1's crack-gate hold rides inside. Restore alongside GetGeyserChance/
-			   GetSalvageRolls/SALVAGE_TABLE.
-			bool geyserPlaced = false;
+			   now" -- reconsider once the mutation is functioning). The keeper-salvage rolls;
+			   the figure survives (lore-bearing, not loot). Feel round 1's crack-gate hold rides
+			   inside. Restore alongside GetSalvageRolls/SALVAGE_TABLE. (The geyser-in-gap that
+			   was held here died for good at the 2026-08-13 geyser cut -- its code and helpers
+			   are scrubbed, not held; pre-cut shape at git tag fissure-v2-grenade.)
 			foreach (Cell gap in gaps)
 			{
-				if (!geyserPlaced && GetGeyserChance(Level).in100() && !StillHoldsCombatant(gap))
-				{
-					deposits.Add((gap, GetGeyserBlueprint(Level), 0f));
-					geyserPlaced = true;
-					continue;
-				}
 				if (CRACK_GATE_CHANCE.in100())
 					deposits.Add((gap, CRACK_BLUEPRINT, 0f));
 			}
