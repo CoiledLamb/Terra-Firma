@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using ConsoleLib.Console;
 using XRL.Language;
@@ -52,6 +52,17 @@ namespace XRL.World.Parts
 		// is the one-line veto if the starter kit should carve clean.
 		private const int GARBLE_TIER_CEILING = 6;
 		private const int GARBLE_PCT_PER_TIER = 4;
+		// Improvised penalty (user 2026-08-15, on the proper-tools build: they wanted purpose made
+		// tools to beat "a carbide dagger and hammer being used in place of it"). Before this, the
+		// tag bought NOTHING: any ShortBlades edge and any Cudgel striker counted at face tier, so
+		// a carbide dagger etched exactly as cleanly as a carbide chisel and the whole tool ladder
+		// was cosmetic against improvisation. Written as a PENALTY on improvised tools rather than
+		// a bonus on proper ones so that nothing already tuned moves: the blunted pair stays at its
+		// ruled 24%, steel stays 16%, carbide stays 8%, and only borrowed weapons get worse.
+		// Two rungs is the gap, so an improvised tool always carves like a purpose made one two
+		// tiers below it. Clamped at 0 so a tier 0 club cannot push garble past the 24% ceiling.
+		// CLAUDE DIAL awaiting ratification, same as the two above it.
+		private const int IMPROVISED_TIER_PENALTY = 2;
 
 		public string Inscription;
 
@@ -194,7 +205,8 @@ namespace XRL.World.Parts
 				string kind = item.GetTag(TOOL_TAG);
 				bool isStriker = kind == "Mallet";
 				bool isEdge = kind == "Chisel";
-				if (!isStriker && !isEdge)
+				bool purposeMade = isStriker || isEdge;
+				if (!purposeMade)
 				{
 					string skill = item.GetPart<MeleeWeapon>()?.Skill;
 					if (skill == "Cudgel")
@@ -202,10 +214,14 @@ namespace XRL.World.Parts
 					else if (skill == "ShortBlades")
 						isEdge = true;
 				}
+				// a borrowed weapon carves like a real tool two rungs below it
+				int tier = purposeMade
+					? item.GetTier()
+					: Math.Max(0, item.GetTier() - IMPROVISED_TIER_PENALTY);
 				if (isStriker)
-					striker = Math.Max(striker, item.GetTier());
+					striker = Math.Max(striker, tier);
 				if (isEdge)
-					edge = Math.Max(edge, item.GetTier());
+					edge = Math.Max(edge, tier);
 			}
 			return (striker < 0 || edge < 0) ? -1 : Math.Min(striker, edge);
 		}
