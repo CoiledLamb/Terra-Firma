@@ -102,16 +102,20 @@
        yet either. Faction is inherited Humanoids-100 because the carver faction entry is
        scheduled AFTER the NPC build by ruling. ExcludeFromDynamicEncounters: wish-door only. -->
   <object Name="Cleo_TerraFirma_Stonecarver" Inherits="BaseHumanoid">
-    <!-- COLORS ACCEPTED BY THE USER 2026-08-15 ("these are fine for base colors"): grey body,
-         dark grey detail. An interim brown/white pass lived and died the same sitting; it was
-         Claude misreading a report about the LEGENDARIES as a complaint about the base.
-         CHANNEL MAPPING CORRECTED 2026-08-15 by the user's eyes (they saw the role colors
-         "recoloring the wrong bits" and called the flip). Claude had inferred from a pixel count
-         (66 black to 28 white) that DetailColor paints the black majority. Observation says
-         otherwise, so the pair is swapped: the ROLE color now rides ColorString and the shared
-         grey sits in DetailColor. The pixel count was real; the channel it maps to was a guess,
-         and a guess is not a measurement. -->
-    <part Name="Render" DisplayName="stonecarver" Tile="stonecarver.png" ColorString="&amp;K" DetailColor="y" />
+    <!-- COLORS SETTLED 2026-08-15 (user, final: "let's have main color light grey, detail dark
+         grey, and then do detail dark grey on the rest of them"). DetailColor is set HERE ONLY on
+         purpose: the roles override ColorString and nothing else, so every carver inherits the
+         same dark ground, and "the rest of them" is expressed by inheritance rather than by four
+         copies free to drift apart.
+         Three things fall out of this, worth knowing before anyone dials it. The MASON stops
+         rendering flat, which it had been since the earlier carrier flip left it light grey on
+         light grey, a Claude bug. The LEGENDARY finally reads as asked back at the first pack,
+         pink over dark grey, because MakeLegendary paints ColorString and leaves DetailColor
+         alone. And every earlier colour pass this day is superseded by this one line: the interim
+         brown/white base, the carrier flip, and the channel argument behind them.
+         The one durable fact from all that churn: the pixel count was a measurement, the channel
+         it mapped to was a guess, and colours here get judged by eye, never inferred. -->
+    <part Name="Render" DisplayName="stonecarver" Tile="stonecarver.png" ColorString="&amp;y" DetailColor="K" />
     <!-- Faction landed 2026-08-15. Replaces the inherited Humanoids-100 from BaseHumanoid, and
          every role inherits it from here. Neutral to the player at 0 starting rep by the faction
          entry, so a pack is not automatically hostile; whether quarriers should OPEN friendly,
