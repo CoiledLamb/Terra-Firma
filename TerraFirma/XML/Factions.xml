@@ -32,8 +32,6 @@
            whether the OVERSEER differs from the rank and file (the per creature xTag
            WaterRitual/NoJoin makes that split cheap), is the open call, and it sits next to the
            already open "water ritual on the overseer" thread.
-         - interests (what they buy, sell and gossip about) wait on the kit pass, since what a
-           quarrier trades is mostly what a quarrier carries.
        Emblem uses the user's own stonecarver.png rather than a base-game caste tile. -->
 
   <faction
@@ -51,6 +49,22 @@
     EmblemDetailColor="K"
   >
     <feeling About="*" Value="0" />
+
+    <!-- Interests RULED 2026-08-15 (user: "buying ruins is good, selling desertcanyons and
+         underground works"). These are the water ritual secrets trade, and the buy/sell split is
+         the characterising half: what a faction PAYS to hear says as much as what it will tell.
+         Quarriers sell their own domain, the canyons and everything under them, and buy leads on
+         ruins: worked stone they have not reached yet. The base Farmers' Guild is the model for
+         reading it, a single buy only line that tells you what farmers want to know.
+         Note the ruins direction is deliberate and survives the 2026-08-12 calling change that
+         swapped ruins lore for canyons: the calling stopped being FROM the ruins, the guild still
+         wants to hear about them. -->
+    <interests>
+      <interest Tags="desertcanyons" WillBuy="false" WillSell="true" />
+      <interest Tags="underground" WillBuy="false" WillSell="true" />
+      <interest Tags="ruins" WillBuy="true" WillSell="false" />
+    </interests>
+
     <factionworshipattitudes>
       <factionworshipattitude Name="Cleo_TerraFirma_Quarriers" Attitude="50" />
       <factionworshipattitude Name="Girsh" Attitude="-100" />
