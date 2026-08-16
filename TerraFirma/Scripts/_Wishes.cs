@@ -782,5 +782,57 @@ namespace Cleo.TerraFirma.Scripts
 				MessageQueue.AddPlayerMessage("tfcarverpack TROUBLE: " + line, Capitalize: false);
 			Helpers.VerifyLog("CARVER", $"tfcarverpack: overseer + {spawned} rank and file [{string.Join("/", lines)}]");
 		}
+		/// <summary>Reputation jingle audition (user 2026-08-15: "can i listen to the files and
+		/// judge myself?"). The clips are packed inside Unity's resources.assets with no loose ogg
+		/// anywhere, so extracting them would need AssetRipper. Playing them does not: they are
+		/// ordinary engine sound paths and the mod already plays those.
+		///
+		/// tfjingle cycles the candidates for the Quarriers' Guild, one per wish, naming each
+		/// before it plays. tfjingleneg plays the NEGATIVE half of whichever is currently selected,
+		/// because a faction picks a PAIR and the sour one is half of what you are choosing.
+		///
+		/// Sharing a jingle is base-game practice, not a compromise: sultanCult is used by five
+		/// factions and village by four. BRANCH-ONLY.</summary>
+		private static readonly (string Key, string Why)[] JingleCandidates = new[]
+		{
+			("mopango", "the underground dwellers; your own tracker already runs a mopango-symmetry thread, and you just put the mole on the emblem"),
+			("cragmensch", "the stone-creature faction, the closest thing in the game to a stone people"),
+			("barathrumites", "underground artisans, guild-adjacent, but they read strongly as tinkers"),
+			("farmersGuild", "what the guild is set to now: workaday, institutional"),
+			("merchantsGuild", "the other guild; the civic register at its most formal"),
+			("hermits", "outsider register, if quarriers should sound apart from the settled world"),
+			("issachariTribe", "a desert people rather than a trade body"),
+		};
+
+		private static int JingleIndex = -1;
+
+		[WishCommand(Command = "tfjingle")]
+		public static void JingleAudition()
+		{
+			JingleIndex = (JingleIndex + 1) % JingleCandidates.Length;
+			var pick = JingleCandidates[JingleIndex];
+			string path = $"Sounds/Reputation/sfx_reputation_{pick.Key}_positive";
+			SoundManager.PreloadClipSet(path);
+			The.Player?.PlayWorldSound(path, 1f);
+			MessageQueue.AddPlayerMessage($"tfjingle [{JingleIndex + 1}/{JingleCandidates.Length}] {{{{W|{pick.Key}}}}} positive: {pick.Why}", Capitalize: false);
+			MessageQueue.AddPlayerMessage("wish tfjingle again for the next candidate, or tfjingleneg to hear this one's sour half.", Capitalize: false);
+			Helpers.VerifyLog("JINGLE", $"audition {pick.Key} positive");
+		}
+
+		[WishCommand(Command = "tfjingleneg")]
+		public static void JingleAuditionNegative()
+		{
+			if (JingleIndex < 0)
+			{
+				MessageQueue.AddPlayerMessage("tfjingleneg: nothing selected yet, wish tfjingle first.", Capitalize: false);
+				return;
+			}
+			var pick = JingleCandidates[JingleIndex];
+			string path = $"Sounds/Reputation/sfx_reputation_{pick.Key}_negative";
+			SoundManager.PreloadClipSet(path);
+			The.Player?.PlayWorldSound(path, 1f);
+			MessageQueue.AddPlayerMessage($"tfjingleneg: {{{{W|{pick.Key}}}}} negative.", Capitalize: false);
+			Helpers.VerifyLog("JINGLE", $"audition {pick.Key} negative");
+		}
 	}
 }
