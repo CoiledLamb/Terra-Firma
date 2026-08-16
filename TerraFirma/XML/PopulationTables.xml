@@ -19,9 +19,18 @@
     </group>
   </population>
   	<population Name="Cleo_Stonecarver_Maquette">
+		<!-- Stone added 2026-08-15 (user: "it's fine to add this"), closing the 08-14 material
+		     ladder ruling on the XML side. HEADS UP, this table is SHARED: it seeds the PLAYER
+		     calling kit as well as the mason, so this also changes what a player stonecarver
+		     starts holding. That reads right (a carver's keepsake is something they carved) but
+		     it is a change to the opening hand, not just to an NPC.
+		     WEIGHTS ARE CLAUDE DRAFT. The entries were previously unweighted, i.e. an even split;
+		     stone leads now because it is the thing these people actually make, and silver stays
+		     the rare one worth stealing. -->
 		<group Name="Maquette" Style="pickone">
-		<object Blueprint="Random Copper Figurine" Number="1-2"/>
-		<object Blueprint="Random Silver Figurine" Number="1"/>
+		<object Weight="50" Blueprint="Cleo_TerraFirma_Random Stone Figurine" Number="1-2"/>
+		<object Weight="35" Blueprint="Random Copper Figurine" Number="1-2"/>
+		<object Weight="15" Blueprint="Random Silver Figurine" Number="1"/>
 	 </group>
 	</population>
 	<!-- Cobble baboon butchery (2026-08-13): quartzfur three-piece idiom, equal weights

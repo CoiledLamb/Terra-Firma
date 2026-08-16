@@ -96,4 +96,22 @@
     <part Name="Description" Short="Canyon stone, cut square and stacked for the crossing." />
     <part Name="Physics" Takeable="false" Weight="500" />
   </object>
+
+  <!-- STONE FIGURINE (2026-08-15). Closes the XML half of the FIGURINE MATERIAL LADDER ruling of
+       2026-08-14 (user: "figurines on the floor have a chance to spawn stone (or wood?) instead
+       of copper, still giving rep, but very little value"). That ruling was built on the SIM side
+       only; the warren lab's own entry still reads "figurine (maquette, mod blueprint TBD)", which
+       is sim first working as intended, the lab leading and the XML catching up.
+       The engine needed no help. RandomFigurine.Material is a plain string and
+       GetFigurineRepValue ends in a default case, so "stone" falls through to DEFAULT_REP_VALUE,
+       which is 60: IDENTICAL to copper. So the ruling lands exactly as worded by accident of the
+       engine, same social weight, and the "very little value" half is pure Commerce.
+       Commerce 3 against copper's 60 is a CLAUDE DRAFT. Display name substitutes *material* so it
+       reads "stone <creature> figurine" with no extra work. -->
+  <object Name="Cleo_TerraFirma_Random Stone Figurine" Inherits="Random Figurine">
+    <part Name="Render" DisplayName="{{y|stone}} {{|*creature*}} figurine" DetailColor="K" RenderString="*" ColorString="&amp;y" RenderLayer="5" />
+    <part Name="Commerce" Value="3" />
+    <part Name="RandomFigurine" Material="stone" />
+    <tag Name="Tier" Value="1" />
+  </object>
 </objects>
