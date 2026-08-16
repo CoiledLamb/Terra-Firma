@@ -37,10 +37,16 @@
            roughly 200 rep scaled by the level gap, floor 50. That per creature xTag is the cheap
            lever if the OVERSEER should ever differ from the rank and file, which is still live
            next to the open "water ritual on the overseer" thread.
-       Emblem is the user's own stonerat.png, RULED 2026-08-15 ("let's use the mole"). The mole
-       body fronting the guild rather than the human one is a lore position as much as an art pick,
-       and it arrives the same day the mole folk axis was ratified by building it.
-       Emblem colors are still y over K, untouched by the tile swap and freely dialled. -->
+       Emblem is stonecarver.png, the HUMAN body, RULED 2026-08-15. The mole emblem lasted about
+       an hour: the user picked stonerat.png, then found it faced the wrong way and asked for it
+       "flipped." Claude read that as colour inverted and swapped the channels, which answered a
+       question nobody asked; the user meant literally MIRRORED. Rather than mirror the art the
+       user settled it the simpler way, "just use the regular stonecarver.png rather than
+       stonerat," so the human fronts the guild after all and the colour swap is reverted to the
+       original y over K.
+       Still available if the mole is ever wanted back: a mirrored copy of the sprite as its own
+       emblem file, since the tile is only referenced here and would not disturb the mole
+       creatures that share the original. -->
 
   <faction
     Name="Cleo_TerraFirma_Quarriers"
@@ -52,7 +58,7 @@
     PositiveSound="Sounds/Reputation/sfx_reputation_cragmensch_positive"
     NegativeSound="Sounds/Reputation/sfx_reputation_cragmensch_negative"
     HistoricalSignificance="1"
-    EmblemTile="stonerat.png"
+    EmblemTile="stonecarver.png"
     EmblemTileColor="y"
     EmblemDetailColor="K"
   >
