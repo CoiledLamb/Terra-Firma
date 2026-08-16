@@ -24,17 +24,19 @@
          - feelings toward specific factions. The entry ships neutral to everyone rather than
            inventing a politics; the only attitudes stated are the two the base guilds both
            state (Girsh and Entropic hostility), which read as house style rather than opinion.
-         - the water ritual. NO waterritual node is written yet, and that is not neutral:
-           WaterRitualJoin DEFAULTS TO TRUE, so as it stands ANY quarrier you share water with
-           can be recruited into your party. Correction on record (user caught it 2026-08-15):
-           Join gates whether THEY join YOU, not whether you can join the guild. Decomp
-           WaterRitualJoinParty: the option appears when the faction allows it, the speaker is
-           not already player led, and the speaker has no NoJoin xTag. The base Merchants' Guild
-           sets false, i.e. merchants do not follow you home. Recruit cost is roughly 200 rep
-           scaled by the level gap, floor 50. Whether quarriers are recruitable at all, and
-           whether the OVERSEER differs from the rank and file (the per creature xTag
-           WaterRitual/NoJoin makes that split cheap), is the open call, and it sits next to the
-           already open "water ritual on the overseer" thread.
+         - the water ritual. RULED 2026-08-15 to follow the guild pattern, and the absence of a
+           node here IS the ruling. Note the two base guilds DISAGREE: Merchants' writes
+           Join="false" alongside BuyMostValuableItem, because it has special ritual behaviour to
+           declare; Farmers' writes no waterritual node at all and takes the defaults. Quarriers
+           have no special ritual behaviour either, so they take the Farmers' shape, and
+           WaterRitualJoin defaults TRUE. Quarriers can be recruited.
+           Mechanism, for whoever changes it later: Join gates whether THEY join YOU, not whether
+           the player can join the guild (Claude had that backwards; user caught it the same day).
+           Decomp WaterRitualJoinParty: the option shows when the faction allows it, the speaker
+           is not already player led, and the speaker carries no WaterRitual/NoJoin xTag. Cost is
+           roughly 200 rep scaled by the level gap, floor 50. That per creature xTag is the cheap
+           lever if the OVERSEER should ever differ from the rank and file, which is still live
+           next to the open "water ritual on the overseer" thread.
        Emblem is the user's own stonerat.png, RULED 2026-08-15 ("let's use the mole"). The mole
        body fronting the guild rather than the human one is a lore position as much as an art pick,
        and it arrives the same day the mole folk axis was ratified by building it.
