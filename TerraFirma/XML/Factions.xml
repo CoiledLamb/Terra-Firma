@@ -32,7 +32,10 @@
            whether the OVERSEER differs from the rank and file (the per creature xTag
            WaterRitual/NoJoin makes that split cheap), is the open call, and it sits next to the
            already open "water ritual on the overseer" thread.
-       Emblem uses the user's own stonecarver.png rather than a base-game caste tile. -->
+       Emblem is the user's own stonerat.png, RULED 2026-08-15 ("let's use the mole"). The mole
+       body fronting the guild rather than the human one is a lore position as much as an art pick,
+       and it arrives the same day the mole folk axis was ratified by building it.
+       Emblem colors are still y over K, untouched by the tile swap and freely dialled. -->
 
   <faction
     Name="Cleo_TerraFirma_Quarriers"
@@ -44,7 +47,7 @@
     PositiveSound="Sounds/Reputation/sfx_reputation_farmersGuild_positive"
     NegativeSound="Sounds/Reputation/sfx_reputation_farmersGuild_negative"
     HistoricalSignificance="1"
-    EmblemTile="stonecarver.png"
+    EmblemTile="stonerat.png"
     EmblemTileColor="y"
     EmblemDetailColor="K"
   >
