@@ -15,9 +15,12 @@
 
        DRAFT and owed, all of it the user's:
          - the faction DESCRIPTION and any display text. Nothing is drafted here on purpose.
-         - rep jingles: currently REUSING the Farmers' Guild sounds as a placeholder. Filed as
-           asset debt, and the workaday register was the only reason to prefer them over the
-           Merchants' pair.
+         - rep jingles: RULED 2026-08-15 by ear, via the tfjingle audition wish (user: "definitely
+           cragmensch"), replacing the interim Farmers' Guild borrow. Sharing a pair is base game
+           practice rather than a compromise: sultanCult is used by 5 factions and village by 4,
+           out of ~62 pairs, so this is a finished decision and not outstanding asset debt.
+           Side effect worth knowing: quarriers and base cragmensch now sound identical on a rep
+           change, so the ear cannot tell them apart. Read as kinship between stone things.
          - feelings toward specific factions. The entry ships neutral to everyone rather than
            inventing a politics; the only attitudes stated are the two the base guilds both
            state (Girsh and Entropic hostility), which read as house style rather than opinion.
@@ -44,8 +47,8 @@
     Plural="false"
     FormatWithArticle="true"
     InitialPlayerReputation="0"
-    PositiveSound="Sounds/Reputation/sfx_reputation_farmersGuild_positive"
-    NegativeSound="Sounds/Reputation/sfx_reputation_farmersGuild_negative"
+    PositiveSound="Sounds/Reputation/sfx_reputation_cragmensch_positive"
+    NegativeSound="Sounds/Reputation/sfx_reputation_cragmensch_negative"
     HistoricalSignificance="1"
     EmblemTile="stonerat.png"
     EmblemTileColor="y"
