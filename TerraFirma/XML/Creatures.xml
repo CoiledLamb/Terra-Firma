@@ -191,8 +191,13 @@
        float since 2026-08-07; RATIFIED BY BUILDING 2026-08-15 at the user's direction (they chose
        both bodies for this pass). Each variant is a thin child of its own role, so the profession
        stays the identity and only the body changes: stonerat.png plus Burrowing Claws.
-       PathAsBurrower is OFF, a CLAUDE PICK: with it on they path THROUGH walls, and a warren is
-       a hand painted thing they would tunnel straight out of. The claws still dig and still hit.
+       PathAsBurrower is ON, i.e. left at its default (user 2026-08-15, lifting Claude's caution:
+       "i'm not super precious about quarry design and giving some pickaxes and burrowing claws
+       pathasburrower part is pretty much fine, unless i see it in game and it works out badly").
+       Claude had switched it OFF on the reasoning that a warren is hand painted and they would
+       tunnel straight out of it. That was a CAUTION, never a ruling, and the user has now
+       explicitly accepted the risk. WATCH CONDITION, in the user's own words: revisit if it reads
+       badly in play. Mole carvers now tunnel while traveling.
        Species tag left inherited on purpose. Building the body does not require claiming the
        species string, and what these people ARE is the user's lore call, not a side effect.
        Display names are Claude DRAFT: they exist only so the two bodies are tellable apart in a
@@ -200,16 +205,16 @@
 
   <object Name="Cleo_TerraFirma_Mole Hewer" Inherits="Cleo_TerraFirma_Hewer">
     <part Name="Render" DisplayName="mole hewer" Tile="stonerat.png" /> <!-- name DRAFT -->
-    <mutation Name="BurrowingClaws" Level="4" PathAsBurrower="false" />
+    <mutation Name="BurrowingClaws" Level="4" />
   </object>
 
   <object Name="Cleo_TerraFirma_Mole Mason" Inherits="Cleo_TerraFirma_Mason">
     <part Name="Render" DisplayName="mole mason" Tile="stonerat.png" /> <!-- name DRAFT -->
-    <mutation Name="BurrowingClaws" Level="4" PathAsBurrower="false" />
+    <mutation Name="BurrowingClaws" Level="4" />
   </object>
 
   <object Name="Cleo_TerraFirma_Mole Outrider" Inherits="Cleo_TerraFirma_Outrider">
     <part Name="Render" DisplayName="mole outrider" Tile="stonerat.png" /> <!-- name DRAFT -->
-    <mutation Name="BurrowingClaws" Level="4" PathAsBurrower="false" />
+    <mutation Name="BurrowingClaws" Level="4" />
   </object>
 </objects>
