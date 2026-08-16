@@ -117,6 +117,11 @@
          entry, so a pack is not automatically hostile; whether quarriers should OPEN friendly,
          wary or hostile is a real design call and is deliberately not made here. -->
     <part Name="Brain" Factions="Cleo_TerraFirma_Quarriers-100" />
+    <!-- Bare spine on the chassis. This is what an OVERSEER carries, since the ruled structure is
+         the goatfolk one: the hero inherits the ordinary kit and the EPITHET tops it up. Nothing
+         bespoke, which is what keeps the byname load bearing instead of decorative, and it gives
+         the "lode" material perk something to bite (richer gear populations, by name alone). -->
+    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Quarrier Kit" />
     <part Name="Description" Short="Chalk dust has worked so far into the creases of =pronouns.possessive= hands that the lines read like a map of somewhere quarried." /> <!-- DRAFT, and deliberately identity-neutral: the professions carry who these people are, and they are not built yet -->
     <stat Name="Level" Value="10" /> <!-- CLAUDE PLACEHOLDER, numbers sitting owed -->
     <!-- NOTE the missing "*noinherit" here, unlike every other creature in this file: that marker
@@ -151,6 +156,7 @@
     <part Name="Description" Short="=pronouns.Subjective= =verb:read:afterpronoun= the rock face the way a reader finds a paragraph break, and =pronouns.subjective= =verb:open:afterpronoun= it there." /> <!-- DRAFT, signoff owed -->
     <mutation Name="Cleo_TerraFirma_Fissure" Level="4" /> <!-- level DRAFT -->
     <tag Name="Role" Value="Brute" /> <!-- DRAFT -->
+    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Hewer Kit" />
   </object>
 
   <object Name="Cleo_TerraFirma_Mason" Inherits="Cleo_TerraFirma_Stonecarver">
@@ -166,6 +172,7 @@
          not a mook. Summoner is the honest tag AND the literal truth (Stoneshaper summons statue
          companions); it rates +4 difficulty, so the con warning matches what the fight becomes. -->
     <tag Name="Role" Value="Summoner" />
+    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Mason Kit" />
   </object>
 
   <object Name="Cleo_TerraFirma_Outrider" Inherits="Cleo_TerraFirma_Stonecarver">
@@ -173,6 +180,7 @@
     <part Name="Description" Short="=pronouns.Subjective= =verb:walk:afterpronoun= the edge of the claim with stones already circling =pronouns.possessive= shoulders, waiting." /> <!-- DRAFT, signoff owed -->
     <mutation Name="Cleo_TerraFirma_EarthenBarrage" Level="4" /> <!-- level DRAFT -->
     <tag Name="Role" Value="Artillery" /> <!-- DRAFT -->
+    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Outrider Kit" />
   </object>
 
   <!-- MOLE HALF of the two-body shape. The mole-folk species axis had sat as an unratified user

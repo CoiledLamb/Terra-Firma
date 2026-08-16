@@ -56,4 +56,70 @@
 			<object Chance="15" Number="1" Blueprint="Cleo_TerraFirma_Rockhound" />
 		</group>
 	</population>
+
+	<!-- QUARRIER KITS (2026-08-15). Shape is the user's: "rather than use player base armor, we
+	     could do something like generate tier appropriate armor with a few items biased to roll
+	     each time." That is the base game's own idiom, and HumanoidEquipment is the model.
+	     The piece that makes it work is {ownertier}, a substitution token resolving the tier off
+	     the OWNING creature, so one table scales itself and no per tier duplicates are needed.
+	     GetTier is an explicit Tier tag if present, else (Level minus 1) / 5 + 1. Our chassis sits
+	     at Level 10 with no Tier tag, so carvers currently roll TIER 2 gear. That coupling is now
+	     load bearing: raising the roster level raises what they wear, and the level is still a
+	     Claude placeholder awaiting the numbers sitting.
+	     Entries with no Chance in a pickeach group fire every time, which is the "biased to roll
+	     each time" half: the signature four are certain, the armor is rolled.
+	     Kept LIGHT per the standing note. Figurines stay OUT of this shared spine: the user ruled
+	     them onto the MASON only (see that kit below), so they are a role tell rather than a
+	     pack wide loot floor. If they should ever spread, a Figurines {ownertier} line at a low
+	     chance is all it takes and the tier table already exists. -->
+	<population Name="Cleo_TerraFirma_Quarrier Kit">
+		<group Name="Equipment" Style="pickeach">
+			<object Blueprint="Cleo_TerraFirma_Blunted Chisel" Number="1" />
+			<object Blueprint="Cleo_TerraFirma_Splintered Mallet" Number="1" />
+			<object Blueprint="HalfFullWaterskin" Number="1" />
+			<object Blueprint="Torch" Number="2-5" />
+			<group Name="Armor" Style="pickone">
+				<table Weight="40" Name="DynamicInheritsTable:Armor:Tier{ownertier}" Chance="75" Number="1" />
+				<table Weight="60" Name="Armor {ownertier}" Chance="75" Number="1" />
+			</group>
+			<table Name="Shoes {ownertier}" Chance="60" />
+		</group>
+	</population>
+
+	<!-- Role kits: the spine plus ONE signature item, per the pitch the user accepted. The
+	     discipline is that the mutation is the job and the item is only the tell.
+	     Hewer takes the dust mask rather than a pickaxe DELIBERATELY: DiggingTool installs Digging
+	     and answers PathAsBurrowerEvent, so an armed hewer would tunnel through walls and chew
+	     apart a hand painted warren. The mask is AV 0, pure characterisation, zero risk, and it
+	     says the same thing: the one who works the face eats the dust. -->
+	<population Name="Cleo_TerraFirma_Hewer Kit">
+		<group Name="Equipment" Style="pickeach">
+			<table Name="Cleo_TerraFirma_Quarrier Kit" />
+			<object Blueprint="Vinewood Sap Mask" Number="1" />
+		</group>
+	</population>
+
+	<!-- Mason carries a MAQUETTE, RULED 2026-08-15 (user: "rather than a bubble level, give the
+	     mason a figurine"), superseding the bubble level from the pitch. It reuses the mod's own
+	     Cleo_Stonecarver_Maquette, which is the exact table in the PLAYER calling kit: copper
+	     figurine 1-2, or a silver one. So a mason carries what a player stonecarver carries, and
+	     they read as kin rather than as loot. It also lands the temptation half of the kit pitch
+	     but SCOPED to one role rather than smeared across the pack: a silver figurine on the
+	     quiet one is a specific thing to want, and the figurine rep economy is already on file. -->
+	<population Name="Cleo_TerraFirma_Mason Kit">
+		<group Name="Equipment" Style="pickeach">
+			<table Name="Cleo_TerraFirma_Quarrier Kit" />
+			<table Name="Cleo_Stonecarver_Maquette" />
+		</group>
+	</population>
+
+	<!-- Outrider's bracer drags an ecology in behind it: they hunt cobble baboons for the pelt, in
+	     the same canyons, and the item carries AddsRep Baboons -100 so the baboons hate them for
+	     it. Free faction texture out of an item that already existed. -->
+	<population Name="Cleo_TerraFirma_Outrider Kit">
+		<group Name="Equipment" Style="pickeach">
+			<table Name="Cleo_TerraFirma_Quarrier Kit" />
+			<object Blueprint="Cleo_TerraFirma_Cobblefur Bracer" Number="1" />
+		</group>
+	</population>
 </populations>

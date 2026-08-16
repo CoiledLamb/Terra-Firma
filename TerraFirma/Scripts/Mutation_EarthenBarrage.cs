@@ -603,11 +603,36 @@ namespace XRL.World.Parts.Mutation
 			}
 		}
 
+		/// <summary>Thrown-stone damage dice.
+		/// LADDER F, RULED 2026-08-15 ("we can go with F") -- the early-weighted cut.
+		/// History: the 2026-08-06 pen cut spent penetration and left the dice alone, but
+		/// stones still one-shot electrofuges around L4. The sim (design/eb_damage_sim2.py)
+		/// found the reason: damage rolls once PER PENETRATION, so dice count multiplies and
+		/// the problem is the CEILING, not the average. 2d6+1 tops out at 26 on a two-pen
+		/// throw against an 18-22 HP target. Trading dice for flat bonus at a similar average
+		/// pulls that ceiling down -- which is why this is a table and not a smaller formula.
+		/// L1-10 is hand-authored; L11+ falls through to the pre-existing curve, which the
+		/// table meets exactly at L10 (4d6+1), so there is no seam and the lategame is
+		/// untouched by design (the whole point of picking F over G).
+		/// Every level still ticks: dice or flat goes up at all ten steps.</summary>
+		private static readonly int[] LADDER_DICE = { 1, 1, 1, 1, 2, 2, 3, 3, 4, 4 };
+		private static readonly int[] LADDER_FLAT = { 0, 1, 2, 3, 0, 1, 0, 1, 0, 1 };
+
 		public static string GetThrowDamage(int Lv)
 		{
-			var diceSize = Mathf.FloorToInt(Lv / 3);
-			var bonus = Lv % 3;
-			return $"{diceSize + 1}d6{(bonus != 0 ? $"+{bonus}" : "")}";
+			int dice, bonus;
+			if (Lv <= 10)
+			{
+				int i = Mathf.Clamp(Lv, 1, 10) - 1;
+				dice = LADDER_DICE[i];
+				bonus = LADDER_FLAT[i];
+			}
+			else
+			{
+				dice = Mathf.FloorToInt(Lv / 3) + 1;
+				bonus = Lv % 3;
+			}
+			return $"{dice}d6{(bonus != 0 ? $"+{bonus}" : "")}";
 		}
 
 		/// <summary>The stone's Penetration CAP -- how much of the thrower's Strength mod the
