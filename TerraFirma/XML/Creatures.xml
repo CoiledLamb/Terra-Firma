@@ -112,6 +112,11 @@
          grey sits in DetailColor. The pixel count was real; the channel it maps to was a guess,
          and a guess is not a measurement. -->
     <part Name="Render" DisplayName="stonecarver" Tile="stonecarver.png" ColorString="&amp;K" DetailColor="y" />
+    <!-- Faction landed 2026-08-15. Replaces the inherited Humanoids-100 from BaseHumanoid, and
+         every role inherits it from here. Neutral to the player at 0 starting rep by the faction
+         entry, so a pack is not automatically hostile; whether quarriers should OPEN friendly,
+         wary or hostile is a real design call and is deliberately not made here. -->
+    <part Name="Brain" Factions="Cleo_TerraFirma_Quarriers-100" />
     <part Name="Description" Short="Chalk dust has worked so far into the creases of =pronouns.possessive= hands that the lines read like a map of somewhere quarried." /> <!-- DRAFT, and deliberately identity-neutral: the professions carry who these people are, and they are not built yet -->
     <stat Name="Level" Value="10" /> <!-- CLAUDE PLACEHOLDER, numbers sitting owed -->
     <!-- NOTE the missing "*noinherit" here, unlike every other creature in this file: that marker

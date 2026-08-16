@@ -10,6 +10,16 @@
 	      <skill Name="Discipline" />
 	      <skill Name="Survival_DesertCanyonSurvival" /> <!-- Wilderness Lore: Canyons (USER 2026-08-12; was RuinsSurvival) -->
       </skills>
+      <!-- Starting rep with the guild. Closes the USER FLAG of 2026-07-26 ("so I don't forget
+           later"): the Stonecarver calling should begin with reputation among its own people.
+           Mechanism is the base subtype idiom, verified in Subtypes.xml where callings grant
+           rep the same way (Bears 100, Barathrumites 100, Strangers 200, Issachari 200).
+           VALUE 100 IS A CLAUDE DRAFT, sitting at the lower of the two base tiers: 200 reads as
+           "one of us by birth" and 100 as "known and vouched for," and which of those a
+           stonecarver is happens to be a lore question, not a numbers question. -->
+      <reputations>
+        <reputation With="Cleo_TerraFirma_Quarriers" Value="100" />
+      </reputations>
 	</subtype>
 </class>
 </subtypes>

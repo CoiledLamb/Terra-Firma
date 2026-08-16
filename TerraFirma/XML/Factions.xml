@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<factions>
+
+  <!-- THE QUARRIERS' GUILD. Name RULED 2026-08-15 by the user, choosing it over
+       "Stonecarvers' Guild" so the institution gets its own word: "stonecarver" was already
+       naming the calling, the creature, and the workstream, and a fourth job for one word is
+       the same collision the user rejected for "gravel baboon" against "Gravel Whorl".
+       Period RULED the same exchange (user: "post-sultanate"), and the engine says it for us:
+       Old="false" is the flag that separates contemporary institutions from relics, and both
+       base guilds carry it.
+
+       Structure copied verbatim from the base game's only two guilds, Merchants' and Farmers'
+       (Factions.xml): plural possessive, no article in the DisplayName, FormatWithArticle
+       supplying "the" at runtime, HistoricalSignificance 1. Three guilds is now the whole set.
+
+       DRAFT and owed, all of it the user's:
+         - the faction DESCRIPTION and any display text. Nothing is drafted here on purpose.
+         - rep jingles: currently REUSING the Farmers' Guild sounds as a placeholder. Filed as
+           asset debt, and the workaday register was the only reason to prefer them over the
+           Merchants' pair.
+         - feelings toward specific factions. The entry ships neutral to everyone rather than
+           inventing a politics; the only attitudes stated are the two the base guilds both
+           state (Girsh and Entropic hostility), which read as house style rather than opinion.
+         - the water ritual. Base Merchants' Guild carries one with Join="false"; the tracker
+           has "water ritual on the overseer" as an open thread, and whether the guild can be
+           JOINED is a real design call, so no waterritual node is written yet.
+         - interests (what they buy, sell and gossip about) wait on the kit pass, since what a
+           quarrier trades is mostly what a quarrier carries.
+       Emblem uses the user's own stonecarver.png rather than a base-game caste tile. -->
+
+  <faction
+    Name="Cleo_TerraFirma_Quarriers"
+    DisplayName="Quarriers' Guild"
+    Old="false"
+    Plural="false"
+    FormatWithArticle="true"
+    InitialPlayerReputation="0"
+    PositiveSound="Sounds/Reputation/sfx_reputation_farmersGuild_positive"
+    NegativeSound="Sounds/Reputation/sfx_reputation_farmersGuild_negative"
+    HistoricalSignificance="1"
+    EmblemTile="stonecarver.png"
+    EmblemTileColor="y"
+    EmblemDetailColor="K"
+  >
+    <feeling About="*" Value="0" />
+    <factionworshipattitudes>
+      <factionworshipattitude Name="Cleo_TerraFirma_Quarriers" Attitude="50" />
+      <factionworshipattitude Name="Girsh" Attitude="-100" />
+      <factionworshipattitude Name="Entropic" Attitude="-100" />
+    </factionworshipattitudes>
+  </faction>
+
+</factions>
