@@ -26,6 +26,10 @@
     <stat Name="Hitpoints" Value="18" />
     <stat Name="AV" Value="2" />
     <part Name="Cleo_TerraFirma_RockSweeper" />
+    <!-- NO ConversationScript, RULED 2026-08-16 alongside the cobble baboon (user: "if basedog is
+         mute, then we are good on rockhounds also"). BaseDog carries none, so the rockhound is
+         mute by inheritance and by intent. Contrast the Husangeion, which opted out the other
+         way: it takes PetResponse lines rather than a conversation. -->
     <inventoryobject Blueprint="BigDog_Bite" Number="1" />
     <part Name="Description" Short="Dust grays =pronouns.possessive= coat and =pronouns.possessive= muzzle is worn smooth as riverstone. When =pronouns.subjective= =verb:trot:afterpronoun=, something in =pronouns.possessive= belly clicks and settles, stone against swallowed stone." /> <!-- DRAFT, signoff owed -->
     <tag Name="Role" Value="Brute" />
@@ -74,6 +78,11 @@
          name loaded as a MODERROR + unnamed-node warn and the baboon spawned barrage-less) -->
     <mutation Name="Cleo_TerraFirma_EarthenBarrage" Level="4" />
     <part Name="Corpse" CorpseChance="15" CorpseBlueprint="Cleo_TerraFirma_Cobble Baboon Corpse" />
+    <!-- NO ConversationScript, RULED 2026-08-16. Not an oversight and not a debt: BaseBaboon,
+         Baboon and Quartz Baboon all ship without one, so baboons are unclickable in base and
+         this one matches. Base does give conversations to some beasts (Reptiles, Frogs, Worms,
+         Plants), each a single emote plus a themed farewell, so the door is one line wide if it
+         ever reopens. He expresses through the inherited sound tags instead. -->
     <part Name="Description" Short="Grit clings to =pronouns.possessive= coat in dun sheets, and around =pronouns.objective= the air is never quite still: pebbles circle =pronouns.possessive= shoulders in a lazy orbit, waiting to be thrown." /> <!-- DRAFT, signoff owed -->
     <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
   </object>
@@ -87,6 +96,8 @@
     <part Name="Render" DisplayName="snapjaw miner" Tile="snapjaw miner.png" ColorString="&amp;w" DetailColor="y" />
     <stat Name="Hitpoints" Value="6" />
     <inventoryobject Blueprint="Pickaxe" Number="1" />
+    <!-- overrides the ConversationID inherited from base Snapjaw (2026-08-16); bank in Conversations.xml -->
+    <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_SnapjawMiner" />
     <part Name="Description" Short="Quarry dust grays =pronouns.possessive= tussocked fur, and =pronouns.possessive= knuckles are chipped white from wall-work. =pronouns.Subjective= =verb:eye:afterpronoun= every rockface like a shut door." /> <!-- DRAFT, signoff owed -->
     <tag Name="Role" Value="Minion" />
     <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
@@ -159,6 +170,7 @@
     <part Name="Render" DisplayName="hewer" ColorString="&amp;r" />
     <part Name="Description" Short="=pronouns.Subjective= =verb:read:afterpronoun= the rock face the way a reader finds a paragraph break, and =pronouns.subjective= =verb:open:afterpronoun= it there." /> <!-- DRAFT, signoff owed -->
     <mutation Name="Cleo_TerraFirma_Fissure" Level="4" /> <!-- level DRAFT -->
+    <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Hewer" /> <!-- mole hewer inherits this -->
     <tag Name="Role" Value="Brute" /> <!-- DRAFT -->
     <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Hewer Kit" />
   </object>
@@ -167,6 +179,7 @@
     <part Name="Render" DisplayName="mason" ColorString="&amp;y" />
     <part Name="Description" Short="Stone dust has settled into =pronouns.possessive= sleeves so thoroughly that =pronouns.subjective= =verb:carry:afterpronoun= the quarry around with =pronouns.objective=." /> <!-- DRAFT, signoff owed -->
     <mutation Name="Cleo_TerraFirma_Stoneshaper" Level="4" /> <!-- level DRAFT -->
+    <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Mason" /> <!-- mole mason inherits this -->
     <!-- Role RECON 2026-08-15 (user: "we should investigate creature AI roles more thoroughly").
          Role is NOT an AI layer, whatever the tracker said: nothing under XRL.World.Parts or
          XRL.World.AI reads it. It feeds difficulty rating, dynamic spawn weight, XP value, and a
@@ -183,6 +196,7 @@
     <part Name="Render" DisplayName="outrider" ColorString="&amp;B" />
     <part Name="Description" Short="=pronouns.Subjective= =verb:walk:afterpronoun= the edge of the claim with stones already circling =pronouns.possessive= shoulders, waiting." /> <!-- DRAFT, signoff owed -->
     <mutation Name="Cleo_TerraFirma_EarthenBarrage" Level="4" /> <!-- level DRAFT -->
+    <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Outrider" /> <!-- mole outrider inherits this -->
     <tag Name="Role" Value="Artillery" /> <!-- DRAFT -->
     <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Outrider Kit" />
   </object>
@@ -200,21 +214,24 @@
        badly in play. Mole carvers now tunnel while traveling.
        Species tag left inherited on purpose. Building the body does not require claiming the
        species string, and what these people ARE is the user's lore call, not a side effect.
-       Display names are Claude DRAFT: they exist only so the two bodies are tellable apart in a
-       log. If the profession alone should name both, say so and they collapse. -->
+       DISPLAY NAMES COLLAPSED 2026-08-16 (user: "they do not need to be mole x, they can just be
+       the role"). The DisplayName override is GONE from all three, so each mole variant inherits
+       its role name from its parent and a mole mason is simply a mason. Only the tile differs.
+       Consequence accepted by the ruling: the two bodies are no longer tellable apart in a log or
+       a message line, which is exactly what the draft names existed to do. Eyes only from here. -->
 
   <object Name="Cleo_TerraFirma_Mole Hewer" Inherits="Cleo_TerraFirma_Hewer">
-    <part Name="Render" DisplayName="mole hewer" Tile="stonerat.png" /> <!-- name DRAFT -->
+    <part Name="Render" Tile="stonerat.png" />
     <mutation Name="BurrowingClaws" Level="4" />
   </object>
 
   <object Name="Cleo_TerraFirma_Mole Mason" Inherits="Cleo_TerraFirma_Mason">
-    <part Name="Render" DisplayName="mole mason" Tile="stonerat.png" /> <!-- name DRAFT -->
+    <part Name="Render" Tile="stonerat.png" />
     <mutation Name="BurrowingClaws" Level="4" />
   </object>
 
   <object Name="Cleo_TerraFirma_Mole Outrider" Inherits="Cleo_TerraFirma_Outrider">
-    <part Name="Render" DisplayName="mole outrider" Tile="stonerat.png" /> <!-- name DRAFT -->
+    <part Name="Render" Tile="stonerat.png" />
     <mutation Name="BurrowingClaws" Level="4" />
   </object>
 </objects>

@@ -17,4 +17,87 @@
 			<choice GotoID="End">Thank you for your protection, friend.</choice>
 		</start>
 	</conversation>
+
+	<!-- SNAPJAW MINER (user-written 2026-08-16). The miner INHERITS the base Snapjaw blueprint,
+	     which carries <part Name="ConversationScript" ConversationID="Snapjaw" />, so he was
+	     already talking; he was just saying the generic snapjaw barks. This overrides that ID on
+	     the miner alone. Merging into the base "Snapjaw" conversation was considered and
+	     rejected: it would put pick-and-tunnel lines in the mouth of every snapjaw in Qud.
+	     Shape is the base Snapjaw conversation verbatim, i.e. ONE node whose text is a bank of
+	     tilde-delimited barks picked at random, closing on the live-and-drink exit choice.
+	     USER LINES ONLY below. The bank is short on purpose: at two entries it repeats
+	     immediately, and base ships ~37. Claude drafts are offered in chat, unsigned. -->
+	<conversation ID="Cleo_TerraFirma_SnapjawMiner">
+		<node ID="Start">
+			<text>
+				heheheh. mine rock. rock mine.~
+				bite wall? grehehe.
+			</text>
+			<choice GotoID="End">...live and drink.</choice>
+		</node>
+	</conversation>
+
+	<!-- OUTRIDER (user-written 2026-08-16). First quarrier to get a voice. Unlike the miner
+	     there was nothing to override: BaseHumanoid carries no ConversationScript, so before
+	     this the whole guild was mute.
+	     Wired on the OUTRIDER, not on the stonecarver chassis, per the profession-first ruling
+	     of 2026-08-15: the profession is the face, so the bank belongs to it. The chassis needs
+	     no conversation of its own as long as every carver in play has a profession, which the
+	     roster currently guarantees.
+	     Cleo_TerraFirma_Mole Outrider inherits this by descent, i.e. both bodies speak with one
+	     voice. That is what profession-first predicts; it is not a separate ruling, and a mole
+	     specific bank is one ConversationID away if the user wants the split.
+	     Water ritual, trade and join-party choices arrive FREE: base Conversations.xml opens
+	     with BaseConversation, "inherited by all conversations by default," which carries the
+	     WaterRitualChoice and its whole subtree. Relevant here because the Quarriers ship with
+	     WaterRitualJoin defaulting true, so a written bank is all recruitability needed.
+	     ADDRESS TERM: "wayfarer" is the user's, written inline. That is also the only way it
+	     can work; faction DefaultAddress has no conversation token, so Issachari hardcode
+	     "lack-salt" in their node text exactly like this. -->
+	<conversation ID="Cleo_TerraFirma_Outrider">
+		<node ID="Start">
+			<text>
+				mind the cairns, wayfarer. lest you knock one over.~
+				seen a few baboons today. not one made it further than a stone's throw.
+			</text>
+			<choice GotoID="End">Live and drink.</choice>
+		</node>
+	</conversation>
+
+	<!-- MASON (user-written 2026-08-16). Same wiring shape as the outrider: on the role, so
+	     Cleo_TerraFirma_Mole Mason inherits it by descent and both bodies speak as one mason.
+	     Precedent for a trade having its own bank rather than sharing a guild one is the Stilt
+	     itself: BaseMerchant points at GenericMerchant, and then every named trade on the
+	     Stiltgrounds overrides it with a bank of its own. The vintner talks about wine. -->
+	<conversation ID="Cleo_TerraFirma_Mason">
+		<node ID="Start">
+			<text>
+				stones talk sometimes. just gotta listen real close, and you can hear em singing.~
+				need something sculpted? man, boar, fish?~
+				i sometimes wonder if the stones feel like we do. carving must hurt then, eh?~
+				don't know the name of the rocks around here, but they carve just the same.
+			</text>
+			<choice GotoID="End">Live and drink.</choice>
+		</node>
+	</conversation>
+
+	<!-- HEWER (user-written 2026-08-16). Third role wired, same shape: on the role, so
+	     Cleo_TerraFirma_Mole Hewer inherits it.
+	     Two hooks in these lines that other systems already own, recorded so nobody "fixes" them:
+	     the AQUIFER line is the exception to a rule the warren generator encodes (warren-lab.html
+	     wetChance seals one brine pocket per warren, and wetAvoid exists so tunnels visibly bend
+	     around it, hover text "diggers don't breach aquifers"). This hewer is the digger who did.
+	     Brine, so the soaking is salt water.
+	     The WITCHWOOD ask names an item the player stonecarver starts holding, 2 to 4 Witchwood
+	     Bark out of Cleo_StartingGear_Stonecarver. Stock HaveItem and TakeItem conversation parts
+	     could turn that into a real handover with no C#; not built, just flagged. -->
+	<conversation ID="Cleo_TerraFirma_Hewer">
+		<node ID="Start">
+			<text>
+				smashed through a wall last week, soaked my clothes. damn aquifers.~
+				overseer said we needed to square away more rock, but my back's been killing me... got any witchwood?
+			</text>
+			<choice GotoID="End">Live and drink.</choice>
+		</node>
+	</conversation>
 </conversations>

@@ -221,6 +221,61 @@ recolors the whole site's dressing; the geometry never changes.
   ≈ the >=400 hard fail; FillRoom subdivision available if communal wants a
   multi-room block grown from one footprint instead of suite stamps.
 
+## Red Rock SHAPING recon (2026-08-17 — full decompile of `Redrock`, `NoiseMap`, `TunnelTo`, `EnsureAllVoidsConnected`; the 08-07 section above covered the table side, this is the geometry side)
+
+**Provenance:** Claude recon, decompiled ground truth (ilspycmd vs the current Steam install).
+Context: the user's "rework the warren quarries to be structured more like red rock" question.
+
+**The whole carve, in order (`Redrock.BuildZone`):**
+1. **Every cell gets a Shale wall.** Solid zone, no exceptions.
+2. **The doors become seeds.** Every `ZoneConnection` and every cell tagged Stairs is
+   collected into a `List<NoiseMapNode>` and handed to the noise map as ExtraNodes, each
+   spiked to `MaxSeedDepth`. **There is no mouth search anywhere in the file** — open space
+   grows around the real entrances by construction. This is the base game's entire answer to
+   the attachment problem our `mouthMassR` / `mouthMassPerPart` fitting solves the hard way.
+3. **`NoiseMap(80,25, 10, 3,2, seedsPerSector, 80,240, 0, 4, -3, 1, nodes, -1, maxSeeds)`**,
+   then clear walls wherever `Noise >= 1`, border ring guarded. Param names confirmed off
+   `CreateNoiseMap`: (W, H, MaxDepth, SectorsWide, SectorsHigh, SeedsPerSector, MinSeedDepth,
+   MaxSeedDepth, BaseNoise, FilterPasses, BorderWidth, CutoffDepth, ExtraNodes, FilterBorder,
+   MaximumSeeds). Two details that shape the result:
+   - **BaseNoise 0.** With no background field the ONLY open space is seed blobs — which is
+     why Red Rock reads as discrete chambers rather than sponge. The drillbot's obstacle map
+     passes 6 for exactly the opposite reason.
+   - **Seed depth 80-240, blurred 4 passes.** Depth IS blob size, so chamber size varies per
+     seed for free. `MaximumSeeds` decrements across a SHUFFLED sector list and breaks out
+     mid-run, so a cap starves random sectors, not the last ones.
+   - The ExtraNode guard skips anything on the border ring (`x > 0 && x < Width-1`).
+4. **Water (NOT PORTED).** A second NoiseMap seeded from a SUBSET of the first's `PlacedSeeds`
+   becomes `DeepBrackishPool`; then each pool node runs `TunnelTo` to a random WALL cell
+   within 30, carving pool as it goes — **water veins that run off into the mass and stop.**
+   The opposite shape from our wet pockets (sealed, shelled, conspicuously avoided). Left out
+   of the lab port deliberately; ours already owns the water fiction.
+5. **0-4 long hauls.** `TunnelTo` from a random placed seed to the seed furthest from it.
+   **The sharp bit: `emptyBase` is 200 while a wall costs 80** — open floor is more than twice
+   as expensive as solid rock, so the hauls bore fresh passage instead of threading the
+   chambers that already exist. (`TunnelTo` cost, full: border 2000, wall `80 + |simplex((x +
+   wX*80)/3, y + wY*25)| * 160`, open `emptyBase + noise`, cardinal-only, shuffled directions.)
+6. **`EnsureAllVoidsConnected`.** Regions sorted by distance from the first, each linked to its
+   nearest already-connected neighbour by a noisy cardinal path.
+7. **Level set pieces.** Z12 sorts regions by summed distance from the stairs, takes the top
+   1-3, fills them with `InfluenceMapBlocker` and gives them their own encounter table — **a
+   vault you have to dig into, and the nearest base-game relative of our wet pocket.** Z13
+   rolls one of Stockade / CaveCity / SnapjawFort. Z14 gets the river builders.
+
+**Depth ladder = the same builder with different dice, nothing else:** seeds/sector `1-3`
+(capped at 3 total) → `0-5` → `0-6` → `0-7`; pool nodes 0 → 1 → 2-3 → 3-4; hauls 0 → 1 → 2-3
+→ 3-4. Region size on the dressing side moves with it (100 → 150 → 200). Same grammar,
+turned dials — the idiom our warren size classes already run at zone scale.
+
+**The structural verdict (proposal, unruled): Red Rock has no carve language.** Its geometry
+carries zero intent; intent arrives as a TENANT layered onto finished blobs. That is exactly
+inverted from the warren, whose whole bet is that the geometry itself reads as made. Steals
+worth having without giving that up: the doors-as-seeds trick (if attachment ever gets
+expensive), depth-ranked regions as a placement law (far from the entrance = where the good
+thing goes — we have no such law), and the layered structure itself, i.e. giving the quarry
+natural void to cut into so the seam between worked and unworked is visible. Lab pass for the
+last one built 2026-08-17 — see the TODO entry; the numbers are there.
+
 ## Decompile dumps
 
 Raw sources cached this session at

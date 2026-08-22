@@ -44,9 +44,14 @@
        user settled it the simpler way, "just use the regular stonecarver.png rather than
        stonerat," so the human fronts the guild after all and the colour swap is reverted to the
        original y over K.
-       Still available if the mole is ever wanted back: a mirrored copy of the sprite as its own
-       emblem file, since the tile is only referenced here and would not disturb the mole
-       creatures that share the original. -->
+       SUPERSEDED IN PART 2026-08-16: the mirror is no longer hypothetical. The user mirrored
+       stonerat.png themselves ("qud tiles need to face a certain direction and it was facing the
+       wrong way"), so the art is now correct on its own terms and the fix was an art fix rather
+       than an emblem workaround. Note it was done for the CREATURES, not for the emblem; the
+       mole carvers are the only things that render this tile. The emblem ruling is untouched,
+       stonecarver.png still fronts the guild.
+       So if the mole is ever wanted back, no new file is needed: stonerat.png already faces the
+       right way, and pointing EmblemTile at it would now just work. -->
 
   <faction
     Name="Cleo_TerraFirma_Quarriers"
