@@ -48,7 +48,24 @@ namespace XRL.World.Parts
 				|| ID == SingletonEvent<EndTurnEvent>.ID
 				|| ID == GetInventoryActionsEvent.ID
 				|| ID == InventoryActionEvent.ID
-				|| ID == PooledEvent<GetDisplayNameEvent>.ID;
+				|| ID == PooledEvent<GetDisplayNameEvent>.ID
+				|| ID == GetExtrinsicWeightEvent.ID;
+		}
+
+		/// <summary>Pounds of stone not yet ground away, derived from the fuel pool.</summary>
+		public int RemainingStoneWeight()
+		{
+			return (StoneChargeLeft + CHARGE_PER_POUND - 1) / CHARGE_PER_POUND;
+		}
+
+		/// <summary>The waterskin law (user ruling 2026-08-22: "preserve the weight of what its
+		/// grinding and steadily decrement that over time"): the cell carries its stone's unground
+		/// weight, LiquidVolume's own GetExtrinsicWeightEvent idiom. One pound leaves per 25
+		/// charge ground out - a fed boulder is heavy until the spiral has actually eaten it.</summary>
+		public override bool HandleEvent(GetExtrinsicWeightEvent E)
+		{
+			E.Weight += RemainingStoneWeight();
+			return base.HandleEvent(E);
 		}
 
 		public override bool HandleEvent(GetInventoryActionsEvent E)
@@ -117,6 +134,7 @@ namespace XRL.World.Parts
 				int weight = pick.GetPart<Physics>()?.Weight ?? 0;
 				StoneChargeLeft = Math.Max(weight, 1) * CHARGE_PER_POUND;
 				StoneName = pick.DisplayName;
+				ParentObject.FlushWeightCaches(); // the stone's weight moves into the cell, not into thin air
 				if (E.Actor.IsPlayer())
 				{
 					IComponent<GameObject>.AddPlayerMessage("You feed " + pick.t() + " into " + ParentObject.t() + ", and the spiral begins to churn."); // DRAFT
@@ -137,8 +155,13 @@ namespace XRL.World.Parts
 				if (cell != null && cell.Charge < cell.MaxCharge)
 				{
 					int tick = Math.Min(TRICKLE_PER_TURN, Math.Min(StoneChargeLeft, cell.MaxCharge - cell.Charge));
+					int weightBefore = RemainingStoneWeight();
 					cell.AddCharge(tick);
 					StoneChargeLeft -= tick;
+					if (RemainingStoneWeight() != weightBefore)
+					{
+						ParentObject.FlushWeightCaches(); // a pound ground away
+					}
 					if (StoneChargeLeft <= 0)
 					{
 						StoneName = null;

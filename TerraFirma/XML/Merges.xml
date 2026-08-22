@@ -231,4 +231,9 @@
 		     the shatter/scatter/phosphorescent lives in Part_GlowsphereBreak. 1d4 = DIAL. -->
 		<part Name="ThrownWeapon" Damage="1d4" />
 	</object>
+	<!-- Chalkboard write action (ergonomics ruling 2026-08-22: target-side verbs) - the write
+	     verb lives on the board, shown only when the actor carries chalk. -->
+	<object Name="Chalkboard" Load="Merge">
+		<part Name="Cleo_TerraFirma_ChalkboardWritable" />
+	</object>
 </objects>

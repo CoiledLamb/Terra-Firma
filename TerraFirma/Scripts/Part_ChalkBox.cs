@@ -1,31 +1,31 @@
 using System;
-using System.Collections.Generic;
-using XRL.Language;
 using XRL.Rules;
 using XRL.UI;
 
 namespace XRL.World.Parts
 {
 	/// <summary>
-	/// The box of chalk (design sitting 2026-08-22, all four forks user-ruled same day):
-	/// (1) draw chalk lines on ADJACENT floor cells, sprite AUTO-ORIENTED - a new stroke looks
-	/// for neighboring chalk and takes the connecting direction, else lies along the stroke the
-	/// player drew; (2) write on base Chalkboards, typed AND markov (both ruled in), same prose
-	/// whitelist as etching, no tool gate - chalk IS the tool; (3) 8-12 uses rolled at creation
-	/// ("sounds fine!"), one per stroke or board-write, smearing free (that verb lives on the
-	/// line, Part_ChalkLine). Spent box crumbles. Marks are permanent until smeared by ruling
-	/// ("i don't really think it needs to wear off").
+	/// The box of chalk (design sitting 2026-08-22; ergonomics rework same day, USER RULING:
+	/// actions live on the target when a target object exists, and floor-drawing - which has no
+	/// target object - becomes an ACTIVATED ABILITY granted while the box is carried ("what if it
+	/// gave you an ability? or perhaps ... the action should be on the thing you're doing the
+	/// action on ... this goes for anything else we do also"). Draw = ability, direction-picked,
+	/// stroke lands in the adjacent cell and auto-tiles (Part_ChalkLine). Chalkboard writing
+	/// moved to the BOARD (Part_ChalkboardWritable, merged onto base Chalkboard). This part keeps
+	/// the uses pool: 8-12 rolled at creation (user number), one per stroke or board-write,
+	/// spent box crumbles.
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_ChalkBox : IPart
 	{
-		public const string DRAW_COMMAND = "Cleo_TerraFirma_DrawChalk";
-		public const string WRITE_COMMAND = "Cleo_TerraFirma_WriteChalk";
+		public const string DRAW_COMMAND = "Cleo_TerraFirma_CommandDrawChalk";
 		public const string LINE_BLUEPRINT = "Cleo_TerraFirma_ChalkLine";
-		public const string CORPUS = "LibraryCorpus.json";
 
 		/// <summary>Strokes left in the box; rolled 8-12 at creation (user number).</summary>
 		public int Uses = -1;
+
+		/// <summary>The draw ability this box granted its holder, if it was the granting box.</summary>
+		public Guid AbilityID = Guid.Empty;
 
 		public override bool SameAs(IPart p)
 		{
@@ -40,8 +40,9 @@ namespace XRL.World.Parts
 		{
 			return base.WantEvent(ID, cascade)
 				|| ID == ObjectCreatedEvent.ID
-				|| ID == GetInventoryActionsEvent.ID
-				|| ID == InventoryActionEvent.ID
+				|| ID == TakenEvent.ID
+				|| ID == DroppedEvent.ID
+				|| ID == PooledEvent<CommandEvent>.ID
 				|| ID == PooledEvent<GetDisplayNameEvent>.ID;
 		}
 
@@ -63,146 +64,93 @@ namespace XRL.World.Parts
 			return base.HandleEvent(E);
 		}
 
-		public override bool HandleEvent(GetInventoryActionsEvent E)
+		public override bool HandleEvent(TakenEvent E)
 		{
-			E.AddAction("Draw", "draw a chalk line", DRAW_COMMAND, null, 'd', FireOnActor: false);
-			if (FindAdjacentChalkboard(E.Actor) != null)
+			GameObject who = E.Actor;
+			if (who != null && who.IsCreature && who.ActivatedAbilities != null
+				&& who.ActivatedAbilities.GetAbilityByCommand(DRAW_COMMAND) == null)
 			{
-				E.AddAction("Write", "write on the chalkboard", WRITE_COMMAND, null, 'w', FireOnActor: false);
+				AbilityID = who.ActivatedAbilities.AddAbility("Draw with Chalk", DRAW_COMMAND, "Items", Silent: true); // DRAFT ability name
 			}
 			return base.HandleEvent(E);
 		}
 
-		public override bool HandleEvent(InventoryActionEvent E)
+		public override bool HandleEvent(DroppedEvent E)
 		{
-			if (E.Command == DRAW_COMMAND && E.Actor != null)
+			GameObject who = E.Actor;
+			if (who != null && AbilityID != Guid.Empty)
 			{
-				AttemptDraw(E);
-			}
-			else if (E.Command == WRITE_COMMAND && E.Actor != null)
-			{
-				AttemptWrite(E);
+				// hand the grant to another carried box if one remains, else revoke
+				var others = who.GetInventoryDirect((GameObject go) => go != ParentObject && go.HasPart<Cleo_TerraFirma_ChalkBox>());
+				if (others.Count > 0)
+				{
+					others[0].GetPart<Cleo_TerraFirma_ChalkBox>().AbilityID = AbilityID;
+				}
+				else
+				{
+					who.ActivatedAbilities?.RemoveAbility(AbilityID);
+				}
+				AbilityID = Guid.Empty;
 			}
 			return base.HandleEvent(E);
 		}
 
-		private void AttemptDraw(InventoryActionEvent E)
+		public override bool HandleEvent(CommandEvent E)
+		{
+			if (E.Command == DRAW_COMMAND && E.Actor != null && ParentObject.InInventory == E.Actor)
+			{
+				AttemptDraw(E.Actor);
+			}
+			return base.HandleEvent(E);
+		}
+
+		private void AttemptDraw(GameObject actor)
 		{
 			if (Uses <= 0)
 			{
-				if (E.Actor.IsPlayer())
+				if (actor.IsPlayer())
 				{
 					Popup.ShowFail("The box is empty."); // DRAFT
 				}
 				return;
 			}
-			Cell target = PickDirection("Draw where?", E.Actor); // DRAFT prompt (IComponent helper returns the cell)
-			if (target == null || target == E.Actor.CurrentCell)
+			Cell target = PickDirection("Draw where?", actor); // DRAFT prompt (IComponent helper returns the cell)
+			if (target == null || target == actor.CurrentCell)
 			{
 				return;
 			}
-			string dir = E.Actor.CurrentCell.GetDirectionFromCell(target);
+			string dir = actor.CurrentCell.GetDirectionFromCell(target);
 			if (target.HasWall() || target.HasObjectWithPart(nameof(Cleo_TerraFirma_ChalkLine)))
 			{
-				if (E.Actor.IsPlayer())
+				if (actor.IsPlayer())
 				{
 					Popup.ShowFail("There is no clear floor there to chalk."); // DRAFT
 				}
 				return;
 			}
 			GameObject line = GameObject.Create(LINE_BLUEPRINT);
-			// auto-orient (RULED): take the direction that connects to neighboring chalk if any,
-			// else lie along the stroke the player just drew
-			string facing = dir;
-			foreach (string d in Directions.DirectionList)
+			Cleo_TerraFirma_ChalkLine linePart = line.GetPart<Cleo_TerraFirma_ChalkLine>();
+			if (linePart != null)
 			{
-				Cell neighbor = target.GetCellFromDirection(d);
-				if (neighbor != null && neighbor.HasObjectWithPart(nameof(Cleo_TerraFirma_ChalkLine)))
-				{
-					facing = d;
-					break;
-				}
-			}
-			Render render = line.GetPart<Render>();
-			if (render != null)
-			{
-				render.Tile = "chalkline" + facing + ".png";
+				linePart.StrokeDir = dir;
 			}
 			target.AddObject(line);
-			Uses--;
-			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK", $"line drawn {dir}, facing {facing}, {Uses} uses left");
-			E.Actor.UseEnergy(1000, "Item DrawChalk");
-			ConsumeIfSpent(E.Actor);
-			E.RequestInterfaceExit();
+			actor.PlayWorldSound("Sounds/Interact/sfx_interact_tattoo"); // PLACEHOLDER sound (tattoo gun; closest base cousin) - sound pass flagged
+			// the new piece reads its neighbors, and the neighbors reach back
+			linePart?.Retile();
+			Cleo_TerraFirma_ChalkLine.RetileNeighbors(target);
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK", $"line drawn {dir}, {Uses - 1} uses left");
+			actor.UseEnergy(1000, "Item DrawChalk");
+			ConsumeUse(actor);
 		}
 
-		private void AttemptWrite(InventoryActionEvent E)
+		/// <summary>Spend one stroke; the board's write action calls this too. Crumbles at zero.</summary>
+		public void ConsumeUse(GameObject actor)
 		{
-			if (Uses <= 0)
-			{
-				if (E.Actor.IsPlayer())
-				{
-					Popup.ShowFail("The box is empty."); // DRAFT
-				}
-				return;
-			}
-			GameObject board = FindAdjacentChalkboard(E.Actor);
-			if (board == null || !E.Actor.IsPlayer())
-			{
-				return;
-			}
-			// typed-or-markov pick, the etch menu's shape; these two OPTION LINES are DRAFT
-			// (etching's own pair is USER VOICE and stays etching's)
-			int choice = Popup.PickOption(
-				Intro: "The slate waits under a film of old dust.", // DRAFT
-				Options: new string[] { "Write a message.", "Write from memory." }, // DRAFT
-				AllowEscape: true);
-			string text = null;
-			if (choice == 0)
-			{
-				text = Popup.AskString("Chalk your message. For example: \"live and drink\".", "", "Sounds/UI/ui_notification",
-					Cleo_TerraFirma_Etchable.TYPED_CHARS, null, Cleo_TerraFirma_Etchable.TYPED_MAX); // DRAFT
-				if (text.IsNullOrEmpty())
-				{
-					return;
-				}
-			}
-			else if (choice == 1)
-			{
-				MarkovBook.EnsureCorpusLoaded(CORPUS);
-				if (!MarkovBook.CorpusData.TryGetValue(CORPUS, out MarkovChainData data))
-				{
-					IComponent<GameObject>.AddPlayerMessage("Nothing comes."); // DRAFT
-					return;
-				}
-				for (int i = 0; i < 5; i++)
-				{
-					text = MarkovChain.GenerateShortSentence(data).TrimEnd(' ');
-					if (!text.Contains("="))
-					{
-						break;
-					}
-				}
-			}
-			else
-			{
-				return;
-			}
-			Cleo_TerraFirma_ChalkWriting writing = board.RequirePart<Cleo_TerraFirma_ChalkWriting>();
-			writing.Text = text;
 			Uses--;
-			Popup.Show("You chalk \"" + text + "\" onto " + board.t() + "."); // DRAFT
-			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK", $"chalkboard written ({(choice == 0 ? "typed" : "markov")}), {Uses} uses left");
-			E.Actor.UseEnergy(1000, "Item WriteChalk");
-			ConsumeIfSpent(E.Actor);
-			E.RequestInterfaceExit();
-		}
-
-		private void ConsumeIfSpent(GameObject actor)
-		{
 			if (Uses <= 0)
 			{
-				if (actor.IsPlayer())
+				if (actor != null && actor.IsPlayer())
 				{
 					IComponent<GameObject>.AddPlayerMessage("The last stick of chalk crumbles to dust."); // DRAFT
 				}
@@ -210,46 +158,19 @@ namespace XRL.World.Parts
 			}
 		}
 
-		private static GameObject FindAdjacentChalkboard(GameObject actor)
+		/// <summary>The fullest chalk box a creature carries, for target-side actions.</summary>
+		public static Cleo_TerraFirma_ChalkBox FindCarriedBox(GameObject actor)
 		{
-			if (actor?.CurrentCell == null)
+			Cleo_TerraFirma_ChalkBox best = null;
+			foreach (GameObject item in actor.GetInventoryDirect((GameObject go) => go.HasPart<Cleo_TerraFirma_ChalkBox>()))
 			{
-				return null;
-			}
-			foreach (Cell cell in actor.CurrentCell.GetLocalAdjacentCells())
-			{
-				GameObject board = cell.FindObject("Chalkboard");
-				if (board != null)
+				Cleo_TerraFirma_ChalkBox box = item.GetPart<Cleo_TerraFirma_ChalkBox>();
+				if (box.Uses > 0 && (best == null || box.Uses > best.Uses))
 				{
-					return board;
+					best = box;
 				}
 			}
-			return null;
-		}
-	}
-
-	/// <summary>
-	/// Chalk words on a chalkboard: one string, shown in look text, overwritten by the next
-	/// writer. The Graffitied/etch storage idiom (plain field, serialization-safe by construction).
-	/// </summary>
-	[Serializable]
-	public class Cleo_TerraFirma_ChalkWriting : IPart
-	{
-		public string Text;
-
-		public override bool WantEvent(int ID, int cascade)
-		{
-			return base.WantEvent(ID, cascade)
-				|| ID == GetShortDescriptionEvent.ID;
-		}
-
-		public override bool HandleEvent(GetShortDescriptionEvent E)
-		{
-			if (!Text.IsNullOrEmpty())
-			{
-				E.Postfix.AppendRules("Chalked across it: \"" + Text + "\""); // DRAFT frame
-			}
-			return base.HandleEvent(E);
+			return best;
 		}
 	}
 }
