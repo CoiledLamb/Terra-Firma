@@ -115,45 +115,12 @@
     <tag Name="Tier" Value="1" />
   </object>
 
-  <!-- PROPER ETCH TOOLS (2026-08-15, user: "do you think it's a good idea to give them proper
-       versions of those tools. maybe copper or steel?"). Rungs RULED steel then carbide at the
-       top; the PLAYER KEEPS THE BLUNTED PAIR by the same ruling, which is where its meaning comes
-       from: the starter tools are characterised as worn out, and that only reads once the guild
-       carries better.
-       Copper was considered and dropped. Copper chisels are historically real, Egypt cut limestone
-       with them, but copper is SOFTER than what the blunted pair is already made of, and in Qud's
-       own ladder copper is figurine and wire material rather than tool material. It would have
-       been a downgrade wearing an upgrade's name.
-       No new mechanics needed: the etch slip law of 2026-08-07 already reads tool tier, slip
-       chance being (6 minus pairTier) times 4 percent, where pair tier is the LESSER of striker
-       and edge. So blunted stays at 24% of characters garbled, steel lands 16%, carbide 8%.
-       These INHERIT the base tier weapons rather than tagging them, on purpose: tagging Steel
-       Dagger directly would quietly make every steel dagger in Qud an etching tool, which is the
-       exact widening the rubble cover ruling refused. Narrow tags stay narrow. -->
-  <object Name="Cleo_TerraFirma_Steel Chisel" Inherits="Steel Dagger">
-    <part Name="Render" DisplayName="steel chisel" Tile="blunted_chisel.png" DetailColor="y" ColorString="&amp;Y" />
-    <part Name="Description" Short="A hand's length of steel ground to a chisel edge, its head mushroomed flat from years under the mallet." /> <!-- DRAFT, signoff owed -->
-    <tag Name="Cleo_TerraFirma_EtchTool" Value="Chisel" />
-  </object>
-
-  <object Name="Cleo_TerraFirma_Steel Mallet" Inherits="Steel Hammer">
-    <part Name="Render" DisplayName="steel mallet" Tile="Items/sw_leatherworking_hammer.bmp" DetailColor="y" ColorString="&amp;Y" />
-    <part Name="Description" Short="A short steel mallet, its face dented into a shallow bowl by the chisel heads it has driven." /> <!-- DRAFT, signoff owed -->
-    <tag Name="Cleo_TerraFirma_EtchTool" Value="Mallet" />
-  </object>
-
-  <!-- Carbide sits at tier 4, matching base Carbide Plate Armor, Gauntlets and Boots. It is the
-       ceiling of the ladder by ruling, and it is deliberately RARE in the kit table: a carbide
-       chisel is a 1d8 weapon, so a pack full of them would be a different fight. -->
-  <object Name="Cleo_TerraFirma_Carbide Chisel" Inherits="Dagger4">
-    <part Name="Render" DisplayName="carbide chisel" Tile="blunted_chisel.png" DetailColor="K" ColorString="&amp;c" />
-    <part Name="Description" Short="The edge is a grey so dark it reads as a gap in the light. It has never needed sharpening and it never will." /> <!-- DRAFT, signoff owed -->
-    <tag Name="Cleo_TerraFirma_EtchTool" Value="Chisel" />
-  </object>
-
-  <object Name="Cleo_TerraFirma_Carbide Mallet" Inherits="Cudgel4">
-    <part Name="Render" DisplayName="carbide mallet" Tile="Items/sw_leatherworking_hammer.bmp" DetailColor="K" ColorString="&amp;c" />
-    <part Name="Description" Short="Heavier than it looks and quieter than it should be, the strike landing as a low knock rather than a ring." /> <!-- DRAFT, signoff owed -->
-    <tag Name="Cleo_TerraFirma_EtchTool" Value="Mallet" />
-  </object>
+  <!-- PROPER ETCH TOOLS thread RETIRED 2026-08-22 (user: "let's remove the added chisels and
+       mallets from the mod and just use knives and hammers in their place. the existing blunted
+       chisel and splintered mallet is fine"). The steel/carbide chisel+mallet quartet of
+       2026-08-15 is DELETED: since the hammer-and-knife gate (2026-08-06) and the tag-bonus
+       removal, a steel dagger etched identically to a steel chisel, so the quartet was four
+       blueprints buying nothing. Quarrier kits now roll base Steel Dagger / Steel Hammer with
+       rare Dagger4 / Cudgel4 (PopulationTables.xml, same weights, same mismatched-pair law).
+       The blunted chisel + splintered mallet above STAY: starter kit, kept by ruling. -->
 </objects>

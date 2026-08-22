@@ -142,17 +142,20 @@
 	     Chisel and mallet roll SEPARATELY, which is deliberate: the slip law takes the LESSER of
 	     the two tiers, so a carver holding a carbide chisel and a steel mallet still carves at
 	     steel. Mismatched pairs are a feature, not an oversight.
-	     Carbide at 10 is a CLAUDE DRAFT weight, kept low because a carbide chisel is a 1d8 weapon
-	     and a pack of them is a different fight from a pack of quarriers. -->
+	     Carbide at 10 is a CLAUDE DRAFT weight, kept low because a tier-4 dagger is a 1d8 weapon
+	     and a pack of them is a different fight from a pack of quarriers.
+	     2026-08-22: the mod's steel/carbide chisel+mallet quartet DELETED (user ruling, knives
+	     and hammers in their place); these are now the base blueprints directly. The slip law
+	     reads skill + tier, so nothing else changes. -->
 	<population Name="Cleo_TerraFirma_EtchTools">
 		<group Name="Tools" Style="pickeach">
 			<group Name="Edge" Style="pickone">
-				<object Weight="90" Blueprint="Cleo_TerraFirma_Steel Chisel" Number="1" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Carbide Chisel" Number="1" />
+				<object Weight="90" Blueprint="Steel Dagger" Number="1" />
+				<object Weight="10" Blueprint="Dagger4" Number="1" />
 			</group>
 			<group Name="Striker" Style="pickone">
-				<object Weight="90" Blueprint="Cleo_TerraFirma_Steel Mallet" Number="1" />
-				<object Weight="10" Blueprint="Cleo_TerraFirma_Carbide Mallet" Number="1" />
+				<object Weight="90" Blueprint="Steel Hammer" Number="1" />
+				<object Weight="10" Blueprint="Cudgel4" Number="1" />
 			</group>
 		</group>
 	</population>

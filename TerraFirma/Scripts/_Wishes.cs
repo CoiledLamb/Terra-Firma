@@ -872,5 +872,17 @@ namespace Cleo.TerraFirma.Scripts
 			MessageQueue.AddPlayerMessage("tfgrinder: grinder cell + 3 small stones received. feed it.", Capitalize: false);
 			Helpers.VerifyLog("GRINDER", "tfgrinder kit granted");
 		}
+
+		/// <summary>Mole cricket dev door (2026-08-22).</summary>
+		[WishCommand(Command = "tfcricket")]
+		public static void CricketKit()
+		{
+			GameObject Ply = The.Player;
+			if (Ply == null)
+				return;
+			Ply.ReceiveObject(GameObject.Create("Cleo_TerraFirma_MoleCricket"));
+			MessageQueue.AddPlayerMessage("tfcricket: mole cricket received. equip it floating nearby; unequip kills it.", Capitalize: false);
+			Helpers.VerifyLog("CRICKET", "tfcricket granted");
+		}
 	}
 }

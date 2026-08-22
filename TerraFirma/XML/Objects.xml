@@ -95,7 +95,7 @@
 		<part Name="LightSource" Lit="false" Radius="6" />
 		<part Name="MoteProperties" Fuel="5000" />
 		<part Name="Physics" Weight="1" />
-		<part Name="Commerce" Value="15" />
+		<part Name="Commerce" Value="5" />
 		<part Name="Description" Short="a perfect pearl of light was shattered, yet no life springs forth from it. its glow wanes in the harvest dawn, memories of wholeness reflected in the high salt sun." />
 		<!-- NO Stacker on purpose (2026-08-22): a stack is ONE object, so stacked shards would
 		     share a single Fuel pool and die together - the 2-3-per-sphere ruling only means
@@ -117,7 +117,7 @@
 		<part Name="LightSource" Lit="false" Radius="8" />
 		<part Name="Cleo_TerraFirma_GlowstoneLantern" />
 		<part Name="Physics" Weight="2" />
-		<part Name="Commerce" Value="40" />
+		<part Name="Commerce" Value="25" />
 		<!-- description is state-swapped by the part: lit = the locked user line, unlit = a
 		     PLACEHOLDER awaiting the user's own text -->
 		<part Name="Description" Short="a wrought metal cage sits empty." />
@@ -139,6 +139,27 @@
 		<part Name="Commerce" Value="100" />
 		<part Name="Metal" />
 		<tag Name="Tier" Value="3" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
+	<!-- Symbiotic mole cricket (2026-08-22): description USER TEXT FINAL; replaces the Fresh-air
+	     trio's attendant chisel (user reflavor). Symbiotic Firefly chassis with DestroyOnUnequip
+	     INCLUDED BY RULING - one companion, one goodbye. Behavior in Part_MoleCricket.cs; the
+	     *maybe* etch rider stays open. Acquisition unruled: wish-only. User sprite. -->
+	<object Name="Cleo_TerraFirma_MoleCricket" Inherits="Item">
+		<part Name="Render" DisplayName="symbiotic {{w-y-w-K sequence|mole cricket}}" RenderString="'" ColorString="&amp;w" DetailColor="y" Tile="mole_cricket.png" RenderLayer="5" />
+		<part Name="Physics" Organic="true" Weight="1" />
+		<part Name="Armor" AV="0" DV="0" WornOn="Floating Nearby" />
+		<part Name="Commerce" Value="200" />
+		<part Name="Description" Short="a hopping, diminutive thing scrapes idly at the earth. at hindsun it hums, biological processes becoming musical." />
+		<part Name="RulesDescription" Text="Sometimes pecks an adjacent enemy or scrapes at an adjacent natural stone wall.
+Perishes when unequipped." />
+		<part Name="Springy" Factor="0.5" />
+		<part Name="DestroyOnUnequip" />
+		<part Name="Cleo_TerraFirma_MoleCricket" />
+		<part Name="AddsRep" Faction="Insects" Value="400" />
+		<tag Name="Tier" Value="2" />
+		<stag Name="Floating" />
+		<tag Name="LiveAnimal" />
 		<tag Name="ExcludeFromDynamicEncounters" />
 	</object>
 </objects>
