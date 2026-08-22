@@ -121,9 +121,7 @@
 		<!-- description is state-swapped by the part: lit = the locked user line, unlit = a
 		     PLACEHOLDER awaiting the user's own text -->
 		<part Name="Description" Short="a wrought metal cage sits empty." />
-		<!-- tech tags stripped (user 2026-08-22: "remove the tech parts from lantern") - no
-		     tech tier, and the inherited TinkerCategory deleted: a cage is smithwork, not tech -->
-		<tag Name="TinkerCategory" Value="*delete" />
+		<tag Name="Tier" Value="3" />
 		<tag Name="ExcludeFromDynamicEncounters" />
 	</object>
 	<!-- Grinder cell (2026-08-22): description USER TEXT FINAL; shape + numbers user-approved
