@@ -79,11 +79,11 @@ namespace XRL.World.Parts
 		{
 			if (Shard == null)
 			{
-				E.AddAction("Load", "load glowstone shard", LOAD_COMMAND, null, 'o', FireOnActor: false);
+				E.AddAction("Load", "load fragment", LOAD_COMMAND, null, 'o', FireOnActor: false);
 			}
 			else
 			{
-				E.AddAction("Unload", "remove glowstone shard", UNLOAD_COMMAND, null, 'o', FireOnActor: false);
+				E.AddAction("Unload", "remove fragment", UNLOAD_COMMAND, null, 'o', FireOnActor: false);
 			}
 			return base.HandleEvent(E);
 		}
@@ -97,7 +97,7 @@ namespace XRL.World.Parts
 				{
 					if (E.Actor.IsPlayer())
 					{
-						Popup.ShowFail("You have no glowstone shard to load."); // DRAFT
+						Popup.ShowFail("You have no glowsphere fragment to load."); // DRAFT
 					}
 					return false;
 				}
@@ -145,7 +145,7 @@ namespace XRL.World.Parts
 						{
 							if (ParentObject.Equipped != null && ParentObject.Equipped.IsPlayer())
 							{
-								IComponent<GameObject>.AddPlayerMessage("The shard inside " + The.Player.Poss(ParentObject) + " goes dark."); // DRAFT
+								IComponent<GameObject>.AddPlayerMessage("The fragment inside " + The.Player.Poss(ParentObject) + " goes dark."); // DRAFT
 							}
 							Cleo.TerraFirma.Scripts.Helpers.VerifyLog("LANTERN", "socketed shard burned out");
 							Shard.Obliterate();

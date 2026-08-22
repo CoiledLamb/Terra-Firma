@@ -91,7 +91,7 @@
 	     Acquisition = breaking a glowsphere (Merges.xml) or wish only; spawn layer unruled.
 	     Known wart, flagged: MoteProperties' burnout verb is hardcoded "dissipates". -->
 	<object Name="Cleo_TerraFirma_GlowstoneShard" Inherits="LightSource">
-		<part Name="Render" DisplayName="{{Y|glowstone}} shard" RenderString="'" ColorString="&amp;Y" DetailColor="y" Tile="glowsphere_shard.png" RenderLayer="5" />
+		<part Name="Render" DisplayName="{{Y|glowsphere}} fragment" RenderString="'" ColorString="&amp;Y" DetailColor="y" Tile="glowsphere_shard.png" RenderLayer="5" />
 		<part Name="LightSource" Lit="false" Radius="6" />
 		<part Name="MoteProperties" Fuel="5000" />
 		<part Name="Physics" Weight="1" />
@@ -113,11 +113,11 @@
 		<tag Name="ExcludeFromDynamicEncounters" />
 	</object>
 	<object Name="Cleo_TerraFirma_GlowstoneLantern" Inherits="LightSource">
-		<part Name="Render" DisplayName="lantern" RenderString="}" ColorString="&amp;y" DetailColor="Y" Tile="lantern_unlit.png" RenderLayer="5" />
+		<part Name="Render" DisplayName="lantern" RenderString="}" ColorString="&amp;K" TileColor="&amp;K" DetailColor="Y" Tile="lantern_unlit.png" RenderLayer="5" />
 		<part Name="LightSource" Lit="false" Radius="8" />
 		<part Name="Cleo_TerraFirma_GlowstoneLantern" />
 		<part Name="Physics" Weight="2" />
-		<part Name="Commerce" Value="120" />
+		<part Name="Commerce" Value="40" />
 		<!-- description is state-swapped by the part: lit = the locked user line, unlit = a
 		     PLACEHOLDER awaiting the user's own text -->
 		<part Name="Description" Short="a wrought metal cage sits empty." />
