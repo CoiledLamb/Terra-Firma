@@ -124,14 +124,14 @@
 		<tag Name="Tier" Value="3" />
 		<tag Name="ExcludeFromDynamicEncounters" />
 	</object>
-	<!-- Grinder cell (2026-08-22): description USER TEXT FINAL; shape + numbers user-approved
+	<!-- Piezoelectric cell (renamed from "grinder cell" 2026-08-22, user: "piezoelectric makes sense" - the grind-verb overlap with the mill bugged them; internal GrinderCell ids stay per the glowstone precedent). Description USER TEXT FINAL; shape + numbers user-approved
 	     same sitting (weight x 20 charge per stone, 10/turn trickle, no boulder cap, grinds
 	     anywhere). High-capacity fidget cousin: fidget 2500/easy, this 50000/earned (MaxCharge
 	     re-ruled up from 10k mid-build, user: "make the max charge something like 50k and have
 	     it usually spawn 1/5th to half full"; StartCharge rolls at creation, base idiom).
 	     Acquisition unruled: wish-only for now. -->
 	<object Name="Cleo_TerraFirma_GrinderCell" Inherits="Energy Cell">
-		<part Name="Render" DisplayName="{{c|grinder}} {{y|cell}}" RenderString="&#231;" ColorString="&amp;c" TileColor="&amp;c" DetailColor="y" Tile="grinder_cell.png" RenderLayer="5" />
+		<part Name="Render" DisplayName="{{c|piezoelectric}} {{y|cell}}" RenderString="&#231;" ColorString="&amp;c" TileColor="&amp;c" DetailColor="y" Tile="grinder_cell.png" RenderLayer="5" />
 		<part Name="EnergyCell" Charge="0" MaxCharge="50000" StartCharge="2500-25000" />
 		<part Name="Cleo_TerraFirma_GrinderCell" />
 		<!-- TINKERABLE BY RULING (user 2026-08-22: "only one i'd want tinkerable are the

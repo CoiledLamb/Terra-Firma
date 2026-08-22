@@ -134,6 +134,7 @@ namespace XRL.World.Parts
 				int weight = pick.GetPart<Physics>()?.Weight ?? 0;
 				StoneChargeLeft = Math.Max(weight, 1) * CHARGE_PER_POUND;
 				StoneName = pick.DisplayName;
+				SyncGrindAnimation(true);
 				ParentObject.FlushWeightCaches(); // the stone's weight moves into the cell, not into thin air
 				if (E.Actor.IsPlayer())
 				{
@@ -165,12 +166,37 @@ namespace XRL.World.Parts
 					if (StoneChargeLeft <= 0)
 					{
 						StoneName = null;
+						SyncGrindAnimation(false);
 						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("GRINDER", $"stone ground out, cell at {cell.Charge}/{cell.MaxCharge}");
 					}
 				}
 				// cell full: the spiral idles and the stone keeps; no charge is wasted
 			}
 			return base.HandleEvent(E);
+		}
+
+		/// <summary>Churning spiral while grinding (user 2026-08-22: "set up animated sprite
+		/// while grinding ... using the second sprite i just exported"): AnimatedMaterialGeneric
+		/// tile frames alternating grinder_cell.png / grinder_cell2.png, added at feed and
+		/// removed when the stone grinds out.</summary>
+		private void SyncGrindAnimation(bool grinding)
+		{
+			AnimatedMaterialGeneric anim = ParentObject.GetPart<AnimatedMaterialGeneric>();
+			if (grinding && anim == null)
+			{
+				anim = ParentObject.AddPart<AnimatedMaterialGeneric>();
+				anim.AnimationLength = 60;
+				anim.TileAnimationFrames = "0=grinder_cell.png,30=grinder_cell2.png";
+			}
+			else if (!grinding && anim != null)
+			{
+				ParentObject.RemovePart(anim);
+				Render render = ParentObject.GetPart<Render>();
+				if (render != null)
+				{
+					render.Tile = "grinder_cell.png";
+				}
+			}
 		}
 
 		public override bool HandleEvent(GetDisplayNameEvent E)

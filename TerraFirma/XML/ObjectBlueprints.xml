@@ -9,7 +9,7 @@
        conditional DV 2 (Yurtmat parity), commerce/tier modest. Descriptions DRAFT. -->
     <object Name="Cleo_TerraFirma_Cobblefur Bracer" Inherits="BaseArmlet">
     <part Name="Armor" AV="0" DV="0" WornOn="Arm" />
-    <part Name="Render" DisplayName="{{y|cobblefur}} bracer" RenderString="]" Tile="Items/sw_armlet.bmp" ColorString="&amp;y" DetailColor="K" />
+    <part Name="Render" DisplayName="{{y|granitefur}} bracer" RenderString="]" Tile="Items/sw_armlet.bmp" ColorString="&amp;y" DetailColor="K" />
     <part Name="Commerce" Value="35" />
     <part Name="Description" Short="A forearm's length of dun monkey fur, stiff with grit that never quite shakes out. The arm it wraps learns the short arc: how a stone leaves the hand already knowing where it lands." /> <!-- DRAFT, signoff owed -->
     <part Name="Physics" Weight="1" Organic="true" />
@@ -21,7 +21,7 @@
   </object>
     <object Name="Cleo_TerraFirma_Cobblefur Gloves" Inherits="BaseGlove">
     <part Name="Armor" AV="0" DV="1" WornOn="Hands" />
-    <part Name="Render" DisplayName="{{y|cobblefur}} gloves" RenderString="]" Tile="Items/sw_quartz_fur_gloves.bmp" ColorString="&amp;y" DetailColor="K" />
+    <part Name="Render" DisplayName="{{y|granitefur}} gloves" RenderString="]" Tile="Items/sw_quartz_fur_gloves.bmp" ColorString="&amp;y" DetailColor="K" />
     <part Name="Commerce" Value="35" />
     <part Name="Description" Short="Dun fur was shorn from a dead monkey and sewn into a pair of gloves. The palms remember catching." /> <!-- DRAFT, signoff owed -->
     <part Name="Physics" Weight="5" Organic="true" />
@@ -33,7 +33,7 @@
   </object>
     <object Name="Cleo_TerraFirma_Cobblefur Cloak" Inherits="BaseCloak">
     <part Name="Armor" AV="1" DV="0" WornOn="Back" />
-    <part Name="Render" DisplayName="{{y|cobblefur}} cloak" RenderString="]" Tile="Items/sw_yurtmat.bmp" ColorString="&amp;y" DetailColor="K" />
+    <part Name="Render" DisplayName="{{y|granitefur}} cloak" RenderString="]" Tile="Items/sw_yurtmat.bmp" ColorString="&amp;y" DetailColor="K" />
     <part Name="Commerce" Value="35" />
     <part Name="Description" Short="Hung from the shoulders, the pelt reads as one more heap of canyon scree. Among strewn stones its wearer is a shape the eye forgives." /> <!-- DRAFT, signoff owed -->
     <part Name="Physics" Weight="3" Organic="true" />

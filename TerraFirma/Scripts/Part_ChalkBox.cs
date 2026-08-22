@@ -42,7 +42,6 @@ namespace XRL.World.Parts
 				|| ID == ObjectCreatedEvent.ID
 				|| ID == TakenEvent.ID
 				|| ID == DroppedEvent.ID
-				|| ID == PooledEvent<CommandEvent>.ID
 				|| ID == PooledEvent<GetDisplayNameEvent>.ID;
 		}
 
@@ -70,7 +69,16 @@ namespace XRL.World.Parts
 			if (who != null && who.IsCreature && who.ActivatedAbilities != null
 				&& who.ActivatedAbilities.GetAbilityByCommand(DRAW_COMMAND) == null)
 			{
-				AbilityID = who.ActivatedAbilities.AddAbility("Draw with Chalk", DRAW_COMMAND, "Items", Silent: true); // DRAFT ability name
+				// icon = the box's own look; description per the base AddAbility idiom
+				AbilityID = who.ActivatedAbilities.AddAbility("Draw with Chalk", DRAW_COMMAND, "Items",
+					Description: "Draw a chalk line on an adjacent square.", // DRAFT (ability name + description)
+					Silent: true,
+					UITileDefault: new ConsoleLib.Console.Renderable(ParentObject.Render));
+				// CommandEvent's cascade (17) NEVER reaches inventory (bugfix 2026-08-22, user:
+				// "the ability doesn't seem to work") - the legacy string event is the delivery
+				// path: CommandEvent.Send fires it on the actor when a part is registered, the
+				// BleedingOnHit idiom
+				who.RegisterPartEvent(this, DRAW_COMMAND);
 			}
 			return base.HandleEvent(E);
 		}
@@ -82,9 +90,12 @@ namespace XRL.World.Parts
 			{
 				// hand the grant to another carried box if one remains, else revoke
 				var others = who.GetInventoryDirect((GameObject go) => go != ParentObject && go.HasPart<Cleo_TerraFirma_ChalkBox>());
+				who.UnregisterPartEvent(this, DRAW_COMMAND);
 				if (others.Count > 0)
 				{
-					others[0].GetPart<Cleo_TerraFirma_ChalkBox>().AbilityID = AbilityID;
+					Cleo_TerraFirma_ChalkBox heir = others[0].GetPart<Cleo_TerraFirma_ChalkBox>();
+					heir.AbilityID = AbilityID;
+					who.RegisterPartEvent(heir, DRAW_COMMAND);
 				}
 				else
 				{
@@ -95,13 +106,17 @@ namespace XRL.World.Parts
 			return base.HandleEvent(E);
 		}
 
-		public override bool HandleEvent(CommandEvent E)
+		public override bool FireEvent(Event E)
 		{
-			if (E.Command == DRAW_COMMAND && E.Actor != null && ParentObject.InInventory == E.Actor)
+			if (E.ID == DRAW_COMMAND)
 			{
-				AttemptDraw(E.Actor);
+				GameObject actor = E.GetGameObjectParameter("Actor");
+				if (actor != null && ParentObject.InInventory == actor)
+				{
+					AttemptDraw(actor);
+				}
 			}
-			return base.HandleEvent(E);
+			return base.FireEvent(E);
 		}
 
 		private void AttemptDraw(GameObject actor)

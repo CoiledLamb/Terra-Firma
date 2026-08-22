@@ -51,7 +51,9 @@ namespace XRL.World.Parts
 		{
 			GameObject wearer = ParentObject?.Equipped;
 			GameObject rock = E.Projectile;
-			if (wearer != null && rock != null && rock.HasTag("Cleo_TerraFirma_IsAnyStone")
+			// ALL THROWN ITEMS, not just stones (user rework 2026-08-22). Launcher == null is
+			// the thrown-vs-shot gate; a lit grenade caught is your problem now.
+			if (wearer != null && rock != null && E.Launcher == null
 				&& Stat.Random(1, 100) <= Chance)
 			{
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("GLOV", $"{wearer.Blueprint} catch PROC on {rock.Blueprint} ({Chance}%)");
@@ -64,8 +66,81 @@ namespace XRL.World.Parts
 					if (slot != null && slot.Equipped == null)
 						wearer.FireEvent(Event.New("CommandEquipObject", "Object", rock, "BodyPart", slot));
 				}
+				// HOT POTATO (user design 2026-08-22: "catching a grenade could allow you a
+				// turn before it explodes, so you can throw it back"): without this, a caught
+				// grenade detonates IN YOUR FACE the same instant - IGrenade.Detonate resolves
+				// a null cell through the HOLDER and drops the grenade at your feet before the
+				// boom (decomp-verified). The marker cancels that via BeforeDetonateEvent,
+				// keeps it in hand for a short fuse, then it goes off wherever it is.
+				if (rock.GetPartDescendedFrom<IGrenade>() != null)
+				{
+					Cleo_TerraFirma_CaughtGrenade fuse = rock.RequirePart<Cleo_TerraFirma_CaughtGrenade>();
+					fuse.Catcher = wearer;
+					fuse.FuseTurns = 1; // ~one usable turn; DRAFT dial
+					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("GLOV", $"caught LIVE GRENADE {rock.Blueprint}, fuse ticking");
+				}
 				E.Done = true;
 				return false;
+			}
+			return base.HandleEvent(E);
+		}
+	}
+
+	/// <summary>
+	/// The caught-grenade fuse (user design 2026-08-22): a snatched grenade gets a short grace
+	/// window instead of detonating in the catcher's face. While the fuse runs and the grenade
+	/// is still in the catcher's possession, BeforeDetonateEvent is CANCELED and the grenade is
+	/// pulled back into hand (Detonate drops it to the cell before asking). Throw it away and
+	/// the next detonation attempt is allowed through - the marker strips itself. Sit on it and
+	/// the fuse runs out: it detonates wherever it is, holder resolved by the engine.
+	/// </summary>
+	[Serializable]
+	public class Cleo_TerraFirma_CaughtGrenade : IPart
+	{
+		public int FuseTurns = 1;
+		public GameObject Catcher;
+
+		public override bool WantEvent(int ID, int cascade)
+		{
+			return base.WantEvent(ID, cascade)
+				|| ID == SingletonEvent<EndTurnEvent>.ID
+				|| ID == PooledEvent<BeforeDetonateEvent>.ID;
+		}
+
+		public override bool HandleEvent(BeforeDetonateEvent E)
+		{
+			if (FuseTurns > 0 && GameObject.Validate(ref Catcher))
+			{
+				Cell here = ParentObject.CurrentCell;
+				bool inCatcherReach = ParentObject.Equipped == Catcher || ParentObject.InInventory == Catcher
+					|| (here != null && here == Catcher.CurrentCell);
+				if (inCatcherReach)
+				{
+					if (here != null)
+					{
+						// Detonate already dumped it on the floor; back into hand it goes
+						ParentObject.RemoveFromContext();
+						Catcher.ReceiveObject(ParentObject);
+					}
+					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("GLOV", $"grenade detonation held off, fuse {FuseTurns}");
+					return false;
+				}
+			}
+			// thrown away (or fuse spent): let it happen, job done
+			ParentObject.RemovePart(this);
+			return base.HandleEvent(E);
+		}
+
+		public override bool HandleEvent(EndTurnEvent E)
+		{
+			FuseTurns--;
+			if (FuseTurns < 0)
+			{
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("GLOV", "caught grenade fuse expired");
+				IGrenade grenade = ParentObject.GetPartDescendedFrom<IGrenade>();
+				GameObject catcher = Catcher;
+				ParentObject.RemovePart(this);
+				grenade?.Detonate(null, catcher);
 			}
 			return base.HandleEvent(E);
 		}

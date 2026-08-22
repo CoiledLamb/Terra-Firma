@@ -70,7 +70,7 @@
        table in PopulationTables.xml. ExcludeFromDynamicEncounters = controlled debut,
        lift at the spawn-wiring pass. -->
   <object Name="Cleo_TerraFirma_Cobble Baboon" Inherits="Baboon">
-    <part Name="Render" DisplayName="cobble baboon" Tile="Assets_Content_Textures_Creatures_sw_baboon.bmp" ColorString="&amp;y" DetailColor="K" />
+    <part Name="Render" DisplayName="granite baboon" Tile="Creatures/sw_quartz_baboon.bmp" ColorString="&amp;y" DetailColor="r" /> <!-- RENAMED granite 2026-08-22 (user; supersedes the cobble lock); interim = base quartz baboon tile in grey/brown until the friend-made sprites land -->
     <stat Name="Hitpoints" Value="15" />
     <stat Name="Strength" Boost="2" />
     <stat Name="AV" Value="3" />
@@ -87,7 +87,7 @@
     <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
   </object>
   <object Name="Cleo_TerraFirma_Cobble Baboon Corpse" Inherits="Baboon Corpse">
-    <part Name="Render" DisplayName="cobble baboon corpse" />
+    <part Name="Render" DisplayName="granite baboon corpse" />
     <part Name="Butcherable" OnSuccess="@Cleo_TerraFirma_Cobblefur Items" />
     <tag Name="Tier" Value="2" />
   </object>

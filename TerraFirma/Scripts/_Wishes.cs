@@ -869,7 +869,7 @@ namespace Cleo.TerraFirma.Scripts
 			Ply.ReceiveObject(GameObject.Create("Cleo_TerraFirma_GrinderCell"));
 			for (int i = 0; i < 3; i++)
 				Ply.ReceiveObject(GameObject.Create("Small Stone"));
-			MessageQueue.AddPlayerMessage("tfgrinder: grinder cell + 3 small stones received. feed it.", Capitalize: false);
+			MessageQueue.AddPlayerMessage("tfgrinder: piezoelectric cell + 3 small stones received. feed it.", Capitalize: false);
 			Helpers.VerifyLog("GRINDER", "tfgrinder kit granted");
 		}
 

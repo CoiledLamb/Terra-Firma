@@ -198,6 +198,28 @@ namespace XRL.World.Parts
 			return Shard.GetPart<MoteProperties>()?.Fuel ?? 0;
 		}
 
+		[NonSerialized]
+		private int FrameOffset;
+
+		/// <summary>MoteProperties.Render's EXACT flicker (decomp-verified: 60-frame cycle,
+		/// Y under 15, W to 30, C to 45, W after, random 1-5 frame jitter, priority 50),
+		/// applied to the DETAIL channel so the glow flickers through the dark cage - the
+		/// flicker IS the socketed shard showing through the glass.</summary>
+		public override bool Render(RenderEvent E)
+		{
+			if (GetFuel() > 0)
+			{
+				int num = (XRL.Core.XRLCore.CurrentFrame + FrameOffset) % 60;
+				if (!XRL.UI.Options.DisableTextAnimationEffects)
+				{
+					FrameOffset += XRL.Rules.Stat.Random(1, 5);
+				}
+				string color = num < 15 ? "Y" : num < 30 ? "W" : num >= 45 ? "W" : "C";
+				E.ApplyDetailColor(color, 50);
+			}
+			return base.Render(E);
+		}
+
 		/// <summary>MoteProperties.getLitDescription's exact brackets (it is private in base).</summary>
 		private static string FuelDescription(int fuel)
 		{
@@ -231,18 +253,13 @@ namespace XRL.World.Parts
 			{
 				render.Tile = lit ? "lantern_lit.png" : "lantern_unlit.png";
 			}
-			// lit lanterns shimmer their detail through the fragment's own y/Y pulse (user
-			// 2026-08-22: "can the detail color of lanterns shift in the same colors as the
-			// glowsphere fragment?") - the flicker IS the shard showing through the glass, so
-			// the part comes off entirely while the cage sits empty
+			// the y/Y AnimatedMaterialGeneric approach is GONE (user live-catch 2026-08-22:
+			// "lantern flickers between white and grey, not the colors the shard flickers -
+			// and at a totally different rate"); the shard's visible flicker was never its
+			// anim part but MoteProperties.Render's fast Y/W/C cycle - now mirrored in this
+			// part's own Render override. Strip any anim part older saves still carry.
 			AnimatedMaterialGeneric anim = ParentObject.GetPart<AnimatedMaterialGeneric>();
-			if (lit && anim == null)
-			{
-				anim = ParentObject.AddPart<AnimatedMaterialGeneric>();
-				anim.AnimationLength = 200;
-				anim.DetailColorAnimationFrames = "0=y,100=Y";
-			}
-			else if (!lit && anim != null)
+			if (anim != null)
 			{
 				ParentObject.RemovePart(anim);
 			}
