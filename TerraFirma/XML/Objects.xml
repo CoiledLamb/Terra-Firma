@@ -96,7 +96,8 @@
 		<part Name="MoteProperties" Fuel="5000" />
 		<part Name="Physics" Weight="1" />
 		<part Name="Commerce" Value="5" />
-		<part Name="Description" Short="a perfect pearl of light was shattered, yet no life springs forth from it. its glow wanes in the harvest dawn, memories of wholeness reflected in the high salt sun." />
+		<part Name="Description" Short="A razor shard of a shattered phosphorescent opal-like weeps light that drifts away like smoke. Its glow is waning, but, struck by the high salt sun, it yet reflects memories of wholeness." /> <!-- USER TEXT FINAL 2026-08-22 evening, supersedes the harvest-dawn string -->
+
 		<!-- NO Stacker on purpose (2026-08-22): a stack is ONE object, so stacked shards would
 		     share a single Fuel pool and die together - the 2-3-per-sphere ruling only means
 		     anything if each shard burns alone. (Base Luminous Mote carries this wart; its motes

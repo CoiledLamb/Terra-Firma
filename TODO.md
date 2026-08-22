@@ -147,6 +147,13 @@ User's words 2026-08-04: "note down the items we're committing to from the jam s
 - **cairn** — `a waystone to those with eyes to the earth. it rests upon the path, watching each traveler passing by.`
 - **disrupted cairn** — `a waystone once sat here. now, it rests from its watch, humble stones returned to the earth.`
 
+**EVENING RE-DELIVERY 2026-08-22 (user; capitalized per the case-convention ruling): three of the strings above SUPERSEDED, one name SETTLED.**
+
+- **glowsphere fragment** (the "glowstone shard" entry above, post-rename) — `A razor shard of a shattered phosphorescent opal-like weeps light that drifts away like smoke. Its glow is waning, but, struck by the high salt sun, it yet reflects memories of wholeness.` SWAPPED verbatim into the live blueprint (Objects.xml). **Flagged once, unanswered at logging: "opal-like" reads like it may be missing a word ("a shattered phosphorescent opal-like weeps light"); stands verbatim per the user-voice rule until said otherwise.** Lowercase "high salt sun" carries over from the original string, the user's standing call.
+- **cairn** — `A waystone for those with eyes to the earth, this stack of rocks inhabits an unresolved superposition of endurance and fragility.` Journal-held; blueprint unbuilt.
+- **toppled cairn** — `These scattered rocks once formed a waystone; now, only traces of their former order remain.` Journal-held. **The name "toppled cairn" SETTLES the "disrupted(?) cairn" naming thread below** (the query-mark note is answered; "disrupted cairn" retires).
+- The recorded rests/watch echo between the old cairn pair is RETIRED by this re-delivery; the preserve-it note below is answered, not deleted (provenance).
+
 ### Ground truth checked against Base during the revision passes (Claude, 2026-08-22)
 
 - **`hindsun` is stock Qud vocabulary**, not coinage — 5 uses in Base, incl. `LibraryCorpus.json` and `ObjectBlueprints/Items.xml`.
