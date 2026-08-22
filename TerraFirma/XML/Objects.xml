@@ -124,6 +124,15 @@
 		<tag Name="Tier" Value="3" />
 		<tag Name="DynamicObjectsTable:Trinkets" /> <!-- SPAWN WIRED 2026-08-22: trinket loot + the Utility 2 light-source table (PopulationTables.xml) -->
 	</object>
+	<!-- Kit variant (quarrier spine light group, RULED 2026-08-22): spawns with a part-burned
+	     fragment already socketed via the part's StartLoaded/StartFuel dials, so an NPC's lantern
+	     arrives as a light in use. Kept out of trinket loot and dynamic encounters: the empty
+	     lantern above is the loot-facing blueprint, this one exists for kit tables. -->
+	<object Name="Cleo_TerraFirma_GlowstoneLanternLoaded" Inherits="Cleo_TerraFirma_GlowstoneLantern">
+		<part Name="Cleo_TerraFirma_GlowstoneLantern" StartLoaded="true" StartFuel="2000-4500" />
+		<tag Name="DynamicObjectsTable:Trinkets" Value="*delete" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
 	<!-- Piezoelectric cell (renamed from "grinder cell" 2026-08-22, user: "piezoelectric makes sense" - the grind-verb overlap with the mill bugged them; internal GrinderCell ids stay per the glowstone precedent). Description USER TEXT FINAL; shape + numbers user-approved
 	     same sitting (weight x 20 charge per stone, 10/turn trickle, no boulder cap, grinds
 	     anywhere). High-capacity fidget cousin: fidget 2500/easy, this 50000/earned (MaxCharge

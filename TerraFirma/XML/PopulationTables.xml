@@ -86,11 +86,20 @@
 	     hewer and mason carry both verbatim (current behavior preserved until their own lock
 	     sittings), the outrider replaced both with its locked bespoke kit below. The spine is
 	     now water, light, and shoes; nothing else is universal. -->
+	<!-- Spine light + shoes RULED 2026-08-22 (user: "lets have an 80% chance for tier 1 shoes,
+	     and vary torches so they can also be lanterns with shards and rarely glowspheres").
+	     Light weights CLAUDE DRAFT. The lantern entry is the LOADED variant so it arrives
+	     burning; this is the mod lantern's first walking-around acquisition road. Shoes pinned
+	     to tier 1 by the ruling, decoupled from the ownertier ladder. -->
 	<population Name="Cleo_TerraFirma_Quarrier Kit">
 		<group Name="Equipment" Style="pickeach">
 			<object Blueprint="HalfFullWaterskin" Number="1" />
-			<object Blueprint="Torch" Number="2-5" />
-			<table Name="Shoes {ownertier}" Chance="60" />
+			<group Name="Light" Style="pickone">
+				<object Weight="70" Blueprint="Torch" Number="2-5" />
+				<object Weight="25" Blueprint="Cleo_TerraFirma_GlowstoneLanternLoaded" Number="1" />
+				<object Weight="5" Blueprint="Glowsphere" Number="1" />
+			</group>
+			<table Name="Shoes 1" Chance="80" />
 		</group>
 	</population>
 

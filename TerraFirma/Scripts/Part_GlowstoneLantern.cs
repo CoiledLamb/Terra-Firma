@@ -34,6 +34,15 @@ namespace XRL.World.Parts
 		/// <summary>Half-rate burn phase: fuel ticks only when this flips to 0.</summary>
 		public int BurnPhase;
 
+		/// <summary>
+		/// Blueprint dials for kit/loot lanterns (spine light group, 2026-08-22): StartLoaded
+		/// spawns the lantern with a fragment already socketed, its fuel rolled from the
+		/// StartFuel dice at creation (the piezoelectric cell's StartCharge idiom). A part-burned
+		/// fragment on a working lantern reads as a light in use, not shelf stock.
+		/// </summary>
+		public bool StartLoaded;
+		public string StartFuel = "2000-4500";
+
 		public override bool SameAs(IPart p)
 		{
 			// never stack two lanterns if either holds a shard
@@ -71,6 +80,18 @@ namespace XRL.World.Parts
 
 		public override bool HandleEvent(ObjectCreatedEvent E)
 		{
+			if (StartLoaded && Shard == null)
+			{
+				GameObject shard = GameObject.Create(SHARD_BLUEPRINT);
+				MoteProperties mote = shard?.GetPart<MoteProperties>();
+				if (mote != null)
+				{
+					int fuel = XRL.Rules.Stat.Roll(StartFuel);
+					mote.Fuel = fuel < 1 ? 1 : fuel;
+				}
+				Shard = shard;
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("LANTERN", $"spawn-loaded shard fuel={GetFuel()}");
+			}
 			SyncState();
 			return base.HandleEvent(E);
 		}
