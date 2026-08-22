@@ -152,7 +152,8 @@
 	     Arms note: the dagger and hammer ARE the etch pair's parents (steel chisel inherits
 	     Steel Dagger, steel mallet inherits Steel Hammer), so the outrider now carries the
 	     un-reskinned truth of what the role held before; the etch-tool removal ruling arrives
-	     here first. Buckler/shield ride the Arm slot, so they coexist with the pelt items.
+	     here first. AMENDED same day: arms now roll the material ladder tables below
+	     (blunted/steel/carbide per the user, steel rung swapped to Steel Utility Knife). Buckler/shield ride the Arm slot, so they coexist with the pelt items.
 	     Pelt group replaces the fixed bracer: bias 60/20/20 per the user's "bias towards
 	     bracers". The old ecology note stands: pelt items carry AddsRep Baboons -100, baboons
 	     hate the wearer, free faction texture. -->
@@ -161,20 +162,20 @@
 			<table Name="Cleo_TerraFirma_Quarrier Kit" />
 			<group Name="Arms" Style="pickone">
 				<group Weight="40" Name="ToolPair" Style="pickeach">
-					<object Blueprint="Steel Dagger" Number="1" />
-					<object Blueprint="Steel Hammer" Number="1" />
+					<table Name="Cleo_TerraFirma_Carver Knife" />
+					<table Name="Cleo_TerraFirma_Carver Hammer" />
 				</group>
 				<group Weight="20" Name="ToolPairBuckler" Style="pickeach">
-					<object Blueprint="Steel Dagger" Number="1" />
-					<object Blueprint="Steel Hammer" Number="1" />
+					<table Name="Cleo_TerraFirma_Carver Knife" />
+					<table Name="Cleo_TerraFirma_Carver Hammer" />
 					<object Blueprint="Steel Buckler" Number="1" />
 				</group>
 				<group Weight="20" Name="DaggerShield" Style="pickeach">
-					<object Blueprint="Steel Dagger" Number="1" />
+					<table Name="Cleo_TerraFirma_Carver Knife" />
 					<object Blueprint="Steel Shield" Number="1" />
 				</group>
 				<group Weight="20" Name="HammerShield" Style="pickeach">
-					<object Blueprint="Steel Hammer" Number="1" />
+					<table Name="Cleo_TerraFirma_Carver Hammer" />
 					<object Blueprint="Steel Shield" Number="1" />
 				</group>
 			</group>
@@ -191,6 +192,8 @@
 			<group Name="Chest" Style="pickone">
 				<object Weight="12" Blueprint="Bark Armor" Number="1" />
 				<object Weight="12" Blueprint="Studded Leather Armor" Number="1" />
+				<object Weight="6" Blueprint="Ring Mail" Number="1" />
+				<object Weight="6" Blueprint="Chain Mail" Number="1" />
 				<object Weight="8" Blueprint="Furs" Number="1" />
 				<object Weight="8" Blueprint="Leather Armor" Number="1" />
 				<group Weight="10" Name="Workwear" Style="pickone">
@@ -200,6 +203,29 @@
 					<object Weight="25" Blueprint="Leather Apron" Number="1" />
 				</group>
 			</group>
+		</group>
+	</population>
+
+	<!-- OUTRIDER MATERIAL LADDER, RULED 2026-08-22 (user: "blunted/splintered - steel - carbide
+	     is my lean" and "for the steel dagger, we could use steel utility knives"; the carbide
+	     rung steered to tier 3 same sitting: base Dagger3/Cudgel3 render as plain carbide dagger
+	     and carbide hammer). Weights CLAUDE DRAFT, the EtchTools 90/10 shape with a poverty
+	     floor added. Knife and hammer roll SEPARATELY on purpose: mismatched pairs were ruled a
+	     feature at the EtchTools sitting and the same logic rides here. Wrinkle recorded in
+	     TODO.md: the blunted pair carries the EtchTool tags, so the POOREST outriders are the
+	     etch-capable ones until the base-tool tag fork resolves. -->
+	<population Name="Cleo_TerraFirma_Carver Knife">
+		<group Name="Knife" Style="pickone">
+			<object Weight="15" Blueprint="Cleo_TerraFirma_Blunted Chisel" Number="1" />
+			<object Weight="75" Blueprint="Steel Utility Knife" Number="1" />
+			<object Weight="10" Blueprint="Dagger3" Number="1" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_Carver Hammer">
+		<group Name="Hammer" Style="pickone">
+			<object Weight="15" Blueprint="Cleo_TerraFirma_Splintered Mallet" Number="1" />
+			<object Weight="75" Blueprint="Steel Hammer" Number="1" />
+			<object Weight="10" Blueprint="Cudgel3" Number="1" />
 		</group>
 	</population>
 
