@@ -211,9 +211,10 @@
 	     rung steered to tier 3 same sitting: base Dagger3/Cudgel3 render as plain carbide dagger
 	     and carbide hammer). Weights CLAUDE DRAFT, the EtchTools 90/10 shape with a poverty
 	     floor added. Knife and hammer roll SEPARATELY on purpose: mismatched pairs were ruled a
-	     feature at the EtchTools sitting and the same logic rides here. Wrinkle recorded in
-	     TODO.md: the blunted pair carries the EtchTool tags, so the POOREST outriders are the
-	     etch-capable ones until the base-tool tag fork resolves. -->
+	     feature at the EtchTools sitting and the same logic rides here. The etch wrinkle once
+	     noted here is RETIRED: the gate went skill-based the same day (any Cudgel-skill striker
+	     plus any ShortBlades-skill edge etches; borrowed weapons carve two tiers below their
+	     own), so every knife-and-hammer outrider is etch-capable, not just the blunted rung. -->
 	<population Name="Cleo_TerraFirma_Carver Knife">
 		<group Name="Knife" Style="pickone">
 			<object Weight="15" Blueprint="Cleo_TerraFirma_Blunted Chisel" Number="1" />
