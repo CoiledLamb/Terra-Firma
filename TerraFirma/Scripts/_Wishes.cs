@@ -858,5 +858,19 @@ namespace Cleo.TerraFirma.Scripts
 			MessageQueue.AddPlayerMessage("tflantern: glowsphere + lantern received. break the sphere, load a shard.", Capitalize: false);
 			Helpers.VerifyLog("LANTERN", "tflantern kit granted");
 		}
+
+		/// <summary>Grinder cell dev door (2026-08-22): the cell plus a handful of stones to feed it.</summary>
+		[WishCommand(Command = "tfgrinder")]
+		public static void GrinderKit()
+		{
+			GameObject Ply = The.Player;
+			if (Ply == null)
+				return;
+			Ply.ReceiveObject(GameObject.Create("Cleo_TerraFirma_GrinderCell"));
+			for (int i = 0; i < 3; i++)
+				Ply.ReceiveObject(GameObject.Create("Small Stone"));
+			MessageQueue.AddPlayerMessage("tfgrinder: grinder cell + 3 small stones received. feed it.", Capitalize: false);
+			Helpers.VerifyLog("GRINDER", "tfgrinder kit granted");
+		}
 	}
 }
