@@ -117,7 +117,7 @@
 		<part Name="LightSource" Lit="false" Radius="8" />
 		<part Name="Cleo_TerraFirma_GlowstoneLantern" />
 		<part Name="Physics" Weight="2" />
-		<part Name="Commerce" Value="25" />
+		<part Name="Commerce" Value="15" /> <!-- re-dialed 2026-08-22 from 25: torch 1 / glowsphere 40 anchors; lantern+fragment = 20, half a permanent glowsphere -->
 		<!-- description is state-swapped by the part: lit = the locked user line, unlit = a
 		     PLACEHOLDER awaiting the user's own text -->
 		<part Name="Description" Short="a wrought metal cage sits empty." />
@@ -160,6 +160,29 @@ Perishes when unequipped." />
 		<tag Name="Tier" Value="2" />
 		<stag Name="Floating" />
 		<tag Name="LiveAnimal" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
+	<!-- Box of chalk + chalk line (design sitting 2026-08-22, all four forks user-ruled:
+	     auto-orient strokes, draw adjacent, chalkboard writing typed AND markov, 8-12 uses).
+	     Description PENDING (user writes it). Line sprites = the eight chalkline*.png user
+	     sprites, finally shipping. Camp-painted lines get Physics Owner at the painter pass;
+	     player-drawn ones are unowned and smear clean. Acquisition unruled: wish-only. -->
+	<object Name="Cleo_TerraFirma_ChalkLine" Inherits="InorganicObject">
+		<part Name="Render" DisplayName="chalk line" RenderString="&#196;" ColorString="&amp;Y" TileColor="&amp;Y" DetailColor="y" Tile="chalklineE.png" RenderLayer="1" />
+		<part Name="Physics" Takeable="false" Solid="false" />
+		<part Name="Description" Short="a stroke of white lime lies across the earth." />
+		<part Name="Cleo_TerraFirma_ChalkLine" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+		<tag Name="NoSparkingQuest" />
+		<tag Name="ExcludeFromQuests" />
+	</object>
+	<object Name="Cleo_TerraFirma_BoxOfChalk" Inherits="Tool">
+		<part Name="Render" DisplayName="box of chalk" RenderString="&#248;" ColorString="&amp;Y" TileColor="&amp;Y" DetailColor="y" RenderLayer="5" />
+		<part Name="Physics" Weight="1" />
+		<part Name="Commerce" Value="10" />
+		<part Name="Description" Short="placeholder description &gt;:)" />
+		<part Name="Cleo_TerraFirma_ChalkBox" />
+		<tag Name="Tier" Value="1" />
 		<tag Name="ExcludeFromDynamicEncounters" />
 	</object>
 </objects>

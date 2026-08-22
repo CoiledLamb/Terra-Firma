@@ -884,5 +884,20 @@ namespace Cleo.TerraFirma.Scripts
 			MessageQueue.AddPlayerMessage("tfcricket: mole cricket received. equip it floating nearby; unequip kills it.", Capitalize: false);
 			Helpers.VerifyLog("CRICKET", "tfcricket granted");
 		}
+
+		/// <summary>Box of chalk dev door (2026-08-22): the box plus a chalkboard to write on.</summary>
+		[WishCommand(Command = "tfchalk")]
+		public static void ChalkKit()
+		{
+			GameObject Ply = The.Player;
+			Cell origin = Ply?.CurrentCell;
+			if (origin == null)
+				return;
+			Ply.ReceiveObject(GameObject.Create("Cleo_TerraFirma_BoxOfChalk"));
+			Cell boardCell = origin.GetCellFromDirection("N") ?? origin;
+			boardCell.AddObject(GameObject.Create("Chalkboard"));
+			MessageQueue.AddPlayerMessage("tfchalk: box of chalk received, chalkboard placed north. draw and write.", Capitalize: false);
+			Helpers.VerifyLog("CHALK", "tfchalk kit granted");
+		}
 	}
 }
