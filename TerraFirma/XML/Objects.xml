@@ -134,6 +134,11 @@
 		<part Name="Render" DisplayName="{{c|grinder}} {{y|cell}}" RenderString="&#231;" ColorString="&amp;c" TileColor="&amp;c" DetailColor="y" Tile="grinder_cell.png" RenderLayer="5" />
 		<part Name="EnergyCell" Charge="0" MaxCharge="50000" StartCharge="2500-25000" />
 		<part Name="Cleo_TerraFirma_GrinderCell" />
+		<!-- TINKERABLE BY RULING (user 2026-08-22: "only one i'd want tinkerable are the
+		     seismophone and the grinder cell"). Bits="003" = CLAUDE dial on the cell-family
+		     ladder (fidget t1 001, solar t2 002, thermo t5 024). -->
+		<part Name="TinkerItem" Bits="003" CanDisassemble="true" CanBuild="true" />
+		<tag Name="TinkerCategory" Value="ammo and energy cells" />
 		<part Name="Description" Short="a rumbling spiral milks out bursts of piezoelectric energy from chunks of earth." />
 		<part Name="Physics" Weight="5" />
 		<part Name="Commerce" Value="100" />
