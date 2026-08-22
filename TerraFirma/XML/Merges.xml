@@ -222,4 +222,10 @@
 	<object Name="Random Statue" Load="Merge">
 		<part Name="Cleo_TerraFirma_Etchable" />
 	</object>
+	<!-- Glowsphere break verb (2026-08-22): the glowstone shard's front door. Verb-not-condition
+	     was the delegated call; Floating Glowsphere deliberately unmerged (inherits LightSource,
+	     not Glowsphere - whether it breaks too is an open fork). -->
+	<object Name="Glowsphere" Load="Merge">
+		<part Name="Cleo_TerraFirma_GlowsphereBreak" />
+	</object>
 </objects>

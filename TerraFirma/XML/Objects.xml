@@ -84,4 +84,44 @@
 		<tag Name="DynamicObjectsTable:Trinkets" />
 		-->
 	</object>
+	<!-- Glowstone pair (2026-08-22): descriptions are USER TEXT FINAL, mechanics per the same
+	     sitting's rulings - shards ride base MoteProperties verbatim (user: "let's just use
+	     moteproperties on this one"; Fuel 5000 is a Claude dial ~4.2 in-game days, mote parity);
+	     the lantern socket, steady radius, and half-rate burn live in Part_GlowstoneLantern.cs.
+	     Acquisition = breaking a glowsphere (Merges.xml) or wish only; spawn layer unruled.
+	     Known wart, flagged: MoteProperties' burnout verb is hardcoded "dissipates". -->
+	<object Name="Cleo_TerraFirma_GlowstoneShard" Inherits="LightSource">
+		<part Name="Render" DisplayName="{{Y|glowstone}} shard" RenderString="'" ColorString="&amp;Y" DetailColor="y" Tile="glowsphere_shard.png" RenderLayer="5" />
+		<part Name="LightSource" Lit="false" Radius="6" />
+		<part Name="MoteProperties" Fuel="5000" />
+		<part Name="Physics" Weight="1" />
+		<part Name="Commerce" Value="15" />
+		<part Name="Description" Short="a perfect pearl of light was shattered, yet no life springs forth from it. its glow wanes in the harvest dawn, memories of wholeness reflected in the high salt sun." />
+		<!-- NO Stacker on purpose (2026-08-22): a stack is ONE object, so stacked shards would
+		     share a single Fuel pool and die together - the 2-3-per-sphere ruling only means
+		     anything if each shard burns alone. (Base Luminous Mote carries this wart; its motes
+		     just rarely arrive in multiples.) -->
+		<part Name="ItemElements" Elements="stars::1" />
+		<!-- combat rider (user ruling 2026-08-22): phosphorescent (= base Luminous, verbatim) on
+		     any hit; thrown-only bleed chance behind a pens>0 gate. ThrownWeapon = Small Stone
+		     parity (1d2). Dials in the part are CLAUDE numbers. -->
+		<part Name="ThrownWeapon" Damage="1d2" />
+		<part Name="Cleo_TerraFirma_GlowstoneShardOnHit" />
+		<stag Name="Thrown" />
+		<part Name="AnimatedMaterialGeneric" AnimationLength="200" ColorStringAnimationFrames="0=&amp;Y,100=&amp;y" DetailColorAnimationFrames="0=y,100=Y" />
+		<tag Name="Tier" Value="2" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
+	<object Name="Cleo_TerraFirma_GlowstoneLantern" Inherits="LightSource">
+		<part Name="Render" DisplayName="lantern" RenderString="}" ColorString="&amp;y" DetailColor="Y" Tile="lantern_unlit.png" RenderLayer="5" />
+		<part Name="LightSource" Lit="false" Radius="8" />
+		<part Name="Cleo_TerraFirma_GlowstoneLantern" />
+		<part Name="Physics" Weight="2" />
+		<part Name="Commerce" Value="120" />
+		<!-- description is state-swapped by the part: lit = the locked user line, unlit = a
+		     PLACEHOLDER awaiting the user's own text -->
+		<part Name="Description" Short="a wrought metal cage sits empty." />
+		<tag Name="Tier" Value="3" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
 </objects>

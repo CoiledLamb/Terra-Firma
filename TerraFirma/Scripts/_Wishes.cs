@@ -377,6 +377,16 @@ namespace Cleo.TerraFirma.Scripts
 		[WishCommand(Command = "tfwhorlrico")]
 		public static void WhorlRicoLock() => WhorlOutcomeLock(3, "RICOCHET");
 
+		/// <summary>The devour lock, added 2026-08-16 (user asked for "the one like tfwhorlrico
+		/// but only for devouring small stones" and found there wasn't one). Swat and ricochet
+		/// got shims because the 2026-08-12 request named those two by name; devour was already
+		/// mode 1 and never got its own door. Worth having anyway: tfwhorlgym pins devour by
+		/// default but assumes your whorl is already up, while this runs EnsureWhorlReady first
+		/// -- EB granted, leveled to 10, reserve topped, whorl toggled on -- so it works from a
+		/// bare character. Attackers still come from tfwhorlgym or tfwhorllaser.</summary>
+		[WishCommand(Command = "tfwhorldevour")]
+		public static void WhorlDevourLock() => WhorlOutcomeLock(1, "DEVOUR");
+
 		private static void WhorlOutcomeLock(int mode, string name)
 		{
 			GameObject Ply = The.Player;
@@ -833,6 +843,20 @@ namespace Cleo.TerraFirma.Scripts
 			The.Player?.PlayWorldSound(path, 1f);
 			MessageQueue.AddPlayerMessage($"tfjingleneg: {{{{W|{pick.Key}}}}} negative.", Capitalize: false);
 			Helpers.VerifyLog("JINGLE", $"audition {pick.Key} negative");
+		}
+
+		/// <summary>Glowstone pair dev door (2026-08-22): a glowsphere to break, a lantern to
+		/// load. Everything else about the loop is reachable from these two.</summary>
+		[WishCommand(Command = "tflantern")]
+		public static void GlowstoneKit()
+		{
+			GameObject Ply = The.Player;
+			if (Ply == null)
+				return;
+			Ply.ReceiveObject(GameObject.Create("Glowsphere"));
+			Ply.ReceiveObject(GameObject.Create("Cleo_TerraFirma_GlowstoneLantern"));
+			MessageQueue.AddPlayerMessage("tflantern: glowsphere + lantern received. break the sphere, load a shard.", Capitalize: false);
+			Helpers.VerifyLog("LANTERN", "tflantern kit granted");
 		}
 	}
 }
