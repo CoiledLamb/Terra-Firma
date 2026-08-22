@@ -151,12 +151,12 @@
 		<part Name="Armor" AV="0" DV="0" WornOn="Floating Nearby" />
 		<part Name="Commerce" Value="200" />
 		<part Name="Description" Short="a hopping, diminutive thing scrapes idly at the earth. at hindsun it hums, biological processes becoming musical." />
-		<part Name="RulesDescription" Text="Sometimes pecks an adjacent enemy or scrapes at an adjacent natural stone wall.
+		<part Name="RulesDescription" Text="Sometimes pecks at enemies and scrapes at stone.
 Perishes when unequipped." />
 		<part Name="Springy" Factor="0.5" />
 		<part Name="DestroyOnUnequip" />
 		<part Name="Cleo_TerraFirma_MoleCricket" />
-		<part Name="AddsRep" Faction="Insects" Value="400" />
+		<part Name="AddsRep" Faction="Insects,Cleo_TerraFirma_Quarriers" Value="200" /> <!-- RULED 2026-08-22: +200 each, insects AND the guild - the symbiosis pays both ways -->
 		<tag Name="Tier" Value="2" />
 		<stag Name="Floating" />
 		<tag Name="LiveAnimal" />
