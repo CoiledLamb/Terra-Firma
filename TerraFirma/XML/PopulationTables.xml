@@ -81,15 +81,15 @@
 	     them onto the MASON only (see that kit below), so they are a role tell rather than a
 	     pack wide loot floor. If they should ever spread, a Figurines {ownertier} line at a low
 	     chance is all it takes and the tier table already exists. -->
+	<!-- SPINE LIGHTENED 2026-08-22 (user: "let's lighten up the quarrier kit spine so it just
+	     has what's absolutely essential/misc items"). EtchTools and the armor group moved DOWN:
+	     hewer and mason carry both verbatim (current behavior preserved until their own lock
+	     sittings), the outrider replaced both with its locked bespoke kit below. The spine is
+	     now water, light, and shoes; nothing else is universal. -->
 	<population Name="Cleo_TerraFirma_Quarrier Kit">
 		<group Name="Equipment" Style="pickeach">
-			<table Name="Cleo_TerraFirma_EtchTools" />
 			<object Blueprint="HalfFullWaterskin" Number="1" />
 			<object Blueprint="Torch" Number="2-5" />
-			<group Name="Armor" Style="pickone">
-				<table Weight="40" Name="DynamicInheritsTable:Armor:Tier{ownertier}" Chance="75" Number="1" />
-				<table Weight="60" Name="Armor {ownertier}" Chance="75" Number="1" />
-			</group>
 			<table Name="Shoes {ownertier}" Chance="60" />
 		</group>
 	</population>
@@ -104,6 +104,14 @@
 		<group Name="Equipment" Style="pickeach">
 			<table Name="Cleo_TerraFirma_Quarrier Kit" />
 			<object Blueprint="Vinewood Sap Mask" Number="1" />
+			<!-- Relocated verbatim from the spine at the 2026-08-22 lightening; holds this kit's
+			     pre-lightening behavior until its own lock sitting. The etch-tool ruling (base
+			     knives and hammers replace steel/carbide, NOTED in TODO.md) also lands then. -->
+			<table Name="Cleo_TerraFirma_EtchTools" />
+			<group Name="Armor" Style="pickone">
+				<table Weight="40" Name="DynamicInheritsTable:Armor:Tier{ownertier}" Chance="75" Number="1" />
+				<table Weight="60" Name="Armor {ownertier}" Chance="75" Number="1" />
+			</group>
 		</group>
 	</population>
 
@@ -118,16 +126,71 @@
 		<group Name="Equipment" Style="pickeach">
 			<table Name="Cleo_TerraFirma_Quarrier Kit" />
 			<table Name="Cleo_Stonecarver_Maquette" />
+			<!-- Relocated verbatim from the spine at the 2026-08-22 lightening; same story as the
+			     hewer kit's copy of these lines. -->
+			<table Name="Cleo_TerraFirma_EtchTools" />
+			<group Name="Armor" Style="pickone">
+				<table Weight="40" Name="DynamicInheritsTable:Armor:Tier{ownertier}" Chance="75" Number="1" />
+				<table Weight="60" Name="Armor {ownertier}" Chance="75" Number="1" />
+			</group>
 		</group>
 	</population>
 
-	<!-- Outrider's bracer drags an ecology in behind it: they hunt cobble baboons for the pelt, in
-	     the same canyons, and the item carries AddsRep Baboons -100 so the baboons hate them for
-	     it. Free faction texture out of an item that already existed. -->
+	<!-- OUTRIDER KIT LOCKED 2026-08-22 (design sitting; structure is the USER'S, weights are
+	     CLAUDE DRAFT pending ratification). User shape, verbatim: "dagger + hammer, or
+	     dagger/hammer + shield. dagger + hammer could also have a buckler. a random baboon table
+	     item with a bias towards bracers for synergy" and the chest list below.
+	     Arms note: the dagger and hammer ARE the etch pair's parents (steel chisel inherits
+	     Steel Dagger, steel mallet inherits Steel Hammer), so the outrider now carries the
+	     un-reskinned truth of what the role held before; the etch-tool removal ruling arrives
+	     here first. Buckler/shield ride the Arm slot, so they coexist with the pelt items.
+	     Pelt group replaces the fixed bracer: bias 60/20/20 per the user's "bias towards
+	     bracers". The old ecology note stands: pelt items carry AddsRep Baboons -100, baboons
+	     hate the wearer, free faction texture. -->
 	<population Name="Cleo_TerraFirma_Outrider Kit">
 		<group Name="Equipment" Style="pickeach">
 			<table Name="Cleo_TerraFirma_Quarrier Kit" />
-			<object Blueprint="Cleo_TerraFirma_Cobblefur Bracer" Number="1" />
+			<group Name="Arms" Style="pickone">
+				<group Weight="40" Name="ToolPair" Style="pickeach">
+					<object Blueprint="Steel Dagger" Number="1" />
+					<object Blueprint="Steel Hammer" Number="1" />
+				</group>
+				<group Weight="20" Name="ToolPairBuckler" Style="pickeach">
+					<object Blueprint="Steel Dagger" Number="1" />
+					<object Blueprint="Steel Hammer" Number="1" />
+					<object Blueprint="Steel Buckler" Number="1" />
+				</group>
+				<group Weight="20" Name="DaggerShield" Style="pickeach">
+					<object Blueprint="Steel Dagger" Number="1" />
+					<object Blueprint="Steel Shield" Number="1" />
+				</group>
+				<group Weight="20" Name="HammerShield" Style="pickeach">
+					<object Blueprint="Steel Hammer" Number="1" />
+					<object Blueprint="Steel Shield" Number="1" />
+				</group>
+			</group>
+			<group Name="Pelt" Style="pickone">
+				<object Weight="60" Blueprint="Cleo_TerraFirma_Cobblefur Bracer" Number="1" />
+				<object Weight="20" Blueprint="Cleo_TerraFirma_Cobblefur Gloves" Number="1" />
+				<object Weight="20" Blueprint="Cleo_TerraFirma_Cobblefur Cloak" Number="1" />
+			</group>
+			<!-- Chest: flint-spike pauldrons (Weight 25) and mudskin girdle (Weight 25) join
+			     these entries when their blueprints land (both fully shaped in TODO.md, same
+			     sitting). Until then the live weights normalize among themselves; final
+			     proportions arrive with that build. The workwear subgroup is the user's
+			     "instead of none" fallback: every outrider wears SOMETHING on the chest. -->
+			<group Name="Chest" Style="pickone">
+				<object Weight="12" Blueprint="Bark Armor" Number="1" />
+				<object Weight="12" Blueprint="Studded Leather Armor" Number="1" />
+				<object Weight="8" Blueprint="Furs" Number="1" />
+				<object Weight="8" Blueprint="Leather Armor" Number="1" />
+				<group Weight="10" Name="Workwear" Style="pickone">
+					<object Weight="25" Blueprint="Sooty Smock" Number="1" />
+					<object Weight="25" Blueprint="Ash-Stained Robes" Number="1" />
+					<object Weight="25" Blueprint="Cloth Overalls" Number="1" />
+					<object Weight="25" Blueprint="Leather Apron" Number="1" />
+				</group>
+			</group>
 		</group>
 	</population>
 
