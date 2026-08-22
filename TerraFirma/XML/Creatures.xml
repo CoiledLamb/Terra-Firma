@@ -71,12 +71,13 @@
        lift at the spawn-wiring pass. -->
   <object Name="Cleo_TerraFirma_Cobble Baboon" Inherits="Baboon">
     <part Name="Render" DisplayName="granite baboon" Tile="Creatures/sw_quartz_baboon.bmp" ColorString="&amp;y" DetailColor="r" /> <!-- RENAMED granite 2026-08-22 (user; supersedes the cobble lock); interim = base quartz baboon tile in grey/brown until the friend-made sprites land -->
-    <stat Name="Hitpoints" Value="15" />
+    <stat Name="Hitpoints" Value="18" />
+    <stat Name="Level" Value="6" /> <!-- numbers sitting 2026-08-22: EB2 + slightly-above-parity chassis (base Baboon 15/L5), user-ruled -->
     <stat Name="Strength" Boost="2" />
-    <stat Name="AV" Value="3" />
+    <stat Name="AV" Value="2" /> <!-- lowered from base-parity 3 (user 2026-08-22); the whorl tops it up when stones bank -->
     <!-- mutation nodes resolve by CLASS name, not display name (caught 2026-08-14: the display
          name loaded as a MODERROR + unnamed-node warn and the baboon spawned barrage-less) -->
-    <mutation Name="Cleo_TerraFirma_EarthenBarrage" Level="4" />
+    <mutation Name="Cleo_TerraFirma_EarthenBarrage" Level="2" /> <!-- RULED 2026-08-22 down from 4: 1d6+3 with per-pen rolls two-shots fresh characters and baboons troop; EB2 = 1d6+1, whorl still banks 4 stones -->
     <part Name="Corpse" CorpseChance="15" CorpseBlueprint="Cleo_TerraFirma_Cobble Baboon Corpse" />
     <!-- NO ConversationScript, RULED 2026-08-16. Not an oversight and not a debt: BaseBaboon,
          Baboon and Quartz Baboon all ship without one, so baboons are unclickable in base and
@@ -84,7 +85,9 @@
          Plants), each a single emote plus a themed farewell, so the door is one line wide if it
          ever reopens. He expresses through the inherited sound tags instead. -->
     <part Name="Description" Short="Grit clings to =pronouns.possessive= coat in dun sheets, and around =pronouns.objective= the air is never quite still: pebbles circle =pronouns.possessive= shoulders in a lazy orbit, waiting to be thrown." /> <!-- DRAFT, signoff owed -->
-    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+    <!-- SPAWN WIRED 2026-08-22 (user: "it should spawn in all 3"): exclude tag LIFTED, so the
+         parent Baboon tags deliver Hills_Creatures + DesertCanyon_Creatures + the Baboons pool by
+         inheritance; troop merges live in PopulationTables.xml. First real debut wiring on the branch. -->
   </object>
   <object Name="Cleo_TerraFirma_Cobble Baboon Corpse" Inherits="Baboon Corpse">
     <part Name="Render" DisplayName="granite baboon corpse" />

@@ -122,7 +122,7 @@
 		     PLACEHOLDER awaiting the user's own text -->
 		<part Name="Description" Short="a wrought metal cage sits empty." />
 		<tag Name="Tier" Value="3" />
-		<tag Name="ExcludeFromDynamicEncounters" />
+		<tag Name="DynamicObjectsTable:Trinkets" /> <!-- SPAWN WIRED 2026-08-22: trinket loot + the Utility 2 light-source table (PopulationTables.xml) -->
 	</object>
 	<!-- Piezoelectric cell (renamed from "grinder cell" 2026-08-22, user: "piezoelectric makes sense" - the grind-verb overlap with the mill bugged them; internal GrinderCell ids stay per the glowstone precedent). Description USER TEXT FINAL; shape + numbers user-approved
 	     same sitting (weight x 20 charge per stone, 10/turn trickle, no boulder cap, grinds
@@ -139,12 +139,13 @@
 		     ladder (fidget t1 001, solar t2 002, thermo t5 024). -->
 		<part Name="TinkerItem" Bits="003" CanDisassemble="true" CanBuild="true" />
 		<tag Name="TinkerCategory" Value="ammo and energy cells" />
+		<tag Name="DynamicObjectsTable:EnergyCells" /> <!-- SPAWN WIRED 2026-08-22: everywhere a tier-appropriate cell can spawn (sockets query this table with Tier{zonetier}; our Tier 3 tag does the filtering) -->
 		<part Name="Description" Short="a rumbling spiral milks out bursts of piezoelectric energy from chunks of earth." />
 		<part Name="Physics" Weight="5" />
 		<part Name="Commerce" Value="100" />
 		<part Name="Metal" />
 		<tag Name="Tier" Value="3" />
-		<tag Name="ExcludeFromDynamicEncounters" />
+		<!-- exclude tag LIFTED at the 2026-08-22 spawn wiring -->
 	</object>
 	<!-- Symbiotic mole cricket (2026-08-22): description USER TEXT FINAL; replaces the Fresh-air
 	     trio's attendant chisel (user reflavor). Symbiotic Firefly chassis with DestroyOnUnequip
@@ -165,7 +166,7 @@ Perishes when unequipped." />
 		<tag Name="Tier" Value="2" />
 		<stag Name="Floating" />
 		<tag Name="LiveAnimal" />
-		<tag Name="ExcludeFromDynamicEncounters" />
+		<!-- exclude LIFTED 2026-08-22; rides the Symbiotic Firefly artifact tables via PopulationTables.xml merges -->
 	</object>
 	<!-- Box of chalk + chalk line (design sitting 2026-08-22, all four forks user-ruled:
 	     auto-orient strokes, draw adjacent, chalkboard writing typed AND markov, 8-12 uses).
@@ -188,6 +189,6 @@ Perishes when unequipped." />
 		<part Name="Description" Short="figments of lime sketch out concepts, ideoforms, and diagrams, only to be smeared away by the passage of time." />
 		<part Name="Cleo_TerraFirma_ChalkBox" />
 		<tag Name="Tier" Value="1" />
-		<tag Name="ExcludeFromDynamicEncounters" />
+		<tag Name="DynamicObjectsTable:Trinkets" /> <!-- SPAWN WIRED 2026-08-22: rides the crayon trinket pools via merges -->
 	</object>
 </objects>

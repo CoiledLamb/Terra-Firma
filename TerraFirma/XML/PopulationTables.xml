@@ -159,4 +159,101 @@
 			</group>
 		</group>
 	</population>
+	<!-- Granite baboon troop wiring (user ruling 2026-08-22: "it should spawn in all 3" - the
+	     dynamic pools arrive via inherited parent tags in Creatures.xml; these merges put him in
+	     baboon SOCIETY, the weird cousin who learned to juggle. Chances/numbers DRAFT. -->
+	<population Name="BaboonParty" Load="Merge">
+		<group Name="Baboons" Style="pickeach">
+			<object Chance="33" Number="0-1" Blueprint="Cleo_TerraFirma_Cobble Baboon" />
+		</group>
+	</population>
+	<population Name="BigBaboonParty" Load="Merge">
+		<group Name="Baboons" Style="pickeach">
+			<object Chance="90" Number="1-2" Blueprint="Cleo_TerraFirma_Cobble Baboon" />
+		</group>
+	</population>
+	<!-- Item spawn wiring 2026-08-22 (user rulings, one lane each; all weights DRAFT):
+	     lantern = trinkets (tag on blueprint) + the light-source utility table glowspheres live
+	     in, at half a glowsphere's weight · cricket = the Symbiotic Firefly's exact artifact
+	     ladder, same weights · chalk box = the crayons' eight trinket tables at the crayons'
+	     own 35 · granitefur = ape fur's Armor-table idiom one tier down (ape fur = Armor 3C
+	     w10 each; ours = Armor 2C w10 each). Fragments need no lane: breaking spheres IS the
+	     acquisition (ruled "agreed, done"). -->
+	<population Name="Utility 2" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_GlowstoneLantern" />
+		</group>
+	</population>
+	<population Name="Artifact 0R" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="20" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
+		</group>
+	</population>
+	<population Name="Artifact 1R" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="20" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
+		</group>
+	</population>
+	<population Name="Artifact 2R" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
+		</group>
+	</population>
+	<population Name="Artifact 3R" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="5" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
+		</group>
+	</population>
+	<population Name="Artifact 4R" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="1" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
+		</group>
+	</population>
+	<population Name="Trinkets 1" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="35" Number="1" Blueprint="Cleo_TerraFirma_BoxOfChalk" />
+		</group>
+	</population>
+	<population Name="Trinkets 2" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="35" Number="1" Blueprint="Cleo_TerraFirma_BoxOfChalk" />
+		</group>
+	</population>
+	<population Name="Trinkets 3" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="35" Number="1" Blueprint="Cleo_TerraFirma_BoxOfChalk" />
+		</group>
+	</population>
+	<population Name="Trinkets 4" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="35" Number="1" Blueprint="Cleo_TerraFirma_BoxOfChalk" />
+		</group>
+	</population>
+	<population Name="Trinkets 5" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="35" Number="1" Blueprint="Cleo_TerraFirma_BoxOfChalk" />
+		</group>
+	</population>
+	<population Name="Trinkets 6" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="35" Number="1" Blueprint="Cleo_TerraFirma_BoxOfChalk" />
+		</group>
+	</population>
+	<population Name="Trinkets 7" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="35" Number="1" Blueprint="Cleo_TerraFirma_BoxOfChalk" />
+		</group>
+	</population>
+	<population Name="Trinkets 8" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="35" Number="1" Blueprint="Cleo_TerraFirma_BoxOfChalk" />
+		</group>
+	</population>
+	<population Name="Armor 2C" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_Cobblefur Bracer" />
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_Cobblefur Gloves" />
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_Cobblefur Cloak" />
+		</group>
+	</population>
 </populations>
