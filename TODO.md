@@ -1476,7 +1476,7 @@ All four items' `ExcludeFromDynamicEncounters` tags LIFTED. `[verify]` next boot
 
 ## Pending design budget (ideas parked, not committed)
 
-- **"Pig vessels" — USER FLOAT 2026-08-22, session close, verbatim: "oh flarp, I forgot to get pig vessels set up here. oh well, next time." Nothing else known — no concept, no mechanics, not even a guess recorded on purpose (a bare name invites invented lore). Ask the user what it is at pickup.**
+- **"Pig vessels" — deferred to next session (user, 2026-08-22 close: "I forgot to get pig vessels set up here. oh well, next time").** NOT a mystery: this is the fully-committed **wild grazing boar vessels + gut cistern** workstream (see the creature roster section, the big COMMITTED entry) — build order ruled (base blueprint first, verify wild, then re-parent Husangeion), cistern in v1 at zero C#, name float "pig vessels" with lock owed. The 2026-08-22 "no details known" parking note was a grep miss, corrected same sitting.
 
 Nice-to-haves, only if time/energy allows after the core mutations are solid. No checkboxes on purpose — promote an item into a real section when we commit to it.
 
