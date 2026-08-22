@@ -231,6 +231,21 @@ namespace XRL.World.Parts
 			{
 				render.Tile = lit ? "lantern_lit.png" : "lantern_unlit.png";
 			}
+			// lit lanterns shimmer their detail through the fragment's own y/Y pulse (user
+			// 2026-08-22: "can the detail color of lanterns shift in the same colors as the
+			// glowsphere fragment?") - the flicker IS the shard showing through the glass, so
+			// the part comes off entirely while the cage sits empty
+			AnimatedMaterialGeneric anim = ParentObject.GetPart<AnimatedMaterialGeneric>();
+			if (lit && anim == null)
+			{
+				anim = ParentObject.AddPart<AnimatedMaterialGeneric>();
+				anim.AnimationLength = 200;
+				anim.DetailColorAnimationFrames = "0=y,100=Y";
+			}
+			else if (!lit && anim != null)
+			{
+				ParentObject.RemovePart(anim);
+			}
 			Description desc = ParentObject.GetPart<Description>();
 			if (desc != null)
 			{
