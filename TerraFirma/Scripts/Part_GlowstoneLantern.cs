@@ -23,11 +23,11 @@ namespace XRL.World.Parts
 		public const string SHARD_BLUEPRINT = "Cleo_TerraFirma_GlowstoneShard";
 		public const int STEADY_RADIUS = 8;
 
-		// locked user text (2026-08-22, "USER TEXT, FINAL" ruling) for the lit state; the unlit
-		// description is PENDING (user: "i'll write description for the last one later") - swap
-		// the placeholder verbatim when it lands.
-		public const string LIT_DESCRIPTION = "a wrought metal cage encloses a flickering shard.";
-		public const string UNLIT_DESCRIPTION = "a wrought metal cage sits empty."; // PLACEHOLDER, user text pending
+		// USER TEXT, FINAL (delivered 2026-08-22 evening, swapped verbatim): the lit line
+		// supersedes the original locked description ("a wrought metal cage encloses a
+		// flickering shard."), the unlit line retires the placeholder debt.
+		public const string LIT_DESCRIPTION = "A wrought metal cage and panes of crystal enclose a phosphorescent shard, amplifying its flickering glow.";
+		public const string UNLIT_DESCRIPTION = "A wrought metal cage and panes of crystal enclose an inert wire socket.";
 
 		public GameObject Shard;
 

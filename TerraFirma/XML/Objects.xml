@@ -118,9 +118,9 @@
 		<part Name="Cleo_TerraFirma_GlowstoneLantern" />
 		<part Name="Physics" Weight="2" />
 		<part Name="Commerce" Value="15" /> <!-- re-dialed 2026-08-22 from 25: torch 1 / glowsphere 40 anchors; lantern+fragment = 20, half a permanent glowsphere -->
-		<!-- description is state-swapped by the part: lit = the locked user line, unlit = a
-		     PLACEHOLDER awaiting the user's own text -->
-		<part Name="Description" Short="a wrought metal cage sits empty." />
+		<!-- description is state-swapped by the part; both lines USER TEXT FINAL 2026-08-22
+		     (the lit line superseded the original locked string the same day) -->
+		<part Name="Description" Short="A wrought metal cage and panes of crystal enclose an inert wire socket." />
 		<tag Name="Tier" Value="3" />
 		<tag Name="DynamicObjectsTable:Trinkets" /> <!-- SPAWN WIRED 2026-08-22: trinket loot + the Utility 2 light-source table (PopulationTables.xml) -->
 	</object>
