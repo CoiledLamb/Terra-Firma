@@ -170,7 +170,7 @@
 		<part Name="RulesDescription" Text="Sometimes pecks at enemies and scrapes at stone.
 Perishes when unequipped." />
 		<part Name="Springy" Factor="0.5" />
-		<part Name="DestroyOnUnequip" />
+		<part Name="DestroyOnUnequip" Message="Your symbiotic mole cricket perishes." /> <!-- DRAFT (user flag 2026-08-23: the part's default is "The mote of light is extinguished."; verb from the user-approved rules line) -->
 		<part Name="Cleo_TerraFirma_MoleCricket" />
 		<part Name="AddsRep" Faction="Insects,Cleo_TerraFirma_Quarriers" Value="200" /> <!-- RULED 2026-08-22: +200 each, insects AND the guild - the symbiosis pays both ways -->
 		<tag Name="Tier" Value="2" />
