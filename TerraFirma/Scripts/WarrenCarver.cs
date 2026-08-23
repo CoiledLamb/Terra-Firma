@@ -1735,48 +1735,10 @@ namespace Cleo.TerraFirma.Scripts
 			return last ?? new Result { Built = false, Reason = "no attempt ran", Seed = seed };
 		}
 
-		// ---------------------------------------------------------------- prospect
-		/// <summary>The refusal fallback's physical half (ruled 2026-08-23): a small
-		/// honest mark where a rumor found no quarry - one wall cell broken to
-		/// rubble with a fallen rock or two beside it. Carvers scouted this canyon
-		/// and moved on. Returns pieces placed (0 = no natural wall to chip, the
-		/// bare-lawn case; the note handling keys off that).</summary>
-		public static int ProspectMark(Zone Z, int seed)
-		{
-			_state = (uint)seed;
-			var cands = new List<Cell>();
-			for (int y = 1; y < Z.Height - 1; y++)
-				for (int x = 1; x < Z.Width - 1; x++)
-				{
-					Cell c = Z.GetCell(x, y);
-					if (c == null || !c.HasWall()) continue;
-					GameObject wall = c.GetWalls().FirstOrDefault();
-					if (!XRL.World.Parts.Cleo_TerraFirma_StoneshaperWallProperties.IsNaturalStone(
-						wall?.GetPart<XRL.World.Parts.Cleo_TerraFirma_StoneshaperWallProperties>())) continue;
-					int openN = 0;
-					foreach (var d in N4)
-					{
-						Cell n = Z.GetCell(x + d[0], y + d[1]);
-						if (n != null && !n.HasWall() && !n.HasObjectWithPart("LiquidVolume")) openN++;
-					}
-					if (openN >= 2) cands.Add(c);   // visible, walkable-to chip site
-				}
-			if (cands.Count == 0) return 0;
-			Cell bite = cands[R(0, cands.Count - 1)];
-			int placed = 0;
-			foreach (GameObject w in bite.GetWalls().ToList()) w.Obliterate();
-			bite.AddObject(GameObject.Create("Cleo_TerraFirma_Rock_Rubble")); placed++;
-			int rocks = R(1, 2);
-			foreach (var d in N4)
-			{
-				if (rocks <= 0) break;
-				Cell n = Z.GetCell(bite.X + d[0], bite.Y + d[1]);
-				if (n == null || n.HasWall() || n.IsSolid() || n.HasObjectWithPart("LiquidVolume")) continue;
-				n.AddObject(GameObject.Create("Cleo_TerraFirma_Rock_Generic")); placed++; rocks--;
-			}
-			Helpers.VerifyLog("WARREN", $"prospect mark: bite at ({bite.X},{bite.Y}), {placed} pieces");
-			return placed;
-		}
+		// (ProspectMark REMOVED same day it landed - the prospect fallback was
+		// superseded by the self-erasing ruling ("just stopped existing"). The
+		// mechanism lives in git history at c27bf12 if abandoned prospects ever
+		// return as deliberate content rather than as an apology.)
 
 		// ---------------------------------------------------------------- apply
 		// Grid to zone: final FLOOR cells that are ours lose their walls; aquifer
