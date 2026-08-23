@@ -153,6 +153,7 @@ User's words 2026-08-04: "note down the items we're committing to from the jam s
 - **cairn** — `A waystone for those with eyes to the earth, this stack of rocks inhabits an unresolved superposition of endurance and fragility.` Journal-held; blueprint unbuilt.
 - **toppled cairn** — `These scattered rocks once formed a waystone; now, only traces of their former order remain.` Journal-held. **The name "toppled cairn" SETTLES the "disrupted(?) cairn" naming thread below** (the query-mark note is answered; "disrupted cairn" retires).
 - The recorded rests/watch echo between the old cairn pair is RETIRED by this re-delivery; the preserve-it note below is answered, not deleted (provenance).
+- **box of chalk, same evening — USER TEXT FINAL, swapped into the live blueprint verbatim:** `Fragmented tubes of lime sketch out concepts, ideoforms, and diagrams, only to be smeared away by the passage of time.` Supersedes the lowercase "figments of lime" string; the box-of-chalk description debt from the original batch is retired.
 
 ### Ground truth checked against Base during the revision passes (Claude, 2026-08-22)
 

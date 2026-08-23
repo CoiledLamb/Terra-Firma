@@ -196,7 +196,7 @@ Perishes when unequipped." />
 		<part Name="Render" DisplayName="box of chalk" RenderString="&#248;" ColorString="&amp;Y" TileColor="&amp;Y" DetailColor="y" Tile="Items/sw_crayons.bmp" RenderLayer="5" /> <!-- base crayons tile, detail greyed per ruling -->
 		<part Name="Physics" Weight="1" />
 		<part Name="Commerce" Value="10" />
-		<part Name="Description" Short="figments of lime sketch out concepts, ideoforms, and diagrams, only to be smeared away by the passage of time." />
+		<part Name="Description" Short="Fragmented tubes of lime sketch out concepts, ideoforms, and diagrams, only to be smeared away by the passage of time." /> <!-- USER TEXT FINAL 2026-08-22 evening, supersedes the lowercase figments draft -->
 		<part Name="Cleo_TerraFirma_ChalkBox" />
 		<tag Name="Tier" Value="1" />
 		<tag Name="DynamicObjectsTable:Trinkets" /> <!-- SPAWN WIRED 2026-08-22: rides the crayon trinket pools via merges -->
