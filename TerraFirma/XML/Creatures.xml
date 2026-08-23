@@ -170,7 +170,7 @@
        sequencing, so a role currently carries its mutation and nothing else. -->
 
   <object Name="Cleo_TerraFirma_Hewer" Inherits="Cleo_TerraFirma_Stonecarver">
-    <part Name="Render" DisplayName="hewer" ColorString="&amp;r" />
+    <part Name="Render" DisplayName="quarry hewer" ColorString="&amp;r" /> <!-- "quarry x" naming, lean closed out as RULED 2026-08-23; mole variants inherit -->
     <part Name="Description" Short="=pronouns.Subjective= =verb:read:afterpronoun= the rock face the way a reader finds a paragraph break, and =pronouns.subjective= =verb:open:afterpronoun= it there." /> <!-- DRAFT, signoff owed -->
     <mutation Name="Cleo_TerraFirma_Fissure" Level="4" /> <!-- level DRAFT -->
     <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Hewer" /> <!-- mole hewer inherits this -->
@@ -188,7 +188,7 @@
   </object>
 
   <object Name="Cleo_TerraFirma_Mason" Inherits="Cleo_TerraFirma_Stonecarver">
-    <part Name="Render" DisplayName="mason" ColorString="&amp;y" />
+    <part Name="Render" DisplayName="quarry mason" ColorString="&amp;y" />
     <part Name="Description" Short="Stone dust has settled into =pronouns.possessive= sleeves so thoroughly that =pronouns.subjective= =verb:carry:afterpronoun= the quarry around with =pronouns.objective=." /> <!-- DRAFT, signoff owed -->
     <mutation Name="Cleo_TerraFirma_Stoneshaper" Level="4" /> <!-- level DRAFT -->
     <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Mason" /> <!-- mole mason inherits this -->
@@ -209,7 +209,7 @@
   </object>
 
   <object Name="Cleo_TerraFirma_Outrider" Inherits="Cleo_TerraFirma_Stonecarver">
-    <part Name="Render" DisplayName="outrider" ColorString="&amp;B" />
+    <part Name="Render" DisplayName="quarry outrider" ColorString="&amp;B" />
     <part Name="Description" Short="=pronouns.Subjective= =verb:walk:afterpronoun= the edge of the claim with stones already circling =pronouns.possessive= shoulders, waiting." /> <!-- DRAFT, signoff owed -->
     <mutation Name="Cleo_TerraFirma_EarthenBarrage" Level="4" /> <!-- level DRAFT -->
     <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Outrider" /> <!-- mole outrider inherits this -->
