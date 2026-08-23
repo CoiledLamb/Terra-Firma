@@ -88,6 +88,15 @@
   <object Name="Cleo_TerraFirma_FireDish" Inherits="Campfire">
     <part Name="Render" Tile="firedish.png" DisplayName="carved fire dish" />
     <part Name="Description" Short="A wide basin of dressed stone cradles a bed of embers." />
+    <!-- USER 2026-08-23 (fire dish now rolls the dwelling light pool, so both
+         were loud): no flash when lit, i.e. Campfire's inherited
+         AnimatedMaterialFire strobe goes; the dish is dressed stone, it does
+         not flicker as a sprite. The flame overlay (PrefabImposter,
+         CampfireFlames) stays, raised to sit in the basin: Y offset is a first
+         calibration guess, sign and scale unverified in base XML (no blueprint
+         sets it); ONE eyeball iteration expected per the VFX law. -->
+    <removepart Name="AnimatedMaterialFire" />
+    <part Name="PrefabImposter" Prefab="Prefabs/Particles/CampfireFlames" Y="5" />
   </object>
   <!-- Quarried block: RandomTile builder rotates the three user sprites. -->
   <!-- Quarry stone stacks (warren dress port 2026-08-23): the yard's three
