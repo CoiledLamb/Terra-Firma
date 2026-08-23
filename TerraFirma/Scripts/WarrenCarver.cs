@@ -1256,13 +1256,47 @@ namespace Cleo.TerraFirma.Scripts
 			band = LargestBand(g);   // pools ate rock; re-measure
 			if (band == null) return new Result { Built = false, Reason = "no band after geology", Seed = seed };
 
-			// the mouth opens onto CANYON FLOOR, never onto the river
+			// PORT FIX round 3 (2026-08-23, first sealed warren): the mouth must open
+			// onto host floor CONNECTED to the zone's traversal network, not any open
+			// cell - the real zone has isolated clearings inside the rock mass that
+			// the sim's canyon host never had. Connected = reachable from a zone-edge
+			// open cell (surface canyon travel enters at the edges).
+			var connected = new byte[g.W * g.H];
+			{
+				var cq = new Queue<int>();
+				for (int x = 0; x < g.W; x++)
+					foreach (int yy in new[] { 0, g.H - 1 })
+						if (g.C[g.Idx(x, yy)] == FLOOR && g.Water[g.Idx(x, yy)] == 0 && connected[g.Idx(x, yy)] == 0)
+						{ connected[g.Idx(x, yy)] = 1; cq.Enqueue(g.Idx(x, yy)); }
+				for (int y = 0; y < g.H; y++)
+					foreach (int xx in new[] { 0, g.W - 1 })
+						if (g.C[g.Idx(xx, y)] == FLOOR && g.Water[g.Idx(xx, y)] == 0 && connected[g.Idx(xx, y)] == 0)
+						{ connected[g.Idx(xx, y)] = 1; cq.Enqueue(g.Idx(xx, y)); }
+				while (cq.Count > 0)
+				{
+					int ci = cq.Dequeue();
+					int cx = ci % g.W, cy = ci / g.W;
+					foreach (var d in N4)
+					{
+						int nx = cx + d[0], ny = cy + d[1];
+						if (!g.Inb(nx, ny)) continue;
+						int ni = g.Idx(nx, ny);
+						if (connected[ni] != 0 || g.C[ni] != FLOOR || g.Water[ni] != 0) continue;
+						connected[ni] = 1; cq.Enqueue(ni);
+					}
+				}
+				int connCount = 0; for (int i = 0; i < connected.Length; i++) if (connected[i] != 0) connCount++;
+				Helpers.VerifyLog("WARREN", $"host connectivity: {connCount} edge-connected open cells");
+				// degenerate zone (no edge-open floor at all): fall back to any host
+				// so a fully-walled test slab still carves under the wish
+				if (connCount == 0)
+					for (int i = 0; i < connected.Length; i++) if (g.C[i] == FLOOR && g.Water[i] == 0) connected[i] = 1;
+			}
 			var skin = band.Cells.Where(i =>
 			{
 				int x = i % g.W, y = i / g.W;
 				if (x < 1 || y < 1 || x > g.W - 2 || y > g.H - 2) return false;
-				return N4.Any(d => g.Inb(x + d[0], y + d[1])
-					&& g.Host[g.Idx(x + d[0], y + d[1])] != 0 && g.Water[g.Idx(x + d[0], y + d[1])] == 0);
+				return N4.Any(d => g.Inb(x + d[0], y + d[1]) && connected[g.Idx(x + d[0], y + d[1])] != 0);
 			}).ToList();
 			if (skin.Count == 0) return new Result { Built = false, Reason = "band never meets the canyon", Seed = seed };
 			for (int i = skin.Count - 1; i > 0; i--) { int j = R(0, i); (skin[i], skin[j]) = (skin[j], skin[i]); }
@@ -1397,6 +1431,23 @@ namespace Cleo.TerraFirma.Scripts
 				mossed++;
 			}
 			Helpers.VerifyLog("WARREN", $"applied: {carved} cells carved, {pools} pool cells, {mossed} mossy walls");
+			// mouth forensics (round 3): the first live warren carved green and was
+			// then found sealed. Name the mouth's neighbors at apply time so a
+			// post-builder seal (biome mutation is the suspect - it runs after every
+			// builder) shows up as a diff between this line and what the player sees.
+			if (g.MouthIdx >= 0)
+			{
+				int mx = g.MouthIdx % g.W, my = g.MouthIdx / g.W;
+				var names = new List<string>();
+				foreach (var d in N8)
+				{
+					Cell nc = Z.GetCell(mx + d[0], my + d[1]);
+					if (nc == null) continue;
+					GameObject top = nc.GetWalls().FirstOrDefault() ?? nc.GetFirstObjectWithPart("LiquidVolume");
+					names.Add($"({mx + d[0]},{my + d[1]}) {(top != null ? top.Blueprint : (nc.IsSolid() ? "solid?" : "open"))}");
+				}
+				Helpers.VerifyLog("WARREN", $"mouth ({mx},{my}) neighbors at apply: {string.Join(" | ", names)}");
+			}
 		}
 	}
 }
