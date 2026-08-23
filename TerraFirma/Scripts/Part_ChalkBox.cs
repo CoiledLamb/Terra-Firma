@@ -42,6 +42,7 @@ namespace XRL.World.Parts
 				|| ID == ObjectCreatedEvent.ID
 				|| ID == TakenEvent.ID
 				|| ID == AddedToInventoryEvent.ID
+				|| ID == EquippedEvent.ID
 				|| ID == DroppedEvent.ID
 				|| ID == BeforeDestroyObjectEvent.ID
 				|| ID == PooledEvent<GetDisplayNameEvent>.ID;
@@ -78,6 +79,34 @@ namespace XRL.World.Parts
 		{
 			EnsureGrant(ParentObject.InInventory);
 			return base.HandleEvent(E);
+		}
+
+		// equipping moves the box out of the Inventory part without firing Taken/Dropped;
+		// re-sync so a box in hand keeps counting (live-test round 3: the 20 -> 10 button)
+		public override bool HandleEvent(EquippedEvent E)
+		{
+			EnsureGrant(E.Actor);
+			return base.HandleEvent(E);
+		}
+
+		/// <summary>Every chalk box the creature carries, pack AND hands - GetInventoryDirect
+		/// alone made an equipped box invisible to the count, the fullest-box finder, and the
+		/// heir list (live-test round 3).</summary>
+		private static System.Collections.Generic.List<GameObject> CarriedBoxes(GameObject who, GameObject skip = null)
+		{
+			var found = new System.Collections.Generic.List<GameObject>();
+			if (who == null)
+			{
+				return found;
+			}
+			foreach (GameObject item in who.GetInventoryDirectAndEquipment())
+			{
+				if (item != skip && item.HasPart<Cleo_TerraFirma_ChalkBox>())
+				{
+					found.Add(item);
+				}
+			}
+			return found;
 		}
 
 		private void EnsureGrant(GameObject who)
@@ -120,7 +149,7 @@ namespace XRL.World.Parts
 				return;
 			}
 			int total = 0;
-			foreach (GameObject item in who.GetInventoryDirect((GameObject go) => go.HasPart<Cleo_TerraFirma_ChalkBox>()))
+			foreach (GameObject item in CarriedBoxes(who))
 			{
 				int uses = item.GetPart<Cleo_TerraFirma_ChalkBox>().Uses;
 				if (uses > 0)
@@ -141,7 +170,7 @@ namespace XRL.World.Parts
 		{
 			// Destroy fires no DroppedEvent, so a box that crumbles (or burns) while carried
 			// must release its grant here or the ability outlives every box that could serve it
-			ReleaseGrant(ParentObject.InInventory);
+			ReleaseGrant(ParentObject.InInventory ?? ParentObject.Equipped);
 			return base.HandleEvent(E);
 		}
 
@@ -152,7 +181,7 @@ namespace XRL.World.Parts
 			{
 				return;
 			}
-			var others = who.GetInventoryDirect((GameObject go) => go != ParentObject && go.HasPart<Cleo_TerraFirma_ChalkBox>());
+			var others = CarriedBoxes(who, skip: ParentObject);
 			who.UnregisterPartEvent(this, DRAW_COMMAND);
 			if (others.Count > 0)
 			{
@@ -170,7 +199,7 @@ namespace XRL.World.Parts
 
 		private bool AnyOtherBoxClaimsGrant(GameObject who)
 		{
-			foreach (GameObject item in who.GetInventoryDirect((GameObject go) => go != ParentObject && go.HasPart<Cleo_TerraFirma_ChalkBox>()))
+			foreach (GameObject item in CarriedBoxes(who, skip: ParentObject))
 			{
 				if (item.GetPart<Cleo_TerraFirma_ChalkBox>().AbilityID != Guid.Empty)
 				{
@@ -187,7 +216,7 @@ namespace XRL.World.Parts
 				GameObject actor = E.GetGameObjectParameter("Actor");
 				if (actor != null)
 				{
-					if (ParentObject.InInventory == actor && Uses > 0)
+					if ((ParentObject.InInventory == actor || ParentObject.Equipped == actor) && Uses > 0)
 					{
 						AttemptDraw(actor);
 					}
@@ -283,11 +312,11 @@ namespace XRL.World.Parts
 			SyncAbilityName(holder);
 		}
 
-		/// <summary>The fullest chalk box a creature carries, for target-side actions.</summary>
+		/// <summary>The fullest chalk box a creature carries (pack or hands), for target-side actions.</summary>
 		public static Cleo_TerraFirma_ChalkBox FindCarriedBox(GameObject actor)
 		{
 			Cleo_TerraFirma_ChalkBox best = null;
-			foreach (GameObject item in actor.GetInventoryDirect((GameObject go) => go.HasPart<Cleo_TerraFirma_ChalkBox>()))
+			foreach (GameObject item in CarriedBoxes(actor))
 			{
 				Cleo_TerraFirma_ChalkBox box = item.GetPart<Cleo_TerraFirma_ChalkBox>();
 				if (box.Uses > 0 && (best == null || box.Uses > best.Uses))
