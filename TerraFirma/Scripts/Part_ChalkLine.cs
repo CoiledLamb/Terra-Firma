@@ -93,7 +93,14 @@ namespace XRL.World.Parts
 				return;
 			}
 			bool n = HasChalk(cell, "N"), s = HasChalk(cell, "S"), e = HasChalk(cell, "E"), w = HasChalk(cell, "W");
-			render.Tile = "chalkline" + PieceFor(n, s, e, w, cell, StrokeDir) + ".png";
+			string tile = "chalkline" + PieceFor(n, s, e, w, cell, StrokeDir) + ".png";
+			if (render.Tile != tile)
+			{
+				render.Tile = tile;
+				// ripple: a role change here can change a run-mate's role (closing a rectangle
+				// re-roles the whole edge); cascades only while tiles actually change
+				RetileNeighbors(cell);
+			}
 		}
 
 		private static bool HasChalk(Cell cell, string dir)
@@ -155,15 +162,56 @@ namespace XRL.World.Parts
 			}
 		}
 
-		// N/S and E/W are 1px-offset variants of the same edge; cell parity picks one stably
+		// ROLE, not parity (live-test diagnosis 2026-08-22: the parity dither was a Claude
+		// misread of the kit - N is the TOP-edge stroke and S the BOTTOM-edge stroke, matching
+		// the corners' own arm rows, so alternating them made every run zigzag). A straight
+		// piece asks which way its run eventually TURNS: a horizontal run whose end turns
+		// south is a top edge (N), turns north is a bottom edge (S); vertical runs likewise
+		// (turns east = left edge = W, turns west = right edge = E). A bare run that never
+		// turns reads N/W (dial).
+		private const int RUN_WALK_MAX = 80;
+
 		private static string Horizontal(Cell cell)
 		{
-			return cell.Y % 2 == 0 ? "N" : "S";
+			return RunEdgeRole(cell, "W", "E", "S", "N", "N", "S") ?? "N";
 		}
 
 		private static string Vertical(Cell cell)
 		{
-			return cell.X % 2 == 0 ? "W" : "E";
+			return RunEdgeRole(cell, "N", "S", "E", "W", "W", "E") ?? "W";
+		}
+
+		/// <summary>Walk the run both ways; the first cell with a chalk neighbor on turnA/turnB
+		/// names the edge (roleA/roleB). Null when the run never turns.</summary>
+		private static string RunEdgeRole(Cell cell, string dir1, string dir2, string turnA, string turnB, string roleA, string roleB)
+		{
+			foreach (string d in new string[] { dir1, dir2 })
+			{
+				Cell c = cell;
+				for (int i = 0; i < RUN_WALK_MAX && c != null; i++)
+				{
+					bool a = HasChalk(c, turnA);
+					bool b = HasChalk(c, turnB);
+					if (a && b)
+					{
+						break; // crossing; no verdict from this direction
+					}
+					if (a)
+					{
+						return roleA;
+					}
+					if (b)
+					{
+						return roleB;
+					}
+					c = c.GetCellFromDirection(d);
+					if (c?.GetFirstObjectWithPart(nameof(Cleo_TerraFirma_ChalkLine)) == null)
+					{
+						break;
+					}
+				}
+			}
+			return null;
 		}
 	}
 }

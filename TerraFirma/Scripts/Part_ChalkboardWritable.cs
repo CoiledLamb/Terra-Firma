@@ -21,7 +21,37 @@ namespace XRL.World.Parts
 		{
 			return base.WantEvent(ID, cascade)
 				|| ID == GetInventoryActionsEvent.ID
-				|| ID == InventoryActionEvent.ID;
+				|| ID == InventoryActionEvent.ID
+				|| ID == CanSmartUseEvent.ID
+				|| ID == CommandSmartUseEvent.ID;
+		}
+
+		// space/interact on the board = the write prompt while chalk is carried (user ruling
+		// 2026-08-22; first build wired only the menu Default, but the space path is the
+		// SmartUse event pair - Chair's Sit is the decomp precedent, gates included)
+		private bool CanWrite(GameObject actor)
+		{
+			return actor != null && actor != ParentObject && ParentObject.Understood()
+				&& actor.PhaseMatches(ParentObject) && actor.FlightCanReach(ParentObject)
+				&& Cleo_TerraFirma_ChalkBox.FindCarriedBox(actor) != null;
+		}
+
+		public override bool HandleEvent(CanSmartUseEvent E)
+		{
+			if (CanWrite(E.Actor))
+			{
+				return false;
+			}
+			return base.HandleEvent(E);
+		}
+
+		public override bool HandleEvent(CommandSmartUseEvent E)
+		{
+			if (CanWrite(E.Actor))
+			{
+				AttemptWrite(E.Actor);
+			}
+			return base.HandleEvent(E);
 		}
 
 		public override bool HandleEvent(GetInventoryActionsEvent E)
@@ -37,9 +67,21 @@ namespace XRL.World.Parts
 
 		public override bool HandleEvent(InventoryActionEvent E)
 		{
-			if (E.Command == WRITE_COMMAND && E.Actor != null && E.Actor.IsPlayer())
+			if (E.Command == WRITE_COMMAND && E.Actor != null)
 			{
-				Cleo_TerraFirma_ChalkBox box = Cleo_TerraFirma_ChalkBox.FindCarriedBox(E.Actor);
+				if (AttemptWrite(E.Actor))
+				{
+					E.RequestInterfaceExit();
+				}
+			}
+			return base.HandleEvent(E);
+		}
+
+		private bool AttemptWrite(GameObject actor)
+		{
+			if (actor != null && actor.IsPlayer())
+			{
+				Cleo_TerraFirma_ChalkBox box = Cleo_TerraFirma_ChalkBox.FindCarriedBox(actor);
 				if (box == null)
 				{
 					Popup.ShowFail("You have no chalk."); // DRAFT
@@ -89,11 +131,11 @@ namespace XRL.World.Parts
 				// pass picks a real one if any)
 				Popup.Show("You chalk \"" + text + "\" onto " + ParentObject.t() + "."); // DRAFT
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK", $"chalkboard written ({(choice == 0 ? "typed" : "markov")})");
-				E.Actor.UseEnergy(1000, "Item WriteChalkboard");
-				box.ConsumeUse(E.Actor);
-				E.RequestInterfaceExit();
+				actor.UseEnergy(1000, "Item WriteChalkboard");
+				box.ConsumeUse(actor);
+				return true;
 			}
-			return base.HandleEvent(E);
+			return false;
 		}
 	}
 

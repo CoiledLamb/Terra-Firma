@@ -91,8 +91,30 @@ namespace XRL.World.Parts
 					AbilityID = existing.ID;
 					who.RegisterPartEvent(this, DRAW_COMMAND);
 				}
+				SyncAbilityName(who);
 			}
 			return base.HandleEvent(E);
+		}
+
+		/// <summary>The button shows the carried total (user ask 2026-08-22: "show how much chalk
+		/// you have on the draw with chalk button") - the EB Take Stones display idiom.</summary>
+		public static void SyncAbilityName(GameObject who)
+		{
+			ActivatedAbilityEntry ent = who?.ActivatedAbilities?.GetAbilityByCommand(DRAW_COMMAND);
+			if (ent == null)
+			{
+				return;
+			}
+			int total = 0;
+			foreach (GameObject item in who.GetInventoryDirect((GameObject go) => go.HasPart<Cleo_TerraFirma_ChalkBox>()))
+			{
+				int uses = item.GetPart<Cleo_TerraFirma_ChalkBox>().Uses;
+				if (uses > 0)
+				{
+					total += uses;
+				}
+			}
+			ent.DisplayName = "Draw with Chalk (" + total + ")"; // DRAFT format
 		}
 
 		public override bool HandleEvent(DroppedEvent E)
@@ -129,6 +151,7 @@ namespace XRL.World.Parts
 				who.ActivatedAbilities?.RemoveAbility(AbilityID);
 			}
 			AbilityID = Guid.Empty;
+			SyncAbilityName(who);
 		}
 
 		private bool AnyOtherBoxClaimsGrant(GameObject who)
@@ -148,9 +171,30 @@ namespace XRL.World.Parts
 			if (E.ID == DRAW_COMMAND)
 			{
 				GameObject actor = E.GetGameObjectParameter("Actor");
-				if (actor != null && ParentObject.InInventory == actor)
+				if (actor != null)
 				{
-					AttemptDraw(actor);
+					if (ParentObject.InInventory == actor && Uses > 0)
+					{
+						AttemptDraw(actor);
+					}
+					else
+					{
+						// belt (live-test 2026-08-22): if the registered box is spent or gone,
+						// delegate to a live carried box rather than eating the command. No
+						// re-registration here - we are inside this event's dispatch; ownership
+						// self-heals at the next take/drop/crumble
+						Cleo_TerraFirma_ChalkBox live = FindCarriedBox(actor);
+						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK",
+							$"draw re-route: registered box uses={Uses}, inInv={(ParentObject.InInventory == actor)}, live={(live != null)}");
+						if (live != null && live != this)
+						{
+							live.AttemptDraw(actor);
+						}
+						else if (actor.IsPlayer())
+						{
+							Popup.ShowFail("You have no chalk."); // DRAFT
+						}
+					}
 				}
 			}
 			return base.FireEvent(E);
@@ -201,14 +245,28 @@ namespace XRL.World.Parts
 		public void ConsumeUse(GameObject actor)
 		{
 			Uses--;
+			GameObject box = ParentObject;
+			GameObject holder = box.InInventory ?? actor;
 			if (Uses <= 0)
 			{
 				if (actor != null && actor.IsPlayer())
 				{
 					IComponent<GameObject>.AddPlayerMessage("The last stick of chalk crumbles to dust."); // DRAFT
 				}
-				ParentObject.Destroy();
+				// instrumented (live-test 2026-08-22: spent boxes reported LINGERING at zero with
+				// no exception in the log) - record what Destroy actually does, and force the
+				// removal if it quietly leaves the corpse in an inventory
+				bool destroyed = box.Destroy();
+				bool gone = !GameObject.Validate(box) || box.IsInGraveyard();
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK",
+					$"crumble: Destroy()={destroyed}, gone={gone}, context={(box?.InInventory != null ? "inventory" : box?.CurrentCell != null ? "cell" : "none")}");
+				if (!gone && box.InInventory != null)
+				{
+					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK", "crumble BELT: spent box survived Destroy in an inventory; obliterating");
+					box.Obliterate();
+				}
 			}
+			SyncAbilityName(holder);
 		}
 
 		/// <summary>The fullest chalk box a creature carries, for target-side actions.</summary>
