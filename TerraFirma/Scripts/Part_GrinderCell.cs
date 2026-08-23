@@ -232,6 +232,13 @@ namespace XRL.World.Parts
 					{
 						StoneName = null;
 						SyncGrindAnimation(false);
+						// finish message like feed and stop have (user ask 2026-08-23); gated
+						// on the player actually carrying the cell
+						GameObject holder = ParentObject.InInventory ?? ParentObject.Equipped;
+						if (holder != null && holder.IsPlayer())
+						{
+							IComponent<GameObject>.AddPlayerMessage("The spiral grinds its stone down to nothing and stills."); // DRAFT
+						}
 						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("GRINDER", $"stone ground out, cell at {cell.Charge}/{cell.MaxCharge}");
 					}
 				}
