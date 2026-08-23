@@ -42,6 +42,7 @@ namespace XRL.World.Parts
 				|| ID == ObjectCreatedEvent.ID
 				|| ID == TakenEvent.ID
 				|| ID == DroppedEvent.ID
+				|| ID == BeforeDestroyObjectEvent.ID
 				|| ID == PooledEvent<GetDisplayNameEvent>.ID;
 		}
 
@@ -66,44 +67,80 @@ namespace XRL.World.Parts
 		public override bool HandleEvent(TakenEvent E)
 		{
 			GameObject who = E.Actor;
-			if (who != null && who.IsCreature && who.ActivatedAbilities != null
-				&& who.ActivatedAbilities.GetAbilityByCommand(DRAW_COMMAND) == null)
+			if (who != null && who.IsCreature && who.ActivatedAbilities != null)
 			{
-				// icon = the box's own look; description per the base AddAbility idiom
-				AbilityID = who.ActivatedAbilities.AddAbility("Draw with Chalk", DRAW_COMMAND, "Items",
-					Description: "Draw a chalk line on an adjacent square.", // DRAFT (ability name + description)
-					Silent: true,
-					UITileDefault: new ConsoleLib.Console.Renderable(ParentObject.Render));
-				// CommandEvent's cascade (17) NEVER reaches inventory (bugfix 2026-08-22, user:
-				// "the ability doesn't seem to work") - the legacy string event is the delivery
-				// path: CommandEvent.Send fires it on the actor when a part is registered, the
-				// BleedingOnHit idiom
-				who.RegisterPartEvent(this, DRAW_COMMAND);
+				ActivatedAbilityEntry existing = who.ActivatedAbilities.GetAbilityByCommand(DRAW_COMMAND);
+				if (existing == null)
+				{
+					// icon = the box's own look; description per the base AddAbility idiom
+					AbilityID = who.ActivatedAbilities.AddAbility("Draw with Chalk", DRAW_COMMAND, "Items",
+						Description: "Draw a chalk line on an adjacent square.", // DRAFT (ability name + description)
+						Silent: true,
+						UITileDefault: new ConsoleLib.Console.Renderable(ParentObject.Render));
+					// CommandEvent's cascade (17) NEVER reaches inventory (bugfix 2026-08-22, user:
+					// "the ability doesn't seem to work") - the legacy string event is the delivery
+					// path: CommandEvent.Send fires it on the actor when a part is registered, the
+					// BleedingOnHit idiom
+					who.RegisterPartEvent(this, DRAW_COMMAND);
+				}
+				else if (AbilityID == Guid.Empty && !AnyOtherBoxClaimsGrant(who))
+				{
+					// the ability exists but no living box owns it - the granting box was
+					// destroyed without a DroppedEvent (crumbled at zero, burned, etc.), which
+					// left a dead button behind; adopt the orphaned grant
+					AbilityID = existing.ID;
+					who.RegisterPartEvent(this, DRAW_COMMAND);
+				}
 			}
 			return base.HandleEvent(E);
 		}
 
 		public override bool HandleEvent(DroppedEvent E)
 		{
-			GameObject who = E.Actor;
-			if (who != null && AbilityID != Guid.Empty)
-			{
-				// hand the grant to another carried box if one remains, else revoke
-				var others = who.GetInventoryDirect((GameObject go) => go != ParentObject && go.HasPart<Cleo_TerraFirma_ChalkBox>());
-				who.UnregisterPartEvent(this, DRAW_COMMAND);
-				if (others.Count > 0)
-				{
-					Cleo_TerraFirma_ChalkBox heir = others[0].GetPart<Cleo_TerraFirma_ChalkBox>();
-					heir.AbilityID = AbilityID;
-					who.RegisterPartEvent(heir, DRAW_COMMAND);
-				}
-				else
-				{
-					who.ActivatedAbilities?.RemoveAbility(AbilityID);
-				}
-				AbilityID = Guid.Empty;
-			}
+			ReleaseGrant(E.Actor);
 			return base.HandleEvent(E);
+		}
+
+		public override bool HandleEvent(BeforeDestroyObjectEvent E)
+		{
+			// Destroy fires no DroppedEvent, so a box that crumbles (or burns) while carried
+			// must release its grant here or the ability outlives every box that could serve it
+			ReleaseGrant(ParentObject.InInventory);
+			return base.HandleEvent(E);
+		}
+
+		/// <summary>Hand the grant to another carried box if one remains, else revoke it.</summary>
+		private void ReleaseGrant(GameObject who)
+		{
+			if (who == null || AbilityID == Guid.Empty)
+			{
+				return;
+			}
+			var others = who.GetInventoryDirect((GameObject go) => go != ParentObject && go.HasPart<Cleo_TerraFirma_ChalkBox>());
+			who.UnregisterPartEvent(this, DRAW_COMMAND);
+			if (others.Count > 0)
+			{
+				Cleo_TerraFirma_ChalkBox heir = others[0].GetPart<Cleo_TerraFirma_ChalkBox>();
+				heir.AbilityID = AbilityID;
+				who.RegisterPartEvent(heir, DRAW_COMMAND);
+			}
+			else
+			{
+				who.ActivatedAbilities?.RemoveAbility(AbilityID);
+			}
+			AbilityID = Guid.Empty;
+		}
+
+		private bool AnyOtherBoxClaimsGrant(GameObject who)
+		{
+			foreach (GameObject item in who.GetInventoryDirect((GameObject go) => go != ParentObject && go.HasPart<Cleo_TerraFirma_ChalkBox>()))
+			{
+				if (item.GetPart<Cleo_TerraFirma_ChalkBox>().AbilityID != Guid.Empty)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 		public override bool FireEvent(Event E)
@@ -150,7 +187,8 @@ namespace XRL.World.Parts
 				linePart.StrokeDir = dir;
 			}
 			target.AddObject(line);
-			actor.PlayWorldSound("Sounds/Interact/sfx_interact_tattoo"); // PLACEHOLDER sound (tattoo gun; closest base cousin) - sound pass flagged
+			// no draw sfx by ruling 2026-08-22 (the tattoo-gun placeholder was removed; the
+			// sound pass picks a real one if any)
 			// the new piece reads its neighbors, and the neighbors reach back
 			linePart?.Retile();
 			Cleo_TerraFirma_ChalkLine.RetileNeighbors(target);

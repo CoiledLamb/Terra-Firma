@@ -28,7 +28,9 @@ namespace XRL.World.Parts
 		{
 			if (E.Actor != null && Cleo_TerraFirma_ChalkBox.FindCarriedBox(E.Actor) != null)
 			{
-				E.AddAction("Write", "write with chalk", WRITE_COMMAND, null, 'w', FireOnActor: false);
+				// Default 5 = the Chair "Sit" precedent: pressing space on the board while
+				// holding chalk fires the write prompt directly (user ruling 2026-08-22)
+				E.AddAction("Write", "write with chalk", WRITE_COMMAND, null, 'w', FireOnActor: false, Default: 5);
 			}
 			return base.HandleEvent(E);
 		}
@@ -83,7 +85,8 @@ namespace XRL.World.Parts
 				}
 				Cleo_TerraFirma_ChalkWriting writing = ParentObject.RequirePart<Cleo_TerraFirma_ChalkWriting>();
 				writing.Text = text;
-				E.Actor.PlayWorldSound("Sounds/Interact/sfx_interact_tattoo"); // PLACEHOLDER sound - sound pass flagged
+				// no write sfx by ruling 2026-08-22 (tattoo-gun placeholder removed; the sound
+				// pass picks a real one if any)
 				Popup.Show("You chalk \"" + text + "\" onto " + ParentObject.t() + "."); // DRAFT
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK", $"chalkboard written ({(choice == 0 ? "typed" : "markov")})");
 				E.Actor.UseEnergy(1000, "Item WriteChalkboard");
