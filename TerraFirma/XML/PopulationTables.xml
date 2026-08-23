@@ -160,6 +160,16 @@
 	<population Name="Cleo_TerraFirma_Outrider Kit">
 		<group Name="Equipment" Style="pickeach">
 			<table Name="Cleo_TerraFirma_Quarrier Kit" />
+			<!-- personal effects (USER 2026-08-23: "beaded bracelet, baboon neck ring"; un-parks
+			     the held-off personal-effect line). Beaded bracelet = base Bracelet1/2/3
+			     colorways; neck ring = base Blood-stained neck-ring (displays "neck-ring").
+			     Chance and weights CLAUDE DRAFT. -->
+			<group Name="PersonalEffects" Style="pickone" Chance="15">
+				<object Weight="20" Blueprint="Bracelet1" />
+				<object Weight="20" Blueprint="Bracelet2" />
+				<object Weight="20" Blueprint="Bracelet3" />
+				<object Weight="40" Blueprint="Blood-stained neck-ring" />
+			</group>
 			<group Name="Arms" Style="pickone">
 				<group Weight="40" Name="ToolPair" Style="pickeach">
 					<table Name="Cleo_TerraFirma_Carver Knife" />

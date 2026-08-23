@@ -90,11 +90,38 @@ namespace XRL.World.Parts
 				// own candidate idiom (Part_StoneMill).
 				List<GameObject> stones = E.Actor.GetInventoryDirect((GameObject go) =>
 					go.HasTagOrProperty(STONE_TAG) && go != ParentObject && !go.HasPart<Temporary>());
+				int carried = stones.Count;
+				// ADJACENCY FEED (user ruling 2026-08-23: "should pull stones from adjacency
+				// rather than just your inventory, so selecting feed a stone knows if a boulder
+				// is in the tile next to you"): stones on your own tile and the eight neighbors
+				// join the picker and grind IN PLACE - a boulder never has to be lifted. Walls
+				// refuse (a tagged wall is terrain, not a meal), creatures refuse, owned stones
+				// are skipped rather than silently vandalized (dial), conjured stones excluded
+				// as ever. Weight conservation stands as ruled: a fed boulder makes the cell
+				// heavy until the spiral has actually eaten it.
+				Cell origin = E.Actor.CurrentCell;
+				if (origin != null)
+				{
+					List<Cell> reach = origin.GetLocalAdjacentCells();
+					reach.Insert(0, origin);
+					foreach (Cell c in reach)
+					{
+						foreach (GameObject go in c.Objects)
+						{
+							if (go.HasTagOrProperty(STONE_TAG) && go != ParentObject && !go.HasPart<Temporary>()
+								&& !go.IsCreature && !go.IsWall()
+								&& (go.GetPart<Physics>()?.Owner).IsNullOrEmpty())
+							{
+								stones.Add(go);
+							}
+						}
+					}
+				}
 				if (stones.Count == 0)
 				{
 					if (E.Actor.IsPlayer())
 					{
-						Popup.ShowFail("You have no stone to feed it."); // DRAFT
+						Popup.ShowFail("There is no stone in reach to feed it."); // DRAFT (was inventory-only wording)
 					}
 					return false;
 				}
@@ -104,10 +131,11 @@ namespace XRL.World.Parts
 					// stones differ wildly in worth (weight) and in regret (gems grind too), so
 					// the player picks; NPCs take the heaviest
 					List<string> options = new List<string>();
-					foreach (GameObject stone in stones)
+					for (int i = 0; i < stones.Count; i++)
 					{
-						int w = stone.GetPart<Physics>()?.Weight ?? 0;
-						options.Add(stone.DisplayName + " {{K|(" + w + "#)}}");
+						int w = stones[i].GetPart<Physics>()?.Weight ?? 0;
+						options.Add(stones[i].DisplayName + " {{K|(" + w + "#)}}"
+							+ (i >= carried ? " {{K|(nearby)}}" : "")); // DRAFT marker
 					}
 					int choice = Popup.PickOption(
 						Intro: "Feed which stone?", // DRAFT
