@@ -276,6 +276,26 @@ namespace XRL.World.Parts.Mutation
 
 		public override bool HandleEvent(EndTurnEvent E)
 		{
+			// slot heal (live find 2026-08-23): an object destroyed WHILE EQUIPPED as the
+			// thrown weapon (the whorl-vs-gloves double-resolve; the grinder feed bug was the
+			// same class) leaves a dead reference the slot can neither throw nor release, and
+			// every re-arm gate above bails on it forever. Clear it and let this turn re-arm.
+			GameObject held = ParentObject.GetFirstThrownWeapon();
+			if (held != null && (!GameObject.Validate(held) || held.IsInGraveyard()))
+			{
+				Body body = ParentObject.Body;
+				if (body != null)
+				{
+					foreach (XRL.World.Anatomy.BodyPart bp in body.GetParts())
+					{
+						if (bp.Equipped == held)
+						{
+							bp.Unequip();
+						}
+					}
+				}
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("EB", "cleared a dead thrown-slot reference (slot-destroyed stone)");
+			}
 			// NPC auto-arm (2026-08-06 advertisement pass, user: legendaries can roll pool
 			// mutations): the Take Stones toggle is player UX -- a generated NPC keeps it on
 			// and keeps a stone sculpted. No AI ability list needed: base AI throws thrown-slot

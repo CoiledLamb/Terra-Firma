@@ -54,6 +54,7 @@ namespace XRL.World.Parts
 			// ALL THROWN ITEMS, not just stones (user rework 2026-08-22). Launcher == null is
 			// the thrown-vs-shot gate; a lit grenade caught is your problem now.
 			if (wearer != null && rock != null && E.Launcher == null
+				&& !E.Done && GameObject.Validate(rock) && !rock.IsInGraveyard()
 				&& Stat.Random(1, 100) <= Chance)
 			{
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("GLOV", $"{wearer.Blueprint} catch PROC on {rock.Blueprint} ({Chance}%)");

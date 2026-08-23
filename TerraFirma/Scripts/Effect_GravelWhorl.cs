@@ -173,6 +173,13 @@ namespace XRL.World.Effects
 
 		public override bool HandleEvent(DefenderMissileHitEvent E)
 		{
+			// double-resolve guard (live find 2026-08-23): the catching gloves ride the same
+			// event in a different dispatch pass, so without this the whorl devoured a stone
+			// the gloves had already equipped into the thrown slot - a dead slot reference
+			if (E.Done || !GameObject.Validate(E.Projectile))
+			{
+				return base.HandleEvent(E);
+			}
 			bool deflectable = Resonant ? IsLightProjectile(E.Projectile) : IsPhysicalProjectile(E.Projectile);
 			bool procs = deflectable && (DebugForceDeflect || DeflectChance.in100());
 			Helpers.VerifyLog("GVW", $"incoming {E.Projectile?.Blueprint ?? "projectile"} (resonant={Resonant}): {(deflectable ? (procs ? "deflect PROC" : $"deflectable, no proc ({DeflectChance}%)") : "wrong type, passes through")}");
