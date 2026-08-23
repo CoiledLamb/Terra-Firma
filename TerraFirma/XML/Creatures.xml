@@ -193,6 +193,10 @@
          companions); it rates +4 difficulty, so the con warning matches what the fight becomes. -->
     <tag Name="Role" Value="Summoner" />
     <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Mason Kit" />
+    <!-- Figurine escort, role-texture pitch 2026-08-23; count RULED same day (user: "figurine
+         count can be 2-4"). HasGuards grammar, blueprint pinned; the mole mason inherits the
+         swarm by descent, deliberately. See the pitch entry in TODO.md, quarriers section. -->
+    <part Name="Cleo_TerraFirma_HasFigurinesPart" NumberOfFigurines="2-4" />
   </object>
 
   <object Name="Cleo_TerraFirma_Outrider" Inherits="Cleo_TerraFirma_Stonecarver">
@@ -236,5 +240,33 @@
   <object Name="Cleo_TerraFirma_Mole Outrider" Inherits="Cleo_TerraFirma_Outrider">
     <part Name="Render" Tile="stonerat.png" />
     <mutation Name="BurrowingClaws" Level="4" />
+  </object>
+
+  <!-- ANIMATE FIGURINE (built 2026-08-23; pitch is the USER'S, "a small swarm of animate stone
+       figurines with the swarmer bonus could spawn alongside them", count 2-4 RULED same day).
+       Spawned only by the mason's Cleo_TerraFirma_HasFigurinesPart; never free-range, hence the
+       encounter gate. Swarmer decompiled: +1 melee to-hit and +1 to penetration rolls per other
+       swarmer beyond the first who is adjacent to the target, so the swarm sharpens as it
+       surrounds. Render is the figurine item tile walking (the mason's pocket maquette, woken),
+       stone grey per the roster color ruling; the corpse drop closes the loop, a killed one
+       sometimes reverts to the inert stone figurine curio (chance CLAUDE DRAFT). MentalShield:
+       there is no mind in there to reach. ALL STATS CLAUDE PLACEHOLDER, numbers sitting owed;
+       DisplayName and description DRAFT, signoff owed. -->
+  <object Name="Cleo_TerraFirma_AnimateFigurine" Inherits="BaseHumanoid">
+    <part Name="Render" DisplayName="animate figurine" Tile="Items/figurine.png" RenderString="*" ColorString="&amp;y" DetailColor="K" />
+    <part Name="Description" Short="Someone spent longer on the face than the feet, and it walks like that is true." /> <!-- DRAFT, signoff owed -->
+    <part Name="Brain" Hostile="False" Factions="Cleo_TerraFirma_Quarriers-100" />
+    <part Name="Swarmer" />
+    <part Name="MentalShield" />
+    <part Name="Corpse" CorpseChance="50" CorpseBlueprint="Cleo_TerraFirma_Random Stone Figurine" />
+    <stat Name="Level" Value="5" />
+    <stat Name="Hitpoints" Value="12" />
+    <stat Name="AV" Value="3" />
+    <stat Name="DV" Value="2" />
+    <stat Name="Strength" Value="14" />
+    <stat Name="Toughness" Value="12" />
+    <stat Name="Agility" Value="16" />
+    <tag Name="Role" Value="Minion" />
+    <tag Name="ExcludeFromDynamicEncounters" />
   </object>
 </objects>

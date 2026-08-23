@@ -113,6 +113,10 @@
 		<group Name="Equipment" Style="pickeach">
 			<table Name="Cleo_TerraFirma_Quarrier Kit" />
 			<object Blueprint="Vinewood Sap Mask" Number="1" />
+			<!-- Fissure stones, role-texture pitch 2026-08-23; count RULED same day (user: "amount
+			     should be 2-3"). The sower precedent: grenades in plain inventory get thrown by
+			     stock AI. Whoever fells the hewer inherits the unspent ones, deliberately. -->
+			<object Blueprint="Cleo_TerraFirma_FissureStone" Number="2-3" />
 			<!-- Relocated verbatim from the spine at the 2026-08-22 lightening; holds this kit's
 			     pre-lightening behavior until its own lock sitting. The etch-tool ruling (base
 			     knives and hammers replace steel/carbide, NOTED in TODO.md) also lands then. -->
