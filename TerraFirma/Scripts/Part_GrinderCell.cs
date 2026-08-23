@@ -23,6 +23,7 @@ namespace XRL.World.Parts
 	public class Cleo_TerraFirma_GrinderCell : IPart
 	{
 		public const string FEED_COMMAND = "Cleo_TerraFirma_FeedGrinderCell";
+		public const string STOP_COMMAND = "Cleo_TerraFirma_StopGrinderCell";
 		public const string STONE_TAG = "Cleo_TerraFirma_IsAnyStone";
 		public const int CHARGE_PER_POUND = 50; // re-ruled 2026-08-23 ("raise the grind to *50 charge")
 		public const int TRICKLE_PER_TURN = 10;
@@ -75,11 +76,35 @@ namespace XRL.World.Parts
 			{
 				E.AddAction("Feed", "feed a stone", FEED_COMMAND, null, 'f', FireOnActor: false);
 			}
+			else
+			{
+				// stop grinding (USER 2026-08-23: "in case your cell fills up but its still
+				// grinding away at rocks and weighing a ton"): dumps the unground grist -
+				// pool and carried weight clear, remaining charge forfeited (the stone was
+				// already paid; no reconstitution per the no-unload call)
+				E.AddAction("Stop", "stop grinding", STOP_COMMAND, null, 's', FireOnActor: false);
+			}
 			return base.HandleEvent(E);
 		}
 
 		public override bool HandleEvent(InventoryActionEvent E)
 		{
+			if (E.Command == STOP_COMMAND && E.Actor != null && StoneChargeLeft > 0)
+			{
+				int dumped = RemainingStoneWeight();
+				StoneChargeLeft = 0;
+				StoneName = null;
+				SyncGrindAnimation(false);
+				ParentObject.FlushWeightCaches();
+				if (E.Actor.IsPlayer())
+				{
+					IComponent<GameObject>.AddPlayerMessage("The spiral stills and dumps its unground grist."); // DRAFT
+				}
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("GRINDER", $"grind stopped, {dumped} lb of grist dumped");
+				E.Actor.UseEnergy(1000, "Item StopGrinderCell");
+				E.RequestInterfaceExit();
+				return base.HandleEvent(E);
+			}
 			if (E.Command == FEED_COMMAND && E.Actor != null)
 			{
 				// LOOSE INVENTORY ONLY (bugfix 2026-08-22, user repro: feeding the equipped
