@@ -89,23 +89,39 @@ namespace XRL.World.ZoneBuilders
 		}
 
 		/// <summary>Testing wish (user ask 2026-08-23): reveal every warren secret on
-		/// the world map at once, so verifying the 25 does not mean walking the
-		/// desert. Keys on the "stonecarver" secret attribute the placement stamps.</summary>
+		/// the world map at once, so verifying does not mean walking the desert.
+		/// FORCE-BUILDS each claimed zone first (round 9 refinement, closing the
+		/// first-visit hole for the test loop): duds erase their own notes during
+		/// the build sweep, so every note this wish reveals is a REAL warren by
+		/// construction. Keys on the "stonecarver" secret attribute.</summary>
 		[WishCommand(Command = "tfwarrens")]
 		public static void RevealAll()
 		{
-			int revealed = 0, total = 0;
+			// snapshot first: the build sweep deletes dud notes out from under us
+			var claims = new System.Collections.Generic.List<Qud.API.JournalMapNote>();
 			foreach (var note in Qud.API.JournalAPI.MapNotes)
+				if (note.Attributes != null && note.Attributes.Contains("stonecarver")) claims.Add(note);
+			int built = 0;
+			foreach (var note in claims)
 			{
-				if (note.Attributes == null || !note.Attributes.Contains("stonecarver")) continue;
-				total++;
+				if (!The.ZoneManager.IsZoneBuilt(note.ZoneID))
+				{
+					The.ZoneManager.GetZone(note.ZoneID);   // builds; a refusal erases its note
+					built++;
+				}
+			}
+			int revealed = 0, real = 0;
+			foreach (var note in claims)
+			{
+				if (Qud.API.JournalAPI.GetMapNote(note.ID) == null) continue;   // erased in the sweep
+				real++;
 				if (note.Revealed) continue;
 				Qud.API.JournalAPI.RevealMapNote(note, silent: true);
 				revealed++;
 			}
-			Helpers.VerifyLog("WARREN", $"tfwarrens: revealed {revealed} of {total} warren secrets");
-			MessageQueue.AddPlayerMessage(total > 0
-				? $"tfwarrens: revealed {revealed} warren locations ({total} exist). Check the world map."
+			Helpers.VerifyLog("WARREN", $"tfwarrens: {claims.Count} claims, {built} zones built in the sweep, {real} real warrens, {revealed} newly revealed");
+			MessageQueue.AddPlayerMessage(claims.Count > 0
+				? $"tfwarrens: {real} real warrens on the map ({claims.Count} were claimed; the difference erased itself). Every note is a warren."
 				: "tfwarrens: {{R|no warren secrets in this world}} - was it embarked before the placement extension?");
 		}
 	}
