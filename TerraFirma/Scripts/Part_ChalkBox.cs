@@ -281,13 +281,22 @@ namespace XRL.World.Parts
 			{
 				linePart.StrokeDir = dir;
 			}
+			// draw reveal (user shape 2026-08-23): the mask must exist BEFORE the line does --
+			// it wears the cell's floor paint, so the juice queue's spin-up frames render
+			// floor-over-floor and the stroke is born already hidden. Hold is the carve-swap
+			// lesson; 0 means unseen/classic/unpainted and the draw lands as before.
+			float settle = Cleo.TerraFirma.Scripts.Cleo_TerraFirma_ChalkRevealFX.Play(target, line.Render?.Tile);
+			if (settle > 0f)
+			{
+				Cleo.TerraFirma.Scripts.Cleo_TerraFirma_ChalkRevealFX.Hold(settle);
+			}
 			target.AddObject(line);
 			// no draw sfx by ruling 2026-08-22 (the tattoo-gun placeholder was removed; the
 			// sound pass picks a real one if any)
 			// the new piece reads its neighbors, and the neighbors reach back
 			linePart?.Retile();
 			Cleo_TerraFirma_ChalkLine.RetileNeighbors(target);
-			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK", $"line drawn {dir}, {Uses - 1} uses left");
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK", $"line drawn {dir}, reveal {(settle > 0f ? "played" : "skipped")}, {Uses - 1} uses left");
 			actor.UseEnergy(1000, "Item DrawChalk");
 			ConsumeUse(actor);
 		}
