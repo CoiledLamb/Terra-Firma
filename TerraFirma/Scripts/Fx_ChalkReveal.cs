@@ -49,7 +49,15 @@ namespace Cleo.TerraFirma.Scripts
 		private const float QUAD_PUFF_R0 = 1f;      // born on the quad itself
 		private const float QUAD_PUFF_R1 = 7f;      // shorter throw; the riding dust hugs the cell
 		private const int SCUFF_COUNT = 4;          // trample beat: a boot's worth of dust, CLAUDE DRAFT
-		private const int BOARD_SCUFF_COUNT = 6;    // board write: a bit more, thrown full radius (bug catch 2026-08-23: short-throw motes lived on the board sprite)
+		private const int BOARD_SCUFF_COUNT = 6;    // board write dust
+		// board feel round (user 2026-08-23: "aimed around on the body of the chalk board"):
+		// motes are born scattered on the board FACE (upper body; the legs get no dust) and
+		// drift only a little, instead of spraying from cell center. all chalk-white - the
+		// writing is ruled {{Y|}} white, and the grey mix stays a floor thing
+		private const float BOARD_FACE_X = 5f;      // px of horizontal jitter across the face
+		private const float BOARD_FACE_Y_MIN = 2f;  // px above center: the face band
+		private const float BOARD_FACE_Y_MAX = 8f;
+		private const float BOARD_PUFF_R1 = 3f;     // short per-mote drift; the dust hangs on the board
 		// feel round 2 (user: "lighten the color more"): the motes WORE the 1px stroke tile, and
 		// at fleck scale that is a sub-pixel sliver the filtering blends into the floor - white
 		// rendered as gray. The whorl's own mote tile is a chunky blob that survives downscaling
@@ -106,11 +114,32 @@ namespace Cleo.TerraFirma.Scripts
 			}
 		}
 
-		/// <summary>The board write beat: the scuff with a couple more motes at full throw, so
-		/// the dust clears the board's own sprite and reads against the floor around it.</summary>
+		/// <summary>The board write beat: chalk-white motes born scattered across the board's
+		/// FACE (each from its own jittered point in the upper-body band), drifting a short
+		/// way with the usual rise - dust coming off the written surface, not a cell-center
+		/// spray. Fire AFTER any modal popup (the invisible-puffs lesson).</summary>
 		public static void PlayBoardScuff(Cell target)
 		{
-			PlayScuff(target, BOARD_SCUFF_COUNT, MOTE_R1);
+			if (target == null)
+				return;
+			GameManager gm = GameManager.Instance;
+			if (gm == null)
+				return;
+			Zone zone = target.ParentZone;
+			if (zone == null || !zone.IsActive() || !target.IsVisible())
+				return;
+			Vector3 center = gm.getTileCenter(target.X, target.Y);
+			IRenderable mote = new Cleo_TerraFirma_StoneTileRenderable(MOTE_TILE, 'Y', 'Y', 'k');
+			for (int m = 0; m < BOARD_SCUFF_COUNT; m++)
+			{
+				Vector3 spawn = center + new Vector3(
+					Stat.RandomCosmetic(-(int)BOARD_FACE_X, (int)BOARD_FACE_X),
+					Stat.RandomCosmetic((int)BOARD_FACE_Y_MIN, (int)BOARD_FACE_Y_MAX),
+					0f);
+				float ang = Stat.RandomCosmetic(0, 359) * (Mathf.PI / 180f);
+				float scale = Mathf.Lerp(MOTE_SCALE_MIN, MOTE_SCALE_MAX, Stat.RandomCosmetic(0, 100) * 0.01f);
+				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceChalkMote(mote, spawn, ang, (m % 3) * MOTE_STAGGER, MOTE_LIFE, scale, 0f, BOARD_PUFF_R1, Color.white), async: true);
+			}
 		}
 
 		private static float PlayCore(Cell target, bool inverted)
