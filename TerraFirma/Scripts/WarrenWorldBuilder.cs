@@ -18,12 +18,17 @@ namespace XRL.World.WorldBuilders
 	[JoppaWorldBuilderExtension]
 	public class Cleo_TerraFirma_WarrenPlacement : IJoppaWorldBuilderExtension
 	{
-		public const int WARRENS_PER_WORLD = 25;   // ruled 2026-08-18; pig-farm frequency
+		public const int WARRENS_PER_WORLD = 25;   // ruled 2026-08-18; pig-farm frequency - the TARGET of real sites
+		// OVERCLAIM (ruled 2026-08-23 "like all three of these fixes"): placement is
+		// blind to rockiness at embark, so claim wide and let refusals settle their
+		// own rumors (SettleRumor). 35 claims at the observed post-fix refusal band
+		// converges on roughly the 25-target of real sites. CLAUDE dial.
+		public const int CLAIMS = 35;
 
 		public override void OnAfterMutableInit(JoppaWorldBuilder Builder)
 		{
 			int placed = 0;
-			Builder.AddMutableEncounterToTerrain("DesertCanyon", WARRENS_PER_WORLD,
+			Builder.AddMutableEncounterToTerrain("DesertCanyon", CLAIMS,
 				delegate(string zoneID, Genkit.Location2D location, XRL.World.Parts.TerrainTravel pTravel)
 				{
 					if (Options.ShowOverlandEncounters && pTravel != null)
@@ -49,7 +54,7 @@ namespace XRL.World.WorldBuilders
 					Builder.mutableMap.SetMutable(location, 0);
 					placed++;
 				});
-			Helpers.VerifyLog("WARREN", $"placement: {placed} warrens sited at embark ({WARRENS_PER_WORLD} asked)");
+			Helpers.VerifyLog("WARREN", $"placement: {placed} warren claims sited at embark ({CLAIMS} asked, target ~{WARRENS_PER_WORLD} real sites)");
 		}
 	}
 }

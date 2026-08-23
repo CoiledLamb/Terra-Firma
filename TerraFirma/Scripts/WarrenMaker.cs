@@ -28,7 +28,9 @@ namespace XRL.World.ZoneBuilders
 			{
 				var r = WarrenCarver.Build(Z, WarrenCarver.SeedFor(Z.ZoneID));
 				if (r.Built)
-					Helpers.VerifyLog("WARREN", $"builder done: {Z.ZoneID} -> {r.Stage}, {r.Occupancy}, attempt {r.Attempt}");
+					Helpers.VerifyLog("WARREN", $"builder done: {Z.ZoneID} -> {r.Stage}, {r.Occupancy}, attempt {r.Attempt}, {r.Layout}");
+				else
+					SettleRumor(Z);
 			}
 			catch (System.Exception x)
 			{
@@ -36,6 +38,44 @@ namespace XRL.World.ZoneBuilders
 				MetricsManager.LogException("Cleo_TerraFirma_WarrenMaker", x);
 			}
 			return true;
+		}
+
+		/// <summary>SELF-SETTLING RUMORS (ruled 2026-08-23 "like all three of these
+		/// fixes"): a refused zone settles its own promise, zone-locally. Rock to
+		/// chip -> the prospect mark lands and the map note REWRITES to the
+		/// prospect (DRAFT string; user voice owed at the release pass). Bare
+		/// lawn -> an unrevealed note deletes (the rumor never gets told) and the
+		/// orphaned LocationFinder widget is swept; a note the player already
+		/// holds rewrites instead of vanishing mid-journal.</summary>
+		private static void SettleRumor(Zone Z)
+		{
+			Qud.API.JournalMapNote note = null;
+			foreach (var n in Qud.API.JournalAPI.MapNotes)
+				if (n.ZoneID == Z.ZoneID && n.Attributes != null && n.Attributes.Contains("stonecarver")) { note = n; break; }
+			if (note == null) return;   // wish carves and unnoted zones settle nothing
+			int marks = WarrenCarver.ProspectMark(Z, WarrenCarver.SeedFor(Z.ZoneID) + 1);
+			if (marks > 0 || note.Revealed)
+			{
+				note.Text = "an abandoned prospect";   // DRAFT: player-facing, user voice owed
+				Helpers.VerifyLog("WARREN", $"rumor settled: rewritten to prospect ({marks} pieces) for {Z.ZoneID}");
+			}
+			else
+			{
+				Qud.API.JournalAPI.DeleteMapNote(note);
+				// the finder builder (priority 5000, ran before us) left a widget at
+				// (0,0) pointing at the dead secret - sweep any orphaned finder
+				Cell c00 = Z.GetCell(0, 0);
+				if (c00 != null)
+				{
+					foreach (GameObject o in new System.Collections.Generic.List<GameObject>(c00.GetObjectsWithPart("LocationFinder")))
+					{
+						var lf = o.GetPart<XRL.World.Parts.LocationFinder>();
+						if (lf != null && Qud.API.JournalAPI.GetMapNote(lf.ID) == null)
+							o.Obliterate();
+					}
+				}
+				Helpers.VerifyLog("WARREN", $"rumor settled: unrevealed note deleted for {Z.ZoneID}");
+			}
 		}
 	}
 

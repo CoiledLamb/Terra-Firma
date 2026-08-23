@@ -53,6 +53,19 @@ namespace Cleo.TerraFirma.Scripts
 		public const int EMPTY_BASE = 200;        // emptyBase (Redrock's own figure)
 		public const int ATTEMPTS = 4;            // attempts
 		public const int MIN_SITE = 70;           // minSite ("worth the trip")
+		// RULED 2026-08-23 ("like all three of these fixes"): the face gate is a
+		// PREDICTOR, not the bar - licensing (MIN_SITE + 2 rooms) stays the ruled
+		// judge of what got built. 400 (the smallest stage's area budget) was
+		// over-predicting refusal on lobes that could honestly build 80+ floor.
+		public const int FACE_PREDICTOR = 300;
+		public const int FACE_SAMPLE = 40;        // faces tried per attempt (was 25; serrated skins hide clean throats)
+		// blockMode (fix 2, same ruling): claim-and-subdivide, the sim's A/B lane,
+		// ported as the snake-country specialist. Boxes stay the DEFAULT look (the
+		// user's 08-18 A/B lean); blocks run when a face's box carve under-builds
+		// below licensing (retry-with-blocks policy: CLAUDE proposal in the ruling).
+		public const int BLOCK_MIN = 50;          // blockMin
+		public const int BLOCK_MAX = 95;          // blockMax
+		public const int DEN_MAX = 24;            // denMax (FillRoom's own number)
 		public const int CAMP_FLOOR = 130;        // campFloor
 		public const int FLOUR_FLOOR = 210;       // flourFloor
 		public const int DRIFT_MAX = 10;          // driftMax (unused in box mode's tunnels)
@@ -60,16 +73,17 @@ namespace Cleo.TerraFirma.Scripts
 		private class Stage
 		{
 			public string Name;
-			public int P0, P1;        // pockets
+			public int P0, P1;        // pockets (box layout)
+			public int C0, C1;        // claims (block layout)
 			public int Cross;
 			public int Wp0, Wp1;      // waypoints
 			public int Area;
 			public int Fill0, Fill1;
 		}
 		private static readonly Stage[] STAGES = {
-			new Stage{ Name="working",     P0=3, P1=5, Cross=2, Wp0=1, Wp1=2, Area=400,  Fill0=1, Fill1=2 },
-			new Stage{ Name="camp",        P0=4, P1=7, Cross=4, Wp0=2, Wp1=3, Area=680,  Fill0=1, Fill1=3 },
-			new Stage{ Name="flourishing", P0=6, P1=9, Cross=7, Wp0=3, Wp1=4, Area=1000, Fill0=2, Fill1=4 },
+			new Stage{ Name="working",     P0=3, P1=5, C0=1, C1=2, Cross=2, Wp0=1, Wp1=2, Area=400,  Fill0=1, Fill1=2 },
+			new Stage{ Name="camp",        P0=4, P1=7, C0=2, C1=3, Cross=4, Wp0=2, Wp1=3, Area=680,  Fill0=1, Fill1=3 },
+			new Stage{ Name="flourishing", P0=6, P1=9, C0=3, C1=4, Cross=7, Wp0=3, Wp1=4, Area=1000, Fill0=2, Fill1=4 },
 		};
 
 		// ---------------------------------------------------------------- rng
@@ -551,6 +565,247 @@ namespace Cleo.TerraFirma.Scripts
 				}
 			}
 			p.Entrances = p.Through > 0 ? 1 : 0;
+		}
+
+		// ------------------------------------------------ LAYER 2 ALT: BLOCKS
+		// Claim-and-subdivide, ported from the sim (carveBlocks/subdivide/finishRoom;
+		// the BuildingTemplate/FillRoom voice and the organblock drawing's rule 7).
+		// Stamped overlapping rectangles claim mass, hollow where fully surrounded,
+		// FillRoom-style partition down to den size, deliberate 1-2 doorways onto
+		// the road. Room count falls out of the division instead of being begged
+		// from 900 failed box placements - the snake-country specialist.
+		private static void FinishRoom(Grid g, List<int> comp, Box bb, List<PocketRec> pockets)
+		{
+			var p = new PocketRec
+			{
+				Id = pockets.Count,
+				BoxOut = new Box { X0 = Math.Max(0, bb.X0 - 1), Y0 = Math.Max(0, bb.Y0 - 1), X1 = Math.Min(g.W - 1, bb.X1 + 1), Y1 = Math.Min(g.H - 1, bb.Y1 + 1) },
+				In = new Box { X0 = bb.X0, Y0 = bb.Y0, X1 = bb.X1, Y1 = bb.Y1 },
+			};
+			p.W = bb.X1 - bb.X0 + 1; p.H = bb.Y1 - bb.Y0 + 1;
+			p.Character = p.W <= PLAIN_W ? "plain" : (p.W >= HALL_W ? "hall" : "worked");
+			foreach (int i in comp) g.Pocket[i] = (short)p.Id;
+			if (p.Character != "plain")
+			{
+				int sx = MAX_SPAN + 1, sy = LAT_Y;
+				int ox = bb.X0 + 1 + R(0, Math.Min(sx - 1, 2)), oy = bb.Y0 + 1 + R(0, Math.Min(sy - 1, 1));
+				bool Free2(int x, int y)
+				{
+					if (!g.Inb(x, y)) return false;
+					int i = g.Idx(x, y);
+					if (g.Pocket[i] != p.Id || g.C[i] != FLOOR || g.Art[i] != 0) return false;
+					foreach (var d in N8)
+					{
+						int nx = x + d[0], ny = y + d[1];
+						if (g.Inb(nx, ny) && g.C[g.Idx(nx, ny)] == SOLID) return false;
+					}
+					return true;
+				}
+				for (int py = oy; py <= bb.Y1 - 1; py += sy)
+					for (int px = ox; px <= bb.X1 - 1; px += sx)
+					{
+						if (!Chance(PILLAR_FILL / 100.0)) continue;
+						if (!Free2(px, py)) continue;
+						g.C[g.Idx(px, py)] = SOLID; p.Pillars++;
+						if (Chance(COLUMN_CHANCE / 100.0))
+						{
+							int gy = py + (Chance(.5) ? 1 : -1);
+							if (Free2(px, gy)) { g.C[g.Idx(px, gy)] = SOLID; p.Pillars++; }
+						}
+					}
+			}
+			pockets.Add(p);
+		}
+
+		private static void Subdivide(Grid g, List<int> comp, List<PocketRec> pockets, Func<bool> takeHall)
+		{
+			int x0 = g.W, y0 = g.H, x1 = 0, y1 = 0;
+			foreach (int i in comp)
+			{
+				int x = i % g.W, y = i / g.W;
+				if (x < x0) x0 = x; if (x > x1) x1 = x;
+				if (y < y0) y0 = y; if (y > y1) y1 = y;
+			}
+			int w = x1 - x0 + 1, h = y1 - y0 + 1;
+			var bb = new Box { X0 = x0, Y0 = y0, X1 = x1, Y1 = y1 };
+			// the commons guarantee, block flavor: the first wide-enough region
+			// on the mouth side stops dividing and stands as the hall
+			if (w >= HALL_W && comp.Count >= HALL_W * 3 && takeHall())
+			{ FinishRoom(g, comp, bb, pockets); return; }
+			if (comp.Count <= DEN_MAX || (w <= 4 && h <= 4))
+			{ FinishRoom(g, comp, bb, pockets); return; }
+			bool vert = w > h; if (Chance(.25)) vert = !vert;   // FillRoom's own dice
+			for (int attempt = 0; attempt < 8; attempt++)
+			{
+				int line = vert ? R(x0 + 2, Math.Max(x0 + 2, x1 - 2)) : R(y0 + 2, Math.Max(y0 + 2, y1 - 2));
+				var wallCells = comp.Where(i => vert ? i % g.W == line : i / g.W == line).ToList();
+				if (wallCells.Count < 3) continue;
+				// the door is the GAP the wall leaves, biased to the ends
+				int gap = wallCells[Chance(.6) ? (Chance(.5) ? 0 : wallCells.Count - 1) : R(1, wallCells.Count - 2)];
+				int gap2 = -1;
+				// rule 5, loops beat trees: 40% leave the second end open too
+				if (Chance(.6) && wallCells.Count >= 4)
+				{
+					var ends = new List<int>();
+					if (wallCells[0] != gap) ends.Add(wallCells[0]);
+					if (wallCells[wallCells.Count - 1] != gap) ends.Add(wallCells[wallCells.Count - 1]);
+					if (ends.Count > 0) gap2 = ends[R(0, ends.Count - 1)];
+				}
+				foreach (int i in wallCells) g.C[i] = SOLID;
+				var rest = comp.Where(i => g.C[i] == FLOOR).ToList();
+				var restSet = new HashSet<int>(rest);
+				var seen = new HashSet<int>();
+				var parts = new List<List<int>>();
+				foreach (int i in rest)
+				{
+					if (seen.Contains(i)) continue;
+					var part = new List<int> { i };
+					var st = new Stack<int>(); st.Push(i); seen.Add(i);
+					while (st.Count > 0)
+					{
+						int ci = st.Pop(); int cx = ci % g.W, cy = ci / g.W;
+						foreach (var d in N4)
+						{
+							int nx = cx + d[0], ny = cy + d[1];
+							if (!g.Inb(nx, ny)) continue;
+							int ni = g.Idx(nx, ny);
+							if (restSet.Contains(ni) && !seen.Contains(ni)) { seen.Add(ni); part.Add(ni); st.Push(ni); }
+						}
+					}
+					parts.Add(part);
+				}
+				// a split that would orphan a CLOSET is retried - a den is a room, not a shelf
+				if (parts.Count < 2 || parts.Any(pt => pt.Count < 8))
+				{ foreach (int i in wallCells) g.C[i] = FLOOR; continue; }
+				g.C[gap] = FLOOR;
+				if (gap2 >= 0) g.C[gap2] = FLOOR;
+				foreach (var part in parts) Subdivide(g, part, pockets, takeHall);
+				return;
+			}
+			FinishRoom(g, comp, bb, pockets);
+		}
+
+		private static List<PocketRec> CarveBlocks(Grid g, Artery art, Stage S, bool wantHall)
+		{
+			var pockets = new List<PocketRec>();
+			var claimed = new byte[g.W * g.H];
+			int nClaims = R(S.C0, S.C1);
+			bool hallLeft = wantHall;
+			Func<bool> takeHall = () => { if (hallLeft) { hallLeft = false; return true; } return false; };
+			for (int c = 0; c < nClaims; c++)
+			{
+				// seeds spread along the haul road, mouth outward (rule 1 + accretion)
+				double t = Math.Min(.95, Math.Max(.05, (c + .5) / nClaims + R(-15, 15) / 100.0));
+				var a = art.Path[Math.Min(art.Path.Count - 1, (int)(art.Path.Count * t))];
+				int budget = R(BLOCK_MIN, BLOCK_MAX);
+				var cells = new List<int[]>();
+				int sx2 = a.X, sy2 = a.Y;
+				for (int r2 = 0; r2 < 4 && cells.Count < budget; r2++)
+				{
+					int rw = R(6, 12), rh = R(4, 8);
+					int rx = sx2 - R(1, rw - 2), ry = sy2 - R(1, rh - 2);
+					for (int y = ry; y < ry + rh; y++)
+						for (int x = rx; x < rx + rw; x++)
+						{
+							if (x < 1 || y < 1 || x >= g.W - 1 || y >= g.H - 1) continue;
+							int ni = g.Idx(x, y);
+							if (claimed[ni] != 0 || g.Host[ni] != 0) continue;
+							if (art.Mask[ni] == 0) continue;
+							bool wet = false;   // the wet-pocket guard holds
+							foreach (var d in N8)
+							{
+								int wx = x + d[0], wy = y + d[1];
+								if (g.Inb(wx, wy) && g.Aqua[g.Idx(wx, wy)] != 0) { wet = true; break; }
+							}
+							if (wet) continue;
+							if (g.C[ni] != FLOOR) { cells.Add(new[] { x, y }); claimed[ni] = 1; }
+						}
+					// the next rect anchors inside this one, so the union stays one mass
+					sx2 = rx + R(0, rw - 1); sy2 = ry + R(0, rh - 1);
+				}
+				if (cells.Count < BLOCK_MIN * 0.5) continue;
+				// hollow: a claim cell opens only when everything around it is CLAIM -
+				// the block walls itself against rock AND against the road
+				var open = new List<int>();
+				foreach (var cxy in cells)
+				{
+					bool ok = true;
+					foreach (var d in N8)
+					{
+						int nx = cxy[0] + d[0], ny = cxy[1] + d[1];
+						if (!g.Inb(nx, ny) || claimed[g.Idx(nx, ny)] == 0) { ok = false; break; }
+					}
+					if (ok) open.Add(g.Idx(cxy[0], cxy[1]));
+				}
+				foreach (int i in open) g.C[i] = FLOOR;
+				var openSet = new HashSet<int>(open);
+				var compSeen = new HashSet<int>();
+				foreach (int i in open)
+				{
+					if (compSeen.Contains(i)) continue;
+					var comp = new List<int> { i };
+					var st = new Stack<int>(); st.Push(i); compSeen.Add(i);
+					while (st.Count > 0)
+					{
+						int ci = st.Pop(); int cx = ci % g.W, cy = ci / g.W;
+						foreach (var d in N4)
+						{
+							int nx = cx + d[0], ny = cy + d[1];
+							if (!g.Inb(nx, ny)) continue;
+							int ni = g.Idx(nx, ny);
+							if (openSet.Contains(ni) && !compSeen.Contains(ni)) { compSeen.Add(ni); comp.Add(ni); st.Push(ni); }
+						}
+					}
+					if (comp.Count >= 8) Subdivide(g, comp, pockets, takeHall);
+					else foreach (int ci in comp) g.C[ci] = SOLID;   // slivers go back to rock
+				}
+				// DELIBERATE THRESHOLDS: 1-2 doorways where a block wall stands
+				// between a room and the road
+				var doors = new List<int[]>();
+				foreach (var cxy in cells)
+				{
+					int i = g.Idx(cxy[0], cxy[1]);
+					if (g.C[i] == FLOOR) continue;
+					foreach (var d in new[] { new[]{1,0}, new[]{0,1} })
+					{
+						int ax = cxy[0] + d[0], ay = cxy[1] + d[1], bx2 = cxy[0] - d[0], by2 = cxy[1] - d[1];
+						if (!g.Inb(ax, ay) || !g.Inb(bx2, by2)) continue;
+						int a1 = g.Idx(ax, ay), b1 = g.Idx(bx2, by2);
+						bool roomA = g.C[a1] == FLOOR && g.Pocket[a1] >= 0, roadB = g.C[b1] == FLOOR && g.Pocket[b1] < 0;
+						bool roomB = g.C[b1] == FLOOR && g.Pocket[b1] >= 0, roadA = g.C[a1] == FLOOR && g.Pocket[a1] < 0;
+						if ((roomA && roadB) || (roomB && roadA)) { doors.Add(cxy); break; }
+					}
+				}
+				int want = R(1, 2);
+				while (want-- > 0 && doors.Count > 0)
+				{
+					var dxy = doors[R(0, doors.Count - 1)];
+					doors.Remove(dxy);
+					g.C[g.Idx(dxy[0], dxy[1])] = FLOOR;
+					for (int k = doors.Count - 1; k >= 0; k--)
+						if (Math.Abs(doors[k][0] - dxy[0]) + Math.Abs(doors[k][1] - dxy[1]) < 4) doors.RemoveAt(k);
+				}
+			}
+			// registration facts the box path gets from connectPocket
+			foreach (var p in pockets)
+			{
+				for (int y = p.In.Y0; y <= p.In.Y1; y++)
+					for (int x = p.In.X0; x <= p.In.X1; x++)
+					{
+						int i = g.Idx(x, y);
+						if (g.Pocket[i] != p.Id || g.C[i] != FLOOR) continue;
+						foreach (var d in N4)
+						{
+							int nx = x + d[0], ny = y + d[1];
+							if (!g.Inb(nx, ny)) continue;
+							int ni = g.Idx(nx, ny);
+							if (g.C[ni] != FLOOR) continue;
+							if (g.Art[ni] != 0) p.Through++;
+							if (g.Pocket[ni] != p.Id) p.Entrances = 1;
+						}
+					}
+			}
+			return pockets;
 		}
 
 		// ---------------------------------------------------------------- tunneling
@@ -1272,11 +1527,12 @@ namespace Cleo.TerraFirma.Scripts
 			public bool Built;
 			public string Reason = "";
 			public string Stage = "", Occupancy = "", Roles = "", Yard = "";
+			public string Layout = "boxes";
 			public int Floor, Pockets, Degraded, Attempt, Seed;
 		}
 
 		/// <summary>One complete attempt (buildOnce). Grid-side only; ApplyToZone lands it.</summary>
-		private static Result BuildOnce(Zone Z, int seed, int? forced, int attempt, out Grid gridOut, out List<PocketRec> pocketsOut)
+		private static Result BuildOnce(Zone Z, int seed, int? forced, int attempt, bool blockLayout, out Grid gridOut, out List<PocketRec> pocketsOut)
 		{
 			_state = (uint)seed; _noiseSeed = seed;
 			gridOut = null; pocketsOut = null;
@@ -1344,11 +1600,11 @@ namespace Cleo.TerraFirma.Scripts
 			}
 
 			RegionRec region = null; Pt mouth = null;
-			foreach (int mi in skin.Take(25))
+			foreach (int mi in skin.Take(FACE_SAMPLE))
 			{
 				var cand = new Pt { X = mi % g.W, Y = mi / g.W };
 				var reachR = GrowRegion(g, cand, int.MaxValue, connected);
-				if (reachR.Size < STAGES[0].Area) continue;   // the smallest stage is a FLOOR, not a fallback
+				if (reachR.Size < FACE_PREDICTOR) continue;   // predictor only; licensing stays the bar
 				int sTry = si, deg = 0;
 				while (sTry > 0 && STAGES[sTry].Area > reachR.Size) { sTry--; deg++; }
 				region = GrowRegion(g, cand, STAGES[sTry].Area, connected);
@@ -1405,9 +1661,17 @@ namespace Cleo.TerraFirma.Scripts
 			var art = LayArtery(g, S, mouth, foot, region.Mask, lobeCells);
 			g.MouthIdx = g.Idx(art.Mouth.X, art.Mouth.Y);
 			bool wantHall = si == 2 && Chance(COMMONS_PCT / 100.0);
-			var pockets = FindPockets(g, art, R(S.P0, S.P1), wantHall);
-			foreach (var p in pockets) ResolvePocket(g, p);
-			foreach (var p in pockets) ConnectPocket(g, p, art);
+			List<PocketRec> pockets;
+			if (blockLayout)
+			{
+				pockets = CarveBlocks(g, art, S, wantHall);
+			}
+			else
+			{
+				pockets = FindPockets(g, art, R(S.P0, S.P1), wantHall);
+				foreach (var p in pockets) ResolvePocket(g, p);
+				foreach (var p in pockets) ConnectPocket(g, p, art);
+			}
 			foreach (var p in pockets) p.Live = occupancy == "in use";
 			int crosscuts = AddCrosscuts(g, S.Cross);
 			int filled = Infill(g, art, pockets, R(S.Fill0, S.Fill1));
@@ -1424,36 +1688,94 @@ namespace Cleo.TerraFirma.Scripts
 			var roles = RegisterRoles(g, art, pockets, si, occupancy);
 			Helpers.VerifyLog("WARREN", $"carve: band {band.Mass}, mouth ({mouth.X},{mouth.Y}), stage {STAGES[si].Name} (wanted {STAGES[wanted].Name}, degraded {degraded}), " +
 				$"{pockets.Count} pockets, floor {m.Floor}, loops {m.Loops}, comps {m.Comps}, crosscuts {crosscuts}, infill {filled}, " +
-				$"aquifers {aq.Pools}p/{aq.Veins}v, breaches {breaches}, repairs {repairs}, trimmed {trimmed}");
+				$"aquifers {aq.Pools}p/{aq.Veins}v, breaches {breaches}, repairs {repairs}, trimmed {trimmed}, layout {(blockLayout ? "blocks" : "boxes")}");
 			Helpers.VerifyLog("WARREN", $"roles: {roles.Tally}; yard {roles.YardDesc}; occupancy {occupancy}");
 			gridOut = g; pocketsOut = pockets;
 			return new Result
 			{
 				Built = true, Stage = STAGES[si].Name, Occupancy = occupancy,
-				Roles = roles.Tally, Yard = roles.YardDesc,
+				Roles = roles.Tally, Yard = roles.YardDesc, Layout = blockLayout ? "blocks" : "boxes",
 				Floor = m.Floor, Pockets = pockets.Count, Degraded = degraded, Attempt = attempt, Seed = seed,
 			};
 		}
 
 		/// <summary>The retry contract (build): same canyon every attempt, first
 		/// attempt that clears the bar wins, and no-warren stays a legal outcome
-		/// (a rumour that does not pay off is fine - ruled, abandoned villages).</summary>
+		/// (a rumour that does not pay off is fine - ruled, abandoned villages).
+		/// RETRY-WITH-BLOCKS (ruled 2026-08-23 "like all three of these fixes"):
+		/// a face whose BOX carve under-builds below licensing retries once with
+		/// the block layout before the next face burns - boxes stay the default
+		/// look per the 08-18 A/B lean; blocks are the snake-country specialist.</summary>
 		public static Result Build(Zone Z, int seed, int? forcedStage = null)
 		{
 			Result last = null;
 			for (int a = 0; a < ATTEMPTS; a++)
 			{
-				var r = BuildOnce(Z, seed, forcedStage, a, out Grid g, out List<PocketRec> pockets);
+				var r = BuildOnce(Z, seed, forcedStage, a, false, out Grid g, out List<PocketRec> pockets);
 				if (r.Built)
 				{
 					ApplyToZone(Z, g);
 					return r;
 				}
 				last = r;
+				if (r.Reason.StartsWith("too little got built"))
+				{
+					var r2 = BuildOnce(Z, seed, forcedStage, a, true, out Grid g2, out List<PocketRec> pockets2);
+					if (r2.Built)
+					{
+						Helpers.VerifyLog("WARREN", $"blocks rescued the face (attempt {a}, boxes built {r.Reason})");
+						ApplyToZone(Z, g2);
+						return r2;
+					}
+					last = r2;
+				}
 				if (r.Reason == "no band" || r.Reason == "no band after geology" || r.Reason == "band never meets the canyon") break;
 			}
 			Helpers.VerifyLog("WARREN", $"no site: {last?.Reason ?? "?"} (zone {Z.ZoneID}, seed {seed})");
 			return last ?? new Result { Built = false, Reason = "no attempt ran", Seed = seed };
+		}
+
+		// ---------------------------------------------------------------- prospect
+		/// <summary>The refusal fallback's physical half (ruled 2026-08-23): a small
+		/// honest mark where a rumor found no quarry - one wall cell broken to
+		/// rubble with a fallen rock or two beside it. Carvers scouted this canyon
+		/// and moved on. Returns pieces placed (0 = no natural wall to chip, the
+		/// bare-lawn case; the note handling keys off that).</summary>
+		public static int ProspectMark(Zone Z, int seed)
+		{
+			_state = (uint)seed;
+			var cands = new List<Cell>();
+			for (int y = 1; y < Z.Height - 1; y++)
+				for (int x = 1; x < Z.Width - 1; x++)
+				{
+					Cell c = Z.GetCell(x, y);
+					if (c == null || !c.HasWall()) continue;
+					GameObject wall = c.GetWalls().FirstOrDefault();
+					if (!XRL.World.Parts.Cleo_TerraFirma_StoneshaperWallProperties.IsNaturalStone(
+						wall?.GetPart<XRL.World.Parts.Cleo_TerraFirma_StoneshaperWallProperties>())) continue;
+					int openN = 0;
+					foreach (var d in N4)
+					{
+						Cell n = Z.GetCell(x + d[0], y + d[1]);
+						if (n != null && !n.HasWall() && !n.HasObjectWithPart("LiquidVolume")) openN++;
+					}
+					if (openN >= 2) cands.Add(c);   // visible, walkable-to chip site
+				}
+			if (cands.Count == 0) return 0;
+			Cell bite = cands[R(0, cands.Count - 1)];
+			int placed = 0;
+			foreach (GameObject w in bite.GetWalls().ToList()) w.Obliterate();
+			bite.AddObject(GameObject.Create("Cleo_TerraFirma_Rock_Rubble")); placed++;
+			int rocks = R(1, 2);
+			foreach (var d in N4)
+			{
+				if (rocks <= 0) break;
+				Cell n = Z.GetCell(bite.X + d[0], bite.Y + d[1]);
+				if (n == null || n.HasWall() || n.IsSolid() || n.HasObjectWithPart("LiquidVolume")) continue;
+				n.AddObject(GameObject.Create("Cleo_TerraFirma_Rock_Generic")); placed++; rocks--;
+			}
+			Helpers.VerifyLog("WARREN", $"prospect mark: bite at ({bite.X},{bite.Y}), {placed} pieces");
+			return placed;
 		}
 
 		// ---------------------------------------------------------------- apply
