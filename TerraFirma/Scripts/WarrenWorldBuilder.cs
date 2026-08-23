@@ -21,9 +21,11 @@ namespace XRL.World.WorldBuilders
 		public const int WARRENS_PER_WORLD = 25;   // ruled 2026-08-18; pig-farm frequency - the TARGET of real sites
 		// OVERCLAIM (ruled 2026-08-23 "like all three of these fixes"): placement is
 		// blind to rockiness at embark, so claim wide and let refusals settle their
-		// own rumors (SettleRumor). 35 claims at the observed post-fix refusal band
-		// converges on roughly the 25-target of real sites. CLAUDE dial.
-		public const int CLAIMS = 35;
+		// own rumors (SettleRumor). RE-DIALED same day: the first live sweep ran
+		// 34 real of 35 claims (the fix bundle collapsed refusal to ~3%), so 35
+		// overshot the ruled 25-target by a third. 27 at the observed band
+		// converges on ~25-26 real sites. CLAUDE dial, twice now.
+		public const int CLAIMS = 27;
 
 		public override void OnAfterMutableInit(JoppaWorldBuilder Builder)
 		{
