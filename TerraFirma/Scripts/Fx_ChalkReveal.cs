@@ -37,7 +37,7 @@ namespace Cleo.TerraFirma.Scripts
 		private const float FRAG_STAGGER = 0.05f;   // departures, shuffled order
 		private const float FRAG_LEAVE = 0.10f;     // one quad's drift-out window
 		internal const float FRAG_DRIFT = 3f;       // px outward while leaving (the carve chunk's own lean)
-		private const int MOTE_COUNT = 8;           // central burst; feel round 1 (user 2026-08-23: "some more puffs of white dust"), up from 6
+		private const int MOTE_COUNT = 5;           // central burst; feel round 2 (user: "too many motes, dial it back a bit") from round 1's 8
 		private const float MOTE_LIFE = 0.30f;
 		private const float MOTE_R0 = 2f;           // born tight on the stroke
 		private const float MOTE_R1 = 11f;          // flung toward the cell edge
@@ -45,9 +45,14 @@ namespace Cleo.TerraFirma.Scripts
 		private const float MOTE_SCALE_MIN = 0.22f; // the whorl's SETTLED fleck range, not renegotiated
 		private const float MOTE_SCALE_MAX = 0.30f;
 		private const float MOTE_STAGGER = 0.03f;
-		private const int QUAD_PUFF_COUNT = 3;      // extra dust riding EACH fragment's departure (same feel round)
+		private const int QUAD_PUFF_COUNT = 2;      // dust riding EACH fragment's departure; feel round 2, from 3
 		private const float QUAD_PUFF_R0 = 1f;      // born on the quad itself
 		private const float QUAD_PUFF_R1 = 7f;      // shorter throw; the riding dust hugs the cell
+		// feel round 2 (user: "lighten the color more"): the motes WORE the 1px stroke tile, and
+		// at fleck scale that is a sub-pixel sliver the filtering blends into the floor - white
+		// rendered as gray. The whorl's own mote tile is a chunky blob that survives downscaling
+		// ("guaranteed atlas resident", its journal note); solid chalk-white on both channels.
+		private const string MOTE_TILE = "Items/sw_smallstone.bmp";
 		internal const float FADE_OUT_FRAC = 0.25f;
 		internal const float MASK_Z = -10f;         // carve block's own layer: in front of map tiles
 		internal const float MOTE_Z = -12f;         // in front of the mask
@@ -56,7 +61,7 @@ namespace Cleo.TerraFirma.Scripts
 		/// <summary>Enqueues the reveal over the target cell. Returns how long the caller must
 		/// Hold before adding the line object (0 = no beat, place immediately). The mask wears
 		/// the cell's floor paint, so this must run BEFORE the line exists in the cell.</summary>
-		public static float Play(Cell target, string strokeTile)
+		public static float Play(Cell target)
 		{
 			if (target == null)
 				return 0f;
@@ -80,33 +85,27 @@ namespace Cleo.TerraFirma.Scripts
 				int j = Stat.RandomCosmetic(0, i);
 				(order[i], order[j]) = (order[j], order[i]);
 			}
-			IRenderable mote = strokeTile.IsNullOrEmpty() ? null : new Cleo_TerraFirma_StoneTileRenderable(strokeTile, 'Y', 'Y', 'k');
+			IRenderable mote = new Cleo_TerraFirma_StoneTileRenderable(MOTE_TILE, 'Y', 'Y', 'k');
 			for (int q = 0; q < 4; q++)
 			{
 				float leaveAt = SWAP_SEC + order[q] * FRAG_STAGGER;
 				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceChalkMaskFrag(floor, center, q, leaveAt, FRAG_LEAVE, coverAllOnFallback: q == 0), async: true);
-				if (mote != null)
+				// each departing quad exhales its own small puff (feel round 1: "more puffs of
+				// white dust") -- born on the quad, thrown shorter than the central burst;
+				// offsets mirror the frag class's quad geometry
+				Vector3 quadOffset = new Vector3(q % 2 == 0 ? -4f : 4f, q / 2 == 0 ? 6f : -6f, 0f);
+				for (int m = 0; m < QUAD_PUFF_COUNT; m++)
 				{
-					// each departing quad exhales its own small puff (feel round 1: "more puffs
-					// of white dust") -- born on the quad, thrown shorter than the central burst;
-					// offsets mirror the frag class's quad geometry
-					Vector3 quadOffset = new Vector3(q % 2 == 0 ? -4f : 4f, q / 2 == 0 ? 6f : -6f, 0f);
-					for (int m = 0; m < QUAD_PUFF_COUNT; m++)
-					{
-						float ang = Stat.RandomCosmetic(0, 359) * (Mathf.PI / 180f);
-						float scale = Mathf.Lerp(MOTE_SCALE_MIN, MOTE_SCALE_MAX, Stat.RandomCosmetic(0, 100) * 0.01f);
-						CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceChalkMote(mote, center + quadOffset, ang, leaveAt + m * 0.02f, MOTE_LIFE, scale, QUAD_PUFF_R0, QUAD_PUFF_R1), async: true);
-					}
+					float ang = Stat.RandomCosmetic(0, 359) * (Mathf.PI / 180f);
+					float scale = Mathf.Lerp(MOTE_SCALE_MIN, MOTE_SCALE_MAX, Stat.RandomCosmetic(0, 100) * 0.01f);
+					CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceChalkMote(mote, center + quadOffset, ang, leaveAt + m * 0.02f, MOTE_LIFE, scale, QUAD_PUFF_R0, QUAD_PUFF_R1), async: true);
 				}
 			}
-			if (mote != null)
+			for (int m = 0; m < MOTE_COUNT; m++)
 			{
-				for (int m = 0; m < MOTE_COUNT; m++)
-				{
-					float ang = (m + 0.5f) * (Mathf.PI * 2f / MOTE_COUNT) + Stat.RandomCosmetic(-30, 30) * 0.01f;
-					float scale = Mathf.Lerp(MOTE_SCALE_MIN, MOTE_SCALE_MAX, Stat.RandomCosmetic(0, 100) * 0.01f);
-					CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceChalkMote(mote, center, ang, SWAP_SEC + (m % 3) * MOTE_STAGGER, MOTE_LIFE, scale, MOTE_R0, MOTE_R1), async: true);
-				}
+				float ang = (m + 0.5f) * (Mathf.PI * 2f / MOTE_COUNT) + Stat.RandomCosmetic(-30, 30) * 0.01f;
+				float scale = Mathf.Lerp(MOTE_SCALE_MIN, MOTE_SCALE_MAX, Stat.RandomCosmetic(0, 100) * 0.01f);
+				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceChalkMote(mote, center, ang, SWAP_SEC + (m % 3) * MOTE_STAGGER, MOTE_LIFE, scale, MOTE_R0, MOTE_R1), async: true);
 			}
 			return SWAP_SEC;
 		}

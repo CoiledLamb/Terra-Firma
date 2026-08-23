@@ -362,7 +362,7 @@ namespace XRL.World.Parts
 			// it wears the cell's floor paint, so the juice queue's spin-up frames render
 			// floor-over-floor and the stroke is born already hidden. Hold is the carve-swap
 			// lesson; 0 means unseen/classic/unpainted and the draw lands as before.
-			float settle = Cleo.TerraFirma.Scripts.Cleo_TerraFirma_ChalkRevealFX.Play(target, line.Render?.Tile);
+			float settle = Cleo.TerraFirma.Scripts.Cleo_TerraFirma_ChalkRevealFX.Play(target);
 			if (settle > 0f)
 			{
 				Cleo.TerraFirma.Scripts.Cleo_TerraFirma_ChalkRevealFX.Hold(settle);
