@@ -90,6 +90,26 @@
     <part Name="Description" Short="A wide basin of dressed stone cradles a bed of embers." />
   </object>
   <!-- Quarried block: RandomTile builder rotates the three user sprites. -->
+  <!-- Quarry stone stacks (warren dress port 2026-08-23): the yard's three
+       grades, user sprites (quarrystones 1a/1b through 3a/3b). Grade 1 is the
+       column being filled NOW, grade 3 is finished stock; the yard recipe reads
+       time through them (fill ordering RULED 2026-07-27). DisplayName DRAFT;
+       descriptions deliberately absent, ride the release text pass. -->
+  <object Name="Cleo_TerraFirma_QuarryStones1" Inherits="Furniture">
+    <part Name="Render" Tile="quarrystones1a.png" DisplayName="stack of quarried stone" RenderString="#" ColorString="&amp;y" DetailColor="K" Occluding="false" />
+    <builder Name="RandomTile" Tiles="quarrystones1a.png,quarrystones1b.png" />
+    <part Name="Physics" Solid="false" Takeable="false" Weight="300" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
+  <object Name="Cleo_TerraFirma_QuarryStones2" Inherits="Cleo_TerraFirma_QuarryStones1">
+    <part Name="Render" Tile="quarrystones2a.png" DisplayName="stack of quarried stone" RenderString="#" ColorString="&amp;y" DetailColor="K" Occluding="false" />
+    <builder Name="RandomTile" Tiles="quarrystones2a.png,quarrystones2b.png" />
+  </object>
+  <object Name="Cleo_TerraFirma_QuarryStones3" Inherits="Cleo_TerraFirma_QuarryStones1">
+    <part Name="Render" Tile="quarrystones3a.png" DisplayName="stack of quarried stone" RenderString="#" ColorString="&amp;y" DetailColor="K" Occluding="false" />
+    <builder Name="RandomTile" Tiles="quarrystones3a.png,quarrystones3b.png" />
+  </object>
+
   <object Name="Cleo_TerraFirma_QuarriedBlock" Inherits="Furniture">
     <part Name="Render" Tile="quarrybricks1.png" DisplayName="quarried stone" RenderString="#" ColorString="&amp;y" DetailColor="K" Occluding="false" />
     <builder Name="RandomTile" Tiles="quarrybricks1.png,quarrybricks2.png,quarrybricks3.png" />

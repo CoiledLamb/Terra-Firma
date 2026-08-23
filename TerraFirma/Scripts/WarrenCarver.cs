@@ -121,6 +121,7 @@ namespace Cleo.TerraFirma.Scripts
 			public int W, H;
 			public byte[] C, Art, Host, Water, Aqua, Tree, Region, Marker;
 			public short[] Pocket;
+			public string[] Item;           // the dress layer: sim item ids, translated at placement
 			public int MouthIdx = -1;
 			public int[] MouthDist;
 			public Grid(int w, int h)
@@ -164,6 +165,8 @@ namespace Cleo.TerraFirma.Scripts
 			public bool Live, Infill;
 			public int Depth, DepthRank;
 			public List<int> Footprint;   // blockyard only: actual floor cells (idx)
+			public List<int[]> PillarCells = new List<int[]>();   // the commons tables land on the carve's own articulation
+			public List<int[]> SpurCells = new List<int[]>();
 		}
 		private class Artery
 		{
@@ -542,11 +545,11 @@ namespace Cleo.TerraFirma.Scripts
 					{
 						if (!Chance(PILLAR_FILL / 100.0)) continue;
 						if (!Free(px, py)) continue;
-						g.C[g.Idx(px, py)] = SOLID; p.Pillars++;
+						g.C[g.Idx(px, py)] = SOLID; p.Pillars++; p.PillarCells.Add(new[] { px, py });
 						if (Chance(COLUMN_CHANCE / 100.0))
 						{
 							int gy = py + (Chance(.5) ? 1 : -1);
-							if (Free(px, gy)) { g.C[g.Idx(px, gy)] = SOLID; p.Pillars++; }
+							if (Free(px, gy)) { g.C[g.Idx(px, gy)] = SOLID; p.Pillars++; p.PillarCells.Add(new[] { px, gy }); }
 						}
 					}
 				// a lattice point inside the clearance margin merges into the wall as a SPUR
@@ -556,13 +559,14 @@ namespace Cleo.TerraFirma.Scripts
 					bool fromTop = Chance(.5);
 					int len = R(1, 2);
 					bool did = false;
+					int[] tip = null;
 					for (int k = 0; k < len; k++)
 					{
 						int sy2 = fromTop ? y0 + k : y1 - k;
 						if (sy2 < y0 || sy2 > y1 || g.Art[g.Idx(px, sy2)] != 0 || g.C[g.Idx(px, sy2)] != FLOOR) break;
-						g.C[g.Idx(px, sy2)] = SOLID; did = true;
+						g.C[g.Idx(px, sy2)] = SOLID; did = true; tip = new[] { px, sy2 };
 					}
-					if (did) p.Spurs++;
+					if (did) { p.Spurs++; p.SpurCells.Add(tip); }
 				}
 			}
 			p.Entrances = p.Through > 0 ? 1 : 0;
@@ -607,11 +611,11 @@ namespace Cleo.TerraFirma.Scripts
 					{
 						if (!Chance(PILLAR_FILL / 100.0)) continue;
 						if (!Free2(px, py)) continue;
-						g.C[g.Idx(px, py)] = SOLID; p.Pillars++;
+						g.C[g.Idx(px, py)] = SOLID; p.Pillars++; p.PillarCells.Add(new[] { px, py });
 						if (Chance(COLUMN_CHANCE / 100.0))
 						{
 							int gy = py + (Chance(.5) ? 1 : -1);
-							if (Free2(px, gy)) { g.C[g.Idx(px, gy)] = SOLID; p.Pillars++; }
+							if (Free2(px, gy)) { g.C[g.Idx(px, gy)] = SOLID; p.Pillars++; p.PillarCells.Add(new[] { px, gy }); }
 						}
 					}
 			}
@@ -1305,7 +1309,7 @@ namespace Cleo.TerraFirma.Scripts
 		}
 
 		// ---------------------------------------------------------------- roles
-		private class RolesRec { public string Tally; public string YardDesc; }
+		private class RolesRec { public string Tally; public string YardDesc; public Box YardRect; public string YardState; }
 		private static RolesRec RegisterRoles(Grid g, Artery art, List<PocketRec> pockets, int si, string occupancy)
 		{
 			// depth = walk distance from the mouth over finished floor
@@ -1372,6 +1376,7 @@ namespace Cleo.TerraFirma.Scripts
 			// block yard: largest clear rectangle in a near, off-route, non-hall
 			// pocket (5x5 up to 9x7); else a patch of canyon floor from the doorstep
 			string yardDesc = "none";
+			Box yardRect = null;
 			bool ClearAt(int i) => g.C[i] == FLOOR && g.Art[i] == 0 && g.Water[i] == 0 && g.Tree[i] == 0 && i != g.MouthIdx;
 			Box BestRectMin(HashSet<int> cl, int minW, int minH)
 			{
@@ -1430,6 +1435,7 @@ namespace Cleo.TerraFirma.Scripts
 				for (int y = r2.Y0; y <= r2.Y1; y++)
 					for (int x = r2.X0; x <= r2.X1; x++) p.Footprint.Add(g.Idx(x, y));
 				yardDesc = $"inside pocket {p.Id} ({r2.X1 - r2.X0 + 1}x{r2.Y1 - r2.Y0 + 1})";
+				yardRect = r2;
 				break;
 			}
 			if (yardDesc == "none")
@@ -1455,7 +1461,7 @@ namespace Cleo.TerraFirma.Scripts
 					q2 = nq;
 				}
 				var r2 = BestRect(cl);
-				if (r2 != null) yardDesc = $"outside ({r2.X1 - r2.X0 + 1}x{r2.Y1 - r2.Y0 + 1})";
+				if (r2 != null) { yardDesc = $"outside ({r2.X1 - r2.X0 + 1}x{r2.Y1 - r2.Y0 + 1})"; yardRect = r2; }
 			}
 			// yard state stamped at registration (the contract: dress never classifies)
 			if (yardDesc != "none")
@@ -1479,7 +1485,7 @@ namespace Cleo.TerraFirma.Scripts
 			var tally = pockets.GroupBy(p => p.Role).ToDictionary(gr => gr.Key, gr => gr.Count());
 			string tstr = string.Join(" ", new[] { "commons", "blockyard", "face", "dwelling", "plain" }
 				.Select(role => role + ":" + (tally.TryGetValue(role, out int v) ? v : 0)));
-			return new RolesRec { Tally = tstr, YardDesc = yardDesc };
+			return new RolesRec { Tally = tstr, YardDesc = yardDesc, YardRect = yardRect, YardState = yardState };
 		}
 
 		// ---------------------------------------------------------------- moss
@@ -1520,6 +1526,631 @@ namespace Cleo.TerraFirma.Scripts
 			}
 			if (outCells.Count == 0 && first >= 0) outCells.Add(first);
 			return outCells;
+		}
+
+		// ---------------------------------------------------------------- dress
+		// The full sim dress pass, ported 2026-08-23 on the user's green light
+		// ("this is our first honest to goodness good patch that feels like the
+		// sim, so i feel like we can do dressing"). Tables, laws, weights and
+		// dials are the sim's verbatim (warren-lab-v2.html dressSite; v1
+		// provenance markers live there). Deliberately NOT ported, flagged loud:
+		// commons pre-etched walls (Part_Etchable integration gets its own look),
+		// basket contents poptables (baskets place empty), the cider pitcher
+		// blueprint (maps to Wine Pitcher for now), catch basin (no confirmed
+		// base blueprint name; dropped from the liquid pool), cold-brazier and
+		// cold-firedish art (light parts stripped; sprite may still read lit).
+		private class Row { public int Wt; public string Id, Hint; public Row(int w, string id, string hint = null) { Wt = w; Id = id; Hint = hint; } }
+		private static readonly Row[] T_SOCKET = { new Row(55,null), new Row(18,"stack1"), new Row(8,"straytorch","face"), new Row(5,"pickaxe","face"), new Row(5,"trash"), new Row(2,"chest"), new Row(4,"bg.floor_cushion"), new Row(3,"bg.bedroll"), new Row(2,"pitcher_wine"), new Row(4,"basket_stones") };
+		private static readonly Row[] T_GALLERYBAY = { new Row(50,null), new Row(18,"bg.random_stone_statue"), new Row(12,"largeboulder"), new Row(10,"stack2"), new Row(5,"chest"), new Row(5,"straytorch"), new Row(6,"pitcher_wine") };
+		private static readonly Row[] T_GALLERYPILLAR = { new Row(62,null), new Row(20,"bg.random_stone_statue"), new Row(10,"straytorch"), new Row(8,"stack1"), new Row(8,"bg.bench"), new Row(6,"bg.floor_cushion") };
+		private static readonly Row[] T_GALLERYFLOOR = { new Row(47,null), new Row(25,"largeboulder","center"), new Row(15,"bg.random_stone_statue","center"), new Row(5,"bg.village_monument_stele","center"), new Row(8,"firedish","center") };
+		private static readonly Row[] T_NATURAL = { new Row(55,null), new Row(10,"stone"), new Row(15,"loosestone"), new Row(20,"pebble") };
+		private static readonly Row[] T_PLAINTRACE = { new Row(74,null), new Row(10,"straytorch","face"), new Row(7,"trash"), new Row(5,"pickaxe","face"), new Row(3,"bg.floor_cushion"), new Row(2,"pitcher_cider") };
+		private static readonly Row[] T_HALLTABLE = { new Row(74,null), new Row(10,"straytorch","face"), new Row(7,"trash"), new Row(5,"pickaxe","face"), new Row(4,"chalkmark") };
+		private static readonly HashSet<string> SOLID_ITEMS = new HashSet<string> { "bg.random_stone_statue", "bg.village_monument_stele", "largeboulder" };
+		private static readonly Dictionary<string, string[]> ROOMPOOLS = new Dictionary<string, string[]>
+		{
+			{ "light", new[]{ "bg.brazier", "straytorch" } },
+			{ "storage", new[]{ "bg.chest", "bg.woven_basket", "basket_food" } },
+			{ "seating", new[]{ "bg.floor_cushion", "bg.canvas_folding_chair", "kline", "bg.bench", "stool" } },
+			{ "sleep", new[]{ "bg.bed", "bg.bedroll", "bg.folding_cot" } },
+			{ "centre", new[]{ "bg.table", "bg.workbench" } },
+			{ "liquid", new[]{ "bg.wine_pitcher", "pitcher_wine", "pitcher_cider" } },
+			{ "crafts", new[]{ "bg.workbench", "bg.anvil", "pickaxe", "bg.random_stone_statue", "stack1", "stack2", "stack3", "stonefig", "basket_stones", "kiln" } },
+			{ "hearth", new[]{ "bg.oven", "bg.campfire" } },
+			{ "comfort", new[]{ "bg.hookah" } },
+		};
+		private class RowSpec { public int N0, N1, Chance; public string Pool, Hint; public bool First; }
+		private class RoomType { public int Wt; public string Name; public RowSpec[] Rows; public double Density; }
+		private static RowSpec RS(int n0, int n1, string pool, string hint, int chance = 0, bool first = false)
+			=> new RowSpec { N0 = n0, N1 = n1, Pool = pool, Hint = hint, Chance = chance, First = first };
+		private static readonly RoomType[] ROOMTYPES = {
+			new RoomType{ Wt=40, Name="house", Density=0.3, Rows=new[]{ RS(1,1,"light","corner"), RS(1,2,"storage","wall"), RS(0,1,"seating","inside"), RS(0,1,"sleep","wall"), RS(1,1,"centre","wall",30), RS(1,1,"liquid","wall",40) } },
+			new RoomType{ Wt=20, Name="storage", Density=0.3, Rows=new[]{ RS(1,1,"light","corner"), RS(1,3,"liquid","wall"), RS(3,4,"storage","wall",0,true) } },
+			new RoomType{ Wt=15, Name="crafts", Density=0.3, Rows=new[]{ RS(1,1,"light","corner"), RS(1,2,"seating","wall"), RS(2,4,"crafts","corner",0,true), RS(0,2,"storage","wall") } },
+			new RoomType{ Wt=10, Name="seating", Density=0.3, Rows=new[]{ RS(1,1,"light","corner"), RS(2,4,"seating","wall",0,true), RS(0,1,"centre","inside"), RS(1,1,"comfort","inside",35,true), RS(1,1,"liquid","wall",40) } },
+			new RoomType{ Wt=8, Name="hearth", Density=0.42, Rows=new[]{ RS(1,1,"light","corner"), RS(1,2,"hearth","wall",0,true), RS(1,2,"liquid","wall"), RS(1,2,"storage","wall"), RS(1,1,"centre","inside",60), RS(0,2,"seating","inside") } },
+		};
+		private const double DWELLDENSITY = 0.3;   // v1's engine-faithful number
+
+		private static string DressSite(Grid g, Artery art, List<PocketRec> pockets, RolesRec roles, string occupancy)
+		{
+			g.Item = new string[g.W * g.H];
+			var placed = new Dictionary<string, int>();
+			int items = 0, tableItems = 0, refused = 0, topups = 0;
+			var misses = new List<(Row[] tbl, PocketRec p, List<int[]> cs)>();
+			bool SolidItem(int i) => g.Item[i] != null && SOLID_ITEMS.Contains(g.Item[i]);
+			bool IsFree(int i) => g.C[i] == FLOOR && g.Item[i] == null && g.Art[i] == 0 && g.Water[i] == 0 && g.Tree[i] == 0 && i != g.MouthIdx;
+			// v1's articulation guard: a solid item only lands where removing the
+			// cell keeps its floor neighbours mutually reachable
+			bool SolidOK(int x, int y)
+			{
+				int home = g.Idx(x, y);
+				var ns = new List<int>();
+				foreach (var d in N4)
+				{
+					int nx = x + d[0], ny = y + d[1];
+					if (g.Inb(nx, ny) && g.C[g.Idx(nx, ny)] == FLOOR && !SolidItem(g.Idx(nx, ny))) ns.Add(g.Idx(nx, ny));
+				}
+				if (ns.Count <= 1) return true;
+				var seen = new HashSet<int> { home, ns[0] };
+				var st = new Stack<int>(); st.Push(ns[0]);
+				int found = 1;
+				while (st.Count > 0 && found < ns.Count)
+				{
+					int c = st.Pop(); int cx = c % g.W, cy = c / g.W;
+					foreach (var d in N4)
+					{
+						int nx = cx + d[0], ny = cy + d[1];
+						if (!g.Inb(nx, ny)) continue;
+						int ni = g.Idx(nx, ny);
+						if (seen.Contains(ni) || g.C[ni] != FLOOR || SolidItem(ni)) continue;
+						seen.Add(ni); st.Push(ni);
+						if (ns.Contains(ni)) found++;
+					}
+				}
+				return found == ns.Count;
+			}
+			void Put(int i, string id) { g.Item[i] = id; placed[id] = (placed.TryGetValue(id, out int v) ? v : 0) + 1; items++; }
+			string WRoll(Row[] tbl)
+			{
+				int t = 0; foreach (var r in tbl) t += r.Wt;
+				double x = Rng() * t;
+				foreach (var r in tbl) { x -= r.Wt; if (x < 0) return r.Id == null ? null : (r.Hint != null ? r.Id + "|" + r.Hint : r.Id); }
+				return null;
+			}
+			List<int[]> CellsOf(PocketRec p)
+			{
+				var cs = new List<int[]>();
+				for (int y = p.In.Y0; y <= p.In.Y1; y++)
+					for (int x = p.In.X0; x <= p.In.X1; x++)
+						if (g.Pocket[g.Idx(x, y)] == p.Id && g.C[g.Idx(x, y)] == FLOOR) cs.Add(new[] { x, y });
+				return cs;
+			}
+			// the doorway rule: furniture stays off any cell open to floor outside the pocket
+			bool Threshold(PocketRec p, int x, int y)
+			{
+				foreach (var d in N4)
+				{
+					int nx = x + d[0], ny = y + d[1];
+					if (g.Inb(nx, ny) && g.C[g.Idx(nx, ny)] == FLOOR && g.Pocket[g.Idx(nx, ny)] != p.Id) return true;
+				}
+				return false;
+			}
+			bool Seat(PocketRec p, string rolled, List<int[]> cs)
+			{
+				if (rolled == null) return false;
+				string item = rolled, hint = null;
+				int bar = rolled.IndexOf('|');
+				if (bar >= 0) { hint = rolled.Substring(bar + 1); item = rolled.Substring(0, bar); }
+				bool solid = SOLID_ITEMS.Contains(item);
+				bool Legal(int[] c2) => IsFree(g.Idx(c2[0], c2[1])) && !Threshold(p, c2[0], c2[1]) && (!solid || SolidOK(c2[0], c2[1]));
+				int[] c = null;
+				if (hint == "face")
+				{
+					int best = -1;
+					foreach (var cc in cs)
+					{
+						int dd = g.MouthDist != null ? g.MouthDist[g.Idx(cc[0], cc[1])] : -1;
+						if (dd > best && Legal(cc)) { best = dd; c = cc; }
+					}
+				}
+				else if (hint == "center")
+				{
+					double cx = 0, cy = 0;
+					foreach (var cc in cs) { cx += cc[0]; cy += cc[1]; }
+					cx /= cs.Count; cy /= cs.Count;
+					double best = 1e9;
+					foreach (var cc in cs)
+					{
+						if (!Legal(cc)) continue;
+						double dd = (cc[0] - cx) * (cc[0] - cx) + (cc[1] - cy) * (cc[1] - cy);
+						if (dd < best) { best = dd; c = cc; }
+					}
+				}
+				if (c == null)
+				{
+					var ok = cs.Where(Legal).ToList();
+					if (ok.Count == 0) { if (solid) refused++; return false; }
+					c = ok[R(0, ok.Count - 1)];
+				}
+				Put(g.Idx(c[0], c[1]), item); tableItems++;
+				if (item == "trash" && !Chance(.55))
+				{
+					var pile = new List<int[]> { c };
+					int extra = R(1, 3);
+					for (int e = 0; e < extra; e++)
+					{
+						var ps = pile[R(0, pile.Count - 1)];
+						var adj = cs.Where(a => Math.Abs(a[0] - ps[0]) <= 1 && Math.Abs(a[1] - ps[1]) <= 1 && IsFree(g.Idx(a[0], a[1]))).ToList();
+						if (adj.Count == 0) continue;
+						var nc = adj[R(0, adj.Count - 1)];
+						Put(g.Idx(nc[0], nc[1]), "trash"); pile.Add(nc);
+					}
+				}
+				return true;
+			}
+			// FACE: one socket roll per ~30 floor cells, 1-3
+			void DressFace(PocketRec p)
+			{
+				var cs = CellsOf(p); if (cs.Count == 0) return;
+				int rolls = Math.Max(1, Math.Min(3, (int)Math.Round(cs.Count / 30.0)));
+				for (int i = 0; i < rolls; i++)
+					if (!Seat(p, WRoll(T_SOCKET), cs)) misses.Add((T_SOCKET, p, cs));
+			}
+			// COMMONS: gallery tables on the carve's own articulation
+			void DressCommons(PocketRec p)
+			{
+				var cs = CellsOf(p); if (cs.Count == 0) return;
+				foreach (var pc in p.PillarCells)
+				{
+					var adj = cs.Where(a => Math.Abs(a[0] - pc[0]) <= 1 && Math.Abs(a[1] - pc[1]) <= 1).ToList();
+					if (adj.Count > 0 && !Seat(p, WRoll(T_GALLERYPILLAR), adj)) misses.Add((T_GALLERYPILLAR, p, adj));
+				}
+				foreach (var sc in p.SpurCells)
+				{
+					var adj = cs.Where(a => Math.Abs(a[0] - sc[0]) <= 1 && Math.Abs(a[1] - sc[1]) <= 1).ToList();
+					if (adj.Count > 0 && !Seat(p, WRoll(T_GALLERYBAY), adj)) misses.Add((T_GALLERYBAY, p, adj));
+				}
+				if (!Seat(p, WRoll(T_GALLERYFLOOR), cs)) misses.Add((T_GALLERYFLOOR, p, cs));
+				// pre-etched commons walls: NOT PORTED yet (Part_Etchable markov
+				// integration gets its own sitting) - flagged in TODO
+			}
+			// DWELLING: v1's typed-room grammar whole
+			void DressDwelling(PocketRec p)
+			{
+				var cs = CellsOf(p); if (cs.Count == 0) return;
+				int tot = 0; foreach (var t in ROOMTYPES) tot += t.Wt;
+				double x = Rng() * tot; RoomType type = null;
+				foreach (var t in ROOMTYPES) { x -= t.Wt; if (x < 0) { type = t; break; } }
+				if (type == null) return;
+				int WallsAround(int[] c2)
+				{
+					int n = 0;
+					foreach (var d in N4)
+					{
+						int nx = c2[0] + d[0], ny = c2[1] + d[1];
+						if (!g.Inb(nx, ny) || g.C[g.Idx(nx, ny)] != FLOOR) n++;
+					}
+					return n;
+				}
+				int budget = Math.Max(1, (int)Math.Round(cs.Count * type.Density));
+				int roomChests = 0;   // one chest per room (user flag: "too many chests")
+				var rows = type.Rows.ToList();
+				var fixedRows = new List<RowSpec> { rows[0] };
+				rows.RemoveAt(0);
+				for (int i = rows.Count - 1; i >= 0; i--) if (rows[i].First) { fixedRows.Add(rows[i]); rows.RemoveAt(i); }
+				for (int i = rows.Count - 1; i > 0; i--) { int j = R(0, i); (rows[i], rows[j]) = (rows[j], rows[i]); }
+				foreach (var row in fixedRows.Concat(rows))
+				{
+					if (budget <= 0) break;
+					if (row.Chance > 0 && !Chance(row.Chance / 100.0)) continue;
+					int want = Math.Min(R(row.N0, row.N1), budget);
+					if (row.Pool == "light") want = Math.Min(want, Math.Max(1, budget >> 1));   // a room is lit once
+					for (int w2 = 0; w2 < want && budget > 0; w2++)
+					{
+						var pool = ROOMPOOLS[row.Pool];
+						// ONE OVEN PER SITE - an oven is built masonry, a camp builds one
+						if (pool.Contains("bg.oven") && placed.ContainsKey("bg.oven")) pool = pool.Where(i2 => i2 != "bg.oven").ToArray();
+						string item = pool[R(0, pool.Length - 1)];
+						if (item == "bg.chest") { if (roomChests >= 1) item = "bg.woven_basket"; else roomChests++; }
+						bool solid = SOLID_ITEMS.Contains(item);
+						bool Legal(int[] c2) => IsFree(g.Idx(c2[0], c2[1])) && !Threshold(p, c2[0], c2[1]) && (!solid || SolidOK(c2[0], c2[1]));
+						var cands = cs.Where(c2 =>
+						{
+							if (!Legal(c2)) return false;
+							if (row.Hint == "corner") return WallsAround(c2) >= 2;
+							if (row.Hint == "wall") return WallsAround(c2) >= 1;
+							return true;
+						}).ToList();
+						if (cands.Count == 0) cands = cs.Where(Legal).ToList();
+						if (cands.Count == 0) { if (solid) refused++; break; }
+						var c = cands[R(0, cands.Count - 1)];
+						Put(g.Idx(c[0], c[1]), item); budget--; tableItems++;
+						// cluster stamps riding a centerpiece roll: the hookah-circle
+						// (user sketch, ruled) and the kiln's brick piles
+						if (item == "bg.hookah" || item == "kiln")
+						{
+							string orbit = item == "bg.hookah" ? "bg.floor_cushion" : "quarrybricks";
+							int kmax = item == "bg.hookah" ? R(2, 4) : R(1, 2);
+							var slots = new List<int[]>();
+							foreach (var d in N4)
+							{
+								int sxx = c[0] + d[0], syy = c[1] + d[1];
+								if (cs.Any(a => a[0] == sxx && a[1] == syy) && IsFree(g.Idx(sxx, syy)) && !Threshold(p, sxx, syy))
+									slots.Add(new[] { sxx, syy });
+							}
+							int k = Math.Max(1, Math.Min(kmax, slots.Count));
+							while (k-- > 0 && slots.Count > 0)
+							{
+								int si2 = R(0, slots.Count - 1);
+								var s2 = slots[si2]; slots.RemoveAt(si2);
+								Put(g.Idx(s2[0], s2[1]), orbit); tableItems++;
+							}
+						}
+					}
+				}
+			}
+			// BLOCK YARD: the chalked rectangle with contents inside, five states,
+			// grades ascending from the bench (the yard is the site's status board)
+			void DressYard(Box rect, string state)
+			{
+				int x0 = rect.X0, y0 = rect.Y0, x1 = rect.X1, y1 = rect.Y1;
+				bool FreeI(int i) => g.C[i] == FLOOR && g.Item[i] == null;
+				for (int x = x0; x <= x1; x++) for (int y = y0; y <= y1; y++) g.Tree[g.Idx(x, y)] = 0;   // the drape clears its ground
+				for (int x = x0; x <= x1; x++)
+					for (int y = y0; y <= y1; y++)
+					{
+						if (x > x0 && x < x1 && y > y0 && y < y1) continue;
+						int i = g.Idx(x, y); if (!FreeI(i)) continue;
+						string id = y == y0 ? (x == x0 ? "chalklineNW" : x == x1 ? "chalklineNE" : "chalklineN")
+								 : y == y1 ? (x == x0 ? "chalklineSW" : x == x1 ? "chalklineSE" : "chalklineS")
+								 : x == x0 ? "chalklineW" : "chalklineE";
+						Put(i, id);
+					}
+				int ix0 = x0 + 1, iy0 = y0 + 1, ix1 = x1 - 1, iy1 = y1 - 1;
+				if (ix1 < ix0 || iy1 < iy0) return;
+				int wx = Math.Abs(ix0 - art.Mouth.X) <= Math.Abs(ix1 - art.Mouth.X) ? ix0 : ix1;
+				bool working = state == "working" || state == "full";
+				if (state == "fresh" || working)
+				{
+					int benchY = -1;
+					if (Chance(.75)) { Put(g.Idx(wx, iy0), "bg.workbench"); benchY = iy0; }
+					if (working && benchY >= 0 && iy0 + 1 <= iy1 && Chance(.7)) Put(g.Idx(wx, iy0 + 1), "bg.canvas_folding_chair");
+					if (working && Chance(.75) && FreeI(g.Idx(wx, iy1))) Put(g.Idx(wx, iy1), "basket_stones");
+				}
+				if (state == "fresh")
+				{
+					// never an EMPTY ring: one short stack1 run, "just getting started"
+					int x = wx + (wx == ix0 ? 1 : -1);
+					if (x >= ix0 && x <= ix1)
+					{
+						int len = R(1, 2);
+						for (int k = 0; k < len; k++) { int i = g.Idx(x, iy0 + k); if (FreeI(i)) Put(i, "stack1"); }
+					}
+					return;
+				}
+				int dir = wx == ix0 ? 1 : -1, avail = ix1 - ix0, ih = iy1 - iy0 + 1;
+				int nCols = state == "full" ? avail : R(1, Math.Min(3, Math.Max(1, avail)));
+				bool gaps = state == "robbed";
+				for (int c2 = 0; c2 < nCols; c2++)
+				{
+					int x = wx + dir * (c2 + 1); if (x < ix0 || x > ix1) break;
+					int gi = state == "full" ? Math.Min(3, c2 + 2) : Math.Min(3, c2 + 1);
+					int len = state == "full" || gi == 3 ? ih
+							: gi == 2 ? R(Math.Max(1, ih - 1), ih)
+							: R(1, Math.Max(1, ih - 1));
+					for (int k = 0; k < len; k++)
+					{
+						int i = g.Idx(x, iy0 + k); if (!FreeI(i)) continue;
+						if (gaps && Chance(.5)) { if (Chance(.4)) Put(i, "loosestone"); continue; }
+						Put(i, "stack" + gi);
+					}
+				}
+			}
+			foreach (var p in pockets)
+			{
+				if (p.Role == "face") DressFace(p);
+				else if (p.Role == "commons") DressCommons(p);
+				else if (p.Role == "dwelling") DressDwelling(p);
+				else if (p.Role == "plain")
+				{
+					var cs = CellsOf(p);
+					if (cs.Count > 0 && !Seat(p, WRoll(T_PLAINTRACE), cs)) misses.Add((T_PLAINTRACE, p, cs));
+				}
+			}
+			if (roles.YardRect != null) DressYard(roles.YardRect, roles.YardState ?? "working");
+			// WARREN FLOOR: only the tail is cut - Nothing-rolled spaces re-roll
+			// with the Nothing row removed until the site clears its floor
+			int eligible = pockets.Count(p => p.Role == "face" || p.Role == "commons" || p.Role == "dwelling");
+			int wantFloor = Math.Max(2, (int)Math.Round(eligible * 0.45));
+			string WRollNo(Row[] tbl)
+			{
+				int t = 0; foreach (var r in tbl) if (r.Id != null) t += r.Wt;
+				if (t == 0) return null;
+				double x = Rng() * t;
+				foreach (var r in tbl) { if (r.Id == null) continue; x -= r.Wt; if (x < 0) return r.Hint != null ? r.Id + "|" + r.Hint : r.Id; }
+				return null;
+			}
+			int fguard = 0;
+			while (tableItems < wantFloor && misses.Count > 0 && fguard++ < 12)
+			{
+				int mi = R(0, misses.Count - 1);
+				var (tbl, p, cs) = misses[mi]; misses.RemoveAt(mi);
+				if (Seat(p, WRollNo(tbl), cs)) topups++;
+			}
+			// CORRIDOR TRACES: the sparsest table on non-artery segments
+			var segSeen = new byte[g.W * g.H];
+			bool Corr(int i2) => g.C[i2] == FLOOR && g.Host[i2] == 0 && g.Water[i2] == 0 && g.Art[i2] == 0 && g.Pocket[i2] < 0 && i2 != g.MouthIdx;
+			for (int i0 = 0; i0 < g.W * g.H; i0++)
+			{
+				if (segSeen[i0] != 0 || !Corr(i0)) continue;
+				var seg = new List<int> { i0 };
+				var st = new Stack<int>(); st.Push(i0); segSeen[i0] = 1;
+				while (st.Count > 0)
+				{
+					int c = st.Pop(); int cx = c % g.W, cy = c / g.W;
+					foreach (var d in N4)
+					{
+						int nx = cx + d[0], ny = cy + d[1];
+						if (!g.Inb(nx, ny)) continue;
+						int ni = g.Idx(nx, ny);
+						if (segSeen[ni] != 0 || !Corr(ni)) continue;
+						segSeen[ni] = 1; seg.Add(ni); st.Push(ni);
+					}
+				}
+				if (seg.Count < 3) continue;
+				string rolled = WRoll(T_HALLTABLE);
+				if (rolled == null) continue;
+				string item = rolled, hint = null;
+				int bar = rolled.IndexOf('|');
+				if (bar >= 0) { hint = rolled.Substring(bar + 1); item = rolled.Substring(0, bar); }
+				var open = seg.Where(i2 => g.Item[i2] == null).ToList();
+				if (open.Count == 0) continue;
+				if (item == "chalkmark")
+				{
+					// a claim mark chalked against the passage wall
+					var walled = new List<(int i, string id)>();
+					foreach (int i2 in open)
+					{
+						int cx = i2 % g.W, cy = i2 / g.W;
+						foreach (var (dd, dx, dy) in new[] { ("N", 0, -1), ("S", 0, 1), ("E", 1, 0), ("W", -1, 0) })
+							if (g.Inb(cx + dx, cy + dy) && g.C[g.Idx(cx + dx, cy + dy)] != FLOOR) { walled.Add((i2, "chalkline" + dd)); break; }
+					}
+					if (walled.Count == 0) continue;
+					var pick2 = walled[R(0, walled.Count - 1)];
+					Put(pick2.i, pick2.id); continue;
+				}
+				int ci;
+				if (hint == "face")
+				{
+					int best = -1; ci = open[0];
+					foreach (int i2 in open)
+					{
+						int dd2 = g.MouthDist != null ? g.MouthDist[i2] : -1;
+						if (dd2 > best) { best = dd2; ci = i2; }
+					}
+				}
+				else ci = open[R(0, open.Count - 1)];
+				Put(ci, item);
+				if (item == "trash" && !Chance(.55))
+				{
+					int px2 = ci % g.W, py2 = ci / g.W;
+					int extra = R(1, 3);
+					for (int e = 0; e < extra; e++)
+					{
+						int nx = px2 + R(-1, 1), ny = py2 + R(-1, 1);
+						if (!g.Inb(nx, ny)) continue;
+						int ni = g.Idx(nx, ny);
+						if (g.C[ni] == FLOOR && g.Host[ni] == 0 && g.Item[ni] == null && g.Water[ni] == 0 && ni != g.MouthIdx)
+						{ Put(ni, "trash"); px2 = nx; py2 = ny; }
+					}
+				}
+			}
+			// NATURAL SCATTER: geology showing through the floor, corridors included
+			var natFloors = new List<int>();
+			for (int i = 0; i < g.W * g.H; i++)
+				if (g.C[i] == FLOOR && g.Host[i] == 0 && g.Water[i] == 0 && g.Item[i] == null && i != g.MouthIdx) natFloors.Add(i);
+			int natWant = R(2, 5) + (int)Math.Round(natFloors.Count * 0.03);
+			for (int na = 0; na < natWant && natFloors.Count > 0; na++)
+			{
+				string it = WRoll(T_NATURAL); if (it == null) continue;
+				for (int t = 0; t < 8 && natFloors.Count > 0; t++)
+				{
+					int pi = R(0, natFloors.Count - 1), ci = natFloors[pi];
+					if (SOLID_ITEMS.Contains(it) && !SolidOK(ci % g.W, ci / g.W)) { refused++; continue; }
+					natFloors.RemoveAt(pi);
+					if (g.Item[ci] == null) Put(ci, it);
+					break;
+				}
+			}
+			// LIGHTING: sconces flank the commons entrances from the inside, dens
+			// stay dark, one post at the mouth - the light you steer by
+			{
+				var posts = new List<int[]>();
+				bool PostOK(int px, int py) => posts.All(q => Math.Max(Math.Abs(q[0] - px), Math.Abs(q[1] - py)) >= 2);
+				foreach (var p in pockets)
+				{
+					if (p.Role != "commons") continue;
+					var cs = CellsOf(p);
+					var inC = new HashSet<int>(cs.Select(c2 => g.Idx(c2[0], c2[1])));
+					var cand = new List<int[]>();   // [ex, ey, gx, gy]
+					var seenD = new HashSet<int>();
+					foreach (var c2 in cs)
+						foreach (var d in N4)
+						{
+							int ex = c2[0] + d[0], ey = c2[1] + d[1];
+							if (!g.Inb(ex, ey)) continue;
+							int ei = g.Idx(ex, ey);
+							if (seenD.Contains(ei) || inC.Contains(ei) || g.C[ei] != FLOOR) continue;
+							int ox = ex + d[0], oy = ey + d[1];
+							if (g.Inb(ox, oy) && g.Pocket[g.Idx(ox, oy)] >= 0 && g.Pocket[g.Idx(ox, oy)] != p.Id) continue;   // den door: dark
+							seenD.Add(ei); cand.Add(new[] { ex, ey, c2[0], c2[1] });
+						}
+					var used = new HashSet<int>();
+					foreach (var e in cand)
+					{
+						int ek = g.Idx(e[0], e[1]);
+						if (used.Contains(ek)) continue;
+						var cq = new List<int[]> { e }; used.Add(ek);
+						for (int ci2 = 0; ci2 < cq.Count; ci2++)
+							foreach (var o in cand)
+							{
+								int ok3 = g.Idx(o[0], o[1]);
+								if (!used.Contains(ok3) && Math.Abs(o[0] - cq[ci2][0]) <= 2 && Math.Abs(o[1] - cq[ci2][1]) <= 2) { used.Add(ok3); cq.Add(o); }
+							}
+						int ax = e[2] - e[0], ay = e[3] - e[1];
+						foreach (var f in new[] { new[] { e[2] - ay, e[3] - ax }, new[] { e[2] + ay, e[3] + ax } })
+						{
+							if (!g.Inb(f[0], f[1])) continue;
+							if (!inC.Contains(g.Idx(f[0], f[1])) || !IsFree(g.Idx(f[0], f[1]))) continue;
+							if (!PostOK(f[0], f[1])) continue;
+							Put(g.Idx(f[0], f[1]), "bg.torchpost"); posts.Add(new[] { f[0], f[1] });
+						}
+					}
+				}
+				// the mouth post
+				var mq = new Queue<int[]>(); mq.Enqueue(new[] { art.Mouth.X, art.Mouth.Y, 0 });
+				var mseen = new HashSet<int> { g.MouthIdx };
+				while (mq.Count > 0)
+				{
+					var m = mq.Dequeue();
+					int mi = g.Idx(m[0], m[1]);
+					if (g.C[mi] == FLOOR && g.Host[mi] == 0 && g.Item[mi] == null && mi != g.MouthIdx)
+					{
+						bool hug = false;
+						foreach (var d in N4) if (g.Inb(m[0] + d[0], m[1] + d[1]) && g.C[g.Idx(m[0] + d[0], m[1] + d[1])] != FLOOR) hug = true;
+						if (hug) { Put(mi, "bg.torchpost"); break; }
+					}
+					if (m[2] < 2)
+						foreach (var d in N4)
+						{
+							int nx = m[0] + d[0], ny = m[1] + d[1];
+							if (g.Inb(nx, ny) && !mseen.Contains(g.Idx(nx, ny)) && g.C[g.Idx(nx, ny)] == FLOOR)
+							{ mseen.Add(g.Idx(nx, ny)); mq.Enqueue(new[] { nx, ny, m[2] + 1 }); }
+						}
+				}
+			}
+			// TENSE: a dead site goes dark (per-space, so the held retreat gradient
+			// stays a one-function change); reclaimed = TAKEN, the whole abandoned
+			// base plus fresh snapjaw fires beside the cold hearths
+			if (occupancy != "in use")
+			{
+				var flip = new Dictionary<string, string> {
+					{ "bg.campfire", "campfire_remains" }, { "bg.brazier", "brazier_cold" },
+					{ "bg.torchpost", "torchpost_unlit" }, { "firedish", "firedish_cold" }, { "straytorch", null } };
+				for (int i = 0; i < g.W * g.H; i++)
+				{
+					string it = g.Item[i];
+					if (it == null || !flip.ContainsKey(it)) continue;
+					int pid = g.Pocket[i];
+					if (pid >= 0 && pid < pockets.Count && pockets[pid].Live) continue;
+					string to = flip[it];
+					g.Item[i] = to;
+					if (to == null) items--;
+				}
+			}
+			if (occupancy == "reclaimed")
+			{
+				// 1-2 crude fires, deep-biased - the newcomers den in the back
+				var dens = pockets.OrderByDescending(p => p.DepthRank).Take(Math.Min(3, pockets.Count)).ToList();
+				int fires = R(1, 2);
+				foreach (var p in dens)
+				{
+					if (fires <= 0) break;
+					var cs = CellsOf(p).Where(c2 => IsFree(g.Idx(c2[0], c2[1]))).ToList();
+					if (cs.Count == 0) continue;
+					var c = cs[R(0, cs.Count - 1)];
+					Put(g.Idx(c[0], c[1]), "bg.campfire"); fires--;
+				}
+			}
+			// trash scatter, all tenses; a dead site stops sweeping its road
+			bool deadSite = occupancy != "in use";
+			var tCells = new List<int>();
+			for (int i = 0; i < g.W * g.H; i++)
+				if (g.C[i] == FLOOR && g.Host[i] == 0 && g.Water[i] == 0 && g.Item[i] == null && i != g.MouthIdx
+					&& (deadSite || g.Art[i] == 0)) tCells.Add(i);
+			int tWant = (int)Math.Round(tCells.Count * (deadSite ? 0.048 : 0.012)) + (deadSite ? R(2, 4) : R(0, 2));
+			for (int n = 0; n < tWant && tCells.Count > 0; n++)
+			{
+				int pi = R(0, tCells.Count - 1), ci = tCells[pi]; tCells.RemoveAt(pi);
+				if (g.Item[ci] != null) continue;
+				Put(ci, "trash");
+				if (!Chance(.55))
+				{
+					int px2 = ci % g.W, py2 = ci / g.W;
+					int extra = R(1, 3);
+					for (int e = 0; e < extra; e++)
+					{
+						int nx = px2 + R(-1, 1), ny = py2 + R(-1, 1);
+						if (!g.Inb(nx, ny)) continue;
+						int ni = g.Idx(nx, ny);
+						if (g.C[ni] == FLOOR && g.Host[ni] == 0 && g.Item[ni] == null && g.Water[ni] == 0 && ni != g.MouthIdx)
+						{ Put(ni, "trash"); px2 = nx; py2 = ny; }
+					}
+				}
+			}
+			return $"{items} items, {tableItems} table, {topups} topups, {refused} solid-refused";
+		}
+
+		// sim item id -> real blueprint. Every name here is verified against Base
+		// or the mod's own XML; an unverified name is a MODERROR at spawn, so the
+		// unconfirmed ones were dropped or substituted (flags in the TODO entry).
+		private static readonly Dictionary<string, string> BP = new Dictionary<string, string>
+		{
+			{ "straytorch", "Torch" }, { "pickaxe", "Pickaxe" }, { "trash", "Garbage" },
+			{ "chest", "Chest" }, { "bg.chest", "Chest" },
+			{ "stack1", "Cleo_TerraFirma_QuarryStones1" }, { "stack2", "Cleo_TerraFirma_QuarryStones2" }, { "stack3", "Cleo_TerraFirma_QuarryStones3" },
+			{ "quarrybricks", "Cleo_TerraFirma_QuarriedBlock" },
+			{ "bg.random_stone_statue", "Random Stone Statue" }, { "bg.village_monument_stele", "Village Monument Stele" },
+			{ "bg.brazier", "Brazier" }, { "bg.campfire", "Campfire" }, { "campfire_remains", "Campfire Remains" },
+			{ "bg.woven_basket", "Woven Basket" }, { "basket_stones", "Woven Basket" }, { "basket_food", "Woven Basket" },
+			{ "bg.floor_cushion", "Floor Cushion" }, { "bg.canvas_folding_chair", "Canvas Folding Chair" },
+			{ "bg.bed", "Bed" }, { "bg.bedroll", "Bedroll" }, { "bg.folding_cot", "Folding Cot" },
+			{ "bg.table", "Table" }, { "bg.workbench", "Workbench" },
+			{ "bg.wine_pitcher", "Wine Pitcher" }, { "pitcher_wine", "Wine Pitcher" }, { "pitcher_cider", "Wine Pitcher" },
+			{ "bg.anvil", "Anvil" }, { "bg.oven", "Oven" }, { "bg.hookah", "Hookah" }, { "bg.bench", "Bench" },
+			{ "kline", "Kline" }, { "stool", "Stool" }, { "kiln", "Kiln" },
+			{ "bg.torchpost", "Torchpost" }, { "torchpost_unlit", "Unlit Torchpost" },
+			{ "firedish", "Cleo_TerraFirma_FireDish" }, { "firedish_cold", "Cleo_TerraFirma_FireDish" },
+			{ "brazier_cold", "Brazier" },
+			{ "stonefig", "Cleo_TerraFirma_Random Stone Figurine" }, { "figurine", "Random Figurine" },
+			{ "largeboulder", "LargeBoulder" },
+			{ "stone", "Cleo_TerraFirma_Rock_Generic" }, { "loosestone", "Cleo_TerraFirma_Rock_Generic" }, { "pebble", "Cleo_TerraFirma_Rock_Pebbles" },
+		};
+
+		private static int PlaceItems(Zone Z, Grid g)
+		{
+			if (g.Item == null) return 0;
+			int placed = 0;
+			for (int i = 0; i < g.W * g.H; i++)
+			{
+				string id = g.Item[i];
+				if (id == null) continue;
+				Cell c = Z.GetCell(i % g.W, i / g.W);
+				if (c == null || c.HasWall()) continue;
+				GameObject obj;
+				if (id.StartsWith("chalkline"))
+				{
+					obj = GameObject.Create("Cleo_TerraFirma_ChalkLine");
+					if (obj.Render != null) obj.Render.Tile = id + ".png";   // the directional piece
+				}
+				else
+				{
+					if (!BP.TryGetValue(id, out string bp)) continue;
+					obj = GameObject.Create(bp);
+					if (id == "firedish_cold" || id == "brazier_cold")
+					{
+						// the cold flip: light and heat stripped (sprite may still
+						// read lit - art polish flagged in TODO)
+						obj.RemovePart<XRL.World.Parts.LightSource>();
+						obj.RemovePart<XRL.World.Parts.Campfire>();
+					}
+				}
+				c.AddObject(obj);
+				placed++;
+			}
+			return placed;
 		}
 
 		// ---------------------------------------------------------------- build
@@ -1704,6 +2335,8 @@ namespace Cleo.TerraFirma.Scripts
 			int[] floorMin = { 0, CAMP_FLOOR, FLOUR_FLOOR };
 			while (si > 0 && m.Floor < floorMin[si]) { si--; degraded++; }
 			var roles = RegisterRoles(g, art, pockets, si, occupancy);
+			string dressStats = DressSite(g, art, pockets, roles, occupancy);
+			Helpers.VerifyLog("WARREN", $"dress: {dressStats}");
 			Helpers.VerifyLog("WARREN", $"carve: band {band.Mass}, mouth ({mouth.X},{mouth.Y}), stage {STAGES[si].Name} (wanted {STAGES[wanted].Name}, degraded {degraded}), " +
 				$"{pockets.Count} pockets, floor {m.Floor}, loops {m.Loops}, comps {m.Comps}, crosscuts {crosscuts}, infill {filled}, " +
 				$"aquifers {aq.Pools}p/{aq.Veins}v, breaches {breaches}, repairs {repairs}, trimmed {trimmed}, layout {(blockLayout ? "blocks" : "boxes")}");
@@ -1795,7 +2428,8 @@ namespace Cleo.TerraFirma.Scripts
 				wall.Render.DetailColor = "g";
 				mossed++;
 			}
-			Helpers.VerifyLog("WARREN", $"applied: {carved} cells carved, {pools} pool cells, {mossed} mossy walls");
+			int dressed = PlaceItems(Z, g);
+			Helpers.VerifyLog("WARREN", $"applied: {carved} cells carved, {pools} pool cells, {mossed} mossy walls, {dressed} dress items");
 			// mouth forensics (round 3): the first live warren carved green and was
 			// then found sealed. Name the mouth's neighbors at apply time so a
 			// post-builder seal (biome mutation is the suspect - it runs after every
