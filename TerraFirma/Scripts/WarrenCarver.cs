@@ -1695,13 +1695,20 @@ namespace Cleo.TerraFirma.Scripts
 				}
 				return true;
 			}
-			// FACE: one socket roll per ~30 floor cells, 1-3
+			// FACE: one socket roll per ~30 floor cells, 1-3. A FACE IS NEVER
+			// STERILE (2026-08-23, user's overlit/bare contrast flag): the first
+			// roll skips the Nothing row - work stopped here, something is always
+			// left. Echoes the plain-rooms ruling's own words ("it just isn't
+			// sterile"). CLAUDE dial, strikeable; sim catch-up flagged.
 			void DressFace(PocketRec p)
 			{
 				var cs = CellsOf(p); if (cs.Count == 0) return;
 				int rolls = Math.Max(1, Math.Min(3, (int)Math.Round(cs.Count / 30.0)));
 				for (int i = 0; i < rolls; i++)
-					if (!Seat(p, WRoll(T_SOCKET), cs)) misses.Add((T_SOCKET, p, cs));
+				{
+					string rolled = i == 0 ? WRollNo(T_SOCKET) : WRoll(T_SOCKET);
+					if (!Seat(p, rolled, cs)) misses.Add((T_SOCKET, p, cs));
+				}
 			}
 			// COMMONS: gallery tables on the carve's own articulation
 			void DressCommons(PocketRec p)
@@ -2003,11 +2010,18 @@ namespace Cleo.TerraFirma.Scripts
 			// LIGHTING: sconces flank the commons entrances from the inside, dens
 			// stay dark, one post at the mouth - the light you steer by
 			{
+				// OVERLIT COMMONS FIX (2026-08-23, user in game: "galleries are
+				// spawning pretty overlit"): v2 commons straddle the haul road, so
+				// they carry far more openings than v1's galleries - every cluster
+				// double-flanked read as a landing strip. ONE flank per doorway,
+				// spacing 3, hard cap 4 posts per commons. Dials CLAUDE, sim
+				// catch-up flagged; "underground the glow is choreography" intact.
 				var posts = new List<int[]>();
-				bool PostOK(int px, int py) => posts.All(q => Math.Max(Math.Abs(q[0] - px), Math.Abs(q[1] - py)) >= 2);
+				bool PostOK(int px, int py) => posts.All(q => Math.Max(Math.Abs(q[0] - px), Math.Abs(q[1] - py)) >= 3);
 				foreach (var p in pockets)
 				{
 					if (p.Role != "commons") continue;
+					int pocketPosts = 0;
 					var cs = CellsOf(p);
 					var inC = new HashSet<int>(cs.Select(c2 => g.Idx(c2[0], c2[1])));
 					var cand = new List<int[]>();   // [ex, ey, gx, gy]
@@ -2035,6 +2049,7 @@ namespace Cleo.TerraFirma.Scripts
 								int ok3 = g.Idx(o[0], o[1]);
 								if (!used.Contains(ok3) && Math.Abs(o[0] - cq[ci2][0]) <= 2 && Math.Abs(o[1] - cq[ci2][1]) <= 2) { used.Add(ok3); cq.Add(o); }
 							}
+						if (pocketPosts >= 4) break;
 						int ax = e[2] - e[0], ay = e[3] - e[1];
 						foreach (var f in new[] { new[] { e[2] - ay, e[3] - ax }, new[] { e[2] + ay, e[3] + ax } })
 						{
@@ -2042,6 +2057,8 @@ namespace Cleo.TerraFirma.Scripts
 							if (!inC.Contains(g.Idx(f[0], f[1])) || !IsFree(g.Idx(f[0], f[1]))) continue;
 							if (!PostOK(f[0], f[1])) continue;
 							Put(g.Idx(f[0], f[1]), "bg.torchpost"); posts.Add(new[] { f[0], f[1] });
+							pocketPosts++;
+							break;   // one flank per doorway - a lone flank is fine, the pair was the floodlight
 						}
 					}
 				}
