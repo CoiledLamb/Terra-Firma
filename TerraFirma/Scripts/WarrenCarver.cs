@@ -281,8 +281,17 @@ namespace Cleo.TerraFirma.Scripts
 					bool bubble = g.C[ni] == FLOOR;            // open but not edge-connected
 					bool rind = !bubble && OnRind(nx, ny);
 					seen[ni] = 1;
-					q.Add(ni);                                 // traversable either way
-					if (bubble || rind) continue;              // pass-through: never claimed
+					// ROUND 7 (2026-08-23, the 1-of-1000 starfish): the rind is
+					// impassable again as well as unclaimable - SIM-FAITHFUL, the
+					// sim's flood never crossed its skin; round 4's pinch-crossing
+					// was port over-reach that let a face with a 1-cell lobe size
+					// itself on mass it could never walk to, building mouth-anchored
+					// starfish. Faces with tiny lobes now lose to the next face in
+					// the try order. Bubbles stay crossable: the one real terrain
+					// class the sim lacks, and they can never be a mouth.
+					if (rind) continue;
+					q.Add(ni);                                 // rock and bubbles are traversable
+					if (bubble) continue;                      // pre-carved air: crossed, never claimed
 					mask[ni] = 1; cells.Add(ni); n++;
 					if (n >= budget) break;
 				}
