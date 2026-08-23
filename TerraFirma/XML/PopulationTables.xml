@@ -105,22 +105,31 @@
 
 	<!-- Role kits: the spine plus ONE signature item, per the pitch the user accepted. The
 	     discipline is that the mutation is the job and the item is only the tell.
-	     Hewer takes the dust mask rather than a pickaxe DELIBERATELY: DiggingTool installs Digging
-	     and answers PathAsBurrowerEvent, so an armed hewer would tunnel through walls and chew
-	     apart a hand painted warren. The mask is AV 0, pure characterisation, zero risk, and it
-	     says the same thing: the one who works the face eats the dust. -->
+	     HISTORY, superseded: the hewer originally took the dust mask INSTEAD of a pickaxe
+	     because DiggingTool paths NPCs through walls. That veto is REVERSED, RULED 2026-08-23
+	     (user: "i don't like that veto, i think it makes sense for quarriers to have digging
+	     tools especially if it means they dig their environment"): tunneling is accepted
+	     behavior now, and the ground truth pass found the mole variants were latent tunnelers
+	     all along (BurrowingClaws paths-as-burrower by default; see the gear sitting record in
+	     TODO.md). The jackhammer rides the hewer BLUEPRINT (Creatures.xml), not this kit, on
+	     the graverobber precedent. Headgear rolls from the MiningGear table; the mask lives on
+	     as a common rung there. Arms: the 2026-08-22 etch-tool ruling lands here as sequenced;
+	     both kits roll the Carver Knife and Carver Hammer ladders and the near-duplicate
+	     EtchTools table is scrubbed, its provenance journaled at the 08-23 gear sitting.
+	     Same-pool RULED same sitting (user: "let's have all 3 quarriers use the same weapon
+	     pool. we'll have bucklers/shields as a special get for outriders"): the outrider's
+	     arms already rolled these ladders, so all three roles now share one arms
+	     distribution, and shields stay the outrider's alone. -->
 	<population Name="Cleo_TerraFirma_Hewer Kit">
 		<group Name="Equipment" Style="pickeach">
 			<table Name="Cleo_TerraFirma_Quarrier Kit" />
-			<object Blueprint="Vinewood Sap Mask" Number="1" />
+			<table Name="Cleo_TerraFirma_MiningGear" />
 			<!-- Fissure stones, role-texture pitch 2026-08-23; count RULED same day (user: "amount
 			     should be 2-3"). The sower precedent: grenades in plain inventory get thrown by
 			     stock AI. Whoever fells the hewer inherits the unspent ones, deliberately. -->
 			<object Blueprint="Cleo_TerraFirma_FissureStone" Number="2-3" />
-			<!-- Relocated verbatim from the spine at the 2026-08-22 lightening; holds this kit's
-			     pre-lightening behavior until its own lock sitting. The etch-tool ruling (base
-			     knives and hammers replace steel/carbide, NOTED in TODO.md) also lands then. -->
-			<table Name="Cleo_TerraFirma_EtchTools" />
+			<table Name="Cleo_TerraFirma_Carver Knife" />
+			<table Name="Cleo_TerraFirma_Carver Hammer" />
 			<group Name="Armor" Style="pickone">
 				<table Weight="40" Name="DynamicInheritsTable:Armor:Tier{ownertier}" Chance="75" Number="1" />
 				<table Weight="60" Name="Armor {ownertier}" Chance="75" Number="1" />
@@ -139,9 +148,13 @@
 		<group Name="Equipment" Style="pickeach">
 			<table Name="Cleo_TerraFirma_Quarrier Kit" />
 			<table Name="Cleo_Stonecarver_Maquette" />
-			<!-- Relocated verbatim from the spine at the 2026-08-22 lightening; same story as the
-			     hewer kit's copy of these lines. -->
-			<table Name="Cleo_TerraFirma_EtchTools" />
+			<!-- Headgear at a chance rather than the hewer's guarantee: the quiet one is
+			     sometimes bare-headed. Chance CLAUDE DRAFT (gear sitting 2026-08-23). -->
+			<table Name="Cleo_TerraFirma_MiningGear" Chance="65" />
+			<!-- Carver ladders replace EtchTools here too (etch-tool ruling of 2026-08-22
+			     landing as sequenced at the 08-23 gear sitting). -->
+			<table Name="Cleo_TerraFirma_Carver Knife" />
+			<table Name="Cleo_TerraFirma_Carver Hammer" />
 			<group Name="Armor" Style="pickone">
 				<table Weight="40" Name="DynamicInheritsTable:Armor:Tier{ownertier}" Chance="75" Number="1" />
 				<table Weight="60" Name="Armor {ownertier}" Chance="75" Number="1" />
@@ -228,7 +241,10 @@
 	     feature at the EtchTools sitting and the same logic rides here. The etch wrinkle once
 	     noted here is RETIRED: the gate went skill-based the same day (any Cudgel-skill striker
 	     plus any ShortBlades-skill edge etches; borrowed weapons carve two tiers below their
-	     own), so every knife-and-hammer outrider is etch-capable, not just the blunted rung. -->
+	     own), so every knife-and-hammer outrider is etch-capable, not just the blunted rung.
+	     2026-08-23 gear sitting: the hewer and mason kits now roll these same two ladders (the
+	     etch-tool ruling landing as sequenced), so this is the PACK arms distribution, no
+	     longer outrider-only; the near-duplicate EtchTools table was scrubbed the same pass. -->
 	<population Name="Cleo_TerraFirma_Carver Knife">
 		<group Name="Knife" Style="pickone">
 			<object Weight="15" Blueprint="Cleo_TerraFirma_Blunted Chisel" Number="1" />
@@ -244,31 +260,42 @@
 		</group>
 	</population>
 
-	<!-- ETCH TOOLS (2026-08-15). Replaces the fixed blunted pair in the spine, per the user:
-	     NPC quarriers carry proper tools and the PLAYER keeps the blunted pair, which is what
-	     makes the starter kit read as poverty rather than as the world's standard.
-	     This is a weighted table rather than a {ownertier} ladder ON PURPOSE, and it is the one
-	     place in the kit that does not scale. A per tier ladder needs a table for EVERY tier a
-	     carver can spawn at, and a missing rung fails silently; with only two NPC rungs built,
-	     weights give the same effect and cannot break. If the ladder ever grows, this is the line
-	     that becomes Cleo_TerraFirma_EtchTools {ownertier}.
-	     Chisel and mallet roll SEPARATELY, which is deliberate: the slip law takes the LESSER of
-	     the two tiers, so a carver holding a carbide chisel and a steel mallet still carves at
-	     steel. Mismatched pairs are a feature, not an oversight.
-	     Carbide at 10 is a CLAUDE DRAFT weight, kept low because a tier-4 dagger is a 1d8 weapon
-	     and a pack of them is a different fight from a pack of quarriers.
-	     2026-08-22: the mod's steel/carbide chisel+mallet quartet DELETED (user ruling, knives
-	     and hammers in their place); these are now the base blueprints directly. The slip law
-	     reads skill + tier, so nothing else changes. -->
-	<population Name="Cleo_TerraFirma_EtchTools">
-		<group Name="Tools" Style="pickeach">
-			<group Name="Edge" Style="pickone">
-				<object Weight="90" Blueprint="Steel Dagger" Number="1" />
-				<object Weight="10" Blueprint="Dagger4" Number="1" />
+	<!-- MINING GEAR (gear sitting 2026-08-23; structure is the USER'S: "a mining gear table for
+	     things like, gas masks, mining helmets, headlamps, knollworm skulls ... we could also
+	     expand it with some more common ones like leather caps, witchwood wreaths, goggles, and
+	     vinewood sap masks", expanded same sitting with basic gloves and the granitefur pair).
+	     One shared workwear distribution for the pack: hewer rolls it always (his old
+	     guaranteed mask became a common rung), mason at a chance; the outrider kit is LOCKED
+	     and deliberately not touched. All weights CLAUDE DRAFT pending ratification; every
+	     blueprint verified real at the sitting, slots and riders cited in the TODO.md record.
+	     Riders worth knowing, all deliberate: miner's helmet and headlamp are always-on light
+	     sources (radius 6 and 3), so some carvers arrive self-lit; goggles carry AddsRep
+	     Insects +50; the witchwood wreath harvests into Witchwood Bark, i.e. a carver can wear
+	     the very thing the hewer's dialogue asks for; knollworm skull is +1 Ego. Headgear is
+	     one pickone ON PURPOSE (one headgear identity per carver, variety across the pack);
+	     gloves are a second group at a chance, so hands arrive independently of hats. The
+	     granitefur rung carries AddsRep Baboons -100, so a gloved carver inherits the baboon
+	     grudge the outrider pelt already runs; ecology spreading to the pack is deliberate.
+	     (The EtchTools table that lived here, 2026-08-15 to 2026-08-23, is scrubbed: its two
+	     consumers moved to the Carver ladders above. Its load-bearing findings survive there
+	     and in the journal: weighted flat beats {ownertier} parameterization because a missing
+	     rung fails silently, and mismatched knife-and-hammer pairs are a ruled feature.) -->
+	<population Name="Cleo_TerraFirma_MiningGear">
+		<group Name="Gear" Style="pickeach">
+			<group Name="Headgear" Style="pickone">
+				<object Weight="20" Blueprint="Leather Cap" Number="1" />
+				<object Weight="20" Blueprint="Vinewood Sap Mask" Number="1" />
+				<object Weight="13" Blueprint="Goggles" Number="1" />
+				<object Weight="12" Blueprint="Witchwood Wreath" Number="1" />
+				<object Weight="10" Blueprint="Miner's Helmet" Number="1" />
+				<object Weight="10" Blueprint="Headlamp" Number="1" />
+				<object Weight="8" Blueprint="Gas Mask" Number="1" />
+				<object Weight="7" Blueprint="Knollworm Skull" Number="1" />
 			</group>
-			<group Name="Striker" Style="pickone">
-				<object Weight="90" Blueprint="Steel Hammer" Number="1" />
-				<object Weight="10" Blueprint="Cudgel4" Number="1" />
+			<group Name="Gloves" Style="pickone" Chance="35">
+				<object Weight="45" Blueprint="Leather Gloves" Number="1" />
+				<object Weight="40" Blueprint="Boar-skin gloves" Number="1" />
+				<object Weight="15" Blueprint="Cleo_TerraFirma_Cobblefur Gloves" Number="1" />
 			</group>
 		</group>
 	</population>

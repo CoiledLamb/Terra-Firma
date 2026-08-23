@@ -176,6 +176,15 @@
     <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Hewer" /> <!-- mole hewer inherits this -->
     <tag Name="Role" Value="Brute" /> <!-- DRAFT -->
     <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Hewer Kit" />
+    <!-- Jackhammer, gear sitting 2026-08-23 (user: "the hewer could sometimes spawn with a
+         nanopneumatic jackhammer?"; the digging-tool veto reversed same sitting, "they dig
+         their environment"). Graverobber precedent, base Creatures.xml:7207: AlwaysEquipAsWeapon
+         makes the bearer actually wield it (two hands plus back). The socket self-slots a chem
+         cell half the time (EnergyCellSocket creation defaults) and the item ships its own AI
+         cell-reload parts; charged means burrower pathing, dead still bashes walls via the
+         Digging part. Chance CLAUDE DRAFT. Mole hewer inherits it, stacking with its own
+         claws, deliberately. -->
+    <inventoryobject Blueprint="Nanopneumatic Jackhammer" Chance="25" IntProperties="AlwaysEquipAsWeapon:1" />
   </object>
 
   <object Name="Cleo_TerraFirma_Mason" Inherits="Cleo_TerraFirma_Stonecarver">
