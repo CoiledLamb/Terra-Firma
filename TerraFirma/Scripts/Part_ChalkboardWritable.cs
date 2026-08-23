@@ -116,7 +116,15 @@ namespace XRL.World.Parts
 		{
 			if (!Text.IsNullOrEmpty())
 			{
-				E.Postfix.AppendRules("Chalked across it: \"" + Text + "\""); // DRAFT frame
+				// Graffitied.AddGraffiti's frame verbatim (ruled 2026-08-22): infix prose, blank
+				// line, quote alone on its own line. One word swapped in the frame line (DRAFT,
+				// user's to reword); words fixed chalk-white where graffiti uses the spray color
+				if (E.Infix.Length > 0)
+				{
+					E.Infix.Append("\n");
+				}
+				E.Infix.Append("\n").Append("Chalk is scrawled across the surface. It reads: \n\n\"")
+					.Append("{{Y|").Append(Text).Append("}}").Append("\"\n");
 			}
 			return base.HandleEvent(E);
 		}
