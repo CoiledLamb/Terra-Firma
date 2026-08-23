@@ -57,11 +57,30 @@ namespace Cleo.TerraFirma.Scripts
 		internal const float MASK_Z = -10f;         // carve block's own layer: in front of map tiles
 		internal const float MOTE_Z = -12f;         // in front of the mask
 		internal const float PARK_Z = 100f;         // behind the map
+		private const float COVER_HOLD = 0.10f;     // smear: assembled cover outlives the line's removal by this much
+		// feel round 3 (user: "a mix of grey and white", unlocked by the round-2 tile fix):
+		// half the motes wear qud's own y-gray, half stay chalk-white Y
+		private static readonly Color CHALK_GREY = new Color(177f / 255f, 201f / 255f, 195f / 255f); // &y = #B1C9C3
 
-		/// <summary>Enqueues the reveal over the target cell. Returns how long the caller must
-		/// Hold before adding the line object (0 = no beat, place immediately). The mask wears
-		/// the cell's floor paint, so this must run BEFORE the line exists in the cell.</summary>
+		/// <summary>The draw reveal. Returns how long the caller must Hold before adding the
+		/// line object (0 = no beat, place immediately). The mask wears the cell's floor
+		/// paint, so this must run BEFORE the line exists in the cell.</summary>
 		public static float Play(Cell target)
+		{
+			return PlayCore(target, inverted: false);
+		}
+
+		/// <summary>The smear: the reveal inverted (RULED 2026-08-23, user: "let's have smear be
+		/// the same animation but inverted"). Quads fly IN over the still-standing line and
+		/// assemble into a copy of bare floor; the caller Holds the returned time, removes the
+		/// line behind the finished cover, and the cover's exit is floor-over-floor - invisible,
+		/// so the mask simply parks after COVER_HOLD with no second beat.</summary>
+		public static float PlaySmear(Cell target)
+		{
+			return PlayCore(target, inverted: true);
+		}
+
+		private static float PlayCore(Cell target, bool inverted)
 		{
 			if (target == null)
 				return 0f;
@@ -86,28 +105,37 @@ namespace Cleo.TerraFirma.Scripts
 				(order[i], order[j]) = (order[j], order[i]);
 			}
 			IRenderable mote = new Cleo_TerraFirma_StoneTileRenderable(MOTE_TILE, 'Y', 'Y', 'k');
+			// draw: quads stand assembled from t=0 and depart after the swap window.
+			// smear: quads fly in from t=0 staggered; the cover completes at settle, the caller
+			// removes the line behind it, and every quad holds through COVER_HOLD past that.
+			float moveBase = inverted ? 0f : SWAP_SEC;
+			float settle = inverted ? 3 * FRAG_STAGGER + FRAG_LEAVE : SWAP_SEC;
 			for (int q = 0; q < 4; q++)
 			{
-				float leaveAt = SWAP_SEC + order[q] * FRAG_STAGGER;
-				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceChalkMaskFrag(floor, center, q, leaveAt, FRAG_LEAVE, coverAllOnFallback: q == 0), async: true);
-				// each departing quad exhales its own small puff (feel round 1: "more puffs of
+				float moveAt = moveBase + order[q] * FRAG_STAGGER;
+				float holdAfter = inverted ? settle + COVER_HOLD - (moveAt + FRAG_LEAVE) : 0f;
+				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceChalkMaskFrag(floor, center, q, moveAt, FRAG_LEAVE, coverAllOnFallback: q == 0, assembleIn: inverted, holdAfter: holdAfter), async: true);
+				// each moving quad exhales its own small puff (feel round 1: "more puffs of
 				// white dust") -- born on the quad, thrown shorter than the central burst;
-				// offsets mirror the frag class's quad geometry
+				// offsets mirror the frag class's quad geometry. draw puffs at departure,
+				// smear puffs at arrival (the scrub's contact moment)
+				float puffAt = inverted ? moveAt + FRAG_LEAVE : moveAt;
 				Vector3 quadOffset = new Vector3(q % 2 == 0 ? -4f : 4f, q / 2 == 0 ? 6f : -6f, 0f);
 				for (int m = 0; m < QUAD_PUFF_COUNT; m++)
 				{
 					float ang = Stat.RandomCosmetic(0, 359) * (Mathf.PI / 180f);
 					float scale = Mathf.Lerp(MOTE_SCALE_MIN, MOTE_SCALE_MAX, Stat.RandomCosmetic(0, 100) * 0.01f);
-					CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceChalkMote(mote, center + quadOffset, ang, leaveAt + m * 0.02f, MOTE_LIFE, scale, QUAD_PUFF_R0, QUAD_PUFF_R1), async: true);
+					CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceChalkMote(mote, center + quadOffset, ang, puffAt + m * 0.02f, MOTE_LIFE, scale, QUAD_PUFF_R0, QUAD_PUFF_R1, MoteTint()), async: true);
 				}
 			}
+			// central burst: draw blooms at the reveal moment, smear at the mark's death
 			for (int m = 0; m < MOTE_COUNT; m++)
 			{
 				float ang = (m + 0.5f) * (Mathf.PI * 2f / MOTE_COUNT) + Stat.RandomCosmetic(-30, 30) * 0.01f;
 				float scale = Mathf.Lerp(MOTE_SCALE_MIN, MOTE_SCALE_MAX, Stat.RandomCosmetic(0, 100) * 0.01f);
-				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceChalkMote(mote, center, ang, SWAP_SEC + (m % 3) * MOTE_STAGGER, MOTE_LIFE, scale, MOTE_R0, MOTE_R1), async: true);
+				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceChalkMote(mote, center, ang, settle + (m % 3) * MOTE_STAGGER, MOTE_LIFE, scale, MOTE_R0, MOTE_R1, MoteTint()), async: true);
 			}
-			return SWAP_SEC;
+			return settle;
 		}
 
 		/// <summary>The fissure pump idiom: hold the game thread while Unity composites, so the
@@ -124,6 +152,11 @@ namespace Cleo.TerraFirma.Scripts
 				Thread.Sleep(40);
 				t += 0.04f;
 			}
+		}
+
+		private static Color MoteTint()
+		{
+			return Stat.RandomCosmetic(0, 1) == 0 ? Color.white : CHALK_GREY;
 		}
 
 		/// <summary>"&amp;w^k" / "&amp;w" / "w" -> 'w'; paint color strings are stored with
@@ -148,7 +181,9 @@ namespace Cleo.TerraFirma.Scripts
 	/// through the swap window, then drift outward a few px and park at their moment. On a
 	/// rotated/diced atlas entry quads cannot sub-rect: quad 0 wears the WHOLE tile and
 	/// shrinks to nothing over its window instead, quads 1-3 park unseen (single-cover
-	/// fallback, the CarveBlock squash lesson).
+	/// fallback, the CarveBlock squash lesson). Runs in either direction: draw departs an
+	/// assembled cover; smear (assembleIn) flies the quads IN, then holds the finished cover
+	/// holdAfter seconds so the line's removal happens behind it.
 	/// </summary>
 	public class Cleo_TerraFirma_JuiceChalkMaskFrag : CombatJuiceEntry
 	{
@@ -159,6 +194,8 @@ namespace Cleo.TerraFirma.Scripts
 		private float LeaveAt;
 		private float LeaveSec;
 		private bool CoverAllOnFallback;
+		private bool AssembleIn;
+		private float HoldAfter;
 		private bool Dead;
 		private bool FallbackWhole;
 		private Vector3 QuadOffset;
@@ -171,7 +208,7 @@ namespace Cleo.TerraFirma.Scripts
 		private Color Detail;
 		private Color DetailNudge;
 
-		public Cleo_TerraFirma_JuiceChalkMaskFrag(IRenderable tile, Vector3 center, int quad, float leaveAt, float leaveSec, bool coverAllOnFallback)
+		public Cleo_TerraFirma_JuiceChalkMaskFrag(IRenderable tile, Vector3 center, int quad, float leaveAt, float leaveSec, bool coverAllOnFallback, bool assembleIn = false, float holdAfter = 0f)
 		{
 			Tile = tile;
 			Center = center;
@@ -179,7 +216,9 @@ namespace Cleo.TerraFirma.Scripts
 			LeaveAt = leaveAt;
 			LeaveSec = Mathf.Max(0.01f, leaveSec);
 			CoverAllOnFallback = coverAllOnFallback;
-			duration = leaveAt + this.LeaveSec + 0.02f;
+			AssembleIn = assembleIn;
+			HoldAfter = Mathf.Max(0f, holdAfter);
+			duration = leaveAt + this.LeaveSec + this.HoldAfter + 0.02f;
 		}
 
 		public override bool canFinishUpToTurn() => false;
@@ -219,7 +258,10 @@ namespace Cleo.TerraFirma.Scripts
 				transform.position = Center + new Vector3(0f, 0f, Cleo_TerraFirma_ChalkRevealFX.PARK_Z);
 				return;
 			}
-			transform.position = Center + QuadOffset + new Vector3(0f, 0f, Cleo_TerraFirma_ChalkRevealFX.MASK_Z);
+			// smear quads have not arrived yet at t=0; draw quads stand assembled
+			transform.position = AssembleIn
+				? Center + new Vector3(0f, 0f, Cleo_TerraFirma_ChalkRevealFX.PARK_Z)
+				: Center + QuadOffset + new Vector3(0f, 0f, Cleo_TerraFirma_ChalkRevealFX.MASK_Z);
 		}
 
 		public override void update()
@@ -232,28 +274,38 @@ namespace Cleo.TerraFirma.Scripts
 			Target.backcolor = Background;
 			Target.detailcolor = DetailNudge;
 			Target.detailcolor = Detail;
+			Vector3 assembled = Center + QuadOffset + new Vector3(0f, 0f, Cleo_TerraFirma_ChalkRevealFX.MASK_Z);
+			Vector3 parked = Center + new Vector3(0f, 0f, Cleo_TerraFirma_ChalkRevealFX.PARK_Z);
+			if (t >= LeaveAt + LeaveSec + HoldAfter)
+			{
+				Target.transform.position = parked;
+				return;
+			}
 			if (t < LeaveAt)
 			{
-				Target.transform.position = Center + QuadOffset + new Vector3(0f, 0f, Cleo_TerraFirma_ChalkRevealFX.MASK_Z);
+				Target.transform.position = AssembleIn ? parked : assembled;
 				return;
 			}
 			float p = (t - LeaveAt) / LeaveSec;
 			if (p >= 1f)
 			{
-				Target.transform.position = Center + new Vector3(0f, 0f, Cleo_TerraFirma_ChalkRevealFX.PARK_Z);
+				// draw: gone the moment its slide ends; smear: stands as cover until the hold runs out
+				Target.transform.position = AssembleIn ? assembled : parked;
 				return;
 			}
 			float ease = 1f - (1f - p) * (1f - p);
+			float slide = AssembleIn ? 1f - ease : ease; // how far off its socket the quad sits
 			if (FallbackWhole)
 			{
-				Target.gameObject.transform.localScale = OrigScale * Mathf.Max(0.01f, 1f - ease);
+				float coverFrac = AssembleIn ? ease : 1f - ease;
+				Target.gameObject.transform.localScale = OrigScale * Mathf.Max(0.01f, coverFrac);
 				ScaleTouched = true;
 				Target.transform.position = Center + new Vector3(0f, 0f, Cleo_TerraFirma_ChalkRevealFX.MASK_Z);
 			}
 			else
 			{
 				Vector3 dir = QuadOffset.normalized;
-				Target.transform.position = Center + QuadOffset + dir * (Cleo_TerraFirma_ChalkRevealFX.FRAG_DRIFT * ease) + new Vector3(0f, 0f, Cleo_TerraFirma_ChalkRevealFX.MASK_Z);
+				Target.transform.position = assembled + dir * (Cleo_TerraFirma_ChalkRevealFX.FRAG_DRIFT * slide);
 			}
 		}
 
@@ -279,8 +331,8 @@ namespace Cleo.TerraFirma.Scripts
 	}
 
 	/// <summary>
-	/// One white chalk mote: a pooled sprite wearing the stroke's own tile at fleck scale,
-	/// forced chalk-white, parked until its start, then flung radially ease-out with a slight
+	/// One chalk mote: a pooled sprite wearing the house fleck tile, tinted white or qud-gray
+	/// (the round-3 mix), parked until its start, then flung radially ease-out with a slight
 	/// rise, fading by scale over its last quarter. WhorlFleck lifecycle throughout.
 	/// </summary>
 	public class Cleo_TerraFirma_JuiceChalkMote : CombatJuiceEntry
@@ -294,10 +346,12 @@ namespace Cleo.TerraFirma.Scripts
 		private float Scale;
 		private float R0;
 		private float R1;
+		private Color Tint;
+		private Color TintNudge;
 		private Vector3 OrigScale;
 		private Color Background;
 
-		public Cleo_TerraFirma_JuiceChalkMote(IRenderable tile, Vector3 center, float angle, float startAt, float life, float scale, float r0, float r1)
+		public Cleo_TerraFirma_JuiceChalkMote(IRenderable tile, Vector3 center, float angle, float startAt, float life, float scale, float r0, float r1, Color tint)
 		{
 			Tile = tile;
 			Center = center;
@@ -307,6 +361,8 @@ namespace Cleo.TerraFirma.Scripts
 			Scale = scale;
 			R0 = r0;
 			R1 = r1;
+			Tint = tint;
+			TintNudge = new Color(tint.r, tint.g, tint.b, 0.996f);
 			duration = startAt + this.Life + 0.02f;
 		}
 
@@ -332,10 +388,11 @@ namespace Cleo.TerraFirma.Scripts
 				Target.transform.position = Center + new Vector3(0f, 0f, Cleo_TerraFirma_ChalkRevealFX.PARK_Z);
 				return;
 			}
-			// chalk-white every frame; the reassignment doubles as the normals-stomp repair
-			Target.color = Color.white;
-			Target.detailcolor = new Color(1f, 1f, 1f, 0.996f);
-			Target.detailcolor = Color.white;
+			// tinted every frame (grey/white mix, feel round 3); the reassignment doubles as
+			// the normals-stomp repair
+			Target.color = Tint;
+			Target.detailcolor = TintNudge;
+			Target.detailcolor = Tint;
 			Target.backcolor = Background;
 			float p = tm / Life;
 			float ease = 1f - (1f - p) * (1f - p);

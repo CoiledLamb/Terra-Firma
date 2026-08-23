@@ -59,6 +59,15 @@ namespace XRL.World.Parts
 				}
 				Cell cell = ParentObject.CurrentCell;
 				E.Actor.UseEnergy(1000, "Item SmearChalkLine");
+				// smear reveal, inverted (RULED 2026-08-23): floor-copy quads fly IN over the
+				// line; the removal happens behind the finished cover, whose exit is
+				// floor-over-floor and therefore invisible. 0 = unseen/classic/unpainted,
+				// remove immediately as before
+				float cover = Cleo.TerraFirma.Scripts.Cleo_TerraFirma_ChalkRevealFX.PlaySmear(cell);
+				if (cover > 0f)
+				{
+					Cleo.TerraFirma.Scripts.Cleo_TerraFirma_ChalkRevealFX.Hold(cover);
+				}
 				ParentObject.Destroy();
 				RetileNeighbors(cell);
 				E.RequestInterfaceExit();
