@@ -1356,8 +1356,37 @@ namespace Cleo.TerraFirma.Scripts
 			string occupancy = oRoll <= ABANDONED_PCT ? "abandoned"
 				: oRoll <= ABANDONED_PCT + RECLAIMED_PCT ? "reclaimed" : "in use";
 
+			// ROUND 5 (2026-08-23, the stubby-site watch item fired: band 1051 built
+			// only 71 floor): waypoints must live in the MOUTH'S LOBE. Round 4 lets
+			// the region span pinches, but the artery walks only claimed cells, so
+			// far-lobe waypoints stalled it at the first pinch - breaking RULE 1
+			// (RULED: the artery traces most of the compound). The artery now fully
+			// works its own lobe; cross-pinch mass stays in the region for tunnels
+			// and infill, which already pay the sim-sanctioned dear-skin cost to
+			// cross. Lobe share logged for the stubby-site watch.
+			var lobeCells = new List<int>();
+			{
+				var lseen = new byte[g.W * g.H];
+				var lq = new Queue<int>();
+				int m0 = g.Idx(mouth.X, mouth.Y);
+				lseen[m0] = 1; lq.Enqueue(m0); lobeCells.Add(m0);
+				while (lq.Count > 0)
+				{
+					int ci = lq.Dequeue();
+					int lx = ci % g.W, ly = ci / g.W;
+					foreach (var d in N4)
+					{
+						int nx = lx + d[0], ny = ly + d[1];
+						if (!g.Inb(nx, ny)) continue;
+						int ni = g.Idx(nx, ny);
+						if (lseen[ni] != 0 || region.Mask[ni] == 0) continue;
+						lseen[ni] = 1; lq.Enqueue(ni); lobeCells.Add(ni);
+					}
+				}
+				Helpers.VerifyLog("WARREN", $"mouth lobe: {lobeCells.Count} of {region.Size} claimable cells");
+			}
 			var S = STAGES[si];
-			var art = LayArtery(g, S, mouth, foot, region.Mask, region.Cells);
+			var art = LayArtery(g, S, mouth, foot, region.Mask, lobeCells);
 			g.MouthIdx = g.Idx(art.Mouth.X, art.Mouth.Y);
 			bool wantHall = si == 2 && Chance(COMMONS_PCT / 100.0);
 			var pockets = FindPockets(g, art, R(S.P0, S.P1), wantHall);
