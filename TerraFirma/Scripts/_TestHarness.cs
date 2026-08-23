@@ -32,35 +32,23 @@ namespace Cleo.TerraFirma.Scripts
 	[HasWishCommand]
 	public class TestHarnessWishes
 	{
-		private const string STREAK_BP = "Cleo_TerraFirma_Rock_Hypersonic"; // display name: streakschorl
-		private const string HOPPER_STOCK_BP = "Cleo_TerraFirma_Rock_Salt";
 		private const string SCAV_AMMO_BP = "Cleo_TerraFirma_Rock_Generic";
 		private const string BABOON_BP = "Baboon";
 		private const string SPAWN_MARK = "TFHarnessSpawn";
-		private const string STRANGE_BP = "Cleo_TerraFirma_Rock_Strange";
-		private const string STRANGE_POOL = "Cleo_TerraFirma_StrangeRocksPool";
 		private const string STATUETTE_BP = "Cleo_TerraFirma_Rock_BaboonFigurine";
 		private const string FIGURINE_ITEM_BP = "Cleo_TerraFirma_BaboonFigurineItem";
 		private const string APE_BP = "Cleo_TerraFirma_Rock_ApeStatue";
 		private const string RUBBLE_BP = "Cleo_TerraFirma_Rock_Rubble";
 		private const string PEBBLES_BP = "Cleo_TerraFirma_Rock_Pebbles";
-		private const string HEALSTONE_BP = "Cleo_TerraFirma_Rock_Healstone";
-		private const string AEGISCHIST_BP = "Cleo_TerraFirma_Rock_Shieldstone"; // display: aegischist
-		private const string DRAINSTONE_BP = "Cleo_TerraFirma_Rock_Drainstone";
-		private const string CAROM_BP = "Cleo_TerraFirma_Rock_Rubber";           // display: caromcobble
 		private const string CRACK_BP = "Cleo_TerraFirma_Rock_Crack";
-		private const string GEODE_BP = "Cleo_TerraFirma_Rock_Soupstone";        // display: brine geode
 		private const string GENERIC_BP = "Cleo_TerraFirma_Rock_Generic";
 		private const string ROBOT_BP = "Scrapbot";
-		private const string SCARY_BP = "Cleo_TerraFirma_Rock_Scary"; // display: grimslate (tfmine's test mine; was dazestone until its 2026-07-25 cut)
-		private const string TANGLE_BP = "Cleo_TerraFirma_Rock_Bola";      // display: tanglelith (name pending mini-slate)
-		private const string TAR_PATCH_BP = "Cleo_TerraFirma_TarPatch";
 		private const string MOTH_BP = "Glowmoth";
 
 		[WishCommand(Command = "tfverify")]
 		public static void Help()
 		{
-			MessageQueue.AddPlayerMessage("TF harness (BETA TRIM 2026-08-02) -- instant: tfquick (pockets+rep), tffeedback (2026-08-07 batch: Husangeion name/bleed, statue popup tag, rough-vs-tier look-text, gaze-wall lockout belt), tfcarom, tfcrack, tfredoubt (8 scripted casts: ring census by band, push/stun, carve depth, water displacement -- chews nearby natural stone). Turn-driven: tfform (5t), tfshape (Stoneshaper, 3t; incl. shape.mourning swap-quiet stamp), tffis (NPC caster, 20t), tfscav (30t, you are the target). tfbatch = the surviving set, ~60 turns standing still, ends with ONE 'BATCH COMPLETE' verdict line for the quick boot-and-test loop. Stage-for-eyes: tfgazewall (plain + animated holo wall, you cast the gaze). Diagnostic: tfstatueai (12t, statue-AI inertness repro: control + animated-wall + miner muses, snapshot + tick telemetry). Peek: tfspore (pure read). BETA-HELD dev doors (test held content, run by hand only): tfstreak, tfstrange, tfspill, tfpuddle, tfmine, tftar, tfhopper, tfdrain, tfdevour + tfeat (need kitchenrock's Lithovore grant), quickape/dull via queue.", "W");
+			MessageQueue.AddPlayerMessage("TF harness (BETA TRIM 2026-08-02; catalog dev doors PARKED on branch quarantine-hold 2026-08-22) -- instant: tfquick (pockets+rep), tffeedback (2026-08-07 batch: Husangeion name/bleed, statue popup tag, rough-vs-tier look-text, gaze-wall lockout belt), tfcrack, tfredoubt (8 scripted casts: ring census by band, push/stun, carve depth, water displacement -- chews nearby natural stone). Turn-driven: tfform (5t), tfshape (Stoneshaper, 3t; incl. shape.mourning swap-quiet stamp), tffis (NPC caster, 20t), tfscav (30t, you are the target). tfbatch = the surviving set, ~60 turns standing still, ends with ONE 'BATCH COMPLETE' verdict line for the quick boot-and-test loop. Stage-for-eyes: tfgazewall (plain + animated holo wall, you cast the gaze). Diagnostic: tfstatueai (12t, statue-AI inertness repro: control + animated-wall + miner muses, snapshot + tick telemetry). Peek: tfspore (pure read).", "W");
 			if (!Helpers.VERIFY_WATCH)
 				MessageQueue.AddPlayerMessage("VERIFY_WATCH is OFF -- the harness is disabled.", "R");
 		}
@@ -146,9 +134,9 @@ namespace Cleo.TerraFirma.Scripts
 
 		/// <summary>The full sweep, BETA TRIM shape (redoubt pivot, RULED 2026-08-02): three
 		/// synchronous scenarios, then the turn-driven four chained through the driver's queue.
-		/// Held-content scenarios (streak/strange/spill/puddle/mine/tar/devour/eat/hopper/
-		/// quickape/drain) left compiled as hand-run dev doors; restore them to this chain with
-		/// the catalog. Pre-trim chain at tag fissure-v2-grenade.</summary>
+		/// Held-content scenarios (streak/strange/spill/puddle/mine/tar/devour/eat/hopper/carom)
+		/// PARKED on branch quarantine-hold 2026-08-22 with the catalog; restore from that branch.
+		/// Pre-trim chain at tag fissure-v2-grenade.</summary>
 		[WishCommand(Command = "tfbatch")]
 		public static void Batch()
 		{
@@ -160,7 +148,6 @@ namespace Cleo.TerraFirma.Scripts
 			BatchActive = true;
 			QuickSync();
 			FeedbackSync();
-			CaromSync();
 			CrackSync();
 			RedoubtSync();
 			SetupForm(The.Player, "shape,fis,scav");
@@ -218,79 +205,8 @@ namespace Cleo.TerraFirma.Scripts
 				$"figurine take: Baboons rep {repBefore}->{repAfter} (delta {delta}, INTENT +200 carried), after removal {repFinal}" +
 				(delta == 0 ? " -- AddsRep never applied: the WorksOnCarrier suspicion is CONFIRMED (part is equipper-only without it)" : ""));
 
-			/* BETA-HELD (redoubt pivot, RULED 2026-08-02): quick.heal + quick.cage test held rocks
-			   (healstone, aegischist). Restore with the catalog.
-			// healstone via the step path (no throw-damage confound): wounded patient forced over
-			// the stone until the 25% proc lands; heal must raise HP and ConsumedOnStep must eat the stone
-			List<Cell> open = origin.GetLocalAdjacentCells();
-			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
-			if (open.Count >= 2)
-			{
-				GameObject patient = GameObject.Create(BABOON_BP);
-				patient.SetIntProperty(SPAWN_MARK, 1);
-				patient.GetStat("Hitpoints").BaseValue = 60;
-				patient.GetStat("Hitpoints").Penalty += 25;
-				open[0].AddObject(patient);
-				GameObject healstone = GameObject.Create(HEALSTONE_BP);
-				open[1].AddObject(healstone);
-				int hpBefore = patient.GetStat("Hitpoints").Value;
-				int entries = ForceEntries(patient, open[0], open[1], 30, () => !GameObject.Validate(healstone));
-				int hpAfter = GameObject.Validate(patient) ? patient.GetStat("Hitpoints").Value : -1;
-				bool consumed = !GameObject.Validate(healstone);
-				Report("quick.heal", consumed && hpAfter > hpBefore,
-					$"step-proc after {entries} crossing(s): HP {hpBefore}->{hpAfter} (want risen), stone {(consumed ? "consumed (ConsumedOnStep)" : "STILL THERE")}");
-				if (GameObject.Validate(healstone)) healstone.Obliterate();
-				if (GameObject.Validate(patient)) patient.Obliterate();
-			}
-			else
-				Report("quick.heal", false, "SETUP FAIL - need two open adjacent cells");
-
-			// aegischist cage: thrown hit rings the victim in forcefield. Round-3 run rang 3/8 at a
-			// cramped lane-end -- ambiguous between mod behavior and harness terrain; now the target
-			// stands in the open (>=7 open sides) and blocked sides are reported per-cell.
-			Cell spot = FindLaneOpenEnd(origin, 3, 7);
-			if (spot != null)
-			{
-				GameObject victim = GameObject.Create(BABOON_BP);
-				victim.SetIntProperty(SPAWN_MARK, 1);
-				victim.GetStat("Hitpoints").BaseValue = 100;
-				spot.AddObject(victim);
-				// up to 4 throws: even at perfect accuracy the engine keeps an agility-based
-				// connect roll (harness find, third distinct miss mode 2026-07-24 -- the lend
-				// kills scatter, not the connect); a whiff drops its ring at the landing cell
-				// and expires on its own in 12 rounds
-				int ring = 0;
-				int blocked = 0;
-				int attempts = 0;
-				List<GameObject> segments = new List<GameObject>();
-				for (int attempt = 1; attempt <= 4 && GameObject.Validate(victim); attempt++)
-				{
-					attempts = attempt;
-					ThrowAt(ply, AEGISCHIST_BP, victim);
-					ring = 0;
-					blocked = 0;
-					segments.Clear();
-					Cell vc = victim.CurrentCell;
-					if (vc != null)
-						foreach (Cell adj in vc.GetLocalAdjacentCells())
-						{
-							bool found = false;
-							foreach (GameObject obj in adj.Objects)
-								if (obj.HasPart("Forcefield")) { ring++; segments.Add(obj); found = true; }
-							if (!found && (adj.IsSolid() || adj.HasObjectWithPart("Combat")))
-								blocked++;
-						}
-					if (ring >= 7)
-						break;
-				}
-				Report("quick.cage", GameObject.Validate(victim) && ring >= 7,
-					$"{ring} forcefield segment(s) ring the victim after {attempts} throw(s), {blocked} side(s) blocked (want >=7 of 8; whiff rings expire on their own)");
-				foreach (GameObject seg in segments) seg.Obliterate();
-				if (GameObject.Validate(victim)) victim.Obliterate();
-			}
-			else
-				Report("quick.cage", false, "SETUP FAIL - no clear lane ending in an open-surrounded cell");
-			BETA-HELD end */
+			// BETA-HELD quick.heal + quick.cage (healstone, aegischist) PARKED on branch
+			// quarantine-hold 2026-08-22 with the catalog; restore from that branch.
 		}
 
 		/// <summary>The 2026-08-07 Discord-feedback batch, synchronous: Husangeion rename (ASCII-only
@@ -480,169 +396,6 @@ namespace Cleo.TerraFirma.Scripts
 			MessageQueue.AddPlayerMessage($"Staged: PLAIN holographic shale at ({open[0].X},{open[0].Y}) -- gaze must refuse, no cooldown; ANIMATED at ({open[1].X},{open[1].Y}) -- gaze must duel normally.", "W");
 		}
 
-		/// <summary>Caromcobble trip statistics: 40 forced crossings of the peel in one wish
-		/// (ObjectEnteredCellEvent fires synchronously per entry). StepChance 50 (re-ruled
-		/// 2026-07-25, was 25) -> ~20 expected trips; accept 9-31 (binomial tails under 0.05%).
-		/// HoldChance 100 -> the peel NEVER breaks.</summary>
-		[WishCommand(Command = "tfcarom")]
-		public static void CaromSync()
-		{
-			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			GameObject ply = The.Player;
-			Cell origin = ply?.CurrentCell;
-			if (origin == null)
-				return;
-			List<Cell> open = origin.GetLocalAdjacentCells();
-			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
-			if (open.Count < 2) { Report("carom", false, "SETUP FAIL - need two open adjacent cells"); return; }
-			GameObject rock = GameObject.Create(CAROM_BP);
-			rock.SetIntProperty(SPAWN_MARK, 1);
-			open[0].AddObject(rock);
-			GameObject victim = GameObject.Create(BABOON_BP);
-			victim.SetIntProperty(SPAWN_MARK, 1);
-			victim.GetStat("Hitpoints").BaseValue = 100;
-			open[1].AddObject(victim);
-			int procs = 0;
-			for (int i = 0; i < 40 && GameObject.Validate(victim); i++)
-			{
-				victim.DirectMoveTo(open[0], 0, Forced: true, IgnoreCombat: true);
-				if (victim.HasEffect(typeof(XRL.World.Effects.Prone)))
-				{
-					procs++;
-					victim.RemoveEffect<XRL.World.Effects.Prone>();
-				}
-				victim.DirectMoveTo(open[1], 0, Forced: true, IgnoreCombat: true);
-			}
-			bool alive = GameObject.Validate(rock) && rock.CurrentCell == open[0];
-			Report("carom", alive && procs >= 9 && procs <= 31,
-				$"40 forced crossings: {procs} trip(s) (StepChance 50 -> expect ~20, accept 9-31), peel {(alive ? "intact through every proc (HoldChance 100)" : "BROKE OR MOVED")}");
-			if (GameObject.Validate(rock)) rock.Obliterate();
-			if (GameObject.Validate(victim)) victim.Obliterate();
-		}
-
-		/// <summary>Tanglelith tar redesign (RULED 2026-07-25), three asserts in one wish:
-		/// step discharge (patch underfoot + stepper stuck + stone spent) · tar persistence
-		/// (the patch SURVIVES its catches -- the web contrast; stick rolls are save-based, so
-		/// sticks are counted over 6 crossings, not asserted per-crossing) · flyer-downing
-		/// (a thrown hit forces a flying Glowmoth out of the air; conditional on the moth
-		/// actually flying at throw time -- the detail line says which path ran).</summary>
-		[WishCommand(Command = "tftar")]
-		public static void TarSync()
-		{
-			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			GameObject ply = The.Player;
-			Cell origin = ply?.CurrentCell;
-			if (origin == null)
-				return;
-			Zone zone = origin.ParentZone;
-			List<Cell> open = origin.GetLocalAdjacentCells();
-			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
-			if (open.Count < 2) { Report("tar", false, "SETUP FAIL - need two open adjacent cells"); return; }
-			int patchesBefore = CountInZone(zone, TAR_PATCH_BP);
-			// 1: step discharge -- patch underfoot, stepper stuck, stone spent
-			GameObject rock = GameObject.Create(TANGLE_BP);
-			rock.SetIntProperty(SPAWN_MARK, 1);
-			open[0].AddObject(rock);
-			GameObject walker = GameObject.Create(BABOON_BP);
-			walker.SetIntProperty(SPAWN_MARK, 1);
-			walker.GetStat("Hitpoints").BaseValue = 100;
-			open[1].AddObject(walker);
-			walker.DirectMoveTo(open[0], 0, Forced: true, IgnoreCombat: true);
-			bool stuckOnStep = walker.HasEffect(typeof(XRL.World.Effects.Stuck));
-			bool spent = !GameObject.Validate(rock);
-			int patchesMade = CountInZone(zone, TAR_PATCH_BP) - patchesBefore;
-			Report("tar.step", stuckOnStep && spent && patchesMade >= 1,
-				$"step discharge: stepper {(stuckOnStep ? "STUCK" : "free (want stuck)")}, stone {(spent ? "spent (discharge law)" : "SURVIVED (should be gone)")}, patches +{patchesMade} (want >=1)");
-			// 2: persistence -- the patch keeps catching and survives every catch
-			int sticks = 0;
-			for (int i = 0; i < 6 && GameObject.Validate(walker); i++)
-			{
-				walker.RemoveEffect<XRL.World.Effects.Stuck>();
-				walker.DirectMoveTo(open[1], 0, Forced: true, IgnoreCombat: true);
-				walker.DirectMoveTo(open[0], 0, Forced: true, IgnoreCombat: true);
-				if (walker.HasEffect(typeof(XRL.World.Effects.Stuck)))
-					sticks++;
-			}
-			walker.RemoveEffect<XRL.World.Effects.Stuck>();
-			bool patchAlive = CountInZone(zone, TAR_PATCH_BP) - patchesBefore >= patchesMade;
-			Report("tar.holds", patchAlive && sticks >= 1,
-				$"persistence: {sticks}/6 re-crossings stuck (save-based; want >=1), patch {(patchAlive ? "SURVIVES its catches (tar keeps catching -- the web contrast)" : "GONE (tar must not spend itself)")}");
-			if (GameObject.Validate(walker)) walker.Obliterate();
-			// 3: the anti-air shot -- a thrown hit forces a flyer down into the tar
-			GameObject moth = GameObject.Create(MOTH_BP);
-			moth.SetIntProperty(SPAWN_MARK, 1);
-			open[1].AddObject(moth);
-			bool wasFlying = moth.IsFlying;
-			bool mothStuck = false, downed = false;
-			for (int t = 0; t < 3 && GameObject.Validate(moth) && !mothStuck; t++)
-			{
-				ThrowAt(ply, TANGLE_BP, moth); // retries: the agility connect roll survives perfect accuracy
-				mothStuck = moth.HasEffect(typeof(XRL.World.Effects.Stuck));
-			}
-			downed = wasFlying && GameObject.Validate(moth) && !moth.IsFlying;
-			Report("tar.flyer", mothStuck && (!wasFlying || downed), wasFlying
-				? $"flying Glowmoth: {(downed ? "FORCED DOWN out of the air" : "STILL AIRBORNE (Flight.Fall failed)")}, {(mothStuck ? "stuck in the tar" : "not stuck")}"
-				: $"Glowmoth was NOT flying at throw time -- grounding path unexercised (limit for the ledger); {(mothStuck ? "stuck applied" : "and not stuck either")}");
-			if (GameObject.Validate(moth)) moth.Obliterate();
-			// sweep: tar patches have no inventory and only this mod mints them
-			foreach (Cell c in zone.GetCells())
-				foreach (GameObject o in new List<GameObject>(c.Objects))
-					if (o.Blueprint == TAR_PATCH_BP)
-						o.Obliterate();
-		}
-
-		/// <summary>Discharge law + party gate in one wish (fragility system RULED 2026-07-25):
-		/// a player-owned grimslate must NOT trigger on an allied baboon crossing it (party gate),
-		/// then must fire on a non-party baboon's FIRST crossing (StepChance 100) and be consumed
-		/// by its own discharge (HoldChance 0). (Test mine was dazestone until its cut.)</summary>
-		[WishCommand(Command = "tfmine")]
-		public static void MineSync()
-		{
-			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			GameObject ply = The.Player;
-			Cell origin = ply?.CurrentCell;
-			if (origin == null)
-				return;
-			List<Cell> open = origin.GetLocalAdjacentCells();
-			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
-			if (open.Count < 2) { Report("mine", false, "SETUP FAIL - need two open adjacent cells"); return; }
-			GameObject rock = GameObject.Create(SCARY_BP);
-			rock.SetIntProperty(SPAWN_MARK, 1);
-			Cleo_TerraFirma_FallenRockPart part = rock.GetPart<Cleo_TerraFirma_FallenRockPart>();
-			if (part == null) { Report("mine", false, "SETUP FAIL - grimslate has no FallenRockPart"); rock.Obliterate(); return; }
-			part.Owner = ply;
-			open[0].AddObject(rock);
-			// half 1: an ALLIED crossing must pass over safely (party gate)
-			GameObject friendly = GameObject.Create(BABOON_BP);
-			friendly.SetIntProperty(SPAWN_MARK, 1);
-			friendly.GetStat("Hitpoints").BaseValue = 100;
-			open[1].AddObject(friendly);
-			friendly.Brain?.SetAlliedLeader<XRL.World.AI.AllySummon>(ply, 0, Silent: true);
-			friendly.DirectMoveTo(open[0], 0, Forced: true, IgnoreCombat: true);
-			bool allyTripped = friendly.HasEffect(typeof(XRL.World.Effects.Terrified));
-			bool intactAfterAlly = GameObject.Validate(rock) && rock.CurrentCell == open[0];
-			friendly.DirectMoveTo(open[1], 0, Forced: true, IgnoreCombat: true);
-			Report("mine.party", intactAfterAlly && !allyTripped,
-				$"allied crossing: stone {(intactAfterAlly ? "intact" : "GONE (gate failed)")}, ally {(allyTripped ? "TERRIFIED (gate failed)" : "unharmed")} -- owner-party gate");
-			if (GameObject.Validate(friendly)) friendly.Obliterate();
-			// half 2: a non-party crossing must fire FIRST STEP and consume the stone
-			bool fired = false, consumed = false;
-			if (GameObject.Validate(rock))
-			{
-				GameObject stranger = GameObject.Create(BABOON_BP);
-				stranger.SetIntProperty(SPAWN_MARK, 1);
-				stranger.GetStat("Hitpoints").BaseValue = 100;
-				open[1].AddObject(stranger);
-				stranger.DirectMoveTo(open[0], 0, Forced: true, IgnoreCombat: true);
-				fired = stranger.HasEffect(typeof(XRL.World.Effects.Terrified));
-				consumed = !GameObject.Validate(rock);
-				if (GameObject.Validate(stranger)) stranger.Obliterate();
-			}
-			Report("mine.discharge", fired && consumed,
-				$"stranger crossing: payload {(fired ? "fired first step (StepChance 100)" : "did NOT fire")}, stone {(consumed ? "consumed by its own discharge (HoldChance 0)" : "SURVIVED (discharge law violated)")}");
-			if (GameObject.Validate(rock)) rock.Obliterate();
-		}
-
 		/// <summary>Crack pull-down: force a victim over the cracked floor until the 15% proc
 		/// drops it to the zone below (60 crossings: miss odds ~0.006%).</summary>
 		[WishCommand(Command = "tfcrack")]
@@ -677,235 +430,6 @@ namespace Cleo.TerraFirma.Scripts
 				: $"victim NEVER fell in 60 crossings (miss odds ~0.006% -- the FallThrough payload looks dead)");
 			if (GameObject.Validate(victim)) victim.Obliterate();
 			if (GameObject.Validate(crack)) crack.Obliterate();
-		}
-
-		/// <summary>Liquid-rock destruction spill (RULED 2026-07-24): a brine geode killed by
-		/// incidental damage releases its pool -- assert one puddle, 4-32 drams (the 4d8 audit).</summary>
-		[WishCommand(Command = "tfspill")]
-		public static void SpillSync()
-		{
-			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			GameObject ply = The.Player;
-			Cell origin = ply?.CurrentCell;
-			if (origin == null)
-				return;
-			List<Cell> open = origin.GetLocalAdjacentCells();
-			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
-			if (open.Count < 1) { Report("spill", false, "SETUP FAIL - no open adjacent cell"); return; }
-			GameObject geode = GameObject.Create(GEODE_BP);
-			open[0].AddObject(geode);
-			geode.Destroy(null, Silent: true); // destruction, not obliteration: the spill path
-			GameObject puddle = null;
-			int drams = 0;
-			foreach (GameObject obj in open[0].Objects)
-				if (obj.LiquidVolume != null) { puddle = obj; drams = obj.LiquidVolume.Volume; break; }
-			Report("spill", puddle != null && drams >= 4 && drams <= 32,
-				$"destruction spilled {(puddle == null ? "NO puddle" : drams + " dram(s)")} (want 4-32 per the 4d8 pool-volume audit)");
-			if (puddle != null && GameObject.Validate(puddle)) puddle.Obliterate();
-		}
-
-		// ---------------------------------------------------------------- round 4, synchronous
-
-		/// <summary>rock-onepuddle: a liquid rock that BREAKS on the use-path must leave exactly
-		/// ONE puddle (the hit-payload's), the death-spill suppressed against doubles. Retries
-		/// until a throw both connects and breaks; pre-cleans between attempts.</summary>
-		[WishCommand(Command = "tfpuddle")]
-		public static void PuddleSync()
-		{
-			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			GameObject ply = The.Player;
-			Cell origin = ply?.CurrentCell;
-			if (origin == null)
-				return;
-			Cell lane = FindLane(origin, 3);
-			if (lane == null) { Report("puddle", false, "SETUP FAIL - no open lane"); return; }
-			GameObject victim = GameObject.Create(BABOON_BP);
-			victim.SetIntProperty(SPAWN_MARK, 1);
-			victim.GetStat("Hitpoints").BaseValue = 150;
-			lane.AddObject(victim);
-			bool scored = false;
-			int puddles = -1;
-			int attempts = 0;
-			for (int i = 1; i <= 6 && GameObject.Validate(victim); i++)
-			{
-				attempts = i;
-				SweepPuddlesAround(victim); // pre-clean: prior attempts' splashes
-				GameObject stone = ThrowAt(ply, GEODE_BP, victim);
-				if (stone == null)
-					break;
-				if (!GameObject.Validate(stone))
-				{
-					puddles = CountPuddlesAround(victim);
-					if (puddles == 0)
-						continue; // the breaking throw MISSED (splash landed elsewhere) -- doesn't test the suppression; retry
-					scored = true;
-					break;
-				}
-				stone.Obliterate(); // survived (25%): clear it and retry
-			}
-			Report("puddle", scored && puddles == 1, scored
-				? $"use-path break scored on throw {attempts}: {puddles} puddle object(s) at the impact (want exactly 1 -- death-spill suppressed against doubles)"
-				: $"no scoring break in {attempts} throw(s) (break odds 75%/throw; misses excluded) -- INCONCLUSIVE, re-run");
-			SweepPuddlesAround(victim);
-			if (GameObject.Validate(victim)) victim.Obliterate();
-		}
-
-		private static int CountPuddlesAround(GameObject who)
-		{
-			int n = 0;
-			Cell c = who?.CurrentCell;
-			if (c == null)
-				return 0;
-			foreach (GameObject obj in c.Objects)
-				if (obj.LiquidVolume != null) n++;
-			foreach (Cell adj in c.GetLocalAdjacentCells())
-				foreach (GameObject obj in adj.Objects)
-					if (obj.LiquidVolume != null) n++;
-			return n;
-		}
-
-		private static void SweepPuddlesAround(GameObject who)
-		{
-			Cell c = who?.CurrentCell;
-			if (c == null)
-				return;
-			List<GameObject> doomed = new List<GameObject>();
-			foreach (GameObject obj in c.Objects)
-				if (obj.LiquidVolume != null) doomed.Add(obj);
-			foreach (Cell adj in c.GetLocalAdjacentCells())
-				foreach (GameObject obj in adj.Objects)
-					if (obj.LiquidVolume != null) doomed.Add(obj);
-			foreach (GameObject obj in doomed)
-				obj.Obliterate();
-		}
-
-		/// <summary>lith-devour, EXTENDED 2026-07-27 (pre-beta hardening): the full devour
-		/// surface, six phases — (gate) a sated devour is refused; (descent) the EaterStatue
-		/// blueprint-descent bite, plus the hunger-actually-clears assert the original row
-		/// skipped; (spill) an inert container statue spills its entombed item at its feet;
-		/// (living) a living devourable dies properly and drops its possessions (the stats
-		/// part stamped at zero shifts to satisfy the predicate and route the Die branch;
-		/// XP zeroed); (rubble) rubble devoured whole; (boulder) refused as a sated snack,
-		/// then devoured straight from the pack while famished. Hunger and cooking counter
-		/// restored; every spawn swept.</summary>
-		[WishCommand(Command = "tfdevour")]
-		public static void DevourSync()
-		{
-			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			GameObject ply = The.Player;
-			Cell origin = ply?.CurrentCell;
-			if (origin == null)
-				return;
-			if (ply.GetPart<XRL.World.Parts.Mutation.Cleo_TerraFirma_Lithovore>() == null)
-			{
-				Report("devour", false, "SETUP SKIP - needs a lithovore character (the defect part is absent)");
-				return;
-			}
-			Stomach stomach = ply.GetPart<Stomach>();
-			if (stomach == null) { Report("devour", false, "SETUP FAIL - no Stomach part"); return; }
-			List<Cell> open = origin.GetLocalAdjacentCells();
-			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
-			if (open.Count < 1) { Report("devour", false, "SETUP FAIL - no open adjacent cell"); return; }
-			Cell stage = open[0];
-			int hungerBefore = stomach.HungerLevel;
-			int cookBefore = stomach.CookingCounter;
-			int passCount = 0;
-			List<string> fails = new List<string>();
-			bool suppressed = Popup.Suppress;
-			Popup.Suppress = true;
-			try
-			{
-				// ---- gate + descent: one statue serves both phases ----
-				GameObject statue = GameObject.Create("EaterStatue");
-				statue.SetIntProperty(SPAWN_MARK, 1);
-				stage.AddObject(statue);
-				stomach.HungerLevel = 0; // sated: the gate must refuse
-				InventoryActionEvent.Check(ply, ply, statue, "Cleo_TerraFirma_DevourStatue");
-				bool gated = GameObject.Validate(statue);
-				Helpers.VerifyLog("AUTO", $"devour.gate: {(gated ? "PASS" : "FAIL")} - {(gated ? "sated devour refused, statue untouched" : "statue eaten WITHOUT the famished gate")}");
-				if (gated) passCount++; else fails.Add("gate");
-
-				stomach.HungerLevel = 2; // famished
-				InventoryActionEvent.Check(ply, ply, statue, "Cleo_TerraFirma_DevourStatue");
-				bool gone = !GameObject.Validate(statue);
-				bool cleared = stomach.HungerLevel < 2;
-				Helpers.VerifyLog("AUTO", $"devour.descent: {(gone && cleared ? "PASS" : "FAIL")} - EaterStatue {(gone ? "devoured whole (blueprint-descent detection)" : "STILL STANDS")}, hunger {(cleared ? "cleared" : "NOT cleared")}");
-				if (gone && cleared) passCount++; else fails.Add("descent");
-				if (!gone && GameObject.Validate(statue)) statue.Obliterate();
-
-				// ---- spill: inert container statue with an entombed item ----
-				GameObject container = GameObject.Create("Cleo_TerraFirma_StoneshaperStatue");
-				container.SetIntProperty(SPAWN_MARK, 1);
-				container.RequirePart<Inventory>();
-				GameObject relic = GameObject.Create("Dagger");
-				container.ReceiveObject(relic);
-				stage.AddObject(container);
-				stomach.HungerLevel = 2;
-				InventoryActionEvent.Check(ply, ply, container, "Cleo_TerraFirma_DevourStatue");
-				bool contGone = !GameObject.Validate(container);
-				bool spilled = GameObject.Validate(relic) && relic.CurrentCell == stage;
-				Helpers.VerifyLog("AUTO", $"devour.spill: {(contGone && spilled ? "PASS" : "FAIL")} - container statue {(contGone ? "devoured" : "STILL STANDS")}, entombed dagger {(spilled ? "spilled at its feet" : "MISSING")}");
-				if (contGone && spilled) passCount++; else fails.Add("spill");
-				if (GameObject.Validate(relic)) relic.Obliterate();
-				if (!contGone && GameObject.Validate(container)) container.Obliterate();
-
-				// ---- living: the Die(actor) branch — dies properly, possessions drop ----
-				GameObject living = GameObject.Create(BABOON_BP);
-				living.SetIntProperty(SPAWN_MARK, 1);
-				living.GetStat("XPValue").BaseValue = 0; // the test must not level you
-				living.AddPart(new XRL.World.Parts.Cleo_TerraFirma_StoneshaperStatueStatsPart()); // zero shifts; satisfies the devour predicate, routes the living branch
-				GameObject keepsake = GameObject.Create("Dagger");
-				living.ReceiveObject(keepsake);
-				stage.AddObject(living);
-				stomach.HungerLevel = 2;
-				InventoryActionEvent.Check(ply, ply, living, "Cleo_TerraFirma_DevourStatue");
-				bool died = !GameObject.Validate(living) || living.Stat("Hitpoints") <= 0 || living.CurrentCell == null;
-				bool dropped = GameObject.Validate(keepsake) && keepsake.CurrentCell != null;
-				Helpers.VerifyLog("AUTO", $"devour.living: {(died && dropped ? "PASS" : "FAIL")} - living devourable {(died ? "died properly" : "SURVIVED the devour")}, its dagger {(dropped ? "dropped as loot" : "MISSING")}");
-				if (died && dropped) passCount++; else fails.Add("living");
-				if (GameObject.Validate(keepsake)) keepsake.Obliterate();
-				if (GameObject.Validate(living)) living.Obliterate();
-				foreach (GameObject leftover in new List<GameObject>(stage.Objects))
-					if (leftover.Blueprint != null && leftover.Blueprint.Contains("Corpse")) leftover.Obliterate();
-
-				// ---- rubble: the eating-a-path ruling ----
-				GameObject rubble = GameObject.Create("Rubble");
-				rubble.SetIntProperty(SPAWN_MARK, 1);
-				stage.AddObject(rubble);
-				stomach.HungerLevel = 2;
-				InventoryActionEvent.Check(ply, ply, rubble, "Cleo_TerraFirma_DevourStatue");
-				bool rubbleGone = !GameObject.Validate(rubble);
-				Helpers.VerifyLog("AUTO", $"devour.rubble: {(rubbleGone ? "PASS" : "FAIL")} - rubble {(rubbleGone ? "devoured (path-eating works)" : "STILL THERE")}");
-				if (rubbleGone) passCount++; else fails.Add("rubble");
-				if (!rubbleGone && GameObject.Validate(rubble)) rubble.Obliterate();
-
-				// ---- boulder: snack door refuses it sated; pack devour takes it famished ----
-				GameObject boulder = GameObject.Create("MediumBoulder");
-				ply.ReceiveObject(boulder);
-				// probes (2026-08-01, first-run FAIL was unattributable: no eat log, boulder gone --
-				// these name which step loses it: the receive, the eat-attempt, or the devour)
-				Helpers.VerifyLog("AUTO", $"devour.boulder probe after receive: valid={GameObject.Validate(boulder)}, inInv={boulder != null && boulder.InInventory == ply}, onGround={boulder?.CurrentCell != null}");
-				stomach.HungerLevel = 0;
-				InventoryActionEvent.Check(ply, ply, boulder, "Cleo_TerraFirma_EatStone");
-				Helpers.VerifyLog("AUTO", $"devour.boulder probe after eat-attempt: valid={GameObject.Validate(boulder)}, inInv={boulder != null && boulder.InInventory == ply}, onGround={boulder?.CurrentCell != null}");
-				bool refused = GameObject.Validate(boulder) && boulder.InInventory == ply;
-				stomach.HungerLevel = 2;
-				InventoryActionEvent.Check(ply, ply, boulder, "Cleo_TerraFirma_DevourStatue");
-				bool boulderGone = !GameObject.Validate(boulder) || boulder.InInventory != ply;
-				bool boulderCleared = stomach.HungerLevel < 2;
-				bool boulderPass = refused && boulderGone && boulderCleared;
-				Helpers.VerifyLog("AUTO", $"devour.boulder: {(boulderPass ? "PASS" : "FAIL")} - sated snack {(refused ? "refused" : "ACCEPTED (boulders must not be snackable)")}, famished pack-devour {(boulderGone ? "consumed from inventory" : "DID NOT consume")}, hunger {(boulderCleared ? "cleared" : "NOT cleared")}");
-				if (boulderPass) passCount++; else fails.Add("boulder");
-				if (GameObject.Validate(boulder) && boulder.InInventory == ply) boulder.Obliterate();
-			}
-			finally
-			{
-				Popup.Suppress = suppressed;
-				stomach.HungerLevel = hungerBefore; // devours cleared it; the test should not feed you
-				stomach.CookingCounter = cookBefore;
-			}
-			Report("devour", fails.Count == 0,
-				$"{passCount}/6 devour phases asserted{(fails.Count > 0 ? "; FAILS: " + string.Join(", ", fails) : "")} (gate, descent, spill, living, rubble, boulder); hunger + cooking counter restored, spawns swept");
 		}
 
 		[WishCommand(Command = "tfshape")]
@@ -1125,295 +649,6 @@ namespace Cleo.TerraFirma.Scripts
 		}
 
 		// ---------------------------------------------------------------- round 5
-
-		/// <summary>The eaten-channel sweep (lithovore only): one representative rock per cheap
-		/// channel, eaten via the mutation's own command, with per-channel state asserts where
-		/// the state is readable and consume-only where it isn't. Deliberately SKIPPED: the
-		/// EatenDetonate pair (a live grenade in your gut), the fungal twins (a real infection
-		/// on the player), mullstone (needs a staged cooling ability), and the deep four
-		/// (bite-back + full meal, live-verified in the kitchen round). Everything the test
-		/// does to the player is restored: hunger, HP, position, temperature normalizes.</summary>
-		[WishCommand(Command = "tfeat")]
-		public static void EatSync()
-		{
-			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			GameObject ply = The.Player;
-			Cell origin = ply?.CurrentCell;
-			if (origin == null)
-				return;
-			if (ply.GetPart<XRL.World.Parts.Mutation.Cleo_TerraFirma_Lithovore>() == null)
-			{
-				Report("eat", false, "SETUP SKIP - needs a lithovore character");
-				return;
-			}
-			Stomach stomach = ply.GetPart<Stomach>();
-			if (stomach == null) { Report("eat", false, "SETUP FAIL - no Stomach part"); return; }
-			List<Cell> open = origin.GetLocalAdjacentCells();
-			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
-			GameObject neighbor = null;
-			if (open.Count > 0)
-			{
-				neighbor = GameObject.Create(BABOON_BP); // the galvena arc's target (was also the thunderclap's ear until its 2026-07-25 cut)
-				neighbor.SetIntProperty(SPAWN_MARK, 1);
-				neighbor.GetStat("Hitpoints").BaseValue = 100;
-				open[0].AddObject(neighbor);
-			}
-
-			int hungerBefore = stomach.HungerLevel;
-			int cookBefore = stomach.CookingCounter;
-			int penaltyBefore = ply.GetStat("Hitpoints").Penalty;
-			Cell home = origin;
-
-			string[,] rows = {
-				{ GEODE_BP, "water", "brine geode" },
-				{ "Cleo_TerraFirma_Rock_Healstone", "heal", "healstone (eaten heal, ruled 2026-07-27)" },
-				{ "Cleo_TerraFirma_Rock_Salt", "consume", "chunk of salt (tasty)" },
-				{ "Cleo_TerraFirma_Rock_Pointy", "bleed", "pointy rock" },
-				{ "Cleo_TerraFirma_Rock_ShatteredStalactite", "bleed", "shattered stalactite" },
-				{ "Cleo_TerraFirma_Rock_CompressedAsh", "belly", "compressed ash (ash belly; choke cut 2026-07-25)" },
-				{ "Cleo_TerraFirma_Rock_Melting", "harm", "sludgabbro-acid (melting)" },
-				{ CAROM_BP, "moved", "caromcobble (hop)" },
-				{ "Cleo_TerraFirma_Rock_Shunting", "moved", "farflint (teleport)" },
-				{ STREAK_BP, "consume", "streakschorl (plain snack; thunderclap cut 2026-07-25)" },
-				{ "Cleo_TerraFirma_Rock_Rusty", "oxidize", "oxidian (rusting limbs)" },
-				{ "Cleo_TerraFirma_Rock_Sludgestone", "spawnliquid", "sludgestone" },
-				{ "Cleo_TerraFirma_Rock_Spiderweb", "webs", "gossamarl (3 webs)" },
-				{ "Cleo_TerraFirma_Rock_Whorlstone", "belly", "vertigneiss (gas belly)" },
-				{ "Cleo_TerraFirma_Rock_Scorching", "hot", "pyroclase" },
-				{ "Cleo_TerraFirma_Rock_Icy", "cold", "rimeholm" },
-				{ "Cleo_TerraFirma_Rock_Voltaic", "consume", "galvena (self-arc/crackle)" },
-				{ "Cleo_TerraFirma_Rock_Spiny", "consume", "urchinite (quill burst)" },
-				{ STRANGE_BP, "consume", "strange rock (mimic eat)" },
-				// eaten-table comb rows (2026-07-31): witchwood channels assert EITHER branch --
-				// exactly one of the two outcomes must land where both are raw applications;
-				// save-gated channels (grimslate dread, vertigneiss confuse) stay log-grade
-				{ "Cleo_TerraFirma_Rock_Scary", "consume", "grimslate (dread invert; save-gated, log-grade)" },
-				{ "Cleo_TerraFirma_Rock_Vantabsidian", "darksight", "vantabsidian (dark-adapted or the blind bite)" },
-				{ "Cleo_TerraFirma_Rock_Torpor", "sleepbelly", "lullabaster (sleep belly; nap bite-gated)" },
-				{ "Cleo_TerraFirma_Rock_Bola", "footing", "tanglelith (sure-footed or the stuck bite)" },
-				{ "Cleo_TerraFirma_Rock_Oilstone", "greased", "oilstone (sure-greased or the slick bite)" },
-				{ "Cleo_TerraFirma_Rock_Hexstone", "anchor", "lattice euclase (tether + belly, detonate cut)" },
-				{ "Cleo_TerraFirma_Rock_Holographic", "hologram", "holographic rock (zero-satiety joke)" },
-			};
-
-			int passCount = 0;
-			List<string> fails = new List<string>();
-			for (int i = 0; i < rows.GetLength(0); i++)
-			{
-				string bp = rows[i, 0];
-				string kind = rows[i, 1];
-				string label = rows[i, 2];
-				GameObject rock = GameObject.Create(bp);
-				if (rock == null) { fails.Add(label + " (no blueprint)"); continue; }
-				ply.ReceiveObject(rock);
-				int hpBefore = ply.GetStat("Hitpoints").Value;
-				int waterBefore = stomach.Water;
-				int tempBefore = ply.Physics?.Temperature ?? 25;
-				int cookRowBefore = stomach.CookingCounter;
-				Cell cellBefore = ply.CurrentCell;
-				if (kind == "spawnliquid" || kind == "greased")
-					SweepPuddlesAround(ply); // pools MERGE: a leftover puddle absorbs the spawn and the object count never moves (live find: sludgestone's slime vanished into melting's acid)
-				int healStagedPenalty = 0;
-				if (kind == "heal") { ply.GetStat("Hitpoints").Penalty += 5; healStagedPenalty = ply.GetStat("Hitpoints").Penalty; } // a heal needs a wound to show itself; the stage is restored with the rest
-				int liquidsBefore = CountPuddlesAround(ply);
-				int websBefore = CountAround(ply, "Web");
-				bool suppressed = Popup.Suppress;
-				Popup.Suppress = true;
-				try { InventoryActionEvent.Check(ply, ply, rock, "Cleo_TerraFirma_EatStone"); }
-				finally { Popup.Suppress = suppressed; }
-				bool consumed = !GameObject.Validate(rock) || rock.InInventory != ply;
-				bool pass;
-				string detail;
-				switch (kind)
-				{
-					case "water":
-						pass = consumed && stomach.Water > waterBefore;
-						detail = $"water {waterBefore}->{stomach.Water}";
-						break;
-					case "bleed":
-						pass = consumed && ply.HasEffect(typeof(XRL.World.Effects.Bleeding));
-						detail = "internal bleeding " + (pass ? "applied" : "MISSING");
-						ply.RemoveEffect<XRL.World.Effects.Bleeding>();
-						break;
-					case "harm":
-						pass = consumed && ply.GetStat("Hitpoints").Value < hpBefore;
-						detail = $"HP {hpBefore}->{ply.GetStat("Hitpoints").Value}";
-						break;
-					case "heal":
-						pass = consumed && ply.GetStat("Hitpoints").Penalty < healStagedPenalty;
-						detail = $"HP penalty {healStagedPenalty}->{ply.GetStat("Hitpoints").Penalty} (staged wound {(pass ? "healed" : "NOT healed")})";
-						break;
-					case "moved":
-						pass = consumed && ply.CurrentCell != cellBefore;
-						detail = pass ? "displaced" : "did not move";
-						if (ply.CurrentCell != home)
-							ply.DirectMoveTo(home, 0, Forced: true, IgnoreCombat: true);
-						break;
-					case "daze":
-						pass = consumed && neighbor != null && GameObject.Validate(neighbor) && neighbor.HasEffect(typeof(XRL.World.Effects.Dazed)) && !ply.HasEffect(typeof(XRL.World.Effects.Dazed));
-						detail = "neighbor " + (pass ? "dazed, eater spared" : "NOT dazed (or eater dazed)");
-						if (neighbor != null && GameObject.Validate(neighbor))
-							neighbor.RemoveEffect<XRL.World.Effects.Dazed>();
-						break;
-					case "spawnliquid":
-						pass = consumed && CountPuddlesAround(ply) > liquidsBefore;
-						detail = "puddle " + (pass ? "spawned" : "MISSING");
-						SweepPuddlesAround(ply);
-						break;
-					case "webs":
-						int websNow = CountAround(ply, "Web");
-						pass = consumed && websNow - websBefore >= 2;
-						detail = $"webs +{websNow - websBefore} (want >=2 of 3; own-cell placement varies)";
-						SweepAround(ply, "Web");
-						break;
-					case "belly":
-						pass = consumed && ply.HasEffect(typeof(XRL.World.Effects.Cleo_TerraFirma_GasBelly));
-						detail = "gas belly " + (pass ? "settled in" : "MISSING");
-						ply.RemoveEffect<XRL.World.Effects.Cleo_TerraFirma_GasBelly>();
-						break;
-					case "oxidize":
-						pass = consumed && ply.HasEffect(typeof(XRL.World.Effects.Cleo_TerraFirma_OxidizedLimbs));
-						detail = "oxidized effect " + (pass ? "applied (RustOnHit rides the natural weapons)" : "MISSING");
-						ply.RemoveEffect<XRL.World.Effects.Cleo_TerraFirma_OxidizedLimbs>(); // Remove() strips the stamped parts
-						break;
-					case "hot":
-						pass = consumed && (ply.Physics?.Temperature ?? 25) > tempBefore;
-						detail = $"temperature {tempBefore}->{ply.Physics?.Temperature}";
-						break;
-					case "cold":
-						pass = consumed && (ply.Physics?.Temperature ?? 25) < tempBefore;
-						detail = $"temperature {tempBefore}->{ply.Physics?.Temperature}";
-						break;
-					case "darksight":
-						bool adapted = ply.HasEffect(typeof(XRL.World.Effects.Cleo_TerraFirma_DarkAdapted));
-						bool blinded = ply.HasEffect(typeof(XRL.World.Effects.Blind));
-						pass = consumed && (adapted || blinded);
-						detail = adapted ? "dark-adapted (the 75%)" : blinded ? "blind (the bite)" : "NEITHER effect landed";
-						ply.RemoveEffect<XRL.World.Effects.Cleo_TerraFirma_DarkAdapted>();
-						ply.RemoveEffect<XRL.World.Effects.Blind>();
-						break;
-					case "sleepbelly":
-						pass = consumed && ply.HasEffect(typeof(XRL.World.Effects.Cleo_TerraFirma_GasBelly));
-						detail = "sleep belly " + (pass ? "settled in" : "MISSING")
-							+ (ply.HasEffect(typeof(XRL.World.Effects.Asleep)) ? "; the nap landed (the bite)" : "");
-						ply.RemoveEffect<XRL.World.Effects.Cleo_TerraFirma_GasBelly>();
-						ply.RemoveEffect<XRL.World.Effects.Asleep>();
-						break;
-					case "footing":
-						bool footed = ply.HasEffect(typeof(XRL.World.Effects.Cleo_TerraFirma_SureFooted));
-						bool stuckBite = ply.HasEffect(typeof(XRL.World.Effects.Stuck));
-						pass = consumed && (footed || stuckBite);
-						detail = footed ? "sure-footed (the 75%)" : stuckBite ? "stuck (the bite)" : "NEITHER landed";
-						ply.RemoveEffect<XRL.World.Effects.Cleo_TerraFirma_SureFooted>();
-						ply.RemoveEffect<XRL.World.Effects.Stuck>();
-						break;
-					case "greased":
-						bool greasedOn = ply.HasEffect(typeof(XRL.World.Effects.Cleo_TerraFirma_SureGreased));
-						bool slicked = CountPuddlesAround(ply) > liquidsBefore;
-						pass = consumed && (greasedOn || slicked);
-						detail = greasedOn ? "sure-greased (the 75%)" : slicked ? "slick underfoot (the bite)" : "NEITHER landed";
-						ply.RemoveEffect<XRL.World.Effects.Cleo_TerraFirma_SureGreased>();
-						SweepPuddlesAround(ply);
-						break;
-					case "anchor":
-						bool tethered = ply.HasEffect(typeof(XRL.World.Effects.RealityStabilized));
-						bool anchorBelly = ply.HasEffect(typeof(XRL.World.Effects.Cleo_TerraFirma_GasBelly));
-						pass = consumed && tethered && anchorBelly && ply.GetStat("Hitpoints").Value == hpBefore;
-						detail = $"tether {(tethered ? "on" : "MISSING")}, belly {(anchorBelly ? "on" : "MISSING")}, HP {hpBefore}->{ply.GetStat("Hitpoints").Value} (detonate stays cut)";
-						ply.RemoveEffect<XRL.World.Effects.RealityStabilized>();
-						ply.RemoveEffect<XRL.World.Effects.Cleo_TerraFirma_GasBelly>();
-						break;
-					case "hologram":
-						pass = consumed && stomach.CookingCounter == cookRowBefore;
-						detail = "satiety " + (stomach.CookingCounter == cookRowBefore ? "unchanged (the joke completes)" : $"CHANGED {cookRowBefore}->{stomach.CookingCounter}");
-						break;
-					default: // consume
-						pass = consumed;
-						detail = consumed ? "consumed (effect is log/eyeball-grade)" : "NOT consumed";
-						break;
-				}
-				Helpers.VerifyLog("AUTO", $"eat.{label}: {(pass ? "PASS" : "FAIL")} - {detail}");
-				if (pass) passCount++;
-				else fails.Add(label);
-				if (GameObject.Validate(rock) && rock.InInventory == ply)
-					rock.Obliterate(); // a refused eat should not litter the pack
-			}
-
-			// mullstone refresh (the last cheap skip, staged): exactly one ability left cooling,
-			// eat -> it must refresh to 0; every cooldown snapshot-restored after (net-neutral)
-			int totalRows = rows.GetLength(0);
-			ActivatedAbilities abilities = ply.ActivatedAbilities;
-			if (abilities?.AbilityByGuid != null && abilities.AbilityByGuid.Count > 0)
-			{
-				totalRows++;
-				Dictionary<Guid, int> snapshot = new Dictionary<Guid, int>();
-				foreach (KeyValuePair<Guid, ActivatedAbilityEntry> kv in abilities.AbilityByGuid)
-					snapshot[kv.Key] = kv.Value.Cooldown;
-				ActivatedAbilityEntry staged = null;
-				foreach (ActivatedAbilityEntry entry in abilities.AbilityByGuid.Values)
-				{
-					if (staged == null) { staged = entry; entry.Cooldown = 500; }
-					else if (entry.Cooldown > 0) entry.Cooldown = 0;
-				}
-				GameObject mull = GameObject.Create("Cleo_TerraFirma_Rock_Mullstone");
-				ply.ReceiveObject(mull);
-				bool sup = Popup.Suppress;
-				Popup.Suppress = true;
-				try { InventoryActionEvent.Check(ply, ply, mull, "Cleo_TerraFirma_EatStone"); }
-				finally { Popup.Suppress = sup; }
-				bool refreshed = staged != null && staged.Cooldown <= 0;
-				Helpers.VerifyLog("AUTO", $"eat.mullstone (staged refresh): {(refreshed ? "PASS" : "FAIL")} - the one cooling ability {(refreshed ? "refreshed to ready" : "still cooling: " + (staged?.Cooldown ?? -1))}");
-				if (refreshed) passCount++;
-				else fails.Add("mullstone refresh");
-				foreach (KeyValuePair<Guid, int> kv in snapshot)
-					if (abilities.AbilityByGuid.TryGetValue(kv.Key, out ActivatedAbilityEntry restoreEntry))
-						restoreEntry.Cooldown = kv.Value;
-				if (GameObject.Validate(mull) && mull.InInventory == ply)
-					mull.Obliterate();
-			}
-			else
-				Helpers.VerifyLog("AUTO", "eat.mullstone (staged refresh): SKIP - no activated abilities on this character");
-
-			// the test must not feed, hurt, or relocate you on net
-			stomach.HungerLevel = hungerBefore;
-			stomach.CookingCounter = cookBefore;
-			ply.GetStat("Hitpoints").Penalty = penaltyBefore;
-			if (ply.CurrentCell != home)
-				ply.DirectMoveTo(home, 0, Forced: true, IgnoreCombat: true);
-			if (neighbor != null && GameObject.Validate(neighbor))
-				neighbor.Obliterate();
-			Report("eat", fails.Count == 0,
-				$"{passCount}/{totalRows} eaten channels asserted{(fails.Count > 0 ? "; FAILS: " + string.Join(", ", fails) : "")}; skipped by design: detonate pair, fungal twins, deep four, lodestone (the 25% bite rips real gear). Player state restored (cooldowns included).");
-		}
-
-		private static int CountAround(GameObject who, string blueprint)
-		{
-			int n = 0;
-			Cell c = who?.CurrentCell;
-			if (c == null)
-				return 0;
-			foreach (GameObject obj in c.Objects)
-				if (obj.Blueprint == blueprint) n++;
-			foreach (Cell adj in c.GetLocalAdjacentCells())
-				foreach (GameObject obj in adj.Objects)
-					if (obj.Blueprint == blueprint) n++;
-			return n;
-		}
-
-		private static void SweepAround(GameObject who, string blueprint)
-		{
-			Cell c = who?.CurrentCell;
-			if (c == null)
-				return;
-			List<GameObject> doomed = new List<GameObject>();
-			foreach (GameObject obj in c.Objects)
-				if (obj.Blueprint == blueprint) doomed.Add(obj);
-			foreach (Cell adj in c.GetLocalAdjacentCells())
-				foreach (GameObject obj in adj.Objects)
-					if (obj.Blueprint == blueprint) doomed.Add(obj);
-			foreach (GameObject obj in doomed)
-				obj.Obliterate();
-		}
 
 		[WishCommand(Command = "tffis")]
 		public static void Fis()
@@ -2035,107 +1270,6 @@ namespace Cleo.TerraFirma.Scripts
 			MessageQueue.AddPlayerMessage("Harness: dull-clock scenario running -- 5 turns carrying a doomed rock.", "W");
 		}
 
-		[WishCommand(Command = "tfdrain")]
-		public static void Drain()
-		{
-			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
-			SetupDrain(The.Player, "");
-		}
-
-		/// <summary>The drainstone lifecycle: player-path latch on flesh (LifeDrain applied),
-		/// starved attach on a robot (no leech), the one-shot corpse-can't-latch path, then 25
-		/// turns for the two endings -- gorged burst vs dry crumble.</summary>
-		internal static void SetupDrain(GameObject ply, string queue)
-		{
-			Cell origin = ply?.CurrentCell;
-			if (origin == null)
-				return;
-			Cell laneA = FindLane(origin, 3);
-			if (laneA == null) { Report("drain", false, "SETUP FAIL - no open lane"); RunNext(queue, ply); return; }
-
-			// flesh: latch + LifeDrain, buffed to survive the full 15 rounds for the gorged burst
-			GameObject fleshy = GameObject.Create(BABOON_BP);
-			fleshy.SetIntProperty(SPAWN_MARK, 1);
-			fleshy.GetStat("Hitpoints").BaseValue = 100;
-			laneA.AddObject(fleshy);
-			GameObject stoneA = ThrowAt(ply, DRAINSTONE_BP, fleshy);
-			bool latchedA = GameObject.Validate(stoneA) && stoneA.Equipped == fleshy;
-			bool draining = GameObject.Validate(fleshy) && fleshy.HasEffect(typeof(XRL.World.Effects.LifeDrain));
-			Report("drain.latch", latchedA && draining,
-				$"thrown latch on flesh: stone {(latchedA ? "riding the victim" : "NOT attached")}, LifeDrain {(draining ? "applied" : "MISSING")}");
-
-			// robot: attach-but-no-leech (IsOrganic gate)
-			GameObject robot = GameObject.Create(ROBOT_BP);
-			robot.SetIntProperty(SPAWN_MARK, 1);
-			robot.GetStat("Hitpoints").BaseValue = 100;
-			Cell laneB = FindLane(origin, 2) ?? laneA.GetLocalAdjacentCells().Find(c => !c.IsSolid() && !c.HasObjectWithPart("Combat"));
-			if (laneB == null) { Report("drain.robot", false, "SETUP FAIL - nowhere to stand the robot"); }
-			else
-			{
-				laneB.AddObject(robot);
-				GameObject stoneR = ThrowAt(ply, DRAINSTONE_BP, robot);
-				bool latchedR = GameObject.Validate(stoneR) && stoneR.Equipped == robot;
-				bool dryR = GameObject.Validate(robot) && !robot.HasEffect(typeof(XRL.World.Effects.LifeDrain));
-				Report("drain.robot", latchedR && dryR,
-					$"thrown latch on a {ROBOT_BP}: stone {(latchedR ? "attached" : "NOT attached")}, LifeDrain {(dryR ? "correctly withheld (inorganic)" : "APPLIED TO A ROBOT")}");
-				if (latchedA)
-				{
-					Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "drain", TurnsRemaining = 25, TurnsTotal = 25, Queue = queue };
-					driver.InitDrain(fleshy, stoneA, robot, stoneR,
-						GameObject.Validate(fleshy) ? fleshy.GetStat("Hitpoints").Value : 0,
-						GameObject.Validate(robot) ? robot.GetStat("Hitpoints").Value : 0);
-					ply.AddPart(driver);
-					MessageQueue.AddPlayerMessage("Harness: drain endings running -- 25 turns while two stones ride out their latches.", "W");
-					// one-shot check rides the same setup, before the driver turns start
-				}
-			}
-
-			// one-shot: a 1-HP victim dies to the throw itself; a corpse can't be latched
-			Cell laneC = FindLane(origin, 3);
-			if (laneC != null)
-			{
-				GameObject frail = GameObject.Create(BABOON_BP);
-				frail.SetIntProperty(SPAWN_MARK, 1);
-				frail.GetStat("Hitpoints").BaseValue = 1;
-				laneC.AddObject(frail);
-				GameObject stoneB = ThrowAt(ply, DRAINSTONE_BP, frail);
-				bool dead = !GameObject.Validate(frail) || frail.GetStat("Hitpoints").Value <= 0;
-				bool loose = GameObject.Validate(stoneB) && stoneB.Equipped == null && stoneB.InInventory == null;
-				Report("drain.oneshot", dead && loose,
-					$"1-HP victim: {(dead ? "killed by the throw" : "SURVIVED (assert void)")}, stone {(loose ? "loose as loot, unlatched" : "NOT loose")}");
-				if (GameObject.Validate(stoneB)) stoneB.Obliterate();
-			}
-
-			// step-path latch (the last drain footnote): an at-rest drainstone underfoot latches
-			// IMMEDIATELY on its 25% step proc -- the smarter Latch channel's other half
-			List<Cell> stepOpen = origin.GetLocalAdjacentCells();
-			stepOpen.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
-			if (stepOpen.Count >= 2)
-			{
-				GameObject stepVictim = GameObject.Create(BABOON_BP);
-				stepVictim.SetIntProperty(SPAWN_MARK, 1);
-				stepVictim.GetStat("Hitpoints").BaseValue = 100;
-				stepOpen[0].AddObject(stepVictim);
-				GameObject stepStone = GameObject.Create(DRAINSTONE_BP);
-				stepStone.SetIntProperty(SPAWN_MARK, 1);
-				stepOpen[1].AddObject(stepStone);
-				int crossings = ForceEntries(stepVictim, stepOpen[0], stepOpen[1], 30,
-					() => GameObject.Validate(stepStone) && stepStone.Equipped == stepVictim);
-				bool latchedStep = GameObject.Validate(stepStone) && stepStone.Equipped == stepVictim;
-				bool drainingStep = GameObject.Validate(stepVictim) && stepVictim.HasEffect(typeof(XRL.World.Effects.LifeDrain));
-				Report("drain.steplatch", latchedStep && drainingStep,
-					$"at-rest step latch after {crossings} crossing(s) (StepChance 25, IMMEDIATE channel): stone {(latchedStep ? "riding the stepper" : "NOT attached")}, LifeDrain {(drainingStep ? "applied (half duration, step rules)" : "MISSING")}");
-				if (GameObject.Validate(stepVictim)) stepVictim.Obliterate();
-				if (GameObject.Validate(stepStone)) stepStone.Obliterate();
-			}
-			else
-				Report("drain.steplatch", false, "SETUP SKIP - no room for the step lane");
-
-			if (!latchedA)
-				RunNext(queue, ply);
-		}
-
 		/// <summary>Slot-normalized player-path throw: force-equip a fresh stone and PerformThrow
 		/// it at the victim. Returns the stone (often spent/broken afterwards). Logs a diagnostic
 		/// line either way -- the round-3 drain anomalies (guard fail on a live robot; a batch
@@ -2246,144 +1380,6 @@ namespace Cleo.TerraFirma.Scripts
 			return n;
 		}
 
-		/// <summary>The strange-rock audit invariant ("everything it does should actually happen,
-		/// no null" -- RULED 2026-07-24) as a standing assertion: 50 pool rolls, every rolled
-		/// blueprint must be a creature-free grenade-carrier or payload-mimic, never strange
-		/// itself. This is the invariant most likely to rot silently when future rocks join the
-		/// catalog. Prototypes are created in memory and obliterated -- no zone side effects; the
-		/// live fire-through/"visibly does something" half stays an eyeball item.</summary>
-		[WishCommand(Command = "tfstrange")]
-		public static void Strange()
-		{
-			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			const int ROLLS = 50;
-			int nulls = 0;
-			List<string> bad = new List<string>();
-			HashSet<string> seen = new HashSet<string>();
-			for (int i = 0; i < ROLLS; i++)
-			{
-				string rolled = PopulationManager.RollOneFrom(STRANGE_POOL)?.Blueprint;
-				if (rolled == null) { nulls++; continue; }
-				seen.Add(rolled);
-				if (rolled == STRANGE_BP) { bad.Add(rolled + " (itself)"); continue; }
-				GameObject proto = GameObject.Create(rolled);
-				if (proto == null) { bad.Add(rolled + " (no such blueprint)"); continue; }
-				bool creature = proto.Brain != null;
-				bool grenade = proto.GetFirstPartDescendedFrom<IGrenade>() != null;
-				Cleo_TerraFirma_FallenRockPart frp = proto.GetPart<Cleo_TerraFirma_FallenRockPart>();
-				bool mimic = frp != null && !frp.Payload.IsNullOrEmpty() && frp.Payload != "Strange";
-				if (creature || (!grenade && !mimic))
-					bad.Add(rolled + (creature ? " (creature)" : " (payloadless fizzle)"));
-				proto.Obliterate();
-			}
-			bool pass = bad.Count == 0 && nulls == 0;
-			Report("strange", pass,
-				$"{ROLLS} pool rolls, {seen.Count} distinct blueprints, {nulls} null roll(s), {bad.Count} bad: {(bad.Count > 0 ? string.Join("; ", bad) : "none")} (every roll must detonate or mimic, never fizzle)");
-		}
-
-		// ---------------------------------------------------------------- streak (synchronous)
-
-		/// <summary>The re-fix's exact failure shape (user find 2026-07-24): fly the LAST HELD
-		/// streakschorl with spares in the BAG -> the next one must land in the hand. Setup order
-		/// matters -- equip one BEFORE granting spares, or all three merge into one equipped stack
-		/// and the flight's stack-split mimics a bag re-equip (the session's own false positive).</summary>
-		[WishCommand(Command = "tfstreak")]
-		public static void Streak()
-		{
-			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			GameObject ply = The.Player;
-			Cell origin = ply?.CurrentCell;
-			if (origin == null)
-				return;
-			BodyPart slot = ply.GetFirstBodyPart("Thrown Weapon");
-			if (slot == null) { Report("streak", false, "SETUP FAIL - player has no Thrown Weapon body part"); return; }
-
-			// an open 3-cell lane for the flight
-			Cell target = FindLane(origin, 3);
-			if (target == null) { Report("streak", false, "SETUP FAIL - no open 3-cell lane from the player"); return; }
-
-			// normalize the slot: a previous run's re-equipped stone (or the player's own thrown
-			// weapon) otherwise absorbs the new stone by stacking and the equip silently no-ops --
-			// the first live run's retry failure (2026-07-24), found in five minutes by the harness
-			// doing exactly what it was built for
-			if (slot.Equipped != null)
-				slot.ForceUnequip(Silent: true);
-
-			GameObject first = GameObject.Create(STREAK_BP);
-			if (first == null) { Report("streak", false, "SETUP FAIL - could not create " + STREAK_BP); return; }
-			// ForceEquipObject, NOT inventory-then-equip: passing through the bag stacks the new
-			// stone onto any leftover streakschorls and the ref we hold goes stale
-			ply.ForceEquipObject(first, slot, Silent: true);
-			if (slot.Equipped != first) { Report("streak", false, "SETUP FAIL - could not equip the streakschorl into the thrown slot (even force-equip refused)"); return; }
-			for (int i = 0; i < 2; i++)
-				ply.ReceiveObject(GameObject.Create(STREAK_BP)); // spares AFTER the equip: separate bag stack
-			int bagBefore = CountInBag(ply, STREAK_BP);
-
-			GameObject baboon = GameObject.Create(BABOON_BP);
-			baboon.SetIntProperty(SPAWN_MARK, 1);
-			target.AddObject(baboon);
-
-			bool suppressed = Popup.Suppress;
-			Popup.Suppress = true;
-			try
-			{
-				ply.PerformThrow(first, baboon.CurrentCell ?? target, baboon);
-			}
-			finally
-			{
-				Popup.Suppress = suppressed;
-			}
-
-			GameObject after = slot.Equipped;
-			int bagAfter = CountInBag(ply, STREAK_BP);
-			// two legal outcomes (live find 2026-07-25): on an Earthen Barrage character with
-			// Take Stones on, the replacement flow's Check() is VETOED by EB's auto-sculpt --
-			// the handler owns the slot and equips a sculpted stone instead. That is the
-			// designed interaction (the re-fix's own Check-first contract), not a failure.
-			bool bagPath = after != null && after.Blueprint == STREAK_BP && after != first;
-			bool sculptPath = after != null && after.Blueprint == "Cleo_TerraFirma_EphemeralStone" && bagAfter == bagBefore;
-			bool pass = bagPath || sculptPath;
-			Report("streak", pass,
-				$"slot after flight = {(after == null ? "EMPTY" : after.Blueprint + " x" + after.Count)}, bag {bagBefore}->{bagAfter}" +
-				(bagPath ? " (re-equipped from bag, player path)"
-				: sculptPath ? " (EB auto-sculpt vetoed the bag re-equip and armed a sculpted stone -- the Check-first contract's OTHER branch, working as designed)"
-				: " (expected a bag spare OR an EB sculpted stone)"));
-			if (GameObject.Validate(baboon))
-				baboon.Obliterate(); // survivors don't get to hold a grudge
-		}
-
-		// ---------------------------------------------------------------- hopper (5 turns)
-
-		/// <summary>Two wish-spawned mills: one force-powered (ChargeUse=0), one force-dead
-		/// (unpayable ChargeUse), two salt rocks each. Five turns later the powered mill must
-		/// hold powders and no stones; the dead mill must hold exactly its stones.</summary>
-		[WishCommand(Command = "tfhopper")]
-		public static void Hopper()
-		{
-			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
-			SetupHopper(The.Player, "");
-		}
-
-		internal static void SetupHopper(GameObject ply, string queue)
-		{
-			Cell origin = ply?.CurrentCell;
-			if (origin == null)
-				return;
-			List<Cell> open = origin.GetLocalAdjacentCells();
-			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
-			if (open.Count < 2) { Report("hopper", false, "SETUP FAIL - need two open adjacent cells for the mills"); RunNext(queue, ply); return; }
-
-			GameObject millLive = SpawnMill(open[0], powered: true);
-			GameObject millDead = SpawnMill(open[1], powered: false);
-			if (millLive == null || millDead == null) { Report("hopper", false, "SETUP FAIL - Millstone spawn or Mill part missing"); RunNext(queue, ply); return; }
-
-			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "hopper", TurnsRemaining = 5, TurnsTotal = 5, Queue = queue };
-			driver.InitHopper(millLive, millDead, stonesEach: 2);
-			ply.AddPart(driver);
-			MessageQueue.AddPlayerMessage("Harness: hopper scenario running -- standing still for 5 turns while the mills work.", "W");
-		}
-
 		/// <summary>Statuette expiry mechanics (batch item 5's assertable half): a spawned
 		/// statuette with its TimedForm clock wound to 2 must, within 5 turns, be GONE and
 		/// replaced by a rep-granting figurine item with its pocket stones spilled beside it.
@@ -2430,31 +1426,13 @@ namespace Cleo.TerraFirma.Scripts
 			string rest = comma < 0 ? "" : queue.Substring(comma + 1);
 			switch (next)
 			{
-				case "hopper": SetupHopper(ply, rest); break;
 				case "form": SetupForm(ply, rest); break;
 				case "scav": SetupScav(ply, rest); break;
 				case "quickape": SetupQuickApe(ply, rest); break;
 				case "dull": SetupDull(ply, rest); break;
-				case "drain": SetupDrain(ply, rest); break;
 				case "shape": SetupShape(ply, rest); break;
 				case "fis": SetupFis(ply, rest); break;
 			}
-		}
-
-		private static GameObject SpawnMill(Cell where, bool powered)
-		{
-			GameObject mill = GameObject.Create("Millstone");
-			if (mill == null)
-				return null;
-			Mill part = mill.GetPart<Mill>();
-			if (part == null)
-				return null;
-			part.ChargeUse = powered ? 0 : 999999999; // 0 = trivially powered; unpayable = guaranteed dead
-			mill.SetIntProperty(SPAWN_MARK, 1);
-			where.AddObject(mill);
-			for (int i = 0; i < 2; i++)
-				mill.ReceiveObject(GameObject.Create(HOPPER_STOCK_BP));
-			return mill;
 		}
 
 		// ---------------------------------------------------------------- scav (30 turns)
@@ -2615,22 +1593,12 @@ namespace XRL.World.Parts
 		public string Queue = "";
 
 		[NonSerialized] private bool LiveSetup;
-		[NonSerialized] private GameObject MillLive;
-		[NonSerialized] private GameObject MillDead;
-		[NonSerialized] private int StonesEach;
-		[NonSerialized] private bool LoggedReadiness;
 		[NonSerialized] private GameObject FormCreature;
 		[NonSerialized] private int FigurineBaseline;
 		[NonSerialized] private GameObject ApeCreature;
 		[NonSerialized] private int RubbleBaseline;
 		[NonSerialized] private GameObject DullRock;
 		[NonSerialized] private int PebblesBaseline;
-		[NonSerialized] private GameObject DrainFleshy;
-		[NonSerialized] private GameObject DrainStoneA;
-		[NonSerialized] private GameObject DrainRobot;
-		[NonSerialized] private GameObject DrainStoneR;
-		[NonSerialized] private int FleshyHpAtLatch;
-		[NonSerialized] private int RobotHpAtLatch;
 		[NonSerialized] private ActivatedAbilityEntry ShapeEntry;
 		[NonSerialized] private int ShapeCdBeforeKill;
 		[NonSerialized] private GameObject FisCaster;
@@ -2644,14 +1612,6 @@ namespace XRL.World.Parts
 		[NonSerialized] private bool[] AiKillMoved;
 		[NonSerialized] private int[] AiKillDmg;
 		[NonSerialized] private int[] AiFollowBaseDist;
-
-		public void InitHopper(GameObject millLive, GameObject millDead, int stonesEach)
-		{
-			MillLive = millLive;
-			MillDead = millDead;
-			StonesEach = stonesEach;
-			LiveSetup = true;
-		}
 
 		public void InitScav()
 		{
@@ -2676,17 +1636,6 @@ namespace XRL.World.Parts
 		{
 			DullRock = rock;
 			PebblesBaseline = pebblesBaseline;
-			LiveSetup = true;
-		}
-
-		public void InitDrain(GameObject fleshy, GameObject stoneA, GameObject robot, GameObject stoneR, int fleshyHp, int robotHp)
-		{
-			DrainFleshy = fleshy;
-			DrainStoneA = stoneA;
-			DrainRobot = robot;
-			DrainStoneR = stoneR;
-			FleshyHpAtLatch = fleshyHp;
-			RobotHpAtLatch = robotHp;
 			LiveSetup = true;
 		}
 
@@ -2736,11 +1685,6 @@ namespace XRL.World.Parts
 					ParentObject.RemovePart(this);
 					Cleo.TerraFirma.Scripts.TestHarnessWishes.FinishBatch(); // the abort drops the queue; close the tally so the verdict line still lands
 					return base.HandleEvent(E);
-				}
-				if (Scenario == "hopper" && !LoggedReadiness)
-				{
-					LoggedReadiness = true;
-					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("AUTO", $"hopper tick 1: live mill turning={MillTurning(MillLive)}, dead mill turning={MillTurning(MillDead)}");
 				}
 				if (Scenario == "scav" || Scenario == "fis" || Scenario == "statueai")
 					ReassertHostileLocks(ParentObject);
@@ -2854,18 +1798,9 @@ namespace XRL.World.Parts
 			}
 		}
 
-		private static bool MillTurning(GameObject mill)
-		{
-			if (mill?.GetPart<Mill>() is Mill part)
-				return part.IsReady(UseCharge: false, IgnoreCharge: false, IgnoreLiquid: false, IgnoreBootSequence: false, IgnoreBreakage: false, IgnoreRust: false, IgnoreEMP: false, IgnoreRealityStabilization: false, IgnoreSubject: false, IgnoreLocallyDefinedFailure: false, 1, null, UseChargeIfUnpowered: false, 0L);
-			return false;
-		}
-
 		private void Finish(GameObject owner)
 		{
-			if (Scenario == "hopper")
-				FinishHopper();
-			else if (Scenario == "scav")
+			if (Scenario == "scav")
 				FinishScav(owner);
 			else if (Scenario == "form")
 				FinishForm(owner);
@@ -2873,8 +1808,6 @@ namespace XRL.World.Parts
 				FinishQuickApe(owner);
 			else if (Scenario == "dull")
 				FinishDull(owner);
-			else if (Scenario == "drain")
-				FinishDrain();
 			else if (Scenario == "shape")
 				FinishShape();
 			else if (Scenario == "fis")
@@ -2946,27 +1879,6 @@ namespace XRL.World.Parts
 				$"carried rock (clock wound to 2) {(goneFromBag ? "went dull and gone" : "STILL IN THE BAG")} after {TurnsTotal} turns; pebbles {PebblesBaseline}->{pebblesNow} (want >=+1, payload lost with the dull)");
 		}
 
-		private void FinishDrain()
-		{
-			bool fleshyAlive = GameObject.Validate(DrainFleshy);
-			int fleshyHp = fleshyAlive ? DrainFleshy.GetStat("Hitpoints").Value : -1;
-			bool drained = fleshyAlive && fleshyHp < FleshyHpAtLatch;
-			bool drainOver = fleshyAlive && !DrainFleshy.HasEffect(typeof(XRL.World.Effects.LifeDrain));
-			bool burstA = !GameObject.Validate(DrainStoneA);
-			bool robotAlive = GameObject.Validate(DrainRobot);
-			int robotHp = robotAlive ? DrainRobot.GetStat("Hitpoints").Value : -1;
-			// robot HP is REPORTED, not asserted (two live lessons: robots regenerate the throw's
-			// scratch, and live-arena bystanders can maul them during the wait -- 97->20 once).
-			// The no-leech claim was already asserted at latch time (drain.robot); the ending's
-			// claim is only that the stone dry-crumbles on schedule.
-			bool crumbledR = !GameObject.Validate(DrainStoneR);
-			bool pass = drained && drainOver && burstA && crumbledR;
-			string stoneAState = burstA ? "gone (gorged burst)" : DrainStoneA?.Equipped != null ? "STILL ATTACHED" : "still exists, unattached";
-			string stoneRState = crumbledR ? "gone (dry crumble)" : DrainStoneR?.Equipped != null ? "STILL ATTACHED" : "still exists, unattached (latch never took?)";
-			Cleo.TerraFirma.Scripts.TestHarnessWishes.Report("drain.endings", pass,
-				$"after {TurnsTotal} turns -- flesh: HP {FleshyHpAtLatch}->{fleshyHp} ({(drained ? "drained" : "NOT drained")}), LifeDrain {(drainOver ? "expired" : "still ticking")}, stone {stoneAState}; robot: stone {stoneRState}, HP {RobotHpAtLatch}->{robotHp} (reported only -- bystanders/regen may move it)");
-		}
-
 		private void FinishForm(GameObject owner)
 		{
 			bool gone = !GameObject.Validate(FormCreature);
@@ -2995,16 +1907,6 @@ namespace XRL.World.Parts
 				$"statuette {(gone ? "expired and gone" : "STILL ALIVE")} after {TurnsTotal} turns; figurine items {FigurineBaseline}->{figurinesNow} (want +1); {spilled} loose pocket stone(s) beside the figurine");
 			if (pass && cleanupTarget != null && GameObject.Validate(cleanupTarget))
 				cleanupTarget.Obliterate(); // spilled pebbles stay as litter -- acceptable
-		}
-
-		private void FinishHopper()
-		{
-			CountMill(MillLive, out int liveStones, out int livePowders);
-			CountMill(MillDead, out int deadStones, out int deadPowders);
-			// band floor = StonesEach * 3: the 2-3/rock hand rate PLUS the mill's +1 bonus (ruled 2026-07-25)
-			bool pass = liveStones == 0 && livePowders >= StonesEach * 3 && deadStones == StonesEach && deadPowders == 0;
-			Cleo.TerraFirma.Scripts.TestHarnessWishes.Report("hopper", pass,
-				$"after {TurnsTotal} turns: powered mill stones={liveStones} powders={livePowders} (want 0 / >={StonesEach * 3}, mill +1 rate), dead mill stones={deadStones} powders={deadPowders} (want {StonesEach} / 0)");
 		}
 
 		private static void CountMill(GameObject mill, out int stones, out int powders)

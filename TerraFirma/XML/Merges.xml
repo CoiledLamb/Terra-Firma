@@ -3,13 +3,11 @@
 	<object Name="BaseStone" Load="Merge">
 		<tag Name="Cleo_TerraFirma_IsAnyStone" />
 		<part Name="Cleo_TerraFirma_GeomancyStonePart" />
-		<!-- BETA-HELD (mill cut, RULED 2026-08-02): <part Name="Cleo_TerraFirma_StoneMill" /> rock-side "grind with your pestle" action (the ergonomic front door) -->
 	</object>
 	<object Name="Gemstone" Load="Merge">
 		<tag Name="Cleo_TerraFirma_IsAnyStone" />
 		<tag Name="Cleo_TerraFirma_IsGemstone" />
 		<part Name="Cleo_TerraFirma_GeomancyStonePart" />
-		<!-- BETA-HELD (mill cut, RULED 2026-08-02): <part Name="Cleo_TerraFirma_StoneMill" /> gemstones grind too (to flour; wasteful comedy, accepted) -->
 		<!-- RULED 2026-07-25 (user: "we would have to add the behavior for them to be thrown
 		     slot, but i think that's a good idea"): gemstones are first-class Geomancy ammo, so
 		     default equip should pick the Thrown Weapon slot - which the engine does for any
@@ -175,22 +173,9 @@
 	     fetch spent stones off the floor, including fissure fallout. Pocket MOD-rocks are CUT
 	     ("baboons should no longer spawn with new stones"); they keep plain base-game Small
 	     Stones at the old quantities instead ("let them keep their stones"). -->
-	<!-- BETA-HELD (mill cut, RULED 2026-08-02) — the whole milling suite is out of the beta;
-	     future home = separate mod or stonecarver-faction merchants. Original rulings kept
-	     below for the restore. Stone milling (RULED 2026-07-22): one part, two homes. On the
-	     Campfire, the cooking menu grows "Grind stones with your pestle". On the Pestle,
-	     "grind stones" is available anywhere: the tool is the gate. HOPPER RULING (user
-	     2026-07-24): stones dropped into the millstone's inventory grind one per turn.
-	<object Name="Campfire" Load="Merge">
-		<part Name="Cleo_TerraFirma_StoneMill" />
-	</object>
-	<object Name="Pestle" Load="Merge">
-		<part Name="Cleo_TerraFirma_StoneMill" />
-	</object>
-	<object Name="Millstone" Load="Merge">
-		<part Name="Cleo_TerraFirma_StoneHopper" />
-	</object>
-	-->
+	<!-- Mill/cooking suite PARKED on branch quarantine-hold (2026-08-22, user ruling):
+	     the StoneMill/StoneHopper merges for Campfire, Pestle and Millstone lived here;
+	     restore from that branch with the kitchen. Design record in TODO-quarantine.md. -->
 	<object Name="Baboon" Load="Merge">
 		<part Name="Cleo_TerraFirma_StoneScavenger" />
 		<inventoryobject Blueprint="Small Stone" Number="1-2" />
