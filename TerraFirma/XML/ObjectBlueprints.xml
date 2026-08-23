@@ -117,6 +117,25 @@
     <part Name="Physics" Takeable="false" Weight="500" />
   </object>
 
+  <!-- QUARRY CHEST (gear sitting 2026-08-23; user ruling: "making it a generalized loot table
+       that merchant tables and chests can roll makes sense"). The MiningGear consumer for
+       PLACED loot: a Chest variant whose inventory rolls the table, on the ChestBronzeIngots
+       grammar (base Furniture.xml:3521, inherit Chest + inventoryobject lines). The @-table
+       roll syntax is the templar-grenades idiom from creature inventories; the inventoryobject
+       parser is shared across blueprint types, verify-at-boot item filed. Contents rhyme with
+       the quarrier spine on purpose: the stash holds what the crew carries. The warren
+       dressing can place this instead of a plain Chest where a site reads worked; that
+       placement lives in the warren workstream's file and is theirs to wire. Vine merchant
+       restock joins when that blueprint lands (intent recorded in TODO.md). Counts and
+       chances CLAUDE DRAFT; DisplayName DRAFT, signoff owed. -->
+  <object Name="Cleo_TerraFirma_Quarry Chest" Inherits="Chest">
+    <part Name="Render" DisplayName="quarry chest" />
+    <part Name="Inventory" />
+    <inventoryobject Blueprint="@Cleo_TerraFirma_MiningGear" Number="1-2" />
+    <inventoryobject Blueprint="Pickaxe" Chance="35" />
+    <inventoryobject Blueprint="Torch" Number="1-3" Chance="50" />
+  </object>
+
   <!-- STONE FIGURINE (2026-08-15). Closes the XML half of the FIGURINE MATERIAL LADDER ruling of
        2026-08-14 (user: "figurines on the floor have a chance to spawn stone (or wood?) instead
        of copper, still giving rep, but very little value"). That ruling was built on the SIM side
