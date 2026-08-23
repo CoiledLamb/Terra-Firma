@@ -62,6 +62,14 @@ namespace XRL.World.Parts
 			if (Uses >= 0 && ParentObject.IsReal && ParentObject.IsTakeable())
 			{
 				E.AddTag("{{y|(" + Uses + ")}}");
+				// self-heal for the button count: the ability entry's DisplayName SERIALIZES,
+				// so a fresh load shows the previous session's stale total until something
+				// syncs; any render of a carried box (inventory open, message line) fixes it
+				GameObject who = ParentObject.InInventory ?? ParentObject.Equipped;
+				if (who != null)
+				{
+					SyncAbilityName(who);
+				}
 			}
 			return base.HandleEvent(E);
 		}
