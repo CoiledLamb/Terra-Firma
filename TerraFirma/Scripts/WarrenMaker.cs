@@ -44,5 +44,26 @@ namespace XRL.World.ZoneBuilders
 				? $"tfwarrenv2: {r.Stage} warren, {r.Occupancy}, {r.Floor} floor, {r.Pockets} pockets (seed {r.Seed}, attempt {r.Attempt}). Roles in the log."
 				: $"tfwarrenv2: {{{{R|no site}}}} - {r.Reason} (seed {r.Seed}).");
 		}
+
+		/// <summary>Testing wish (user ask 2026-08-23): reveal every warren secret on
+		/// the world map at once, so verifying the 25 does not mean walking the
+		/// desert. Keys on the "stonecarver" secret attribute the placement stamps.</summary>
+		[WishCommand(Command = "tfwarrens")]
+		public static void RevealAll()
+		{
+			int revealed = 0, total = 0;
+			foreach (var note in Qud.API.JournalAPI.MapNotes)
+			{
+				if (note.Attributes == null || !note.Attributes.Contains("stonecarver")) continue;
+				total++;
+				if (note.Revealed) continue;
+				Qud.API.JournalAPI.RevealMapNote(note, silent: true);
+				revealed++;
+			}
+			Helpers.VerifyLog("WARREN", $"tfwarrens: revealed {revealed} of {total} warren secrets");
+			MessageQueue.AddPlayerMessage(total > 0
+				? $"tfwarrens: revealed {revealed} warren locations ({total} exist). Check the world map."
+				: "tfwarrens: {{R|no warren secrets in this world}} - was it embarked before the placement extension?");
+		}
 	}
 }

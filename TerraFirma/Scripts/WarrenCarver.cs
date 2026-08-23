@@ -192,6 +192,16 @@ namespace Cleo.TerraFirma.Scripts
 					if (c.HasObjectWithPart("LiquidVolume")) g.Water[i] = 1;
 					else if (c.IsSolid()) g.Tree[i] = 1;      // solid non-wall on open ground
 				}
+			// census, because the first live zone refused with "no face opens onto
+			// enough rock" (2026-08-23) and the numbers settle every host-read theory
+			int rock = 0, hard = 0, open = 0, water = 0, trees = 0;
+			for (int i = 0; i < g.W * g.H; i++)
+			{
+				if (g.C[i] == FLOOR) { open++; if (g.Water[i] != 0) water++; if (g.Tree[i] != 0) trees++; }
+				else if (g.Host[i] != 0) hard++;
+				else rock++;
+			}
+			Helpers.VerifyLog("WARREN", $"host census: {rock} natural rock, {hard} hard walls, {open} open ({water} water, {trees} trees)");
 			return g;
 		}
 
@@ -206,7 +216,11 @@ namespace Cleo.TerraFirma.Scripts
 				for (int x = 0; x < g.W; x++)
 				{
 					int i0 = g.Idx(x, y);
-					if (g.C[i0] == FLOOR || lab[i0] >= 0) continue;
+					// PORT FIX 2026-08-23: the band is CARVABLE rock only. The sim
+					// had no host-marked solids; the real zone does (hard walls),
+					// and counting them inflated the band and seated mouth
+					// candidates on cells the region growth then refused.
+					if (g.C[i0] == FLOOR || g.Host[i0] != 0 || lab[i0] >= 0) continue;
 					int id = comps.Count;
 					var acc = new List<int>();
 					var st = new Stack<int>(); st.Push(i0); lab[i0] = id;
