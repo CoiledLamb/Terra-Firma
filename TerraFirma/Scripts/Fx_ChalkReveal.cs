@@ -48,6 +48,7 @@ namespace Cleo.TerraFirma.Scripts
 		private const int QUAD_PUFF_COUNT = 2;      // dust riding EACH fragment's departure; feel round 2, from 3
 		private const float QUAD_PUFF_R0 = 1f;      // born on the quad itself
 		private const float QUAD_PUFF_R1 = 7f;      // shorter throw; the riding dust hugs the cell
+		private const int SCUFF_COUNT = 4;          // trample beat: a boot's worth of dust, CLAUDE DRAFT
 		// feel round 2 (user: "lighten the color more"): the motes WORE the 1px stroke tile, and
 		// at fleck scale that is a sub-pixel sliver the filtering blends into the floor - white
 		// rendered as gray. The whorl's own mote tile is a chunky blob that survives downscaling
@@ -78,6 +79,30 @@ namespace Cleo.TerraFirma.Scripts
 		public static float PlaySmear(Cell target)
 		{
 			return PlayCore(target, inverted: true);
+		}
+
+		/// <summary>The trample beat (user shape 2026-08-23): a light mote-scuff with no mask
+		/// and no Hold - incidental wear must never block the game thread mid-move, so this is
+		/// fire-and-forget and the caller removes the line immediately. Needs no paint gate;
+		/// motes fly over any floor.</summary>
+		public static void PlayScuff(Cell target)
+		{
+			if (target == null)
+				return;
+			GameManager gm = GameManager.Instance;
+			if (gm == null)
+				return;
+			Zone zone = target.ParentZone;
+			if (zone == null || !zone.IsActive() || !target.IsVisible())
+				return;
+			Vector3 center = gm.getTileCenter(target.X, target.Y);
+			IRenderable mote = new Cleo_TerraFirma_StoneTileRenderable(MOTE_TILE, 'Y', 'Y', 'k');
+			for (int m = 0; m < SCUFF_COUNT; m++)
+			{
+				float ang = Stat.RandomCosmetic(0, 359) * (Mathf.PI / 180f);
+				float scale = Mathf.Lerp(MOTE_SCALE_MIN, MOTE_SCALE_MAX, Stat.RandomCosmetic(0, 100) * 0.01f);
+				CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuiceChalkMote(mote, center, ang, (m % 2) * 0.02f, MOTE_LIFE, scale, QUAD_PUFF_R0, QUAD_PUFF_R1, MoteTint()), async: true);
+			}
 		}
 
 		private static float PlayCore(Cell target, bool inverted)

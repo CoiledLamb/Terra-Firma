@@ -15,11 +15,20 @@ namespace XRL.World.Parts
 	/// offered to draw more.
 	/// Smear: open to anyone adjacent; owned camp lines broadcast for help via native ownership
 	/// (BroadcastForHelp), player lines are unowned and wipe clean.
+	/// Trample (user shape 2026-08-23, amending the 08-22 "doesn't wear off" shape with traffic
+	/// wear): a creature stepping on the cell has a small chance to smear the line - the light
+	/// mote-scuff beat, never the deliberate smear's Hold, because any passing NPC could not be
+	/// allowed to hitch the game thread mid-move. Owner-faction walkers skip the roll entirely
+	/// (their own camp traffic minds its marks - and cannot anger itself); everyone else who
+	/// tramples an owned line gets the same help broadcast a deliberate smear does.
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_ChalkLine : IPart
 	{
 		public const string SMEAR_COMMAND = "Cleo_TerraFirma_SmearChalkLine";
+
+		/// <summary>Percent chance per step that a walker smears the line. CLAUDE DRAFT dial.</summary>
+		public const int TRAMPLE_SMEAR_CHANCE = 5;
 
 		/// <summary>The stroke direction this piece was drawn with; the re-tile fallback when
 		/// no neighboring chalk remains.</summary>
@@ -29,7 +38,50 @@ namespace XRL.World.Parts
 		{
 			return base.WantEvent(ID, cascade)
 				|| ID == GetInventoryActionsEvent.ID
-				|| ID == InventoryActionEvent.ID;
+				|| ID == InventoryActionEvent.ID
+				|| ID == ObjectEnteredCellEvent.ID;
+		}
+
+		public override bool HandleEvent(ObjectEnteredCellEvent E)
+		{
+			// walker gates on the Sticky chassis (solid, phase-matched) plus creature-and-grounded:
+			// fliers touch nothing, and webs WANT fliers where chalk does not
+			GameObject walker = E.Object;
+			if (walker != null && walker.IsCreature && !walker.IsFlying
+				&& walker.GetMatterPhase() <= 1 && walker.PhaseMatches(ParentObject))
+			{
+				string owner = ParentObject.Physics?.Owner;
+				// the Bed ownership guard, inverted: owner-matched walkers (tag, name, or
+				// faction) never roll - camp traffic minds its marks and cannot anger itself
+				bool ownerMatched = !owner.IsNullOrEmpty()
+					&& (walker.HasTagOrProperty(owner) || walker.DisplayNameOnly == owner || walker.BelongsToFaction(owner));
+				if (!ownerMatched && XRL.Rules.Stat.Random(1, 100) <= TRAMPLE_SMEAR_CHANCE)
+				{
+					if (!owner.IsNullOrEmpty())
+					{
+						// trampling camp chalk is the same vandalism as scrubbing it
+						ParentObject.Physics.BroadcastForHelp(walker);
+						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK", $"owned chalk line ({owner}) trampled by {walker.Blueprint}, help broadcast");
+					}
+					else
+					{
+						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK", $"chalk line trampled by {walker.Blueprint}");
+					}
+					if (walker.IsPlayer())
+					{
+						IComponent<GameObject>.AddPlayerMessage("Your steps smear the chalk line."); // DRAFT
+					}
+					else if (ParentObject.IsVisible())
+					{
+						IComponent<GameObject>.AddPlayerMessage(walker.Does("smear") + " the chalk line underfoot."); // DRAFT
+					}
+					Cell cell = ParentObject.CurrentCell;
+					Cleo.TerraFirma.Scripts.Cleo_TerraFirma_ChalkRevealFX.PlayScuff(cell);
+					ParentObject.Destroy();
+					RetileNeighbors(cell);
+				}
+			}
+			return base.HandleEvent(E);
 		}
 
 		public override bool HandleEvent(GetInventoryActionsEvent E)
