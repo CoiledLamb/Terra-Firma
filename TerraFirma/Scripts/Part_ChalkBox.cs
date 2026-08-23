@@ -41,6 +41,7 @@ namespace XRL.World.Parts
 			return base.WantEvent(ID, cascade)
 				|| ID == ObjectCreatedEvent.ID
 				|| ID == TakenEvent.ID
+				|| ID == AddedToInventoryEvent.ID
 				|| ID == DroppedEvent.ID
 				|| ID == BeforeDestroyObjectEvent.ID
 				|| ID == PooledEvent<GetDisplayNameEvent>.ID;
@@ -66,7 +67,21 @@ namespace XRL.World.Parts
 
 		public override bool HandleEvent(TakenEvent E)
 		{
-			GameObject who = E.Actor;
+			EnsureGrant(E.Actor);
+			return base.HandleEvent(E);
+		}
+
+		// ReceiveObject arrivals (wish grants, trades, containers) fire AddedToInventoryEvent,
+		// never TakenEvent - the EB pickup lesson (2026-08-12) applying here: without this, a
+		// granted box neither registers nor resyncs the button count
+		public override bool HandleEvent(AddedToInventoryEvent E)
+		{
+			EnsureGrant(ParentObject.InInventory);
+			return base.HandleEvent(E);
+		}
+
+		private void EnsureGrant(GameObject who)
+		{
 			if (who != null && who.IsCreature && who.ActivatedAbilities != null)
 			{
 				ActivatedAbilityEntry existing = who.ActivatedAbilities.GetAbilityByCommand(DRAW_COMMAND);
@@ -93,7 +108,6 @@ namespace XRL.World.Parts
 				}
 				SyncAbilityName(who);
 			}
-			return base.HandleEvent(E);
 		}
 
 		/// <summary>The button shows the carried total (user ask 2026-08-22: "show how much chalk
