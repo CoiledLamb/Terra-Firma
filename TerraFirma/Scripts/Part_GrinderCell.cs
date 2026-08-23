@@ -128,15 +128,22 @@ namespace XRL.World.Parts
 				Cell origin = E.Actor.CurrentCell;
 				if (origin != null)
 				{
-					List<Cell> reach = origin.GetLocalAdjacentCells();
+					// COPY the engine's list: GetLocalAdjacentCells returns the cell's CACHED
+					// adjacency by reference (decomp _LocalAdjacentCellCache), and the first
+					// build's Insert was corrupting it in place - the 2026-08-23 reach=9/10
+					// log lines were that cache growing. A restart flushes any corrupted cell.
+					List<Cell> reach = new List<Cell>(origin.GetLocalAdjacentCells());
 					reach.Insert(0, origin);
 					foreach (Cell c in reach)
 					{
 						foreach (GameObject go in c.Objects)
 						{
+							// no IsWall guard (live find 2026-08-23: LargeBoulder CARRIES the
+							// Wall tag, so the guard refused the exact target; real walls never
+							// descend from BaseStone, so the stone tag alone is the diet gate)
 							bool tagged = go.HasTagOrProperty(STONE_TAG);
 							if (tagged && go != ParentObject && !go.HasPart<Temporary>()
-								&& !go.IsCreature && !go.IsWall()
+								&& !go.IsCreature
 								&& (go.GetPart<Physics>()?.Owner).IsNullOrEmpty())
 							{
 								stones.Add(go);
