@@ -833,6 +833,18 @@ Both known fixes carry v1 receipts and neither is free — **filling** is the us
 | flourishing | 7 | 3 | **0** |
 
 **Structural consequence worth a decision later, flagged not solved: 25 warrens cannot populate a 3x3 grid.** Five of the nine cells land under one per world, and *flourishing / reclaimed* — arguably the most dramatic combination in the concept, a whole settlement chewed through by miners — occurred **zero times in five worlds**. The bottleneck is the stage distribution, not occupancy: flourishing is only ~9% of warrens. Either the flourishing share rises, or occupancy is deliberately biased so the rare stage draws the interesting state, or the corners stay effectively unreachable and that is accepted.
+
+#### DEEP WARRENS (multilevel) — USER CONCEPT 2026-08-23, LOGGED OPEN; decoupled from the first port
+
+> "what about multilevel warrens? stairs can randomly generate inside them, right? what if we leaned into that and some warrens could go deep instead of wide?"
+
+Ground truth already on record: canyon-zone stairs are real zone connections and `CanyonBuilder` paths to every Stairs connection as an interior endpoint (the stair-spur law the sim already ports). The multilevel precedent is Red Rock itself: strata 11-14 run the dedicated `Redrock` builder with stairs as forced nodes, each level carving to meet its connections (`design/worldbuilder-recon-2026-08-23.md` §5). The door-A placement extension can stamp the warren builder on zones below a claimed surface zone; the connection system keeps the shafts aligned — no new engine machinery.
+
+Design fit (CLAUDE read, offered at the sitting): the accretion axis goes vertical — settlement on top, active face at the bottom, the two-gradients-opposite-ends law told in literal strata.
+
+Two costs named, neither resolved: **(1)** lower cave strata build their own carve + population first, so a deep warren either lands ON TOP of living caves (breach-as-feature, house doctrine) or replaces the lower build outright (negative-priority override mode exists; Red Rock replaces via its cell blueprints). Different flavors, choose deliberately. **(2)** Sim leads, ruled — deep needs a lab pass before any port: stacked-strata view, per-level roles (no commons at depth 3), the judging bar applied to a whole shaft.
+
+**SEQUENCING ACCEPTED 2026-08-23 (user: "yeag log it and then we can go for port!"): the first port ships wide-only; deep is a future lab pass.** CLAUDE floats banked, unruled: deep warrens rare the way flourishing is rare, so finding one stays an event · minimal shape = 2 strata · license rule = a warren goes deep only where a pre-existing stair falls inside the band (the world provided the way down).
 #### REGISTRATION CONTRACT — BUILT AND MEASURED 2026-08-18 (three rulings the same sitting)
 
 The v1 ruling (2026-08-12) executed for v2: **carvers stamp each space's identity at birth; the
@@ -1171,6 +1183,18 @@ as a young dig or as bare is a two-up call, the user's.
   (denominator-class bug, caught by measure). Render = the same wall sprite recolored g/G
   through the palette, autotile untouched. Measured: 207 of 253 aquifer sites show moss, avg 22
   cells; fully sealed pools honestly show none.
+  **MOSS COLOR PORT + SPAWN DIAL — USER DOCKET 2026-08-23 ("port the moss colors from the old
+  sim and dial the spawn numbers on them down a good bit"), BUILT + MEASURED same day.** The
+  g/G tint above is superseded: moss now wears the v1 USER-PICK colors (TileColor `K` #155352
+  / DetailColor `g` #009403, the picks recorded on v1's mossTile/mossDetail knobs). Spawn was
+  silently deterministic in v2 (every eligible wall, 100%); now a `moss %` knob (geology
+  group, default 35 = CLAUDE DIAL) rolls once per eligible cell at its min distance — full
+  chance beside the water, x0.4 at the reach edge, the v1 grading, so density still points at
+  the pool. Two v1 laws carried: one roll per cell (no compounding where pools overlap) and
+  the guaranteed tell (zero-moss aquifer forces one mossy wall — a sealed pool with no
+  surface sign is unreadable). Measured over 5 forced-aquifer seeds: 56 moss cells at 100 →
+  18 at 35, no zero-moss sites. `node --check` green. Port implication: `ZonePainter.cs` gets
+  TileColor/DetailColor K/g and the graded roll at its next paint pass.
 - **Corridor traces IN**: v1's hall table on v2 corridor segments (non-artery only — haulage
   stays clear). One roll per segment >=3 cells; chalk marks resolve to the directional piece
   facing the passage wall. Measured: 167 trace items across 390 sites, ZERO on the artery.

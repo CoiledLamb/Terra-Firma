@@ -1632,8 +1632,12 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
   // 2026-08-18: "aquifer symptoms are *out*. the only one we want to port is
   // moss from the walls"). Wall cells within reach 2 of a sealed pool grow
   // moss; mud, seep and puddles are dead. Render-side: the same wall sprite
-  // recolored green through the Qud palette, the v1 idiom.
+  // recolored through the Qud palette in the v1 user-pick colors (TileColor K
+  // #155352 / DetailColor g #009403) - color port + spawn dial 2026-08-23.
+  // Two passes: candidacy at min distance first, then ONE roll per wall cell -
+  // rolling inside the spread loop would compound wherever pools overlap.
   g.moss=new Uint8Array(W*H);
+  const mossCand=new Uint8Array(W*H);
   for(let i=0;i<W*H;i++){
     if(!g.aqua||!g.aqua[i]) continue;            // aquifer pools + veins, never the river
     const wx2=i%W, wy2=(i/W)|0;
@@ -1645,8 +1649,21 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
       let faces=false;
       for(const[ax,ay]of N8){ const fx=nx+ax, fy=ny+ay;
         if(inb(fx,fy)&&g.c[idx(fx,fy)]===FLOOR&&!g.water[idx(fx,fy)]){faces=true;break} }
-      if(faces) g.moss[idx(nx,ny)]=1 }
+      if(!faces) continue;
+      const d=Math.max(Math.abs(dx),Math.abs(dy))||1, j=idx(nx,ny);
+      if(!mossCand[j]||d<mossCand[j]) mossCand[j]=d }
   }
+  // the v1 grading at knob strength: full chance beside the water, x0.4 at
+  // the reach edge, so density still points AT the pool
+  let mossN=0, mossFirst=-1;
+  for(let i=0;i<W*H;i++){
+    if(!mossCand[i]) continue;
+    if(mossFirst<0) mossFirst=i;
+    if(RNG()<(K.mossPct/100)*(mossCand[i]<=1?1:0.4)){ g.moss[i]=1; mossN++ }
+  }
+  // v1 guaranteed-tell law, moss-only now the other symptoms are dead: an
+  // aquifer with zero surface signs is unreadable, so force one mossy wall
+  if(!mossN&&mossFirst>=0) g.moss[mossFirst]=1;
   // CORRIDOR TRACES (USER RULED 2026-08-18: "corridor traces are in") - v1's
   // sparsest table on v2's corridor segments: human traces, not furniture.
   // The ARTERY is exempt - haulage stays clear - so this dresses only the
@@ -2270,6 +2287,7 @@ const KNOBS=[
   ['geology','breachChance','breached %',0,100,45,'chance this warren hit one. A short heading off a corridor ending in standing water: they were digging that way and stopped'],
   ['geology','breachMax','breaches max',1,4,2,''],
   ['geology','breachReach','breach depth',2,10,5,'how far back from the water the abandoned heading may start'],
+  ['geology','mossPct','moss %',0,100,35,'chance an eligible wall cell grows moss (eligible = within reach 2 of a sealed pool, accessible face - the v1 halo law). One roll per cell at its min distance: full chance beside the water, x0.4 at the reach edge - the v1 grading, so density still points at the pool. Ported + dialed down from deterministic 100% (user docket 2026-08-23, "dial the spawn numbers on them down a good bit"; 35 is a CLAUDE dial). Colors ride the same port: TileColor K / DetailColor g, the v1 user picks'],
   ['canyon','riverPct','river %',0,100,35,'chance the zone carries a river. NOT part of CanyonBuilder — a separate builder in the zone list'],
   ['canyon','marshPct','marsh %',0,100,25,'of rivers, the share that dead-end here as a marsh: cellular-automata pools plus a terminus channel, the river rising out of it'],
   ['canyon','treePct','tree density %',0,200,100,'scales the DesertCanyonZoneGlobals numbers (dogthorn 95%/30-80, witchwood 25%/5-20, starapple 5%/5-20)'],
@@ -2496,8 +2514,9 @@ function draw(cv,res,cell,drawMode,tintArt,useTiles,padded){
       if(solid){
         const nm2="wall_rock-"+wallMask(g,x,y);
         // moss and etching recolor the SAME wall sprite through the palette -
-        // the v1 idiom; the wall autotile is untouched
-        const special = (g.moss&&g.moss[idx(x,y)])? tinted(nm2,'g','G')
+        // the v1 idiom; the wall autotile is untouched. Moss wears the v1
+        // user-pick colors: TileColor K #155352, DetailColor g #009403
+        const special = (g.moss&&g.moss[idx(x,y)])? tinted(nm2,'K','g')
                       : (g.etch&&g.etch[idx(x,y)])? tinted(nm2,'r','Y') : null;
         if(special) ctx.drawImage(special,px,py,cw,ch);
         else {
