@@ -246,13 +246,25 @@ namespace Cleo.TerraFirma.Scripts
 		// region = every band cell reachable from the mouth out to a budget, keeping
 		// a one-cell rind against the canyon everywhere except the mouth (N8: a
 		// diagonal slip into the canyon is a second mouth the N4 count never saw).
+		// ROUND 4 (2026-08-23, RULED at the user's posted archipelago zone: "i could
+		// see it being a valid quarry spot, we just have to get smarter about how
+		// we're placing them"): real rock is shore-heavy and pinch-riddled, and the
+		// sim conflated NOT CARVABLE with NOT TRAVERSABLE. Two classes are now
+		// pass-through-but-unclaimable for the flood: the rind (rock beside the
+		// EDGE-CONNECTED canyon - isolated bubbles no longer poison a ring) and the
+		// bubbles themselves (pre-carved interior air; they can never be a mouth,
+		// so crossing them risks nothing). The one-mouth law holds untouched: the
+		// carve still only opens cells the mask claims, and the mask never holds a
+		// rind or bubble cell. Sim catch-up flagged in TODO for all three parts.
 		private class RegionRec { public byte[] Mask; public int Size; public List<int> Cells; }
-		private static RegionRec GrowRegion(Grid g, Pt mouth, int budget)
+		private static RegionRec GrowRegion(Grid g, Pt mouth, int budget, byte[] connected)
 		{
-			bool OnSkin(int x, int y) => N8.Any(d => g.Inb(x + d[0], y + d[1]) && g.Host[g.Idx(x + d[0], y + d[1])] != 0);
+			bool OnRind(int x, int y) => N8.Any(d => g.Inb(x + d[0], y + d[1]) && connected[g.Idx(x + d[0], y + d[1])] != 0);
 			var mask = new byte[g.W * g.H];
+			var seen = new byte[g.W * g.H];
 			var q = new List<int> { g.Idx(mouth.X, mouth.Y) };
-			mask[q[0]] = 1;
+			seen[q[0]] = 1; mask[q[0]] = 1;             // the mouth is exempt by construction
+			var cells = new List<int> { q[0] };          // claimable cells in flood order = depth
 			int n = 1, head = 0;
 			while (head < q.Count && n < budget)
 			{
@@ -261,15 +273,21 @@ namespace Cleo.TerraFirma.Scripts
 				foreach (var d in N4)
 				{
 					int nx = x + d[0], ny = y + d[1];
-					if (!g.Inb(nx, ny) || mask[g.Idx(nx, ny)] != 0) continue;
+					if (!g.Inb(nx, ny)) continue;
+					int ni = g.Idx(nx, ny);
+					if (seen[ni] != 0) continue;
 					if (nx < 1 || ny < 1 || nx > g.W - 2 || ny > g.H - 2) continue;
-					if (g.C[g.Idx(nx, ny)] == FLOOR) continue;
-					if (OnSkin(nx, ny)) continue;
-					mask[g.Idx(nx, ny)] = 1; n++; q.Add(g.Idx(nx, ny));
+					if (connected[ni] != 0) continue;          // the canyon proper: hard stop
+					bool bubble = g.C[ni] == FLOOR;            // open but not edge-connected
+					bool rind = !bubble && OnRind(nx, ny);
+					seen[ni] = 1;
+					q.Add(ni);                                 // traversable either way
+					if (bubble || rind) continue;              // pass-through: never claimed
+					mask[ni] = 1; cells.Add(ni); n++;
 					if (n >= budget) break;
 				}
 			}
-			return new RegionRec { Mask = mask, Size = n, Cells = q.Take(n).ToList() };
+			return new RegionRec { Mask = mask, Size = n, Cells = cells };
 		}
 
 		// ---------------------------------------------------------------- artery
@@ -1313,11 +1331,11 @@ namespace Cleo.TerraFirma.Scripts
 			foreach (int mi in skin.Take(25))
 			{
 				var cand = new Pt { X = mi % g.W, Y = mi / g.W };
-				var reachR = GrowRegion(g, cand, int.MaxValue);
+				var reachR = GrowRegion(g, cand, int.MaxValue, connected);
 				if (reachR.Size < STAGES[0].Area) continue;   // the smallest stage is a FLOOR, not a fallback
 				int sTry = si, deg = 0;
 				while (sTry > 0 && STAGES[sTry].Area > reachR.Size) { sTry--; deg++; }
-				region = GrowRegion(g, cand, STAGES[sTry].Area);
+				region = GrowRegion(g, cand, STAGES[sTry].Area, connected);
 				si = sTry; degraded = deg; mouth = cand;
 				break;
 			}
