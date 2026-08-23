@@ -122,6 +122,7 @@ namespace Cleo.TerraFirma.Scripts
 			public byte[] C, Art, Host, Water, Aqua, Tree, Region, Marker;
 			public short[] Pocket;
 			public string[] Item;           // the dress layer: sim item ids, translated at placement
+			public string YardBoardText;    // the yard chalkboard's ledger lines (user concept 2026-08-23)
 			public int MouthIdx = -1;
 			public int[] MouthDist;
 			public Grid(int w, int h)
@@ -1550,7 +1551,11 @@ namespace Cleo.TerraFirma.Scripts
 		private static readonly HashSet<string> SOLID_ITEMS = new HashSet<string> { "bg.random_stone_statue", "bg.village_monument_stele", "largeboulder" };
 		private static readonly Dictionary<string, string[]> ROOMPOOLS = new Dictionary<string, string[]>
 		{
-			{ "light", new[]{ "bg.brazier", "straytorch" } },
+			// brazier REMOVED (USER RULED 2026-08-23: "remove chrome braziers with
+			// the blue flames from the roll" - base Brazier is chrome + blue flame,
+			// wrong hands entirely). Fire dish substituted: CLAUDE dial, the mod's
+			// own light furniture, strikeable.
+			{ "light", new[]{ "firedish", "straytorch" } },
 			{ "storage", new[]{ "bg.chest", "bg.woven_basket", "basket_food" } },
 			{ "seating", new[]{ "bg.floor_cushion", "bg.canvas_folding_chair", "kline", "bg.bench", "stool" } },
 			{ "sleep", new[]{ "bg.bed", "bg.bedroll", "bg.folding_cot" } },
@@ -1573,7 +1578,7 @@ namespace Cleo.TerraFirma.Scripts
 		};
 		private const double DWELLDENSITY = 0.3;   // v1's engine-faithful number
 
-		private static string DressSite(Grid g, Artery art, List<PocketRec> pockets, RolesRec roles, string occupancy)
+		private static string DressSite(Grid g, Artery art, List<PocketRec> pockets, RolesRec roles, string occupancy, int siteFloor)
 		{
 			g.Item = new string[g.W * g.H];
 			var placed = new Dictionary<string, int>();
@@ -1819,6 +1824,37 @@ namespace Cleo.TerraFirma.Scripts
 					if (working && benchY >= 0 && iy0 + 1 <= iy1 && Chance(.7)) Put(g.Idx(wx, iy0 + 1), "bg.canvas_folding_chair");
 					if (working && Chance(.75) && FreeI(g.Idx(wx, iy1))) Put(g.Idx(wx, iy1), "basket_stones");
 				}
+				// THE YARD LEDGER (USER 2026-08-23: a chalkboard as a likely roll,
+				// "chalked with a date of arrival, and if they've left, a date of
+				// departure, styled in the games own vernacular. as well as
+				// potentially saying how much stone was quarried"). Chance 70 and
+				// the 60%-tally roll are CLAUDE dials; the LINES ARE DRAFT (user
+				// voice owed). Dates ride Calendar.GetDay/GetMonth - the engine's
+				// own marginalia vernacular; the tally is the site's true carved
+				// floor, so the board never lies about the dig it stands in.
+				if (Chance(.7))
+				{
+					int bi = -1;
+					for (int y = iy0; y <= iy1 && bi < 0; y++)
+						for (int x = ix0; x <= ix1; x++)
+							if (FreeI(g.Idx(x, y))) { bi = g.Idx(x, y); break; }
+					if (bi >= 0)
+					{
+						long now = Calendar.TotalTimeTicks;
+						long Wrap(long t) { long y2 = 438000L; t %= y2; if (t < 0) t += y2; return t; }
+						long arrival = Wrap(now - (long)R(45, 320) * 1200);
+						var lines = new List<string> { "arrived the " + Calendar.GetDay(arrival) + " of " + Calendar.GetMonth(arrival) };
+						if (occupancy != "in use")
+						{
+							long depart = Wrap(now - (long)R(8, 40) * 1200);
+							lines.Add("departed the " + Calendar.GetDay(depart) + " of " + Calendar.GetMonth(depart));
+						}
+						if (Chance(.6))
+							lines.Add(siteFloor + " blocks raised");
+						g.YardBoardText = string.Join("\n", lines);
+						Put(bi, "yardboard");
+					}
+				}
 				if (state == "fresh")
 				{
 					// never an EMPTY ring: one short stack1 run, "just getting started"
@@ -2037,7 +2073,7 @@ namespace Cleo.TerraFirma.Scripts
 			if (occupancy != "in use")
 			{
 				var flip = new Dictionary<string, string> {
-					{ "bg.campfire", "campfire_remains" }, { "bg.brazier", "brazier_cold" },
+					{ "bg.campfire", "campfire_remains" },
 					{ "bg.torchpost", "torchpost_unlit" }, { "firedish", "firedish_cold" }, { "straytorch", null } };
 				for (int i = 0; i < g.W * g.H; i++)
 				{
@@ -2103,7 +2139,7 @@ namespace Cleo.TerraFirma.Scripts
 			{ "stack1", "Cleo_TerraFirma_QuarryStones1" }, { "stack2", "Cleo_TerraFirma_QuarryStones2" }, { "stack3", "Cleo_TerraFirma_QuarryStones3" },
 			{ "quarrybricks", "Cleo_TerraFirma_QuarriedBlock" },
 			{ "bg.random_stone_statue", "Random Stone Statue" }, { "bg.village_monument_stele", "Village Monument Stele" },
-			{ "bg.brazier", "Brazier" }, { "bg.campfire", "Campfire" }, { "campfire_remains", "Campfire Remains" },
+			{ "bg.campfire", "Campfire" }, { "campfire_remains", "Campfire Remains" },
 			{ "bg.woven_basket", "Woven Basket" }, { "basket_stones", "Woven Basket" }, { "basket_food", "Woven Basket" },
 			{ "bg.floor_cushion", "Floor Cushion" }, { "bg.canvas_folding_chair", "Canvas Folding Chair" },
 			{ "bg.bed", "Bed" }, { "bg.bedroll", "Bedroll" }, { "bg.folding_cot", "Folding Cot" },
@@ -2113,7 +2149,6 @@ namespace Cleo.TerraFirma.Scripts
 			{ "kline", "Kline" }, { "stool", "Stool" }, { "kiln", "Kiln" },
 			{ "bg.torchpost", "Torchpost" }, { "torchpost_unlit", "Unlit Torchpost" },
 			{ "firedish", "Cleo_TerraFirma_FireDish" }, { "firedish_cold", "Cleo_TerraFirma_FireDish" },
-			{ "brazier_cold", "Brazier" },
 			{ "stonefig", "Cleo_TerraFirma_Random Stone Figurine" }, { "figurine", "Random Figurine" },
 			{ "largeboulder", "LargeBoulder" },
 			{ "stone", "Cleo_TerraFirma_Rock_Generic" }, { "loosestone", "Cleo_TerraFirma_Rock_Generic" }, { "pebble", "Cleo_TerraFirma_Rock_Pebbles" },
@@ -2135,11 +2170,17 @@ namespace Cleo.TerraFirma.Scripts
 					obj = GameObject.Create("Cleo_TerraFirma_ChalkLine");
 					if (obj.Render != null) obj.Render.Tile = id + ".png";   // the directional piece
 				}
+				else if (id == "yardboard")
+				{
+					obj = GameObject.Create("Chalkboard");
+					if (g.YardBoardText != null)
+						obj.RequirePart<XRL.World.Parts.Cleo_TerraFirma_ChalkWriting>().Text = g.YardBoardText;
+				}
 				else
 				{
 					if (!BP.TryGetValue(id, out string bp)) continue;
 					obj = GameObject.Create(bp);
-					if (id == "firedish_cold" || id == "brazier_cold")
+					if (id == "firedish_cold")
 					{
 						// the cold flip: light and heat stripped (sprite may still
 						// read lit - art polish flagged in TODO)
@@ -2335,7 +2376,7 @@ namespace Cleo.TerraFirma.Scripts
 			int[] floorMin = { 0, CAMP_FLOOR, FLOUR_FLOOR };
 			while (si > 0 && m.Floor < floorMin[si]) { si--; degraded++; }
 			var roles = RegisterRoles(g, art, pockets, si, occupancy);
-			string dressStats = DressSite(g, art, pockets, roles, occupancy);
+			string dressStats = DressSite(g, art, pockets, roles, occupancy, m.Floor);
 			Helpers.VerifyLog("WARREN", $"dress: {dressStats}");
 			Helpers.VerifyLog("WARREN", $"carve: band {band.Mass}, mouth ({mouth.X},{mouth.Y}), stage {STAGES[si].Name} (wanted {STAGES[wanted].Name}, degraded {degraded}), " +
 				$"{pockets.Count} pockets, floor {m.Floor}, loops {m.Loops}, comps {m.Comps}, crosscuts {crosscuts}, infill {filled}, " +
