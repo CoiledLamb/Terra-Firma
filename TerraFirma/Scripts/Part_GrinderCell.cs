@@ -11,7 +11,8 @@ namespace XRL.World.Parts
 	/// grinds anywhere (no installed-in-device requirement) · trickle, not burst · no boulder
 	/// cap ("no need for boulder cap" - a 300-lb slab is 600 turns of grinding, its own tax) ·
 	/// mill law inapplicable (no armed stones shipped). Numbers user-approved 2026-08-22:
-	/// stone value = weight x 25 charge (re-ruled from x20 same sitting), trickle 10/turn.
+	/// stone value = weight x 50 charge (re-ruled 2026-08-23 with the cap drop to 25k; was
+	/// x25, before that x20), trickle 10/turn.
 	/// Feed idiom = the lantern socket pattern, one stone at a time, ground to nothing - no
 	/// unload (a half-ground stone is not a thing; Claude call). Grinding PAUSES while the cell
 	/// is full so no stone is wasted (Claude call). Diet gate = Cleo_TerraFirma_IsAnyStone
@@ -23,10 +24,10 @@ namespace XRL.World.Parts
 	{
 		public const string FEED_COMMAND = "Cleo_TerraFirma_FeedGrinderCell";
 		public const string STONE_TAG = "Cleo_TerraFirma_IsAnyStone";
-		public const int CHARGE_PER_POUND = 25; // re-ruled 2026-08-22 ("weight*25")
+		public const int CHARGE_PER_POUND = 50; // re-ruled 2026-08-23 ("raise the grind to *50 charge")
 		public const int TRICKLE_PER_TURN = 10;
 
-		/// <summary>Charge remaining in the stone currently being ground (weight x 25 at load).</summary>
+		/// <summary>Charge remaining in the stone currently being ground (weight x 50 at load).</summary>
 		public int StoneChargeLeft;
 
 		/// <summary>Display name of the stone being ground, for the status tag.</summary>
@@ -60,7 +61,7 @@ namespace XRL.World.Parts
 
 		/// <summary>The waterskin law (user ruling 2026-08-22: "preserve the weight of what its
 		/// grinding and steadily decrement that over time"): the cell carries its stone's unground
-		/// weight, LiquidVolume's own GetExtrinsicWeightEvent idiom. One pound leaves per 25
+		/// weight, LiquidVolume's own GetExtrinsicWeightEvent idiom. One pound leaves per 50
 		/// charge ground out - a fed boulder is heavy until the spiral has actually eaten it.</summary>
 		public override bool HandleEvent(GetExtrinsicWeightEvent E)
 		{
