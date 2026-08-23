@@ -129,11 +129,12 @@ namespace XRL.World.Parts
 				writing.Text = text;
 				// no write sfx by ruling 2026-08-22 (tattoo-gun placeholder removed; the sound
 				// pass picks a real one if any)
-				// write beat (user shape 2026-08-23: "a few puffs of dust coming off the
-				// chalkboard when it's written on, no mask or anything") - the trample scuff
-				// reused verbatim: fire-and-forget motes, escape from either prompt never gets here
-				Cleo.TerraFirma.Scripts.Cleo_TerraFirma_ChalkRevealFX.PlayScuff(ParentObject.CurrentCell);
 				Popup.Show("You chalk \"" + text + "\" onto " + ParentObject.t() + "."); // DRAFT
+				// write beat AFTER the modal (bug catch 2026-08-23 "puffs are almost invisible":
+				// fired before Popup.Show, the whole 0.3s beat played out behind the popup);
+				// board profile throws full radius so the dust clears the board's own sprite.
+				// escape from either prompt never gets here
+				Cleo.TerraFirma.Scripts.Cleo_TerraFirma_ChalkRevealFX.PlayBoardScuff(ParentObject.CurrentCell);
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK", $"chalkboard written ({(choice == 0 ? "typed" : "markov")})");
 				actor.UseEnergy(1000, "Item WriteChalkboard");
 				box.ConsumeUse(actor);
