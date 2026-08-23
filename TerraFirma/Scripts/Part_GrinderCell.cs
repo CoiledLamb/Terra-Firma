@@ -109,14 +109,25 @@ namespace XRL.World.Parts
 					{
 						foreach (GameObject go in c.Objects)
 						{
-							if (go.HasTagOrProperty(STONE_TAG) && go != ParentObject && !go.HasPart<Temporary>()
+							bool tagged = go.HasTagOrProperty(STONE_TAG);
+							if (tagged && go != ParentObject && !go.HasPart<Temporary>()
 								&& !go.IsCreature && !go.IsWall()
 								&& (go.GetPart<Physics>()?.Owner).IsNullOrEmpty())
 							{
 								stones.Add(go);
 							}
+							// diagnostic (2026-08-23 live report: adjacent boulder not offered;
+							// every gate checks out in decomp, so the scan narrates itself -
+							// strip with the TF-VERIFY family)
+							else if (tagged || (go.Blueprint != null && go.Blueprint.IndexOf("oulder", StringComparison.Ordinal) >= 0))
+							{
+								Cleo.TerraFirma.Scripts.Helpers.VerifyLog("GRINDER",
+									$"feed scan refused {go.Blueprint}: tagged={tagged}, creature={go.IsCreature}, wall={go.IsWall()}, owner={go.GetPart<Physics>()?.Owner ?? "none"}, temp={go.HasPart<Temporary>()}");
+							}
 						}
 					}
+					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("GRINDER",
+						$"feed scan: reach={reach.Count} cells, carried={carried}, nearby={stones.Count - carried}");
 				}
 				if (stones.Count == 0)
 				{
