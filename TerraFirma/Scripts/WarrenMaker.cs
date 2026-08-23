@@ -20,9 +20,21 @@ namespace XRL.World.ZoneBuilders
 	{
 		public bool BuildZone(Zone Z)
 		{
-			var r = WarrenCarver.Build(Z, WarrenCarver.SeedFor(Z.ZoneID));
-			if (r.Built)
-				Helpers.VerifyLog("WARREN", $"builder done: {Z.ZoneID} -> {r.Stage}, {r.Occupancy}, attempt {r.Attempt}");
+			// The belt (round 6): our carve is zone-seeded, so any throw is
+			// DETERMINISTIC - the engine's rebuild loop replays it forever and the
+			// player gets the "zone isn't building properly" dialog. An exception
+			// must therefore degrade to an honest no-warren, never a loop.
+			try
+			{
+				var r = WarrenCarver.Build(Z, WarrenCarver.SeedFor(Z.ZoneID));
+				if (r.Built)
+					Helpers.VerifyLog("WARREN", $"builder done: {Z.ZoneID} -> {r.Stage}, {r.Occupancy}, attempt {r.Attempt}");
+			}
+			catch (System.Exception x)
+			{
+				Helpers.VerifyLog("WARREN", $"EXCEPTION in builder for {Z.ZoneID}: {x}");
+				MetricsManager.LogException("Cleo_TerraFirma_WarrenMaker", x);
+			}
 			return true;
 		}
 	}

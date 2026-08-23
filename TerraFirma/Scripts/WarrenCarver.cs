@@ -304,7 +304,14 @@ namespace Cleo.TerraFirma.Scripts
 			{
 				int lo = (int)Math.Floor((b + 0.35) * nC / nWp);
 				int hi = Math.Min(nC - 1, (int)Math.Floor((double)(b + 1) * nC / nWp) - 1);
-				int ci = regionCells[R(Math.Min(lo, hi), Math.Max(lo, hi))];
+				int wi = R(Math.Min(lo, hi), Math.Max(lo, hi));
+				// ROUND 6 (2026-08-23, the rebuild-loop dialog): a tiny lobe makes hi
+				// -1 and wi negative. The SIM survived this - JS cs[-1] is undefined
+				// and its if(c) guard swallowed it - so the guard WAS the behavior,
+				// and dropping it in the port turned a skipped waypoint into a
+				// deterministic throw, which the zone-seeded rebuild replays forever.
+				if (wi < 0 || wi >= nC) continue;
+				int ci = regionCells[wi];
 				wps.Add(new Pt { X = ci % g.W, Y = ci / g.W });
 			}
 			if (wps.Count == 0 && nC > 0)
