@@ -85,7 +85,8 @@
 	     has what's absolutely essential/misc items"). EtchTools and the armor group moved DOWN:
 	     hewer and mason carry both verbatim (current behavior preserved until their own lock
 	     sittings), the outrider replaced both with its locked bespoke kit below. The spine is
-	     now water, light, and shoes; nothing else is universal. -->
+	     now water, light, shoes, and a semi-common carried pickaxe; nothing else is
+	     universal. -->
 	<!-- Spine light + shoes RULED 2026-08-22 (user: "lets have an 80% chance for tier 1 shoes,
 	     and vary torches so they can also be lanterns with shards and rarely glowspheres").
 	     Light weights CLAUDE DRAFT. The lantern entry is the LOADED variant so it arrives
@@ -100,6 +101,17 @@
 				<object Weight="5" Blueprint="Glowsphere" Number="1" />
 			</group>
 			<table Name="Shoes 1" Chance="80" />
+			<!-- Pickaxe on the spine, gear sitting 2026-08-23 (user: "why not add the pickaxe
+			     as a semi-common item on the spine instead?", then "it's fine if they don't
+			     *use* the pickaxes, i just mean why not have them carry them?"): a carried work
+			     tool beside the waterskin, flavor first. Snapjaw miner precedent in-pack
+			     (Creatures.xml, plain inventoryobject pick). The Carver Hammer rung variant was
+			     REJECTED on ground truth: Pickaxe is Skill="Axe" (base Items.xml:11170), so as
+			     a striker it would break that carver's Cudgel-gated etching. Digging note: a
+			     pack pick is inert; only a WIELDED one grants Digging and burrower pathing, and
+			     pick-vs-hammer equip scoring is close, so spine picks make organic diggers,
+			     not guaranteed ones. Chance CLAUDE DRAFT. -->
+			<object Blueprint="Pickaxe" Chance="35" Number="1" />
 		</group>
 	</population>
 
