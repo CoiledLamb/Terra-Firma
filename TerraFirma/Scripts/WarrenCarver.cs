@@ -119,7 +119,7 @@ namespace Cleo.TerraFirma.Scripts
 		private class Grid
 		{
 			public int W, H;
-			public byte[] C, Art, Host, Water, Aqua, Tree, Region;
+			public byte[] C, Art, Host, Water, Aqua, Tree, Region, Marker;
 			public short[] Pocket;
 			public int MouthIdx = -1;
 			public int[] MouthDist;
@@ -128,7 +128,7 @@ namespace Cleo.TerraFirma.Scripts
 				W = w; H = h;
 				int n = w * h;
 				C = new byte[n]; Art = new byte[n]; Host = new byte[n]; Water = new byte[n];
-				Aqua = new byte[n]; Tree = new byte[n];
+				Aqua = new byte[n]; Tree = new byte[n]; Marker = new byte[n];
 				Pocket = new short[n];
 				for (int i = 0; i < n; i++) Pocket[i] = -1;
 			}
@@ -203,6 +203,7 @@ namespace Cleo.TerraFirma.Scripts
 						continue;                             // natural rock: SOLID, ours
 					}
 					g.C[i] = FLOOR; g.Host[i] = 1;
+					if (c.HasObject("CanyonMarker")) g.Marker[i] = 1;   // the canyon's own breadcrumbs (CanyonBuilder stamps every corridor cell)
 					if (c.HasObjectWithPart("LiquidVolume")) g.Water[i] = 1;
 					else if (c.IsSolid()) g.Tree[i] = 1;      // solid non-wall on open ground
 				}
@@ -1551,17 +1552,34 @@ namespace Cleo.TerraFirma.Scripts
 			// cell - the real zone has isolated clearings inside the rock mass that
 			// the sim's canyon host never had. Connected = reachable from a zone-edge
 			// open cell (surface canyon travel enters at the edges).
+			// ROUND 10 (2026-08-23, the sealed-from-the-canyon warren: "doesn't open
+			// out into the canyon"): "connected" now means THE CANYON, not the zone
+			// edge. Edge-flooding accepted any open sliver touching the border, and
+			// a mouth legally opened onto one - reachable only from the next
+			// parasang, sealed from this zone's own network. The canyon announces
+			// itself: CanyonBuilder stamps a CanyonMarker widget on every corridor
+			// cell (stair spurs included), so the flood seeds from markers and
+			// spreads over open ground. Edge seeding survives only as the fallback
+			// for markerless zones (tfslab tests, oddball terrain).
 			var connected = new byte[g.W * g.H];
 			{
 				var cq = new Queue<int>();
-				for (int x = 0; x < g.W; x++)
-					foreach (int yy in new[] { 0, g.H - 1 })
-						if (g.C[g.Idx(x, yy)] == FLOOR && g.Water[g.Idx(x, yy)] == 0 && connected[g.Idx(x, yy)] == 0)
-						{ connected[g.Idx(x, yy)] = 1; cq.Enqueue(g.Idx(x, yy)); }
-				for (int y = 0; y < g.H; y++)
-					foreach (int xx in new[] { 0, g.W - 1 })
-						if (g.C[g.Idx(xx, y)] == FLOOR && g.Water[g.Idx(xx, y)] == 0 && connected[g.Idx(xx, y)] == 0)
-						{ connected[g.Idx(xx, y)] = 1; cq.Enqueue(g.Idx(xx, y)); }
+				int seeds = 0;
+				for (int i = 0; i < g.W * g.H; i++)
+					if (g.Marker[i] != 0 && g.C[i] == FLOOR && g.Water[i] == 0)
+					{ connected[i] = 1; cq.Enqueue(i); seeds++; }
+				bool fallback = seeds == 0;
+				if (fallback)
+				{
+					for (int x = 0; x < g.W; x++)
+						foreach (int yy in new[] { 0, g.H - 1 })
+							if (g.C[g.Idx(x, yy)] == FLOOR && g.Water[g.Idx(x, yy)] == 0 && connected[g.Idx(x, yy)] == 0)
+							{ connected[g.Idx(x, yy)] = 1; cq.Enqueue(g.Idx(x, yy)); }
+					for (int y = 0; y < g.H; y++)
+						foreach (int xx in new[] { 0, g.W - 1 })
+							if (g.C[g.Idx(xx, y)] == FLOOR && g.Water[g.Idx(xx, y)] == 0 && connected[g.Idx(xx, y)] == 0)
+							{ connected[g.Idx(xx, y)] = 1; cq.Enqueue(g.Idx(xx, y)); }
+				}
 				while (cq.Count > 0)
 				{
 					int ci = cq.Dequeue();
@@ -1576,9 +1594,9 @@ namespace Cleo.TerraFirma.Scripts
 					}
 				}
 				int connCount = 0; for (int i = 0; i < connected.Length; i++) if (connected[i] != 0) connCount++;
-				Helpers.VerifyLog("WARREN", $"host connectivity: {connCount} edge-connected open cells");
-				// degenerate zone (no edge-open floor at all): fall back to any host
-				// so a fully-walled test slab still carves under the wish
+				Helpers.VerifyLog("WARREN", $"host connectivity: {connCount} canyon-connected open cells ({(fallback ? "edge fallback" : seeds + " marker seeds")})");
+				// degenerate zone (no markers AND no edge-open floor): any host, so
+				// a fully-walled test slab still carves under the wish
 				if (connCount == 0)
 					for (int i = 0; i < connected.Length; i++) if (g.C[i] == FLOOR && g.Water[i] == 0) connected[i] = 1;
 			}
