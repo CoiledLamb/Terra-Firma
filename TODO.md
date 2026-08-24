@@ -1371,6 +1371,17 @@ on a padded interior is the last box; only zones built after the deploy carry it
       table at weight 2 each (water and oil at the work face; the heavy Nothing share stands).
       Sim-measured, 514 sites: vases 50 → 61, jugs 38 → 64 with the socket rows in, 0 guard
       errors. Compile 0 errors, deployed hash-verified. `log-confirmed pending`.
+  - **QUARRIED STONE → SHALE PALETTE — USER DOCKET 2026-08-24 ("can we make sure quarried
+    blocks are shale colored also? rust red and brown?"), BUILT same sitting.** The sim
+    already painted stacks rust (`#a64a2e` baked art); the GAME blueprints had diverged to
+    `&y`/`K` grey. All four (`QuarryStones1/2/3` + `QuarriedBlock`) now wear base `Shale`'s
+    own codes (Walls.xml:308): ColorString/TileColor `&r`, DetailColor `w` — rust red and
+    brown, the user's words and the rock's. Provenance note (recorded HERE, not in the code —
+    the fire dish's comment belongs to the moss lane's uncommitted hunk and stays theirs):
+    the dish's 08-23 grey cited "same as QuarriedBlock" as its family link; that link is now
+    broken, and the dish KEEPS its ruled grey ("not red" was its own ruling's text). XML
+    strict-valid, deployed hash-verified; XML-only, no compile needed. Sim needed no change —
+    this was the game catching up to the sim.
 
 **WARREN FLOOR PORTED + PLAIN ROOMS GET TRACES — USER FLAG 2026-08-18** (*"this working site
 generated dressed pretty light"*, with screenshot): two deliberate gaps closed. (1) Role-plain
