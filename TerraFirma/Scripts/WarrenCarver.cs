@@ -1560,7 +1560,11 @@ namespace Cleo.TerraFirma.Scripts
 			{ "seating", new[]{ "bg.floor_cushion", "bg.canvas_folding_chair", "kline", "bg.bench", "stool" } },
 			{ "sleep", new[]{ "bg.bed", "bg.bedroll", "bg.folding_cot" } },
 			{ "centre", new[]{ "bg.table", "bg.workbench" } },
-			{ "liquid", new[]{ "bg.wine_pitcher", "pitcher_wine", "pitcher_cider" } },
+			// vases + clay jugs joined 2026-08-24 (USER: "let's add vases and
+			// clay jugs for variety"). Base Vase's own description places it in
+			// a canyon dweller's home-kiln; both carry RandomColors, so glaze
+			// variety rolls per spawn. Catch basin still out (no confirmed name).
+			{ "liquid", new[]{ "bg.wine_pitcher", "pitcher_wine", "pitcher_cider", "bg.vase", "bg.clay_jug" } },
 			{ "crafts", new[]{ "bg.workbench", "bg.anvil", "pickaxe", "bg.random_stone_statue", "stack1", "stack2", "stack3", "stonefig", "basket_stones", "kiln" } },
 			{ "hearth", new[]{ "bg.oven", "bg.campfire" } },
 			{ "comfort", new[]{ "bg.hookah" } },
@@ -2196,6 +2200,7 @@ namespace Cleo.TerraFirma.Scripts
 			{ "bg.animation_table", "Cleo_TerraFirma_AnimationTable" }, // sketch vocab reserved 2026-08-24; no sketch uses it yet
 
 			{ "bg.wine_pitcher", "Wine Pitcher" }, { "pitcher_wine", "Wine Pitcher" }, { "pitcher_cider", "Wine Pitcher" },
+			{ "bg.vase", "Vase" }, { "bg.clay_jug", "Jug" },
 			{ "bg.anvil", "Anvil" }, { "bg.oven", "Oven" }, { "bg.hookah", "Hookah" }, { "bg.bench", "Bench" },
 			{ "kline", "Kline" }, { "stool", "Stool" }, { "kiln", "Kiln" },
 			{ "bg.torchpost", "Torchpost" }, { "torchpost_unlit", "Unlit Torchpost" },

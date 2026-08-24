@@ -1271,6 +1271,13 @@ const ITEMS={
   'bg.bench':{g:'╦',fg:'#b1a98e',qt:['sw_bench'],tc:'w',dc:'y'},
   pitcher_wine:{g:'¿',fg:'#b154cf',qt:['bg_wine_pitcher'],baked:1},
   pitcher_cider:{g:'¿',fg:'#e99f10',qt:['bg_wine_pitcher'],baked:1},
+  // vases + clay jugs (USER 2026-08-24: "let's add vases and clay jugs for
+  // variety"). Rig stand-ins share the pitcher art, the cider-pitcher idiom;
+  // blueprint truth at port: base Vase ("fired in the home-kiln of a canyon
+  // dweller" - it is already our people's pottery) and Jug, both carrying
+  // RandomColors so every spawn rolls its own glaze in game.
+  'bg.vase':{g:'¿',fg:'#8fbf7f',qt:['bg_wine_pitcher'],baked:1},
+  'bg.clay_jug':{g:'¿',fg:'#c97b4a',qt:['bg_wine_pitcher'],baked:1},
   // the lighting pass (v1 port, 2026-08-18): Torchpost &R/w is blueprint
   // truth; Unlit Torchpost is a REAL base blueprint sharing the tile - the
   // rig tells them apart by tint. firedish = the mod's own light furniture.
@@ -1321,7 +1328,7 @@ const ROOMPOOLS={
   sleep:['bg.bed','bg.bedroll','bg.folding_cot'], centre:['bg.table','bg.workbench'],
   // wine + cider pitchers joined the liquid pool (USER 2026-08-18: "pitchers
   // of wine and cider for the kitchens and common areas")
-  liquid:['bg.wine_pitcher','bg.catchbasin','pitcher_wine','pitcher_cider'],
+  liquid:['bg.wine_pitcher','bg.catchbasin','pitcher_wine','pitcher_cider','bg.vase','bg.clay_jug'],
   crafts:['bg.workbench','bg.anvil','pickaxe','bg.random_stone_statue','stack1','stack2','stack3','stonefig','basket_stones','kiln'],
   hearth:['bg.oven','bg.campfire'], comfort:['bg.hookah']
 };
