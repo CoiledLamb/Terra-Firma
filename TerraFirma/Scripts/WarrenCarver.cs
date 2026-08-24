@@ -2500,13 +2500,14 @@ namespace Cleo.TerraFirma.Scripts
 						foreach (GameObject wall in c.GetWalls().ToList()) wall.Obliterate();
 						carved++;
 						// PADDED EARTH (user ruled 2026-08-12, whole-warren scope;
-						// gap user-flagged in game 2026-08-24, the sim had it and
-						// this port did not): every carved cell is trodden floor,
-						// the strict VillageMaker hut idiom. The mouth stays raw,
-						// a doorstep worn back to rock; water keeps its pools.
+						// gap user-flagged in game 2026-08-24; base parent DIRECT
+						// per user ruling same day, no rename blueprint): every
+						// carved cell gets the stock DirtFloor, the strict
+						// VillageMaker hut idiom. The mouth stays raw, a doorstep
+						// worn back to rock; water keeps its pools.
 						if (i != g.MouthIdx && g.Water[i] == 0)
 						{
-							c.AddObject(GameObject.Create("Cleo_TerraFirma_PaddedEarth"));
+							c.AddObject(GameObject.Create("DirtFloor"));
 							padded++;
 						}
 					}

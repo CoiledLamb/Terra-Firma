@@ -104,22 +104,6 @@
        column being filled NOW, grade 3 is finished stock; the yard recipe reads
        time through them (fill ordering RULED 2026-07-27). DisplayName DRAFT;
        descriptions deliberately absent, ride the release text pass. -->
-  <!-- Padded earth (USER RULED 2026-08-12, whole-warren scope; in-game gap
-       user-flagged 2026-08-24, the sim had it and the port did not): every
-       carved warren cell is trodden floor, the strict VillageMaker idiom,
-       and the floor object masks the ground paint exactly as a hut's does.
-       Child of base DirtFloor (ZoneTerrain.xml), so RandomTileOnMove rolls
-       the same four sw_ground_dots sprites the sim renders with; DetailColor
-       k is the sim's user-pick tint. Name is the user's own word (ruled
-       2026-08-12); description deliberately absent, rides the release text
-       pass. The mouth stays raw, a doorstep worn back to rock; placement in
-       WarrenCarver.ApplyToZone. -->
-  <object Name="Cleo_TerraFirma_PaddedEarth" Inherits="DirtFloor">
-    <part Name="Render" DisplayName="padded earth" DetailColor="k" />
-    <tag Name="NoSparkingQuest" />
-    <tag Name="ExcludeFromDynamicEncounters" />
-  </object>
-
   <object Name="Cleo_TerraFirma_QuarryStones1" Inherits="Furniture">
     <part Name="Render" Tile="quarrystones1a.png" DisplayName="stack of quarried stone" RenderString="#" ColorString="&amp;y" DetailColor="K" Occluding="false" />
     <builder Name="RandomTile" Tiles="quarrystones1a.png,quarrystones1b.png" />

@@ -1330,9 +1330,16 @@ own ruled word), DetailColor `k` (the sim's user-pick tint), description deliber
 for the release text pass. `ApplyToZone` adds it to every carved cell EXCEPT the mouth (stays
 raw, the doorstep worn back to rock — the sim's exact exclusion) and water cells; the applied
 log line now reads `N cells carved (P padded)`. XML strict-valid, text rules clean, compile 0
-errors, both files deployed hash-verified. **Status: `log-confirmed pending, awaiting in-game
-verification` — and the floor only exists in zones built AFTER the deploy; already-visited
-warrens are baked and stay bare-rock, so judge it on a fresh zone or a fresh world.**
+errors, both files deployed hash-verified. **BLUEPRINT KILLED SAME SITTING — USER RULED
+2026-08-24 ("we don't need to do a rename, just use the base game parent for the floor"):**
+`Cleo_TerraFirma_PaddedEarth` deleted the hour it was born; `ApplyToZone` places stock
+`DirtFloor` directly, so warren floors read "packed dirt floor" in game, the same object under
+every base hut. "Padded earth" survives as the design word for the layer, not as a shipped
+name; the sim's `w`/`k` render tint is now a known cosmetic delta from the game's `&w`/`w`
+(sim-side only, flag if it ever misleads a judging sitting). Recompiled 0 errors, redeployed
+hash-verified. **Status: `log-confirmed pending, awaiting in-game verification` — and the
+floor only exists in zones built AFTER the deploy; already-visited warrens are baked and stay
+bare-rock, so judge it on a fresh zone or a fresh world.**
 
 **WARREN FLOOR PORTED + PLAIN ROOMS GET TRACES — USER FLAG 2026-08-18** (*"this working site
 generated dressed pretty light"*, with screenshot): two deliberate gaps closed. (1) Role-plain
