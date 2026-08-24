@@ -1363,8 +1363,14 @@ on a padded interior is the last box; only zones built after the deploy carry it
     cider-pitcher idiom; game map → `Vase` / `Jug`). Sim-measured, 514 sites: 50 vases, 38
     jugs, pitchers still lead (they also ride the work tables), 0 guard errors. Compile 0
     errors, deployed hash-verified. `log-confirmed pending` on next zone builds. ON FILE, not
-    built: `Jug Eastern Style`/`Jug Wide Eastern Style` (tile variants) as future ids; base
-    `Cider Vase` exists and could retire the pitcher_cider → Wine Pitcher port debt if wanted.
+    built: `Jug Eastern Style`/`Jug Wide Eastern Style` (tile variants) as future ids.
+    - **BOTH FLOATS TAKEN — USER RULED same sitting ("we could retire that + we could add
+      vases and jugs to work tables"), BUILT + PORTED:** (1) cider-pitcher debt RETIRED, the
+      game map now reads `pitcher_cider → Cider Vase` (a real base cider vessel; sim id and
+      rig art unchanged, the NOT-ported list pruned); (2) vase + jug rows joined the SOCKET
+      table at weight 2 each (water and oil at the work face; the heavy Nothing share stands).
+      Sim-measured, 514 sites: vases 50 → 61, jugs 38 → 64 with the socket rows in, 0 guard
+      errors. Compile 0 errors, deployed hash-verified. `log-confirmed pending`.
 
 **WARREN FLOOR PORTED + PLAIN ROOMS GET TRACES — USER FLAG 2026-08-18** (*"this working site
 generated dressed pretty light"*, with screenshot): two deliberate gaps closed. (1) Role-plain

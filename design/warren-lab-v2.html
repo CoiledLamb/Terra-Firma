@@ -1265,8 +1265,9 @@ const ITEMS={
   // cider"). Kline is a real blueprint (sw_cot, &w/W). The plain BENCH rejoins:
   // user amended the 08-17 cut to the ORNATE bench specifically (its text
   // carried the tomb register; the plain one is just a bench). Cider pitcher
-  // is a port-time blueprint (clay pitcher + cider LiquidVolume); both
-  // pitchers share v1's art in the rig.
+  // debt RETIRED 2026-08-24 (user: "we could retire that"): the game maps
+  // pitcher_cider to base Cider Vase, a real cider vessel; sim id and art
+  // stand-in unchanged. Both pitchers share v1's art in the rig.
   kline:{g:'≡',fg:'#cfc041',qt:['sw_cot'],tc:'w',dc:'W'},
   'bg.bench':{g:'╦',fg:'#b1a98e',qt:['sw_bench'],tc:'w',dc:'y'},
   pitcher_wine:{g:'¿',fg:'#b154cf',qt:['bg_wine_pitcher'],baked:1},
@@ -1302,7 +1303,7 @@ const STACKSETS={stack1:['stack1','stack1a','stack1b'],stack2:['stack2','stack2a
 const DRESS={
   // break-spot rows (cushion/bedroll/wine) added 2026-08-18 - USER: "more
   // leisure spots for worksites". Weights CLAUDE dials.
-  socket:[[55,null],[18,'stack1'],[8,{i:'straytorch',hint:'face'}],[5,{i:'pickaxe',hint:'face'}],[5,'trash'],[2,'chest'],[4,'bg.floor_cushion'],[3,'bg.bedroll'],[2,'pitcher_wine'],[4,'basket_stones']],
+  socket:[[55,null],[18,'stack1'],[8,{i:'straytorch',hint:'face'}],[5,{i:'pickaxe',hint:'face'}],[5,'trash'],[2,'chest'],[4,'bg.floor_cushion'],[3,'bg.bedroll'],[2,'pitcher_wine'],[4,'basket_stones'],[2,'bg.vase'],[2,'bg.clay_jug']],
   gallerybay:[[50,null],[18,'bg.random_stone_statue'],[12,'largeboulder'],[10,'stack2'],[5,'chest'],[5,'straytorch'],[6,'pitcher_wine']],
   gallerypillar:[[62,null],[20,'bg.random_stone_statue'],[10,'straytorch'],[8,'stack1'],[8,'bg.bench'],[6,'bg.floor_cushion']],
   galleryfloor:[[47,null],[25,{i:'largeboulder',hint:'center'}],[15,{i:'bg.random_stone_statue',hint:'center'}],[5,{i:'bg.village_monument_stele',hint:'center'}],[8,{i:'firedish',hint:'center'}]]

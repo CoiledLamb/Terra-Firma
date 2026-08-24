@@ -1536,12 +1536,11 @@ namespace Cleo.TerraFirma.Scripts
 		// dials are the sim's verbatim (warren-lab-v2.html dressSite; v1
 		// provenance markers live there). Deliberately NOT ported, flagged loud:
 		// commons pre-etched walls (Part_Etchable integration gets its own look),
-		// basket contents poptables (baskets place empty), the cider pitcher
-		// blueprint (maps to Wine Pitcher for now), catch basin (no confirmed
+		// basket contents poptables (baskets place empty), catch basin (no confirmed
 		// base blueprint name; dropped from the liquid pool), cold-brazier and
 		// cold-firedish art (light parts stripped; sprite may still read lit).
 		private class Row { public int Wt; public string Id, Hint; public Row(int w, string id, string hint = null) { Wt = w; Id = id; Hint = hint; } }
-		private static readonly Row[] T_SOCKET = { new Row(55,null), new Row(18,"stack1"), new Row(8,"straytorch","face"), new Row(5,"pickaxe","face"), new Row(5,"trash"), new Row(2,"chest"), new Row(4,"bg.floor_cushion"), new Row(3,"bg.bedroll"), new Row(2,"pitcher_wine"), new Row(4,"basket_stones") };
+		private static readonly Row[] T_SOCKET = { new Row(55,null), new Row(18,"stack1"), new Row(8,"straytorch","face"), new Row(5,"pickaxe","face"), new Row(5,"trash"), new Row(2,"chest"), new Row(4,"bg.floor_cushion"), new Row(3,"bg.bedroll"), new Row(2,"pitcher_wine"), new Row(4,"basket_stones"), new Row(2,"bg.vase"), new Row(2,"bg.clay_jug") };
 		private static readonly Row[] T_GALLERYBAY = { new Row(50,null), new Row(18,"bg.random_stone_statue"), new Row(12,"largeboulder"), new Row(10,"stack2"), new Row(5,"chest"), new Row(5,"straytorch"), new Row(6,"pitcher_wine") };
 		private static readonly Row[] T_GALLERYPILLAR = { new Row(62,null), new Row(20,"bg.random_stone_statue"), new Row(10,"straytorch"), new Row(8,"stack1"), new Row(8,"bg.bench"), new Row(6,"bg.floor_cushion") };
 		private static readonly Row[] T_GALLERYFLOOR = { new Row(47,null), new Row(25,"largeboulder","center"), new Row(15,"bg.random_stone_statue","center"), new Row(5,"bg.village_monument_stele","center"), new Row(8,"firedish","center") };
@@ -2199,7 +2198,7 @@ namespace Cleo.TerraFirma.Scripts
 			{ "bg.table", "Table" }, { "bg.workbench", "Workbench" },
 			{ "bg.animation_table", "Cleo_TerraFirma_AnimationTable" }, // sketch vocab reserved 2026-08-24; no sketch uses it yet
 
-			{ "bg.wine_pitcher", "Wine Pitcher" }, { "pitcher_wine", "Wine Pitcher" }, { "pitcher_cider", "Wine Pitcher" },
+			{ "bg.wine_pitcher", "Wine Pitcher" }, { "pitcher_wine", "Wine Pitcher" }, { "pitcher_cider", "Cider Vase" },
 			{ "bg.vase", "Vase" }, { "bg.clay_jug", "Jug" },
 			{ "bg.anvil", "Anvil" }, { "bg.oven", "Oven" }, { "bg.hookah", "Hookah" }, { "bg.bench", "Bench" },
 			{ "kline", "Kline" }, { "stool", "Stool" }, { "kiln", "Kiln" },
