@@ -1333,7 +1333,9 @@ per-zone key, sim-validated 2026-08-18, NOT GREENLIT). Options put to the user: 
 scout-and-quota, the real fix, also answers the census shortfall and flourishing supply ·
 (b) park the pass-over encounter until then · (c) force-build the zone at prompt time and ask
 only if a warren stands (travel hitch, materializes zones early - brute, works) · (d) accept
-lying rumors as flavor. AWAITING RULING.
+lying rumors as flavor. AWAITING RULING — deliberately deferred (user, same day: "i'll
+generate a few more batches before deciding"); do not nudge, the evidence-gathering is the
+user's own.
 
 **PADDED EARTH PORT GAP — USER FLAG IN GAME 2026-08-24 ("i see a thing we are doing different
 from the sim - the inside of warrens aren't using padded earth floors"), FIXED same sitting.**
