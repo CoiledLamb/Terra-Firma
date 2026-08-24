@@ -44,6 +44,16 @@ namespace XRL.World.WorldBuilders
 					string secretID = Builder.AddSecret(zoneID, "a quarry warren",
 						new string[3] { "stonecarver", "settlement", "humanoid" }, "Settlements");
 					Builder.AddLocationFinder(zoneID, secretID);
+					// PASS-OVER ENCOUNTER (user ask 2026-08-23): the village/lair
+					// idiom - an optional would-you-like-to-investigate on crossing
+					// the parasang. Sensory register per the goatfolk precedent
+					// ("You smell roasted boar nearby"), ours is sound. LINE IS
+					// DRAFT, user voice owed. Rides the same known first-visit-dud
+					// hole as the map note (rare post-bundle; claims that refuse
+					// self-erase their note but this entry fires before the build).
+					pTravel?.AddEncounter(new XRL.World.Parts.EncounterEntry(
+						"You hear the ring of hammers on stone nearby. Would you like to investigate?",
+						zoneID, "", secretID, Optional: true));
 					// non-hostile by goal statement -> friendlySettlements
 					// (CLAUDE call, delegated plumbing; forts use enemySettlements)
 					Builder.worldInfo.friendlySettlements.Add(new GeneratedLocationInfo

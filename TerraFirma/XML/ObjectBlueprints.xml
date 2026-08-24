@@ -86,7 +86,12 @@
   <!-- ===== Painter vertical-slice test objects (2026-07-25). All names/descriptions are DRAFT pending user sign-off. ===== -->
   <!-- Fire dish: inherits Campfire wholesale so the flame VFX come free (AnimatedMaterialFire + PrefabImposter particle flames + LightSource). Tile expects Textures/firedish.png (not yet supplied). -->
   <object Name="Cleo_TerraFirma_FireDish" Inherits="Campfire">
-    <part Name="Render" Tile="firedish.png" DisplayName="carved fire dish" />
+    <!-- USER 2026-08-23: "firepits should be brown or grey (your pick) not red".
+         Pick was GREY; SUPERSEDED 2026-08-24, USER RULED BROWN ("fire dish could
+         be brown also?", at the shale-recolor sitting). Brown = &w body; detail
+         r is the shale family inverted (blocks are &r/w), CLAUDE rendering
+         call, strikeable. -->
+    <part Name="Render" Tile="firedish.png" DisplayName="carved fire dish" ColorString="&amp;w" TileColor="&amp;w" DetailColor="r" />
     <part Name="Description" Short="A wide basin of dressed stone cradles a bed of embers." />
     <!-- USER 2026-08-23 (fire dish now rolls the dwelling light pool, so both
          were loud): no flash when lit, i.e. Campfire's inherited
@@ -104,6 +109,21 @@
        column being filled NOW, grade 3 is finished stock; the yard recipe reads
        time through them (fill ordering RULED 2026-07-27). DisplayName DRAFT;
        descriptions deliberately absent, ride the release text pass. -->
+  <!-- Moss clump (USER RULED 2026-08-23: wall moss is harvestable, wall reverts).
+       Mirrors base's own Clump of Grave Moss (a Snack): tile is that clump
+       RECOLORED PLACEHOLDER (sprite debt filed, house convention); description
+       absent for the release pass. NAME FORMAT USER-RULED same day ("clump of
+       (dark grey)cave(green)moss" - no space, split-colored); dark grey mapped
+       to the K code, CLAUDE rendering call, strikeable. COOKING: gets an effect
+       later per the user - only the lithovore cooking conversation is benched;
+       this item's effect is planned work, not quarantined. -->
+  <object Name="Cleo_TerraFirma_MossClump" Inherits="Snack">
+    <part Name="Render" DisplayName="clump of {{K|cave}}{{green|moss}}" ColorString="&amp;g" DetailColor="K" RenderString="%" Tile="Items/sw_grave_moss_clump.bmp" />
+    <part Name="Physics" Weight="1" Organic="true" />
+    <part Name="Commerce" Value="1" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
+
   <object Name="Cleo_TerraFirma_QuarryStones1" Inherits="Furniture">
     <part Name="Render" Tile="quarrystones1a.png" DisplayName="stack of quarried stone" RenderString="#" ColorString="&amp;r" TileColor="&amp;r" DetailColor="w" Occluding="false" />
     <builder Name="RandomTile" Tiles="quarrystones1a.png,quarrystones1b.png" />
