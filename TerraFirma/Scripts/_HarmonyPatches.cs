@@ -18,6 +18,9 @@ namespace Cleo.TerraFirma.Scripts.Patches
 	//   1. Scanning.HasScanningFor postfix (gemstone scan) -- no native hook exists.
 	//   2-4. The Lithovore meal-policy patches PARKED on branch quarantine-hold 2026-08-22
 	//        with the Lithovore mutation (user ruling); restore from that branch.
+	// (The seismophone beep fix was drafted here 2026-08-24 and moved to a native seam the
+	//  same sitting on the user's "can we do it without harmony?": ApplyEffectEvent veto via
+	//  cross-object RegisterEvent, see Part_Seismophone.cs.)
 	[HarmonyPatch]
 	class HarmonyPatches
 	{

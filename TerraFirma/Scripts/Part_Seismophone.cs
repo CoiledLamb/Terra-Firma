@@ -28,6 +28,13 @@ namespace XRL.World.Parts
 		/// instead of every turn.</summary>
 		public bool WasGranted;
 
+		/// <summary>Instrumentation shadow (2026-08-24 beep hunt): whether the wearer carried
+		/// the hidden HeightenedHearingEffect last turn. Diagnosis under test: the mutation's
+		/// EndTurn sweep stamps the effect on every Combat object in radius INCLUDING the
+		/// listener at distance 0, and that self-effect's removal on grant loss is what plays
+		/// sfx_statusEffect_stop (Effect.RemoveSound fires for effects dying on the player).</summary>
+		public bool HadSelfEffect;
+
 		public Cleo_TerraFirma_Seismophone()
 		{
 			ClassName = "HeightenedHearing";
@@ -57,6 +64,40 @@ namespace XRL.World.Parts
 			return "NoWallContact";
 		}
 
+		// Beep fix (user flag 2026-08-24, "it plays a sound when you leave the walls radius";
+		// no-Harmony per the user, same sitting). Root cause: HeightenedHearing's EndTurn sweep
+		// stamps its hidden effect on every Combat object in radius INCLUDING the listener at
+		// distance 0, and Effect.RemoveSound plays sfx_statusEffect_stop for any effect dying
+		// on the player - so the self-stamp's removal beeped on every wall-departure (repro'd
+		// in-log + by ear). Fix: veto the self-stamp so it never exists. ApplyEffectEvent is
+		// cascade 0 and never reaches equipment, so we register on the wearer directly - the
+		// CyberneticsAirCurrentMicrosensor idiom, Serialize:true so it survives save/load.
+		// Another creature's hearing stamping ITS effect on our wearer has Listener != wearer
+		// and passes untouched.
+
+		public override bool HandleEvent(EquippedEvent E)
+		{
+			E.Actor.RegisterEvent(this, ApplyEffectEvent.ID, 0, Serialize: true);
+			return base.HandleEvent(E);
+		}
+
+		public override bool HandleEvent(UnequippedEvent E)
+		{
+			E.Actor.UnregisterEvent(this, ApplyEffectEvent.ID);
+			return base.HandleEvent(E);
+		}
+
+		public override bool HandleEvent(ApplyEffectEvent E)
+		{
+			if (E.Effect is XRL.World.Effects.HeightenedHearingEffect fx
+				&& fx.Listener == ParentObject.Equipped)
+			{
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SEISMO", "self-stamp vetoed");
+				return false;
+			}
+			return base.HandleEvent(E);
+		}
+
 		public override bool HandleEvent(EndTurnEvent E)
 		{
 			bool result = base.HandleEvent(E);
@@ -65,6 +106,18 @@ namespace XRL.World.Parts
 				WasGranted = MutationWasAdded;
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SEISMO",
 					WasGranted ? "hearing granted (powered, wall contact)" : "hearing removed");
+			}
+			GameObject wearer = ParentObject.Equipped;
+			if (wearer != null && wearer.IsPlayer())
+			{
+				bool selfFx = wearer.HasEffect(typeof(XRL.World.Effects.HeightenedHearingEffect));
+				if (selfFx != HadSelfEffect)
+				{
+					HadSelfEffect = selfFx;
+					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SEISMO", selfFx
+						? "self-effect STAMPED on wearer (hidden HeightenedHearingEffect, distance 0)"
+						: "self-effect REMOVED from wearer <- if the beep lands here, diagnosis confirmed");
+				}
 			}
 			return result;
 		}
