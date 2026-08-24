@@ -743,6 +743,19 @@ namespace Cleo.TerraFirma.Scripts
 			Helpers.VerifyLog("CRICKET", "tfcricket granted");
 		}
 
+		/// <summary>Seismophone dev door (2026-08-23): the ear plus a piezoelectric cell to feed it.</summary>
+		[WishCommand(Command = "tfseismophone")]
+		public static void SeismophoneKit()
+		{
+			GameObject Ply = The.Player;
+			if (Ply == null)
+				return;
+			Ply.ReceiveObject(GameObject.Create("Cleo_TerraFirma_Seismophone"));
+			Ply.ReceiveObject(GameObject.Create("Cleo_TerraFirma_GrinderCell"));
+			MessageQueue.AddPlayerMessage("tfseismophone: seismophone + piezoelectric cell received. socket the cell, switch it on, stand by a wall.", Capitalize: false);
+			Helpers.VerifyLog("SEISMO", "tfseismophone kit granted");
+		}
+
 		/// <summary>Box of chalk dev door (2026-08-22): the box plus a chalkboard to write on.</summary>
 		[WishCommand(Command = "tfchalk")]
 		public static void ChalkKit()

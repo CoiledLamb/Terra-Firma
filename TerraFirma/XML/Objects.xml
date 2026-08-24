@@ -178,6 +178,36 @@ Perishes when unequipped." />
 		<tag Name="LiveAnimal" />
 		<!-- exclude LIFTED 2026-08-22; rides the Symbiotic Firefly artifact tables via PopulationTables.xml merges -->
 	</object>
+	<!-- Seismophone (name RULED 2026-08-22, wall-ear retired; description USER TEXT FINAL,
+	     NOT among the evening re-delivery's superseded three, so the lowercase original ships).
+	     Mechanic per the user: "grants heightened hearing when you're adjacent to a wall and
+	     it's powered." Pre-build rulings 2026-08-23: ANY wall counts; hearing level 2 (radius 7);
+	     tier 3; the aquifer liquid-ping half SKIPPED; grant toggles silently. The conditional
+	     lives in Part_Seismophone.cs, a MutationOnEquip subclass riding the base part's own
+	     re-check events. Powered profile = night-vision goggles grammar (socket + switch,
+	     1 charge/turn). Acquisition: tinkering (ruled) or wish tfseismophone; dynamic loot and
+	     the stonecarver kit-spread lane stay unwired, that lane is its own docket. -->
+	<object Name="Cleo_TerraFirma_Seismophone" Inherits="BaseHelmet">
+		<part Name="Armor" AV="0" DV="1" WornOn="Head" />
+		<part Name="Render" DisplayName="seismophone" RenderString="]" ColorString="&amp;y" TileColor="&amp;y" DetailColor="c" Tile="Items/sw_teleprojector.bmp" /> <!-- base teleprojector tile (coiled antennae read as listening wire); CLAUDE pick per the art-bar ruling, bespoke sprite lands if the user makes one -->
+		<part Name="Physics" Weight="2" />
+		<part Name="Commerce" Value="150" />
+		<part Name="Description" Short="a thin shim of wire encloses a whispering ear. when pressed against the earth, it speaks." />
+		<part Name="RulesDescription" Text="Functions only while the wearer is beside a wall." /> <!-- DRAFT (Claude); the "Grants you Heightened Hearing at level 2." line is appended by the part itself -->
+		<part Name="Cleo_TerraFirma_Seismophone" />
+		<part Name="Examiner" Complexity="3" />
+		<part Name="EnergyCellSocket" SlotType="EnergyCell" />
+		<part Name="PowerSwitch" EnergyCost="100" FlippableWithoutUnderstanding="true" ActivateSuccessMessage="" ActivateFailureMessage="" DeactivateSuccessMessage="" DeactivateFailureMessage="" />
+		<part Name="Metal" />
+		<part Name="ItemElements" Elements="circuitry::2" />
+		<!-- TINKERABLE BY RULING (user 2026-08-22: "only one i'd want tinkerable are the
+		     seismophone and the grinder cell"). Bits="0003" = night-vision goggles parity, tier 3. -->
+		<part Name="TinkerItem" Bits="0003" CanDisassemble="true" CanBuild="true" />
+		<tag Name="EquipSound" Value="sfx_equip_armor_artifact_light" />
+		<tag Name="Mods" Value="HelmetMods,HeadwearMods,CommonMods,ElectronicsMods" />
+		<tag Name="Tier" Value="3" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
 	<!-- Box of chalk + chalk line (design sitting 2026-08-22, all four forks user-ruled:
 	     auto-orient strokes, draw adjacent, chalkboard writing typed AND markov, 8-12 uses).
 	     Description PENDING (user writes it). Line sprites = the eight chalkline*.png user
