@@ -1898,8 +1898,17 @@ namespace Cleo.TerraFirma.Scripts
 				else if (p.Role == "dwelling") DressDwelling(p);
 				else if (p.Role == "plain")
 				{
+					// SIZE-SCALED TRACES (user feel flag in game 2026-08-24,
+					// "still a bit bare"): one roll per den-threshold of floor
+					// (24, the engine's own number), cap 3 - the scaling shape
+					// faces already use. Nothing weights per roll untouched;
+					// a plain room is still allowed to be plain, it just is
+					// not forever one-roll regardless of size. Sim-measured:
+					// big plains 2.9 items avg, site totals unmoved.
 					var cs = CellsOf(p);
-					if (cs.Count > 0 && !Seat(p, WRoll(T_PLAINTRACE), cs)) misses.Add((T_PLAINTRACE, p, cs));
+					int rolls = Math.Max(1, Math.Min(3, cs.Count / 24 + 1));
+					for (int ri = 0; ri < rolls; ri++)
+						if (cs.Count > 0 && !Seat(p, WRoll(T_PLAINTRACE), cs)) misses.Add((T_PLAINTRACE, p, cs));
 				}
 			}
 			if (roles.YardRect != null) DressYard(roles.YardRect, roles.YardState ?? "working");

@@ -1337,9 +1337,23 @@ errors, both files deployed hash-verified. **BLUEPRINT KILLED SAME SITTING — U
 every base hut. "Padded earth" survives as the design word for the layer, not as a shipped
 name; the sim's `w`/`k` render tint is now a known cosmetic delta from the game's `&w`/`w`
 (sim-side only, flag if it ever misleads a judging sitting). Recompiled 0 errors, redeployed
-hash-verified. **Status: `log-confirmed pending, awaiting in-game verification` — and the
-floor only exists in zones built AFTER the deploy; already-visited warrens are baked and stay
-bare-rock, so judge it on a fresh zone or a fresh world.**
+hash-verified. **LOG-CONFIRMED same day, 7 warren builds on the post-deploy world: every
+applied line reads exactly `N cells carved (N-1 padded)` — 184/183, 83/82, 79/78, 111/110,
+72/71, 266/265, 81/80 — the single unpadded cell per site being the mouth, the ruled
+exclusion proven by arithmetic; zero MODERRORs. (Same sweep: room floor fired 3 more times,
+4 total in game.) Status: `log-confirmed, awaiting in-game verification` — the user's eyeball
+on a padded interior is the last box; only zones built after the deploy carry it.**
+  - **USER-VERIFIED IN GAME same day, with a fresh flag and its own counter-example, both
+    screenshots on file: "perfect! looking homier, but still a bit bare" → then "this warren
+    generated with quite a bit though."** Padded earth CLOSES verified. The two screenshots
+    bracket the ruled variance band ("density variance IS the freshness"): the rich end reads
+    right, the barren tail was BIG PLAIN ROOMS, which took exactly one trace roll at any size.
+    **SIZE-SCALED TRACES BUILT + PORTED same sitting (dial CLAUDE's, mechanism mirrors the
+    face's own scaling):** plains roll once per den-threshold of floor (24, the engine's
+    number), cap 3, Nothing weights per roll untouched. Sim-measured, 414 sites / 291 plains:
+    big plains 2.88 items avg vs small 2.03, zero bare, site med/p90 40/53 UNMOVED — only the
+    tail lifts, the variance law stands. Compile 0 errors, deployed hash-verified.
+    `log-confirmed pending` on next zone builds.
 
 **WARREN FLOOR PORTED + PLAIN ROOMS GET TRACES — USER FLAG 2026-08-18** (*"this working site
 generated dressed pretty light"*, with screenshot): two deliberate gaps closed. (1) Role-plain

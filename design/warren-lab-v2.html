@@ -1607,8 +1607,16 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
     else if(p.role==='commons') dressCommons(p);
     else if(p.role==='dwelling') dressDwelling(p);
     else if(p.role==='plain'){
+      // SIZE-SCALED TRACES (user feel flag in game 2026-08-24, "still a bit
+      // bare", padded-earth screenshot: the emptiest spaces are big plains).
+      // One roll per den-threshold of floor (24 = the engine's own number),
+      // cap 3 - the same scaling shape faces already use. Nothing weights
+      // per roll untouched; RULE 9 stands, a plain room is still allowed to
+      // be plain, it just is not forever one-roll regardless of size.
       const cs=cellsOf(p);
-      if(cs.length&&!seat(p,wroll(PLAINTRACE),cs)) misses.push([PLAINTRACE,p,cs]);
+      const rolls=Math.max(1,Math.min(3,Math.floor(cs.length/24)+1));
+      for(let ri=0;ri<rolls;ri++)
+        if(cs.length&&!seat(p,wroll(PLAINTRACE),cs)) misses.push([PLAINTRACE,p,cs]);
     }
   }
   if(yardRec&&yardRec.rect) dressYard(yardRec.rect, yardRec.state||'working');
