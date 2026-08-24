@@ -208,6 +208,23 @@ Perishes when unequipped." />
 		<tag Name="Tier" Value="3" />
 		<tag Name="ExcludeFromDynamicEncounters" />
 	</object>
+	<!-- Figurine animation table (design sitting 2026-08-24, all forks user-ruled; build
+	     docket opened same day, "lets build it"). Internal EnergyCell BY RULING - no socket,
+	     so the cell is tinker-rechargeable but unstealable. Exchange verb lives in
+	     Part_AnimationTable.cs (target-side per the ergonomics ruling). Cell numbers +
+	     animation cost are CLAUDE DIALS. Spawn layer: wish tffigtable + the warren painter's
+	     sketch vocabulary (bg.animation_table); poptable wiring is its own open ruling. -->
+	<object Name="Cleo_TerraFirma_AnimationTable" Inherits="Furniture">
+		<part Name="Render" DisplayName="animation table" RenderString="227" Tile="Assets_Content_Textures_Tiles_sw_table.bmp" ColorString="&amp;y" TileColor="&amp;y" DetailColor="K" Occluding="false" RenderIfDark="true" /> <!-- base table tile, stone greys; name + look are DRAFT, user's domain -->
+		<part Name="Physics" Weight="200" Takeable="false" Organic="false" />
+		<part Name="Description" Short="placeholder description >:)" /> <!-- USER WRITES IT, statue-maker placeholder per the batch ruling -->
+		<part Name="Cleo_TerraFirma_AnimationTablePart" />
+		<part Name="EnergyCell" Charge="0" MaxCharge="5000" StartCharge="1000-3000" />
+		<part Name="Examiner" Complexity="3" />
+		<part Name="MissileCover" Percentage="10" />
+		<tag Name="Tier" Value="3" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
 	<!-- Box of chalk + chalk line (design sitting 2026-08-22, all four forks user-ruled:
 	     auto-orient strokes, draw adjacent, chalkboard writing typed AND markov, 8-12 uses).
 	     Description PENDING (user writes it). Line sprites = the eight chalkline*.png user

@@ -2161,6 +2161,8 @@ namespace Cleo.TerraFirma.Scripts
 			{ "bg.floor_cushion", "Floor Cushion" }, { "bg.canvas_folding_chair", "Canvas Folding Chair" },
 			{ "bg.bed", "Bed" }, { "bg.bedroll", "Bedroll" }, { "bg.folding_cot", "Folding Cot" },
 			{ "bg.table", "Table" }, { "bg.workbench", "Workbench" },
+			{ "bg.animation_table", "Cleo_TerraFirma_AnimationTable" }, // sketch vocab reserved 2026-08-24; no sketch uses it yet
+
 			{ "bg.wine_pitcher", "Wine Pitcher" }, { "pitcher_wine", "Wine Pitcher" }, { "pitcher_cider", "Wine Pitcher" },
 			{ "bg.anvil", "Anvil" }, { "bg.oven", "Oven" }, { "bg.hookah", "Hookah" }, { "bg.bench", "Bench" },
 			{ "kline", "Kline" }, { "stool", "Stool" }, { "kiln", "Kiln" },
@@ -2476,11 +2478,29 @@ namespace Cleo.TerraFirma.Scripts
 						carved++;
 					}
 				}
+			// MOSS AS A LIVING COAT (USER RULED 2026-08-23: "shale that has grown
+			// mossy should be prefixed green|mossy shale. the moss should be
+			// harvestable, reverting the wall to its basic form"). Stock
+			// Harvestable carries the whole loop - DestroyOnHarvest=false keeps
+			// the wall, Unripe* holds the wall's ORIGINAL palette captured here,
+			// harvest drops the moss clump and the render reverts natively; the
+			// MossyWall part adds the name adjective only while Ripe. Regen
+			// deliberately off (RegenTime unset) - regrowth is an unruled float.
 			foreach (int i in MossCells(g))
 			{
 				Cell c = Z.GetCell(i % g.W, i / g.W);
 				GameObject wall = c?.GetWalls().FirstOrDefault();
 				if (wall?.Render == null) continue;
+				var h = wall.RequirePart<XRL.World.Parts.Harvestable>();
+				h.Ripe = true;
+				h.DestroyOnHarvest = false;
+				h.OnSuccess = "Cleo_TerraFirma_MossClump";
+				h.OnSuccessAmount = "1";
+				h.RipeColor = "&K"; h.RipeTileColor = "&K"; h.RipeDetailColor = "g";
+				h.UnripeColor = wall.Render.ColorString ?? "";
+				h.UnripeTileColor = wall.Render.TileColor ?? "";
+				h.UnripeDetailColor = wall.Render.DetailColor ?? "";
+				wall.RequirePart<XRL.World.Parts.Cleo_TerraFirma_MossyWall>();
 				wall.Render.TileColor = "&K";
 				wall.Render.ColorString = "&K";
 				wall.Render.DetailColor = "g";

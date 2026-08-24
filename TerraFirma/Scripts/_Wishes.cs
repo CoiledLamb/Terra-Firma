@@ -756,6 +756,29 @@ namespace Cleo.TerraFirma.Scripts
 			Helpers.VerifyLog("SEISMO", "tfseismophone kit granted");
 		}
 
+		/// <summary>Animation table dev door (2026-08-24): the table placed beside you plus
+		/// figurines in two materials to feed it.</summary>
+		[WishCommand(Command = "tffigtable")]
+		public static void AnimationTableKit()
+		{
+			GameObject Ply = The.Player;
+			Cell origin = Ply?.CurrentCell;
+			if (origin == null)
+				return;
+			Cell spot = origin.GetFirstEmptyAdjacentCell(1, 2);
+			if (spot == null)
+			{
+				MessageQueue.AddPlayerMessage("tffigtable: no open ground for the table.", Capitalize: false);
+				return;
+			}
+			spot.AddObject(GameObject.Create("Cleo_TerraFirma_AnimationTable"));
+			Ply.ReceiveObject(GameObject.Create("Cleo_TerraFirma_Random Stone Figurine"));
+			Ply.ReceiveObject(GameObject.Create("Cleo_TerraFirma_Random Stone Figurine"));
+			Ply.ReceiveObject(GameObject.Create("Random Copper Figurine"));
+			MessageQueue.AddPlayerMessage("tffigtable: animation table placed + 3 figurines received. interact with the table.", Capitalize: false);
+			Helpers.VerifyLog("FIGTABLE", "tffigtable kit granted");
+		}
+
 		/// <summary>Box of chalk dev door (2026-08-22): the box plus a chalkboard to write on.</summary>
 		[WishCommand(Command = "tfchalk")]
 		public static void ChalkKit()
