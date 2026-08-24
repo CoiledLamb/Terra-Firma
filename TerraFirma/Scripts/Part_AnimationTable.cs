@@ -142,6 +142,14 @@ namespace XRL.World.Parts
 			// identity echo: "animate stone snapjaw figurine"
 			walker.Render.DisplayName = "animate " + figurine.DisplayNameOnlyStripped;
 
+			// description echo (RULED 2026-08-24, "the description should copy the figurine
+			// description"): the walker wears the item's own text verbatim, material and
+			// depicted-creature passage included; the chassis draft stays for mason escorts
+			Description figDesc = figurine.GetPart<Description>();
+			Description walkerDesc = walker.GetPart<Description>();
+			if (figDesc != null && walkerDesc != null)
+				walkerDesc._Short = figDesc._Short;
+
 			// faction feeling: the same allegiance list base RandomFigurine feeds its AddsRep
 			// from, copied onto the walker's own brain (quarriers membership kept from the
 			// blueprint; only new keys added)
