@@ -90,7 +90,7 @@
       <label title="draw with Qud's own extracted sprites: walls picked by the same 8-neighbour mask ZoneManager.PaintWall uses (all 256 wall_rock masks are stocked), floors rolling one of four sw_ground_dots"><input type="checkbox" id="qtiles" checked> Qud tiles</label>
       <label title="crop to the carve and black out mass that touches no floor — renders a roll in the same three values as your drawings, for side-by-side. ON by default: comparability is the point. Uncheck to see the whole 80x25 zone."><input type="checkbox" id="drawmode" checked> drawing mode</label>
       <label title="whole-warren trodden floor (user ruled 2026-08-12, whole-warren scope). The floor object masks the Dirty paint underneath, so grass only peeks through in raw canyon — fresh cuts show old ground"><input type="checkbox" id="padded" checked> padded earth</label>
-      <label title="v1's dress tables on the v2 registry (ported 2026-08-18): work evidence on the face, gallery on the commons, typed rooms in dwellings, the quarry-yard recipe on the block yard, natural stones warren-wide. Render toggle only; the dress always rolls, so the census sees it either way. Tense is lived-in; abandoned/reclaimed tables not yet written"><input type="checkbox" id="dressed" checked> dress</label>
+      <label title="v1's dress tables on the v2 registry (ported 2026-08-18): work evidence on the face, gallery on the commons, typed rooms in dwellings, the quarry-yard recipe on the block yard, natural stones warren-wide. Render toggle only; the dress always rolls, so the census sees it either way. Tense pass landed 2026-08-18: abandoned goes dark with heavy trash, reclaimed adds snapjaw fires; yard states ride occupancy"><input type="checkbox" id="dressed" checked> dress</label>
       <label title="tint the haulage way so you can see the global layer's decision"><input type="checkbox" id="showart"> show artery</label>
       <label>zoom <select id="genzoom"><option value="6">S</option><option value="10" selected>M</option><option value="16">L</option></select></label>
       <span id="status"></span>
@@ -1858,6 +1858,29 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
       }
     }
   }
+  // ROOM FLOOR - the warren-floor law one level down (USER DOCKET 2026-08-24:
+  // rooms should spawn with *some* kind of decoration). Runs LAST on purpose:
+  // natural scatter and tense trash count as decoration, so the pass only
+  // catches rooms that end the whole dress with ZERO items - measured 109 of
+  // 1651 rooms (6.6%), all face (7%) or plain (18%), median 17 cells. Such a
+  // room re-rolls its OWN table with the Nothing row removed - same cells,
+  // same hints, same guards. Per-space Nothing weights stay as ruled and
+  // count variance stays (the 08-12 freshness law); only the zero collapses
+  // to one. Dwellings never need it (budget floors at 1) and the yard
+  // dresses its rect. A room where no cell is legal stays bare and counts in
+  // refused - the honest limit, same as the 4-cell-closet case.
+  S.roomFloor=0;
+  if(K.roomFloor){
+    const roomTbl=p=>p.role==='face'?DRESS.socket
+      :p.role==='plain'?PLAINTRACE
+      :p.role==='commons'?DRESS.galleryfloor:null;
+    for(const p of pockets){
+      const tbl=roomTbl(p); if(!tbl) continue;
+      const cs=cellsOf(p); if(!cs.length) continue;
+      if(cs.some(([x,y])=>g.item[idx(x,y)])) continue;
+      if(seat(p,wrollNo(tbl),cs)) S.roomFloor++;
+    }
+  }
   return S;
 }
 
@@ -2324,6 +2347,7 @@ const KNOBS=[
   ['network','crosscuts','crosscuts',-1,8,-1,'-1 = let the stage decide'],
   ['network','infill','infill rooms',-1,6,-1,'leftover mass claimed as extra single-entrance rooms; -1 = let the stage decide'],
   ['network','driftMax','drift reach',3,16,10,'how far a door or crosscut will bore looking for floor'],
+  ['dress','roomFloor','room floor',0,1,1,'1 = a registered room (face / plain / commons) that dressed to ZERO items takes one re-roll of its own table with the Nothing row removed — the warren-floor law one level down (user docket 2026-08-24: rooms should spawn with *some* kind of decoration). Count variance stays; only the zero collapses to one. A room with no legal cell stays bare and counts refused'],
 ];
 const DEFAULTS={}; for(const [,id,,,,d] of KNOBS) DEFAULTS[id]=d;
 let K={...DEFAULTS};
@@ -2634,7 +2658,7 @@ function statsHtml(r){
     ['pockets', `${r.pockets.length} &middot; ${r.halls}h ${r.plains}p`],
     ['roles', r.roles?`${r.roles.face}face ${r.roles.dwelling}dw ${r.roles.plain}pl${r.roles.commons?' &middot; commons':''}`:'—'],
     ['block yard', r.yard?`${r.yard.state||'?'} &middot; ${r.yard.where} (${r.yard.cells} cells)`:'none', !r.yard],
-    ['dress', r.dress?`${r.dress.items} item(s)${r.dress.refused?` &middot; ${r.dress.refused} refused`:''}`:'—'],
+    ['dress', r.dress?`${r.dress.items} item(s)${r.dress.refused?` &middot; ${r.dress.refused} refused`:''}${r.dress.roomFloor?` &middot; ${r.dress.roomFloor} room-floored`:''}`:'—'],
     ['dwelling types', r.dress&&Object.keys(r.dress.types).length? Object.entries(r.dress.types).map(([k,v])=>v+' '+k).join(', ') : '—'],
     ['infill rooms', r.filled],
     ['pillars / spurs', `${r.pillars} / ${r.spurs}`],

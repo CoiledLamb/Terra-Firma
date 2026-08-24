@@ -2143,7 +2143,30 @@ namespace Cleo.TerraFirma.Scripts
 					}
 				}
 			}
-			return $"{items} items, {tableItems} table, {topups} topups, {refused} solid-refused";
+			// ROOM FLOOR - the warren-floor law one level down (user docket
+			// 2026-08-24: rooms should spawn with *some* kind of decoration).
+			// Runs LAST so natural scatter and tense trash count as decoration:
+			// only a room that ends the whole dress with ZERO items re-rolls
+			// its own table with the Nothing row removed - same cells, same
+			// hints, same guards. Per-space Nothing weights stay as ruled;
+			// count variance survives, only the zero collapses to one.
+			// Dwellings never need it (their budget floors at 1); a room with
+			// no legal cell stays bare and counts refused. Sim-verified
+			// 2026-08-24: 497 sites / 1651 rooms, bare 109 -> 0, density unmoved.
+			int roomFloored = 0;
+			foreach (var p in pockets)
+			{
+				Row[] tbl = p.Role == "face" ? T_SOCKET
+					: p.Role == "plain" ? T_PLAINTRACE
+					: p.Role == "commons" ? T_GALLERYFLOOR : null;
+				if (tbl == null) continue;
+				var cs = CellsOf(p); if (cs.Count == 0) continue;
+				bool hasItem = false;
+				foreach (var c2 in cs) if (g.Item[g.Idx(c2[0], c2[1])] != null) { hasItem = true; break; }
+				if (hasItem) continue;
+				if (Seat(p, WRollNo(tbl), cs)) roomFloored++;
+			}
+			return $"{items} items, {tableItems} table, {topups} topups, {roomFloored} room-floored, {refused} solid-refused";
 		}
 
 		// sim item id -> real blueprint. Every name here is verified against Base

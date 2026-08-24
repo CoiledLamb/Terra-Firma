@@ -1191,6 +1191,15 @@ before any of today's changes. The recorded 5.7/7.8% figures belong to an earlie
 census numbers are STALE for the current defaults. A fresh authoritative census belongs at the
 top of the next sitting, before any number from the handoff era is cited again.
 
+**FRESH AUTHORITATIVE CENSUS — RUN 2026-08-24 (dress sitting opener, current defaults, the
+owed number).** All 1,251 desert-canyon zones at target 25/world: **14 sited (1.12% of canyon
+zones)** — working 11 / camp 3 / **flourishing 0** this run; occupancy in-use 10 / abandoned 1 /
+reclaimed 3; payload-bearing 3; mean floor 146 cells. Consistent with the corrected ~14/world
+baseline above; the 25 target stays missed under blind placement and a zero-flourishing world is
+now an observed outcome, not a corner-math projection — both are the scout-and-quota case as
+recorded, which remains NOT GREENLIT (user's call). These are the citable numbers for the
+current knob era.
+
 **SIGNS-OF-LIFE / LIGHTING PASS — USER 2026-08-18** (*"working needs more signs of life i think
 to differentiate it from abandoned?"* → talked first, then "that sounds fine, yeag"). The answer
 turned out to be a PORT, not a design: v1's ruled lighting machinery had never crossed.
@@ -1272,6 +1281,39 @@ works), and whole claim components under 8 return to rock. **After: min 8, 10% u
 4.3/site — the honest count.** The visual preference lean is RECORDED AS A LEAN, not a ruling:
 the mode toggle (`blockMode`) and the A/B view exist precisely so the default stays the user's
 call after real side-by-side time.
+
+**ROOM FLOOR — USER DOCKET 2026-08-24 ("making sure warren rooms spawn with *some* kind of
+decoration"), BUILT + MEASURED same day.** The warren-floor law one level down. **Measured
+first, 497 sites / 1,651 registered rooms: 109 bare (6.6%) — all face (45/649, 7%) or plain
+(64/351, 18%), median 17 cells, up to 36; dwellings, commons and yards zero-bare by
+construction** (dwelling budget floors at 1; the yard dresses its rect). Cause: a face rolls
+its socket table 1-3 times and every roll can come up Nothing; a plain room takes exactly one
+trace roll; the SITE floor only fires when the whole site is light and picks misses at random,
+so an individual room can stay bare forever. **Built: a room that ends the WHOLE dress with
+zero items re-rolls its own table (face → socket, plain → traces, commons → galleryfloor)
+with the Nothing row removed — same cells, same hints, same guards.** Runs dead LAST on
+purpose, first cut fired 460x from before the natural/trash scatters (rooms that would have
+picked up a stone anyway); moved after them it fired **exactly 109 times — the measured bare
+set, nothing more. Per-space Nothing weights untouched (the 08-12 freshness law); count
+variance survives, only the zero collapses to one. Same-seed carve and all prior dress rolls
+bit-identical (the pass consumes RNG only after the last scatter).** Knob `roomFloor`
+(new dress group, default 1 = CLAUDE dial). **Verified, 497 sites: bare rooms 109 → 0;
+items/site p10/med/p90 26/40/53 (density unmoved); 0 doorless, 0 breaches, 0 disconnects,
+0 refusals, 0 console errors; `node --check` green.** A room where no cell is legal would stay
+bare and count refused (the 4-cell-closet law) — zero such rooms in the batch. Dress line
+shows `N room-floored`. **PORTED TO `WarrenCarver.cs` + DEPLOYED same day (user: "we can ship
+it in game and i'll see it there"):** same block mirrored at the same pipeline point (after the
+tense trash scatter, before the dress return), face → `T_SOCKET`, plain → `T_PLAINTRACE`,
+commons → `T_GALLERYFLOOR`; the `[TF-VERIFY] [WARREN] dress:` line now carries
+`N room-floored`. Compile 0 errors, live dev copy hash-verified. **Status:
+`log-confirmed pending, awaiting in-game verification` — the user is taking the eyeball
+in game directly.**
+  - **NEXT DRESS THREADS QUEUED BY THE USER same docket: "planning out abandoned + flourishing
+    expansions later on"** — planning first, nothing built. What already stands: abandoned =
+    tense pass first slice + dark-site flip + yard states (open: anti-carve chew float,
+    miner-weighted snapjaw poptable fork); flourishing = the leisure stratum ("a table never
+    written, it carries the most culture of any layer" — and by the standing text rule its
+    voice is the user's), leisure gating, the hookah stage call, scout-and-quota supply.
 
 **WARREN FLOOR PORTED + PLAIN ROOMS GET TRACES — USER FLAG 2026-08-18** (*"this working site
 generated dressed pretty light"*, with screenshot): two deliberate gaps closed. (1) Role-plain
