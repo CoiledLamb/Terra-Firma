@@ -1305,15 +1305,34 @@ shows `N room-floored`. **PORTED TO `WarrenCarver.cs` + DEPLOYED same day (user:
 it in game and i'll see it there"):** same block mirrored at the same pipeline point (after the
 tense trash scatter, before the dress return), face → `T_SOCKET`, plain → `T_PLAINTRACE`,
 commons → `T_GALLERYFLOOR`; the `[TF-VERIFY] [WARREN] dress:` line now carries
-`N room-floored`. Compile 0 errors, live dev copy hash-verified. **Status:
-`log-confirmed pending, awaiting in-game verification` — the user is taking the eyeball
-in game directly.**
+`N room-floored`. Compile 0 errors, live dev copy hash-verified. **FIRST IN-GAME FIRING LOGGED same day, during
+the user's tfwarrens sweep (27 claims, 18 real warrens built): `JoppaWorld.11.9.0.1.10`
+(working/abandoned, 2 pockets, floor 73) logged `dress: 7 items, 3 table, 1 topups,
+1 room-floored, 0 solid-refused` — 1 firing over 18 sites, consistent with the sim's ~0.1/site
+rate at these small pocket counts; every other dress line carried the counter at 0 with zero
+MODERRORs.** **Status: `log-confirmed, awaiting in-game verification`** — the user's eyeball
+on a floored room is the last box.
   - **NEXT DRESS THREADS QUEUED BY THE USER same docket: "planning out abandoned + flourishing
     expansions later on"** — planning first, nothing built. What already stands: abandoned =
     tense pass first slice + dark-site flip + yard states (open: anti-carve chew float,
     miner-weighted snapjaw poptable fork); flourishing = the leisure stratum ("a table never
     written, it carries the most culture of any layer" — and by the standing text rule its
     voice is the user's), leisure gating, the hookah stage call, scout-and-quota supply.
+
+**PADDED EARTH PORT GAP — USER FLAG IN GAME 2026-08-24 ("i see a thing we are doing different
+from the sim - the inside of warrens aren't using padded earth floors"), FIXED same sitting.**
+The 2026-08-12 whole-warren ruling had only ever been sim-render; grep confirmed ZERO padded
+references in `WarrenCarver.cs` or the mod XML — the port never crossed. **Built:**
+`Cleo_TerraFirma_PaddedEarth`, a one-override child of base `DirtFloor` (ZoneTerrain.xml:932,
+"packed dirt floor", the SAME four `sw_ground_dots` sprites the sim renders with and the
+literal VillageMaker hut idiom the 08-12 recon cited) — DisplayName "padded earth" (the user's
+own ruled word), DetailColor `k` (the sim's user-pick tint), description deliberately absent
+for the release text pass. `ApplyToZone` adds it to every carved cell EXCEPT the mouth (stays
+raw, the doorstep worn back to rock — the sim's exact exclusion) and water cells; the applied
+log line now reads `N cells carved (P padded)`. XML strict-valid, text rules clean, compile 0
+errors, both files deployed hash-verified. **Status: `log-confirmed pending, awaiting in-game
+verification` — and the floor only exists in zones built AFTER the deploy; already-visited
+warrens are baked and stay bare-rock, so judge it on a fresh zone or a fresh world.**
 
 **WARREN FLOOR PORTED + PLAIN ROOMS GET TRACES — USER FLAG 2026-08-18** (*"this working site
 generated dressed pretty light"*, with screenshot): two deliberate gaps closed. (1) Role-plain

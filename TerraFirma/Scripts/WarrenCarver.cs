@@ -2480,7 +2480,7 @@ namespace Cleo.TerraFirma.Scripts
 		// recolor in place (TileColor K / DetailColor g, the v1 user picks).
 		private static void ApplyToZone(Zone Z, Grid g)
 		{
-			int carved = 0, pools = 0, mossed = 0;
+			int carved = 0, pools = 0, mossed = 0, padded = 0;
 			for (int y = 0; y < g.H; y++)
 				for (int x = 0; x < g.W; x++)
 				{
@@ -2499,6 +2499,16 @@ namespace Cleo.TerraFirma.Scripts
 						if (c == null) continue;
 						foreach (GameObject wall in c.GetWalls().ToList()) wall.Obliterate();
 						carved++;
+						// PADDED EARTH (user ruled 2026-08-12, whole-warren scope;
+						// gap user-flagged in game 2026-08-24, the sim had it and
+						// this port did not): every carved cell is trodden floor,
+						// the strict VillageMaker hut idiom. The mouth stays raw,
+						// a doorstep worn back to rock; water keeps its pools.
+						if (i != g.MouthIdx && g.Water[i] == 0)
+						{
+							c.AddObject(GameObject.Create("Cleo_TerraFirma_PaddedEarth"));
+							padded++;
+						}
 					}
 				}
 			// MOSS AS A LIVING COAT (USER RULED 2026-08-23: "shale that has grown
@@ -2530,7 +2540,7 @@ namespace Cleo.TerraFirma.Scripts
 				mossed++;
 			}
 			int dressed = PlaceItems(Z, g);
-			Helpers.VerifyLog("WARREN", $"applied: {carved} cells carved, {pools} pool cells, {mossed} mossy walls, {dressed} dress items");
+			Helpers.VerifyLog("WARREN", $"applied: {carved} cells carved ({padded} padded), {pools} pool cells, {mossed} mossy walls, {dressed} dress items");
 			// mouth forensics (round 3): the first live warren carved green and was
 			// then found sealed. Name the mouth's neighbors at apply time so a
 			// post-builder seal (biome mutation is the suspect - it runs after every
