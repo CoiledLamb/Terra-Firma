@@ -33,6 +33,14 @@ namespace XRL.World.Parts
 		/// statue law makes 1-vs-2 purely 25 vs 50 HP, and "miniature" argues the floor.</summary>
 		public int StoneshaperLevel = 1;
 
+		/// <summary>One-shot guard for the creation spawn (RULED 2026-08-24, "the table should
+		/// try to spawn the figurine creature in an adjacent tile when created"): a stock
+		/// animate figurine placed beside the table on its first cell entry, HasFigurines
+		/// grammar. UNBONDED on purpose - its blueprint is already quarriers-100, so it
+		/// loiters the warren as the table's product on display rather than following a
+		/// piece of furniture around.</summary>
+		public bool CreationSpawnDone;
+
 		public override bool SameAs(IPart p)
 		{
 			return false;
@@ -41,8 +49,28 @@ namespace XRL.World.Parts
 		public override bool WantEvent(int ID, int cascade)
 		{
 			return base.WantEvent(ID, cascade)
+				|| (ID == EnteredCellEvent.ID && !CreationSpawnDone)
 				|| ID == GetInventoryActionsEvent.ID
 				|| ID == InventoryActionEvent.ID;
+		}
+
+		public override bool HandleEvent(EnteredCellEvent E)
+		{
+			if (!CreationSpawnDone)
+			{
+				CreationSpawnDone = true;
+				Cell spot = ParentObject.CurrentCell?.GetFirstEmptyAdjacentCell(1, 2);
+				if (spot != null)
+				{
+					spot.AddObject(GameObject.Create("Cleo_TerraFirma_AnimateFigurine")).MakeActive();
+					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("FIGTABLE", "creation spawn: ambient figurine placed beside the table");
+				}
+				else
+				{
+					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("FIGTABLE", "creation spawn: no open adjacent tile, skipped");
+				}
+			}
+			return base.HandleEvent(E);
 		}
 
 		public override bool HandleEvent(GetInventoryActionsEvent E)
