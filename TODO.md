@@ -1379,7 +1379,11 @@ on a padded interior is the last box; only zones built after the deploy carry it
     brown, the user's words and the rock's. Provenance note (recorded HERE, not in the code —
     the fire dish's comment belongs to the moss lane's uncommitted hunk and stays theirs):
     the dish's 08-23 grey cited "same as QuarriedBlock" as its family link; that link is now
-    broken, and the dish KEEPS its ruled grey ("not red" was its own ruling's text). XML
+    broken. ~~The dish KEEPS its ruled grey~~ **SUPERSEDED minutes later — USER RULED BROWN
+    ("fire dish could be brown also?"): dish is now `&w` body / `r` detail, the shale family
+    inverted (blocks `&r`/`w`); detail color CLAUDE rendering call, strikeable. Deployed
+    hash-verified; the dish's Render line rides the moss lane's pending hunk, so this change
+    stays uncommitted with it and lands whenever that lane commits.** XML
     strict-valid, deployed hash-verified; XML-only, no compile needed. Sim needed no change —
     this was the game catching up to the sim.
 
