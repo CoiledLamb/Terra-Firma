@@ -192,15 +192,15 @@
        cell and the part destroys the stone after. PV rides the thrower's Strength mod per the
        fissure grammar, so a looted stone scales with whoever throws it while the dice stay
        pinned. No Examiner: carved stone, understood on sight. DetonatedSound is Fissure's own
-       verified slam. FLAVOR RULED 2026-08-24 (user: "the fissure grenade can be flavored as a
-       lump of primordial clay, and use the copper nugget sprite as a placeholder"): DisplayName
-       is the user's phrase verbatim; tile is the nugget family's Items/sw_nugget.bmp with the
-       copper colorway (base ObjectBlueprints/Items.xml, BaseNugget + Copper Nugget), an explicit
-       PLACEHOLDER until bespoke art. Description redrafted to the clay flavor, still DRAFT.
-       Commerce and Weight CLAUDE DRAFT; description DRAFT, signoff owed. -->
+       verified slam. Tile is the fallen-rock family's, kin to what the detonation scatters.
+       FLAVOR NOTE 2026-08-24: a "lump of primordial clay" pass landed here for a few hours by
+       misread; the user meant it for the FIGURINE grenade (unbuilt, see TODO roster flags).
+       Name and description here are CLAUDE GUT by the user's license ("go with your gut and
+       i'll edit it later however i desire"), so both are freely editable, no signoff gate.
+       Commerce and Weight CLAUDE DRAFT. -->
   <object Name="Cleo_TerraFirma_FissureStone" Inherits="BaseThrownWeapon">
-    <part Name="Render" DisplayName="lump of primordial clay" Tile="Items/sw_nugget.bmp" RenderString="*" ColorString="&amp;w" DetailColor="y" />
-    <part Name="Description" Short="A heavy fistful of clay from before the rock set. Where it lands, the ground remembers breaking." /> <!-- DRAFT, signoff owed -->
+    <part Name="Render" DisplayName="fissure stone" Tile="Items/sw_smallboulder.bmp" RenderString="*" ColorString="&amp;y" DetailColor="K" />
+    <part Name="Description" Short="A fist of quarried stone, scored to a lattice of fault lines. It is waiting for one hard landing." /> <!-- CLAUDE GUT, user edits at will -->
     <part Name="Stacker" />
     <part Name="Physics" Category="Grenades" Weight="10" />
     <part Name="Commerce" Value="20" />
