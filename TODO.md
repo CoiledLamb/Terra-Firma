@@ -1319,6 +1319,22 @@ on a floored room is the last box.
     written, it carries the most culture of any layer" — and by the standing text rule its
     voice is the user's), leisure gating, the hookah stage call, scout-and-quota supply.
 
+**PASS-OVER DUD OBSERVED — USER FLAG IN GAME 2026-08-24 ("this site gave a warren popup when
+passing over it but had no warren?", screenshot: bare canyon, goats, no carve). MECHANISM
+CONFIRMED, NOT NEW: the first-visit-dud hole the encounter's own comment names.** The
+encounter, secret and map note all attach at EMBARK to all 27 claims; the build runs lazily
+on first zone visit and roughly a THIRD of claims refuse ("no face opens onto enough rock" -
+both logged sweeps ran 27 claims → 18 real). A refusing claim self-erases its rumor, but the
+pass-over prompt fires BEFORE the build, so it can promise hammers a zone cannot pay. **The
+comment's word "rare" is wrong by the measured rate (~1 in 3) and is corrected by this entry.**
+No honest cheap fix exists: the prompt cannot know the claim is real without pre-validating
+the canyon, which is EXACTLY the scout-and-quota design (worldgen-time scoring off a derived
+per-zone key, sim-validated 2026-08-18, NOT GREENLIT). Options put to the user: (a) greenlight
+scout-and-quota, the real fix, also answers the census shortfall and flourishing supply ·
+(b) park the pass-over encounter until then · (c) force-build the zone at prompt time and ask
+only if a warren stands (travel hitch, materializes zones early - brute, works) · (d) accept
+lying rumors as flavor. AWAITING RULING.
+
 **PADDED EARTH PORT GAP — USER FLAG IN GAME 2026-08-24 ("i see a thing we are doing different
 from the sim - the inside of warrens aren't using padded earth floors"), FIXED same sitting.**
 The 2026-08-12 whole-warren ruling had only ever been sim-render; grep confirmed ZERO padded
