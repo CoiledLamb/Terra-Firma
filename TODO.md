@@ -1239,7 +1239,21 @@ areas, and just to have laying around?"*), all built same sitting:
 **SCOUT-AND-QUOTA PLACEMENT — USER CONCEPT 2026-08-18, DEEP-DIVED, NOT BUILT** (*"instead of
 only trying to place 25, we could place more, and then trim down to 25 warrens that fit our
 tables"*). Full design + decomp receipts + sim validation in
-`design/worldgen-placement-2026-08-18.md`. The short of it: zones build lazily so selection must
+`design/worldgen-placement-2026-08-18.md`. **GREENLIT 2026-08-24 (user: "this sounds fine to
+implement", after the pass-over-dud sitting and a full walkthrough). SIM MODEL BUILT same day
+per the sim-first obligation — the census button now runs BOTH models side by side** (blind =
+the shipped mechanism, with its lying-claim count made explicit; scout-and-quota = score
+scoutN zones by forced-flourishing build, fill a rolled stage quota biggest-first, site only
+capable zones). Canyon determinism verified in the rig: forced stages share a seed's canyon
+by construction, so score and rebuild cannot disagree. **First model run, same defaults:
+blind 14 sited / 7 lying claims / 0 flourishing vs scout-and-quota 25 of 25 sited / 0 lying
+claims / 0 label demotions / flourishing 5 / payloads 13 vs 3 / mean floor 202 vs 146, and
+the stage x occupancy grid fills its corners (fl-reclaimed 1 this world). New placement knob
+group: `scoutN` 50 / `quotaFl` 5 / `quotaCamp` 9 / `quotaRoll` 1 — ALL CLAUDE DIALS awaiting
+strikes.** NEXT: the C# port pass (WarrenWorldBuilder scorer in OnAfterBuild + the derived-seed
+canyon so score==build in-engine + TF-VERIFY capacity assert) — deliberate port, sized as its
+own sitting; the pass-over popup's fate resolves with it (a claim then only exists where a
+warren stands). Original design record: zones build lazily so selection must
 score bands AT WORLDGEN; zone-build RNG is derivable (`GetWorldSeed("ZONESEED"+id)+tries`) but
 the ambient stream drifts, so **our builder seeds its canyon from its own derived per-zone key,
 making the worldgen pre-roll exact by construction**; the scorer reuses the builder's own

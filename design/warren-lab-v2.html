@@ -2364,6 +2364,10 @@ const KNOBS=[
   ['network','infill','infill rooms',-1,6,-1,'leftover mass claimed as extra single-entrance rooms; -1 = let the stage decide'],
   ['network','driftMax','drift reach',3,16,10,'how far a door or crosscut will bore looking for floor'],
   ['dress','roomFloor','room floor',0,1,1,'1 = a registered room (face / plain / commons) that dressed to ZERO items takes one re-roll of its own table with the Nothing row removed — the warren-floor law one level down (user docket 2026-08-24: rooms should spawn with *some* kind of decoration). Count variance stays; only the zero collapses to one. A room with no legal cell stays bare and counts refused'],
+  ['placement','scoutN','scouts / world',10,150,50,'scout-and-quota (USER GREENLIT 2026-08-24): candidate canyon zones scored at worldgen before any claim exists. More scouts = better flourishing tails, slower worldgen. 50 is the design-doc sim number, CLAUDE dial'],
+  ['placement','quotaFl','quota: flourishing',0,12,5,'flourishing slots in the stage quota. Corner math: fl-reclaimed per world is roughly this x 0.14, so 7 buys a guaranteed corner. CLAUDE dial awaiting the user strike'],
+  ['placement','quotaCamp','quota: camp',0,15,9,'camp slots in the stage quota; working fills the remainder to warrens/world. CLAUDE dial awaiting the user strike'],
+  ['placement','quotaRoll','quota rolled',0,1,1,'1 = each quota rolls in a +/-1 band per world so world stage-mixes differ (the sameness-risk mitigation, CLAUDE lean). 0 = fixed quota, every world identical'],
 ];
 const DEFAULTS={}; for(const [,id,,,,d] of KNOBS) DEFAULTS[id]=d;
 let K={...DEFAULTS};
@@ -2780,42 +2784,110 @@ $('host').onchange=()=>rollNew();
 $('dressed').onchange=()=>{ if(current&&!pairMode) render(current) };
 $('census').onclick=()=>{
   const stage=$('forcestage').value, t0=performance.now();
+  const NL=String.fromCharCode(10);
+  const pad=(a,b)=>(a+'                   ').slice(0,19)+b;
+
+  // ---- MODEL A: BLIND PLACEMENT (the shipped mechanism) ----
+  // A dud = the gate said "warren here" and the carve then refused: the
+  // zone that pops "you hear hammers" and pays nothing (user flag 2026-08-24).
   applySpawn=true;
-  let n=0; const got={}, grid={}, occ={}; let floor=0, payload=0;
+  let n=0, dudsA=0; const got={}, grid={}, occ={}; let floor=0, payload=0;
   for(let i=0;i<CANYON_ZONES;i++){
     const r=build(1000000+i,K,stage===''?null:stage,'canyon');
-    if(r.none) continue;
+    if(r.none){ if(r.reason!=='no warren sited in this zone') dudsA++; continue; }
     n++; got[r.stage]=(got[r.stage]||0)+1; floor+=r.floor;
     const k2=r.stage+' / '+r.occupancy; grid[k2]=(grid[k2]||0)+1;
     occ[r.occupancy]=(occ[r.occupancy]||0)+1;
     if(r.stage!=='working') payload++;
   }
   applySpawn=false;
-  const NL=String.fromCharCode(10);
-  const pad=(a,b)=>(a+'                   ').slice(0,19)+b;
+
+  // ---- MODEL B: SCOUT-AND-QUOTA (USER GREENLIT 2026-08-24: "this sounds
+  // fine to implement"; sim-first per the 2026-08-07 ruling - this model is
+  // the design target, the C# WarrenWorldBuilder ports it). Scout scoutN
+  // zones, score each EXACTLY (forced-flourishing build; the demote-honesty
+  // bar IS the scorer, so score and build cannot disagree - canyon identical
+  // by construction, verified: forced stages share the seed's canyon), fill
+  // a stage quota biggest-first, site ONLY capable zones. Duds are
+  // structurally zero: a claim exists only where a warren stands.
+  // quotaFl/quotaCamp/scoutN/quotaRoll all CLAUDE dials awaiting strikes.
+  const wr=mulberry32((20260824 ^ (K.worldWarrens|0))|0);
+  const wR=(a,b)=>a+Math.floor(wr()*(b-a+1));
+  const pool=[...Array(CANYON_ZONES).keys()], scouts=[];
+  for(let k=0;k<Math.min(K.scoutN,CANYON_ZONES);k++){
+    const j=k+Math.floor(wr()*(pool.length-k));
+    [pool[k],pool[j]]=[pool[j],pool[k]]; scouts.push(pool[k]);
+  }
+  const SIDX={working:0,camp:1,flourishing:2};
+  const scored=[]; let scoutNone=0;
+  for(const i of scouts){
+    const r=build(1000000+i,K,2,'canyon');
+    if(r.none){ scoutNone++; continue; }
+    scored.push({i, cap:SIDX[r.stage], floor:r.floor});
+  }
+  const flQ = K.quotaRoll? wR(Math.max(0,K.quotaFl-1),K.quotaFl+1) : K.quotaFl;
+  const campQ = K.quotaRoll? wR(Math.max(0,K.quotaCamp-1),K.quotaCamp+1) : K.quotaCamp;
+  const total=Math.min(K.worldWarrens, scored.length);
+  scored.sort((a,b)=>b.cap-a.cap || b.floor-a.floor);
+  const chosen=[];
+  const take=(pred,stageIdx,count)=>{
+    for(const s of scored){
+      if(chosen.length>=total||count<=0) break;
+      if(s.assigned!==undefined||!pred(s)) continue;
+      s.assigned=stageIdx; chosen.push(s); count--;
+    }
+  };
+  take(s=>s.cap===2,2,flQ);
+  take(s=>s.cap>=1,1,campQ);
+  take(()=>true,0,total);
+  const got2={}, grid2={}, occ2={}; let floor2=0, payload2=0, mismatch=0, demoted2=0;
+  for(const s of chosen){
+    const r=build(1000000+s.i,K,s.assigned,'canyon');
+    if(r.none){ mismatch++; continue; }
+    if(SIDX[r.stage]<s.assigned) demoted2++;
+    got2[r.stage]=(got2[r.stage]||0)+1; floor2+=r.floor;
+    const k2=r.stage+' / '+r.occupancy; grid2[k2]=(grid2[k2]||0)+1;
+    occ2[r.occupancy]=(occ2[r.occupancy]||0)+1;
+    if(r.stage!=='working') payload2++;
+  }
+
   $('io').value=[
     'WORLD CENSUS  -  '+CANYON_ZONES+' desert-canyon surface zones',
     '(QudWorldMap.rpm is authored: 139 DesertCanyon parasangs x 9 zones)',
     '',
+    '== MODEL A: BLIND (shipped) ==',
     pad('target', K.worldWarrens+' warrens / world'),
     pad('actually sited', n+'   ('+(n/CANYON_ZONES*100).toFixed(2)+'% of canyon zones)'),
-    pad('base-game peers', '25 pig farms / 25 starapple farms / 25 snapjaw forts'),
-    '',
+    pad('lying claims', dudsA+'   (gate said yes, carve refused - the popup dud)'),
     pad('working', got['working']||0),
     pad('camp', got['camp']||0),
     pad('flourishing', got['flourishing']||0),
-    pad('payload-bearing', payload+'   (camp+flourishing, the vine merchant range)'),
+    pad('payload-bearing', payload+''),
     pad('mean floor cells', n?Math.round(floor/n):0),
-    '',
     pad('in use', occ['in use']||0),
     pad('abandoned', occ['abandoned']||0),
     pad('reclaimed', occ['reclaimed']||0),
-    '',
     ...Object.entries(grid).sort().map(([k,v])=>pad('  '+k, v)),
+    '',
+    '== MODEL B: SCOUT-AND-QUOTA (greenlit 2026-08-24) ==',
+    pad('scouts', K.scoutN+' scored, '+scoutNone+' incapable, '+scored.length+' capable'),
+    pad('quota', 'fl '+flQ+' / camp '+campQ+' / working fills to '+K.worldWarrens+(K.quotaRoll?'   (rolled in a band)':'   (fixed)')),
+    pad('sited', chosen.length+' of '+K.worldWarrens+' target'),
+    pad('lying claims', '0 by construction'+(mismatch?'   BUT '+mismatch+' REBUILD MISMATCH - INVESTIGATE':'')),
+    pad('label demotions', demoted2+'   (assigned stage not met at rebuild; ceiling law)'),
+    pad('working', got2['working']||0),
+    pad('camp', got2['camp']||0),
+    pad('flourishing', got2['flourishing']||0),
+    pad('payload-bearing', payload2+''),
+    pad('mean floor cells', chosen.length?Math.round(floor2/(chosen.length-mismatch||1)):0),
+    pad('in use', occ2['in use']||0),
+    pad('abandoned', occ2['abandoned']||0),
+    pad('reclaimed', occ2['reclaimed']||0),
+    ...Object.entries(grid2).sort().map(([k,v])=>pad('  '+k, v)),
     '',
     'took '+((performance.now()-t0)/1000).toFixed(1)+'s'
   ].join(NL);
-  $('status').textContent='census: '+n+' warrens per world';
+  $('status').textContent='census: blind '+n+' / scouted '+(chosen.length-mismatch);
 };
 
 window.addEventListener('keydown',e=>{
