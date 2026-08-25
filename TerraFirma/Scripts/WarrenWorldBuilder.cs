@@ -1,72 +1,219 @@
+using System;
+using System.Collections.Generic;
 using Cleo.TerraFirma.Scripts;
+using Genkit;
 using XRL.UI;
 
 namespace XRL.World.WorldBuilders
 {
 	/// <summary>
-	/// Warren placement - DOOR A (user lean 2026-08-23: "new saves only probably?
-	/// since this will be in a new mod you should start a new save for that").
-	/// The exact pig-farm/snapjaw-fort idiom from JoppaWorldBuilder.BuildForts,
-	/// decompiled 2026-08-18: pop N mutable DesertCanyon zones, stamp the zone
-	/// builder, register the secret + location finder so gossip can point at it.
-	/// Runs at OnAfterMutableInit, which fires BEFORE BuildForts inside
-	/// BuildMutableEncounters - both draw from the same pool and both remove
-	/// their claims, so warrens, farms and forts never share a zone.
-	/// Fires once, at embark: existing saves get no warrens by design (ruled
-	/// consequence of the door-A lean; the base mod is untouched by this file).
+	/// SCOUT-AND-QUOTA warren placement (user concept 2026-08-18 "instead of only
+	/// trying to place 25, we could place more, and then trim down to 25 warrens
+	/// that fit our tables"; greenlit 08-24; ported 2026-08-25). Replaces the
+	/// overclaim-27 blind placement + self-erasing rumors: a claim is now written
+	/// only AFTER its warren physically exists, so no rumor can lie by construction.
+	///
+	/// Flow, receipts in the decomp (2026-08-18 + 2026-08-25):
+	///  1. OnAfterBuild - fires after BuildMutableEncounters, so farms and forts
+	///     have already claimed their zones (JoppaWorldBuilder.cs:3655).
+	///  2. Enumerate the mutable DesertCanyon pool - never sample it
+	///     (GetMutableLocationWithTerrain draws WITH replacement, MutabilityMap.cs:35);
+	///     the list is private, so reflection with the engine sampler as fallback.
+	///  3. Shuffle by a derived world-seed key (The.Game.GetWorldSeed, pure fn,
+	///     XRLGame.cs:1505) - the ambient stream is never consumed.
+	///  4. Scout: MATERIALIZE each candidate zone (the tfwarrens-sweep precedent)
+	///     and dry-run the carve forced-flourishing. Degrade honesty demotes to
+	///     what the band holds, so the dry run's stage IS the zone's capacity, and
+	///     the scorer IS the builder - they cannot disagree. The design doc's
+	///     derived-canyon twist died when the shipped carver went host-read (the
+	///     REAL zone replaces genCanyon); materializing is the honest replacement.
+	///  5. Fill the stage quota biggest-first, carve winners on the spot (a
+	///     flourishing slot replays its probe exactly), wire the claim, and stamp
+	///     WarrenMaker with the assigned stage so a zone REBUILD reproduces it.
 	/// </summary>
 	[JoppaWorldBuilderExtension]
 	public class Cleo_TerraFirma_WarrenPlacement : IJoppaWorldBuilderExtension
 	{
-		public const int WARRENS_PER_WORLD = 25;   // ruled 2026-08-18; pig-farm frequency - the TARGET of real sites
-		// OVERCLAIM (ruled 2026-08-23 "like all three of these fixes"): placement is
-		// blind to rockiness at embark, so claim wide and let refusals settle their
-		// own rumors (SettleRumor). RE-DIALED same day: the first live sweep ran
-		// 34 real of 35 claims (the fix bundle collapsed refusal to ~3%), so 35
-		// overshot the ruled 25-target by a third. 27 at the observed band
-		// converges on ~25-26 real sites. CLAUDE dial, twice now.
-		public const int CLAIMS = 27;
+		public const int WARRENS_PER_WORLD = 25;   // ruled 2026-08-18; pig-farm frequency
+		public const int SCOUT_N = 50;             // CLAUDE dial (more = better tails, slower worldgen)
+		public const int QUOTA_FL = 5;             // CLAUDE dial; fl-reclaimed/world ~ this x 0.14
+		public const int QUOTA_CAMP = 9;           // CLAUDE dial; working fills the remainder
+		public const bool QUOTA_ROLLED = true;     // CLAUDE lean: +/-1 per world so worlds differ
 
-		public override void OnAfterMutableInit(JoppaWorldBuilder Builder)
+		private static readonly string[] STAGE_NAMES = { "working", "camp", "flourishing" };
+
+		public override void OnAfterBuild(JoppaWorldBuilder Builder)
 		{
-			int placed = 0;
-			Builder.AddMutableEncounterToTerrain("DesertCanyon", CLAIMS,
-				delegate(string zoneID, Genkit.Location2D location, XRL.World.Parts.TerrainTravel pTravel)
+			try { Place(Builder); }
+			catch (Exception x)
+			{
+				Helpers.VerifyLog("WARREN", $"EXCEPTION in scout placement: {x}");
+				MetricsManager.LogException("Cleo_TerraFirma_WarrenPlacement", x);
+			}
+		}
+
+		private class Scouted
+		{
+			public string ZoneID;
+			public Location2D Loc;
+			public int Capacity = -1;   // -1 = no site; else STAGES index
+			public int Floor;
+			public bool Used;
+		}
+
+		private static void Place(JoppaWorldBuilder Builder)
+		{
+			// loading note: this is the one added step that does real work. DRAFT
+			// text, rides the release voice pass. StepProgress is the lairs
+			// builder's own in-phase idiom - no NextStep, the bar budget stands.
+			WorldCreationProgress.StepProgress("Scouting canyons...");
+			var pool = EnumeratePool(Builder);
+			var rng = new Random(The.Game.GetWorldSeed("TFWARRENSCOUT"));
+			for (int i = pool.Count - 1; i > 0; i--)
+			{
+				int j = rng.Next(i + 1);
+				(pool[i], pool[j]) = (pool[j], pool[i]);
+			}
+			int scoutN = Math.Min(SCOUT_N, pool.Count);
+			var scored = new List<Scouted>();
+			for (int i = 0; i < scoutN; i++)
+			{
+				var L = pool[i];
+				string zoneID = Zone.XYToID("JoppaWorld", L.X, L.Y, 10);
+				WorldCreationProgress.StepProgress($"Scouting canyons... ({i + 1}/{scoutN})");
+				The.ZoneManager.AdjustZoneGenerationTierTo(zoneID);
+				Zone Z = The.ZoneManager.GetZone(zoneID);
+				if (Z == null) continue;
+				var probe = WarrenCarver.Build(Z, WarrenCarver.SeedFor(zoneID), 2, apply: false);
+				scored.Add(new Scouted
 				{
-					if (Options.ShowOverlandEncounters && pTravel != null)
-					{
-						pTravel.ParentObject.Render.RenderString = "Q";
-						pTravel.ParentObject.Render.SetForegroundColor('y');
-					}
-					The.ZoneManager.AddZoneBuilder(zoneID, 6000, "Cleo_TerraFirma_WarrenMaker");
-					// secret name is player-facing text: DRAFT, rides the release
-					// voice pass (user owns shipped strings)
-					string secretID = Builder.AddSecret(zoneID, "a quarry warren",
-						new string[3] { "stonecarver", "settlement", "humanoid" }, "Settlements");
-					Builder.AddLocationFinder(zoneID, secretID);
-					// PASS-OVER ENCOUNTER (user ask 2026-08-23): the village/lair
-					// idiom - an optional would-you-like-to-investigate on crossing
-					// the parasang. Sensory register per the goatfolk precedent
-					// ("You smell roasted boar nearby"), ours is sound. LINE IS
-					// DRAFT, user voice owed. Rides the same known first-visit-dud
-					// hole as the map note (rare post-bundle; claims that refuse
-					// self-erase their note but this entry fires before the build).
-					pTravel?.AddEncounter(new XRL.World.Parts.EncounterEntry(
-						"You hear the ring of hammers on stone nearby. Would you like to investigate?",
-						zoneID, "", secretID, Optional: true));
-					// non-hostile by goal statement -> friendlySettlements
-					// (CLAUDE call, delegated plumbing; forts use enemySettlements)
-					Builder.worldInfo.friendlySettlements.Add(new GeneratedLocationInfo
-					{
-						name = "a quarry warren",
-						targetZone = zoneID,
-						zoneLocation = location,
-						secretID = secretID
-					});
-					Builder.mutableMap.SetMutable(location, 0);
-					placed++;
+					ZoneID = zoneID,
+					Loc = L,
+					Capacity = probe.Built ? probe.StageIdx : -1,
+					Floor = probe.Built ? probe.Floor : 0
 				});
-			Helpers.VerifyLog("WARREN", $"placement: {placed} warren claims sited at embark ({CLAIMS} asked, target ~{WARRENS_PER_WORLD} real sites)");
+			}
+			// the quota (dials); rolled in a +/-1 band so world stage-mixes differ
+			int fl = Math.Max(0, QUOTA_FL + (QUOTA_ROLLED ? rng.Next(-1, 2) : 0));
+			int camp = Math.Max(0, QUOTA_CAMP + (QUOTA_ROLLED ? rng.Next(-1, 2) : 0));
+			int working = Math.Max(0, WARRENS_PER_WORLD - fl - camp);
+			scored.Sort((a, b) => a.Capacity != b.Capacity
+				? b.Capacity.CompareTo(a.Capacity)
+				: b.Floor.CompareTo(a.Floor));
+			int capFl = 0, capCamp = 0, capAny = 0;
+			foreach (var s in scored)
+			{
+				if (s.Capacity >= 2) capFl++;
+				if (s.Capacity >= 1) capCamp++;
+				if (s.Capacity >= 0) capAny++;
+			}
+			// assign biggest-first; carve immediately; a refusal burns no slot,
+			// the next capable spare steps up (refusals should be ~impossible for
+			// flourishing - an exact probe replay - and rare below it)
+			WorldCreationProgress.StepProgress("Raising quarry warrens...");
+			int sited = 0, refusals = 0;
+			var builtByStage = new int[3];
+			void Fill(int slots, int stage)
+			{
+				foreach (var s in scored)
+				{
+					if (slots <= 0) return;
+					if (s.Used || s.Capacity < stage) continue;
+					s.Used = true;
+					var r = Claim(Builder, s, stage);
+					if (r == null) { refusals++; continue; }
+					builtByStage[r.StageIdx]++;
+					sited++;
+					slots--;
+				}
+			}
+			Fill(fl, 2);
+			Fill(camp, 1);
+			Fill(working, 0);
+			// the capacity assert: quota vs capability vs what actually stood up
+			Helpers.VerifyLog("WARREN",
+				$"scout: pool {pool.Count}, scouted {scored.Count}, capable fl {capFl} / camp+ {capCamp} / any {capAny}; " +
+				$"quota {fl}/{camp}/{working} (fl/camp/working); sited {sited} " +
+				$"(built {builtByStage[2]} fl / {builtByStage[1]} camp / {builtByStage[0]} working), refusals {refusals}" +
+				(sited < WARRENS_PER_WORLD ? $" - UNDER TARGET {WARRENS_PER_WORLD}" : ""));
+		}
+
+		/// <summary>The pool, enumerated. Reflection on the private terrain list
+		/// (MutabilityMap.cs:13); fallback is bounded engine draws with dedupe.</summary>
+		private static List<Location2D> EnumeratePool(JoppaWorldBuilder Builder)
+		{
+			var pool = new List<Location2D>();
+			try
+			{
+				var f = typeof(MutabilityMap).GetField("mutableLocationsByTerrainType",
+					System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+				if (f?.GetValue(Builder.mutableMap) is Dictionary<string, List<Location2D>> byTerrain
+					&& byTerrain.TryGetValue("DesertCanyon", out var list))
+					foreach (var L in list)
+						if (Builder.mutableMap.GetMutable(L) > 0)
+							pool.Add(L);
+			}
+			catch (Exception x)
+			{
+				Helpers.VerifyLog("WARREN", $"pool reflection failed ({x.Message}); falling back to engine draws");
+			}
+			if (pool.Count == 0)
+			{
+				var seen = new HashSet<Location2D>();
+				for (int t = 0; t < SCOUT_N * 20 && pool.Count < SCOUT_N * 2; t++)
+				{
+					var L = Builder.mutableMap.GetMutableLocationWithTerrain("DesertCanyon");
+					if (L == null) break;
+					if (seen.Add(L)) pool.Add(L);
+				}
+			}
+			return pool;
+		}
+
+		/// <summary>Carve the assigned stage into the already-built zone and wire
+		/// the claim. Returns the carve result, or null on refusal (no claim is
+		/// written - a rumor only exists where a warren stands).</summary>
+		private static WarrenCarver.Result Claim(JoppaWorldBuilder Builder, Scouted s, int stage)
+		{
+			Zone Z = The.ZoneManager.GetZone(s.ZoneID);
+			if (Z == null) return null;
+			var r = WarrenCarver.Build(Z, WarrenCarver.SeedFor(s.ZoneID), stage);
+			if (!r.Built)
+			{
+				Helpers.VerifyLog("WARREN", $"scout refusal: {s.ZoneID} scored capacity {s.Capacity} but refused stage {STAGE_NAMES[stage]} ({r.Reason})");
+				return null;
+			}
+			// rebuild reproducer: if the engine ever regenerates this zone, the
+			// stamped builder re-carves the SAME warren (same seed, same stage)
+			The.ZoneManager.AddZoneBuilder(s.ZoneID, 6000, "Cleo_TerraFirma_WarrenMaker", "Stage", STAGE_NAMES[stage]);
+			Builder.terrainComponents.TryGetValue(Location2D.Get(s.Loc.X / 3, s.Loc.Y / 3), out XRL.World.Parts.TerrainTravel pTravel);
+			if (Options.ShowOverlandEncounters && pTravel != null)
+			{
+				pTravel.ParentObject.Render.RenderString = "Q";
+				pTravel.ParentObject.Render.SetForegroundColor('y');
+			}
+			// secret name is player-facing text: DRAFT, rides the release voice pass
+			string secretID = Builder.AddSecret(s.ZoneID, "a quarry warren",
+				new string[3] { "stonecarver", "settlement", "humanoid" }, "Settlements");
+			Builder.AddLocationFinder(s.ZoneID, secretID);
+			// PASS-OVER ENCOUNTER (user ask 2026-08-23, the village/lair idiom).
+			// LINE IS DRAFT, user voice owed. The first-visit-dud hole is CLOSED
+			// by construction now: the warren already exists when this is wired.
+			pTravel?.AddEncounter(new XRL.World.Parts.EncounterEntry(
+				"You hear the ring of hammers on stone nearby. Would you like to investigate?",
+				s.ZoneID, "", secretID, Optional: true));
+			// non-hostile by goal statement -> friendlySettlements
+			Builder.worldInfo.friendlySettlements.Add(new GeneratedLocationInfo
+			{
+				name = "a quarry warren",
+				targetZone = s.ZoneID,
+				zoneLocation = s.Loc,
+				secretID = secretID
+			});
+			Builder.mutableMap.RemoveMutableLocation(s.Loc);
+			Builder.mutableMap.SetMutable(s.Loc, 0);
+			Helpers.VerifyLog("WARREN", $"claimed: {s.ZoneID} as {r.Stage} (assigned {STAGE_NAMES[stage]}, capacity {STAGE_NAMES[Math.Max(s.Capacity, 0)]}), {r.Floor} floor, {r.Occupancy}");
+			return r;
 		}
 	}
 }

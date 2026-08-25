@@ -2417,6 +2417,7 @@ namespace Cleo.TerraFirma.Scripts
 			public bool Built;
 			public string Reason = "";
 			public string Stage = "", Occupancy = "", Roles = "", Yard = "";
+			public int StageIdx = -1;   // index into STAGES; the scout's capacity read
 			public string Layout = "boxes";
 			public int Floor, Pockets, Degraded, Attempt, Seed;
 		}
@@ -2602,7 +2603,7 @@ namespace Cleo.TerraFirma.Scripts
 			gridOut = g; pocketsOut = pockets;
 			return new Result
 			{
-				Built = true, Stage = STAGES[si].Name, Occupancy = occupancy,
+				Built = true, Stage = STAGES[si].Name, StageIdx = si, Occupancy = occupancy,
 				Roles = roles.Tally, Yard = roles.YardDesc, Layout = blockLayout ? "blocks" : "boxes",
 				Floor = m.Floor, Pockets = pockets.Count, Degraded = degraded, Attempt = attempt, Seed = seed,
 			};
@@ -2615,7 +2616,13 @@ namespace Cleo.TerraFirma.Scripts
 		/// a face whose BOX carve under-builds below licensing retries once with
 		/// the block layout before the next face burns - boxes stay the default
 		/// look per the 08-18 A/B lean; blocks are the snake-country specialist.</summary>
-		public static Result Build(Zone Z, int seed, int? forcedStage = null)
+		/// <summary>apply=false is the SCOUT'S DRY RUN (scout-and-quota port
+		/// 2026-08-25): the full pipeline runs - degrade honesty, worth-the-trip,
+		/// retry-with-blocks - but the zone is never touched. Forced-flourishing
+		/// dry runs read a zone's CAPACITY: the scorer IS the builder, so score
+		/// and build cannot disagree, and a chosen flourishing carve is an exact
+		/// replay of its own probe (same seed, same forced stage).</summary>
+		public static Result Build(Zone Z, int seed, int? forcedStage = null, bool apply = true)
 		{
 			Result last = null;
 			for (int a = 0; a < ATTEMPTS; a++)
@@ -2623,7 +2630,7 @@ namespace Cleo.TerraFirma.Scripts
 				var r = BuildOnce(Z, seed, forcedStage, a, false, out Grid g, out List<PocketRec> pockets);
 				if (r.Built)
 				{
-					ApplyToZone(Z, g);
+					if (apply) ApplyToZone(Z, g);
 					return r;
 				}
 				last = r;
@@ -2633,7 +2640,7 @@ namespace Cleo.TerraFirma.Scripts
 					if (r2.Built)
 					{
 						Helpers.VerifyLog("WARREN", $"blocks rescued the face (attempt {a}, boxes built {r.Reason})");
-						ApplyToZone(Z, g2);
+						if (apply) ApplyToZone(Z, g2);
 						return r2;
 					}
 					last = r2;

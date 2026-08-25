@@ -18,6 +18,13 @@ namespace XRL.World.ZoneBuilders
 	/// </summary>
 	public class Cleo_TerraFirma_WarrenMaker
 	{
+		/// <summary>Assigned stage from the scout pass (AddZoneBuilder key/value,
+		/// scout-and-quota port 2026-08-25). Under scout placement the warren is
+		/// carved AT WORLDGEN and this builder only runs if the engine ever
+		/// REBUILDS the zone - same seed, same stage, same warren. Empty = the
+		/// wish/legacy path, which rolls its own stage.</summary>
+		public string Stage;
+
 		public bool BuildZone(Zone Z)
 		{
 			// The belt (round 6): our carve is zone-seeded, so any throw is
@@ -26,7 +33,8 @@ namespace XRL.World.ZoneBuilders
 			// must therefore degrade to an honest no-warren, never a loop.
 			try
 			{
-				var r = WarrenCarver.Build(Z, WarrenCarver.SeedFor(Z.ZoneID));
+				int? forced = Stage == "flourishing" ? 2 : Stage == "camp" ? 1 : Stage == "working" ? 0 : (int?)null;
+				var r = WarrenCarver.Build(Z, WarrenCarver.SeedFor(Z.ZoneID), forced);
 				if (r.Built)
 					Helpers.VerifyLog("WARREN", $"builder done: {Z.ZoneID} -> {r.Stage}, {r.Occupancy}, attempt {r.Attempt}, {r.Layout}");
 				else

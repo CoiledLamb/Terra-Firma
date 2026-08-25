@@ -1504,6 +1504,41 @@ the same carve-measured cap in the game-side walker.**
     straight 15 — thin bands rind-pin the perpendiculars. Known, shown, unfixed on purpose;
     next lever if it matters in play is pricing rind-adjacent straights, unbuilt.
 
+**SCOUT-AND-QUOTA PORTED — USER GREENLIT THE PORT 2026-08-25 ("let's implement it - should
+we have a note in the worldgen loading display for it?" - yes, and the note is in), BUILT +
+DEPLOYED same sitting; `log-confirmed pending` ON A FRESH EMBARK ONLY (worldgen code; door-A
+rule, existing saves keep their old placement).** THE ARCHITECTURE MOVED off the 08-18 doc,
+recorded loudly: the doc's determinism twist (mod-seeded canyon) died when the first port
+went host-read ("the REAL zone replaces genCanyon"), so pre-rolling cannot reproduce a
+canyon the game's drifting RNG builds. The honest replacement, proven viable by the user's
+own tfwarrens sweep: **MATERIALIZE the scout zones at worldgen and score the real terrain.**
+Flow: OnAfterBuild (after farms/forts claim) · enumerate the mutable DesertCanyon pool
+(reflection on the private list; the engine sampler draws WITH replacement, the 08-18 trap)
+· shuffle by derived key `GetWorldSeed("TFWARRENSCOUT")`, ambient stream untouched · build
+each scout zone + DRY-RUN the carve forced-flourishing (new `apply:false` on
+WarrenCarver.Build - full pipeline, zone untouched; degrade honesty makes the result the
+zone's CAPACITY, the scorer IS the builder) · fill the rolled quota biggest-first · carve
+winners ON THE SPOT (a flourishing slot replays its probe exactly - same seed, same forced
+stage) · wire secret/finder/pass-over/friendlySettlements only after the warren stands.
+**Overclaim-27 + self-erasing rumors RETIRED as placement** (SettleRumor survives as the
+rebuild belt); the pass-over first-visit dud is CLOSED BY CONSTRUCTION - the encounter is
+only wired where a warren already exists. WarrenMaker gains a `Stage` builder param
+(AddZoneBuilder key/value) so an engine zone REBUILD reproduces the assigned stage. Loading
+display: `Scouting canyons... (k/N)` then `Raising quarry warrens...` via
+WorldCreationProgress.StepProgress (the lairs builder's own in-phase idiom; no NextStep, the
+bar budget stands) - **both lines DRAFT, user voice owed**, as is the standing "a quarry
+warren" secret name. Capacity assert: the `[TF-VERIFY] [WARREN] scout:` line carries
+pool/scouted/capable/quota/sited/refusals and flags UNDER TARGET. Dials all CLAUDE,
+unstruck by the user's explicit word ("strike nothing, judge on a real world"): SCOUT_N 50 ·
+QUOTA_FL 5 · QUOTA_CAMP 9 · QUOTA_ROLLED true (the rolled lean). **Costs stated in-sitting:
+~50 real zone builds at worldgen (seconds, the loading note covers it; unmeasured until a
+real embark) · scouted-but-unclaimed zones stay built as plain canyon · camp/working slots
+on higher-capacity zones force their stage, so a rare further-demote can drift the quota
+(logged, degrade honesty is the law).** `[verify]` fresh embark: scout line with 25 sited ·
+worldgen shows both loading notes · tfwarrens reveals 25 real, 0 erased · a flourishing
+site exists and matches its claim · pass-over popups only at real warrens. Compile 0
+errors, deployed hash-verified 3/3.
+
 **YARD PLACEMENT: AREA DECIDES — USER FLOAT 2026-08-25 ("what if we improved blockyard
 placement a bit when there's lots of open space outside?", with an in-game screenshot of a
 yard wedged in a cramped chamber beside a wide-open doorstep), SIM BUILT + MEASURED same
