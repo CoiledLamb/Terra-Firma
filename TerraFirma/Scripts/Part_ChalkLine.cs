@@ -10,9 +10,9 @@ namespace XRL.World.Parts
 	/// plot they are: N/S = top/bottom edges (horizontal), E/W = right/left edges (vertical),
 	/// corners named by position - chalklineNE is a rectangle's northeast corner, arms south+west.
 	/// Auto-tiling reads the four cardinal neighbors and picks the piece whose arms reach them,
-	/// and every placement or smear RE-TILES the neighbors so they reach back. No T-junction or
-	/// cross sprites exist yet (3-4 arm cells fall back to a straight); flagged to the user, who
-	/// offered to draw more.
+	/// and every placement or smear RE-TILES the neighbors so they reach back. Tees follow the
+	/// same position convention (chalklineTN sits on the north edge, stem reaching south into
+	/// the plot) and chalklineX is the four-way (user sprites 2026-08-25).
 	/// Smear: open to anyone adjacent; owned camp lines broadcast for help via native ownership
 	/// (BroadcastForHelp), player lines are unowned and wipe clean.
 	/// Trample (user shape 2026-08-23, amending the 08-22 "doesn't wear off" shape with traffic
@@ -171,8 +171,29 @@ namespace XRL.World.Parts
 
 		private static string PieceFor(bool n, bool s, bool e, bool w, Cell cell, string strokeDir)
 		{
-			// straights win when an opposing pair exists (also the 3-4 arm fallback: no
-			// T-junction or cross sprites in the kit yet)
+			// junctions first: four arms is the cross, three is a tee named for the plot
+			// edge it sits on (stem always reaches inward, matching the corner convention)
+			if (n && s && e && w)
+			{
+				return "X";
+			}
+			if (e && w && s)
+			{
+				return "TN";
+			}
+			if (e && w && n)
+			{
+				return "TS";
+			}
+			if (n && s && w)
+			{
+				return "TE";
+			}
+			if (n && s && e)
+			{
+				return "TW";
+			}
+			// straights win when an opposing pair exists
 			if (n && s)
 			{
 				return Vertical(cell);
