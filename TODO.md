@@ -1533,6 +1533,26 @@ compile 0 errors; all `log-confirmed pending` on next zone builds.** Three lanes
        trail owed, rank fallback still doors it; yard-placer quirk, logged not fixed).**
        Old 85% w/ desync class → 99.1% with the class deleted. `[TF-VERIFY]` trail line now
        reads cells/cairns/gap or `doorstep`. Compile 0 errors, deployed hash-verified.
+     - **CAIRN TOPPLE-ON-STEP — USER DOCKET 2026-08-25 ("they should start upright and
+       topple over when stepped on - doing so is considered a hostile action by the owner
+       of the cairn"; updated sprites landed same message), BUILT + DEPLOYED same sitting.**
+       Ground truth cited before build: ownership is the engine's own idiom, `Physics.Owner`
+       faction string (the Barathrumite-furniture pattern, 30x in Furniture.xml), which
+       gates damage via OkayToDamageEvent (decompiled Physics: HandleEvent returns false
+       when Owner set) and angers via `BroadcastForHelp` -> AIHelpBroadcastEvent,
+       HelpCause.Trespass, radius 20. Built `Cleo_TerraFirma_CairnTopple`
+       (Part_Cairn.cs, step channel mirrors FallenRockPart's ObjectEnteredCellEvent gates):
+       standing cairn is now WALKABLE (Solid false - it must be steppable to topple);
+       stepping replaces it with the toppled scatter, Owner carried over (the scatter is
+       still theirs), help broadcast fires when owned, autowalk interrupts on approach,
+       owner-faction members never topple their own waystones. Topple message line is
+       DRAFT (voice pass owed). **OWNER ASSIGNMENT DEFERRED, the honest gap: no warren
+       faction exists yet (population lane unbuilt), so spawned cairns are unowned and the
+       hostility channel is LATENT until that lane lands - wiring point is the trail
+       dress's cairn Put.** `[verify]` in game: cairns start upright with the new sprite ·
+       stepping topples with message · `[TF-VERIFY] [CAIRN] toppled by` line · autowalk
+       stops at a cairn. Compile 0 errors, deployed hash-verified 4/4 (both updated
+       sprites rode along), `log-confirmed pending`.
      - **CAIRN SPLIT — USER FLAG IN GAME 2026-08-25 ("cairns are starting out using the
        toppled sprite for some reason"), FIXED same sitting.** cairn1 STANDS, cairn2 is the
        toppled scatter; the first cut wrongly rolled both as RandomTile variants of one

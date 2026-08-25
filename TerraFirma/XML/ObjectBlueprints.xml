@@ -146,7 +146,10 @@
   <object Name="Cleo_TerraFirma_Cairn" Inherits="Furniture">
     <part Name="Render" Tile="cairn1.png" DisplayName="cairn" RenderString="007" ColorString="&amp;r" TileColor="&amp;r" DetailColor="w" Occluding="false" />
     <part Name="Description" Short="A waystone for those with eyes to the earth, this stack of rocks inhabits an unresolved superposition of endurance and fragility." />
-    <part Name="Physics" Solid="true" Takeable="false" Weight="400" />
+    <!-- walkable ON PURPOSE (user docket 2026-08-25): it topples when stepped on, so it
+         must be steppable; the topple part carries the ownership trespass channel -->
+    <part Name="Physics" Solid="false" Takeable="false" Weight="400" />
+    <part Name="Cleo_TerraFirma_CairnTopple" />
     <tag Name="ExcludeFromDynamicEncounters" />
     <tag Name="NoSparkingQuest" />
   </object>
