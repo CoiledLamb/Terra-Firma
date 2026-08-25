@@ -1542,10 +1542,20 @@ compile 0 errors; all `log-confirmed pending` on next zone builds.** Three lanes
      takeable pocket rock), `loosestone` to `SmallBoulder` (Items.xml:3049, chunkier - it
      plays the robbed-yard block remnant); picks CLAUDE dials. `pebble` keeps
      `Cleo_TerraFirma_Rock_Pebbles` (not named in the ruling; also live in Part_FallenRock).
-     Sim mirrors. **The user's follow-up question (delete `Cleo_TerraFirma_Rock_Generic`
-     entirely?) is OPEN - remaining references after this swap are Mutation_Fissure's
-     DEBRIS_BLUEPRINT (the QUARANTINED v1 lane) and _TestHarness; Claude's recommendation
-     and the save-compat caveat given in-sitting, awaiting the user's word.**
+     Sim mirrors. **DELETED OUTRIGHT same sitting - USER RULED ("remo ve em") after the
+     caveats were given.** Quarantine check first: TODO.md's own boundary note (the rocks
+     that iteration added) lists Rock_Generic/Pebbles as "still live, NOT quarantined"
+     structural stone, so this crossed no line. Repoints: Mutation_Fissure DEBRIS_BLUEPRINT
+     to base `SmallBoulder` (MediumBoulder already sat in the same ring roll); harness
+     SCAV_AMMO_BP + dull test to `Cleo_TerraFirma_Rock_Pebbles` (both need a FallenRockPart
+     carrier, which no base rock is); RedoubtIsScatter recognizes SmallBoulder. Blueprint
+     removed from Rocks.xml with a tombstone comment; spine note updated. **BEHAVIOR DELTA,
+     flagged not hidden: Rock_Generic carried CrushDamage 2d6 and base boulders carry no
+     crush tag, so fissure debris no longer crushes on landing. Strikeable if fissure ever
+     revives and wants its crush back (a Cleo_TerraFirma child of SmallBoulder with the tag
+     is the one-object fix).** Save caveat stated in-sitting: old saves carrying spawned
+     fallen rocks will drop them noisily on load. Compile 0 errors, deployed hash-verified
+     3/3.
   3. **SQUATTERS RULED + SIM BUILT; game-side placement HELD.** Sub-roll WITHIN abandoned
      (the ruled reclaimed knobs stand untouched): knob `squatterPct` 35 (CLAUDE dial), 1-2
      hermits or trash monks, or 2-3 spiders. Names verified in Base Creatures.xml:

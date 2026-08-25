@@ -17,9 +17,9 @@
 	<!-- shared base: a throwable stone that fell from the ceiling -->
 	<!-- V1 ROCK CATALOG + KITCHEN PARKED on branch quarantine-hold (2026-08-22, user ruling:
 	     "move it to its own branch so it doesn't come up until i'm ready to address it").
-	     This file keeps the live fissure spine (base fallen rock, pebbles, debris, rubble,
+	     This file keeps the live fissure spine (base fallen rock, pebbles, rubble,
 	     crumbled wall, fabric wall) and the held ring pieces (crack, chasm, figure, ape statue,
-	     baboon figurine + fists). The payload stones, puddles, tar patch, ground/kitchen forms,
+	     baboon figurine + fists). Generic debris left the spine 2026-08-25 (user: base rocks). The payload stones, puddles, tar patch, ground/kitchen forms,
 	     StoneMeal, cooking ingredient mappings, surge field and force shards live on that branch;
 	     design record in TODO-quarantine.md. -->
 	<object Name="Cleo_TerraFirma_BaseFallenRock" Inherits="BaseStone">
@@ -58,13 +58,9 @@
 
 	<!-- (russet/blue pebble variants CUT, user ruling 2026-07-22) -->
 
-	<object Name="Cleo_TerraFirma_Rock_Generic" Inherits="Cleo_TerraFirma_BaseFallenRock">
-		<part Name="Render" DisplayName="fallen rock" Tile="Items/sw_smallboulder.bmp" ColorString="&amp;y" DetailColor="Y" />
-		<!-- BETA-HELD: <part Name="Description" Short="A fist of the ceiling, freshly parted from it." /> -->
-		<part Name="ThrownWeapon" Damage="1d3" Penetration="4" />
-
-		<tag Name="Cleo_TerraFirma_CrushDamage" Value="2d6" />
-	</object>
+	<!-- (Rock_Generic "fallen rock" DELETED, user ruling 2026-08-25 "remove em":
+	     base rocks serve everywhere it spawned. Dress: Small Stone/SmallBoulder;
+	     fissure debris: SmallBoulder. Its 2d6 CrushDamage left with it.) -->
 
 	<!-- THE HOLOGRAPHIC ROCK (user concept 2026-07-24, designed + ruled 2026-07-25): the rock
 	     that isn't there. Belief gates both ends (Part_Holographic: Int DC 12, sticky forever,

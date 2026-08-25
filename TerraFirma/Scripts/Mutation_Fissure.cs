@@ -51,7 +51,11 @@ namespace XRL.World.Parts.Mutation
 		// color blocks don't communicate what is actually happening."
 		// Calcify's verified "large stone impact" -- the wave's slam
 		private const string SLAM_SOUND = "Sounds/Throw/sfx_throwing_stone_large_impact";
-		private const string DEBRIS_BLUEPRINT = "Cleo_TerraFirma_Rock_Generic";
+		// fallen rock DELETED (user ruling 2026-08-25 "remove em"): debris is now
+		// the base boulder, joining the MediumBoulder already in the ring roll.
+		// Behavior delta flagged in TODO: base boulders carry no CrushDamage tag,
+		// so debris deposits no longer crush on landing.
+		private const string DEBRIS_BLUEPRINT = "SmallBoulder";
 		private const string RUBBLE_BLUEPRINT = "Cleo_TerraFirma_Rock_Rubble";
 		private const string CRUMBLED_BLUEPRINT = "Cleo_TerraFirma_Rock_CrumbledWall";
 		private const string WALL_BLUEPRINT = "Cleo_TerraFirma_Rock_Wall";

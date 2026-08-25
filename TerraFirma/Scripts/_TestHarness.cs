@@ -32,7 +32,7 @@ namespace Cleo.TerraFirma.Scripts
 	[HasWishCommand]
 	public class TestHarnessWishes
 	{
-		private const string SCAV_AMMO_BP = "Cleo_TerraFirma_Rock_Generic";
+		private const string SCAV_AMMO_BP = "Cleo_TerraFirma_Rock_Pebbles";   // was Rock_Generic (deleted 2026-08-25); scavenger tests need a FallenRockPart carrier
 		private const string BABOON_BP = "Baboon";
 		private const string SPAWN_MARK = "TFHarnessSpawn";
 		private const string STATUETTE_BP = "Cleo_TerraFirma_Rock_BaboonFigurine";
@@ -41,7 +41,7 @@ namespace Cleo.TerraFirma.Scripts
 		private const string RUBBLE_BP = "Cleo_TerraFirma_Rock_Rubble";
 		private const string PEBBLES_BP = "Cleo_TerraFirma_Rock_Pebbles";
 		private const string CRACK_BP = "Cleo_TerraFirma_Rock_Crack";
-		private const string GENERIC_BP = "Cleo_TerraFirma_Rock_Generic";
+		private const string DULLTEST_BP = "Cleo_TerraFirma_Rock_Pebbles";   // was GENERIC_BP = Rock_Generic (deleted 2026-08-25); the dull test needs a FallenRockPart carrier
 		private const string ROBOT_BP = "Scrapbot";
 		private const string MOTH_BP = "Glowmoth";
 
@@ -815,7 +815,7 @@ namespace Cleo.TerraFirma.Scripts
 
 		private static bool RedoubtIsFabric(string bp) => bp == RUBBLE_BP || bp == FABRIC_CRUMBLED_BP || bp == FABRIC_WALL_BP;
 
-		private static bool RedoubtIsScatter(string bp) => bp == GENERIC_BP || bp == PEBBLES_BP || bp == "MediumBoulder";
+		private static bool RedoubtIsScatter(string bp) => bp == "SmallBoulder" || bp == PEBBLES_BP || bp == "MediumBoulder";   // SmallBoulder = fissure's post-deletion debris
 
 		private static HashSet<GameObject> SnapshotZone(Zone zone)
 		{
@@ -1258,7 +1258,7 @@ namespace Cleo.TerraFirma.Scripts
 		{
 			if (ply?.CurrentCell == null)
 				return;
-			GameObject rock = GameObject.Create(GENERIC_BP);
+			GameObject rock = GameObject.Create(DULLTEST_BP);
 			Cleo_TerraFirma_FallenRockPart frp = rock?.GetPart<Cleo_TerraFirma_FallenRockPart>();
 			if (frp == null) { Report("dull", false, "SETUP FAIL - generic rock or FallenRockPart missing"); RunNext(queue, ply); return; }
 			frp.DullAfter = 2;
