@@ -1819,32 +1819,108 @@ namespace Cleo.TerraFirma.Scripts
 				int x0 = rect.X0, y0 = rect.Y0, x1 = rect.X1, y1 = rect.Y1;
 				bool FreeI(int i) => g.C[i] == FLOOR && g.Item[i] == null;
 				for (int x = x0; x <= x1; x++) for (int y = y0; y <= y1; y++) g.Tree[g.Idx(x, y)] = 0;   // the drape clears its ground
-				// GUARANTEED GAP (user float 2026-08-24, sim-measured; ported
-				// 2026-08-25 with the sprites in). The ring's door: the non-corner
-				// border cell nearest the mouth stays unchalked, preferring a cell
-				// whose OUTWARD step is walkable (a door onto rock is no door; the
-				// sim measured 71 of 128 trail failures as exactly that). Rank 0
-				// clear ground, 1 brush (the trail may trample), 2 anything.
+				// GAP + TRAIL, TRAIL-FIRST (USER FIX 2026-08-25 after an in-game
+				// yard rolled ringed but trail-less: "draw the path first and make
+				// the hole last, on the first tile where there's room"). The trail
+				// walks out from beside the mouth and the ring opens where the
+				// walk arrives, so gap and path agree BY CONSTRUCTION. The rank
+				// picker survives as fallback only: inside yards, yards no route
+				// reaches, and the mouth-inside-the-ring edge (sim audit found 1
+				// in 117: the ring encloses the mouth, so no trail is owed).
 				int gmx = art.Mouth.X, gmy = art.Mouth.Y;
-				int gapI = -1, gapBest = int.MaxValue, gapX = 0, gapY = 0, gapRank = 9;
-				for (int x = x0; x <= x1; x++)
-					for (int y = y0; y <= y1; y++)
+				int gapI = -1, gapX = 0, gapY = 0;
+				List<int> tpath = null;
+				string trailNote = null;
+				if (outside)
+				{
+					bool IsGapCell(int x, int y)
 					{
-						if (x > x0 && x < x1 && y > y0 && y < y1) continue;
-						if ((x == x0 || x == x1) && (y == y0 || y == y1)) continue;   // corners never door
-						int odx = x == x0 ? -1 : x == x1 ? 1 : 0, ody = y == y0 ? -1 : y == y1 ? 1 : 0;
-						int gox = x + odx, goy = y + ody;
-						int rank = 2;
-						if (g.Inb(gox, goy))
-						{
-							int goi = g.Idx(gox, goy);
-							if (g.C[goi] == FLOOR && g.Host[goi] != 0 && g.Water[goi] == 0)
-								rank = g.Tree[goi] != 0 ? 1 : 0;
-						}
-						int gd = (x - gmx) * (x - gmx) + (y - gmy) * (y - gmy);
-						if (rank < gapRank || (rank == gapRank && gd < gapBest))
-						{ gapRank = rank; gapBest = gd; gapI = g.Idx(x, y); gapX = x; gapY = y; }
+						if (x < x0 || x > x1 || y < y0 || y > y1) return false;
+						if (x > x0 && x < x1 && y > y0 && y < y1) return false;
+						return !((x == x0 || x == x1) && (y == y0 || y == y1));   // corners never door
 					}
+					bool PassAt(int i2, bool trees)
+					{
+						int px3 = i2 % g.W, py3 = i2 / g.W;
+						return g.C[i2] == FLOOR && g.Host[i2] != 0 && g.Water[i2] == 0 && (trees || g.Tree[i2] == 0)
+							&& !(px3 >= x0 && px3 <= x1 && py3 >= y0 && py3 <= y1);
+					}
+					int mxc = g.MouthIdx % g.W, myc = g.MouthIdx / g.W;
+					// THE DOORSTEP CASE (sim audit 2026-08-25: 12 of 13 failures):
+					// a yard flush against the mouth leaves the search no seeds. If
+					// the mouth already touches a legal gap cell, that cell is the
+					// door and the trail is zero cells long.
+					foreach (var dd in N4)
+					{
+						int nx = mxc + dd[0], ny = myc + dd[1];
+						if (g.Inb(nx, ny) && IsGapCell(nx, ny))
+						{ gapI = g.Idx(nx, ny); gapX = nx; gapY = ny; tpath = new List<int>(); trailNote = "doorstep"; break; }
+					}
+					int[] prevA = null; int gapFound = -1;
+					int Bfs(bool trees)
+					{
+						var pv = new int[g.W * g.H]; for (int k = 0; k < pv.Length; k++) pv[k] = -2;
+						var ql = new List<int>();
+						foreach (var dd in N4)
+						{
+							int nx = mxc + dd[0], ny = myc + dd[1]; if (!g.Inb(nx, ny)) continue;
+							int ni = g.Idx(nx, ny);
+							if (PassAt(ni, trees) && pv[ni] == -2) { pv[ni] = -1; ql.Add(ni); }
+						}
+						int head = 0;
+						while (head < ql.Count)
+						{
+							int c2 = ql[head++], cx2 = c2 % g.W, cy2 = c2 / g.W;
+							foreach (var dd in N4)
+							{
+								int nx = cx2 + dd[0], ny = cy2 + dd[1]; if (!g.Inb(nx, ny)) continue;
+								if (IsGapCell(nx, ny)) { prevA = pv; gapFound = g.Idx(nx, ny); return c2; }
+								int ni = g.Idx(nx, ny);
+								if (pv[ni] != -2 || !PassAt(ni, trees)) continue;
+								pv[ni] = c2; ql.Add(ni);
+							}
+						}
+						return -1;
+					}
+					if (gapI < 0)
+					{
+						// strict first; a blocked route retries THROUGH brush and
+						// tramples what it crosses (the drape precedent)
+						int hitI = Bfs(false); if (hitI < 0) hitI = Bfs(true);
+						if (hitI >= 0)
+						{
+							gapI = gapFound; gapX = gapI % g.W; gapY = gapI / g.W;
+							tpath = new List<int>();
+							for (int c2 = hitI; c2 >= 0; c2 = prevA[c2]) tpath.Add(c2);
+							tpath.Reverse();   // beside-the-mouth first, gap-side last
+						}
+					}
+				}
+				if (gapI < 0)
+				{
+					// FALLBACK rank picker (the 08-24 primary, demoted): outward
+					// step walkable first, then nearness to the mouth. The gap
+					// always exists even when the trail honestly does not.
+					int gapBest = int.MaxValue, gapRank = 9;
+					for (int x = x0; x <= x1; x++)
+						for (int y = y0; y <= y1; y++)
+						{
+							if (x > x0 && x < x1 && y > y0 && y < y1) continue;
+							if ((x == x0 || x == x1) && (y == y0 || y == y1)) continue;   // corners never door
+							int odx = x == x0 ? -1 : x == x1 ? 1 : 0, ody = y == y0 ? -1 : y == y1 ? 1 : 0;
+							int gox = x + odx, goy = y + ody;
+							int rank = 2;
+							if (g.Inb(gox, goy))
+							{
+								int goi = g.Idx(gox, goy);
+								if (g.C[goi] == FLOOR && g.Host[goi] != 0 && g.Water[goi] == 0)
+									rank = g.Tree[goi] != 0 ? 1 : 0;
+							}
+							int gd = (x - gmx) * (x - gmx) + (y - gmy) * (y - gmy);
+							if (rank < gapRank || (rank == gapRank && gd < gapBest))
+							{ gapRank = rank; gapBest = gd; gapI = g.Idx(x, y); gapX = x; gapY = y; }
+						}
+				}
 				for (int x = x0; x <= x1; x++)
 					for (int y = y0; y <= y1; y++)
 					{
@@ -1855,76 +1931,38 @@ namespace Cleo.TerraFirma.Scripts
 								 : x == x0 ? "chalklineW" : "chalklineE";
 						Put(i, id);
 					}
-				// TRAIL + CAIRNS (same float; outside yards only - an inside yard's
-				// path is the warren's own halls). BFS gap to beside the mouth over
-				// open host floor; strict first, retrying THROUGH brush with trample
-				// (the drape precedent). The mouth cell stays raw per the doorstep
-				// law; cairns sit the shoulder every R(3,6), side rolled.
-				if (outside && gapI >= 0)
+				// TRAIL + CAIRNS paint: the worn line renders as dirt path, the
+				// mouth cell stays raw (the doorstep law), cairns on the shoulder
+				// every R(3,6), side rolled.
+				if (tpath != null && tpath.Count > 0)
 				{
-					int sdx = gapX == x0 ? -1 : gapX == x1 ? 1 : 0, sdy = gapY == y0 ? -1 : gapY == y1 ? 1 : 0;
-					int tsx = gapX + sdx, tsy = gapY + sdy;
-					int[] prevA = null;
-					bool PassAt(int i2, bool trees)
+					var trailSet = new HashSet<int>(tpath);
+					foreach (int c2 in tpath) { g.Tree[c2] = 0; if (g.Item[c2] == null) Put(c2, "dirtpath"); }
+					int cairns = 0, until = R(3, 6);
+					for (int pi2 = 1; pi2 < tpath.Count; pi2++)
 					{
-						int px3 = i2 % g.W, py3 = i2 / g.W;
-						return g.C[i2] == FLOOR && g.Host[i2] != 0 && g.Water[i2] == 0 && (trees || g.Tree[i2] == 0)
-							&& !(px3 >= x0 && px3 <= x1 && py3 >= y0 && py3 <= y1);
-					}
-					int Bfs(bool trees)
-					{
-						if (!g.Inb(tsx, tsy) || !PassAt(g.Idx(tsx, tsy), trees)) return -1;
-						int start = g.Idx(tsx, tsy);
-						var pv = new int[g.W * g.H]; for (int k = 0; k < pv.Length; k++) pv[k] = -2;
-						pv[start] = -1; var q = new Queue<int>(); q.Enqueue(start); int hit = -1;
-						while (q.Count > 0 && hit < 0)
+						if (--until > 0) continue;
+						until = R(3, 6);
+						int c2 = tpath[pi2], cx2 = c2 % g.W, cy2 = c2 / g.W;
+						int px3 = tpath[pi2 - 1] % g.W, py3 = tpath[pi2 - 1] / g.W;
+						int tdx = cx2 - px3, tdy = cy2 - py3;
+						int cside = Chance(.5) ? 1 : -1;
+						int cox = cx2 + (-tdy) * cside, coy = cy2 + tdx * cside;
+						if (!g.Inb(cox, coy)) continue;
+						int coi = g.Idx(cox, coy);
+						if (g.C[coi] == FLOOR && g.Host[coi] != 0 && g.Item[coi] == null && g.Water[coi] == 0 && g.Tree[coi] == 0
+							&& !trailSet.Contains(coi) && coi != g.MouthIdx)
 						{
-							int c2 = q.Dequeue(), cx2 = c2 % g.W, cy2 = c2 / g.W;
-							foreach (var dd in N4)
-							{
-								int nx2 = cx2 + dd[0], ny2 = cy2 + dd[1]; if (!g.Inb(nx2, ny2)) continue;
-								int ni2 = g.Idx(nx2, ny2);
-								if (ni2 == g.MouthIdx) { hit = c2; break; }
-								if (pv[ni2] != -2 || !PassAt(ni2, trees)) continue;
-								pv[ni2] = c2; q.Enqueue(ni2);
-							}
+							// tense pass: a living camp keeps its waystones stacked; a
+							// dead site lets some fall (50% toppled, CLAUDE dial)
+							Put(coi, occupancy != "in use" && Chance(.5) ? "cairn_toppled" : "cairn");
+							cairns++;
 						}
-						if (hit < 0) return -1;
-						prevA = pv; return hit;
 					}
-					int hitI = Bfs(false); if (hitI < 0) hitI = Bfs(true);
-					if (hitI >= 0)
-					{
-						var tpath = new List<int>();
-						for (int c2 = hitI; c2 >= 0; c2 = prevA[c2]) tpath.Add(c2);
-						tpath.Reverse();
-						var trailSet = new HashSet<int>(tpath);
-						foreach (int c2 in tpath) { g.Tree[c2] = 0; if (g.Item[c2] == null) Put(c2, "dirtpath"); }
-						int cairns = 0, until = R(3, 6);
-						for (int pi2 = 1; pi2 < tpath.Count; pi2++)
-						{
-							if (--until > 0) continue;
-							until = R(3, 6);
-							int c2 = tpath[pi2], cx2 = c2 % g.W, cy2 = c2 / g.W;
-							int px3 = tpath[pi2 - 1] % g.W, py3 = tpath[pi2 - 1] / g.W;
-							int tdx = cx2 - px3, tdy = cy2 - py3;
-							int cside = Chance(.5) ? 1 : -1;
-							int cox = cx2 + (-tdy) * cside, coy = cy2 + tdx * cside;
-							if (!g.Inb(cox, coy)) continue;
-							int coi = g.Idx(cox, coy);
-							if (g.C[coi] == FLOOR && g.Host[coi] != 0 && g.Item[coi] == null && g.Water[coi] == 0 && g.Tree[coi] == 0
-								&& !trailSet.Contains(coi) && coi != g.MouthIdx)
-							{
-								// tense pass: a living camp keeps its waystones stacked; a
-								// dead site lets some fall (50% toppled, CLAUDE dial)
-								Put(coi, occupancy != "in use" && Chance(.5) ? "cairn_toppled" : "cairn");
-								cairns++;
-							}
-						}
-						Helpers.VerifyLog("WARREN", $"trail: {tpath.Count} cells, {cairns} cairns, gap {gapX},{gapY} rank {gapRank}");
-					}
-					else Helpers.VerifyLog("WARREN", $"trail: none (no route), gap {gapX},{gapY} rank {gapRank}");
+					Helpers.VerifyLog("WARREN", $"trail: {tpath.Count} cells, {cairns} cairns, gap {gapX},{gapY}");
 				}
+				else if (outside)
+					Helpers.VerifyLog("WARREN", $"trail: {(trailNote ?? "none (no route)")}, gap {gapX},{gapY}");
 				int ix0 = x0 + 1, iy0 = y0 + 1, ix1 = x1 - 1, iy1 = y1 - 1;
 				if (ix1 < ix0 || iy1 < iy0) return;
 				int wx = Math.Abs(ix0 - art.Mouth.X) <= Math.Abs(ix1 - art.Mouth.X) ? ix0 : ix1;

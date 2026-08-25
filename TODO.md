@@ -1519,6 +1519,20 @@ compile 0 errors; all `log-confirmed pending` on next zone builds.** Three lanes
      cells/cairns/gap. `[verify]` in game: ring shows one unchalked door cell facing the
      mouth · a dirt line runs gap-to-mouth with 2ish cairns on its shoulder · inside yards
      get the gap only · no MODERROR on Cairn/DirtPath.
+     - **TRAIL-FIRST GAP — USER FLAG IN GAME 2026-08-25 (screenshot: ringed yard, no trail
+       to the hole) + USER FIX ("draw the path first and make the hole last, on the first
+       tile where there's room"), BUILT + PORTED same sitting.** Claude endorsed as a
+       construction, not a patch: the trail walks out from beside the mouth and the ring
+       opens where the walk arrives, so gap and path agree BY CONSTRUCTION; the 08-24 rank
+       picker demotes to fallback (inside yards, unreachable yards). First sim cut audited
+       88.9% and ALL 13 failures were reachable - THE DOORSTEP CASE: a yard flush against
+       the mouth leaves the rect-excluded search zero seeds, fixed by checking whether the
+       mouth already touches a legal gap cell (door found, trail zero cells). Re-measured,
+       200 seeds / 117 outside yards: **104 trails + 12 doorsteps = 116/117 constructed;
+       the 1 residual is a yard whose RING ENCLOSES THE MOUTH (you spawn inside it - no
+       trail owed, rank fallback still doors it; yard-placer quirk, logged not fixed).**
+       Old 85% w/ desync class → 99.1% with the class deleted. `[TF-VERIFY]` trail line now
+       reads cells/cairns/gap or `doorstep`. Compile 0 errors, deployed hash-verified.
      - **CAIRN SPLIT — USER FLAG IN GAME 2026-08-25 ("cairns are starting out using the
        toppled sprite for some reason"), FIXED same sitting.** cairn1 STANDS, cairn2 is the
        toppled scatter; the first cut wrongly rolled both as RandomTile variants of one

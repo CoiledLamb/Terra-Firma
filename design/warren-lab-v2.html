@@ -1687,32 +1687,89 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
     // the drape clears its ground: brush under the claim goes (an outside
     // rect may include tree cells by design; see the yard flood)
     for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++) g.tree[idx(x,y)]=0;
-    // GUARANTEED GAP (USER FLOAT 2026-08-24, sim preview: "a guaranteed gap
-    // in the blockyard with a trail leading to the entrance of the quarry").
-    // The gap is the ring's door: the non-corner border cell nearest the
-    // mouth stays unchalked, always - a yard you can walk into.
+    // GAP + TRAIL, TRAIL-FIRST (USER FIX 2026-08-25 after an in-game yard
+    // rolled ringed but trail-less: "draw the path first and make the hole
+    // last, on the first tile where there's room"). The old order picked the
+    // gap by rank and HOPED a route existed from it; now the trail is walked
+    // out from beside the mouth and the ring opens where the walk actually
+    // arrives, so gap and path agree BY CONSTRUCTION. The rank picker
+    // survives only as fallback: inside yards (no trail owed) and yards no
+    // route reaches (water honestly cutting the arm).
     const mx=art.mouth.x, my=art.mouth.y;
-    // gap choice prefers a border cell whose OUTWARD step is walkable (a door
-    // onto rock is no door; measured 71 of 128 trail failures were exactly
-    // that), then nearness to the mouth. Rank 0 = clear ground outside,
-    // 1 = brush outside (trail may trample it, the drape precedent),
-    // 2 = anything (the gap still exists, the trail honestly does not).
-    let gapI=-1, gapBest=1e9, gapX=0, gapY=0, gapRank=9;
-    for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){
-      if(x>x0&&x<x1&&y>y0&&y<y1) continue;
-      const corner=(x===x0||x===x1)&&(y===y0||y===y1);
-      if(corner) continue;
-      const odx=x===x0?-1:x===x1?1:0, ody=y===y0?-1:y===y1?1:0;
-      const ox2=x+odx, oy2=y+ody;
-      let rank=2;
-      if(inb(ox2,oy2)){
-        const oi2=idx(ox2,oy2);
-        if(g.c[oi2]===FLOOR&&g.host[oi2]&&!g.water[oi2])
-          rank=g.tree[oi2]?1:0;
+    let gapI=-1, gapX=0, gapY=0, tpath=null;
+    if(K.yardTrail&&where==='outside'){
+      const isGapCell=(x,y)=>{
+        if(x<x0||x>x1||y<y0||y>y1) return false;
+        if(x>x0&&x<x1&&y>y0&&y<y1) return false;
+        return !((x===x0||x===x1)&&(y===y0||y===y1));   // corners never door
+      };
+      const passAt=trees=>i2=>{ const x=i2%W, y=(i2/W)|0;
+        return g.c[i2]===FLOOR&&g.host[i2]&&!g.water[i2]&&(trees||!g.tree[i2])
+          &&!(x>=x0&&x<=x1&&y>=y0&&y<=y1); };
+      const mxc=g.mouthIdx%W, myc=(g.mouthIdx/W)|0;
+      // THE DOORSTEP CASE (found by the first 200-roll audit: all 13 "failures"
+      // were this): a yard rolled flush against the mouth, so the mouth's only
+      // walkable neighbor IS a ring border cell and the rect-exclusion starves
+      // the search of seeds. If the mouth already touches a legal gap cell,
+      // that cell is the door and the trail is zero cells long.
+      for(const[ddx,ddy]of N4){
+        const nx=mxc+ddx, ny=myc+ddy;
+        if(inb(nx,ny)&&isGapCell(nx,ny)){ gapI=idx(nx,ny); gapX=nx; gapY=ny; tpath=[]; break; }
       }
-      const d=(x-mx)*(x-mx)+(y-my)*(y-my);
-      if(rank<gapRank||(rank===gapRank&&d<gapBest)){
-        gapRank=rank; gapBest=d; gapI=idx(x,y); gapX=x; gapY=y;
+      const bfs=pass=>{
+        const pv=new Int32Array(W*H).fill(-2), q=[];
+        for(const[ddx,ddy]of N4){
+          const nx=mxc+ddx, ny=myc+ddy; if(!inb(nx,ny)) continue;
+          const ni=idx(nx,ny);
+          if(pass(ni)&&pv[ni]===-2){ pv[ni]=-1; q.push(ni); }
+        }
+        let head=0;
+        while(head<q.length){
+          const c2=q[head++], cx=c2%W, cy=(c2/W)|0;
+          for(const[ddx,ddy]of N4){
+            const nx=cx+ddx, ny=cy+ddy; if(!inb(nx,ny)) continue;
+            if(isGapCell(nx,ny)){ bfs.prev=pv; bfs.gap=idx(nx,ny); return c2; }
+            const ni=idx(nx,ny);
+            if(pv[ni]!==-2||!pass(ni)) continue;
+            pv[ni]=c2; q.push(ni);
+          }
+        }
+        return -1;
+      };
+      if(gapI<0){
+        // strict first; a blocked route retries THROUGH brush and the trail
+        // tramples what it crosses (the drape precedent: a claim stamps over
+        // terrain, and a worn line through dogthorn is exactly a trail)
+        let hit=bfs(passAt(false));
+        if(hit<0) hit=bfs(passAt(true));
+        if(hit>=0){
+          gapI=bfs.gap; gapX=gapI%W; gapY=(gapI/W)|0;
+          tpath=[]; for(let c2=hit;c2>=0;c2=bfs.prev[c2]) tpath.push(c2);
+          tpath.reverse();   // beside-the-mouth first, gap-side last
+        }
+      }
+    }
+    if(gapI<0){
+      // FALLBACK rank picker (the 08-24 primary, demoted): outward step
+      // walkable first, then nearness to the mouth. The gap always exists
+      // even when the trail honestly does not.
+      let gapBest=1e9, gapRank=9;
+      for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){
+        if(x>x0&&x<x1&&y>y0&&y<y1) continue;
+        const corner=(x===x0||x===x1)&&(y===y0||y===y1);
+        if(corner) continue;
+        const odx=x===x0?-1:x===x1?1:0, ody=y===y0?-1:y===y1?1:0;
+        const ox2=x+odx, oy2=y+ody;
+        let rank=2;
+        if(inb(ox2,oy2)){
+          const oi2=idx(ox2,oy2);
+          if(g.c[oi2]===FLOOR&&g.host[oi2]&&!g.water[oi2])
+            rank=g.tree[oi2]?1:0;
+        }
+        const d=(x-mx)*(x-mx)+(y-my)*(y-my);
+        if(rank<gapRank||(rank===gapRank&&d<gapBest)){
+          gapRank=rank; gapBest=d; gapI=idx(x,y); gapX=x; gapY=y;
+        }
       }
     }
     for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){
@@ -1723,62 +1780,25 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
                : x===x0? 'chalklineW':'chalklineE';
       put(i,id);
     }
-    // TRAIL + CAIRNS (same float; outside yards only - an inside yard's path
-    // is the warren's own halls). BFS gap -> beside the mouth over open host
-    // floor, avoiding water and trees; the worn line renders as dirt path,
-    // the mouth cell itself stays raw (the doorstep law). Cairns sit on the
-    // trail's shoulder at irregular intervals (R(3,6) cells, side rolled) -
-    // spacing dials CLAUDE's. Cairn art is a PLACEHOLDER (sprite debt).
-    if(K.yardTrail&&where==='outside'&&gapI>=0){
-      const dxg=gapX===x0?-1:gapX===x1?1:0, dyg=gapY===y0?-1:gapY===y1?1:0;
-      const sx=gapX+dxg, sy=gapY+dyg;
-      const passAt=trees=>i2=>{ const x=i2%W, y=(i2/W)|0;
-        return g.c[i2]===FLOOR&&g.host[i2]&&!g.water[i2]&&(trees||!g.tree[i2])
-          &&!(x>=x0&&x<=x1&&y>=y0&&y<=y1); };
-      const bfs=pass=>{
-        if(!inb(sx,sy)||!pass(idx(sx,sy))) return -1;
-        const start=idx(sx,sy), pv=new Int32Array(W*H).fill(-2);
-        pv[start]=-1; const q=[start]; let hit=-1;
-        while(q.length&&hit<0){
-          const c2=q.shift(), cx=c2%W, cy=(c2/W)|0;
-          for(const[ddx,ddy]of N4){
-            const nx=cx+ddx, ny=cy+ddy; if(!inb(nx,ny)) continue;
-            const ni=idx(nx,ny);
-            if(ni===g.mouthIdx){ hit=c2; break; }
-            if(pv[ni]!==-2||!pass(ni)) continue;
-            pv[ni]=c2; q.push(ni);
-          }
-        }
-        return hit<0? -1 : (bfs.prev=pv, hit);
-      };
-      // strict first; a blocked route retries THROUGH brush and the trail
-      // tramples what it crosses (the drape precedent: a claim stamps over
-      // terrain, and a worn line through dogthorn is exactly a trail)
-      let hit=bfs(passAt(false));
-      if(hit<0) hit=bfs(passAt(true));
-      {
-        const prev=bfs.prev;
-        if(hit>=0){
-          const path=[]; for(let c2=hit;c2>=0;c2=prev[c2]) path.push(c2);
-          path.reverse();
-          if(!g.trail) g.trail=new Uint8Array(W*H);
-          for(const c2 of path){ g.trail[c2]=1; g.tree[c2]=0; }
-          let until=R(3,6);
-          for(let pi2=1;pi2<path.length;pi2++){
-            if(--until>0) continue;
-            until=R(3,6);
-            const c2=path[pi2], cx=c2%W, cy=(c2/W)|0;
-            const px2=path[pi2-1]%W, py2=(path[pi2-1]/W)|0;
-            const tdx=cx-px2, tdy=cy-py2;
-            const side=chance(.5)?1:-1;
-            const ox=cx+(-tdy)*side, oy=cy+tdx*side;
-            if(!inb(ox,oy)) continue;
-            const oi=idx(ox,oy);
-            if(g.c[oi]===FLOOR&&g.host[oi]&&!g.item[oi]&&!g.water[oi]&&!g.tree[oi]
-               &&!g.trail[oi]&&oi!==g.mouthIdx)
-              put(oi, occupancy!=='in use'&&chance(.5)?'cairn_toppled':'cairn');   // dead sites let some fall (CLAUDE dial)
-          }
-        }
+    // TRAIL + CAIRNS paint: the worn line renders as dirt path, the mouth
+    // cell stays raw (the doorstep law), cairns on the shoulder R(3,6)
+    if(tpath){
+      if(!g.trail) g.trail=new Uint8Array(W*H);
+      for(const c2 of tpath){ g.trail[c2]=1; g.tree[c2]=0; }
+      let until=R(3,6);
+      for(let pi2=1;pi2<tpath.length;pi2++){
+        if(--until>0) continue;
+        until=R(3,6);
+        const c2=tpath[pi2], cx=c2%W, cy=(c2/W)|0;
+        const px2=tpath[pi2-1]%W, py2=(tpath[pi2-1]/W)|0;
+        const tdx=cx-px2, tdy=cy-py2;
+        const side=chance(.5)?1:-1;
+        const ox=cx+(-tdy)*side, oy=cy+tdx*side;
+        if(!inb(ox,oy)) continue;
+        const oi=idx(ox,oy);
+        if(g.c[oi]===FLOOR&&g.host[oi]&&!g.item[oi]&&!g.water[oi]&&!g.tree[oi]
+           &&!g.trail[oi]&&oi!==g.mouthIdx)
+          put(oi, occupancy!=='in use'&&chance(.5)?'cairn_toppled':'cairn');   // dead sites let some fall (CLAUDE dial)
       }
     }
     const ix0=x0+1, iy0=y0+1, ix1=x1-1, iy1=y1-1;
