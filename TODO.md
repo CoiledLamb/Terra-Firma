@@ -1504,6 +1504,20 @@ the same carve-measured cap in the game-side walker.**
     straight 15 — thin bands rind-pin the perpendiculars. Known, shown, unfixed on purpose;
     next lever if it matters in play is pricing rind-adjacent straights, unbuilt.
 
+**YARD PLACEMENT: AREA DECIDES — USER FLOAT 2026-08-25 ("what if we improved blockyard
+placement a bit when there's lots of open space outside?", with an in-game screenshot of a
+yard wedged in a cramped chamber beside a wide-open doorstep), SIM BUILT + MEASURED same
+sitting, PORT AWAITING the user's nod.** Root cause: the placer took any qualifying pocket
+UNCONDITIONALLY (first 5x5 clearing wins) and only consulted the doorstep when no pocket
+qualified - the doorstep was never measured. Now both candidates are measured every time
+and the doorstep wins when STRICTLY bigger; inside keeps ties (a sheltered yard matching
+the doorstep's size earned its spot). No new knobs - rects already cap at 9x7, so "lots of
+open space" is just "the doorstep hit the cap and the pocket didn't". **Measured, 200
+seeds / 147 yards: inside share 22% (the 08-24 census) → 8.2% (12 yards), outside 78% →
+91.8%; the ~14% that flipped are exactly the cramped-inside-roomy-outside class. The 12
+inside survivors all beat their doorstep on area.** Port debt when nodded: the same
+compare in WarrenCarver's roles pass.
+
 **TANDEM DOCKET 2026-08-25 — USER RULED ("i figure we can add the other low impact ones in
 tandem, like building the cairn pass (sprites should be in now), and adding bracelets and
 nuggets to tables, with your lean being fine there" + squatters: "you're right on the money

@@ -1238,6 +1238,15 @@ function registerRoles(g,art,pockets,K,si,occupancy){
   const bestRect=cl=>bestRectMin(cl,5,5)||bestRectMin(cl,5,4)||bestRectMin(cl,4,5);
   const rectCells=r2=>{ const cs=[];
     for(let y=r2.y0;y<=r2.y1;y++)for(let x=r2.x0;x<=r2.x1;x++) cs.push([x,y]); return cs };
+  // BOTH candidates measured, AREA decides (USER 2026-08-25: "what if we
+  // improved blockyard placement a bit when there's lots of open space
+  // outside?"). The old order took any qualifying pocket unconditionally and
+  // only consulted the doorstep when none qualified - a barely-legal 5x5
+  // interior clearing beat a wide-open doorstep it never measured. Now the
+  // doorstep wins when it is STRICTLY bigger; inside keeps ties (a sheltered
+  // yard that matches the doorstep's size earned its spot). Rects cap at 9x7,
+  // so "lots of open space" = the doorstep hit the cap and the pocket didn't.
+  let insideCand=null;
   for(const p of reach){
     if(p.role||p.through!==0||p.character==='hall'||!near(p)) continue;
     const cl=new Set();
@@ -1245,17 +1254,17 @@ function registerRoles(g,art,pockets,K,si,occupancy){
       const i=idx(x,y); if(g.pocket[i]===p.id&&clearAt(i)) cl.add(i) }
     const r2=bestRect(cl);
     if(!r2) continue;
-    p.role='blockyard'; p.footprint=rectCells(r2);
-    yard={where:'inside',pocket:p.id,rect:r2,cells:p.footprint.length};
+    insideCand={p,rect:r2};
     break;
   }
-  if(!yard){
-    // outside: canyon floor from the doorstep. The flood WALKS through tree
-    // cells (dogthorn otherwise strangles it at the mouth) but only clear dry
-    // ground can join the rectangle.
-    // tree cells are allowed INTO the rectangle: the recipe is an exterior
-    // DRAPE (recipes.md's own word), and a drape stamps over terrain - the
-    // dress pass clears the brush under the claim. Rock and water still bound.
+  // outside: canyon floor from the doorstep. The flood WALKS through tree
+  // cells (dogthorn otherwise strangles it at the mouth) but only clear dry
+  // ground can join the rectangle.
+  // tree cells are allowed INTO the rectangle: the recipe is an exterior
+  // DRAPE (recipes.md's own word), and a drape stamps over terrain - the
+  // dress pass clears the brush under the claim. Rock and water still bound.
+  let outsideRect=null;
+  {
     const cl=new Set(), seen=new Uint8Array(W*H);
     let q2=[[art.mouth.x,art.mouth.y]], visited=0; seen[g.mouthIdx]=1;
     while(q2.length&&visited<320){ const nq=[];
@@ -1264,8 +1273,15 @@ function registerRoles(g,art,pockets,K,si,occupancy){
         seen[idx(nx,ny)]=1; visited++; nq.push([nx,ny]);
         cl.add(idx(nx,ny)) }
       q2=nq }
-    const r2=bestRect(cl);
-    if(r2) yard={where:'outside',rect:r2,cells:(r2.x1-r2.x0+1)*(r2.y1-r2.y0+1)};
+    outsideRect=bestRect(cl);
+  }
+  const areaOf=r2=>(r2.x1-r2.x0+1)*(r2.y1-r2.y0+1);
+  if(insideCand && (!outsideRect || areaOf(insideCand.rect)>=areaOf(outsideRect))){
+    const p=insideCand.p, r2=insideCand.rect;
+    p.role='blockyard'; p.footprint=rectCells(r2);
+    yard={where:'inside',pocket:p.id,rect:r2,cells:p.footprint.length};
+  } else if(outsideRect){
+    yard={where:'outside',rect:outsideRect,cells:areaOf(outsideRect)};
   }
   // YARD STATE - stamped AT REGISTRATION, not at dress (the contract: identity
   // at birth, dress never classifies; anything downstream - gossip text, loot,
