@@ -1419,6 +1419,12 @@ namespace Cleo.TerraFirma.Scripts
 			}
 			Box BestRect(HashSet<int> cl) => BestRectMin(cl, 5, 5) ?? BestRectMin(cl, 5, 4) ?? BestRectMin(cl, 4, 5);
 			string yardState = null;
+			// BOTH candidates measured, AREA decides (USER 2026-08-25 "what if we improved
+			// blockyard placement a bit when there's lots of open space outside?", nodded
+			// to port after the sim measured inside share 22% -> 8.2%). The old order took
+			// any qualifying pocket unconditionally and never measured the doorstep; now
+			// the doorstep wins when STRICTLY bigger, inside keeps ties.
+			PocketRec insidePocket = null; Box insideRect = null;
 			foreach (var p in reach)
 			{
 				if (p.Role != null || p.Through != 0 || p.Character == "hall" || !Near(p)) continue;
@@ -1431,15 +1437,10 @@ namespace Cleo.TerraFirma.Scripts
 					}
 				var r2 = BestRect(cl);
 				if (r2 == null) continue;
-				p.Role = "blockyard";
-				p.Footprint = new List<int>();
-				for (int y = r2.Y0; y <= r2.Y1; y++)
-					for (int x = r2.X0; x <= r2.X1; x++) p.Footprint.Add(g.Idx(x, y));
-				yardDesc = $"inside pocket {p.Id} ({r2.X1 - r2.X0 + 1}x{r2.Y1 - r2.Y0 + 1})";
-				yardRect = r2;
+				insidePocket = p; insideRect = r2;
 				break;
 			}
-			if (yardDesc == "none")
+			Box outsideRect = null;
 			{
 				// outside: canyon floor from the doorstep; trees walkable for the
 				// flood and claimable by the rectangle (the drape stamps over brush)
@@ -1461,8 +1462,22 @@ namespace Cleo.TerraFirma.Scripts
 						}
 					q2 = nq;
 				}
-				var r2 = BestRect(cl);
-				if (r2 != null) { yardDesc = $"outside ({r2.X1 - r2.X0 + 1}x{r2.Y1 - r2.Y0 + 1})"; yardRect = r2; }
+				outsideRect = BestRect(cl);
+			}
+			int AreaOf(Box r2) => (r2.X1 - r2.X0 + 1) * (r2.Y1 - r2.Y0 + 1);
+			if (insideRect != null && (outsideRect == null || AreaOf(insideRect) >= AreaOf(outsideRect)))
+			{
+				insidePocket.Role = "blockyard";
+				insidePocket.Footprint = new List<int>();
+				for (int y = insideRect.Y0; y <= insideRect.Y1; y++)
+					for (int x = insideRect.X0; x <= insideRect.X1; x++) insidePocket.Footprint.Add(g.Idx(x, y));
+				yardDesc = $"inside pocket {insidePocket.Id} ({insideRect.X1 - insideRect.X0 + 1}x{insideRect.Y1 - insideRect.Y0 + 1})";
+				yardRect = insideRect;
+			}
+			else if (outsideRect != null)
+			{
+				yardDesc = $"outside ({outsideRect.X1 - outsideRect.X0 + 1}x{outsideRect.Y1 - outsideRect.Y0 + 1})";
+				yardRect = outsideRect;
 			}
 			// yard state stamped at registration (the contract: dress never classifies)
 			if (yardDesc != "none")

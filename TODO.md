@@ -1516,7 +1516,24 @@ open space" is just "the doorstep hit the cap and the pocket didn't". **Measured
 seeds / 147 yards: inside share 22% (the 08-24 census) → 8.2% (12 yards), outside 78% →
 91.8%; the ~14% that flipped are exactly the cramped-inside-roomy-outside class. The 12
 inside survivors all beat their doorstep on area.** Port debt when nodded: the same
-compare in WarrenCarver's roles pass.
+compare in WarrenCarver's roles pass. **PORTED same sitting (user: "probably fine to
+port"); compile 0 errors, deployed hash-verified, `log-confirmed pending`.**
+
+**CAIRN NAV WEIGHTS — USER DOCKET 2026-08-25 ("find what base game uses for pathing around
+tiles (i think navweight?) and make sure its on cairns, with a lower weight on chalk lines
+also"), BUILT + DEPLOYED same sitting.** Preceded by a mass-topple mystery the USER solved
+themselves mid-investigation: the log showed only 6 real topples ever (4 = the player's
+own steps, blueprint `Humanoid`; 2 = a wandering Snapjaw Scavenger 1), so the "spawning
+toppled" sites were the abandoned tense dial's 50/50 pre-topple - USER RULED it stays
+("if in abandoned sites cairns are pre toppled with a 50/50 chance, that's fine").
+Mechanism is `GetNavigationWeightEvent` / `E.MinWeight` - the idiom FallenRockPart already
+speaks, its own comment naming 7 "mine-grade route around". Standing cairns advertise 7
+to smart actors (wildlife routes around, a deliberate step still topples; the toppled
+scatter advertises nothing, its part is removed); chalk lines advertise a soft 2 (a
+boundary you'd rather not scuff, not an obstacle - value CLAUDE dial). `[verify]` in
+game: wildlife visibly detours around standing cairns · creatures prefer stepping around
+the ring to through it · stepping on a cairn yourself still topples. Compile 0 errors,
+deployed hash-verified 3/3, `log-confirmed pending`.
 
 **TANDEM DOCKET 2026-08-25 — USER RULED ("i figure we can add the other low impact ones in
 tandem, like building the cairn pass (sprites should be in now), and adding bracelets and

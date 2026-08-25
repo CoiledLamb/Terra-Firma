@@ -29,7 +29,18 @@ namespace XRL.World.Parts
 		{
 			return base.WantEvent(ID, cascade)
 				|| ID == GetInventoryActionsEvent.ID
-				|| ID == InventoryActionEvent.ID;
+				|| ID == InventoryActionEvent.ID
+				|| ID == GetNavigationWeightEvent.ID;
+		}
+
+		/// <summary>Soft pathing nudge (user docket 2026-08-25, "a lower weight on chalk
+		/// lines also"): 2, well under the cairn's mine-grade 7 - a line on the ground is
+		/// a boundary you'd rather not scuff, not an obstacle.</summary>
+		public override bool HandleEvent(GetNavigationWeightEvent E)
+		{
+			if (E.Smart)
+				E.MinWeight(2);
+			return base.HandleEvent(E);
 		}
 
 		public override bool HandleEvent(GetInventoryActionsEvent E)

@@ -22,12 +22,26 @@ namespace XRL.World.Parts
 		/// <summary>What the cairn becomes underfoot.</summary>
 		public string ToppledBlueprint = "Cleo_TerraFirma_CairnToppled";
 
+		/// <summary>Pathfinding weight advertised to smart actors (7 = FallenRockPart's own
+		/// mine-grade "route around", user docket 2026-08-25): nobody wanders through a
+		/// waystone by accident, so wildlife stops toppling them in the site's off-hours;
+		/// a deliberate step still topples.</summary>
+		public int AvoidWeight = 7;
+
 		public override bool WantEvent(int ID, int cascade)
 		{
 			if (!base.WantEvent(ID, cascade) &&
-				ID != ObjectEnteredCellEvent.ID)
+				ID != ObjectEnteredCellEvent.ID &&
+				ID != GetNavigationWeightEvent.ID)
 				return ID == PooledEvent<InterruptAutowalkEvent>.ID;
 			return true;
+		}
+
+		public override bool HandleEvent(GetNavigationWeightEvent E)
+		{
+			if (E.Smart && E.PhaseMatches(ParentObject))
+				E.MinWeight(AvoidWeight);
+			return base.HandleEvent(E);
 		}
 
 		// a step that would anger somebody should not happen on autopilot
