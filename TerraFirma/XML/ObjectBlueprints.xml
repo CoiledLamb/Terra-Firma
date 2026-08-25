@@ -144,7 +144,8 @@
        RandomTile variants (user flag 2026-08-25). Shale colors and both descriptions are
        USER TEXT FINAL 2026-08-25. -->
   <object Name="Cleo_TerraFirma_Cairn" Inherits="Furniture">
-    <part Name="Render" Tile="cairn1.png" DisplayName="cairn" RenderString="007" ColorString="&amp;r" TileColor="&amp;r" DetailColor="w" Occluding="false" />
+    <!-- colors swapped w/r (user note 1, 2026-08-25) -->
+    <part Name="Render" Tile="cairn1.png" DisplayName="cairn" RenderString="007" ColorString="&amp;w" TileColor="&amp;w" DetailColor="r" Occluding="false" />
     <part Name="Description" Short="A waystone for those with eyes to the earth, this stack of rocks inhabits an unresolved superposition of endurance and fragility." />
     <!-- walkable ON PURPOSE (user docket 2026-08-25): it topples when stepped on, so it
          must be steppable; the topple part carries the ownership trespass channel -->
@@ -154,9 +155,12 @@
     <tag Name="NoSparkingQuest" />
   </object>
   <object Name="Cleo_TerraFirma_CairnToppled" Inherits="Cleo_TerraFirma_Cairn">
-    <part Name="Render" Tile="cairn2.png" DisplayName="toppled cairn" RenderString="007" ColorString="&amp;r" TileColor="&amp;r" DetailColor="w" Occluding="false" />
+    <part Name="Render" Tile="cairn2.png" DisplayName="toppled cairn" RenderString="007" ColorString="&amp;w" TileColor="&amp;w" DetailColor="r" Occluding="false" />
     <part Name="Description" Short="These scattered rocks once formed a waystone; now, only traces of their former order remain." />
     <part Name="Physics" Solid="false" Takeable="false" Weight="400" />
+    <!-- already fallen: inheriting the topple part made stepping on the scatter
+         print a second topple (user note 2, 2026-08-25) and re-topple forever -->
+    <removepart Name="Cleo_TerraFirma_CairnTopple" />
   </object>
 
   <object Name="Cleo_TerraFirma_QuarriedBlock" Inherits="Furniture">

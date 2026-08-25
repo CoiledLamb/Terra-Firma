@@ -55,6 +55,9 @@ namespace XRL.World.Parts
 					toppled.Physics.Owner = owner;   // the scatter is still theirs
 				if (Visible())
 					XDidY(stepper, "topple", ParentObject.the + ParentObject.ShortDisplayName, "!", ColorAsBadFor: stepper);   // DRAFT line, voice pass owed
+				// rocks coming down (user note 3, 2026-08-25): base SmallBoulder's own
+				// impact sound, verified in Items.xml; medium fits a knee-high stack
+				ParentObject.PlayWorldSound("Sounds/Throw/sfx_throwing_stone_medium_impact", 1f);
 				if (!string.IsNullOrEmpty(owner))
 					ParentObject.Physics?.BroadcastForHelp(stepper);   // the hostile act, engine's own trespass channel
 				Helpers.VerifyLog("CAIRN", $"toppled by {stepper.Blueprint}{(string.IsNullOrEmpty(owner) ? "" : $" (owner {owner}, help broadcast)")}");

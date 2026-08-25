@@ -1553,6 +1553,16 @@ compile 0 errors; all `log-confirmed pending` on next zone builds.** Three lanes
        stepping topples with message · `[TF-VERIFY] [CAIRN] toppled by` line · autowalk
        stops at a cairn. Compile 0 errors, deployed hash-verified 4/4 (both updated
        sprites rode along), `log-confirmed pending`.
+       - **THREE USER NOTES 2026-08-25, FIXED same sitting:** (1) colors swapped, both
+         blueprints now `&w` body / `r` detail (the fire-dish inversion family). (2)
+         **DOUBLE TOPPLE — USER FLAG ("you topple the cairn! and you topple the toppled
+         cairn!"): the toppled child INHERITED the topple part** from its parent, so the
+         mid-dispatch AddObject received the still-iterating step event and toppled the
+         scatter too; `removepart` on the child is the fix (also kills re-toppling and
+         inherited autowalk-interrupt on a thing already fallen). (3) topple now plays
+         base SmallBoulder's own `sfx_throwing_stone_medium_impact` (verified Items.xml;
+         medium-not-large is a CLAUDE dial, a knee-high stack not a calcify slam).
+         Compile 0 errors, deployed hash-verified 2/2, `log-confirmed pending`.
      - **CAIRN SPLIT — USER FLAG IN GAME 2026-08-25 ("cairns are starting out using the
        toppled sprite for some reason"), FIXED same sitting.** cairn1 STANDS, cairn2 is the
        toppled scatter; the first cut wrongly rolled both as RandomTile variants of one
