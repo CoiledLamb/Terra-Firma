@@ -1536,6 +1536,16 @@ compile 0 errors; all `log-confirmed pending` on next zone builds.** Three lanes
      room pool, house dwellings only, 12% one-per-room: a personal effect. Sim parity same
      sitting (sim ids nugget/bracelet1-3, base sw_nugget/sw_necklace tiles). Sim-measured,
      150 seeds / 123 sites: 3 nuggets, 8 bracelets - rare reads rare.
+  2b. **FALLEN ROCK OUT OF DRESS — USER RULED 2026-08-25 ("we should remove the fallen rock
+     blueprint from the dress table and replace it with basegame rocks"), BUILT + DEPLOYED
+     same sitting.** Dress map now: `stone` maps to base `Small Stone` (Items.xml:3016, the
+     takeable pocket rock), `loosestone` to `SmallBoulder` (Items.xml:3049, chunkier - it
+     plays the robbed-yard block remnant); picks CLAUDE dials. `pebble` keeps
+     `Cleo_TerraFirma_Rock_Pebbles` (not named in the ruling; also live in Part_FallenRock).
+     Sim mirrors. **The user's follow-up question (delete `Cleo_TerraFirma_Rock_Generic`
+     entirely?) is OPEN - remaining references after this swap are Mutation_Fissure's
+     DEBRIS_BLUEPRINT (the QUARANTINED v1 lane) and _TestHarness; Claude's recommendation
+     and the save-compat caveat given in-sitting, awaiting the user's word.**
   3. **SQUATTERS RULED + SIM BUILT; game-side placement HELD.** Sub-roll WITHIN abandoned
      (the ruled reclaimed knobs stand untouched): knob `squatterPct` 35 (CLAUDE dial), 1-2
      hermits or trash monks, or 2-3 spiders. Names verified in Base Creatures.xml:

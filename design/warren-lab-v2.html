@@ -1348,8 +1348,10 @@ const ITEMS={
   // Shale colors per the ruled family.
   cairn:{g:'∆',fg:'#a64a2e',solid:1,qt:['cairn1'],tc:'r',dc:'w'},
   cairn_toppled:{g:'%',fg:'#a64a2e',qt:['cairn2'],tc:'r',dc:'w'},
-  stone:{g:'.',fg:'#b1c9c3',qt:['sw_stone_large'],tc:'y',dc:'Y'},               // (v1)
-  loosestone:{g:'.',fg:'#8a9a95',qt:['sw_smallstone'],tc:'y',dc:'Y'},           // (v1)
+  // fallen rock out of dress 2026-08-25 (USER RULED): base rocks now - stone
+  // maps to Small Stone (sw_smallstone), loosestone to SmallBoulder
+  stone:{g:'.',fg:'#b1c9c3',qt:['sw_smallstone'],tc:'y',dc:'Y'},
+  loosestone:{g:'.',fg:'#8a9a95',qt:['sw_smallboulder'],tc:'y',dc:'Y'},
   pebble:{g:'·',fg:'#155352',qt:['sw_smallstone'],tc:'K',dc:'y'},               // (v1)
   'bg.random_stone_statue':{g:'|',fg:'#e8e9ee',solid:1,qt:['sw_statue1','sw_statue2','sw_statue3','sw_statue4','sw_statue5','sw_statue6'],tc:'y',dc:'K'},
   'bg.village_monument_stele':{g:'|',fg:'#8fa3b8',solid:1,qt:['bg_village_monument_stele'],baked:1},

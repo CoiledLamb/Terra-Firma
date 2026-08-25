@@ -2308,7 +2308,11 @@ namespace Cleo.TerraFirma.Scripts
 			{ "firedish", "Cleo_TerraFirma_FireDish" }, { "firedish_cold", "Cleo_TerraFirma_FireDish" },
 			{ "stonefig", "Cleo_TerraFirma_Random Stone Figurine" }, { "figurine", "Random Figurine" },
 			{ "largeboulder", "LargeBoulder" },
-			{ "stone", "Cleo_TerraFirma_Rock_Generic" }, { "loosestone", "Cleo_TerraFirma_Rock_Generic" }, { "pebble", "Cleo_TerraFirma_Rock_Pebbles" },
+			// fallen rock OUT of dress (USER RULED 2026-08-25 "replace it with
+			// basegame rocks"): stone = the takeable pocket rock, loosestone =
+			// the robbed-yard block remnant, so it reads chunkier. Picks CLAUDE
+			// dials, both verified (Items.xml:3016 / 3049).
+			{ "stone", "Small Stone" }, { "loosestone", "SmallBoulder" }, { "pebble", "Cleo_TerraFirma_Rock_Pebbles" },
 			{ "cairn", "Cleo_TerraFirma_Cairn" }, { "cairn_toppled", "Cleo_TerraFirma_CairnToppled" }, { "dirtpath", "DirtPath" },   // trail port 2026-08-25; DirtPath IS the register (ZoneTerrain.xml:937)
 			{ "nugget", "Copper Nugget" },
 			{ "bracelet1", "Bracelet1" }, { "bracelet2", "Bracelet2" }, { "bracelet3", "Bracelet3" },
