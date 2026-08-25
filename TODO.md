@@ -1370,7 +1370,8 @@ default 1. **Measured, 477 sites / 427 yards / 333 outside: gap present 427/427,
 med 21 / p90 47, 606 cairns (~2.1/trail), tripwires and guards clean, 0 console errors.**
 Port debt when taken: DirtPath objects for the trail (the base object IS the register), a
 cairn blueprint + sprite, the gap in the C# chalk ring. **NOT YET EYEBALLED — seed 80005 is
-rolled in the rig as a specimen (33 trail cells, 3 cairns).**
+rolled in the rig as a specimen (33 trail cells, 3 cairns).** **PORT TAKEN 2026-08-25 — see
+the tandem docket entry below (user's cairn sprites landed; deployed hash-verified).**
 
 **PADDED EARTH PORT GAP — USER FLAG IN GAME 2026-08-24 ("i see a thing we are doing different
 from the sim - the inside of warrens aren't using padded earth floors"), FIXED same sitting.**
@@ -1439,6 +1440,99 @@ on a padded interior is the last box; only zones built after the deploy carry it
     stays uncommitted with it and lands whenever that lane commits.** XML
     strict-valid, deployed hash-verified; XML-only, no compile needed. Sim needed no change —
     this was the game catching up to the sim.
+
+**ARTERY WINDING (the maxRun switchback cap) — USER FLOAT 2026-08-25 ("more interesting is if
+the path wasn't just a straight line ... there are mazes with horizontal passage biases that
+would still communicate that message"; stated reasons: more interesting combat encounters
+inside + thematic texture; sim rounds greenlit same sitting: "let's try running a few rounds
+of this in the sim"), SIM BUILT + MEASURED same day, NOTHING PORTED.** First item taken from
+the 08-25 six-item warren docket walkthrough (the mazelike thread; the user picked mechanism
+(c), winding, over dead-ends/loops/chew when the forks were laid out). Root cause named before
+any knob: the walker already jogged (`wander` 22%) but thin bands VETOED the wind — every
+vertical jog left the flood mask and the abandon rule ate it, so flat bands rolled straight
+lanes (the user's in-game screenshot). Built in `warren-lab-v2.html`: (1) jogs may now DIG
+into owned rock past the mask edge (never the canyon, never its rind, never the border);
+(2) knobs `maxRun` (default 8) + `jogMin`/`jogMax` (2-4), all CLAUDE dials: a step that would
+extend a carved artery straight past maxRun deflects into a committed perpendicular
+switchback. THE CAP MEASURES THE CARVE, NOT THE WALK — recorded so it isn't re-simplified:
+first cut counted walk streaks, but shuffled waypoint bands re-cross rows and colinear passes
+merge into straights no streak ever saw (cap 8 still rolled a 15); second cut missed turns
+landing on an old lane's end and extending it. Horizontal bias falls out free (the goal chase
+pulls along the band's long axis), so the haulage read stands; `mouthRun`'s straight doorstep
+untouched. New stat row `artery max straight` — the longest straight carved artery run, i.e.
+the sniper lane, the judgeable number. **Measured, 80 seeds / 63 sites, cap 8 vs off: sites
+over 8 lanes 15 → 3 (residuals pinned against canyon rind, both perpendiculars refused — rock
+wins by design), worst lane 15 → 14 (rind-pinned), median 4 UNCHANGED (the carve was already
+staircase-y; the knob kills the straight tail, which is exactly where the user's flag lived),
+floor 138.5 → 132.5 avg, loops 1.9 → 1.8, zero disconnected sites.** Specimen seed 570168
+(camp): 15 → 8, before/after rendered in the sitting with artery view on. **AWAITING the
+user's judging rolls. Open and the user's: the maxRun default (8 is a CLAUDE dial) · whether
+between-room tunnels take the same cap (they still bore cost-direct; the stronger dose would
+live there, asked and unanswered) · whether winding rides the stage axis or stays universal
+(the inverted-stage lean from the walkthrough is CLAUDE's, unruled). Port debt when ruled:
+the same carve-measured cap in the game-side walker.**
+  - **TUNNELS TAKE THE CAP + DEAD ENDS — USER RULED same sitting ("between room tunnels seems
+    worth trying out, yeag" + "we could do a few dead ends as well"), SIM BUILT + MEASURED
+    same day.** (1) The borers (connectors, crosscuts, repairs; the geology vein exempt) are
+    engine-ported Dijkstra with no heading, so the search state grew one: (cell, entry
+    direction, straight-run length), knob `tunnelMaxRun` default 6 (CLAUDE dial, tighter than
+    the artery's 8 on purpose: nobody hauls carts through a side passage). Straightness past
+    the cap costs +600/cell against a wall's 80 — dear, never a ban, so a boxed-in room still
+    gets out. THE MERGE LESSON, THIRD APPEARANCE: each path obeying its own cap still fused
+    with neighbours into carve-straights no single path drew, so the cost prices the LANE the
+    carve will hold (existing colinear corridor floor counted both axes), and only on cells
+    the tunnel would newly carve — threading existing floor stays priced by `emptyBase` alone.
+    (2) `digDeadEnds`, knobs `deadEndMin`/`deadEndMax` (1-3, CLAUDE dials): dry test-digs off
+    corridors, 2-5 cells, ending in rock, stopping one cell short of any other floor (joining
+    would be a loop, a different word), never the canyon/rind/border/water; dug AFTER the
+    trimmer (a stub is exactly the dead-end leaf the trimmer eats — the sealed-mouth lesson),
+    and a stub at a lane's end owes the cap, its allowance shrunk by the floor behind it.
+    New stat rows: `corridor max straight` (warren corridor floor only — first cut counted
+    the CANYON's open floor and read 63, recorded so the wf() guard isn't dropped) and `dead
+    ends`. **Measured, 80 seeds / 63 sites, full stack vs all off: corridor max straight
+    median 11 → 7, sites over 10 lanes 37 → 17, worst 38 → 27 (residuals rind-pinned or
+    merge-priced through rock the cost model let through — soft cap by design), dead ends
+    avg 1.8/site (5 sites rolled zero, allowance-refused, honest), floor 138.5 → 141.1,
+    loops 1.9 → 1.8, zero disconnects, zero doorless. Build cost ~60ms/site in the lab (was
+    ~17); the port is C# and unmeasured.** Specimen 570168: artery 8, corridor 7, 3 stubs.
+    **AWAITING the user's judging rolls on the full stack; the three walkthrough opens stand
+    (dial values · stage scaling · now also the dead-end count band).**
+  - **WIND A/B — USER ASK same sitting ("can we get some before and afters?"), BUILT.** Third
+    pair mode beside Two-up and A/B layout: same seed, current knobs left, the maze stack
+    zeroed right, captions carrying artery/corridor straight + dead-end counts. Specimen
+    506816 (thin working band) put the soft cap's residual on display: wound corridor 13 vs
+    straight 15 — thin bands rind-pin the perpendiculars. Known, shown, unfixed on purpose;
+    next lever if it matters in play is pricing rind-adjacent straights, unbuilt.
+
+**TANDEM DOCKET 2026-08-25 — USER RULED ("i figure we can add the other low impact ones in
+tandem, like building the cairn pass (sprites should be in now), and adding bracelets and
+nuggets to tables, with your lean being fine there" + squatters: "you're right on the money
+with squatters, sub roll makes sense"). BUILT + DEPLOYED same day, hash-verified 4/4,
+compile 0 errors; all `log-confirmed pending` on next zone builds.** Three lanes:
+  1. **YARD GAP + TRAIL + CAIRNS PORTED** (retires the 08-24 sim entry's port debt; the
+     user's cairn sprites `cairn1/2.png` landed same day). `Cleo_TerraFirma_Cairn`
+     (Furniture, solid, RandomTile over both sprites, quarrystones idiom; description owed
+     to the release voice pass) + trail cells place base `DirtPath` (ZoneTerrain.xml:937,
+     the object IS the register) + `DressYard` gained the sim's exact gap rank (walkable
+     outward step first, then mouth distance) and BFS trail (strict, then brush-trampling),
+     outside yards only, mouth cell raw. New `[TF-VERIFY] [WARREN] trail:` line carries
+     cells/cairns/gap. `[verify]` in game: ring shows one unchalked door cell facing the
+     mouth · a dirt line runs gap-to-mouth with 2ish cairns on its shoulder · inside yards
+     get the gap only · no MODERROR on Cairn/DirtPath.
+  2. **NUGGETS + BRACELETS IN TABLES** (weights CLAUDE dials, delegated). `Copper Nugget`
+     (Items.xml:11571) weight 1 on T_SOCKET, ~1 in 110 rolls: quarry product at the work
+     face. `Bracelet1/2/3` (Items.xml:5729, the beaded Svy trade goods) as a new `keepsake`
+     room pool, house dwellings only, 12% one-per-room: a personal effect. Sim parity same
+     sitting (sim ids nugget/bracelet1-3, base sw_nugget/sw_necklace tiles). Sim-measured,
+     150 seeds / 123 sites: 3 nuggets, 8 bracelets - rare reads rare.
+  3. **SQUATTERS RULED + SIM BUILT; game-side placement HELD.** Sub-roll WITHIN abandoned
+     (the ruled reclaimed knobs stand untouched): knob `squatterPct` 35 (CLAUDE dial), 1-2
+     hermits or trash monks, or 2-3 spiders. Names verified in Base Creatures.xml:
+     `Scrap-clad Hermit` / `Hide-Sheathed Hermit` / `Trash Monk` / `Cave Spider` /
+     `Phase Spider`. Sim-measured: 7 of 25 abandoned sites drew squatters (28% vs the 35%
+     dial, binomial-fine). **Creature placement deliberately unported: it shares machinery
+     with the OPEN reclaimed-population fork (bespoke table vs miner-weighted
+     SnapjawParty1), so it waits for the user's nod rather than prejudging that fork.**
 
 **WARREN FLOOR PORTED + PLAIN ROOMS GET TRACES — USER FLAG 2026-08-18** (*"this working site
 generated dressed pretty light"*, with screenshot): two deliberate gaps closed. (1) Role-plain

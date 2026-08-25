@@ -1540,7 +1540,9 @@ namespace Cleo.TerraFirma.Scripts
 		// base blueprint name; dropped from the liquid pool), cold-brazier and
 		// cold-firedish art (light parts stripped; sprite may still read lit).
 		private class Row { public int Wt; public string Id, Hint; public Row(int w, string id, string hint = null) { Wt = w; Id = id; Hint = hint; } }
-		private static readonly Row[] T_SOCKET = { new Row(55,null), new Row(18,"stack1"), new Row(8,"straytorch","face"), new Row(5,"pickaxe","face"), new Row(5,"trash"), new Row(2,"chest"), new Row(4,"bg.floor_cushion"), new Row(3,"bg.bedroll"), new Row(2,"pitcher_wine"), new Row(4,"basket_stones"), new Row(2,"bg.vase"), new Row(2,"bg.clay_jug") };
+		// nugget row weight 1 (USER RULED 2026-08-25, weights delegated): quarry
+		// product tumbled free at the work face - rare on purpose, ~1 in 110 rolls
+		private static readonly Row[] T_SOCKET = { new Row(55,null), new Row(18,"stack1"), new Row(8,"straytorch","face"), new Row(5,"pickaxe","face"), new Row(5,"trash"), new Row(2,"chest"), new Row(4,"bg.floor_cushion"), new Row(3,"bg.bedroll"), new Row(2,"pitcher_wine"), new Row(4,"basket_stones"), new Row(2,"bg.vase"), new Row(2,"bg.clay_jug"), new Row(1,"nugget") };
 		private static readonly Row[] T_GALLERYBAY = { new Row(50,null), new Row(18,"bg.random_stone_statue"), new Row(12,"largeboulder"), new Row(10,"stack2"), new Row(5,"chest"), new Row(5,"straytorch"), new Row(6,"pitcher_wine") };
 		private static readonly Row[] T_GALLERYPILLAR = { new Row(62,null), new Row(20,"bg.random_stone_statue"), new Row(10,"straytorch"), new Row(8,"stack1"), new Row(8,"bg.bench"), new Row(6,"bg.floor_cushion") };
 		private static readonly Row[] T_GALLERYFLOOR = { new Row(47,null), new Row(25,"largeboulder","center"), new Row(15,"bg.random_stone_statue","center"), new Row(5,"bg.village_monument_stele","center"), new Row(8,"firedish","center") };
@@ -1567,13 +1569,17 @@ namespace Cleo.TerraFirma.Scripts
 			{ "crafts", new[]{ "bg.workbench", "bg.anvil", "pickaxe", "bg.random_stone_statue", "stack1", "stack2", "stack3", "stonefig", "basket_stones", "kiln" } },
 			{ "hearth", new[]{ "bg.oven", "bg.campfire" } },
 			{ "comfort", new[]{ "bg.hookah" } },
+			// keepsake joined 2026-08-25 (USER: bracelets + nuggets as rare table
+			// spawns, leans delegated): a personal effect in a dwelling. Base
+			// Bracelet1/2/3 are the beaded trade goods bartered up the Svy.
+			{ "keepsake", new[]{ "bracelet1", "bracelet2", "bracelet3" } },
 		};
 		private class RowSpec { public int N0, N1, Chance; public string Pool, Hint; public bool First; }
 		private class RoomType { public int Wt; public string Name; public RowSpec[] Rows; public double Density; }
 		private static RowSpec RS(int n0, int n1, string pool, string hint, int chance = 0, bool first = false)
 			=> new RowSpec { N0 = n0, N1 = n1, Pool = pool, Hint = hint, Chance = chance, First = first };
 		private static readonly RoomType[] ROOMTYPES = {
-			new RoomType{ Wt=40, Name="house", Density=0.3, Rows=new[]{ RS(1,1,"light","corner"), RS(1,2,"storage","wall"), RS(0,1,"seating","inside"), RS(0,1,"sleep","wall"), RS(1,1,"centre","wall",30), RS(1,1,"liquid","wall",40) } },
+			new RoomType{ Wt=40, Name="house", Density=0.3, Rows=new[]{ RS(1,1,"light","corner"), RS(1,2,"storage","wall"), RS(0,1,"seating","inside"), RS(0,1,"sleep","wall"), RS(1,1,"centre","wall",30), RS(1,1,"liquid","wall",40), RS(1,1,"keepsake","inside",12) } },
 			new RoomType{ Wt=20, Name="storage", Density=0.3, Rows=new[]{ RS(1,1,"light","corner"), RS(1,3,"liquid","wall"), RS(3,4,"storage","wall",0,true) } },
 			new RoomType{ Wt=15, Name="crafts", Density=0.3, Rows=new[]{ RS(1,1,"light","corner"), RS(1,2,"seating","wall"), RS(2,4,"crafts","corner",0,true), RS(0,2,"storage","wall") } },
 			new RoomType{ Wt=10, Name="seating", Density=0.3, Rows=new[]{ RS(1,1,"light","corner"), RS(2,4,"seating","wall",0,true), RS(0,1,"centre","inside"), RS(1,1,"comfort","inside",35,true), RS(1,1,"liquid","wall",40) } },
@@ -1808,21 +1814,112 @@ namespace Cleo.TerraFirma.Scripts
 			}
 			// BLOCK YARD: the chalked rectangle with contents inside, five states,
 			// grades ascending from the bench (the yard is the site's status board)
-			void DressYard(Box rect, string state)
+			void DressYard(Box rect, string state, bool outside)
 			{
 				int x0 = rect.X0, y0 = rect.Y0, x1 = rect.X1, y1 = rect.Y1;
 				bool FreeI(int i) => g.C[i] == FLOOR && g.Item[i] == null;
 				for (int x = x0; x <= x1; x++) for (int y = y0; y <= y1; y++) g.Tree[g.Idx(x, y)] = 0;   // the drape clears its ground
+				// GUARANTEED GAP (user float 2026-08-24, sim-measured; ported
+				// 2026-08-25 with the sprites in). The ring's door: the non-corner
+				// border cell nearest the mouth stays unchalked, preferring a cell
+				// whose OUTWARD step is walkable (a door onto rock is no door; the
+				// sim measured 71 of 128 trail failures as exactly that). Rank 0
+				// clear ground, 1 brush (the trail may trample), 2 anything.
+				int gmx = art.Mouth.X, gmy = art.Mouth.Y;
+				int gapI = -1, gapBest = int.MaxValue, gapX = 0, gapY = 0, gapRank = 9;
 				for (int x = x0; x <= x1; x++)
 					for (int y = y0; y <= y1; y++)
 					{
 						if (x > x0 && x < x1 && y > y0 && y < y1) continue;
-						int i = g.Idx(x, y); if (!FreeI(i)) continue;
+						if ((x == x0 || x == x1) && (y == y0 || y == y1)) continue;   // corners never door
+						int odx = x == x0 ? -1 : x == x1 ? 1 : 0, ody = y == y0 ? -1 : y == y1 ? 1 : 0;
+						int gox = x + odx, goy = y + ody;
+						int rank = 2;
+						if (g.Inb(gox, goy))
+						{
+							int goi = g.Idx(gox, goy);
+							if (g.C[goi] == FLOOR && g.Host[goi] != 0 && g.Water[goi] == 0)
+								rank = g.Tree[goi] != 0 ? 1 : 0;
+						}
+						int gd = (x - gmx) * (x - gmx) + (y - gmy) * (y - gmy);
+						if (rank < gapRank || (rank == gapRank && gd < gapBest))
+						{ gapRank = rank; gapBest = gd; gapI = g.Idx(x, y); gapX = x; gapY = y; }
+					}
+				for (int x = x0; x <= x1; x++)
+					for (int y = y0; y <= y1; y++)
+					{
+						if (x > x0 && x < x1 && y > y0 && y < y1) continue;
+						int i = g.Idx(x, y); if (i == gapI || !FreeI(i)) continue;
 						string id = y == y0 ? (x == x0 ? "chalklineNW" : x == x1 ? "chalklineNE" : "chalklineN")
 								 : y == y1 ? (x == x0 ? "chalklineSW" : x == x1 ? "chalklineSE" : "chalklineS")
 								 : x == x0 ? "chalklineW" : "chalklineE";
 						Put(i, id);
 					}
+				// TRAIL + CAIRNS (same float; outside yards only - an inside yard's
+				// path is the warren's own halls). BFS gap to beside the mouth over
+				// open host floor; strict first, retrying THROUGH brush with trample
+				// (the drape precedent). The mouth cell stays raw per the doorstep
+				// law; cairns sit the shoulder every R(3,6), side rolled.
+				if (outside && gapI >= 0)
+				{
+					int sdx = gapX == x0 ? -1 : gapX == x1 ? 1 : 0, sdy = gapY == y0 ? -1 : gapY == y1 ? 1 : 0;
+					int tsx = gapX + sdx, tsy = gapY + sdy;
+					int[] prevA = null;
+					bool PassAt(int i2, bool trees)
+					{
+						int px3 = i2 % g.W, py3 = i2 / g.W;
+						return g.C[i2] == FLOOR && g.Host[i2] != 0 && g.Water[i2] == 0 && (trees || g.Tree[i2] == 0)
+							&& !(px3 >= x0 && px3 <= x1 && py3 >= y0 && py3 <= y1);
+					}
+					int Bfs(bool trees)
+					{
+						if (!g.Inb(tsx, tsy) || !PassAt(g.Idx(tsx, tsy), trees)) return -1;
+						int start = g.Idx(tsx, tsy);
+						var pv = new int[g.W * g.H]; for (int k = 0; k < pv.Length; k++) pv[k] = -2;
+						pv[start] = -1; var q = new Queue<int>(); q.Enqueue(start); int hit = -1;
+						while (q.Count > 0 && hit < 0)
+						{
+							int c2 = q.Dequeue(), cx2 = c2 % g.W, cy2 = c2 / g.W;
+							foreach (var dd in N4)
+							{
+								int nx2 = cx2 + dd[0], ny2 = cy2 + dd[1]; if (!g.Inb(nx2, ny2)) continue;
+								int ni2 = g.Idx(nx2, ny2);
+								if (ni2 == g.MouthIdx) { hit = c2; break; }
+								if (pv[ni2] != -2 || !PassAt(ni2, trees)) continue;
+								pv[ni2] = c2; q.Enqueue(ni2);
+							}
+						}
+						if (hit < 0) return -1;
+						prevA = pv; return hit;
+					}
+					int hitI = Bfs(false); if (hitI < 0) hitI = Bfs(true);
+					if (hitI >= 0)
+					{
+						var tpath = new List<int>();
+						for (int c2 = hitI; c2 >= 0; c2 = prevA[c2]) tpath.Add(c2);
+						tpath.Reverse();
+						var trailSet = new HashSet<int>(tpath);
+						foreach (int c2 in tpath) { g.Tree[c2] = 0; if (g.Item[c2] == null) Put(c2, "dirtpath"); }
+						int cairns = 0, until = R(3, 6);
+						for (int pi2 = 1; pi2 < tpath.Count; pi2++)
+						{
+							if (--until > 0) continue;
+							until = R(3, 6);
+							int c2 = tpath[pi2], cx2 = c2 % g.W, cy2 = c2 / g.W;
+							int px3 = tpath[pi2 - 1] % g.W, py3 = tpath[pi2 - 1] / g.W;
+							int tdx = cx2 - px3, tdy = cy2 - py3;
+							int cside = Chance(.5) ? 1 : -1;
+							int cox = cx2 + (-tdy) * cside, coy = cy2 + tdx * cside;
+							if (!g.Inb(cox, coy)) continue;
+							int coi = g.Idx(cox, coy);
+							if (g.C[coi] == FLOOR && g.Host[coi] != 0 && g.Item[coi] == null && g.Water[coi] == 0 && g.Tree[coi] == 0
+								&& !trailSet.Contains(coi) && coi != g.MouthIdx)
+							{ Put(coi, "cairn"); cairns++; }
+						}
+						Helpers.VerifyLog("WARREN", $"trail: {tpath.Count} cells, {cairns} cairns, gap {gapX},{gapY} rank {gapRank}");
+					}
+					else Helpers.VerifyLog("WARREN", $"trail: none (no route), gap {gapX},{gapY} rank {gapRank}");
+				}
 				int ix0 = x0 + 1, iy0 = y0 + 1, ix1 = x1 - 1, iy1 = y1 - 1;
 				if (ix1 < ix0 || iy1 < iy0) return;
 				int wx = Math.Abs(ix0 - art.Mouth.X) <= Math.Abs(ix1 - art.Mouth.X) ? ix0 : ix1;
@@ -1914,7 +2011,7 @@ namespace Cleo.TerraFirma.Scripts
 						if (cs.Count > 0 && !Seat(p, WRoll(T_PLAINTRACE), cs)) misses.Add((T_PLAINTRACE, p, cs));
 				}
 			}
-			if (roles.YardRect != null) DressYard(roles.YardRect, roles.YardState ?? "working");
+			if (roles.YardRect != null) DressYard(roles.YardRect, roles.YardState ?? "working", roles.YardDesc != null && roles.YardDesc.StartsWith("outside"));
 			// WARREN FLOOR: only the tail is cut - Nothing-rolled spaces re-roll
 			// with the Nothing row removed until the site clears its floor
 			int eligible = pockets.Count(p => p.Role == "face" || p.Role == "commons" || p.Role == "dwelling");
@@ -2207,6 +2304,9 @@ namespace Cleo.TerraFirma.Scripts
 			{ "stonefig", "Cleo_TerraFirma_Random Stone Figurine" }, { "figurine", "Random Figurine" },
 			{ "largeboulder", "LargeBoulder" },
 			{ "stone", "Cleo_TerraFirma_Rock_Generic" }, { "loosestone", "Cleo_TerraFirma_Rock_Generic" }, { "pebble", "Cleo_TerraFirma_Rock_Pebbles" },
+			{ "cairn", "Cleo_TerraFirma_Cairn" }, { "dirtpath", "DirtPath" },   // trail port 2026-08-25; DirtPath IS the register (ZoneTerrain.xml:937)
+			{ "nugget", "Copper Nugget" },
+			{ "bracelet1", "Bracelet1" }, { "bracelet2", "Bracelet2" }, { "bracelet3", "Bracelet3" },
 		};
 
 		private static int PlaceItems(Zone Z, Grid g)

@@ -77,6 +77,7 @@
       <button id="gen-reroll" title="bump the seed and roll again (Space)">Reroll</button>
       <button id="gen-two" class="mode" title="two rolls side by side — this is the judging bar's own view">Two-up</button>
       <button id="gen-ab" class="mode" title="THIS iteration against the LAST one: the same seed carved under block layout (left) and the old box layout (right). Same canyon, same artery — only layer 2 differs">A/B layout</button>
+      <button id="gen-wind" class="mode" title="the maze stack against its absence: the same seed with your current knobs (left) and with maxRun, tunnelMaxRun and dead ends all zeroed (right). Same canyon, same rooms wanted — only the winding differs">Wind a/b</button>
       <label title="force a point on the growth axis instead of rolling one">stage
         <select id="forcestage">
           <option value="">(roll)</option>
@@ -448,6 +449,20 @@ function layArtery(g,K,wpRange,foot,fixed){
     }
   }
 
+  // USER 2026-08-25 ("more interesting is if the path wasn't just a straight
+  // line ... there are mazes with horizontal passage biases that would still
+  // communicate that message"): thin bands were VETOING the wind — every
+  // vertical jog left the flood mask and the abandon rule ate it. Two changes:
+  // a jog may now DIG into adjacent owned rock (never the canyon, never its
+  // rind, never the border), and maxRun forces a switchback when a heading
+  // runs too long. The bias stays horizontal because the goal chase does.
+  const nearHost=(x,y)=>N8.some(([dx,dy])=>inb(x+dx,y+dy)&&g.host[idx(x+dx,y+dy)]);
+  const diggable=(x,y)=> x>=1&&y>=1&&x<=W-2&&y<=H-2 && !g.host[idx(x,y)] && !nearHost(x,y);
+  // the cap measures the CARVE, not the walk: shuffled waypoint bands re-cross
+  // rows, and colinear passes merge into straights no walk streak ever saw.
+  // Count carved artery cells behind a candidate cell along its heading.
+  const carvedRun=(x,y,d)=>{ let n=0,cx=x-d[0],cy=y-d[1];
+    while(inb(cx,cy)&&g.art[idx(cx,cy)]){n++;cx-=d[0];cy-=d[1]} return n; };
   const path=[]; let cur={...mouth}; let lastDir=null, wander=0, wanderDir=null;
   g.c[idx(cur.x,cur.y)]=FLOOR; g.art[idx(cur.x,cur.y)]=1; path.push({...cur});
   for(const wp of wps){
@@ -460,7 +475,11 @@ function layArtery(g,K,wpRange,foot,fixed){
       // way. A JOG is a committed run at right angles to the goal — it winds,
       // and it fits more site into less zone.
       // the stretch you use most gets straightened: no jogs on the way out
-      if(wander>0){ dir=wanderDir; wander--; }
+      if(wander>0){ dir=wanderDir; wander--;
+        // a jog that would itself merge into a capped lane ends early and
+        // hands the step back to the normal chase (which gets capped below)
+        if(K.maxRun>0 && carvedRun(cur.x+dir[0],cur.y+dir[1],dir)>=K.maxRun){ dir=null; wander=0 }
+      }
       else if(path.length>=K.mouthRun && chance(K.wander/100)){
         wanderDir = dx ? [0,(chance(.5)?1:-1)] : [(chance(.5)?1:-1),0];
         wander=R(1,3); dir=wanderDir;
@@ -474,16 +493,38 @@ function layArtery(g,K,wpRange,foot,fixed){
         if(!opts.length) break;
         dir = opts.length===1 ? opts[0] : (chance(.6)?opts[0]:opts[1]);
       }
-      // a jog that would leave the footprint is abandoned, not clamped
+      // THE CAP, applied to whatever got chosen: a step that would extend a
+      // carved straight past maxRun deflects into a switchback instead. It
+      // measures the carve because turns can land on an old lane's end and
+      // extend it — a lastDir-only check missed those merges. Either side,
+      // but only into somewhere a digger could go that isn't itself a capped
+      // lane; if both refuse, the straight continues (rock wins, same as always).
+      if(wander===0 && K.maxRun>0 && path.length>=K.mouthRun && dir &&
+         carvedRun(cur.x+dir[0],cur.y+dir[1],dir)>=K.maxRun){
+        const perp = dir[0] ? [[0,1],[0,-1]] : [[1,0],[-1,0]];
+        if(chance(.5)) perp.reverse();
+        for(const p of perp){
+          const tx=cur.x+p[0], ty=cur.y+p[1];
+          if(!inb(tx,ty)) continue;
+          if(!((MASK&&MASK[idx(tx,ty)])||diggable(tx,ty))) continue;
+          if(carvedRun(tx,ty,p)>=K.maxRun) continue;
+          wanderDir=p; wander=R(Math.min(K.jogMin,K.jogMax),Math.max(K.jogMin,K.jogMax)); dir=p; break;
+        }
+      }
+      // a jog that would leave the footprint is abandoned, not clamped —
+      // unless it can DIG (band mode only): owned rock past the mask edge is
+      // fair game, so a thin band no longer eats every vertical jog
       if(wander>0){
         const tx=cur.x+dir[0], ty=cur.y+dir[1];
-        const out = MASK ? (!inb(tx,ty)||!MASK[idx(tx,ty)])
+        const out = MASK ? (!inb(tx,ty)||(!MASK[idx(tx,ty)]&&!diggable(tx,ty)))
                          : (tx<F.x0||tx>F.x1||ty<F.y0||ty>F.y1);
         if(out){ wander=0; continue }
       }
       let nx=Math.min(W-1,Math.max(0,cur.x+dir[0])), ny=Math.min(H-1,Math.max(0,cur.y+dir[1]));
       if(g.host[idx(nx,ny)]) break;      // the haul route stops at canyon floor; it never eats it
-      if(MASK&&!MASK[idx(nx,ny)]) break; // and it stays inside the site's own rock
+      // it stays inside the site's own rock — except mid-jog, or on the way
+      // back from one (an off-mask walker heading for an in-mask waypoint)
+      if(MASK&&!MASK[idx(nx,ny)] && !((wander>0||!MASK[idx(cur.x,cur.y)])&&diggable(nx,ny))) break;
       if(!sideClear(g,nx,ny,cur.x,cur.y)){
         const alt = dir[0] ? [0,Math.sign(wp.y-cur.y)||(chance(.5)?1:-1)] : [Math.sign(wp.x-cur.x)||(chance(.5)?1:-1),0];
         const ax=Math.min(W-1,Math.max(0,cur.x+alt[0])), ay=Math.min(H-1,Math.max(0,cur.y+alt[1]));
@@ -914,35 +955,100 @@ function tunnelCost(g,x,y,emptyBase,noiseOn){
 }
 // cardinal only, shuffled ties — ShuffleDirections:true is where the organic
 // look comes from; a fixed neighbour order draws staircases.
-function tunnel(g,ax,ay,bx,by,emptyBase,noiseOn,costFn){
-  const SZ=W*H, dist=new Float64Array(SZ).fill(Infinity), prev=new Int32Array(SZ).fill(-1), done=new Uint8Array(SZ);
-  const heap=[[0,ay*W+ax]]; dist[ay*W+ax]=0;
-  const push=v=>{heap.push(v);let i=heap.length-1;
+// windCap (USER 2026-08-25, "between room tunnels seems worth trying out"): the
+// artery's straight-run cap, translated into this machine's own language. A
+// Dijkstra field has no heading, so the search state grows one: (cell, entry
+// direction, straight-run length). Running straighter than the cap COSTS —
+// +600/cell against a wall's 80 — it is never banned, so a boxed-in room still
+// gets out the only way it can. Run lengths pool at cap+1: past the cap every
+// extra straight cell prices the same, which keeps the state space small.
+function tunnel(g,ax,ay,bx,by,emptyBase,noiseOn,costFn,windCap){
+  const push=(heap,v)=>{heap.push(v);let i=heap.length-1;
     while(i>0){const p=(i-1)>>1; if(heap[p][0]<=heap[i][0])break; [heap[p],heap[i]]=[heap[i],heap[p]]; i=p}};
-  const pop=()=>{const t=heap[0],l=heap.pop();
+  const pop=(heap)=>{const t=heap[0],l=heap.pop();
     if(heap.length){heap[0]=l;let i=0;for(;;){const a=2*i+1,b=a+1;let m=i;
       if(a<heap.length&&heap[a][0]<heap[m][0])m=a; if(b<heap.length&&heap[b][0]<heap[m][0])m=b;
       if(m===i)break; [heap[m],heap[i]]=[heap[i],heap[m]]; i=m}} return t};
-  const goal=by*W+bx;
+  const start=ay*W+ax, goal=by*W+bx;
+  if(start===goal) return [start];
+  const cap=windCap|0;
+  if(!cap){
+    const SZ=W*H, dist=new Float64Array(SZ).fill(Infinity), prev=new Int32Array(SZ).fill(-1), done=new Uint8Array(SZ);
+    const heap=[[0,start]]; dist[start]=0;
+    while(heap.length){
+      const [c,cur]=pop(heap);
+      if(done[cur]) continue; done[cur]=1;
+      if(cur===goal) break;
+      const cx=cur%W, cy=(cur/W)|0;
+      const dirs=N4.slice();
+      for(let i=dirs.length-1;i>0;i--){const j=R(0,i);[dirs[i],dirs[j]]=[dirs[j],dirs[i]]}
+      for(const [dx,dy] of dirs){
+        const nx=cx+dx, ny=cy+dy; if(!inb(nx,ny)) continue;
+        const ni=ny*W+nx; if(done[ni]) continue;
+        const w=costFn?costFn(nx,ny):tunnelCost(g,nx,ny,emptyBase,noiseOn);
+        if(w>=1e6) continue;
+        const nc=c+w;
+        if(nc<dist[ni]){dist[ni]=nc; prev[ni]=cur; push(heap,[nc,ni])}
+      }
+    }
+    if(prev[goal]<0) return null;
+    const path=[]; let cur=goal;
+    while(cur>=0){ path.push(cur); cur=prev[cur] }
+    return path.reverse();
+  }
+  // direction-aware lane
+  // existing corridor floor colinear from (x,y), counted starting one step out
+  // in (dx,dy); rooms excluded — a hall's width is its own law
+  const floorRun=(x,y,dx,dy)=>{let n=0,cx2=x+dx,cy2=y+dy;
+    while(inb(cx2,cy2)&&wf(g,cx2,cy2)&&g.pocket[idx(cx2,cy2)]<0){n++;cx2+=dx;cy2+=dy} return n};
+  const RB=cap+1, STRIDE=4*RB, SZ=W*H*STRIDE;
+  const dist=new Float64Array(SZ).fill(Infinity), prev=new Int32Array(SZ).fill(-1), done=new Uint8Array(SZ);
+  const sid=(ci,d,run)=>ci*STRIDE+d*RB+(run-1);
+  const heap=[];
+  for(let d=0;d<4;d++){
+    const nx=ax+N4[d][0], ny=ay+N4[d][1]; if(!inb(nx,ny)) continue;
+    const w=costFn?costFn(nx,ny):tunnelCost(g,nx,ny,emptyBase,noiseOn);
+    if(w>=1e6) continue;
+    const id=sid(ny*W+nx,d,1);
+    if(w<dist[id]){dist[id]=w; push(heap,[w,id])}
+  }
+  let goalState=-1;
   while(heap.length){
-    const [c,cur]=pop();
+    const [c,cur]=pop(heap);
     if(done[cur]) continue; done[cur]=1;
-    if(cur===goal) break;
-    const cx=cur%W, cy=(cur/W)|0;
-    const dirs=N4.slice();
-    for(let i=dirs.length-1;i>0;i--){const j=R(0,i);[dirs[i],dirs[j]]=[dirs[j],dirs[i]]}
-    for(const [dx,dy] of dirs){
-      const nx=cx+dx, ny=cy+dy; if(!inb(nx,ny)) continue;
-      const ni=ny*W+nx; if(done[ni]) continue;
-      const w=costFn?costFn(nx,ny):tunnelCost(g,nx,ny,emptyBase,noiseOn);
+    const ci=(cur/STRIDE)|0, rem=cur%STRIDE, d=(rem/RB)|0, run=(rem%RB)+1;
+    if(ci===goal){ goalState=cur; break }
+    const cx=ci%W, cy=(ci/W)|0;
+    const dirs=[0,1,2,3];
+    for(let i=3;i>0;i--){const j=R(0,i);[dirs[i],dirs[j]]=[dirs[j],dirs[i]]}
+    for(const nd of dirs){
+      const nx=cx+N4[nd][0], ny=cy+N4[nd][1]; if(!inb(nx,ny)) continue;
+      let w=costFn?costFn(nx,ny):tunnelCost(g,nx,ny,emptyBase,noiseOn);
       if(w>=1e6) continue;
+      const straight = nd===d;
+      // price the LANE the carve will hold, not the path's own shape: separate
+      // capped paths landing colinear-adjacent fuse into straights no single
+      // path drew (the artery's merge lesson, third appearance). Only a cell
+      // this tunnel would NEWLY carve changes the carve — threading existing
+      // floor stays priced by emptyBase alone.
+      if(g.c[idx(nx,ny)]!==FLOOR){
+        const ndx=N4[nd][0], ndy=N4[nd][1];
+        const behind = straight ? run : 1+floorRun(cx,cy,-ndx,-ndy);
+        const laneMove = behind + 1 + floorRun(nx,ny,ndx,ndy);
+        const lanePerp = 1 + floorRun(nx,ny,ndy,ndx) + floorRun(nx,ny,-ndy,-ndx);
+        if(laneMove>cap) w+=600;
+        if(lanePerp>cap) w+=600;
+      }
+      const ni=sid(ny*W+nx,nd,straight?Math.min(run+1,RB):1);
+      if(done[ni]) continue;
       const nc=c+w;
-      if(nc<dist[ni]){dist[ni]=nc; prev[ni]=cur; push([nc,ni])}
+      if(nc<dist[ni]){dist[ni]=nc; prev[ni]=cur; push(heap,[nc,ni])}
     }
   }
-  if(prev[goal]<0 && goal!==ay*W+ax) return null;
-  const path=[]; let cur=goal;
-  while(cur>=0){ path.push(cur); cur=prev[cur] }
+  if(goalState<0) return null;
+  const path=[]; let cur=goalState;
+  while(cur>=0){ path.push((cur/STRIDE)|0); cur=prev[cur] }
+  path.push(start);
   return path.reverse();
 }
 function carveTunnel(g,path){
@@ -970,7 +1076,7 @@ function connectPocket(g,p,K,art,forceWant){
   let made=0;
   for(let k=0;k<want;k++){
     const from=mine[R(0,mine.length-1)], to=targets[R(0,targets.length-1)];
-    const path=tunnel(g,from[0],from[1],to.x,to.y,K.emptyBase,true);
+    const path=tunnel(g,from[0],from[1],to.x,to.y,K.emptyBase,true,null,K.tunnelMaxRun);
     if(!path) continue;
     if(carveTunnel(g,path)>=0){ made++; p.entrances++ }
   }
@@ -991,7 +1097,7 @@ function addCrosscuts(g,n,K){
     if(Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])<6) continue;
     const d=graphDist(g,a[0],a[1],b[0],b[1],60);
     if(d>=0&&d<14) continue;                       // already an easy walk: no circuit gained
-    const path=tunnel(g,a[0],a[1],b[0],b[1],K.emptyBase,true);
+    const path=tunnel(g,a[0],a[1],b[0],b[1],K.emptyBase,true,null,K.tunnelMaxRun);
     if(!path) continue;
     if(carveTunnel(g,path)>0) made++;
   }
@@ -1300,13 +1406,21 @@ const ITEMS={
   torchpost_unlit:{g:'!',fg:'#5a5a52',qt:['sw_torch_nofire'],tc:'k',dc:'K'},
   firedish:{g:'ʘ',fg:'#e06c30',qt:['firedish'],tc:'O',dc:'R'},
   firedish_cold:{g:'ʘ',fg:'#5a5a52',qt:['firedish'],tc:'k',dc:'K'},
-  brazier_cold:{g:'∙',fg:'#5a5a52',qt:['sw_firepan'],tc:'k',dc:'K'}
+  brazier_cold:{g:'∙',fg:'#5a5a52',qt:['sw_firepan'],tc:'k',dc:'K'},
+  // loot pair 2026-08-25: base sw_nugget / sw_necklace tiles, colors off the
+  // base Render lines (nugget &w/y; bracelets vary per id, approximated here)
+  nugget:{g:'*',fg:'#b8722c',qt:['sw_nugget'],tc:'w',dc:'y'},
+  bracelet1:{g:'"',fg:'#d05050',qt:['sw_necklace'],tc:'R',dc:'W'},
+  bracelet2:{g:'"',fg:'#50a0d0',qt:['sw_necklace'],tc:'B',dc:'Y'},
+  bracelet3:{g:'"',fg:'#70c070',qt:['sw_necklace'],tc:'G',dc:'W'}
 };
 const STACKSETS={stack1:['stack1','stack1a','stack1b'],stack2:['stack2','stack2a','stack2b'],stack3:['stack3','stack3a','stack3b']};
 const DRESS={
   // break-spot rows (cushion/bedroll/wine) added 2026-08-18 - USER: "more
   // leisure spots for worksites". Weights CLAUDE dials.
-  socket:[[55,null],[18,'stack1'],[8,{i:'straytorch',hint:'face'}],[5,{i:'pickaxe',hint:'face'}],[5,'trash'],[2,'chest'],[4,'bg.floor_cushion'],[3,'bg.bedroll'],[2,'pitcher_wine'],[4,'basket_stones'],[2,'bg.vase'],[2,'bg.clay_jug']],
+  // nugget weight 1 joined 2026-08-25 (USER RULED, weights delegated): quarry
+  // product tumbled free at the work face, ~1 in 110 rolls
+  socket:[[55,null],[18,'stack1'],[8,{i:'straytorch',hint:'face'}],[5,{i:'pickaxe',hint:'face'}],[5,'trash'],[2,'chest'],[4,'bg.floor_cushion'],[3,'bg.bedroll'],[2,'pitcher_wine'],[4,'basket_stones'],[2,'bg.vase'],[2,'bg.clay_jug'],[1,'nugget']],
   gallerybay:[[50,null],[18,'bg.random_stone_statue'],[12,'largeboulder'],[10,'stack2'],[5,'chest'],[5,'straytorch'],[6,'pitcher_wine']],
   gallerypillar:[[62,null],[20,'bg.random_stone_statue'],[10,'straytorch'],[8,'stack1'],[8,'bg.bench'],[6,'bg.floor_cushion']],
   galleryfloor:[[47,null],[25,{i:'largeboulder',hint:'center'}],[15,{i:'bg.random_stone_statue',hint:'center'}],[5,{i:'bg.village_monument_stele',hint:'center'}],[8,{i:'firedish',hint:'center'}]]
@@ -1334,7 +1448,10 @@ const ROOMPOOLS={
   // of wine and cider for the kitchens and common areas")
   liquid:['bg.wine_pitcher','bg.catchbasin','pitcher_wine','pitcher_cider','bg.vase','bg.clay_jug'],
   crafts:['bg.workbench','bg.anvil','pickaxe','bg.random_stone_statue','stack1','stack2','stack3','stonefig','basket_stones','kiln'],
-  hearth:['bg.oven','bg.campfire'], comfort:['bg.hookah']
+  hearth:['bg.oven','bg.campfire'], comfort:['bg.hookah'],
+  // keepsake joined 2026-08-25 (USER RULED, leans delegated): a personal effect
+  // in a dwelling - the beaded bracelets bartered up and down the Svy
+  keepsake:['bracelet1','bracelet2','bracelet3']
 };
 const ROOMTYPES=[
   [40,'house',[
@@ -1343,7 +1460,8 @@ const ROOMTYPES=[
     {n:[0,1],pool:'seating',hint:'inside'},
     {n:[0,1],pool:'sleep',hint:'wall'},
     {n:[1,1],pool:'centre',hint:'wall',chance:30},
-    {n:[1,1],pool:'liquid',hint:'wall',chance:40}
+    {n:[1,1],pool:'liquid',hint:'wall',chance:40},
+    {n:[1,1],pool:'keepsake',hint:'inside',chance:12}
   ]],
   [20,'storage',[
     {n:[1,1],pool:'light',hint:'corner'},
@@ -2036,6 +2154,31 @@ function measure(g){
   return {loops:edges.size-V+C, comps:C, floor};
 }
 
+// the judgeable number for the winding docket (USER 2026-08-25): the longest
+// straight run of carved artery cells, horizontal or vertical. This is the
+// sniper lane — what maxRun exists to cap. Measured on the carve, not the
+// walk, so doubled-back paths don't flatter it.
+// same measure over ALL corridor floor (artery + tunnels + stubs, rooms
+// excluded — a hall's width is its own law): the site-wide sniper lane.
+function corridorStraight(g){
+  const cor=(x,y)=> wf(g,x,y) && g.pocket[idx(x,y)]<0;   // warren floor, not the canyon's
+  let best=0;
+  for(let y=0;y<H;y++){ let r=0;
+    for(let x=0;x<W;x++){ r = cor(x,y) ? r+1 : 0; if(r>best) best=r; } }
+  for(let x=0;x<W;x++){ let r=0;
+    for(let y=0;y<H;y++){ r = cor(x,y) ? r+1 : 0; if(r>best) best=r; } }
+  return best;
+}
+
+function arteryStraight(g){
+  let best=0;
+  for(let y=0;y<H;y++){ let r=0;
+    for(let x=0;x<W;x++){ r = g.art[idx(x,y)] ? r+1 : 0; if(r>best) best=r; } }
+  for(let x=0;x<W;x++){ let r=0;
+    for(let y=0;y<H;y++){ r = g.art[idx(x,y)] ? r+1 : 0; if(r>best) best=r; } }
+  return best;
+}
+
 // USER 2026-08-18, on a circled blob: "this outlined in red is effectively a
 // doorless room to me." It was — corridor slack widened out where drifts, joins
 // and repairs met, big enough to read as a space but with no wall and no door.
@@ -2053,6 +2196,60 @@ function componentCount(g){
   }
   return C;
 }
+// USER 2026-08-25 ("we could do a few dead ends as well"): dry test-digs off
+// corridors, 2-5 cells into the mass, ending in rock. The geology already
+// speaks this line — a breach heading is the same sentence with water at the
+// end — so the language was licensed before the knob existed. A stub must
+// STAY a dead end: it stops one cell short of any other floor (joining would
+// make a loop, which is a different word), and it never touches the canyon,
+// its rind, the border, or standing water.
+function digDeadEnds(g,K){
+  const want=R(Math.min(K.deadEndMin,K.deadEndMax),Math.max(K.deadEndMin,K.deadEndMax));
+  if(want<=0) return {dug:0,cells:0};
+  const nearHost=(x,y)=>N8.some(([dx,dy])=>inb(x+dx,y+dy)&&g.host[idx(x+dx,y+dy)]);
+  const cands=[];
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){
+    if(g.c[idx(x,y)]!==FLOOR||g.pocket[idx(x,y)]>=0) continue;   // corridors only
+    for(let d=0;d<4;d++){
+      const nx=x+N4[d][0], ny=y+N4[d][1];
+      if(inb(nx,ny)&&g.c[idx(nx,ny)]!==FLOOR&&!g.host[idx(nx,ny)]&&!nearHost(nx,ny))
+        cands.push([x,y,d]);
+    }
+  }
+  let dug=0,cells=0;
+  for(let t=0;t<want*8&&dug<want&&cands.length;t++){
+    const [sx,sy,d]=cands[R(0,cands.length-1)];
+    const dx=N4[d][0], dy=N4[d][1];
+    // a stub at a lane's END extends that lane — it owes the same cap the
+    // borers pay, so its length allowance shrinks by the floor already behind it
+    let len=R(2,5);
+    const capT=K.tunnelMaxRun|0;
+    if(capT){
+      let behind=0,bx2=sx-dx,by2=sy-dy;
+      while(inb(bx2,by2)&&wf(g,bx2,by2)&&g.pocket[idx(bx2,by2)]<0){behind++;bx2-=dx;by2-=dy}
+      len=Math.min(len,Math.max(0,capT-1-behind));
+      if(len<2) continue;
+    }
+    const carved=[];
+    let cx=sx, cy=sy;
+    for(let k=0;k<len;k++){
+      const nx=cx+dx, ny=cy+dy;
+      if(nx<1||ny<1||nx>W-2||ny>H-2) break;
+      if(g.c[idx(nx,ny)]===FLOOR) break;
+      if(g.host[idx(nx,ny)]||nearHost(nx,ny)) break;
+      if(g.water&&g.water[idx(nx,ny)]) break;
+      let joins=false;
+      for(const [ex,ey] of N4){ const tx=nx+ex, ty=ny+ey;
+        if(tx===cx&&ty===cy) continue;
+        if(inb(tx,ty)&&g.c[idx(tx,ty)]===FLOOR){joins=true;break} }
+      if(joins) break;
+      carved.push(idx(nx,ny)); cx=nx; cy=ny;
+    }
+    if(carved.length>=2){ for(const i of carved) g.c[i]=FLOOR; dug++; cells+=carved.length }
+  }
+  return {dug,cells};
+}
+
 function trimSlack(g){
   let trimmed=0;
   for(let y=0;y<H-1;y++)for(let x=0;x<W-1;x++){
@@ -2100,7 +2297,7 @@ function repairConnectivity(g,K){
         return da-db});
       const near=joined[0];
       const A=r.cells[R(0,r.cells.length-1)], B=near.cells[R(0,near.cells.length-1)];
-      const path=tunnel(g,A[0],A[1],B[0],B[1],K.emptyBase,false);
+      const path=tunnel(g,A[0],A[1],B[0],B[1],K.emptyBase,false,null,K.tunnelMaxRun);
       if(path&&carveTunnel(g,path)>=0){ repairs++; progressed=true }
       joined.push(r);
     }
@@ -2317,6 +2514,18 @@ function buildOnce(seed,K,forced,host,attempt){
   const oRoll=R(1,100);
   const occupancy = oRoll<=K.abandonedPct ? 'abandoned'
                   : oRoll<=K.abandonedPct+K.reclaimedPct ? 'reclaimed' : 'in use';
+  // SQUATTERS - a sub-roll WITHIN abandoned (USER RULED 2026-08-25, "sub roll
+  // makes sense"): a couple of hermits, trash monks, or spiders move into some
+  // ruins; the rest stay truly empty, and the ruled reclaimed knobs are
+  // untouched. Names verified against Base Creatures.xml (Scrap-clad Hermit /
+  // Hide-Sheathed Hermit / Trash Monk / Cave Spider / Phase Spider). The sim
+  // rolls the STATE; creature placement is game-side and deliberately unported
+  // pending the user's nod (it shares machinery with the open reclaimed fork).
+  let squatters=null;
+  if(occupancy==='abandoned' && chance(K.squatterPct/100)){
+    const kind=pick(['hermits','trash monks','spiders']);
+    squatters={kind, n: kind==='spiders'? R(2,3) : R(1,2)};
+  }
   const S=STAGES[si];
   const art=layArtery(g,K,S.wp,S.foot,fixed);
   g.mouthIdx=idx(art.mouth.x,art.mouth.y);   // the one cell trimming may never take
@@ -2336,6 +2545,10 @@ function buildOnce(seed,K,forced,host,attempt){
   const repairs=repairConnectivity(g,K);
   const preTrim=measure(g).loops;          // instrumentation: what the trimmer inherits
   const trimmed=trimSlack(g);
+  // dead ends dig AFTER the trimmer on purpose: a stub is exactly the dead-end
+  // leaf the trimmer exists to eat (the sealed mouth taught us that), so it
+  // never gets to see them
+  const de=digDeadEnds(g,K);
   const m=measure(g);
   // WORTH THE TRIP (user, 2026-08-18). Guarding the region's SIZE didn't bite:
   // 400 cells of reachable rock still yields a 39-cell warren when the band is
@@ -2362,10 +2575,11 @@ function buildOnce(seed,K,forced,host,attempt){
   for(let i=0;i<W*H;i++){ if(g.host[i]) hostFloor++; if(g.tree[i]) trees++; if(g.water[i]) water++ }
   return {g,art,pockets,seed,stage:STAGES[si].name,stageIdx:si,crosscuts,repairs,filled,trimmed,preTrim,
     roles:reg.tally, yard:reg.yard, dress,
-    canyon,band,rect,degraded,occupancy,wanted:STAGES[wanted].name,hostFloor,trees,water,aquifer,breaches,
+    canyon,band,rect,degraded,occupancy,squatters,wanted:STAGES[wanted].name,hostFloor,trees,water,aquifer,breaches,
     bandMass: band?band.mass:null,
     fit: rect?[rect.x1-rect.x0+1, rect.y1-rect.y0+1]:null,
-    floor:m.floor,loops:m.loops,comps:m.comps,
+    floor:m.floor,loops:m.loops,comps:m.comps,artMax:arteryStraight(g),
+    corMax:corridorStraight(g),deadEnds:de.dug,deadEndCells:de.cells,
     halls:pockets.filter(p=>p.character==='hall').length,
     plains:pockets.filter(p=>p.character==='plain').length,
     doorless:pockets.filter(p=>p.entrances===0).length,
@@ -2405,6 +2619,7 @@ function build(seed,K,forced,host){
 const KNOBS=[
   ['spawn','abandonedPct','abandoned %',0,80,25,'share of warrens standing empty. A rumour that does not pay off is fine — Qud has abandoned villages (user ruled 2026-08-18)'],
   ['spawn','reclaimedPct','reclaimed %',0,80,20,'share taken over by snapjaws — miner-weighted, and their pickaxes path through walls, so a reclaimed warren gets CHEWED. The rest are in use'],
+  ['spawn','squatterPct','squatter %',0,100,35,'of ABANDONED sites, the share where somebody moved into the ruin: 1-2 hermits or trash monks, or 2-3 cave spiders (USER RULED 2026-08-25: squatters are a sub-roll within abandoned, so the reclaimed knobs stand untouched). 35 and the count bands are CLAUDE dials; creature placement is game-side and unported pending the nod'],
   ['spawn','worldWarrens','warrens / world',1,400,25,'how many warrens a world gets. Base game sites exactly 25 pig farms, 25 starapple farms and 25 snapjaw forts in canyon terrain, so 25 puts a warren at pig-farm frequency. Spread over the 1251 canyon surface zones an authored world carries'],
   ['geology','aquiferMin','aquifers min',0,4,0,'pools of standing water sealed inside the band. Most are never seen; the warren keeps a cell clear of them by the same guard that keeps it out of the canyon'],
   ['geology','aquiferMax','aquifers max',0,6,2,''],
@@ -2421,6 +2636,9 @@ const KNOBS=[
   ['artery','momentum','momentum',30,95,55,'chance the haul route keeps its heading instead of turning'],
   ['artery','wander','jog %',0,60,22,'chance per step of a committed 1-3 cell run at right angles to the goal — this is what makes the artery wind instead of running straight'],
   ['artery','mouthRun','straight from mouth',0,14,6,'cells out of the mouth that stay dead straight — a haul road does not meander where every load passes'],
+  ['artery','maxRun','max straight run',0,30,8,'longest heading the artery may hold before it MUST switchback: a committed perpendicular run, then back to chasing the waypoint. 0 = off (the old walker). This is the sightline cap - the ceiling on how far a corridor lets anything shoot (USER 2026-08-25: the path should wind; a horizontal passage bias keeps the haulage read, and the goal chase supplies that bias for free). 8 is a CLAUDE dial'],
+  ['artery','jogMin','jog depth min',1,6,2,'cells a forced switchback commits perpendicular before the goal chase resumes'],
+  ['artery','jogMax','jog depth max',2,10,4,''],
   ['pockets','blockMode','block layout',0,1,0,'1 = claim-and-subdivide (the BuildingTemplate/FillRoom voice, deliberate thresholds, best loop numbers). 0 = the box layout - THE DEFAULT: USER LEAN 2026-08-18 after A/B time ("i am still leaning b generations here") - bigger median rooms, steadier counts, the contiguous-path read. Blocks stays fully alive behind this knob'],
   ['pockets','blockMin','block area min',30,120,50,'mass cells a claim floods before hollowing'],
   ['pockets','blockMax','block area max',40,200,95,''],
@@ -2451,6 +2669,9 @@ const KNOBS=[
   ['network','crosscuts','crosscuts',-1,8,-1,'-1 = let the stage decide'],
   ['network','infill','infill rooms',-1,6,-1,'leftover mass claimed as extra single-entrance rooms; -1 = let the stage decide'],
   ['network','driftMax','drift reach',3,16,10,'how far a door or crosscut will bore looking for floor'],
+  ['network','tunnelMaxRun','tunnel max straight',0,30,6,'the artery cap in the borers\' own language: connectors, crosscuts and repairs pay +600/cell (against a wall\'s 80) to run straighter than this - dear, never a ban, so a boxed-in room still gets out. 0 = off. Tighter than maxRun on purpose: nobody hauls carts through a side passage (USER 2026-08-25 "between room tunnels seems worth trying out"; 6 is a CLAUDE dial)'],
+  ['network','deadEndMin','dead ends min',0,6,1,'dry test-digs off corridors (USER 2026-08-25 "we could do a few dead ends as well"): 2-5 cells into the mass, ending in rock, stopping one cell short of any other floor (joining would be a loop, a different word). Dug after the trimmer so it cannot eat them. The geology already speaks the line - a breach heading is this sentence with water at the end'],
+  ['network','deadEndMax','dead ends max',0,8,3,''],
   ['dress','roomFloor','room floor',0,1,1,'1 = a registered room (face / plain / commons) that dressed to ZERO items takes one re-roll of its own table with the Nothing row removed — the warren-floor law one level down (user docket 2026-08-24: rooms should spawn with *some* kind of decoration). Count variance stays; only the zero collapses to one. A room with no legal cell stays bare and counts refused'],
   ['dress','yardTrail','yard trail',0,1,1,'1 = outside yards get a guaranteed gap in the chalk ring (the non-corner cell nearest the mouth, never chalked) plus a worn trail from the gap to the quarry mouth with cairns on its shoulder at irregular intervals (USER FLOAT 2026-08-24, sim preview ahead of the scout port). Inside yards get the gap only. Cairn spacing R(3,6) and the placeholder cairn art are CLAUDE dials/debt'],
   ['placement','scoutN','scouts / world',10,150,50,'scout-and-quota (USER GREENLIT 2026-08-24): candidate canyon zones scored at worldgen before any claim exists. More scouts = better flourishing tails, slower worldgen. 50 is the design-doc sim number, CLAUDE dial'],
@@ -2759,7 +2980,7 @@ const qt=()=>$('qtiles').checked, hostSel=()=>$('host').value, pad=()=>$('padded
 function statsHtml(r){
   const rows=[
     ['stage', `<span class="name">${r.stage}</span>`],
-    ['occupancy', r.occupancy||'—'],
+    ['occupancy', (r.occupancy||'—')+(r.squatters?` &middot; ${r.squatters.n} ${r.squatters.kind}`:'')],
     ['band mass (rock we own)', r.bandMass!=null?r.bandMass:'—'],
     ['largest fit', r.fit?`${r.fit[0]} x ${r.fit[1]}`:'—'],
     ['stage asked / got', r.degraded?`${r.wanted} &rarr; ${r.stage}`:'—', r.degraded>0],
@@ -2779,6 +3000,9 @@ function statsHtml(r){
     ['partitions', r.partitions],
     ['crosscuts', r.crosscuts],
     ['navigational loops', r.loops],
+    ['artery max straight', r.artMax],
+    ['corridor max straight', r.corMax],
+    ['dead ends', r.deadEnds ? `${r.deadEnds} (${r.deadEndCells} cells)` : 0],
     ['doorless pockets', r.doorless, r.doorless>0],
     ['connectivity repairs', r.repairs, r.repairs>0],
     ['corridor slack trimmed', r.trimmed],
@@ -2791,7 +3015,7 @@ function statsHtml(r){
 function render(r){
   current=r; pairMode=false;
   if(r.none){
-    $('gen-two').classList.remove('on');
+    $('gen-two').classList.remove('on'); $('gen-wind').classList.remove('on');
     $('cv').style.display=''; $('pairwrap').style.display='none';
     draw($('cv'),Object.assign({art:{}},r),cellSize(),false,false,qt(),pad());
     $('cap').innerHTML=`<span class="name">no site</span> &middot; ${r.reason} &middot; band ${r.bandMass||0} cells${r.fit?`, largest fit ${r.fit[0]}x${r.fit[1]}`:''} &middot; seed ${r.seed}`;
@@ -2803,7 +3027,7 @@ function render(r){
     $('status').textContent='canyon too tight for a warren';
     return;
   }
-  $('gen-two').classList.remove('on');
+  $('gen-two').classList.remove('on'); $('gen-wind').classList.remove('on');
   $('cv').style.display=''; $('pairwrap').style.display='none';
   draw($('cv'),r,cellSize(),dm(),ta(),qt(),pad());
   $('cap').innerHTML=`<span class="name">${r.stage}</span> &middot; ${r.floor} floor &middot; ${r.pockets.length} pockets &middot; ${r.loops} loops &middot; seed ${r.seed}`;
@@ -2820,7 +3044,7 @@ function rollNew(seed){
 function rerollSame(){                 // same seed, current knobs (knob tuning)
   if(!current) return rollNew();
   const stage=$('forcestage').value;
-  if(pairMode) return pairKind==='ab'? abLayout() : twoUp();
+  if(pairMode) return pairKind==='ab'? abLayout() : pairKind==='wind'? windAB() : twoUp();
   render(build(current.seed,K,stage===''?null:stage,hostSel()));
 }
 let pairKind=null;
@@ -2828,7 +3052,7 @@ let pairKind=null;
 // about the two up challenge and instead more on the difference between this
 // iteration and the last one") - same seed under both layer-2 layouts.
 function abLayout(){
-  pairMode=true; pairKind='ab'; $('gen-ab').classList.add('on'); $('gen-two').classList.remove('on');
+  pairMode=true; pairKind='ab'; $('gen-ab').classList.add('on'); $('gen-two').classList.remove('on'); $('gen-wind').classList.remove('on');
   $('cv').style.display='none';
   const wrap=$('pairwrap'); wrap.style.display=''; wrap.innerHTML='';
   const stage=$('forcestage').value;
@@ -2845,8 +3069,29 @@ function abLayout(){
   }
   $('cap').innerHTML='<span class="hint">a/b: the same site under this iteration (left) and the last one (right).</span>';
 }
+// the maze stack against its absence (USER 2026-08-25 "can we get some before
+// and afters?") — same seed, current knobs left, winding zeroed right.
+function windAB(){
+  pairMode=true; pairKind='wind';
+  $('gen-ab').classList.remove('on'); $('gen-two').classList.remove('on'); $('gen-wind').classList.add('on');
+  $('cv').style.display='none';
+  const wrap=$('pairwrap'); wrap.style.display=''; wrap.innerHTML='';
+  const stage=$('forcestage').value;
+  const seed=current? current.seed : Math.floor(Math.random()*1e9);
+  for(const windOn of [1,0]){
+    const K2= windOn? {...K} : {...K, maxRun:0, tunnelMaxRun:0, deadEndMin:0, deadEndMax:0};
+    const r=build(seed,K2,stage===''?null:stage,hostSel());
+    const fig=document.createElement('figure');
+    const c=document.createElement('canvas'); c.className='map'; fig.appendChild(c);
+    const cap=document.createElement('figcaption');
+    cap.innerHTML=`<span class="name">${windOn?'WOUND':'STRAIGHT'}</span> &middot; ${r.none?'no site':r.stage+' &middot; '+r.floor+' floor &middot; artery '+r.artMax+' / corridor '+r.corMax+' straight &middot; '+(r.deadEnds||0)+' dead ends &middot; '+r.loops+' loops'} &middot; seed ${seed}`;
+    fig.appendChild(cap); wrap.appendChild(fig);
+    if(!r.none) draw(c,r,Math.max(4,cellSize()-3),dm(),ta(),qt(),pad());
+  }
+  $('cap').innerHTML='<span class="hint">wind a/b: the same site with the maze stack on (left) and off (right).</span>';
+}
 function twoUp(){
-  pairMode=true; pairKind='two'; $('gen-ab').classList.remove('on'); $('gen-two').classList.add('on');
+  pairMode=true; pairKind='two'; $('gen-ab').classList.remove('on'); $('gen-two').classList.add('on'); $('gen-wind').classList.remove('on');
   $('cv').style.display='none';
   const wrap=$('pairwrap'); wrap.style.display=''; wrap.innerHTML='';
   const stage=$('forcestage').value;
@@ -2868,6 +3113,7 @@ $('gen-roll').onclick=()=>rollNew(+$('genseed').value||1);
 $('gen-reroll').onclick=()=>rollNew();
 $('gen-two').onclick=twoUp;
 $('gen-ab').onclick=abLayout;
+$('gen-wind').onclick=windAB;
 $('knob-reset').onclick=resetKnobs;
 $('knob-copy').onclick=copyDiff;
 $('hist-prev').onclick=()=>gotoHist(hpos-1);

@@ -139,6 +139,16 @@
     <builder Name="RandomTile" Tiles="quarrystones3a.png,quarrystones3b.png" />
   </object>
 
+  <!-- trail cairn (user float 2026-08-24, sprites landed 2026-08-25). Solid like the
+       sim says; description owed to the release voice pass -->
+  <object Name="Cleo_TerraFirma_Cairn" Inherits="Furniture">
+    <part Name="Render" Tile="cairn1.png" DisplayName="cairn" RenderString="007" ColorString="&amp;y" TileColor="&amp;y" DetailColor="w" Occluding="false" />
+    <builder Name="RandomTile" Tiles="cairn1.png,cairn2.png" />
+    <part Name="Physics" Solid="true" Takeable="false" Weight="400" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+    <tag Name="NoSparkingQuest" />
+  </object>
+
   <object Name="Cleo_TerraFirma_QuarriedBlock" Inherits="Furniture">
     <part Name="Render" Tile="quarrybricks1.png" DisplayName="quarried stone" RenderString="#" ColorString="&amp;r" TileColor="&amp;r" DetailColor="w" Occluding="false" />
     <builder Name="RandomTile" Tiles="quarrybricks1.png,quarrybricks2.png,quarrybricks3.png" />
