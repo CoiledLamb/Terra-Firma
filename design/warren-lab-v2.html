@@ -1235,6 +1235,9 @@ const ITEMS={
   stonefig:{g:'☺',fg:'#b1a98e',qt:['figurine'],tc:'y',dc:'K'},                  // (v1)
   figurine:{g:'☺',fg:'#c87f3a',qt:['figurine'],tc:'r',dc:'w'},
   largeboulder:{g:'●',fg:'#cfc041',solid:1,qt:['sw_largeboulder'],tc:'W',dc:'Y'},  // (v1)
+  // trail cairn (user float 2026-08-24): PLACEHOLDER art, the large-boulder
+  // sprite tinted earthen; a real stacked-stones sprite is filed asset debt
+  cairn:{g:'∆',fg:'#9a7b5a',solid:1,qt:['sw_largeboulder'],tc:'y',dc:'w'},
   stone:{g:'.',fg:'#b1c9c3',qt:['sw_stone_large'],tc:'y',dc:'Y'},               // (v1)
   loosestone:{g:'.',fg:'#8a9a95',qt:['sw_smallstone'],tc:'y',dc:'Y'},           // (v1)
   pebble:{g:'·',fg:'#155352',qt:['sw_smallstone'],tc:'K',dc:'y'},               // (v1)
@@ -1554,19 +1557,104 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
   //   abandoned - stacks standing, work column BARE.
   //   robbed    - stacks with cells torn out (some leave a loose stone where a
   //               block was taken), work column bare.
-  const dressYard=(rect,state)=>{
+  const dressYard=(rect,state,where)=>{
     const {x0,y0,x1,y1}=rect;
     const freeI=i=>g.c[i]===FLOOR&&!g.item[i];
     // the drape clears its ground: brush under the claim goes (an outside
     // rect may include tree cells by design; see the yard flood)
     for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++) g.tree[idx(x,y)]=0;
+    // GUARANTEED GAP (USER FLOAT 2026-08-24, sim preview: "a guaranteed gap
+    // in the blockyard with a trail leading to the entrance of the quarry").
+    // The gap is the ring's door: the non-corner border cell nearest the
+    // mouth stays unchalked, always - a yard you can walk into.
+    const mx=art.mouth.x, my=art.mouth.y;
+    // gap choice prefers a border cell whose OUTWARD step is walkable (a door
+    // onto rock is no door; measured 71 of 128 trail failures were exactly
+    // that), then nearness to the mouth. Rank 0 = clear ground outside,
+    // 1 = brush outside (trail may trample it, the drape precedent),
+    // 2 = anything (the gap still exists, the trail honestly does not).
+    let gapI=-1, gapBest=1e9, gapX=0, gapY=0, gapRank=9;
     for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){
       if(x>x0&&x<x1&&y>y0&&y<y1) continue;
-      const i=idx(x,y); if(!freeI(i)) continue;
+      const corner=(x===x0||x===x1)&&(y===y0||y===y1);
+      if(corner) continue;
+      const odx=x===x0?-1:x===x1?1:0, ody=y===y0?-1:y===y1?1:0;
+      const ox2=x+odx, oy2=y+ody;
+      let rank=2;
+      if(inb(ox2,oy2)){
+        const oi2=idx(ox2,oy2);
+        if(g.c[oi2]===FLOOR&&g.host[oi2]&&!g.water[oi2])
+          rank=g.tree[oi2]?1:0;
+      }
+      const d=(x-mx)*(x-mx)+(y-my)*(y-my);
+      if(rank<gapRank||(rank===gapRank&&d<gapBest)){
+        gapRank=rank; gapBest=d; gapI=idx(x,y); gapX=x; gapY=y;
+      }
+    }
+    for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){
+      if(x>x0&&x<x1&&y>y0&&y<y1) continue;
+      const i=idx(x,y); if(i===gapI||!freeI(i)) continue;
       const id = y===y0? (x===x0?'chalklineNW':x===x1?'chalklineNE':'chalklineN')
                : y===y1? (x===x0?'chalklineSW':x===x1?'chalklineSE':'chalklineS')
                : x===x0? 'chalklineW':'chalklineE';
       put(i,id);
+    }
+    // TRAIL + CAIRNS (same float; outside yards only - an inside yard's path
+    // is the warren's own halls). BFS gap -> beside the mouth over open host
+    // floor, avoiding water and trees; the worn line renders as dirt path,
+    // the mouth cell itself stays raw (the doorstep law). Cairns sit on the
+    // trail's shoulder at irregular intervals (R(3,6) cells, side rolled) -
+    // spacing dials CLAUDE's. Cairn art is a PLACEHOLDER (sprite debt).
+    if(K.yardTrail&&where==='outside'&&gapI>=0){
+      const dxg=gapX===x0?-1:gapX===x1?1:0, dyg=gapY===y0?-1:gapY===y1?1:0;
+      const sx=gapX+dxg, sy=gapY+dyg;
+      const passAt=trees=>i2=>{ const x=i2%W, y=(i2/W)|0;
+        return g.c[i2]===FLOOR&&g.host[i2]&&!g.water[i2]&&(trees||!g.tree[i2])
+          &&!(x>=x0&&x<=x1&&y>=y0&&y<=y1); };
+      const bfs=pass=>{
+        if(!inb(sx,sy)||!pass(idx(sx,sy))) return -1;
+        const start=idx(sx,sy), pv=new Int32Array(W*H).fill(-2);
+        pv[start]=-1; const q=[start]; let hit=-1;
+        while(q.length&&hit<0){
+          const c2=q.shift(), cx=c2%W, cy=(c2/W)|0;
+          for(const[ddx,ddy]of N4){
+            const nx=cx+ddx, ny=cy+ddy; if(!inb(nx,ny)) continue;
+            const ni=idx(nx,ny);
+            if(ni===g.mouthIdx){ hit=c2; break; }
+            if(pv[ni]!==-2||!pass(ni)) continue;
+            pv[ni]=c2; q.push(ni);
+          }
+        }
+        return hit<0? -1 : (bfs.prev=pv, hit);
+      };
+      // strict first; a blocked route retries THROUGH brush and the trail
+      // tramples what it crosses (the drape precedent: a claim stamps over
+      // terrain, and a worn line through dogthorn is exactly a trail)
+      let hit=bfs(passAt(false));
+      if(hit<0) hit=bfs(passAt(true));
+      {
+        const prev=bfs.prev;
+        if(hit>=0){
+          const path=[]; for(let c2=hit;c2>=0;c2=prev[c2]) path.push(c2);
+          path.reverse();
+          if(!g.trail) g.trail=new Uint8Array(W*H);
+          for(const c2 of path){ g.trail[c2]=1; g.tree[c2]=0; }
+          let until=R(3,6);
+          for(let pi2=1;pi2<path.length;pi2++){
+            if(--until>0) continue;
+            until=R(3,6);
+            const c2=path[pi2], cx=c2%W, cy=(c2/W)|0;
+            const px2=path[pi2-1]%W, py2=(path[pi2-1]/W)|0;
+            const tdx=cx-px2, tdy=cy-py2;
+            const side=chance(.5)?1:-1;
+            const ox=cx+(-tdy)*side, oy=cy+tdx*side;
+            if(!inb(ox,oy)) continue;
+            const oi=idx(ox,oy);
+            if(g.c[oi]===FLOOR&&g.host[oi]&&!g.item[oi]&&!g.water[oi]&&!g.tree[oi]
+               &&!g.trail[oi]&&oi!==g.mouthIdx) put(oi,'cairn');
+          }
+        }
+      }
     }
     const ix0=x0+1, iy0=y0+1, ix1=x1-1, iy1=y1-1;
     const wx = Math.abs(ix0-art.mouth.x)<=Math.abs(ix1-art.mouth.x)? ix0:ix1;
@@ -1627,7 +1715,7 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
         if(cs.length&&!seat(p,wroll(PLAINTRACE),cs)) misses.push([PLAINTRACE,p,cs]);
     }
   }
-  if(yardRec&&yardRec.rect) dressYard(yardRec.rect, yardRec.state||'working');
+  if(yardRec&&yardRec.rect) dressYard(yardRec.rect, yardRec.state||'working', yardRec.where);
   // WARREN FLOOR - v1's law, ported on the user's flag 2026-08-18 (a working
   // site "generated dressed pretty light"). Per-space Nothing weights stay
   // exactly as written - density variance IS the freshness - and only the TAIL
@@ -2364,6 +2452,7 @@ const KNOBS=[
   ['network','infill','infill rooms',-1,6,-1,'leftover mass claimed as extra single-entrance rooms; -1 = let the stage decide'],
   ['network','driftMax','drift reach',3,16,10,'how far a door or crosscut will bore looking for floor'],
   ['dress','roomFloor','room floor',0,1,1,'1 = a registered room (face / plain / commons) that dressed to ZERO items takes one re-roll of its own table with the Nothing row removed — the warren-floor law one level down (user docket 2026-08-24: rooms should spawn with *some* kind of decoration). Count variance stays; only the zero collapses to one. A room with no legal cell stays bare and counts refused'],
+  ['dress','yardTrail','yard trail',0,1,1,'1 = outside yards get a guaranteed gap in the chalk ring (the non-corner cell nearest the mouth, never chalked) plus a worn trail from the gap to the quarry mouth with cairns on its shoulder at irregular intervals (USER FLOAT 2026-08-24, sim preview ahead of the scout port). Inside yards get the gap only. Cairn spacing R(3,6) and the placeholder cairn art are CLAUDE dials/debt'],
   ['placement','scoutN','scouts / world',10,150,50,'scout-and-quota (USER GREENLIT 2026-08-24): candidate canyon zones scored at worldgen before any claim exists. More scouts = better flourishing tails, slower worldgen. 50 is the design-doc sim number, CLAUDE dial'],
   ['placement','quotaFl','quota: flourishing',0,12,5,'flourishing slots in the stage quota. Corner math: fl-reclaimed per world is roughly this x 0.14, so 7 buys a guaranteed corner. CLAUDE dial awaiting the user strike'],
   ['placement','quotaCamp','quota: camp',0,15,9,'camp slots in the stage quota; working fills the remainder to warrens/world. CLAUDE dial awaiting the user strike'],
@@ -2580,6 +2669,11 @@ function draw(cv,res,cell,drawMode,tintArt,useTiles,padded){
         const ours = !g.host[idx(x,y)];
         if(ours && padded && idx(x,y)!==g.mouthIdx){
           const t=tinted(floorVariant(x,y),"w","k");
+          if(t) ctx.drawImage(t,px,py,cw,ch);
+        } else if(g.trail && g.trail[idx(x,y)]){
+          // the yard trail: worn ground, the DirtPath register (user float
+          // 2026-08-24) - a paler tread than the warren's padded interior
+          const t=tinted(floorVariant(x,y),"w","w");
           if(t) ctx.drawImage(t,px,py,cw,ch);
         } else {
           const fp=floorPaint(x,y), t=tinted(fp.t,fp.c,"k");

@@ -1351,6 +1351,26 @@ lying rumors as flavor. AWAITING RULING — deliberately deferred (user, same da
 generate a few more batches before deciding"); do not nudge, the evidence-gathering is the
 user's own.
 
+**YARD GAP + TRAIL + CAIRNS — USER FLOAT 2026-08-24 ("adding a guaranteed gap in the blockyard
+with a trail leading to the entrance of the quarry. cairns placed alongside the trail at
+irregular intervals"; user's own scope: "previewing on the sim before we implement our scout
+path"), SIM PREVIEW BUILT same day, NOTHING PORTED.** Reading stated and built: the gap is
+always in the ring; trail + cairns are OUTSIDE yards only (an inside yard's path is the
+warren's own halls). Mechanics: gap = the non-corner border cell nearest the mouth, never
+chalked, preferring a cell whose OUTWARD step is walkable (first cut ranked by distance alone
+and 71 of 128 trail failures were doors onto rock/brush/warren floor); trail = BFS gap →
+beside the mouth over open host floor, strict first, retrying THROUGH brush with trample (the
+drape precedent) — the mouth cell stays raw per the doorstep law; cairns on the trail's
+shoulder every R(3,6) cells, side rolled (spacing CLAUDE dial; cairn art is the boulder
+sprite tinted earthen, PLACEHOLDER, sprite debt filed). Render: trail wears the dirt-path
+register (`w`/`w` ground dots), paler than the warren's padded interior; knob `yardTrail`
+default 1. **Measured, 477 sites / 427 yards / 333 outside: gap present 427/427, trails
+282/333 outside (85%; the 15% residual is water/rock honestly cutting the arm), trail len
+med 21 / p90 47, 606 cairns (~2.1/trail), tripwires and guards clean, 0 console errors.**
+Port debt when taken: DirtPath objects for the trail (the base object IS the register), a
+cairn blueprint + sprite, the gap in the C# chalk ring. **NOT YET EYEBALLED — seed 80005 is
+rolled in the rig as a specimen (33 trail cells, 3 cairns).**
+
 **PADDED EARTH PORT GAP — USER FLAG IN GAME 2026-08-24 ("i see a thing we are doing different
 from the sim - the inside of warrens aren't using padded earth floors"), FIXED same sitting.**
 The 2026-08-12 whole-warren ruling had only ever been sim-render; grep confirmed ZERO padded
