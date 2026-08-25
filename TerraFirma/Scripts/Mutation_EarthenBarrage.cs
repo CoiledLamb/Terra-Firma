@@ -342,6 +342,20 @@ namespace XRL.World.Parts.Mutation
 					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("EB", "world-map arrival re-arm: slot came back empty, sculpted a fresh stone");
 				}
 			}
+			// empty-slot re-arm (user ruling 2026-08-25, shipped in beta 0.1.2.3 and ported here):
+			// throwing a foreign stack dry should hand the slot back to the pebbles "so you didn't
+			// have to manually do it yourself". Widens the ruled re-arm scope deliberately, at the
+			// user's word: toggle on + empty thrown slot at end of turn = stay armed, whatever
+			// emptied it. Equipping something else still wins (slot occupied, branch silent); the
+			// toggle stays the opt-out. No new state -- same quiet end-of-turn timing the NPC
+			// branch has always used. Verified live on the beta line 2026-08-25.
+			else if (ParentObject.IsPlayer() && IsMyActivatedAbilityToggledOn(ActivatedAbilityID)
+				&& ParentObject.GetFirstThrownWeapon() == null && CanGetStone(true))
+			{
+				Activate();
+				XDidY(ParentObject, "retrieve", $"a {GetStoneName(Level)}", Source: ParentObject);
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("EB", "empty-slot re-arm: thrown slot found empty at end of turn, sculpted a fresh stone");
+			}
 			GameObject heldPebble = ParentObject.FindEquippedItem(x => IsOurStone(x) && x.IsEquippedAsThrownWeapon());
 			if (heldPebble != null)
 			{
