@@ -139,14 +139,21 @@
     <builder Name="RandomTile" Tiles="quarrystones3a.png,quarrystones3b.png" />
   </object>
 
-  <!-- trail cairn (user float 2026-08-24, sprites landed 2026-08-25). Solid like the
-       sim says; description owed to the release voice pass -->
+  <!-- trail cairn (user float 2026-08-24, sprites landed 2026-08-25). cairn1 is the
+       STANDING stack, cairn2 the toppled scatter; the first cut wrongly rolled both as
+       RandomTile variants (user flag 2026-08-25). Shale colors and both descriptions are
+       USER TEXT FINAL 2026-08-25. -->
   <object Name="Cleo_TerraFirma_Cairn" Inherits="Furniture">
-    <part Name="Render" Tile="cairn1.png" DisplayName="cairn" RenderString="007" ColorString="&amp;y" TileColor="&amp;y" DetailColor="w" Occluding="false" />
-    <builder Name="RandomTile" Tiles="cairn1.png,cairn2.png" />
+    <part Name="Render" Tile="cairn1.png" DisplayName="cairn" RenderString="007" ColorString="&amp;r" TileColor="&amp;r" DetailColor="w" Occluding="false" />
+    <part Name="Description" Short="A waystone for those with eyes to the earth, this stack of rocks inhabits an unresolved superposition of endurance and fragility." />
     <part Name="Physics" Solid="true" Takeable="false" Weight="400" />
     <tag Name="ExcludeFromDynamicEncounters" />
     <tag Name="NoSparkingQuest" />
+  </object>
+  <object Name="Cleo_TerraFirma_CairnToppled" Inherits="Cleo_TerraFirma_Cairn">
+    <part Name="Render" Tile="cairn2.png" DisplayName="toppled cairn" RenderString="007" ColorString="&amp;r" TileColor="&amp;r" DetailColor="w" Occluding="false" />
+    <part Name="Description" Short="These scattered rocks once formed a waystone; now, only traces of their former order remain." />
+    <part Name="Physics" Solid="false" Takeable="false" Weight="400" />
   </object>
 
   <object Name="Cleo_TerraFirma_QuarriedBlock" Inherits="Furniture">

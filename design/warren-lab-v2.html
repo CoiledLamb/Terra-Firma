@@ -1343,7 +1343,11 @@ const ITEMS={
   largeboulder:{g:'●',fg:'#cfc041',solid:1,qt:['sw_largeboulder'],tc:'W',dc:'Y'},  // (v1)
   // trail cairn (user float 2026-08-24): PLACEHOLDER art, the large-boulder
   // sprite tinted earthen; a real stacked-stones sprite is filed asset debt
-  cairn:{g:'∆',fg:'#9a7b5a',solid:1,qt:['sw_largeboulder'],tc:'y',dc:'w'},
+  // real sprites 2026-08-25 (placeholder debt retired): cairn1 STANDS, cairn2
+  // is the toppled scatter - two states, never RandomTile variants (user flag).
+  // Shale colors per the ruled family.
+  cairn:{g:'∆',fg:'#a64a2e',solid:1,qt:['cairn1'],tc:'r',dc:'w'},
+  cairn_toppled:{g:'%',fg:'#a64a2e',qt:['cairn2'],tc:'r',dc:'w'},
   stone:{g:'.',fg:'#b1c9c3',qt:['sw_stone_large'],tc:'y',dc:'Y'},               // (v1)
   loosestone:{g:'.',fg:'#8a9a95',qt:['sw_smallstone'],tc:'y',dc:'Y'},           // (v1)
   pebble:{g:'·',fg:'#155352',qt:['sw_smallstone'],tc:'K',dc:'y'},               // (v1)
@@ -1769,7 +1773,8 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
             if(!inb(ox,oy)) continue;
             const oi=idx(ox,oy);
             if(g.c[oi]===FLOOR&&g.host[oi]&&!g.item[oi]&&!g.water[oi]&&!g.tree[oi]
-               &&!g.trail[oi]&&oi!==g.mouthIdx) put(oi,'cairn');
+               &&!g.trail[oi]&&oi!==g.mouthIdx)
+              put(oi, occupancy!=='in use'&&chance(.5)?'cairn_toppled':'cairn');   // dead sites let some fall (CLAUDE dial)
           }
         }
       }

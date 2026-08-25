@@ -1914,7 +1914,12 @@ namespace Cleo.TerraFirma.Scripts
 							int coi = g.Idx(cox, coy);
 							if (g.C[coi] == FLOOR && g.Host[coi] != 0 && g.Item[coi] == null && g.Water[coi] == 0 && g.Tree[coi] == 0
 								&& !trailSet.Contains(coi) && coi != g.MouthIdx)
-							{ Put(coi, "cairn"); cairns++; }
+							{
+								// tense pass: a living camp keeps its waystones stacked; a
+								// dead site lets some fall (50% toppled, CLAUDE dial)
+								Put(coi, occupancy != "in use" && Chance(.5) ? "cairn_toppled" : "cairn");
+								cairns++;
+							}
 						}
 						Helpers.VerifyLog("WARREN", $"trail: {tpath.Count} cells, {cairns} cairns, gap {gapX},{gapY} rank {gapRank}");
 					}
@@ -2304,7 +2309,7 @@ namespace Cleo.TerraFirma.Scripts
 			{ "stonefig", "Cleo_TerraFirma_Random Stone Figurine" }, { "figurine", "Random Figurine" },
 			{ "largeboulder", "LargeBoulder" },
 			{ "stone", "Cleo_TerraFirma_Rock_Generic" }, { "loosestone", "Cleo_TerraFirma_Rock_Generic" }, { "pebble", "Cleo_TerraFirma_Rock_Pebbles" },
-			{ "cairn", "Cleo_TerraFirma_Cairn" }, { "dirtpath", "DirtPath" },   // trail port 2026-08-25; DirtPath IS the register (ZoneTerrain.xml:937)
+			{ "cairn", "Cleo_TerraFirma_Cairn" }, { "cairn_toppled", "Cleo_TerraFirma_CairnToppled" }, { "dirtpath", "DirtPath" },   // trail port 2026-08-25; DirtPath IS the register (ZoneTerrain.xml:937)
 			{ "nugget", "Copper Nugget" },
 			{ "bracelet1", "Bracelet1" }, { "bracelet2", "Bracelet2" }, { "bracelet3", "Bracelet3" },
 		};

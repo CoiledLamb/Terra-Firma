@@ -1519,6 +1519,17 @@ compile 0 errors; all `log-confirmed pending` on next zone builds.** Three lanes
      cells/cairns/gap. `[verify]` in game: ring shows one unchalked door cell facing the
      mouth · a dirt line runs gap-to-mouth with 2ish cairns on its shoulder · inside yards
      get the gap only · no MODERROR on Cairn/DirtPath.
+     - **CAIRN SPLIT — USER FLAG IN GAME 2026-08-25 ("cairns are starting out using the
+       toppled sprite for some reason"), FIXED same sitting.** cairn1 STANDS, cairn2 is the
+       toppled scatter; the first cut wrongly rolled both as RandomTile variants of one
+       standing pile. Now two blueprints: `Cleo_TerraFirma_Cairn` (standing, solid) and
+       `Cleo_TerraFirma_CairnToppled` (walkable scatter), both wearing base Shale's ruled
+       family (`&r`/`w`). **BOTH DESCRIPTIONS USER TEXT FINAL 2026-08-25** (the waystone
+       superposition line; the scattered traces line) - the voice-pass debt on these two is
+       retired. Tense wiring, CLAUDE dial strikeable: living sites keep waystones stacked;
+       abandoned/reclaimed trails topple ~50% of theirs. Sim mirrors both (real sprites
+       replace the boulder placeholder, art debt retired). Compile 0 errors, deployed
+       hash-verified, `log-confirmed pending` next boot.
   2. **NUGGETS + BRACELETS IN TABLES** (weights CLAUDE dials, delegated). `Copper Nugget`
      (Items.xml:11571) weight 1 on T_SOCKET, ~1 in 110 rolls: quarry product at the work
      face. `Bracelet1/2/3` (Items.xml:5729, the beaded Svy trade goods) as a new `keepsake`
