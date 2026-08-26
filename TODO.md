@@ -1574,6 +1574,14 @@ errors, deployed hash-verified 3/3.
         cap; camp-vs-working choice is a CLAUDE dial). Compile 0 errors, deployed
         hash-verified, `log-confirmed pending` next embark: a stingy-fl world should now
         read sited 25 with the deficit visible in the stage split.
+      - **EMBARK 4, a DIFFERENT hole: 50 scouts held only 23 capable zones TOTAL, so
+        the cascade ran dry - sited 23, UNDER TARGET again. FIXED same sitting:
+        ADAPTIVE EXTENSION**, the early exit's twin - past SCOUT_N the loop stays
+        alive only while total capable < 25, hard-capped at 2x (100) so a world
+        genuinely out of rock terminates. Deliberately does NOT extend for a
+        flourishing-only shortfall (chasing the rare tier could double worldgen; the
+        cascade covers it). Timing line grows "(extended for capacity)". Compile 0
+        errors, deployed hash-verified, `log-confirmed pending`.
 
 **YARD PLACEMENT: AREA DECIDES — USER FLOAT 2026-08-25 ("what if we improved blockyard
 placement a bit when there's lots of open space outside?", with an in-game screenshot of a

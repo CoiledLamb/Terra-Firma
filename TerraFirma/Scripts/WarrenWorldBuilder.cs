@@ -74,7 +74,12 @@ namespace XRL.World.WorldBuilders
 				int j = rng.Next(i + 1);
 				(pool[i], pool[j]) = (pool[j], pool[i]);
 			}
-			int scoutN = Math.Min(SCOUT_N, pool.Count);
+			// ADAPTIVE BOTH WAYS: early exit when covered (below), and EXTENSION
+			// past SCOUT_N when capacity runs short (embark 4: 50 scouts held only
+			// 23 capable zones total, so the deficit cascade ran dry at sited 23 -
+			// a poor world needs MORE scouts, not fewer). Hard cap 2x so a world
+			// that is genuinely out of rock still terminates.
+			int scoutN = Math.Min(SCOUT_N * 2, pool.Count);
 			// the quota rolls BEFORE scouting so the adaptive exit knows its
 			// targets (dials; rolled in a +/-1 band so world stage-mixes differ)
 			int fl = Math.Max(0, QUOTA_FL + (QUOTA_ROLLED ? rng.Next(-1, 2) : 0));
@@ -118,7 +123,12 @@ namespace XRL.World.WorldBuilders
 				// Generous worlds stop early; a stingy world (the first embark
 				// ran capable-fl 6 against quota 6) still scouts all fifty,
 				// which is why a naive lower SCOUT_N was the wrong lever.
+				// Between SCOUT_N and the 2x cap, only a capacity SHORTFALL
+				// keeps the loop alive: total capable must at least reach the
+				// world target before the loop may rest at the soft ceiling.
 				if (capFl >= fl + 1 && capCamp >= fl + camp + 2 && capAny >= WARRENS_PER_WORLD + 3)
+					break;
+				if (i + 1 >= SCOUT_N && capAny >= WARRENS_PER_WORLD)
 					break;
 			}
 			scored.Sort((a, b) => a.Capacity != b.Capacity
@@ -183,7 +193,9 @@ namespace XRL.World.WorldBuilders
 				$"avg {(scored.Count > 0 ? swZone.ElapsedMilliseconds / scored.Count : 0)}ms), " +
 				$"probes {swProbe.ElapsedMilliseconds}ms, claims {swClaim.ElapsedMilliseconds}ms; " +
 				$"scout premium {swZone.ElapsedMilliseconds + swProbe.ElapsedMilliseconds}ms, " +
-				$"{scored.Count} of SCOUT_N {SCOUT_N}" + (scored.Count < Math.Min(SCOUT_N, pool.Count) ? " (adaptive exit)" : ""));
+				$"{scored.Count} of SCOUT_N {SCOUT_N}" +
+				(scored.Count > SCOUT_N ? " (extended for capacity)" :
+				 scored.Count < Math.Min(SCOUT_N, pool.Count) ? " (adaptive exit)" : ""));
 		}
 
 		/// <summary>The pool, enumerated. Reflection on the private terrain list
