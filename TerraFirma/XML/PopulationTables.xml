@@ -528,7 +528,6 @@
 			<object Weight="10" Blueprint="Torch" Hint="Cleo_TerraFirma_Face" />
 			<object Weight="7" Blueprint="Garbage" />
 			<object Weight="5" Blueprint="Pickaxe" Hint="Cleo_TerraFirma_Face" />
-			<object Weight="4" Blueprint="Cleo_TerraFirma_ChalkLine" />
 		</group>
 	</population>
 
@@ -557,20 +556,29 @@
 			<object Blueprint="Cleo_TerraFirma_Food Basket" />
 		</group>
 	</population>
+	<!-- Seating weighted 2026-08-26 (USER: "let's add weights to some of the poptables.
+	     seating and sleep seem like a good place to start"; the numbers are CLAUDE DRAFT).
+	     The shape is camp economics: cushions and stools are what a quarry camp actually
+	     sits on, the bench is the shared middle, the folding chair is manufactured goods,
+	     and the kline is the luxury recliner, rare enough that finding one says something
+	     about whoever hauled it down here. -->
 	<population Name="Cleo_TerraFirma_WarrenPool Seating">
 		<group Name="Pool" Style="pickone">
-			<object Blueprint="Floor Cushion" />
-			<object Blueprint="Canvas Folding Chair" />
-			<object Blueprint="Kline" />
-			<object Blueprint="Bench" />
-			<object Blueprint="Stool" />
+			<object Weight="30" Blueprint="Floor Cushion" />
+			<object Weight="15" Blueprint="Canvas Folding Chair" />
+			<object Weight="10" Blueprint="Kline" />
+			<object Weight="20" Blueprint="Bench" />
+			<object Weight="25" Blueprint="Stool" />
 		</group>
 	</population>
+	<!-- Sleep weighted the same sitting (CLAUDE DRAFT): bedrolls are camp bedding and
+	     dominate, the cot is the seasoned camp's upgrade, and a real bed is rare on
+	     purpose, someone SETTLED here. -->
 	<population Name="Cleo_TerraFirma_WarrenPool Sleep">
 		<group Name="Pool" Style="pickone">
-			<object Blueprint="Bed" />
-			<object Blueprint="Bedroll" />
-			<object Blueprint="Folding Cot" />
+			<object Weight="15" Blueprint="Bed" />
+			<object Weight="55" Blueprint="Bedroll" />
+			<object Weight="30" Blueprint="Folding Cot" />
 		</group>
 	</population>
 	<population Name="Cleo_TerraFirma_WarrenPool Centre">

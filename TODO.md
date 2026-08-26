@@ -1742,6 +1742,26 @@ obligation and full verification protocol spelled out in the brief.
   `[verify]` rides the sweep: a yard board still reads its arrived/departed/tally lines,
   and the chalk write verb still works on it (merge inherited through the child).
 
+  **FIRST DIRECT-XML EDITS 2026-08-26, the migration's authorship lane in actual use.**
+  - **USER EDIT, their own hand in the repo XML: the Cleo_TerraFirma_ChalkLine row (Weight
+    4) STRUCK from the WarrenDress HallTable table.** Corridors no longer roll chalked
+    claim marks from the table; hall total drops 100 to 96, the surviving rows' odds
+    rising proportionally. The carver's chalk-line special case (walled-side directional
+    piece) stays in code as a dormant path, so re-adding the row later is again a pure
+    XML edit. Committed with this sitting's pass, attributed here.
+  - **SEATING + SLEEP POOLS WEIGHTED (USER: "let's add weights to some of the poptables.
+    seating and sleep seem like a good place to start"; numbers CLAUDE DRAFT, strike at
+    will):** seating Floor Cushion 30 / Stool 25 / Bench 20 / Canvas Folding Chair 15 /
+    Kline 10 (camp economics, the kline rare on purpose); sleep Bedroll 55 / Folding Cot
+    30 / Bed 15 (a real bed in a warren means somebody settled). NO RECOMPILE, no C#
+    touched: the pool loader's weight expansion was built for exactly this. Dwelling
+    furniture MIX shifts by design; layout, budgets and roll counts are untouched.
+  - **SIM CATCH-UP FLAGGED:** warren-lab-v2.html ROOMPOOLS picks stay uniform (its arrays
+    do not model weights) and its HALLTABLE still carries the chalkmark row; the sim's
+    dress census diverges from game dress accordingly until its own sitting.
+  `[verify]` in-game feel check: dwellings lean cushion/stool/bedroll, klines and real
+  beds read as finds; corridors carry no chalk claim marks.
+
 **BLIND-CLAIM PORTED, SCOUT RETIRED — USER RULED 2026-08-25 ("alright, i'll say go, let's
 try it"), BUILT + DEPLOYED same sitting; `log-confirmed pending` ON A FRESH EMBARK.**
 The full sim stack crossed: `BuildAugmented` ladder (real canyon first · polite thickening
