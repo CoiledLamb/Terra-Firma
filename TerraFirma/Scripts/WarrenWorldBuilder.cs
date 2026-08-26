@@ -118,15 +118,17 @@ namespace XRL.World.WorldBuilders
 				if (cap >= 2) capFl++;
 				if (cap >= 1) capCamp++;
 				if (cap >= 0) capAny++;
-				// ADAPTIVE EARLY EXIT: stop once every quota is covered with
-				// margin (fl +1 against carve-drift, camp-and-up +2, total +3).
-				// Generous worlds stop early; a stingy world (the first embark
-				// ran capable-fl 6 against quota 6) still scouts all fifty,
-				// which is why a naive lower SCOUT_N was the wrong lever.
+				// ADAPTIVE EARLY EXIT: stop once every quota is covered. Margins
+				// priced by ACTUAL risk (embark 5: the old fl+1 margin forced a
+				// full 50-scout run hunting a 5th fl-capable zone for insurance
+				// against fl refusals - which are structurally impossible, a
+				// chosen fl carve replays its probe exactly. fl margin is 0).
+				// camp/working carves CAN drift-demote, but a demote still seats
+				// its slot; only outright refusal burns one, hence thin margins.
 				// Between SCOUT_N and the 2x cap, only a capacity SHORTFALL
 				// keeps the loop alive: total capable must at least reach the
 				// world target before the loop may rest at the soft ceiling.
-				if (capFl >= fl + 1 && capCamp >= fl + camp + 2 && capAny >= WARRENS_PER_WORLD + 3)
+				if (capFl >= fl && capCamp >= fl + camp + 1 && capAny >= WARRENS_PER_WORLD + 2)
 					break;
 				if (i + 1 >= SCOUT_N && capAny >= WARRENS_PER_WORLD)
 					break;
