@@ -1885,7 +1885,6 @@ namespace Cleo.TerraFirma.Scripts
 				}
 				int budget = Math.Max(1, (int)Math.Round(cs.Count * type.Density));
 				int roomChests = 0;   // one chest per room (user flag: "too many chests")
-				bool roomOven = false, roomCampfire = false;   // a kitchen keeps one fire
 				var rows = type.Rows.ToList();
 				var fixedRows = new List<RowSpec> { rows[0] };
 				rows.RemoveAt(0);
@@ -1902,14 +1901,6 @@ namespace Cleo.TerraFirma.Scripts
 						var pool = ROOMPOOLS[row.Pool];
 						// ONE OVEN PER SITE - an oven is built masonry, a camp builds one
 						if (pool.Contains("Oven") && placed.ContainsKey("Oven")) pool = pool.Where(i2 => i2 != "Oven").ToArray();
-						// A KITCHEN KEEPS ONE FIRE (USER DOCKET 2026-08-26, screenshot of an
-						// oven-and-campfire kitchen: "campfires don't spawn in kitchens that
-						// have an oven"): oven and campfire exclude each other within a room,
-						// whichever lands first. Mutual on purpose - campfire-then-oven would
-						// otherwise still build the double-fire kitchen. Not expressible as a
-						// hint (hints seat items, they never gate the roll); law by design.
-						if (roomOven) pool = pool.Where(i2 => i2 != "Campfire").ToArray();
-						if (roomCampfire) pool = pool.Where(i2 => i2 != "Oven").ToArray();
 						string item = pool[R(0, pool.Length - 1)];
 						if (item == "Chest") { if (roomChests >= 1) item = "Woven Basket"; else roomChests++; }
 						bool solid = IsSolidItem(item);
@@ -1925,8 +1916,6 @@ namespace Cleo.TerraFirma.Scripts
 						if (cands.Count == 0) { if (solid) refused++; break; }
 						var c = cands[R(0, cands.Count - 1)];
 						Put(g.Idx(c[0], c[1]), item); budget--; tableItems++;
-						if (item == "Oven") roomOven = true;
-						if (item == "Campfire") roomCampfire = true;
 						// cluster stamps riding a centerpiece roll: the hookah-circle
 						// (user sketch, ruled) and the kiln's brick piles
 						if (item == "Hookah" || item == "Kiln")

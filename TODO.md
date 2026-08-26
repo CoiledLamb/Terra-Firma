@@ -1797,7 +1797,11 @@ obligation and full verification protocol spelled out in the brief.
   water leaves a cold fire dish, not campfire remains; hearth rooms roll dishes, dwelling
   light is torches.
 
-  **A KITCHEN KEEPS ONE FIRE — USER DOCKET 2026-08-26 (screenshot of an oven-and-campfire
+  ~~**A KITCHEN KEEPS ONE FIRE**~~ — **REPEALED 2026-08-26, USER RULED same sitting
+  ("we can repeal that rule, it's probably too strict and ineffective"); the law is OUT
+  of WarrenCarver, hearth pool picks are unfiltered again (beyond one-oven-per-site).
+  Record of the build preserved below for the method answer it carries.**
+  **USER DOCKET 2026-08-26 (screenshot of an oven-and-campfire
   kitchen: "making it so campfires don't spawn in kitchens that have an oven. is it
   possible with just hints?"). ANSWERED + BUILT same sitting: compile 0 errors, deployed
   hash-verified 1/1, `log-confirmed pending`.** The method answer, on record: NOT
