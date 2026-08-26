@@ -1999,7 +1999,42 @@ obligation and full verification protocol spelled out in the brief.
   NameMaker's own rolls, same ambient lane, distribution-equal per bank.
   `[verify]` overseers and tfcarverpack legendaries still roll junction-clean names
   (no double vowel-vowel or consonant-pile joins), no `TerraFirma: namestyle` errors
-  in Player.log. Distribution-equal with
+  in Player.log.
+
+  **THE LAST CLEAN-MIGRATION PAIR — USER GO 2026-08-26 ("alright, sounds good"),
+  BUILT same sitting with a USER MID-BUILD CATCH that improved the design. Compile 0
+  errors, XML strict-valid + text rules OK, deployed hash-verified 3/3,
+  `log-confirmed pending`.**
+  - **(1) TENSE FLIP READS THE BLUEPRINTS.** The user's catch ("don't campfire,
+    torches and torchposts already have a variant?") split the design: campfire-family
+    items ALREADY declare their dead form in the engine's own vocabulary, the
+    `Campfire` part's `ExtinguishBlueprint` (Campfire to Campfire Remains at base
+    Furniture.xml:4472; FireDish to FireDishCold set at the campfire sitting), so the
+    flip reads that FIRST with zero new XML - and an Oven's bare Campfire part
+    declares nothing, correctly never flipping. Only the two relationships the engine
+    does not encode ride the new `Cleo_TerraFirma_ColdForm` tag in Merges.xml:
+    Torchpost to its PARALLEL twin Unlit Torchpost (verified: no inheritance link,
+    name convention only), and Torch with an EMPTY value meaning scavenged-gone. The
+    hardcoded flip dict is deleted; new lit furniture declares its cold form in XML.
+    Recon note banked, unbuilt: base Torch is one blueprint with a lit STATE
+    (`LightSource Lit=` + `TorchProperties`), so dead-site torches COULD flip to
+    unlit-on-the-ground instead of vanishing - a read change, user's call if wanted.
+  - **(2) OCCUPANCY + STAGE WEIGHTS AS CONFIG TABLES.** `Cleo_TerraFirma_
+    WarrenOccupancy` (in use 55 / abandoned 25 / reclaimed 20) and `WarrenStage`
+    (uniform thirds) in PopulationTables.xml, the PowerGridReplace label-table idiom;
+    `RollLabelTable` rolls them with the CARVE SEED at the exact points the old
+    constant draws sat (one Rng draw either way). ABANDONED_PCT/RECLAIMED_PCT knobs
+    died. Guards: missing table falls back to built-in uniform labels LOUDLY; a
+    rolled label outside the known set (the carve laws key on exact spellings) logs
+    and uses the first known label.
+  - **Flagged delta:** the underlying uniform draw maps to labels through row order
+    now, so existing seeds re-roll occupancy and stage on unbuilt zones (visited
+    zones persist). Same class of delta as the garden-breach stream shift, accepted
+    there.
+  `[verify]` sweep: occupancy mix reads ~55/25/20 over many sites, dead sites still
+  flip fires/dishes/torchposts and shed torches, no `TerraFirma: config table`
+  errors; then edit a weight in the XML and confirm the mix moves without a
+  recompile. Distribution-equal with
     the pre-migration pass by construction (same rolls, same order, same percentages
     now read from XML).
   `[verify]` rides the population sweep above unchanged; additionally no `TerraFirma:`

@@ -221,4 +221,16 @@
 	<object Name="Chalkboard" Load="Merge">
 		<part Name="Cleo_TerraFirma_ChalkboardWritable" />
 	</object>
+	<!-- WARREN TENSE FLIP declarations (2026-08-26, the cold-form migration; the user's
+	     catch shaped it: campfire-family blueprints ALREADY declare their dead form via
+	     the Campfire part's ExtinguishBlueprint, which the tense pass reads first, so
+	     only the two relationships the engine does not encode need this tag). A dead
+	     warren flips each lit item to its Cleo_TerraFirma_ColdForm; an EMPTY value
+	     means the item is gone (scavenged), an absent tag means no flip. -->
+	<object Name="Torchpost" Load="Merge">
+		<tag Name="Cleo_TerraFirma_ColdForm" Value="Unlit Torchpost" />
+	</object>
+	<object Name="Torch" Load="Merge">
+		<tag Name="Cleo_TerraFirma_ColdForm" Value="" />
+	</object>
 </objects>

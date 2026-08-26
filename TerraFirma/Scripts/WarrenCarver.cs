@@ -20,8 +20,9 @@ namespace Cleo.TerraFirma.Scripts
 	{
 		// ---------------------------------------------------------------- knobs
 		// The sim's DEFAULTS, frozen at port time. Sim knob ids in comments.
-		public const int ABANDONED_PCT = 25;      // abandonedPct
-		public const int RECLAIMED_PCT = 20;      // reclaimedPct
+		// occupancy + stage weights MOVED to PopulationTables.xml 2026-08-26
+		// (Cleo_TerraFirma_WarrenOccupancy / WarrenStage, the weighted-config
+		// idiom); rolled seeded via RollLabelTable at the old draw points
 		public const int AQUIFER_MIN = 0;         // aquiferMin
 		public const int AQUIFER_MAX = 2;         // aquiferMax
 		public const int POOL_MIN = 6;            // poolMin
@@ -1831,6 +1832,44 @@ namespace Cleo.TerraFirma.Scripts
 			}
 			return pool.ToArray();
 		}
+		// WEIGHTED CONFIG ROLLS (2026-08-26): occupancy and stage weights live in
+		// PopulationTables.xml as label tables (the PowerGridReplace idiom, rows
+		// the roller interprets rather than spawns). Rolled with the CARVE SEED
+		// at the exact points the old constant draws sat - one Rng() draw either
+		// way, so zone determinism holds. A missing table or unknown label fails
+		// LOUD to a known value; the carve laws key on exact label spellings.
+		private static Row[] _occupancyRows, _stageRows;
+		private static string RollLabelTable(ref Row[] cache, string table, string[] known)
+		{
+			if (cache == null)
+			{
+				var rows = new List<Row>();
+				foreach (var po in ReadPopRows(table))
+					if (!IsNothingRow(po.Blueprint))
+						rows.Add(new Row((int)Math.Min(po.Weight, int.MaxValue), po.Blueprint));
+				if (rows.Count == 0)
+				{
+					MetricsManager.LogError("TerraFirma: config table '" + table + "' missing or empty; built-in uniform fallback in use");
+					foreach (string k in known) rows.Add(new Row(1, k));
+				}
+				cache = rows.ToArray();
+			}
+			int t = 0; foreach (var r in cache) t += r.Wt;
+			double x = Rng() * t;
+			string label = cache[cache.Length - 1].Id;
+			foreach (var r in cache) { x -= r.Wt; if (x < 0) { label = r.Id; break; } }
+			if (Array.IndexOf(known, label) < 0)
+			{
+				MetricsManager.LogError("TerraFirma: config table '" + table + "' rolled unknown label '" + label + "'; using '" + known[0] + "'");
+				return known[0];
+			}
+			return label;
+		}
+		private static int StageIndexOf(string name)
+		{
+			for (int i = 0; i < STAGES.Length; i++) if (STAGES[i].Name == name) return i;
+			return 0;
+		}
 		private class RowSpec { public int N0, N1, Chance; public string Pool, Hint; public bool First; }
 		private class RoomType { public int Wt; public string Name; public RowSpec[] Rows; public double Density; }
 		private static RowSpec RS(int n0, int n1, string pool, string hint, int chance = 0, bool first = false)
@@ -2520,18 +2559,42 @@ namespace Cleo.TerraFirma.Scripts
 			// base plus fresh snapjaw fires beside the cold hearths
 			if (occupancy != "in use")
 			{
-				var flip = new Dictionary<string, string> {
-					{ "Campfire", "Campfire Remains" },
-					{ "Torchpost", "Unlit Torchpost" }, { "Cleo_TerraFirma_FireDish", "Cleo_TerraFirma_FireDishCold" }, { "Torch", null } };
+				// THE FLIP READS THE BLUEPRINTS (2026-08-26, replacing a hardcoded
+				// dict; the user's catch shaped the split): campfire-family items
+				// already declare their dead form in the engine's own vocabulary,
+				// the Campfire part's ExtinguishBlueprint (Campfire -> Campfire
+				// Remains, FireDish -> FireDishCold; an Oven's bare Campfire part
+				// declares nothing and correctly never flips). Only what the
+				// engine does not encode rides the Cleo_TerraFirma_ColdForm tag
+				// (Merges.xml): Torchpost's parallel twin, and Torch's empty
+				// value meaning scavenged-gone. New lit furniture declares its
+				// own cold form in XML; this law never learns another name.
+				var flipCache = new Dictionary<string, string>();
+				string ColdFormOf(string id)
+				{
+					if (flipCache.TryGetValue(id, out string known)) return known;
+					string to = null;
+					var bp = GameObjectFactory.Factory.GetBlueprint(id);
+					if (bp != null)
+					{
+						string ex = bp.GetPartParameter<string>("Campfire", "ExtinguishBlueprint");
+						if (!string.IsNullOrEmpty(ex) && ex != id) to = ex;
+						else if (bp.TryGetTag("Cleo_TerraFirma_ColdForm", out string tag))
+							to = tag ?? "";   // empty = the item is gone
+					}
+					flipCache[id] = to;
+					return to;
+				}
 				for (int i = 0; i < g.W * g.H; i++)
 				{
 					string it = g.Item[i];
-					if (it == null || !flip.ContainsKey(it)) continue;
+					if (it == null) continue;
+					string to = ColdFormOf(it);
+					if (to == null) continue;
 					int pid = g.Pocket[i];
 					if (pid >= 0 && pid < pockets.Count && pockets[pid].Live) continue;
-					string to = flip[it];
-					g.Item[i] = to;
-					if (to == null) items--;
+					g.Item[i] = to.Length == 0 ? null : to;
+					if (to.Length == 0) items--;
 				}
 			}
 			if (occupancy == "reclaimed")
@@ -2675,7 +2738,8 @@ namespace Cleo.TerraFirma.Scripts
 				foreach (int ai in aug) { g.C[ai] = SOLID; g.Host[ai] = 0; g.Tree[ai] = 0; g.Water[ai] = 0; g.Aqua[ai] = 0; }
 				g.Augment = aug;
 			}
-			int si = forced ?? R(0, STAGES.Length - 1);
+			int si = forced ?? StageIndexOf(RollLabelTable(ref _stageRows, "Cleo_TerraFirma_WarrenStage",
+				new[] { "working", "camp", "flourishing" }));
 			int wanted = si, degraded = 0;
 
 			var band = LargestBand(g);
@@ -2779,9 +2843,8 @@ namespace Cleo.TerraFirma.Scripts
 
 			// occupancy: whole-site, three states (ruled 2026-08-18); per-pocket
 			// live flags kept so the held retreat gradient stays a one-function change
-			int oRoll = R(1, 100);
-			string occupancy = oRoll <= ABANDONED_PCT ? "abandoned"
-				: oRoll <= ABANDONED_PCT + RECLAIMED_PCT ? "reclaimed" : "in use";
+			string occupancy = RollLabelTable(ref _occupancyRows, "Cleo_TerraFirma_WarrenOccupancy",
+				new[] { "in use", "abandoned", "reclaimed" });
 
 			// ROUND 5 (2026-08-23, the stubby-site watch item fired: band 1051 built
 			// only 71 floor): waypoints must live in the MOUTH'S LOBE. Round 4 lets

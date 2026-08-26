@@ -85,6 +85,29 @@
 			<object Chance="15" Number="1" Blueprint="Cleo_TerraFirma_Rockhound" />
 		</group>
 	</population>
+	<!-- WARREN DIALS AS WEIGHTED CONFIG TABLES (2026-08-26, the last clean migration
+	     pair). The base game's own tables-as-config idiom (the PowerGridReplace family:
+	     rows are labels the roller interprets, not blueprints). Rolled by WarrenCarver
+	     with the CARVE SEED at the exact points the old constant draws sat, so zone
+	     determinism holds; edit weights freely, never the label spellings (the carve
+	     laws key on these exact strings, and an unknown label falls back loudly to the
+	     first row). Occupancy weights were ABANDONED_PCT 25 / RECLAIMED_PCT 20; the
+	     stage roll was uniform. -->
+	<population Name="Cleo_TerraFirma_WarrenOccupancy">
+		<group Name="Roll" Style="pickone">
+			<object Weight="55" Blueprint="in use" />
+			<object Weight="25" Blueprint="abandoned" />
+			<object Weight="20" Blueprint="reclaimed" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenStage">
+		<group Name="Roll" Style="pickone">
+			<object Weight="1" Blueprint="working" />
+			<object Weight="1" Blueprint="camp" />
+			<object Weight="1" Blueprint="flourishing" />
+		</group>
+	</population>
+
 	<!-- PER-STAGE CREW TABLES (2026-08-26, the stage-scaling migration; overseer-as-row
 	     rides the USER-RULED override of the no-blueprint ruling, same day). PopulateSite
 	     picks the table by the rolled stage: prosperity buys population per the 0-2
