@@ -296,15 +296,16 @@
        animal; the Husangeion pet (XML/Pets.xml) re-parents onto it only AFTER this blueprint
        verifies in game. Basin = the creature's own unsealed tank, trending brackish via the salt
        producer (LiquidProducer.IsNeeded self-stops at full, decomp-verified); glaze lies per the
-       2026-08-11 ruling, VesselTint stays majority-liquid. Cistern = real worn equipment in the
-       Gut Cistern slot, drops sealed on death. Flee shape: stock farm-prey idiom only (base has
-       no flee flag; recon 2026-08-26), watch it in game before adding anything. ALL STATS AND
-       RATES DRAFT, numbers sitting owed. Description DRAFT PLACEHOLDER, the user claimed the
-       wild text themself. ExcludeFromDynamicEncounters per the creatures-branch charter; spawn
-       wiring is its own future ruling. -->
+       2026-08-11 ruling, VesselTint stays majority-liquid. Cistern = real worn equipment on the
+       plain Body slot, unremovable via NaturalEquipment (USER RULED 2026-08-26, superseding the
+       custom bodyparttype + anatomy, both deleted); drops sealed on death. Flee shape: stock
+       farm-prey idiom only (base has no flee flag; recon 2026-08-26), watch it in game before
+       adding anything. ALL STATS AND RATES DRAFT, numbers sitting owed. Description DRAFT
+       PLACEHOLDER, the user claimed the wild text themself. ExcludeFromDynamicEncounters per
+       the creatures-branch charter; spawn wiring is its own future ruling. -->
   <object Name="Cleo_TerraFirma_BaseBoarVessel" Inherits="BaseAnimal">
     <part Name="Brain" Hostile="false" Factions="Swine-100,Prey-100" /> <!-- base Boar idiom + Prey-100 per user soft pick 2026-08-11 -->
-    <part Name="Body" Anatomy="Cleo_TerraFirma_BaseBoarVessel" /> <!-- pet layout + Gut Cistern slot, XML/Bodies.xml -->
+    <part Name="Body" Anatomy="Cleo_TerraFirma_BoarVessel" /> <!-- the pet's own anatomy, shared; see XML/Bodies.xml -->
     <part Name="Render" DisplayName="boar vessel" Tile="boar vessel.png" RenderString="b" ColorString="&amp;w" DetailColor="B" />
     <part Name="Description" Short="A pot in the rough shape of a sow grazes on nothing in particular. Brine sloshes in the open bowl of its back, and whatever once tended these herds has been gone a long time." /> <!-- DRAFT PLACEHOLDER, user-claimed text; swap wholesale at signoff -->
     <part Name="LiquidVolume" MaxVolume="64" Volume="64" StartVolume="1d33-1" InitialLiquid="water-800,salt-200" ManualSeal="true" /> <!-- basin; pet tank shape, brackish start mix DRAFT -->

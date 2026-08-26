@@ -249,21 +249,31 @@ Perishes when unequipped." />
 		<tag Name="DynamicObjectsTable:Trinkets" /> <!-- SPAWN WIRED 2026-08-22: rides the crayon trinket pools via merges -->
 	</object>
 	<!-- GUT CISTERN (boar-vessel workstream 2026-08-26): sealed internal fresh-water tank worn
-	     in the Gut Cistern slot (XML/Bodies.xml). Ruled shape: two LiquidProducers, zero C#;
-	     this one trickles pure fresh water into itself (producers tick on carried items, proven
-	     by our own take-stones Temporary bug). Sealed idiom = base Clue_BulgingWaterskin
-	     (Items.xml ~12605). WaterContainer chassis brings LeakWhenBroken free: a cracked cistern
-	     weeps its cargo. Drops with the creature on death, sealed; that drop IS the loot.
+	     on the plain Body slot, unremovable (USER RULED 2026-08-26: Body-slot item that can't
+	     be removed, no custom anatomy; then "a gut cistern is basically a natural weapon", and
+	     the recon agreed). NaturalEquipment = the engine's own organ grammar: forced-only
+	     unequip, no charge baggage (decomp; Cursed rejected as an IActivePart with power
+	     machinery). DELIBERATE OMISSIONS: no NaturalGear tag (Brain.CleanNaturalGear obliterates
+	     unequipped naturals from inventory at reequip, would eat the loot), no IsReal=false, no
+	     Natural intproperty; the item stays REAL so the death drop survives. Auto-equip rides
+	     the same PerformReequip path that arms every base boar's gore from inventoryobject.
+	     Ruled liquid shape: two LiquidProducers, zero C#; this one trickles pure fresh water
+	     into itself (producers tick on carried items, proven by our own take-stones Temporary
+	     bug). Sealed idiom = base Clue_BulgingWaterskin (Items.xml ~12605). WaterContainer
+	     chassis brings LeakWhenBroken free: a cracked cistern weeps its cargo. Drops with the
+	     creature on death, sealed; that drop IS the loot. PLAYER TRAP FLAGGED: a looted cistern
+	     equipped on a player's Body slot is also permanent; the description carries the tell.
 	     RATE and MaxVolume DRAFT and load-bearing (the money number), numbers sitting owed.
 	     Description DRAFT, signoff owed. Tile inherits the waterskin sprite, sprite debt filed. -->
 	<object Name="Cleo_TerraFirma_GutCistern" Inherits="WaterContainer">
 		<part Name="Render" DisplayName="gut cistern" ColorString="&amp;w" DetailColor="B" />
 		<part Name="Physics" Organic="true" Weight="5" />
 		<part Name="LiquidVolume" MaxVolume="16" Volume="0" StartVolume="0" InitialLiquid="water-1000" Sealed="true" />
-		<part Name="Armor" WornOn="Gut Cistern" />
+		<part Name="Armor" WornOn="Body" />
+		<part Name="NaturalEquipment" />
 		<part Name="LiquidProducer" Liquid="water" FillSelfOnly="true" VariableRate="1000-4000" WorksOnWearer="false" WorksOnSelf="true" />
 		<part Name="Commerce" Value="15" />
-		<part Name="Description" Short="A clay bladder rides where a stomach would go, warm and faintly sweating. Something inside strains the salt from what the body carries and hoards the fresh water for itself." /> <!-- DRAFT, signoff owed -->
+		<part Name="Description" Short="A clay bladder rides where a stomach would go, warm and faintly sweating. Something inside strains the salt from what the body carries and hoards the fresh water for itself. Once a body takes it in, it does not come back out." /> <!-- DRAFT, signoff owed -->
 		<tag Name="Tier" Value="1" />
 	</object>
 </objects>
