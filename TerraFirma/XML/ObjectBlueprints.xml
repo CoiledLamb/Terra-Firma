@@ -170,6 +170,21 @@
     <part Name="Physics" Takeable="false" Weight="500" />
   </object>
 
+  <!-- WARREN BASKETS (port debt paid 2026-08-26; the two tables are USER-RULED 2026-08-18:
+       "we could make our own pop tables - one for stones (baskets of earth), and one for
+       canyon specific preserved foods (yuckwheat, starapples jam, boar jerky)"). The
+       Preserved Food Basket idiom exactly (base Furniture.xml:4001): inherit Woven Basket,
+       add one InventoryPopulationTable tag; GameObjectFactory fills the inventory from the
+       named table at spawn (engine rng, same as vase glazes rolling per spawn). Render and
+       name stay the plain basket's on purpose: which basket it is, you learn by opening it.
+       Contents tables live in PopulationTables.xml beside the warren dress tables. -->
+  <object Name="Cleo_TerraFirma_Stone Basket" Inherits="Woven Basket">
+    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_StoneBasket Contents" />
+  </object>
+  <object Name="Cleo_TerraFirma_Food Basket" Inherits="Woven Basket">
+    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_FoodBasket Contents" />
+  </object>
+
   <!-- QUARRY CHEST (gear sitting 2026-08-23; user ruling: "making it a generalized loot table
        that merchant tables and chests can roll makes sense"). The MiningGear consumer for
        PLACED loot: a Chest variant whose inventory rolls the table, on the ChestBronzeIngots

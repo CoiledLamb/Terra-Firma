@@ -1573,7 +1573,8 @@ namespace Cleo.TerraFirma.Scripts
 		// dials are the sim's verbatim (warren-lab-v2.html dressSite; v1
 		// provenance markers live there). Deliberately NOT ported, flagged loud:
 		// commons pre-etched walls (Part_Etchable integration gets its own look),
-		// basket contents poptables (baskets place empty), catch basin (no confirmed
+		// basket contents poptables (DEBT PAID 2026-08-26: Stone/Food Basket child
+		// blueprints fill themselves via InventoryPopulationTable), catch basin (no confirmed
 		// base blueprint name; dropped from the liquid pool), cold-brazier and
 		// cold-firedish art (light parts stripped; sprite may still read lit).
 		private class Row { public int Wt; public string Id, Hint; public Row(int w, string id, string hint = null) { Wt = w; Id = id; Hint = hint; } }
@@ -1601,7 +1602,24 @@ namespace Cleo.TerraFirma.Scripts
 		private static Row[] T_NATURAL => _tNatural ?? (_tNatural = LoadDressTable("Natural"));
 		private static Row[] T_PLAINTRACE => _tPlainTrace ?? (_tPlainTrace = LoadDressTable("PlainTrace"));
 		private static Row[] T_HALLTABLE => _tHallTable ?? (_tHallTable = LoadDressTable("HallTable"));
-		private static readonly HashSet<string> SOLID_ITEMS = new HashSet<string> { "Random Stone Statue", "Village Monument Stele", "LargeBoulder" };
+		// SOLIDITY IS READ OFF THE BLUEPRINT (2026-08-26, replacing a hardcoded
+		// three-name set): Physics Solid= is the engine's own truth, and blueprint
+		// Parts are inheritance-baked at load (ObjectBlueprintLoader.Bake merges
+		// parent node attributes into the child; GameObjectFactory.CreateObject
+		// instantiates from that same flattened collection), so the statues resolve
+		// Solid=true through Random Statue / Village Monument. Closes the gap the
+		// migration opened: a user-authored table row that is solid furniture now
+		// gets the articulation guard automatically instead of bypassing a list it
+		// was never in. Directive ids (chalkline*, yardboard, firedish_cold) have
+		// no blueprint and read not-solid, as before.
+		private static readonly Dictionary<string, bool> _solidCache = new Dictionary<string, bool>();
+		private static bool IsSolidItem(string id)
+		{
+			if (id == null) return false;
+			if (!_solidCache.TryGetValue(id, out bool s))
+				_solidCache[id] = s = GameObjectFactory.Factory.GetBlueprint(id)?.GetPartParameter("Physics", "Solid", false) ?? false;
+			return s;
+		}
 		private static Dictionary<string, string[]> _roomPools;
 		private static Dictionary<string, string[]> ROOMPOOLS => _roomPools ?? (_roomPools = new Dictionary<string, string[]>
 		{
@@ -1701,7 +1719,7 @@ namespace Cleo.TerraFirma.Scripts
 			var placed = new Dictionary<string, int>();
 			int items = 0, tableItems = 0, refused = 0, topups = 0;
 			var misses = new List<(Row[] tbl, PocketRec p, List<int[]> cs)>();
-			bool SolidItem(int i) => g.Item[i] != null && SOLID_ITEMS.Contains(g.Item[i]);
+			bool SolidItem(int i) => IsSolidItem(g.Item[i]);
 			bool IsFree(int i) => g.C[i] == FLOOR && g.Item[i] == null && g.Art[i] == 0 && g.Water[i] == 0 && g.Tree[i] == 0 && i != g.MouthIdx;
 			// v1's articulation guard: a solid item only lands where removing the
 			// cell keeps its floor neighbours mutually reachable
@@ -1765,7 +1783,7 @@ namespace Cleo.TerraFirma.Scripts
 				string item = rolled, hint = null;
 				int bar = rolled.IndexOf('|');
 				if (bar >= 0) { hint = rolled.Substring(bar + 1); item = rolled.Substring(0, bar); }
-				bool solid = SOLID_ITEMS.Contains(item);
+				bool solid = IsSolidItem(item);
 				bool Legal(int[] c2) => IsFree(g.Idx(c2[0], c2[1])) && !Threshold(p, c2[0], c2[1]) && (!solid || SolidOK(c2[0], c2[1]));
 				int[] c = null;
 				if (hint == "face")
@@ -1883,7 +1901,7 @@ namespace Cleo.TerraFirma.Scripts
 						if (pool.Contains("Oven") && placed.ContainsKey("Oven")) pool = pool.Where(i2 => i2 != "Oven").ToArray();
 						string item = pool[R(0, pool.Length - 1)];
 						if (item == "Chest") { if (roomChests >= 1) item = "Woven Basket"; else roomChests++; }
-						bool solid = SOLID_ITEMS.Contains(item);
+						bool solid = IsSolidItem(item);
 						bool Legal(int[] c2) => IsFree(g.Idx(c2[0], c2[1])) && !Threshold(p, c2[0], c2[1]) && (!solid || SolidOK(c2[0], c2[1]));
 						var cands = cs.Where(c2 =>
 						{
@@ -2080,7 +2098,7 @@ namespace Cleo.TerraFirma.Scripts
 					int benchY = -1;
 					if (Chance(.75)) { Put(g.Idx(wx, iy0), "Workbench"); benchY = iy0; }
 					if (working && benchY >= 0 && iy0 + 1 <= iy1 && Chance(.7)) Put(g.Idx(wx, iy0 + 1), "Canvas Folding Chair");
-					if (working && Chance(.75) && FreeI(g.Idx(wx, iy1))) Put(g.Idx(wx, iy1), "Woven Basket");
+					if (working && Chance(.75) && FreeI(g.Idx(wx, iy1))) Put(g.Idx(wx, iy1), "Cleo_TerraFirma_Stone Basket");
 				}
 				// THE YARD LEDGER (USER 2026-08-23: a chalkboard as a likely roll,
 				// "chalked with a date of arrival, and if they've left, a date of
@@ -2263,7 +2281,7 @@ namespace Cleo.TerraFirma.Scripts
 				for (int t = 0; t < 8 && natFloors.Count > 0; t++)
 				{
 					int pi = R(0, natFloors.Count - 1), ci = natFloors[pi];
-					if (SOLID_ITEMS.Contains(it) && !SolidOK(ci % g.W, ci / g.W)) { refused++; continue; }
+					if (IsSolidItem(it) && !SolidOK(ci % g.W, ci / g.W)) { refused++; continue; }
 					natFloors.RemoveAt(pi);
 					if (g.Item[ci] == null) Put(ci, it);
 					break;

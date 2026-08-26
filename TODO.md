@@ -1184,7 +1184,8 @@ tables - one for stones (baskets of earth), and one for canyon specific preserve
   in workrooms, and it replaced the yard's work-column basket) and `basket_food` (canyon
   preserves: yuckwheat, starapple jam, boar jerky - in the storage pool, so kitchens and
   dwellings pantry up). **PORT DEBT: two PopulationTables.xml entries; exact food blueprint
-  names verified against Items.xml at port, not invented.**
+  names verified against Items.xml at port, not invented. (PAID 2026-08-26 at the poptable
+  migration follow-up sitting; see that entry's basket record.)**
 - **Stool** joined seating (sw_stool + low variant, the humble work seat) · **Kiln** joined
   crafts (sw_kiln, the stone trades) and stamps 1-2 of the mod's own **quarrybricks** beside it
   (the cluster idiom the hookah-circle uses; 11 of 12 kilns paired in measure). Weapon rack and
@@ -1684,6 +1685,46 @@ obligation and full verification protocol spelled out in the brief.
     (items/site median ~40), no MODERROR, no `TerraFirma:` dress-load errors in Player.log,
     chalk claim lines still render directionally, cold dishes still read cold on dead
     sites.
+
+  **FOLLOW-UP SITTING 2026-08-26 (USER: "1 and 2 sound fine to implement" off the
+  what-else-migrates survey). Compile 0 errors, both XML strict-valid + text rules OK,
+  deployed hash-verified 3/3 (WarrenCarver.cs, PopulationTables.xml, ObjectBlueprints.xml),
+  `log-confirmed pending`.**
+  - **(1) BASKET CONTENTS, the 2026-08-18 PORT DEBT PAID.** Engine idiom copied exactly
+    from the base game (recon receipt: `Preserved Food Basket` is `Inherits="Woven Basket"`
+    plus one `InventoryPopulationTable` tag, base Furniture.xml:4001; consumer verified in
+    the decompile: `GameObjectFactory.CreateObject` reads the tag and calls
+    `EquipFromPopulationTable` at spawn). Two child blueprints in ObjectBlueprints.xml
+    (`Cleo_TerraFirma_Stone Basket` / `Cleo_TerraFirma_Food Basket`, render and name
+    inherited from the plain basket on purpose) + two contents tables in
+    PopulationTables.xml. Contents are the USER'S OWN 2026-08-18 words; blueprint names
+    verified against base Foods.xml, not invented: `Yuckwheat Stem` (:520), `Starapple
+    Preserves` (:681, the jam), `Boar Jerky` (:978). Numbers/chances CLAUDE DRAFT (pantry
+    rolls picked-over-empty ~1 in 20; `Copper Nugget` rides the stone basket at Chance 5
+    per the 2026-08-25 rare-table-spawn lean). Consumers swapped: Socket table basket row
+    and the Crafts pool row are stone baskets, the Storage pool's pantry row is the food
+    basket, the yard's work-column basket is stone; the one-chest downgrade stays a PLAIN
+    Woven Basket (a downgrade should not arrive with cargo - CLAUDE dial). This restores
+    the basket_stones/basket_food identity the migration had collapsed. Determinism note,
+    precedent already shipped: contents roll on the engine rng at spawn, exactly like vase
+    glazes; dress LAYOUT stays seed-pinned.
+  - **(2) SOLIDITY DERIVED FROM BLUEPRINTS, hardcoded SOLID_ITEMS set deleted.** The
+    articulation guard now asks the blueprint (`GetPartParameter("Physics", "Solid")`).
+    Recon that made it safe, all read: blueprint Parts are inheritance-baked at load
+    (`ObjectBlueprintLoader.Bake` merges parent node attributes into the child;
+    `CreateObject` instantiates from that same flattened collection, so the leaf lookup IS
+    engine truth - the naive read was nearly shipped before the bake was confirmed, the
+    accessor-time `ShallowParent` walks elsewhere were a false alarm). Ground truth per
+    blueprint: `LargeBoulder` Solid=true own-override (Items.xml:3076), both statue rows
+    resolve true through `Random Statue` (:5265) / `Village Monument` (:5606),
+    `Torchpost`/`Campfire`/`SmallBoulder` carry no Solid or false, so the lighting and
+    tense passes see NO behavior change and the current three solids stay solid:
+    behavior-identical today. What it buys: a user-authored XML table row that happens to
+    be solid furniture now gets the articulation guard automatically instead of bypassing
+    a list it was never in (the gap the migration opened).
+  - `[verify]` rides the migration sweep above, plus: open a stone basket (rocks, rare
+    nugget) and a dwelling pantry basket (yuckwheat/preserves/jerky, occasionally bare);
+    statues still never seal a room (articulation guard alive through the derived read).
 
 **BLIND-CLAIM PORTED, SCOUT RETIRED — USER RULED 2026-08-25 ("alright, i'll say go, let's
 try it"), BUILT + DEPLOYED same sitting; `log-confirmed pending` ON A FRESH EMBARK.**
