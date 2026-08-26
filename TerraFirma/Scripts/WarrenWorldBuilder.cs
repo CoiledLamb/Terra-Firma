@@ -132,11 +132,11 @@ namespace XRL.World.WorldBuilders
 			swClaim.Start();
 			int sited = 0, refusals = 0;
 			var builtByStage = new int[3];
-			void Fill(int slots, int stage)
+			int Fill(int slots, int stage)
 			{
 				foreach (var s in scored)
 				{
-					if (slots <= 0) return;
+					if (slots <= 0) break;
 					if (s.Used || s.Capacity < stage) continue;
 					s.Used = true;
 					WorldCreationProgress.StepProgress("Raising quarry warrens...");   // constant text: bar tick, no new row
@@ -146,10 +146,29 @@ namespace XRL.World.WorldBuilders
 					sited++;
 					slots--;
 				}
+				return slots;   // what this tier could not seat
 			}
-			Fill(fl, 2);
-			Fill(camp, 1);
-			Fill(working, 0);
+			// DEFICIT CASCADE (found by the capacity assert, second embark: quota
+			// rolled 6 fl against 5 capable and the unfilled slot evaporated -
+			// sited 24, UNDER TARGET). A tier that cannot fill hands its slots
+			// down; cascaded slots seat at min(capacity, camp) so the cascade can
+			// never mint extra flourishing (the headline rarity the quota caps).
+			int deficit = Fill(fl, 2) + Fill(camp, 1) + Fill(working, 0);
+			if (deficit > 0)
+			{
+				foreach (var s in scored)
+				{
+					if (deficit <= 0) break;
+					if (s.Used || s.Capacity < 0) continue;
+					s.Used = true;
+					WorldCreationProgress.StepProgress("Raising quarry warrens...");
+					var r = Claim(Builder, s, Math.Min(s.Capacity, 1));
+					if (r == null) { refusals++; continue; }
+					builtByStage[r.StageIdx]++;
+					sited++;
+					deficit--;
+				}
+			}
 			swClaim.Stop();
 			// the capacity assert: quota vs capability vs what actually stood up
 			Helpers.VerifyLog("WARREN",

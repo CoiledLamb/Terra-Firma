@@ -1565,6 +1565,15 @@ errors, deployed hash-verified 3/3.
       spam and the second cut's static freeze were the two failure modes either side of
       this). Timing line now carries "N of SCOUT_N 50 (adaptive exit)". Compile 0 errors,
       deployed hash-verified, `log-confirmed pending` next fresh embark.
+      - **ADAPTIVE EXIT LOG-CONFIRMED (embark 2): 31 of 50 scouts, premium 22s → 12.5s,
+        25 sited 0 refusals.** Then **embark 3 caught a REAL GAP via the capacity
+        assert: quota rolled 6 fl against 5 capable and the unfilled slot EVAPORATED -
+        sited 24, UNDER TARGET.** FIXED same sitting: DEFICIT CASCADE - a tier that
+        cannot fill hands its slots down, cascaded slots seat at min(capacity, camp) so
+        the cascade can never mint extra flourishing (the rarity the quota exists to
+        cap; camp-vs-working choice is a CLAUDE dial). Compile 0 errors, deployed
+        hash-verified, `log-confirmed pending` next embark: a stingy-fl world should now
+        read sited 25 with the deficit visible in the stage split.
 
 **YARD PLACEMENT: AREA DECIDES — USER FLOAT 2026-08-25 ("what if we improved blockyard
 placement a bit when there's lots of open space outside?", with an in-game screenshot of a
