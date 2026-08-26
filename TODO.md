@@ -1923,7 +1923,29 @@ obligation and full verification protocol spelled out in the brief.
   - **Laws kept in code:** occupancy picks the table, stage picks roll count and
     overseer chance, seat legality against the real zone, the outside-post radius, the
     overseer recipe (chassis + epithet builder; the parser's per-row `Builder=`
-    attribute is a possible future home, flagged unexplored). Distribution-equal with
+    attribute is a possible future home, flagged unexplored).
+  - **BUILDER= RECON, USER DOCKET 2026-08-26 ("let's recon the builder shape right
+    now"), all read not guessed:** the row attribute is REAL BUT ORPHANED engine-side -
+    `LoadPopulationObject` parses it, `Generate` carries it into the public
+    `PopulationResult.Builder`, but base PopulationTables.xml has ZERO authored uses
+    and the one consumer that receives it (`ZoneBuilderSandbox.PlaceObjectInArea`,
+    `string Builder` param) drops it on the floor: vestigial plumbing. The APPLICATION
+    machinery is healthy and public though: `GameObjectFactory.ApplyBuilder(obj,
+    GamePartBlueprint)` resolves a cached `IObjectBuilder` singleton (trivial contract:
+    `Initialize()` + `Apply(Object, Context)`) via `ModManager.ResolveType(namespace,
+    name)`; blueprint `<builder Name="RandomTile"/>` nodes use exactly this with
+    namespace `XRL.World.ObjectBuilders` (proven live in our QuarryStones blueprints).
+    NOTE the one-arg `ApplyBuilder(obj, string)` overload defaults the namespace to
+    `XRL.World.Parts` (`GamePartBlueprint(string)` ctor) - a bare-name call resolves in
+    the WRONG namespace; use the two-arg GamePartBlueprint. **VERDICT: overseer-as-row
+    is green in OUR architecture** - we are already our tables' consumer (the dress
+    precedent), so `PlaceTable` fires `entry.Builder` itself through the engine's
+    ApplyBuilder; the wrapper is ~10 lines (`Cleo_TerraFirma_Overseer : IObjectBuilder`
+    declared in namespace `XRL.World.ObjectBuilders`, the same convention our parts use
+    to resolve; Apply = StonecarverEpithet.Build; must stay stateless, builders are
+    cached singletons). Bonus: the identical class is instantly legal as a blueprint
+    `<builder>` node anywhere. UNBLOCKS clean-migration item (2), per-stage crew
+    tables with the overseer as a Chance= row. Distribution-equal with
     the pre-migration pass by construction (same rolls, same order, same percentages
     now read from XML).
   `[verify]` rides the population sweep above unchanged; additionally no `TerraFirma:`
