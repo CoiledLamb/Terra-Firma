@@ -233,14 +233,23 @@ namespace Cleo.TerraFirma.Scripts
 		}
 	}
 
-	/// <summary>XML-facing wrapper, so a blueprint can carry this the moment the roster lands
-	/// (`&lt;builder Class="Cleo_TerraFirma_StonecarverLegendary" /&gt;`). Nothing references it
-	/// yet -- the roster blueprints are still owed rulings.</summary>
+}
+
+namespace XRL.World.ObjectBuilders
+{
+	/// <summary>XML-facing wrapper: the goatfolk-hero idiom (GoatfolkHero1 precedent), carried
+	/// by the Cleo_TerraFirma_Overseer blueprint as `&lt;builder Name="Cleo_TerraFirma_
+	/// StonecarverLegendary" /&gt;`. MOVED into this namespace 2026-08-26: it was declared in
+	/// the mod namespace, and ModManager.ResolveType concatenates "XRL.World.ObjectBuilders."
+	/// plus the name with NO fallback search, so the old placement could never have resolved
+	/// from XML; the original "a blueprint can carry this" comment was an untested claim,
+	/// falsified at the overseer-as-blueprint recon. Stateless on purpose: builders are
+	/// cached singletons.</summary>
 	public class Cleo_TerraFirma_StonecarverLegendary : IObjectBuilder
 	{
-		public override void Apply(GameObject Object, string Context)
+		public override void Apply(XRL.World.GameObject Object, string Context)
 		{
-			StonecarverEpithet.Build(Object);
+			Cleo.TerraFirma.Scripts.StonecarverEpithet.Build(Object);
 		}
 	}
 }

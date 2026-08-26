@@ -1945,7 +1945,36 @@ obligation and full verification protocol spelled out in the brief.
     to resolve; Apply = StonecarverEpithet.Build; must stay stateless, builders are
     cached singletons). Bonus: the identical class is instantly legal as a blueprint
     `<builder>` node anywhere. UNBLOCKS clean-migration item (2), per-stage crew
-    tables with the overseer as a Chance= row. Distribution-equal with
+    tables with the overseer as a Chance= row.
+
+  **OVERSEER AS BLUEPRINT + PER-STAGE CREW TABLES — BUILT 2026-08-26 on the goatfolk
+  comparison (USER: "how does this compare to goatfolk heroes?" - answer: base heroes
+  ride blueprint-level `<builder>` nodes, base Creatures.xml:4715 `Goatfolk Hero 1`
+  carries `<builder Name="GoatfolkHero1"/>` and tables name it as a plain row; the
+  row-Builder= attribute is untouched even by the base game). RULING OVERRIDDEN, USER
+  2026-08-26 ("we can override the standing ruling, if it works better this way"):
+  the 2026-08-15 "the overseer got no blueprint" ruling is SUPERSEDED - the new
+  `Cleo_TerraFirma_Overseer` blueprint adds NO stats, no body, no gear (the chassis
+  wearing an on-switch), so "same blueprint, legendary" survives in spirit. Compile 0
+  errors, XML strict-valid + text rules OK, deployed hash-verified 4/4,
+  `log-confirmed pending`.**
+  - **Falsified-claim catch:** the dormant `Cleo_TerraFirma_StonecarverLegendary`
+    wrapper (written at the roster build, "XML-facing... nothing references it yet")
+    was declared in the MOD namespace, and `ModManager.ResolveType` concatenates
+    "XRL.World.ObjectBuilders." + name with no fallback - it could never have resolved
+    from XML. Moved into `XRL.World.ObjectBuilders`, comment corrected, first real
+    reference is the overseer blueprint.
+  - **Shape:** three `Cleo_TerraFirma_WarrenCrew Working/Camp/Flourishing` tables
+    (pack ref once, flourishing twice = the two shifts; overseer as `Chance="15/40/75"`
+    row with `Hint="Cleo_TerraFirma_Den:dwelling"` - the Den hint grew an optional
+    role, deepest-first within it). The OVERSEER_PCT and packRolls knobs died into the
+    tables; PopulateSite's in-use branch is now one table pick by stage. PlaceTable
+    also fires row-level `Builder=` through the engine's two-arg ApplyBuilder (the
+    orphaned attribute is live in our tables), and logs the overseer's rolled name off
+    the object. Determinism note: the overseer roll moved from seeded Chance() to the
+    ambient Generate lane where the rest of the crew already rolled.
+  `[verify]` rides the population sweep: overseer frequency reads ~15/40/75 by stage
+  over many sites, the overseer line carries a real byname, tfcarverpack unchanged. Distribution-equal with
     the pre-migration pass by construction (same rolls, same order, same percentages
     now read from XML).
   `[verify]` rides the population sweep above unchanged; additionally no `TerraFirma:`

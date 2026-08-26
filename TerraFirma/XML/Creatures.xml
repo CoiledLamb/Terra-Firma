@@ -169,6 +169,19 @@
        and the mole variants' display names. NO GEAR: kits are the next pass by the user's own
        sequencing, so a role currently carries its mutation and nothing else. -->
 
+  <!-- THE OVERSEER AS A BLUEPRINT (2026-08-26): the goatfolk-hero idiom exactly - base
+       "Goatfolk Hero 1" is a blueprint carrying <builder Name="GoatfolkHero1"/> and tables
+       name it as a plain row (base Creatures.xml:4715, PopulationTables.xml:4026). This
+       OVERRIDES the 2026-08-15 "the overseer got no blueprint" ruling - USER RULED
+       2026-08-26 ("we can override the standing ruling, if it works better this way").
+       The spirit survives: this child adds NO stats, no body, no gear - it is the chassis
+       wearing an on-switch, and any carver the builder touches still becomes an overseer.
+       What it buys: the overseer is an ordinary table row (Chance=, Hint=, even
+       ForceName-style builder params someday), spawnable by name from any wish or table. -->
+  <object Name="Cleo_TerraFirma_Overseer" Inherits="Cleo_TerraFirma_Stonecarver">
+    <builder Name="Cleo_TerraFirma_StonecarverLegendary" />
+  </object>
+
   <object Name="Cleo_TerraFirma_Hewer" Inherits="Cleo_TerraFirma_Stonecarver">
     <part Name="Render" DisplayName="quarry hewer" ColorString="&amp;r" /> <!-- "quarry x" naming, lean closed out as RULED 2026-08-23; mole variants inherit -->
     <part Name="Description" Short="=pronouns.Subjective= =verb:read:afterpronoun= the rock face the way a reader finds a paragraph break, and =pronouns.subjective= =verb:open:afterpronoun= it there." /> <!-- DRAFT, signoff owed -->

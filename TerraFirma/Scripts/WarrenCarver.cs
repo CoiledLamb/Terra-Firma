@@ -42,14 +42,16 @@ namespace Cleo.TerraFirma.Scripts
 		// the 0-2 payloads ruling (2026-08-17: "an abandoned warren could have
 		// nothing, while a flourishing large warren could have a legendary
 		// overseer and a merchant"). All numbers CLAUDE dials.
-		public static readonly int[] OVERSEER_PCT = { 15, 40, 75 };   // by stage: working/camp/flourishing
 		// Placement biases MIGRATED TO THE TABLES 2026-08-26 (user: "isn't there
 		// basegame precedent for doing something like this with population tables
 		// rather than cs?" - there is, ZoneBuilders.Population and the village
 		// Hint path both place creatures from tables): the trade/outside-post
-		// percentages ride Hint attributes on the pack table rows now, and the
-		// snapjaw count rides the WarrenReclaimers table's Number. The one knob
-		// left in code is a LAW of the interpreter, not a content dial:
+		// percentages ride Hint attributes on the pack table rows, the snapjaw
+		// count rides the WarrenReclaimers table's Number, and the stage scaling
+		// plus overseer chance ride the per-stage WarrenCrew tables (the overseer
+		// is a blueprint on the goatfolk-hero idiom now, USER-RULED override of
+		// the no-blueprint ruling same day). The one knob left in code is a LAW
+		// of the interpreter, not a content dial:
 		public const int OUTRIDER_POST_RADIUS = 8;    // how far from the mouth an outside post reaches
 		public const int MOSS_PCT = 35;           // mossPct (ported + dialed 2026-08-23)
 		public const int MOMENTUM = 55;           // momentum
@@ -3391,12 +3393,17 @@ namespace Cleo.TerraFirma.Scripts
 			bool SeatByHint(GameObject who, string hint)
 			{
 				var engineHints = new List<string>();
-				string trade = null; int tradePct = 100, outsidePct = -1; bool den = false;
+				string trade = null, denRole = null; int tradePct = 100, outsidePct = -1; bool den = false;
 				foreach (string raw in (hint ?? "").Split(','))
 				{
 					string t = raw.Trim();
 					if (t.Length == 0) continue;
-					else if (t == "Cleo_TerraFirma_Den") den = true;
+					else if (t.StartsWith("Cleo_TerraFirma_Den"))
+					{
+						den = true;
+						var parts = t.Split(':');
+						if (parts.Length >= 2) denRole = parts[1];
+					}
 					else if (t.StartsWith("Cleo_TerraFirma_Trade:"))
 					{
 						var parts = t.Split(':');
@@ -3414,7 +3421,7 @@ namespace Cleo.TerraFirma.Scripts
 					}
 					else engineHints.Add(t);
 				}
-				if (den) return Seat(who, pockets.OrderByDescending(p => p.DepthRank).ToList());
+				if (den) return Seat(who, denRole != null ? ByRole(denRole, deepFirst: true) : pockets.OrderByDescending(p => p.DepthRank).ToList());
 				if (trade != null && Chance(tradePct / 100.0))
 				{
 					if (outsidePct >= 0 && Chance(outsidePct / 100.0) && SeatOutsidePost(who)) { outposts++; return true; }
@@ -3426,6 +3433,7 @@ namespace Cleo.TerraFirma.Scripts
 					return true;
 				return SeatRandom(who, pockets) || Seat(who, pockets);
 			}
+			string overseerNote = "none rolled";
 			int PlaceTable(string table, Dictionary<string, int> census2)
 			{
 				int placed = 0;
@@ -3434,8 +3442,16 @@ namespace Cleo.TerraFirma.Scripts
 					{
 						var who = GameObject.Create(entry.Blueprint);
 						if (who == null) continue;
+						// row-level Builder= : orphaned engine plumbing our tables
+						// make live (fired through the engine's own ApplyBuilder;
+						// the one-arg overload resolves the WRONG namespace, so
+						// the explicit two-arg form). Blueprint-level builders
+						// (the overseer's) already ran inside Create.
+						if (!string.IsNullOrEmpty(entry.Builder))
+							GameObjectFactory.ApplyBuilder(who, new GamePartBlueprint("XRL.World.ObjectBuilders", entry.Builder));
 						if (!SeatByHint(who, entry.Hint)) { who.Obliterate(); continue; }
 						placed++;
+						if (entry.Blueprint == "Cleo_TerraFirma_Overseer") overseerNote = who.GetReferenceDisplayName();
 						if (census2 != null) census2[entry.Blueprint] = (census2.TryGetValue(entry.Blueprint, out int v) ? v : 0) + 1;
 					}
 				return placed;
@@ -3453,25 +3469,13 @@ namespace Cleo.TerraFirma.Scripts
 				Helpers.VerifyLog("WARREN", $"population: reclaimed, {denned} denned");
 				return;
 			}
-			// IN USE: the crew. Overseer first, so a cramped site still gets the
-			// thing worth looking at (the wish's own ordering).
-			string overseerNote = "none rolled";
-			if (Chance(OVERSEER_PCT[Math.Max(0, Math.Min(OVERSEER_PCT.Length - 1, r.StageIdx))] / 100.0))
-			{
-				var boss = GameObject.Create("Cleo_TerraFirma_Stonecarver");
-				if (boss != null)
-				{
-					var roll = StonecarverEpithet.Build(boss);
-					if (Seat(boss, ByRole("dwelling", deepFirst: true)))
-						overseerNote = $"{roll.PersonalName} {roll.Byname}";
-					else { boss.Obliterate(); overseerNote = "no seat"; }
-				}
-			}
+			// IN USE: the crew, whole, from the stage's own table - shift count
+			// and overseer chance are XML now, the overseer an ordinary row whose
+			// blueprint carries the epithet builder (goatfolk-hero idiom, the
+			// no-blueprint ruling overridden by the user 2026-08-26)
 			var census = new Dictionary<string, int>();
-			int carvers = 0;
-			int packRolls = r.StageIdx >= 2 ? 2 : 1;   // a flourishing dig runs two shifts
-			for (int roll2 = 0; roll2 < packRolls; roll2++)
-				carvers += PlaceTable("Cleo_TerraFirma_Stonecarver Pack", census);
+			string[] crewTables = { "Cleo_TerraFirma_WarrenCrew Working", "Cleo_TerraFirma_WarrenCrew Camp", "Cleo_TerraFirma_WarrenCrew Flourishing" };
+			int carvers = PlaceTable(crewTables[Math.Max(0, Math.Min(crewTables.Length - 1, r.StageIdx))], census);
 			Helpers.VerifyLog("WARREN", $"population: in use, stage {r.Stage}, overseer {overseerNote}, " +
 				$"{carvers} crew, {outposts} posted outside ({string.Join(", ", census.Select(kv => kv.Value + " " + kv.Key.Replace("Cleo_TerraFirma_", "")))})");
 		}
