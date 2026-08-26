@@ -291,4 +291,35 @@
     <tag Name="Role" Value="Minion" />
     <tag Name="ExcludeFromDynamicEncounters" />
   </object>
+  <!-- BOAR VESSEL, wild base (NAME RULED 2026-08-26, user: "boar over pig"; full design record
+       in TODO.md creature roster). INVERTED HIERARCHY ruling 2026-08-11: this base owns the
+       animal; the Husangeion pet (XML/Pets.xml) re-parents onto it only AFTER this blueprint
+       verifies in game. Basin = the creature's own unsealed tank, trending brackish via the salt
+       producer (LiquidProducer.IsNeeded self-stops at full, decomp-verified); glaze lies per the
+       2026-08-11 ruling, VesselTint stays majority-liquid. Cistern = real worn equipment in the
+       Gut Cistern slot, drops sealed on death. Flee shape: stock farm-prey idiom only (base has
+       no flee flag; recon 2026-08-26), watch it in game before adding anything. ALL STATS AND
+       RATES DRAFT, numbers sitting owed. Description DRAFT PLACEHOLDER, the user claimed the
+       wild text themself. ExcludeFromDynamicEncounters per the creatures-branch charter; spawn
+       wiring is its own future ruling. -->
+  <object Name="Cleo_TerraFirma_BaseBoarVessel" Inherits="BaseAnimal">
+    <part Name="Brain" Hostile="false" Factions="Swine-100,Prey-100" /> <!-- base Boar idiom + Prey-100 per user soft pick 2026-08-11 -->
+    <part Name="Body" Anatomy="Cleo_TerraFirma_BaseBoarVessel" /> <!-- pet layout + Gut Cistern slot, XML/Bodies.xml -->
+    <part Name="Render" DisplayName="boar vessel" Tile="boar vessel.png" RenderString="b" ColorString="&amp;w" DetailColor="B" />
+    <part Name="Description" Short="A pot in the rough shape of a sow grazes on nothing in particular. Brine sloshes in the open bowl of its back, and whatever once tended these herds has been gone a long time." /> <!-- DRAFT PLACEHOLDER, user-claimed text; swap wholesale at signoff -->
+    <part Name="LiquidVolume" MaxVolume="64" Volume="64" StartVolume="1d33-1" InitialLiquid="water-800,salt-200" ManualSeal="true" /> <!-- basin; pet tank shape, brackish start mix DRAFT -->
+    <part Name="Cleo_TerraFirma_VesselTint" EmptyColor="k" />
+    <part Name="LiquidProducer" Liquid="salt" FillSelfOnly="true" VariableRate="500-5000" WorksOnWearer="false" WorksOnSelf="true" /> <!-- salty fill over time; RATE DRAFT. Pet overrides this by part-name replacement at re-parent -->
+    <stat Name="Level" Value="1" />
+    <stat Name="AV" Value="3" /> <!-- DRAFT; base Boar AV 4 anchor, walks like a boar and breaks like a pot -->
+    <stat Name="Hitpoints" Value="15" /> <!-- DRAFT; base Boar 13 -->
+    <inventoryobject Blueprint="Cleo_TerraFirma_GutCistern" Number="1" /> <!-- ruled: real equipment auto-equipped into the anatomy slot, NOT DefaultBehavior; worn gear drops with contents -->
+    <tag Name="Species" Value="oddity" />
+    <tag Name="Gender" Value="neuterperson" />
+    <xtagTextFragments Skin="glaze" PoeticFeatures="artfulness,gentle stillness,childlike wonder" />
+    <tag Name="BleedLiquid" Value="water-900,salt-100" />
+    <tag Name="BleedColor" Value="&amp;B" />
+    <tag Name="BleedPrefix" Value="{{B|wet}}" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
 </objects>

@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <bodies>
+  <bodyparttypes>
+    <!-- Gut Cistern slot (boar-vessel workstream, 2026-08-26): internal organ slot that the
+         sealed cistern item equips into. Integral (dismemberment never takes it), Contact false
+         plus IgnorePosition (internal, not a surface; the Floating Nearby type is the precedent
+         for both flags), NoArmorAveraging so an AV 0 jar never dilutes body armor, ChimeraWeight
+         0 so chimeras never grow one. -->
+    <bodyparttype Type="Gut Cistern" Name="gut cistern" DescriptionPrefix="Worn in" Integral="true" Contact="false" IgnorePosition="true" NoArmorAveraging="true" ChimeraWeight="0" Branching="Stratal,Vertical,Longitudinal,Lateral" />
+  </bodyparttypes>
   <anatomies>
     <!-- The Hûskévos walks like a boar and breaks like a pot (user ruling 2026-08-06: inherit
          anatomy from Boar, keep vessel physical traits). Part layout is the base game's Quadruped
@@ -12,6 +20,26 @@
         <part Type="Face" />
       </part>
       <part Type="Back" />
+      <part Type="Foot" Laterality="Right Fore" SupportsDependent="Forefeet" />
+      <part Type="Foot" Laterality="Left Fore" SupportsDependent="Forefeet" />
+      <part Type="Foot" Laterality="Right Hind" SupportsDependent="Hindfeet" />
+      <part Type="Foot" Laterality="Left Hind" SupportsDependent="Hindfeet" />
+      <part Type="Missile Weapon" Laterality="Right" />
+      <part Type="Missile Weapon" Laterality="Left" />
+      <part Type="Feet" Laterality="Fore" DependsOn="Forefeet" Mobility="0" />
+      <part Type="Feet" Laterality="Hind" DependsOn="Hindfeet" Mobility="0" />
+      <part Type="Tail" />
+    </anatomy>
+    <!-- Wild boar vessel anatomy (2026-08-26): the pet layout above mirrored verbatim, plus the
+         Gut Cistern organ slot. The pet re-parents onto the wild base AFTER the wild form
+         verifies in game (build order ruled 2026-08-11); the pet's own anatomy above stays for
+         existing saves. -->
+    <anatomy Name="Cleo_TerraFirma_BaseBoarVessel" Category="Stone">
+      <part Type="Head">
+        <part Type="Face" />
+      </part>
+      <part Type="Back" />
+      <part Type="Gut Cistern" />
       <part Type="Foot" Laterality="Right Fore" SupportsDependent="Forefeet" />
       <part Type="Foot" Laterality="Left Fore" SupportsDependent="Forefeet" />
       <part Type="Foot" Laterality="Right Hind" SupportsDependent="Hindfeet" />
