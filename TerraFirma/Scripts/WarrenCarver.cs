@@ -44,6 +44,14 @@ namespace Cleo.TerraFirma.Scripts
 		// overseer and a merchant"). All numbers CLAUDE dials.
 		public static readonly int[] OVERSEER_PCT = { 15, 40, 75 };   // by stage: working/camp/flourishing
 		public const int SNAPJAW_MIN = 2, SNAPJAW_MAX = 4;            // reclaimed denners
+		// placement is a BIAS, not a law (USER FLAG 2026-08-26, screenshot of
+		// role-sorted clumps: "i think there should be biases on where they spawn,
+		// but intermingling is something that will be very easy to see, and make
+		// the camp feel more alive"). Roll under the bias = a random pocket of
+		// your trade; over it = anywhere. Dials CLAUDE.
+		public const int ROLE_BIAS_PCT = 55;          // chance a carver seats by trade
+		public const int OUTRIDER_OUTSIDE_PCT = 50;   // biased outriders may post OUTSIDE (user: "an outrider standing outside the quarry, patrolling the trail, makes sense")
+		public const int OUTRIDER_POST_RADIUS = 8;    // how far from the mouth an outside post reaches
 		public const int MOSS_PCT = 35;           // mossPct (ported + dialed 2026-08-23)
 		public const int MOMENTUM = 55;           // momentum
 		public const int WANDER = 22;             // wander
@@ -3268,14 +3276,15 @@ namespace Cleo.TerraFirma.Scripts
 
 		// ---------------------------------------------------------------- population
 		// THE SPAWN WIRING (USER DOCKET 2026-08-26): occupancy decides WHO, the
-		// stage axis decides HOW MUCH, pocket roles decide WHERE. In-use sites get
-		// the rank-and-file pack (Cleo_TerraFirma_Stonecarver Pack, the table that
-		// waited on this ruling) placed by trade - hewers at the faces, masons in
-		// the commons, outriders toward the mouth - plus a stage-chanced overseer
-		// on the tfcarverpack recipe: plain chassis through the epithet builder,
-		// seated in the deepest dwelling. Reclaimed sites get snapjaw miners
-		// denned deep beside the crude fires the tense pass already lights.
-		// Abandoned sites get nobody, per the 0-2 payloads ruling's floor.
+		// stage axis decides HOW MUCH, pocket roles BIAS where (user flag same
+		// day: biases, not sorting - trades lean where they work and still
+		// intermingle; see the bias-seating block). In-use sites get the
+		// rank-and-file pack (Cleo_TerraFirma_Stonecarver Pack, the table that
+		// waited on this ruling) plus a stage-chanced overseer on the
+		// tfcarverpack recipe: plain chassis through the epithet builder, seated
+		// in the deepest dwelling. Reclaimed sites get snapjaw miners denned deep
+		// beside the crude fires the tense pass already lights. Abandoned sites
+		// get nobody, per the 0-2 payloads ruling's floor.
 		// Creature MIX rolls the engine's ambient rng (PopulationManager.Generate,
 		// the wish's own path); cell picks ride the carve seed. Zones build once,
 		// so the split is cosmetic; noted for honesty.
@@ -3357,8 +3366,48 @@ namespace Cleo.TerraFirma.Scripts
 					else { boss.Obliterate(); overseerNote = "no seat"; }
 				}
 			}
+			// BIAS SEATING (user flag 2026-08-26, superseding the role-sorted first
+			// cut whose ordered walk packed each trade into one room): under the
+			// bias roll a carver takes a RANDOM pocket of its trade; over it,
+			// anywhere - so trades lean where they work and still intermingle.
+			// Outriders under bias may post OUTSIDE near the mouth instead, the
+			// trail watch the user called out as the read that makes sense.
+			bool SeatRandom(GameObject who2, List<PocketRec> cands)
+			{
+				var open = cands.ToList();
+				while (open.Count > 0)
+				{
+					int pi = R(0, open.Count - 1);
+					var p = open[pi]; open.RemoveAt(pi);
+					var cs = FreeCellsOf(p);
+					if (cs.Count == 0) continue;
+					var c = cs[R(0, cs.Count - 1)];
+					Z.GetCell(c[0], c[1]).AddObject(who2);
+					return true;
+				}
+				return false;
+			}
+			bool SeatOutsidePost(GameObject who2)
+			{
+				if (g.MouthIdx < 0) return false;
+				int mx = g.MouthIdx % g.W, my = g.MouthIdx / g.W;
+				var posts = new List<int>();
+				for (int y = Math.Max(0, my - OUTRIDER_POST_RADIUS); y <= Math.Min(g.H - 1, my + OUTRIDER_POST_RADIUS); y++)
+					for (int x = Math.Max(0, mx - OUTRIDER_POST_RADIUS); x <= Math.Min(g.W - 1, mx + OUTRIDER_POST_RADIUS); x++)
+					{
+						int i = g.Idx(x, y);
+						if (g.C[i] != FLOOR || g.Host[i] == 0 || g.Water[i] != 0) continue;
+						Cell c = Z.GetCell(x, y);
+						if (c == null || c.IsSolid() || c.HasObjectWithPart("Combat")) continue;
+						posts.Add(i);
+					}
+				if (posts.Count == 0) return false;
+				int pick = posts[R(0, posts.Count - 1)];
+				Z.GetCell(pick % g.W, pick / g.W).AddObject(who2);
+				return true;
+			}
 			var census = new Dictionary<string, int>();
-			int carvers = 0;
+			int carvers = 0, outposts = 0;
 			int packRolls = r.StageIdx >= 2 ? 2 : 1;   // a flourishing dig runs two shifts
 			for (int roll2 = 0; roll2 < packRolls; roll2++)
 			{
@@ -3368,19 +3417,29 @@ namespace Cleo.TerraFirma.Scripts
 					{
 						var who = GameObject.Create(entry.Blueprint);
 						if (who == null) continue;
-						List<PocketRec> prefer =
-							entry.Blueprint.Contains("Hewer") ? ByRole("face", deepFirst: true)
-							: entry.Blueprint.Contains("Mason") ? ByRole("commons", deepFirst: false)
-							: entry.Blueprint.Contains("Outrider") ? ByRole("plain", deepFirst: false)
-							: pockets.OrderBy(p => p.DepthRank).ToList();
-						if (!Seat(who, prefer)) { who.Obliterate(); continue; }
+						List<PocketRec> bias =
+							entry.Blueprint.Contains("Hewer") ? pockets.Where(p => p.Role == "face").ToList()
+							: entry.Blueprint.Contains("Mason") ? pockets.Where(p => p.Role == "commons").ToList()
+							: entry.Blueprint.Contains("Outrider") ? pockets.Where(p => p.Role == "plain").ToList()
+							: null;
+						bool roleBias = Chance(ROLE_BIAS_PCT / 100.0);
+						bool seated = false;
+						if (roleBias && entry.Blueprint.Contains("Outrider") && Chance(OUTRIDER_OUTSIDE_PCT / 100.0))
+						{
+							seated = SeatOutsidePost(who);
+							if (seated) outposts++;
+						}
+						if (!seated && roleBias && bias != null && bias.Count > 0) seated = SeatRandom(who, bias);
+						if (!seated) seated = SeatRandom(who, pockets);
+						if (!seated) seated = Seat(who, pockets);
+						if (!seated) { who.Obliterate(); continue; }
 						carvers++;
 						census[entry.Blueprint] = (census.TryGetValue(entry.Blueprint, out int v) ? v : 0) + 1;
 					}
 				}
 			}
 			Helpers.VerifyLog("WARREN", $"population: in use, stage {r.Stage}, overseer {overseerNote}, " +
-				$"{carvers} crew ({string.Join(", ", census.Select(kv => kv.Value + " " + kv.Key.Replace("Cleo_TerraFirma_", "")))})");
+				$"{carvers} crew, {outposts} posted outside ({string.Join(", ", census.Select(kv => kv.Value + " " + kv.Key.Replace("Cleo_TerraFirma_", "")))})");
 		}
 	}
 }

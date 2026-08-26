@@ -1864,12 +1864,22 @@ obligation and full verification protocol spelled out in the brief.
     the tfcarverpack recipe verbatim: plain `Cleo_TerraFirma_Stonecarver` chassis through
     `StonecarverEpithet.Build`, so name-drives-kit and the pink legendary paint arrive
     unchanged.
-  - **Pocket roles decide WHERE** (CLAUDE placement dials, the age-radiates-from-the-face
-    proposal's first partial use): hewers seat at FACES deep-first (they break rock),
-    masons in the COMMONS, outriders in PLAIN rooms mouth-ward (the watch), rockhound
-    anywhere shallow-first, overseer in the DEEPEST DWELLING. Every seat falls back to
-    any open pocket then any carved floor; a seatless creature is obliterated, not
-    stranded. Cells checked against the real zone (no walls, no combat objects, no water).
+  - ~~**Pocket roles decide WHERE**: hewers seat at FACES deep-first, masons in the
+    COMMONS, outriders in PLAIN rooms mouth-ward, overseer in the DEEPEST DWELLING~~
+    **SUPERSEDED same day, USER FLAG off a first-boot screenshot ("as is you get
+    situations like this - outriders packed together in one place, masons in another...
+    i think there should be biases on where they spawn, but intermingling is something
+    that will be very easy to see, and make the camp feel more alive"). The sorted walk
+    was the clump mechanism (ordered first-fit packed each trade into one room). NOW A
+    BIAS: `ROLE_BIAS_PCT` 55 (CLAUDE dial) - under it a carver takes a RANDOM pocket of
+    its trade (hewer/face, mason/commons, outrider/plain), over it anywhere; rockhound
+    always anywhere. OUTRIDERS UNDER BIAS may instead POST OUTSIDE near the mouth
+    (`OUTRIDER_OUTSIDE_PCT` 50, radius 8) - the trail-watch read the user endorsed
+    ("an outrider standing outside the quarry, patrolling the trail, makes sense").
+    Overseer keeps the deepest dwelling (single creature, no clump). Every seat still
+    falls back to any open pocket then any carved floor; a seatless creature is
+    obliterated, not stranded; cells checked against the real zone. Log line now carries
+    `N posted outside`.**
   - **Reception rides the blueprints:** chassis faction `Cleo_TerraFirma_Quarriers-100`
     (neutral at 0 rep per the faction entry), snapjaws arrive hostile because they are
     snapjaws. Kits ride the blueprints' own tables. Determinism note: creature MIX rolls
