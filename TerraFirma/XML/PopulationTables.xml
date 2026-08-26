@@ -416,4 +416,216 @@
 			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_Cobblefur Cloak" />
 		</group>
 	</population>
+
+	<!-- ================= WARREN DRESS TABLES (migrated from WarrenCarver.cs 2026-08-26;
+	     migration itself USER-GREENLIT 2026-08-25, dials CLAUDE unless struck) =================
+	     These tables are the warren dress system's DATA: which blueprint, what weight, what
+	     spatial hint. The placement LAWS (budgets, one oven per site, one chest per room,
+	     articulation guard, re-roll floors, cluster stamps) stay in WarrenCarver.cs, which is
+	     the ONLY consumer of these tables. It reads them through PopulationManager's parsed
+	     structures and rolls with the carver's own zone-seeded RNG, so warren rebuilds stay
+	     deterministic; the engine's Generate path (ambient RNG, Stat.NextULong in
+	     XRL.PopulationList.Generate) is deliberately not used.
+	     Idioms, all verified in base PopulationTables.xml and the decompile:
+	     - Blueprint="*None" is the engine's weighted nothing row (base PopulationTables.xml:6852,
+	       PowerGridReplace); the roller interprets the sentinel, nothing spawns.
+	     - Hint vocabulary is the engine's own, consumed in our case by WarrenCarver.Seat:
+	       Center matches ZoneBuilderSandbox.PlaceObjectInArea's Center (the area centroid);
+	       Cleo_TerraFirma_Face is OUR hint (deepest cell from the mouth, the work face) with
+	       no engine equivalent, legal here because the engine never reads these tables.
+	     - Row ORDER is load-bearing for seed determinism: same seed walks rows in order.
+	       Reorder and every warren re-dresses (distribution identical, exact items drift).
+	     Weights carry their provenance from the C# tables' comments, copied across verbatim
+	     where they existed. Editing weights or adding rows here needs NO recompile.
+	     SIM MIRROR: design/warren-lab-v2.html keeps its own JS copies (DRESS, ROOMPOOLS,
+	     NATURAL, PLAINTRACE, HALLTABLE + the ITEMS art table, in sim ids). THE SIM LEADS;
+	     when a sitting changes dress content, change the sim first and port here. -->
+
+	<!-- FACE sockets: one roll per ~30 floor cells. The first roll skips the nothing row
+	     in code (a face is never sterile, 2026-08-23 ruling); the weights are untouched.
+	     nugget row weight 1 (USER RULED 2026-08-25, weights delegated): quarry product
+	     tumbled free at the work face, rare on purpose, ~1 in 111 rolls. -->
+	<population Name="Cleo_TerraFirma_WarrenDress Socket">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="55" Blueprint="*None" />
+			<object Weight="18" Blueprint="Cleo_TerraFirma_QuarryStones1" />
+			<object Weight="8" Blueprint="Torch" Hint="Cleo_TerraFirma_Face" />
+			<object Weight="5" Blueprint="Pickaxe" Hint="Cleo_TerraFirma_Face" />
+			<object Weight="5" Blueprint="Garbage" />
+			<object Weight="2" Blueprint="Chest" />
+			<object Weight="4" Blueprint="Floor Cushion" />
+			<object Weight="3" Blueprint="Bedroll" />
+			<object Weight="2" Blueprint="Wine Pitcher" />
+			<object Weight="4" Blueprint="Woven Basket" />
+			<object Weight="2" Blueprint="Vase" />
+			<object Weight="2" Blueprint="Jug" />
+			<object Weight="1" Blueprint="Copper Nugget" />
+		</group>
+	</population>
+	<!-- COMMONS gallery: one roll per spur bay -->
+	<population Name="Cleo_TerraFirma_WarrenDress GalleryBay">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="50" Blueprint="*None" />
+			<object Weight="18" Blueprint="Random Stone Statue" />
+			<object Weight="12" Blueprint="LargeBoulder" />
+			<object Weight="10" Blueprint="Cleo_TerraFirma_QuarryStones2" />
+			<object Weight="5" Blueprint="Chest" />
+			<object Weight="5" Blueprint="Torch" />
+			<object Weight="6" Blueprint="Wine Pitcher" />
+		</group>
+	</population>
+	<!-- COMMONS gallery: one roll beside each pillar -->
+	<population Name="Cleo_TerraFirma_WarrenDress GalleryPillar">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="62" Blueprint="*None" />
+			<object Weight="20" Blueprint="Random Stone Statue" />
+			<object Weight="10" Blueprint="Torch" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_QuarryStones1" />
+			<object Weight="8" Blueprint="Bench" />
+			<object Weight="6" Blueprint="Floor Cushion" />
+		</group>
+	</population>
+	<!-- COMMONS gallery: one centerpiece roll on the whole floor -->
+	<population Name="Cleo_TerraFirma_WarrenDress GalleryFloor">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="47" Blueprint="*None" />
+			<object Weight="25" Blueprint="LargeBoulder" Hint="Center" />
+			<object Weight="15" Blueprint="Random Stone Statue" Hint="Center" />
+			<object Weight="5" Blueprint="Village Monument Stele" Hint="Center" />
+			<object Weight="8" Blueprint="Cleo_TerraFirma_FireDish" Hint="Center" />
+		</group>
+	</population>
+	<!-- NATURAL scatter: geology showing through the floor, corridors included.
+	     Fallen rock OUT of dress (USER RULED 2026-08-25 "replace it with basegame rocks"):
+	     Small Stone = the takeable pocket rock, SmallBoulder = the robbed-yard block remnant,
+	     so it reads chunkier. Picks CLAUDE dials, both verified (base Items.xml:3016/3049). -->
+	<population Name="Cleo_TerraFirma_WarrenDress Natural">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="55" Blueprint="*None" />
+			<object Weight="10" Blueprint="Small Stone" />
+			<object Weight="15" Blueprint="SmallBoulder" />
+			<object Weight="20" Blueprint="Cleo_TerraFirma_Rock_Pebbles" />
+		</group>
+	</population>
+	<!-- PLAIN rooms: human traces, the hall-table register; circulation rooms, not
+	     furnished ones. Size-scaled roll count lives in code (one per 24 floor, cap 3). -->
+	<population Name="Cleo_TerraFirma_WarrenDress PlainTrace">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="74" Blueprint="*None" />
+			<object Weight="10" Blueprint="Torch" Hint="Cleo_TerraFirma_Face" />
+			<object Weight="7" Blueprint="Garbage" />
+			<object Weight="5" Blueprint="Pickaxe" Hint="Cleo_TerraFirma_Face" />
+			<object Weight="3" Blueprint="Floor Cushion" />
+			<object Weight="2" Blueprint="Cider Vase" />
+		</group>
+	</population>
+	<!-- CORRIDORS: the sparsest table, one roll per non-artery segment. The chalk line row
+	     is a claim mark chalked against the passage wall; WarrenCarver picks the walled side
+	     and the directional piece itself. -->
+	<population Name="Cleo_TerraFirma_WarrenDress HallTable">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="74" Blueprint="*None" />
+			<object Weight="10" Blueprint="Torch" Hint="Cleo_TerraFirma_Face" />
+			<object Weight="7" Blueprint="Garbage" />
+			<object Weight="5" Blueprint="Pickaxe" Hint="Cleo_TerraFirma_Face" />
+			<object Weight="4" Blueprint="Cleo_TerraFirma_ChalkLine" />
+		</group>
+	</population>
+
+	<!-- ============ WARREN ROOM POOLS (dwelling furniture, uniform picks) ============
+	     Consumed by WarrenCarver.DressDwelling: the room-type recipes (which pool, how many,
+	     corner or wall or free placement) are LAWS and stay in code; these pools are the
+	     furniture vocabulary each recipe draws from. Rows default to Weight 1, i.e. a
+	     uniform pick, matching the migrated arrays; explicit Weight works and is respected.
+	     Duplicate-blueprint rows are deliberate where two sim ids landed on one blueprint. -->
+	<!-- brazier REMOVED (USER RULED 2026-08-23: "remove chrome braziers with the blue
+	     flames from the roll" - base Brazier is chrome + blue flame, wrong hands entirely).
+	     Fire dish substituted: CLAUDE dial, the mod's own light furniture, strikeable. -->
+	<population Name="Cleo_TerraFirma_WarrenPool Light">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Cleo_TerraFirma_FireDish" />
+			<object Blueprint="Torch" />
+		</group>
+	</population>
+	<!-- second basket row is the sim's pantry basket (basket_food, the canyon preserves
+	     idiom); both land as Woven Basket until basket contents get their own sitting -->
+	<population Name="Cleo_TerraFirma_WarrenPool Storage">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Chest" />
+			<object Blueprint="Woven Basket" />
+			<object Blueprint="Woven Basket" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenPool Seating">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Floor Cushion" />
+			<object Blueprint="Canvas Folding Chair" />
+			<object Blueprint="Kline" />
+			<object Blueprint="Bench" />
+			<object Blueprint="Stool" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenPool Sleep">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Bed" />
+			<object Blueprint="Bedroll" />
+			<object Blueprint="Folding Cot" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenPool Centre">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Table" />
+			<object Blueprint="Workbench" />
+		</group>
+	</population>
+	<!-- vases + clay jugs joined 2026-08-24 (USER: "let's add vases and clay jugs for
+	     variety"). Base Vase's own description places it in a canyon dweller's home-kiln;
+	     both carry RandomColors, so glaze variety rolls per spawn. Catch basin still out
+	     (no confirmed base blueprint name). Double Wine Pitcher row is deliberate: the sim
+	     had bg.wine_pitcher and pitcher_wine as separate entries on one blueprint. -->
+	<population Name="Cleo_TerraFirma_WarrenPool Liquid">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Wine Pitcher" />
+			<object Blueprint="Wine Pitcher" />
+			<object Blueprint="Cider Vase" />
+			<object Blueprint="Vase" />
+			<object Blueprint="Jug" />
+		</group>
+	</population>
+	<!-- the Woven Basket row here is the sim's basket_stones, a mason's rock hamper -->
+	<population Name="Cleo_TerraFirma_WarrenPool Crafts">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Workbench" />
+			<object Blueprint="Anvil" />
+			<object Blueprint="Pickaxe" />
+			<object Blueprint="Random Stone Statue" />
+			<object Blueprint="Cleo_TerraFirma_QuarryStones1" />
+			<object Blueprint="Cleo_TerraFirma_QuarryStones2" />
+			<object Blueprint="Cleo_TerraFirma_QuarryStones3" />
+			<object Blueprint="Cleo_TerraFirma_Random Stone Figurine" />
+			<object Blueprint="Woven Basket" />
+			<object Blueprint="Kiln" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenPool Hearth">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Oven" />
+			<object Blueprint="Campfire" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenPool Comfort">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Hookah" />
+		</group>
+	</population>
+	<!-- keepsake joined 2026-08-25 (USER: bracelets + nuggets as rare table spawns, leans
+	     delegated): a personal effect in a dwelling. Base Bracelet1/2/3 are the beaded
+	     trade goods bartered up the Svy. -->
+	<population Name="Cleo_TerraFirma_WarrenPool Keepsake">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Bracelet1" />
+			<object Blueprint="Bracelet2" />
+			<object Blueprint="Bracelet3" />
+		</group>
+	</population>
 </populations>

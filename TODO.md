@@ -1628,6 +1628,63 @@ one-oven, articulation, re-roll floors, cluster stamps) stay C#; recommended
 parse-and-roll-with-our-seed architecture preserves rebuild determinism; sim mirror
 obligation and full verification protocol spelled out in the brief.
 
+  **BUILT 2026-08-26 per the handoff (fresh-agent sitting; migration USER-greenlit
+  2026-08-25, every dial below CLAUDE unless struck). Compile 0 errors, strict XML load +
+  text-rules OK, deployed hash-verified 2/2 (WarrenCarver.cs, PopulationTables.xml),
+  `log-confirmed pending`.**
+  - **Recon receipts (the handoff's mandatory first obligation), all read not guessed:**
+    the engine hint consumer is `XRL.World.ZoneBuilders.ZoneBuilderSandbox.PlaceObjectInArea`
+    (area path, fed by `PlacePopulationInRegion` with each `PopulationResult.Hint`):
+    comma-separated hints each build a point set, points scoring highest overlap win.
+    Vocabulary read from the switch: `AlongWall` = any 8-adjacent wall · `InsideCorner` =
+    two orthogonal walls plus their shared diagonal, any-wall fallback · `Center` =
+    literally `A.GetCenter()` · `Adjacent:N` = N% chance the item must land cardinal-adjacent
+    to an already-placed same-blueprint object (cluster growth) · `LivesOnWalls`/`Aquatic` =
+    wall/open-liquid cells. Rect twin `PlaceObjectInRegionRect` carries the building vocab:
+    `AlongInsideWall` (rect border), `Interior`/`Inside` (rect interior), `OutsideDoor:n` =
+    points flanking the door n cells out on the front side. Read API:
+    `XRL.PopulationManager.ResolvePopulation(name)` returns the public parsed
+    `PopulationInfo` tree (mod XML merged by the engine loader). Determinism receipt:
+    `XRL.PopulationList.Generate` pickone rolls `Stat.NextULong` - the AMBIENT rng - so the
+    recommended architecture stands: resolve the parsed tree once, roll rows HERE with the
+    carver's zone-seeded R(). Nothing idiom: `*None` weighted sentinel inside pickone
+    (base PopulationTables.xml:6852, the PowerGridReplace family; lowercase
+    `Blueprint="nothing"` variant at :15021), sentinel interpreted by whoever rolls it -
+    here, us.
+  - **Shape landed:** 7 scatter tables (`Cleo_TerraFirma_WarrenDress Socket/GalleryBay/
+    GalleryPillar/GalleryFloor/Natural/PlainTrace/HallTable`) + 10 room pools
+    (`Cleo_TerraFirma_WarrenPool Light/Storage/Seating/Sleep/Centre/Liquid/Crafts/Hearth/
+    Comfort/Keepsake`) in the mod's PopulationTables.xml, weights verbatim, provenance
+    comments carried across. ROOMTYPES recipes (pool, count range, chance, corner/wall/
+    inside hint, first-flag) stay C# as laws per the handoff, which DISSOLVES most of the
+    hint-translation question: corner/wall/inside never reach XML. Only `Center` (engine
+    vocabulary, engine-matching semantics) and `Cleo_TerraFirma_Face` (our work-face hint,
+    no engine equivalent, legal custom data since only WarrenCarver reads these tables)
+    appear as Hint attributes.
+  - **CLAUDE calls flagged for strike-or-keep:** (1) the `BP` id-to-blueprint map DIED -
+    tables and law code both speak real blueprint names now, so an XML edit never needs a
+    recompile and a new table row needs no C# registration; the sim keeps its art-id layer
+    (mirror comments left on both sides; sim leads). (2) Three placement DIRECTIVES survive
+    as non-blueprint grid ids because they carry per-cell state: `chalkline*` (directional
+    tile), `yardboard` (chalk text), `firedish_cold` (part-stripped dish). The HallTable
+    XML row is the plain `Cleo_TerraFirma_ChalkLine` blueprint; the corridor law picks the
+    walled side and the directional piece. (3) Pools load as uniform single-draw picks with
+    Weight-N expanding to N slots - weightless rows reproduce the old arrays exactly,
+    authored weights are respected, duplicate rows (Storage's second basket = the sim's
+    pantry basket, Liquid's double Wine Pitcher) preserve the old per-entry odds. (4) An
+    unknown blueprint at placement is now a LOUD MetricsManager error with the cell left
+    bare; the old BP map skipped it silently. (5) Census/dress log ids renamed to blueprint
+    names (basket_stones/basket_food/bg.woven_basket all count as Woven Basket now) -
+    distribution comparisons against pre-migration sweeps must map old ids to new.
+  - **Determinism: seed-exact preserved by construction** - same roll order, same draw
+    count per decision, same array lengths (the duplicate-blueprint rows keep pool lengths
+    3 and 5), tables loaded lazily outside any roll sequence. Distribution-equal is the
+    verification bar; seed-exact is expected.
+  - `[verify]` tfwarrens sweep: `dress:` lines match pre-migration distributions
+    (items/site median ~40), no MODERROR, no `TerraFirma:` dress-load errors in Player.log,
+    chalk claim lines still render directionally, cold dishes still read cold on dead
+    sites.
+
 **BLIND-CLAIM PORTED, SCOUT RETIRED — USER RULED 2026-08-25 ("alright, i'll say go, let's
 try it"), BUILT + DEPLOYED same sitting; `log-confirmed pending` ON A FRESH EMBARK.**
 The full sim stack crossed: `BuildAugmented` ladder (real canyon first · polite thickening

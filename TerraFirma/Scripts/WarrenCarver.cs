@@ -1577,40 +1577,111 @@ namespace Cleo.TerraFirma.Scripts
 		// base blueprint name; dropped from the liquid pool), cold-brazier and
 		// cold-firedish art (light parts stripped; sprite may still read lit).
 		private class Row { public int Wt; public string Id, Hint; public Row(int w, string id, string hint = null) { Wt = w; Id = id; Hint = hint; } }
-		// nugget row weight 1 (USER RULED 2026-08-25, weights delegated): quarry
-		// product tumbled free at the work face - rare on purpose, ~1 in 110 rolls
-		private static readonly Row[] T_SOCKET = { new Row(55,null), new Row(18,"stack1"), new Row(8,"straytorch","face"), new Row(5,"pickaxe","face"), new Row(5,"trash"), new Row(2,"chest"), new Row(4,"bg.floor_cushion"), new Row(3,"bg.bedroll"), new Row(2,"pitcher_wine"), new Row(4,"basket_stones"), new Row(2,"bg.vase"), new Row(2,"bg.clay_jug"), new Row(1,"nugget") };
-		private static readonly Row[] T_GALLERYBAY = { new Row(50,null), new Row(18,"bg.random_stone_statue"), new Row(12,"largeboulder"), new Row(10,"stack2"), new Row(5,"chest"), new Row(5,"straytorch"), new Row(6,"pitcher_wine") };
-		private static readonly Row[] T_GALLERYPILLAR = { new Row(62,null), new Row(20,"bg.random_stone_statue"), new Row(10,"straytorch"), new Row(8,"stack1"), new Row(8,"bg.bench"), new Row(6,"bg.floor_cushion") };
-		private static readonly Row[] T_GALLERYFLOOR = { new Row(47,null), new Row(25,"largeboulder","center"), new Row(15,"bg.random_stone_statue","center"), new Row(5,"bg.village_monument_stele","center"), new Row(8,"firedish","center") };
-		private static readonly Row[] T_NATURAL = { new Row(55,null), new Row(10,"stone"), new Row(15,"loosestone"), new Row(20,"pebble") };
-		private static readonly Row[] T_PLAINTRACE = { new Row(74,null), new Row(10,"straytorch","face"), new Row(7,"trash"), new Row(5,"pickaxe","face"), new Row(3,"bg.floor_cushion"), new Row(2,"pitcher_cider") };
-		private static readonly Row[] T_HALLTABLE = { new Row(74,null), new Row(10,"straytorch","face"), new Row(7,"trash"), new Row(5,"pickaxe","face"), new Row(4,"chalkmark") };
-		private static readonly HashSet<string> SOLID_ITEMS = new HashSet<string> { "bg.random_stone_statue", "bg.village_monument_stele", "largeboulder" };
-		private static readonly Dictionary<string, string[]> ROOMPOOLS = new Dictionary<string, string[]>
+		// TABLE DATA MOVED TO XML 2026-08-26 (migration USER-greenlit 2026-08-25):
+		// the scatter tables and room pools live in TerraFirma/XML/PopulationTables.xml
+		// (Cleo_TerraFirma_WarrenDress * and Cleo_TerraFirma_WarrenPool *), weight
+		// provenance riding the XML comments. They are read ONCE through
+		// PopulationManager's parsed structures (XRL.PopulationInfo, mod XML merged
+		// by the engine loader) and rolled HERE with the carver's zone-seeded RNG.
+		// The engine's Generate path rolls Stat.NextULong (ambient RNG,
+		// XRL.PopulationList.Generate) and would un-pin rebuild determinism, so it
+		// is deliberately never called. Grid item ids are REAL BLUEPRINT NAMES now
+		// (the old BP indirection died with the migration); the few ids that are
+		// not blueprints are placement directives PlaceItems resolves itself
+		// (chalkline*, yardboard, firedish_cold). Placement laws all stay here.
+		// SIM MIRROR: design/warren-lab-v2.html keeps its own JS copies (DRESS,
+		// ROOMPOOLS, NATURAL, PLAINTRACE, HALLTABLE + the ITEMS art layer, in sim
+		// ids). THE SIM LEADS: dress content changes hit the sim first, then port.
+		private const string HINT_FACE = "Cleo_TerraFirma_Face";
+		private static Row[] _tSocket, _tGalleryBay, _tGalleryPillar, _tGalleryFloor, _tNatural, _tPlainTrace, _tHallTable;
+		private static Row[] T_SOCKET => _tSocket ?? (_tSocket = LoadDressTable("Socket"));
+		private static Row[] T_GALLERYBAY => _tGalleryBay ?? (_tGalleryBay = LoadDressTable("GalleryBay"));
+		private static Row[] T_GALLERYPILLAR => _tGalleryPillar ?? (_tGalleryPillar = LoadDressTable("GalleryPillar"));
+		private static Row[] T_GALLERYFLOOR => _tGalleryFloor ?? (_tGalleryFloor = LoadDressTable("GalleryFloor"));
+		private static Row[] T_NATURAL => _tNatural ?? (_tNatural = LoadDressTable("Natural"));
+		private static Row[] T_PLAINTRACE => _tPlainTrace ?? (_tPlainTrace = LoadDressTable("PlainTrace"));
+		private static Row[] T_HALLTABLE => _tHallTable ?? (_tHallTable = LoadDressTable("HallTable"));
+		private static readonly HashSet<string> SOLID_ITEMS = new HashSet<string> { "Random Stone Statue", "Village Monument Stele", "LargeBoulder" };
+		private static Dictionary<string, string[]> _roomPools;
+		private static Dictionary<string, string[]> ROOMPOOLS => _roomPools ?? (_roomPools = new Dictionary<string, string[]>
 		{
-			// brazier REMOVED (USER RULED 2026-08-23: "remove chrome braziers with
-			// the blue flames from the roll" - base Brazier is chrome + blue flame,
-			// wrong hands entirely). Fire dish substituted: CLAUDE dial, the mod's
-			// own light furniture, strikeable.
-			{ "light", new[]{ "firedish", "straytorch" } },
-			{ "storage", new[]{ "bg.chest", "bg.woven_basket", "basket_food" } },
-			{ "seating", new[]{ "bg.floor_cushion", "bg.canvas_folding_chair", "kline", "bg.bench", "stool" } },
-			{ "sleep", new[]{ "bg.bed", "bg.bedroll", "bg.folding_cot" } },
-			{ "centre", new[]{ "bg.table", "bg.workbench" } },
-			// vases + clay jugs joined 2026-08-24 (USER: "let's add vases and
-			// clay jugs for variety"). Base Vase's own description places it in
-			// a canyon dweller's home-kiln; both carry RandomColors, so glaze
-			// variety rolls per spawn. Catch basin still out (no confirmed name).
-			{ "liquid", new[]{ "bg.wine_pitcher", "pitcher_wine", "pitcher_cider", "bg.vase", "bg.clay_jug" } },
-			{ "crafts", new[]{ "bg.workbench", "bg.anvil", "pickaxe", "bg.random_stone_statue", "stack1", "stack2", "stack3", "stonefig", "basket_stones", "kiln" } },
-			{ "hearth", new[]{ "bg.oven", "bg.campfire" } },
-			{ "comfort", new[]{ "bg.hookah" } },
-			// keepsake joined 2026-08-25 (USER: bracelets + nuggets as rare table
-			// spawns, leans delegated): a personal effect in a dwelling. Base
-			// Bracelet1/2/3 are the beaded trade goods bartered up the Svy.
-			{ "keepsake", new[]{ "bracelet1", "bracelet2", "bracelet3" } },
-		};
+			{ "light", LoadDressPool("Light") },
+			{ "storage", LoadDressPool("Storage") },
+			{ "seating", LoadDressPool("Seating") },
+			{ "sleep", LoadDressPool("Sleep") },
+			{ "centre", LoadDressPool("Centre") },
+			{ "liquid", LoadDressPool("Liquid") },
+			{ "crafts", LoadDressPool("Crafts") },
+			{ "hearth", LoadDressPool("Hearth") },
+			{ "comfort", LoadDressPool("Comfort") },
+			{ "keepsake", LoadDressPool("Keepsake") },
+		});
+		// *None is the engine's weighted nothing row (base PopulationTables.xml:6852,
+		// PowerGridReplace idiom): the roller interprets the sentinel. "nothing" is
+		// the lowercase variant base tables also carry.
+		private static bool IsNothingRow(string bp)
+			=> bp == null || bp == "*None" || string.Equals(bp, "nothing", StringComparison.OrdinalIgnoreCase);
+		// XML hints arrive in the ENGINE's vocabulary (the same strings
+		// ZoneBuilderSandbox.PlaceObjectInArea consumes for village furnishing) and
+		// translate to Seat's internal keys. Cleo_TerraFirma_Face is our own hint,
+		// no engine equivalent; legal data because only this file reads the tables.
+		private static string TranslateHint(string h, string table)
+		{
+			if (h == null) return null;
+			if (h == HINT_FACE) return "face";
+			if (h == "Center") return "center";
+			MetricsManager.LogError("TerraFirma: unknown dress hint '" + h + "' in table '" + table + "' ignored (placement falls back to random)");
+			return null;
+		}
+		/// <summary>Rows of the one pickone list in a poptable: the population itself, or its first pickone group.</summary>
+		private static List<XRL.PopulationObject> ReadPopRows(string name)
+		{
+			var rows = new List<XRL.PopulationObject>();
+			var info = XRL.PopulationManager.ResolvePopulation(name, MissingOkay: true);
+			if (info == null) return rows;
+			XRL.PopulationList list = info;
+			if (!"pickone".Equals(list.Style, StringComparison.OrdinalIgnoreCase))
+				list = info.Items.OfType<XRL.PopulationGroup>().FirstOrDefault(gr => "pickone".Equals(gr.Style, StringComparison.OrdinalIgnoreCase));
+			if (list == null) return rows;
+			foreach (var item in list.Items)
+				if (item is XRL.PopulationObject po && !string.IsNullOrEmpty(po.Blueprint))
+					rows.Add(po);
+			return rows;
+		}
+		private static Row[] LoadDressTable(string shortName)
+		{
+			string name = "Cleo_TerraFirma_WarrenDress " + shortName;
+			var rows = new List<Row>();
+			foreach (var po in ReadPopRows(name))
+				rows.Add(new Row((int)Math.Min(po.Weight, int.MaxValue), IsNothingRow(po.Blueprint) ? null : po.Blueprint, TranslateHint(po.Hint, name)));
+			if (rows.Count == 0)
+			{
+				MetricsManager.LogError("TerraFirma: dress table '" + name + "' missing or empty; that register will roll nothing");
+				rows.Add(new Row(1, null));
+			}
+			return rows.ToArray();
+		}
+		// Pools stay uniform single-draw picks: a Weight N row expands to N slots,
+		// so weightless XML rows reproduce the migrated arrays exactly and an
+		// authored Weight is still respected. Nothing rows are a table concept,
+		// not a pool one; they get refused loudly rather than dropped silently.
+		private static string[] LoadDressPool(string shortName)
+		{
+			string name = "Cleo_TerraFirma_WarrenPool " + shortName;
+			var pool = new List<string>();
+			foreach (var po in ReadPopRows(name))
+			{
+				if (IsNothingRow(po.Blueprint)) { MetricsManager.LogError("TerraFirma: nothing row in pool '" + name + "' ignored (room recipes decide counts, pools only pick items)"); continue; }
+				long wt = Math.Min(po.Weight, 100);
+				for (long k = 0; k < wt; k++) pool.Add(po.Blueprint);
+			}
+			if (pool.Count == 0)
+			{
+				MetricsManager.LogError("TerraFirma: room pool '" + name + "' missing or empty; substituting Woven Basket");
+				pool.Add("Woven Basket");
+			}
+			return pool.ToArray();
+		}
 		private class RowSpec { public int N0, N1, Chance; public string Pool, Hint; public bool First; }
 		private class RoomType { public int Wt; public string Name; public RowSpec[] Rows; public double Density; }
 		private static RowSpec RS(int n0, int n1, string pool, string hint, int chance = 0, bool first = false)
@@ -1726,7 +1797,7 @@ namespace Cleo.TerraFirma.Scripts
 					c = ok[R(0, ok.Count - 1)];
 				}
 				Put(g.Idx(c[0], c[1]), item); tableItems++;
-				if (item == "trash" && !Chance(.55))
+				if (item == "Garbage" && !Chance(.55))
 				{
 					var pile = new List<int[]> { c };
 					int extra = R(1, 3);
@@ -1736,7 +1807,7 @@ namespace Cleo.TerraFirma.Scripts
 						var adj = cs.Where(a => Math.Abs(a[0] - ps[0]) <= 1 && Math.Abs(a[1] - ps[1]) <= 1 && IsFree(g.Idx(a[0], a[1]))).ToList();
 						if (adj.Count == 0) continue;
 						var nc = adj[R(0, adj.Count - 1)];
-						Put(g.Idx(nc[0], nc[1]), "trash"); pile.Add(nc);
+						Put(g.Idx(nc[0], nc[1]), "Garbage"); pile.Add(nc);
 					}
 				}
 				return true;
@@ -1809,9 +1880,9 @@ namespace Cleo.TerraFirma.Scripts
 					{
 						var pool = ROOMPOOLS[row.Pool];
 						// ONE OVEN PER SITE - an oven is built masonry, a camp builds one
-						if (pool.Contains("bg.oven") && placed.ContainsKey("bg.oven")) pool = pool.Where(i2 => i2 != "bg.oven").ToArray();
+						if (pool.Contains("Oven") && placed.ContainsKey("Oven")) pool = pool.Where(i2 => i2 != "Oven").ToArray();
 						string item = pool[R(0, pool.Length - 1)];
-						if (item == "bg.chest") { if (roomChests >= 1) item = "bg.woven_basket"; else roomChests++; }
+						if (item == "Chest") { if (roomChests >= 1) item = "Woven Basket"; else roomChests++; }
 						bool solid = SOLID_ITEMS.Contains(item);
 						bool Legal(int[] c2) => IsFree(g.Idx(c2[0], c2[1])) && !Threshold(p, c2[0], c2[1]) && (!solid || SolidOK(c2[0], c2[1]));
 						var cands = cs.Where(c2 =>
@@ -1827,10 +1898,10 @@ namespace Cleo.TerraFirma.Scripts
 						Put(g.Idx(c[0], c[1]), item); budget--; tableItems++;
 						// cluster stamps riding a centerpiece roll: the hookah-circle
 						// (user sketch, ruled) and the kiln's brick piles
-						if (item == "bg.hookah" || item == "kiln")
+						if (item == "Hookah" || item == "Kiln")
 						{
-							string orbit = item == "bg.hookah" ? "bg.floor_cushion" : "quarrybricks";
-							int kmax = item == "bg.hookah" ? R(2, 4) : R(1, 2);
+							string orbit = item == "Hookah" ? "Floor Cushion" : "Cleo_TerraFirma_QuarriedBlock";
+							int kmax = item == "Hookah" ? R(2, 4) : R(1, 2);
 							var slots = new List<int[]>();
 							foreach (var d in N4)
 							{
@@ -1974,7 +2045,7 @@ namespace Cleo.TerraFirma.Scripts
 				if (tpath != null && tpath.Count > 0)
 				{
 					var trailSet = new HashSet<int>(tpath);
-					foreach (int c2 in tpath) { g.Tree[c2] = 0; if (g.Item[c2] == null) Put(c2, "dirtpath"); }
+					foreach (int c2 in tpath) { g.Tree[c2] = 0; if (g.Item[c2] == null) Put(c2, "DirtPath"); }
 					int cairns = 0, until = R(3, 6);
 					for (int pi2 = 1; pi2 < tpath.Count; pi2++)
 					{
@@ -1992,7 +2063,7 @@ namespace Cleo.TerraFirma.Scripts
 						{
 							// tense pass: a living camp keeps its waystones stacked; a
 							// dead site lets some fall (50% toppled, CLAUDE dial)
-							Put(coi, occupancy != "in use" && Chance(.5) ? "cairn_toppled" : "cairn");
+							Put(coi, occupancy != "in use" && Chance(.5) ? "Cleo_TerraFirma_CairnToppled" : "Cleo_TerraFirma_Cairn");
 							cairns++;
 						}
 					}
@@ -2007,9 +2078,9 @@ namespace Cleo.TerraFirma.Scripts
 				if (state == "fresh" || working)
 				{
 					int benchY = -1;
-					if (Chance(.75)) { Put(g.Idx(wx, iy0), "bg.workbench"); benchY = iy0; }
-					if (working && benchY >= 0 && iy0 + 1 <= iy1 && Chance(.7)) Put(g.Idx(wx, iy0 + 1), "bg.canvas_folding_chair");
-					if (working && Chance(.75) && FreeI(g.Idx(wx, iy1))) Put(g.Idx(wx, iy1), "basket_stones");
+					if (Chance(.75)) { Put(g.Idx(wx, iy0), "Workbench"); benchY = iy0; }
+					if (working && benchY >= 0 && iy0 + 1 <= iy1 && Chance(.7)) Put(g.Idx(wx, iy0 + 1), "Canvas Folding Chair");
+					if (working && Chance(.75) && FreeI(g.Idx(wx, iy1))) Put(g.Idx(wx, iy1), "Woven Basket");
 				}
 				// THE YARD LEDGER (USER 2026-08-23: a chalkboard as a likely roll,
 				// "chalked with a date of arrival, and if they've left, a date of
@@ -2049,7 +2120,7 @@ namespace Cleo.TerraFirma.Scripts
 					if (x >= ix0 && x <= ix1)
 					{
 						int len = R(1, 2);
-						for (int k = 0; k < len; k++) { int i = g.Idx(x, iy0 + k); if (FreeI(i)) Put(i, "stack1"); }
+						for (int k = 0; k < len; k++) { int i = g.Idx(x, iy0 + k); if (FreeI(i)) Put(i, "Cleo_TerraFirma_QuarryStones1"); }
 					}
 					return;
 				}
@@ -2066,8 +2137,8 @@ namespace Cleo.TerraFirma.Scripts
 					for (int k = 0; k < len; k++)
 					{
 						int i = g.Idx(x, iy0 + k); if (!FreeI(i)) continue;
-						if (gaps && Chance(.5)) { if (Chance(.4)) Put(i, "loosestone"); continue; }
-						Put(i, "stack" + gi);
+						if (gaps && Chance(.5)) { if (Chance(.4)) Put(i, "SmallBoulder"); continue; }
+						Put(i, "Cleo_TerraFirma_QuarryStones" + gi);
 					}
 				}
 			}
@@ -2139,9 +2210,11 @@ namespace Cleo.TerraFirma.Scripts
 				if (bar >= 0) { hint = rolled.Substring(bar + 1); item = rolled.Substring(0, bar); }
 				var open = seg.Where(i2 => g.Item[i2] == null).ToList();
 				if (open.Count == 0) continue;
-				if (item == "chalkmark")
+				if (item == "Cleo_TerraFirma_ChalkLine")
 				{
-					// a claim mark chalked against the passage wall
+					// a claim mark chalked against the passage wall; the walled side
+					// picks the directional piece, so the table row's plain blueprint
+					// becomes a chalkline* directive here
 					var walled = new List<(int i, string id)>();
 					foreach (int i2 in open)
 					{
@@ -2165,7 +2238,7 @@ namespace Cleo.TerraFirma.Scripts
 				}
 				else ci = open[R(0, open.Count - 1)];
 				Put(ci, item);
-				if (item == "trash" && !Chance(.55))
+				if (item == "Garbage" && !Chance(.55))
 				{
 					int px2 = ci % g.W, py2 = ci / g.W;
 					int extra = R(1, 3);
@@ -2175,7 +2248,7 @@ namespace Cleo.TerraFirma.Scripts
 						if (!g.Inb(nx, ny)) continue;
 						int ni = g.Idx(nx, ny);
 						if (g.C[ni] == FLOOR && g.Host[ni] == 0 && g.Item[ni] == null && g.Water[ni] == 0 && ni != g.MouthIdx)
-						{ Put(ni, "trash"); px2 = nx; py2 = ny; }
+						{ Put(ni, "Garbage"); px2 = nx; py2 = ny; }
 					}
 				}
 			}
@@ -2245,7 +2318,7 @@ namespace Cleo.TerraFirma.Scripts
 							if (!g.Inb(f[0], f[1])) continue;
 							if (!inC.Contains(g.Idx(f[0], f[1])) || !IsFree(g.Idx(f[0], f[1]))) continue;
 							if (!PostOK(f[0], f[1])) continue;
-							Put(g.Idx(f[0], f[1]), "bg.torchpost"); posts.Add(new[] { f[0], f[1] });
+							Put(g.Idx(f[0], f[1]), "Torchpost"); posts.Add(new[] { f[0], f[1] });
 							pocketPosts++;
 							break;   // one flank per doorway - a lone flank is fine, the pair was the floodlight
 						}
@@ -2262,7 +2335,7 @@ namespace Cleo.TerraFirma.Scripts
 					{
 						bool hug = false;
 						foreach (var d in N4) if (g.Inb(m[0] + d[0], m[1] + d[1]) && g.C[g.Idx(m[0] + d[0], m[1] + d[1])] != FLOOR) hug = true;
-						if (hug) { Put(mi, "bg.torchpost"); break; }
+						if (hug) { Put(mi, "Torchpost"); break; }
 					}
 					if (m[2] < 2)
 						foreach (var d in N4)
@@ -2279,8 +2352,8 @@ namespace Cleo.TerraFirma.Scripts
 			if (occupancy != "in use")
 			{
 				var flip = new Dictionary<string, string> {
-					{ "bg.campfire", "campfire_remains" },
-					{ "bg.torchpost", "torchpost_unlit" }, { "firedish", "firedish_cold" }, { "straytorch", null } };
+					{ "Campfire", "Campfire Remains" },
+					{ "Torchpost", "Unlit Torchpost" }, { "Cleo_TerraFirma_FireDish", "firedish_cold" }, { "Torch", null } };
 				for (int i = 0; i < g.W * g.H; i++)
 				{
 					string it = g.Item[i];
@@ -2303,7 +2376,7 @@ namespace Cleo.TerraFirma.Scripts
 					var cs = CellsOf(p).Where(c2 => IsFree(g.Idx(c2[0], c2[1]))).ToList();
 					if (cs.Count == 0) continue;
 					var c = cs[R(0, cs.Count - 1)];
-					Put(g.Idx(c[0], c[1]), "bg.campfire"); fires--;
+					Put(g.Idx(c[0], c[1]), "Campfire"); fires--;
 				}
 			}
 			// trash scatter, all tenses; a dead site stops sweeping its road
@@ -2317,7 +2390,7 @@ namespace Cleo.TerraFirma.Scripts
 			{
 				int pi = R(0, tCells.Count - 1), ci = tCells[pi]; tCells.RemoveAt(pi);
 				if (g.Item[ci] != null) continue;
-				Put(ci, "trash");
+				Put(ci, "Garbage");
 				if (!Chance(.55))
 				{
 					int px2 = ci % g.W, py2 = ci / g.W;
@@ -2328,7 +2401,7 @@ namespace Cleo.TerraFirma.Scripts
 						if (!g.Inb(nx, ny)) continue;
 						int ni = g.Idx(nx, ny);
 						if (g.C[ni] == FLOOR && g.Host[ni] == 0 && g.Item[ni] == null && g.Water[ni] == 0 && ni != g.MouthIdx)
-						{ Put(ni, "trash"); px2 = nx; py2 = ny; }
+						{ Put(ni, "Garbage"); px2 = nx; py2 = ny; }
 					}
 				}
 			}
@@ -2358,41 +2431,15 @@ namespace Cleo.TerraFirma.Scripts
 			return $"{items} items, {tableItems} table, {topups} topups, {roomFloored} room-floored, {refused} solid-refused";
 		}
 
-		// sim item id -> real blueprint. Every name here is verified against Base
-		// or the mod's own XML; an unverified name is a MODERROR at spawn, so the
-		// unconfirmed ones were dropped or substituted (flags in the TODO entry).
-		private static readonly Dictionary<string, string> BP = new Dictionary<string, string>
-		{
-			{ "straytorch", "Torch" }, { "pickaxe", "Pickaxe" }, { "trash", "Garbage" },
-			{ "chest", "Chest" }, { "bg.chest", "Chest" },
-			{ "stack1", "Cleo_TerraFirma_QuarryStones1" }, { "stack2", "Cleo_TerraFirma_QuarryStones2" }, { "stack3", "Cleo_TerraFirma_QuarryStones3" },
-			{ "quarrybricks", "Cleo_TerraFirma_QuarriedBlock" },
-			{ "bg.random_stone_statue", "Random Stone Statue" }, { "bg.village_monument_stele", "Village Monument Stele" },
-			{ "bg.campfire", "Campfire" }, { "campfire_remains", "Campfire Remains" },
-			{ "bg.woven_basket", "Woven Basket" }, { "basket_stones", "Woven Basket" }, { "basket_food", "Woven Basket" },
-			{ "bg.floor_cushion", "Floor Cushion" }, { "bg.canvas_folding_chair", "Canvas Folding Chair" },
-			{ "bg.bed", "Bed" }, { "bg.bedroll", "Bedroll" }, { "bg.folding_cot", "Folding Cot" },
-			{ "bg.table", "Table" }, { "bg.workbench", "Workbench" },
-			{ "bg.animation_table", "Cleo_TerraFirma_AnimationTable" }, // sketch vocab reserved 2026-08-24; no sketch uses it yet
-
-			{ "bg.wine_pitcher", "Wine Pitcher" }, { "pitcher_wine", "Wine Pitcher" }, { "pitcher_cider", "Cider Vase" },
-			{ "bg.vase", "Vase" }, { "bg.clay_jug", "Jug" },
-			{ "bg.anvil", "Anvil" }, { "bg.oven", "Oven" }, { "bg.hookah", "Hookah" }, { "bg.bench", "Bench" },
-			{ "kline", "Kline" }, { "stool", "Stool" }, { "kiln", "Kiln" },
-			{ "bg.torchpost", "Torchpost" }, { "torchpost_unlit", "Unlit Torchpost" },
-			{ "firedish", "Cleo_TerraFirma_FireDish" }, { "firedish_cold", "Cleo_TerraFirma_FireDish" },
-			{ "stonefig", "Cleo_TerraFirma_Random Stone Figurine" }, { "figurine", "Random Figurine" },
-			{ "largeboulder", "LargeBoulder" },
-			// fallen rock OUT of dress (USER RULED 2026-08-25 "replace it with
-			// basegame rocks"): stone = the takeable pocket rock, loosestone =
-			// the robbed-yard block remnant, so it reads chunkier. Picks CLAUDE
-			// dials, both verified (Items.xml:3016 / 3049).
-			{ "stone", "Small Stone" }, { "loosestone", "SmallBoulder" }, { "pebble", "Cleo_TerraFirma_Rock_Pebbles" },
-			{ "cairn", "Cleo_TerraFirma_Cairn" }, { "cairn_toppled", "Cleo_TerraFirma_CairnToppled" }, { "dirtpath", "DirtPath" },   // trail port 2026-08-25; DirtPath IS the register (ZoneTerrain.xml:937)
-			{ "nugget", "Copper Nugget" },
-			{ "bracelet1", "Bracelet1" }, { "bracelet2", "Bracelet2" }, { "bracelet3", "Bracelet3" },
-		};
-
+		// The BP sim-id map DIED with the poptable migration (2026-08-26): grid ids
+		// ARE blueprint names now, straight from the XML tables or the law code, so
+		// XML edits never need a recompile. Three placement DIRECTIVES survive as
+		// non-blueprint ids because they carry per-cell state a bare blueprint
+		// cannot: chalkline* (directional tile), yardboard (chalk text), and
+		// firedish_cold (the tense pass's part-stripped dish). The old map's
+		// verification duty inverts: an unknown blueprint is now refused LOUDLY at
+		// placement instead of silently skipped. (The retired bg.animation_table
+		// sketch vocab reservation lives on in the sim's ITEMS layer only.)
 		private static int PlaceItems(Zone Z, Grid g)
 		{
 			if (g.Item == null) return 0;
@@ -2415,17 +2462,22 @@ namespace Cleo.TerraFirma.Scripts
 					if (g.YardBoardText != null)
 						obj.RequirePart<XRL.World.Parts.Cleo_TerraFirma_ChalkWriting>().Text = g.YardBoardText;
 				}
+				else if (id == "firedish_cold")
+				{
+					obj = GameObject.Create("Cleo_TerraFirma_FireDish");
+					// the cold flip: light and heat stripped (sprite may still
+					// read lit - art polish flagged in TODO)
+					obj.RemovePart<XRL.World.Parts.LightSource>();
+					obj.RemovePart<XRL.World.Parts.Campfire>();
+				}
 				else
 				{
-					if (!BP.TryGetValue(id, out string bp)) continue;
-					obj = GameObject.Create(bp);
-					if (id == "firedish_cold")
+					if (GameObjectFactory.Factory.GetBlueprint(id) == null)
 					{
-						// the cold flip: light and heat stripped (sprite may still
-						// read lit - art polish flagged in TODO)
-						obj.RemovePart<XRL.World.Parts.LightSource>();
-						obj.RemovePart<XRL.World.Parts.Campfire>();
+						MetricsManager.LogError("TerraFirma: warren dress rolled unknown blueprint '" + id + "' (check PopulationTables.xml); cell left bare");
+						continue;
 					}
+					obj = GameObject.Create(id);
 				}
 				c.AddObject(obj);
 				placed++;

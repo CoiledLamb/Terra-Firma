@@ -1458,6 +1458,11 @@ const ITEMS={
 };
 const STACKSETS={stack1:['stack1','stack1a','stack1b'],stack2:['stack2','stack2a','stack2b'],stack3:['stack3','stack3a','stack3b']};
 const DRESS={
+  // MIRROR NOTE (2026-08-26): the game-side copies of DRESS, NATURAL,
+  // PLAINTRACE, HALLTABLE and ROOMPOOLS live in TerraFirma/XML/
+  // PopulationTables.xml now (Cleo_TerraFirma_WarrenDress * / WarrenPool *,
+  // real blueprint names; the sim keeps these JS copies and its own art ids).
+  // THE SIM LEADS: change here first, then port weights/rows to the XML.
   // break-spot rows (cushion/bedroll/wine) added 2026-08-18 - USER: "more
   // leisure spots for worksites". Weights CLAUDE dials.
   // nugget weight 1 joined 2026-08-25 (USER RULED, weights delegated): quarry
@@ -1475,6 +1480,8 @@ const NATURAL=[[55,null],[10,'stone'],[15,'loosestone'],[20,'pebble']];
 // untouched - plainness still means something, it just isn't sterile.
 const PLAINTRACE=[[74,null],[10,{i:'straytorch',hint:'face'}],[7,'trash'],[5,{i:'pickaxe',hint:'face'}],[3,'bg.floor_cushion'],[2,'pitcher_cider']];
 const ROOMPOOLS={
+  // MIRROR: game-side copy is Cleo_TerraFirma_WarrenPool * in
+  // TerraFirma/XML/PopulationTables.xml (see the DRESS mirror note)
   // basket_food = the Preserved Food Basket idiom on the USER-RULED canyon
   // preserves poptable; a pantry makes a camp visibly EAT
   light:['bg.brazier','straytorch'], storage:['bg.chest','bg.woven_basket','basket_food'],
