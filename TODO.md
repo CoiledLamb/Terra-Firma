@@ -1897,6 +1897,38 @@ obligation and full verification protocol spelled out in the brief.
   their fires; abandoned sites are empty; nobody spawns in walls or water; carvers stay
   neutral at first sight; no MODERROR.
 
+  **CREATURE PLACEMENT MIGRATED TO THE TABLES — USER 2026-08-26 ("isn't there basegame
+  precedent for doing something like this with population tables rather than cs?" then
+  "let's go, send it"). The dress-migration architecture applied to creatures. BUILT:
+  compile 0 errors, XML strict-valid + text rules OK, deployed hash-verified 2/2,
+  `log-confirmed pending`.**
+  - **Precedent receipts (decomp):** `XRL.World.ZoneBuilders.Population` is a whole
+    base-game builder that fills zones with creatures from a `Table` attribute, seating
+    by creature nature (Aquatic/LivesOnWalls/StartInLiquid); the village path
+    (`PlacePopulationInRegion` + per-row Hint) places creatures too, and `Adjacent:N`
+    is a natively parameterized percentage bias.
+  - **Shape:** the pack table's rows now CARRY their placement as Hint attributes -
+    `Cleo_TerraFirma_Trade:ROLE:PCT` (the bias-not-law roll), `Cleo_TerraFirma_
+    OutsidePost:PCT` (outrider trail watch) - and a new `Cleo_TerraFirma_
+    WarrenReclaimers` table owns the snapjaw denning (`Cleo_TerraFirma_Den` hint,
+    Number 2-4; the SNAPJAW_MIN/MAX knobs died into it). ROLE_BIAS_PCT and
+    OUTRIDER_OUTSIDE_PCT knobs died into the hint parameters. One placement loop
+    (`PlaceTable` + `SeatByHint`) serves both occupancies.
+  - **The engine's whole vocabulary is legal in our tables:** any hint the interpreter
+    does not recognize is handed VERBATIM to `ZoneBuilderSandbox.PlaceObjectInArea`
+    over the warren's carved floor - AlongWall, InsideCorner, AdjacentToBlueprint:X
+    all work today by XML edit alone. (Trade-follows-furniture is therefore available
+    without a recompile: swap a Trade hint for AdjacentToBlueprint:Workbench and a
+    mason seats by any workbench the dress placed.)
+  - **Laws kept in code:** occupancy picks the table, stage picks roll count and
+    overseer chance, seat legality against the real zone, the outside-post radius, the
+    overseer recipe (chassis + epithet builder; the parser's per-row `Builder=`
+    attribute is a possible future home, flagged unexplored). Distribution-equal with
+    the pre-migration pass by construction (same rolls, same order, same percentages
+    now read from XML).
+  `[verify]` rides the population sweep above unchanged; additionally no `TerraFirma:`
+  hint-parse errors in the log.
+
 **BLIND-CLAIM PORTED, SCOUT RETIRED — USER RULED 2026-08-25 ("alright, i'll say go, let's
 try it"), BUILT + DEPLOYED same sitting; `log-confirmed pending` ON A FRESH EMBARK.**
 The full sim stack crossed: `BuildAugmented` ladder (real canyon first · polite thickening

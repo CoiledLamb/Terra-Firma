@@ -62,15 +62,37 @@
 	     the split is visible while testing, which is not a design position on how many there are.
 	     Nothing references this table outside the tfcarverpack wish yet. Real placement waits on
 	     the spawn wiring ruling. -->
+	<!-- WARREN PLACEMENT HINTS joined 2026-08-26 (the creature-placement migration, USER:
+	     "isn't there basegame precedent for doing something like this with population
+	     tables rather than cs?" then "let's go, send it"). Consumed by WarrenCarver's
+	     PopulateSite, never by the wish (tfcarverpack ignores hints by construction).
+	     Vocabulary: Cleo_TerraFirma_Trade:ROLE:PCT = PCT% chance to seat in a random
+	     pocket of that carve role (face/commons/dwelling/plain), else anywhere - the
+	     bias-not-law ruling; Cleo_TerraFirma_OutsidePost:PCT = a biased outrider may
+	     post outside near the mouth instead (the trail watch). ANY OTHER hint string
+	     is handed to the engine's own consumer (ZoneBuilderSandbox.PlaceObjectInArea)
+	     over the warren's carved floor, so the full base-game vocabulary - AlongWall,
+	     InsideCorner, AdjacentToBlueprint:X and friends - is legal here too. All
+	     percentages CLAUDE dials. -->
 	<population Name="Cleo_TerraFirma_Stonecarver Pack">
 		<group Name="Creatures" Style="pickeach">
-			<object Chance="100" Number="1-2" Blueprint="Cleo_TerraFirma_Hewer" />
-			<object Chance="75" Number="1-2" Blueprint="Cleo_TerraFirma_Outrider" />
-			<object Chance="60" Number="1" Blueprint="Cleo_TerraFirma_Mason" />
-			<object Chance="35" Number="1" Blueprint="Cleo_TerraFirma_Mole Hewer" />
-			<object Chance="30" Number="1" Blueprint="Cleo_TerraFirma_Mole Outrider" />
-			<object Chance="25" Number="1" Blueprint="Cleo_TerraFirma_Mole Mason" />
+			<object Chance="100" Number="1-2" Blueprint="Cleo_TerraFirma_Hewer" Hint="Cleo_TerraFirma_Trade:face:55" />
+			<object Chance="75" Number="1-2" Blueprint="Cleo_TerraFirma_Outrider" Hint="Cleo_TerraFirma_Trade:plain:55,Cleo_TerraFirma_OutsidePost:50" />
+			<object Chance="60" Number="1" Blueprint="Cleo_TerraFirma_Mason" Hint="Cleo_TerraFirma_Trade:commons:55" />
+			<object Chance="35" Number="1" Blueprint="Cleo_TerraFirma_Mole Hewer" Hint="Cleo_TerraFirma_Trade:face:55" />
+			<object Chance="30" Number="1" Blueprint="Cleo_TerraFirma_Mole Outrider" Hint="Cleo_TerraFirma_Trade:plain:55,Cleo_TerraFirma_OutsidePost:50" />
+			<object Chance="25" Number="1" Blueprint="Cleo_TerraFirma_Mole Mason" Hint="Cleo_TerraFirma_Trade:commons:55" />
 			<object Chance="15" Number="1" Blueprint="Cleo_TerraFirma_Rockhound" />
+		</group>
+	</population>
+	<!-- Reclaimed warrens: the newcomers who denned in the abandoned dig. Consumed by
+	     PopulateSite when occupancy rolls reclaimed. Cleo_TerraFirma_Den = seat
+	     deepest-first, beside the crude fires the tense pass lights; the clumping is
+	     the point, snapjaws den together. Number range CLAUDE dial (was the
+	     SNAPJAW_MIN/MAX knob pair, migrated here). -->
+	<population Name="Cleo_TerraFirma_WarrenReclaimers">
+		<group Name="Denners" Style="pickeach">
+			<object Number="2-4" Blueprint="Cleo_TerraFirma_Snapjaw Miner" Hint="Cleo_TerraFirma_Den" />
 		</group>
 	</population>
 

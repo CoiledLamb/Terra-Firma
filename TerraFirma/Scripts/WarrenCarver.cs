@@ -43,14 +43,13 @@ namespace Cleo.TerraFirma.Scripts
 		// nothing, while a flourishing large warren could have a legendary
 		// overseer and a merchant"). All numbers CLAUDE dials.
 		public static readonly int[] OVERSEER_PCT = { 15, 40, 75 };   // by stage: working/camp/flourishing
-		public const int SNAPJAW_MIN = 2, SNAPJAW_MAX = 4;            // reclaimed denners
-		// placement is a BIAS, not a law (USER FLAG 2026-08-26, screenshot of
-		// role-sorted clumps: "i think there should be biases on where they spawn,
-		// but intermingling is something that will be very easy to see, and make
-		// the camp feel more alive"). Roll under the bias = a random pocket of
-		// your trade; over it = anywhere. Dials CLAUDE.
-		public const int ROLE_BIAS_PCT = 55;          // chance a carver seats by trade
-		public const int OUTRIDER_OUTSIDE_PCT = 50;   // biased outriders may post OUTSIDE (user: "an outrider standing outside the quarry, patrolling the trail, makes sense")
+		// Placement biases MIGRATED TO THE TABLES 2026-08-26 (user: "isn't there
+		// basegame precedent for doing something like this with population tables
+		// rather than cs?" - there is, ZoneBuilders.Population and the village
+		// Hint path both place creatures from tables): the trade/outside-post
+		// percentages ride Hint attributes on the pack table rows now, and the
+		// snapjaw count rides the WarrenReclaimers table's Number. The one knob
+		// left in code is a LAW of the interpreter, not a content dial:
 		public const int OUTRIDER_POST_RADIUS = 8;    // how far from the mouth an outside post reaches
 		public const int MOSS_PCT = 35;           // mossPct (ported + dialed 2026-08-23)
 		public const int MOMENTUM = 55;           // momentum
@@ -3334,44 +3333,6 @@ namespace Cleo.TerraFirma.Scripts
 				list.AddRange(pockets.Where(p => p.Role != role));
 				return list;
 			}
-			if (r.Occupancy == "abandoned")
-			{
-				Helpers.VerifyLog("WARREN", "population: abandoned, nobody home");
-				return;
-			}
-			if (r.Occupancy == "reclaimed")
-			{
-				// the newcomers den in the back, beside the fires the tense pass lit
-				var dens = pockets.OrderByDescending(p => p.DepthRank).ToList();
-				int want = R(SNAPJAW_MIN, SNAPJAW_MAX), placed = 0;
-				for (int n = 0; n < want; n++)
-				{
-					var sj = GameObject.Create("Cleo_TerraFirma_Snapjaw Miner");
-					if (sj != null && Seat(sj, dens)) placed++;
-				}
-				Helpers.VerifyLog("WARREN", $"population: reclaimed, {placed} snapjaw miners denned");
-				return;
-			}
-			// IN USE: the crew. Overseer first, so a cramped site still gets the
-			// thing worth looking at (the wish's own ordering).
-			string overseerNote = "none rolled";
-			if (Chance(OVERSEER_PCT[Math.Max(0, Math.Min(OVERSEER_PCT.Length - 1, r.StageIdx))] / 100.0))
-			{
-				var boss = GameObject.Create("Cleo_TerraFirma_Stonecarver");
-				if (boss != null)
-				{
-					var roll = StonecarverEpithet.Build(boss);
-					if (Seat(boss, ByRole("dwelling", deepFirst: true)))
-						overseerNote = $"{roll.PersonalName} {roll.Byname}";
-					else { boss.Obliterate(); overseerNote = "no seat"; }
-				}
-			}
-			// BIAS SEATING (user flag 2026-08-26, superseding the role-sorted first
-			// cut whose ordered walk packed each trade into one room): under the
-			// bias roll a carver takes a RANDOM pocket of its trade; over it,
-			// anywhere - so trades lean where they work and still intermingle.
-			// Outriders under bias may post OUTSIDE near the mouth instead, the
-			// trail watch the user called out as the read that makes sense.
 			bool SeatRandom(GameObject who2, List<PocketRec> cands)
 			{
 				var open = cands.ToList();
@@ -3406,38 +3367,111 @@ namespace Cleo.TerraFirma.Scripts
 				Z.GetCell(pick % g.W, pick / g.W).AddObject(who2);
 				return true;
 			}
-			var census = new Dictionary<string, int>();
-			int carvers = 0, outposts = 0;
-			int packRolls = r.StageIdx >= 2 ? 2 : 1;   // a flourishing dig runs two shifts
-			for (int roll2 = 0; roll2 < packRolls; roll2++)
+			// HINT INTERPRETER (placement migrated to the tables 2026-08-26, the
+			// dress-migration architecture applied to creatures): a row's Hint
+			// drives its seat. Cleo_TerraFirma_Den = deepest-first denning;
+			// Cleo_TerraFirma_Trade:ROLE:PCT = the bias-not-law roll (random
+			// pocket of the trade under PCT, anywhere over it);
+			// Cleo_TerraFirma_OutsidePost:PCT = a biased carver may post outside
+			// near the mouth instead. ANYTHING ELSE is handed verbatim to
+			// ZoneBuilderSandbox.PlaceObjectInArea over the warren's carved
+			// floor, so the engine's whole hint vocabulary (AlongWall,
+			// InsideCorner, AdjacentToBlueprint:X ...) is legal in our tables.
+			int outposts = 0;
+			Genkit.LocationList warrenArea = null;
+			Genkit.LocationList WarrenArea()
 			{
-				foreach (var entry in XRL.PopulationManager.Generate("Cleo_TerraFirma_Stonecarver Pack", (Dictionary<string, string>)null))
+				if (warrenArea != null) return warrenArea;
+				var locs = new List<Genkit.Location2D>();
+				for (int i = 0; i < g.W * g.H; i++)
+					if (g.C[i] == FLOOR && g.Host[i] == 0 && g.Water[i] == 0)
+						locs.Add(Genkit.Location2D.Get(i % g.W, i / g.W));
+				return warrenArea = new Genkit.LocationList(locs);
+			}
+			bool SeatByHint(GameObject who, string hint)
+			{
+				var engineHints = new List<string>();
+				string trade = null; int tradePct = 100, outsidePct = -1; bool den = false;
+				foreach (string raw in (hint ?? "").Split(','))
 				{
+					string t = raw.Trim();
+					if (t.Length == 0) continue;
+					else if (t == "Cleo_TerraFirma_Den") den = true;
+					else if (t.StartsWith("Cleo_TerraFirma_Trade:"))
+					{
+						var parts = t.Split(':');
+						trade = parts[1];
+						if (parts.Length < 3 || !int.TryParse(parts[2], out tradePct))
+						{
+							tradePct = 100;
+							MetricsManager.LogError("TerraFirma: Trade hint '" + t + "' has no readable percent; treated as 100");
+						}
+					}
+					else if (t.StartsWith("Cleo_TerraFirma_OutsidePost"))
+					{
+						var parts = t.Split(':');
+						if (parts.Length < 2 || !int.TryParse(parts[1], out outsidePct)) outsidePct = 100;
+					}
+					else engineHints.Add(t);
+				}
+				if (den) return Seat(who, pockets.OrderByDescending(p => p.DepthRank).ToList());
+				if (trade != null && Chance(tradePct / 100.0))
+				{
+					if (outsidePct >= 0 && Chance(outsidePct / 100.0) && SeatOutsidePost(who)) { outposts++; return true; }
+					var mine = pockets.Where(p => p.Role == trade).ToList();
+					if (mine.Count > 0 && SeatRandom(who, mine)) return true;
+				}
+				if (engineHints.Count > 0
+					&& XRL.World.ZoneBuilders.ZoneBuilderSandbox.PlaceObjectInArea(Z, WarrenArea(), who, 0, 0, string.Join(",", engineHints)))
+					return true;
+				return SeatRandom(who, pockets) || Seat(who, pockets);
+			}
+			int PlaceTable(string table, Dictionary<string, int> census2)
+			{
+				int placed = 0;
+				foreach (var entry in XRL.PopulationManager.Generate(table, (Dictionary<string, string>)null))
 					for (int n = 0; n < entry.Number; n++)
 					{
 						var who = GameObject.Create(entry.Blueprint);
 						if (who == null) continue;
-						List<PocketRec> bias =
-							entry.Blueprint.Contains("Hewer") ? pockets.Where(p => p.Role == "face").ToList()
-							: entry.Blueprint.Contains("Mason") ? pockets.Where(p => p.Role == "commons").ToList()
-							: entry.Blueprint.Contains("Outrider") ? pockets.Where(p => p.Role == "plain").ToList()
-							: null;
-						bool roleBias = Chance(ROLE_BIAS_PCT / 100.0);
-						bool seated = false;
-						if (roleBias && entry.Blueprint.Contains("Outrider") && Chance(OUTRIDER_OUTSIDE_PCT / 100.0))
-						{
-							seated = SeatOutsidePost(who);
-							if (seated) outposts++;
-						}
-						if (!seated && roleBias && bias != null && bias.Count > 0) seated = SeatRandom(who, bias);
-						if (!seated) seated = SeatRandom(who, pockets);
-						if (!seated) seated = Seat(who, pockets);
-						if (!seated) { who.Obliterate(); continue; }
-						carvers++;
-						census[entry.Blueprint] = (census.TryGetValue(entry.Blueprint, out int v) ? v : 0) + 1;
+						if (!SeatByHint(who, entry.Hint)) { who.Obliterate(); continue; }
+						placed++;
+						if (census2 != null) census2[entry.Blueprint] = (census2.TryGetValue(entry.Blueprint, out int v) ? v : 0) + 1;
 					}
+				return placed;
+			}
+			if (r.Occupancy == "abandoned")
+			{
+				Helpers.VerifyLog("WARREN", "population: abandoned, nobody home");
+				return;
+			}
+			if (r.Occupancy == "reclaimed")
+			{
+				// the newcomers den in the back, beside the fires the tense pass
+				// lit; who they are and how many now lives in the table
+				int denned = PlaceTable("Cleo_TerraFirma_WarrenReclaimers", null);
+				Helpers.VerifyLog("WARREN", $"population: reclaimed, {denned} denned");
+				return;
+			}
+			// IN USE: the crew. Overseer first, so a cramped site still gets the
+			// thing worth looking at (the wish's own ordering).
+			string overseerNote = "none rolled";
+			if (Chance(OVERSEER_PCT[Math.Max(0, Math.Min(OVERSEER_PCT.Length - 1, r.StageIdx))] / 100.0))
+			{
+				var boss = GameObject.Create("Cleo_TerraFirma_Stonecarver");
+				if (boss != null)
+				{
+					var roll = StonecarverEpithet.Build(boss);
+					if (Seat(boss, ByRole("dwelling", deepFirst: true)))
+						overseerNote = $"{roll.PersonalName} {roll.Byname}";
+					else { boss.Obliterate(); overseerNote = "no seat"; }
 				}
 			}
+			var census = new Dictionary<string, int>();
+			int carvers = 0;
+			int packRolls = r.StageIdx >= 2 ? 2 : 1;   // a flourishing dig runs two shifts
+			for (int roll2 = 0; roll2 < packRolls; roll2++)
+				carvers += PlaceTable("Cleo_TerraFirma_Stonecarver Pack", census);
 			Helpers.VerifyLog("WARREN", $"population: in use, stage {r.Stage}, overseer {overseerNote}, " +
 				$"{carvers} crew, {outposts} posted outside ({string.Join(", ", census.Select(kv => kv.Value + " " + kv.Key.Replace("Cleo_TerraFirma_", "")))})");
 		}
