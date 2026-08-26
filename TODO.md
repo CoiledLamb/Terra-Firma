@@ -1617,6 +1617,17 @@ errors, deployed hash-verified 3/3.
         (0.2s), background scouting (thread risk). Compile 0 errors, deployed
         hash-verified 2/2, `log-confirmed pending`.
 
+**POPTABLE DRESS MIGRATION — HANDOFF WRITTEN 2026-08-25 (USER: "make a handoff aimed at a
+fresh agent to do the migration"), migration itself NOT STARTED.** Full brief in
+`design/poptable-migration-handoff-2026-08-25.md`. Rides the corrected insight (Claude
+claimed engine poptables can't express placement; the USER challenged it and the grep
+found 1000+ Hint attributes - AlongWall 231, InsideCorner 59, Center 25, parameterized
+Adjacent:90/OutsideDoor:1 - richer than our own hint set). Shape: table DATA (rows,
+weights, engine-vocabulary hints) moves to mod PopulationTables.xml; the LAWS (budgets,
+one-oven, articulation, re-roll floors, cluster stamps) stay C#; recommended
+parse-and-roll-with-our-seed architecture preserves rebuild determinism; sim mirror
+obligation and full verification protocol spelled out in the brief.
+
 **BLIND-CLAIM PORTED, SCOUT RETIRED — USER RULED 2026-08-25 ("alright, i'll say go, let's
 try it"), BUILT + DEPLOYED same sitting; `log-confirmed pending` ON A FRESH EMBARK.**
 The full sim stack crossed: `BuildAugmented` ladder (real canyon first · polite thickening
