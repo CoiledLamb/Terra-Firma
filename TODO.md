@@ -1797,6 +1797,22 @@ obligation and full verification protocol spelled out in the brief.
   water leaves a cold fire dish, not campfire remains; hearth rooms roll dishes, dwelling
   light is torches.
 
+  **A KITCHEN KEEPS ONE FIRE — USER DOCKET 2026-08-26 (screenshot of an oven-and-campfire
+  kitchen: "making it so campfires don't spawn in kitchens that have an oven. is it
+  possible with just hints?"). ANSWERED + BUILT same sitting: compile 0 errors, deployed
+  hash-verified 1/1, `log-confirmed pending`.** The method answer, on record: NOT
+  expressible as a hint - hints (engine's and ours) seat an item on a cell, they never
+  gate whether it rolls; the engine's exclusivity idiom is bundled pickone groups, which
+  the per-item room recipes deliberately do not consume. An exclusion is an invariant
+  over rolls, i.e. a LAW, and it landed as one line-pair in the existing filter idiom
+  (one-oven-per-site, chest downgrade): within a room, once an Oven PLACES the pool
+  drops Campfire and vice versa, whichever lands first. MUTUAL by CLAUDE reading
+  (campfire-then-oven would still build the double-fire kitchen the screenshot shows);
+  flags set on successful placement only, so a seat-refused oven bans nothing. Fire
+  dish deliberately NOT in the exclusion (not asked; dish+oven kitchens still roll).
+  Sim catch-up: dressDwelling in the lab has no such law yet, flagged with the others.
+  `[verify]` hearth rooms roll oven-or-campfire, never both; oven+dish still possible.
+
 **BLIND-CLAIM PORTED, SCOUT RETIRED — USER RULED 2026-08-25 ("alright, i'll say go, let's
 try it"), BUILT + DEPLOYED same sitting; `log-confirmed pending` ON A FRESH EMBARK.**
 The full sim stack crossed: `BuildAugmented` ladder (real canyon first · polite thickening
