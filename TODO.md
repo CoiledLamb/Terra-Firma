@@ -1777,8 +1777,10 @@ obligation and full verification protocol spelled out in the brief.
     almost certainly met those. A live-site dish failing the same way would be a NEW bug;
     none is known - flag with a log if seen.
   - **Build:** real `Cleo_TerraFirma_FireDishCold` blueprint (inherits the dish; removes
-    `Campfire`/`LightSource`/`PrefabImposter`, ash-grey `&K`/y on the same tile - cold
-    finally LOOKS cold; DESCRIPTION CLAUDE DRAFT, voice owed alongside the lit dish's).
+    `Campfire`/`LightSource`/`PrefabImposter`. Colors stay the ruled brown - the ash-grey
+    recolor was STRUCK, USER RULED 2026-08-26 "no need for the ash grey recolor"; cold
+    reads through the missing flames and the "cold fire dish" name. DESCRIPTION CLAUDE
+    DRAFT, voice owed alongside the lit dish's).
     The lit dish's `Campfire` part now points `ExtinguishBlueprint` at the cold dish (the
     engine's campfire-to-remains idiom; previously a doused stone dish left inherited
     wooden "Campfire Remains"). Tense flip swaps blueprints like campfires do; the
@@ -1791,7 +1793,7 @@ obligation and full verification protocol spelled out in the brief.
   - **SIM CATCH-UP re-flagged:** sim light pool still rolls its brazier-era pair; hearth
     membership and the cold-dish visual are game-side only until the sim's sitting.
   `[verify]` in game: a lit dish at a live site opens the Cook menu on space; a dish in
-  an abandoned warren reads ash-grey cold, no flames, no light; dousing a lit dish with
+  an abandoned warren shows no flames, casts no light, and names itself cold; dousing a lit dish with
   water leaves a cold fire dish, not campfire remains; hearth rooms roll dishes, dwelling
   light is torches.
 

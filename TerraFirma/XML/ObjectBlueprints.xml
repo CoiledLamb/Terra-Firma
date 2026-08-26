@@ -111,11 +111,12 @@
        dishes kept the flame overlay and lit colors, so they LOOKED lit while silently
        refusing to cook; the old part-strip directive in WarrenCarver died for this).
        A real blueprint in the Campfire/Campfire Remains idiom: no flame prefab, no
-       light, ash-grey on the same tile. The tense pass and the extinguish path both
-       land here now. DESCRIPTION IS CLAUDE DRAFT, user voice owed (the lit dish's
-       line is also still draft). -->
+       light. Colors stay the ruled brown, USER RULED 2026-08-26 ("no need for the ash
+       grey recolor"): cold reads through the dead flames and the name. The tense pass
+       and the extinguish path both land here now. DESCRIPTION IS CLAUDE DRAFT, user
+       voice owed (the lit dish's line is also still draft). -->
   <object Name="Cleo_TerraFirma_FireDishCold" Inherits="Cleo_TerraFirma_FireDish">
-    <part Name="Render" Tile="firedish.png" DisplayName="cold fire dish" ColorString="&amp;K" TileColor="&amp;K" DetailColor="y" />
+    <part Name="Render" DisplayName="cold fire dish" />
     <part Name="Description" Short="A wide basin of dressed stone cradles a bed of cold ash." />
     <removepart Name="Campfire" />
     <removepart Name="LightSource" />
