@@ -76,6 +76,12 @@ namespace XRL.World.WorldBuilders
 			}
 			int scoutN = Math.Min(SCOUT_N, pool.Count);
 			var scored = new List<Scouted>();
+			// timing split (user note 2026-08-25 "load times are a bit severe...
+			// A/B test what the times are like"): zone builds vs carve probes,
+			// separately, so the dial decision is informed - if zone builds
+			// dominate, fewer scouts is the lever; if probes do, a cheaper scorer.
+			var swZone = new System.Diagnostics.Stopwatch();
+			var swProbe = new System.Diagnostics.Stopwatch();
 			for (int i = 0; i < scoutN; i++)
 			{
 				var L = pool[i];
@@ -84,9 +90,13 @@ namespace XRL.World.WorldBuilders
 				// string mints a new display entry per call (user flag 2026-08-25,
 				// fifty "Scouting canyons" rows) - one line per phase, the lairs way
 				The.ZoneManager.AdjustZoneGenerationTierTo(zoneID);
+				swZone.Start();
 				Zone Z = The.ZoneManager.GetZone(zoneID);
+				swZone.Stop();
 				if (Z == null) continue;
+				swProbe.Start();
 				var probe = WarrenCarver.Build(Z, WarrenCarver.SeedFor(zoneID), 2, apply: false);
+				swProbe.Stop();
 				scored.Add(new Scouted
 				{
 					ZoneID = zoneID,
@@ -113,6 +123,8 @@ namespace XRL.World.WorldBuilders
 			// the next capable spare steps up (refusals should be ~impossible for
 			// flourishing - an exact probe replay - and rare below it)
 			WorldCreationProgress.StepProgress("Raising quarry warrens...");
+			var swClaim = new System.Diagnostics.Stopwatch();
+			swClaim.Start();
 			int sited = 0, refusals = 0;
 			var builtByStage = new int[3];
 			void Fill(int slots, int stage)
@@ -132,12 +144,20 @@ namespace XRL.World.WorldBuilders
 			Fill(fl, 2);
 			Fill(camp, 1);
 			Fill(working, 0);
+			swClaim.Stop();
 			// the capacity assert: quota vs capability vs what actually stood up
 			Helpers.VerifyLog("WARREN",
 				$"scout: pool {pool.Count}, scouted {scored.Count}, capable fl {capFl} / camp+ {capCamp} / any {capAny}; " +
 				$"quota {fl}/{camp}/{working} (fl/camp/working); sited {sited} " +
 				$"(built {builtByStage[2]} fl / {builtByStage[1]} camp / {builtByStage[0]} working), refusals {refusals}" +
 				(sited < WARRENS_PER_WORLD ? $" - UNDER TARGET {WARRENS_PER_WORLD}" : ""));
+			// the A/B datum: without-scout time ~ the claim phase alone (winners
+			// would build lazily on visit anyway); the scout premium is zone+probe
+			Helpers.VerifyLog("WARREN",
+				$"scout timing: zone builds {swZone.ElapsedMilliseconds}ms ({scored.Count} zones, " +
+				$"avg {(scored.Count > 0 ? swZone.ElapsedMilliseconds / scored.Count : 0)}ms), " +
+				$"probes {swProbe.ElapsedMilliseconds}ms, claims {swClaim.ElapsedMilliseconds}ms; " +
+				$"scout premium {swZone.ElapsedMilliseconds + swProbe.ElapsedMilliseconds}ms at SCOUT_N {SCOUT_N}");
 		}
 
 		/// <summary>The pool, enumerated. Reflection on the private terrain list

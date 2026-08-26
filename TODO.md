@@ -1538,6 +1538,15 @@ on higher-capacity zones force their stage, so a rare further-demote can drift t
 worldgen shows both loading notes · tfwarrens reveals 25 real, 0 erased · a flourishing
 site exists and matches its claim · pass-over popups only at real warrens. Compile 0
 errors, deployed hash-verified 3/3.
+  - **LOAD TIME FLAG — USER 2026-08-25 ("we may have to do fewer than 50, the load times
+    are a bit severe. it'd be good if we could A/B test what the times are like when with
+    scout and without"), TIMING INSTRUMENTED same sitting.** New `[TF-VERIFY] [WARREN]
+    scout timing:` line splits zone builds / probes / claims, per-zone average included.
+    The A/B datum comes free: without-scout time ~ the claim phase alone (winners build
+    lazily on visit in the old model), so scout premium = zone+probe ms, printed directly.
+    If zone builds dominate (expected), SCOUT_N is the lever; if probes do, a cheaper
+    capacity scorer is. **SCOUT_N stays 50 - "may have to" is a flag, not a strike; the
+    next embark's numbers decide.** Deployed hash-verified.
 
 **YARD PLACEMENT: AREA DECIDES — USER FLOAT 2026-08-25 ("what if we improved blockyard
 placement a bit when there's lots of open space outside?", with an in-game screenshot of a
