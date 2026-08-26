@@ -1547,6 +1547,24 @@ errors, deployed hash-verified 3/3.
     If zone builds dominate (expected), SCOUT_N is the lever; if probes do, a cheaper
     capacity scorer is. **SCOUT_N stays 50 - "may have to" is a flag, not a strike; the
     next embark's numbers decide.** Deployed hash-verified.
+    - **FIRST EMBARK NUMBERS + ADAPTIVE EXIT — measured then USER GREENLIT same sitting
+      ("sure, let's implement that and see how much time it saves"), BUILT + DEPLOYED.**
+      Measured: zone builds 20.5s (50 zones, 409ms avg) / probes 1.4s / claims 6.7s -
+      zones dominate as expected, premium ~22s. Same line exposed why naive lower SCOUT_N
+      is the WRONG lever: capable-fl ran 6 against a rolled quota of 6, zero headroom.
+      Built instead: quota rolls BEFORE scouting; the loop exits once covered with margin
+      (fl+1 against carve-drift, camp-and-up +2, total +3); stingy worlds still scout all
+      50. Also observed in the line, working as designed: 2 camp-assigned zones demoted
+      to working in the real carve (built 6/7/12 vs quota 6/9/10) - degrade honesty
+      outranks the quota, offered bias-camp-to-bigger-zones if the user wants it tighter.
+      **EMBARK HITCH — USER CONCERN same message ("hoping people don't think their game
+      is freezing"): fixed with receipts.** Decompiled WorldGenerationScreen: _AddMessage
+      DEDUPES consecutive identical rows, _IncrementProgress ticks the bar every call -
+      so constant-text StepProgress per scout AND per claim keeps the bar visibly moving
+      through the whole pass with exactly one row per phase (the first cut's fifty-row
+      spam and the second cut's static freeze were the two failure modes either side of
+      this). Timing line now carries "N of SCOUT_N 50 (adaptive exit)". Compile 0 errors,
+      deployed hash-verified, `log-confirmed pending` next fresh embark.
 
 **YARD PLACEMENT: AREA DECIDES — USER FLOAT 2026-08-25 ("what if we improved blockyard
 placement a bit when there's lots of open space outside?", with an in-game screenshot of a

@@ -75,20 +75,31 @@ namespace XRL.World.WorldBuilders
 				(pool[i], pool[j]) = (pool[j], pool[i]);
 			}
 			int scoutN = Math.Min(SCOUT_N, pool.Count);
+			// the quota rolls BEFORE scouting so the adaptive exit knows its
+			// targets (dials; rolled in a +/-1 band so world stage-mixes differ)
+			int fl = Math.Max(0, QUOTA_FL + (QUOTA_ROLLED ? rng.Next(-1, 2) : 0));
+			int camp = Math.Max(0, QUOTA_CAMP + (QUOTA_ROLLED ? rng.Next(-1, 2) : 0));
+			int working = Math.Max(0, WARRENS_PER_WORLD - fl - camp);
 			var scored = new List<Scouted>();
 			// timing split (user note 2026-08-25 "load times are a bit severe...
 			// A/B test what the times are like"): zone builds vs carve probes,
 			// separately, so the dial decision is informed - if zone builds
 			// dominate, fewer scouts is the lever; if probes do, a cheaper scorer.
+			// Measured first embark: zones 20.5s (409ms avg), probes 1.4s - zones
+			// dominate, hence the ADAPTIVE EXIT below (user greenlit 2026-08-25).
 			var swZone = new System.Diagnostics.Stopwatch();
 			var swProbe = new System.Diagnostics.Stopwatch();
+			int capFl = 0, capCamp = 0, capAny = 0;
 			for (int i = 0; i < scoutN; i++)
 			{
 				var L = pool[i];
 				string zoneID = Zone.XYToID("JoppaWorld", L.X, L.Y, 10);
-				// no per-scout counter: StepProgress keys on its TEXT, so a changing
-				// string mints a new display entry per call (user flag 2026-08-25,
-				// fifty "Scouting canyons" rows) - one line per phase, the lairs way
+				// CONSTANT text on purpose: _AddMessage dedupes consecutive
+				// identical rows while _IncrementProgress ticks the bar every
+				// call (decompiled WorldGenerationScreen) - the screen stays
+				// visibly alive through the zone builds without minting the
+				// fifty rows the first cut produced (user flags, both 2026-08-25)
+				WorldCreationProgress.StepProgress("Scouting canyons...");
 				The.ZoneManager.AdjustZoneGenerationTierTo(zoneID);
 				swZone.Start();
 				Zone Z = The.ZoneManager.GetZone(zoneID);
@@ -97,28 +108,22 @@ namespace XRL.World.WorldBuilders
 				swProbe.Start();
 				var probe = WarrenCarver.Build(Z, WarrenCarver.SeedFor(zoneID), 2, apply: false);
 				swProbe.Stop();
-				scored.Add(new Scouted
-				{
-					ZoneID = zoneID,
-					Loc = L,
-					Capacity = probe.Built ? probe.StageIdx : -1,
-					Floor = probe.Built ? probe.Floor : 0
-				});
+				int cap = probe.Built ? probe.StageIdx : -1;
+				scored.Add(new Scouted { ZoneID = zoneID, Loc = L, Capacity = cap, Floor = probe.Built ? probe.Floor : 0 });
+				if (cap >= 2) capFl++;
+				if (cap >= 1) capCamp++;
+				if (cap >= 0) capAny++;
+				// ADAPTIVE EARLY EXIT: stop once every quota is covered with
+				// margin (fl +1 against carve-drift, camp-and-up +2, total +3).
+				// Generous worlds stop early; a stingy world (the first embark
+				// ran capable-fl 6 against quota 6) still scouts all fifty,
+				// which is why a naive lower SCOUT_N was the wrong lever.
+				if (capFl >= fl + 1 && capCamp >= fl + camp + 2 && capAny >= WARRENS_PER_WORLD + 3)
+					break;
 			}
-			// the quota (dials); rolled in a +/-1 band so world stage-mixes differ
-			int fl = Math.Max(0, QUOTA_FL + (QUOTA_ROLLED ? rng.Next(-1, 2) : 0));
-			int camp = Math.Max(0, QUOTA_CAMP + (QUOTA_ROLLED ? rng.Next(-1, 2) : 0));
-			int working = Math.Max(0, WARRENS_PER_WORLD - fl - camp);
 			scored.Sort((a, b) => a.Capacity != b.Capacity
 				? b.Capacity.CompareTo(a.Capacity)
 				: b.Floor.CompareTo(a.Floor));
-			int capFl = 0, capCamp = 0, capAny = 0;
-			foreach (var s in scored)
-			{
-				if (s.Capacity >= 2) capFl++;
-				if (s.Capacity >= 1) capCamp++;
-				if (s.Capacity >= 0) capAny++;
-			}
 			// assign biggest-first; carve immediately; a refusal burns no slot,
 			// the next capable spare steps up (refusals should be ~impossible for
 			// flourishing - an exact probe replay - and rare below it)
@@ -134,6 +139,7 @@ namespace XRL.World.WorldBuilders
 					if (slots <= 0) return;
 					if (s.Used || s.Capacity < stage) continue;
 					s.Used = true;
+					WorldCreationProgress.StepProgress("Raising quarry warrens...");   // constant text: bar tick, no new row
 					var r = Claim(Builder, s, stage);
 					if (r == null) { refusals++; continue; }
 					builtByStage[r.StageIdx]++;
@@ -157,7 +163,8 @@ namespace XRL.World.WorldBuilders
 				$"scout timing: zone builds {swZone.ElapsedMilliseconds}ms ({scored.Count} zones, " +
 				$"avg {(scored.Count > 0 ? swZone.ElapsedMilliseconds / scored.Count : 0)}ms), " +
 				$"probes {swProbe.ElapsedMilliseconds}ms, claims {swClaim.ElapsedMilliseconds}ms; " +
-				$"scout premium {swZone.ElapsedMilliseconds + swProbe.ElapsedMilliseconds}ms at SCOUT_N {SCOUT_N}");
+				$"scout premium {swZone.ElapsedMilliseconds + swProbe.ElapsedMilliseconds}ms, " +
+				$"{scored.Count} of SCOUT_N {SCOUT_N}" + (scored.Count < Math.Min(SCOUT_N, pool.Count) ? " (adaptive exit)" : ""));
 		}
 
 		/// <summary>The pool, enumerated. Reflection on the private terrain list
