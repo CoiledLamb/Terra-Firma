@@ -1634,17 +1634,24 @@ never lie because the zone is MADE to fit at visit.
   desperate rung license · (c) over-assignment numbers for the stage mix · (d) the port
   ruling itself - adopt blind-claim, retiring scout-and-quota placement.**
   - **TWO FURTHER CONSIDERATIONS from the same outside contributor (relayed by the user
-    2026-08-25), CLAUDE READS ATTACHED, both UNRULED:** (1) wipe-and-rebuild as the
-    ladder's final rung - record clear zone edges (the traversability contract), fill
-    with canyon wall, re-open the edges, carve fresh. Read: ADOPT AS DESIGNED-BUT-UNBUILT
-    insurance; the engine's own ForceConnections closes the reconnect half, and a wiped
-    zone is a maximal band so the standard pipeline runs unmodified over a synthetic
-    genCanyon - but the census ran 0-for-90 needing it, so it is logged, not built.
-    (2) structure-first generation with a "fuzzy" rock outline traced around placed
-    structures. Read: DECLINE as the generator (rooms-anywhere un-earns the band
-    negotiation that is the v2 anti-groan identity engine) · ADOPT the fuzzy-trace half
-    as boundary polish if judging ever flags blobby augment seams - noise-jittered
-    acceptance at the growth frontier, one knob, not an architecture.
+    2026-08-25), Claude reads attached, then USER RULED BUILD BOTH ("can we tried
+    implementing these 2?") - SIM BUILT + VERIFIED same sitting:** (1) **WIPE-AND-REBUILD
+    FINAL RUNG** (`rebuildZone`, knob `augRebuild` default on): fires only when the
+    augment ladder stands nothing - records the dry border floor as the traversability
+    contract, fills the zone with mass, re-opens the contract, carves on the maximal
+    band, and cuts 1-wide canyon defiles from each contract cluster toward the mouth
+    (Dijkstra, rock cheap and warren floor dear, so defiles wrap the dig rather than
+    breach it; port-side the engine's own ForceConnections closes reconnection).
+    Verified on the user's own no-site seed 20260818 with the ladder starved: a
+    FLOURISHING stood, 425 floor, 6 pockets, contract honored, water remnant intact -
+    the zone reads as a pinched-shut canyon with a deep dig, a new texture. Stats row
+    reads ZONE REBUILT. Structure-first-as-generator remains DECLINED (rooms-anywhere
+    un-earns the band negotiation, the anti-groan engine). (2) **FUZZY TRACING** (knob
+    `augFuzz` 35, CLAUDE dial): the growth frontier passes a cell by once with augFuzz%
+    chance so the augment seam roughens instead of rounding; second visit always
+    converts (the fuzz can never starve the budget); desperate rounds never fuzz.
+    Fuzz-lane census: zero failures retained. Both riders ride the same open port
+    ruling as the model itself.
 
 **YARD PLACEMENT: AREA DECIDES — USER FLOAT 2026-08-25 ("what if we improved blockyard
 placement a bit when there's lots of open space outside?", with an in-game screenshot of a

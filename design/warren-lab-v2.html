@@ -2760,8 +2760,15 @@ function growAugment(seed,K,aug,assigned,desperate){
   for(const [x,y] of band?band.cells:[])
     for(const[dx,dy]of N4) if(inb(x+dx,y+dy)) enq(x+dx,y+dy);
   let head=0, added=0;
+  const fuzzed=new Uint8Array(W*H);
   while(head<q.length&&added<want){
     const i=q[head++], x=i%W, y=(i/W)|0;
+    // FUZZY TRACE (outside contributor via user 2026-08-25, "trace the outside
+    // of them with a 'fuzzy' outline"): the frontier passes a cell by once
+    // with augFuzz% chance, so deeper cells convert past it and the seam
+    // roughens instead of rounding. Second visit always converts - the fuzz
+    // may never starve the budget. Desperate rounds don't fuzz.
+    if(!desperate&&K.augFuzz>0&&!fuzzed[i]&&chance(K.augFuzz/100)){ fuzzed[i]=1; q.push(i); continue; }
     const wasTree=g.tree[i], wasWater=g.water[i], wasHost=g.host[i];
     g.c[i]=SOLID; g.host[i]=0; g.tree[i]=0; g.water[i]=0;   // tentative
     if(!wasWater&&floorComps()>base){                       // water cells can't split floor
@@ -2770,6 +2777,69 @@ function growAugment(seed,K,aug,assigned,desperate){
     for(const[dx,dy]of N4) if(inb(x+dx,y+dy)) enq(x+dx,y+dy);
   }
   return added;
+}
+
+// FINAL RUNG - WIPE AND REBUILD (outside contributor via user 2026-08-25:
+// "record where the zone edges are clear, clear the entire zone, fill it with
+// canyon wall, carve out the zone edges you recorded, procgen your zone, then
+// work out how to get the cleared edges to connect"; engine license: the zone
+// build's own closing step IS ForceConnections, so edge reconnection is a
+// solved engine problem at port time). Fires only when the augment ladder
+// cannot stand ANY warren. The zone becomes a slot-canyon: full mass, the
+// recorded edge contract re-opened, the warren carved on the maximal band,
+// and 1-wide canyon defiles cut from each contract cluster toward the mouth,
+// preferring rock so they wrap around the dig rather than breaching it.
+function rebuildZone(seed,K,assigned){
+  const g0=canyonGridOnly(seed,K);
+  const contract=[];
+  const dry=i2=>g0.c[i2]===FLOOR&&g0.host[i2]&&!g0.water[i2];
+  for(let x=0;x<W;x++){ if(dry(idx(x,0))) contract.push([x,0]); if(dry(idx(x,H-1))) contract.push([x,H-1]); }
+  for(let y=1;y<H-1;y++){ if(dry(idx(0,y))) contract.push([0,y]); if(dry(idx(W-1,y))) contract.push([W-1,y]); }
+  const aug=new Set();
+  for(let i2=0;i2<W*H;i2++) aug.add(i2);
+  for(const [x,y] of contract) aug.delete(idx(x,y));
+  const r=build(seed,K,assigned,'canyon',aug);
+  r.rebuilt=true; r.augCells=0; r.augRounds=0;   // the overlay would be the whole zone; report via 'rebuilt' instead
+  if(r.none||!r.g||!r.art) return r;
+  const g=r.g;
+  // cluster the contract (runs of adjacent border cells)
+  const clusters=[]; const seen=new Set();
+  for(const [x,y] of contract){
+    const i2=idx(x,y); if(seen.has(i2)) continue;
+    const cl=[]; const q2=[[x,y]]; seen.add(i2);
+    while(q2.length){ const [cx,cy]=q2.pop(); cl.push([cx,cy]);
+      for(const [ox,oy] of contract){ const oi=idx(ox,oy);
+        if(!seen.has(oi)&&Math.abs(ox-cx)<=1&&Math.abs(oy-cy)<=1){ seen.add(oi); q2.push([ox,oy]); } } }
+    clusters.push(cl);
+  }
+  // defiles: dijkstra per cluster to the mouth, mass cheap, warren floor dear
+  const mi=g.mouthIdx;
+  const cost=i2=> (g.c[i2]===FLOOR&&g.host[i2])?0.5 : (g.c[i2]!==FLOOR)?2 : 25;
+  for(const cl of clusters){
+    if(cl.some(([x,y])=>Math.abs(x-(mi%W))+Math.abs(y-((mi/W)|0))<=2)) continue;   // the mouth's own doorstep
+    const dist=new Float64Array(W*H).fill(Infinity), prev=new Int32Array(W*H).fill(-1), done=new Uint8Array(W*H);
+    const heap=[]; const push=v=>{heap.push(v);let a2=heap.length-1;
+      while(a2>0){const p2=(a2-1)>>1; if(heap[p2][0]<=heap[a2][0])break; [heap[p2],heap[a2]]=[heap[a2],heap[p2]]; a2=p2}};
+    const pop=()=>{const t2=heap[0],l2=heap.pop();
+      if(heap.length){heap[0]=l2;let a2=0;for(;;){const b2=2*a2+1,c2=b2+1;let m2=a2;
+        if(b2<heap.length&&heap[b2][0]<heap[m2][0])m2=b2; if(c2<heap.length&&heap[c2][0]<heap[m2][0])m2=c2;
+        if(m2===a2)break; [heap[m2],heap[a2]]=[heap[a2],heap[m2]]; a2=m2}} return t2};
+    for(const [x,y] of cl){ const i2=idx(x,y); dist[i2]=0; push([0,i2]); }
+    let hit=-1;
+    while(heap.length){ const [c2,cur]=pop(); if(done[cur]) continue; done[cur]=1;
+      if(cur===mi){ hit=cur; break; }
+      const cx=cur%W, cy=(cur/W)|0;
+      for(const[dx,dy]of N4){ const nx=cx+dx,ny=cy+dy; if(!inb(nx,ny)) continue;
+        const ni=idx(nx,ny); if(done[ni]) continue;
+        const nc=c2+cost(ni);
+        if(nc<dist[ni]){ dist[ni]=nc; prev[ni]=cur; push([nc,ni]); } } }
+    if(hit<0) continue;
+    for(let c2=hit;c2>=0;c2=prev[c2]){
+      if(!(g.c[c2]===FLOOR&&g.host[c2])&&g.c[c2]!==FLOOR){   // only rock becomes defile; existing floor stays what it is
+        g.c[c2]=FLOOR; g.host[c2]=1; g.water[c2]=0; g.tree[c2]=0; }
+    }
+  }
+  return r;
 }
 function buildAugmented(seed,K,assigned,host){
   const aug=new Set(); let r=null, rounds=0, desperate=false;
@@ -2792,6 +2862,8 @@ function buildAugmented(seed,K,assigned,host){
     if(r.g&&bestAug.size&&!r.g.augment) r.g.augment=bestAug;
     return r;
   }
+  if(r.none && K.augRebuild && host==='canyon')
+    return rebuildZone(seed,K,+assigned);   // the final rung: nothing stood, the contract survives, the zone does not
   r.augCells=aug.size; r.augRounds=rounds;
   if(r.g&&aug.size&&!r.g.augment) r.g.augment=aug;
   return r;
@@ -2855,6 +2927,8 @@ const KNOBS=[
   ['network','tunnelMaxRun','tunnel max straight',0,30,6,'the artery cap in the borers\' own language: connectors, crosscuts and repairs pay +600/cell (against a wall\'s 80) to run straighter than this - dear, never a ban, so a boxed-in room still gets out. 0 = off. Tighter than maxRun on purpose: nobody hauls carts through a side passage (USER 2026-08-25 "between room tunnels seems worth trying out"; 6 is a CLAUDE dial)'],
   ['network','deadEndMin','dead ends min',0,6,1,'dry test-digs off corridors (USER 2026-08-25 "we could do a few dead ends as well"): 2-5 cells into the mass, ending in rock, stopping one cell short of any other floor (joining would be a loop, a different word). Dug after the trimmer so it cannot eat them. The geology already speaks the line - a breach heading is this sentence with water at the end'],
   ['network','deadEndMax','dead ends max',0,8,3,''],
+  ['network','augFuzz','augment fuzz %',0,80,35,'fuzzy tracing (outside contributor via the user, 2026-08-25): chance the growth frontier passes a cell by ONCE before converting it, so deeper cells convert past it and the augment seam roughens instead of rounding. Second visit always converts; desperate rounds never fuzz. 35 is a CLAUDE dial'],
+  ['network','augRebuild','rebuild rung',0,1,1,'the ladder\'s final rung (same contributor): when no warren can stand even augmented, record the clear zone edges (the traversability contract), fill the zone with mass, re-open the edges, carve on the maximal band, and cut 1-wide canyon defiles from each edge cluster toward the mouth (rock preferred, so they wrap the dig). Port-side the engine\'s own ForceConnections closes reconnection. Census has never needed it (0 of 90); it exists so the guarantee is architectural'],
   ['dress','roomFloor','room floor',0,1,1,'1 = a registered room (face / plain / commons) that dressed to ZERO items takes one re-roll of its own table with the Nothing row removed — the warren-floor law one level down (user docket 2026-08-24: rooms should spawn with *some* kind of decoration). Count variance stays; only the zero collapses to one. A room with no legal cell stays bare and counts refused'],
   ['dress','yardTrail','yard trail',0,1,1,'1 = outside yards get a guaranteed gap in the chalk ring (the non-corner cell nearest the mouth, never chalked) plus a worn trail from the gap to the quarry mouth with cairns on its shoulder at irregular intervals (USER FLOAT 2026-08-24, sim preview ahead of the scout port). Inside yards get the gap only. Cairn spacing R(3,6) and the placeholder cairn art are CLAUDE dials/debt'],
   ['placement','scoutN','scouts / world',10,150,50,'scout-and-quota (USER GREENLIT 2026-08-24): candidate canyon zones scored at worldgen before any claim exists. More scouts = better flourishing tails, slower worldgen. 50 is the design-doc sim number, CLAUDE dial'],
@@ -3189,7 +3263,7 @@ function statsHtml(r){
     ['navigational loops', r.loops],
     ['artery max straight', r.artMax],
     ['corridor max straight', r.corMax],
-    ['augmented rock', r.augCells? `${r.augCells} cells / ${r.augRounds} round${r.augRounds===1?'':'s'}` : '—', !!r.augCells],
+    ['augmented rock', r.rebuilt? 'ZONE REBUILT (final rung)' : r.augCells? `${r.augCells} cells / ${r.augRounds} round${r.augRounds===1?'':'s'}` : '—', !!r.augCells||!!r.rebuilt],
     ['dead ends', r.deadEnds ? `${r.deadEnds} (${r.deadEndCells} cells)` : 0],
     ['doorless pockets', r.doorless, r.doorless>0],
     ['connectivity repairs', r.repairs, r.repairs>0],
