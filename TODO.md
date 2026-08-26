@@ -1595,6 +1595,45 @@ errors, deployed hash-verified 3/3.
         (0.2s), background scouting (thread risk). Compile 0 errors, deployed
         hash-verified 2/2, `log-confirmed pending`.
 
+**BLIND-CLAIM AUGMENT MODEL — outside suggestion relayed by the USER 2026-08-25 ("pick the
+zones at random during worldgen, don't check if they have enough space, when the zone is
+found by the player, force the zone into a state that works for the procgen"), USER
+GREENLIT the sim pass ("let's try this, also"); SIM BUILT + MEASURED same sitting.
+Candidate REPLACEMENT for scout-and-quota placement (which stays shipped until ruled).**
+Engine license cited first: StockadeMaker (whose priority slot our warrens borrowed) does
+Z.ClearBox + FillRoundHollowBox - forts bulldoze the canyon blind; ours is the minimal
+inverse. Preceded by the recon that killed full-lazy scoring: worldgen has a hard ~9s
+floor if claims must be carve-verified, and the no-self-erase ruling (USER same sitting:
+"self erasing means that our generation is lying at certain points, which is not valid")
+plus the 6-12s budget forced the fork this model resolves - worldgen drops to ~0s, claims
+never lie because the zone is MADE to fit at visit.
+  Sim mechanics (`buildAugmented`/`growAugment`, `augTries` knob default 9): the carve
+  gets the REAL canyon first with every attempt and honesty gate; only a refusal or a
+  build below the claimed stage thickens rock into the canyon, nearest the band first.
+  Guards: never the border, never splitting the canyon floor (component check per cell),
+  water only on the DESPERATE rung (damming the shoreline; water is not floor so the
+  guard is untouched). Four mechanisms found by census and fixed in-sitting, recorded so
+  they survive the port: (1) frontier must seed from the biggest band WITH DRY CANYON
+  ACCESS, not the biggest band (water-locked giants); (2) target USABLE REACH, not raw
+  mass - growRegion rind-excludes rock touching canyon, and fresh augment is all shell
+  until it thickens; (3) hard zones need rounds - the connectivity guard rations growth
+  to trickles (nemesis seed 465405: rounds of 95/4/25/32/15/9/12); (4) KEEP THE BEST -
+  a later bigger augment can shift the carve and refuse where a smaller one stood, so
+  the best standing snapshot replays deterministically.
+  **MEASURED, 30 seeds per assigned stage, zero failures everywhere:** working 30/30 at
+  stage (fires 30%, avg 146 cells) · camp 30/30 built, 26 at stage (fires 80%, avg 218)
+  · flourishing 30/30 built, 17 at stage (fires 78%, avg 228, max ~490). Stage
+  attainment ceilings are the connectivity guard being honest; over-assignment is the
+  mix dial (assign ~9 fl for ~5 expected). Visit-time cost ~70-400ms inside a normal
+  zone build. Specimen seed 180158: flourishing, 271 floor, 385 augmented cells -
+  **honest view reads clean; 'show augment' overlay confirms most added rock became
+  warren interior.** New lab kit: `show augment` checkbox, `augmented rock` stats row;
+  forced-stage rolls augment, unforced rolls stay pure canyon truth.
+  **OPEN, the user's: (a) THE JUDGING - does an augmented site read as a lie with the
+  overlay off (the canvas question this sim exists to answer) · (b) the water-damming
+  desperate rung license · (c) over-assignment numbers for the stage mix · (d) the port
+  ruling itself - adopt blind-claim, retiring scout-and-quota placement.**
+
 **YARD PLACEMENT: AREA DECIDES — USER FLOAT 2026-08-25 ("what if we improved blockyard
 placement a bit when there's lots of open space outside?", with an in-game screenshot of a
 yard wedged in a cramped chamber beside a wide-open doorstep), SIM BUILT + MEASURED same

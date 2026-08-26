@@ -93,6 +93,7 @@
       <label title="whole-warren trodden floor (user ruled 2026-08-12, whole-warren scope). The floor object masks the Dirty paint underneath, so grass only peeks through in raw canyon — fresh cuts show old ground"><input type="checkbox" id="padded" checked> padded earth</label>
       <label title="v1's dress tables on the v2 registry (ported 2026-08-18): work evidence on the face, gallery on the commons, typed rooms in dwellings, the quarry-yard recipe on the block yard, natural stones warren-wide. Render toggle only; the dress always rolls, so the census sees it either way. Tense pass landed 2026-08-18: abandoned goes dark with heavy trash, reclaimed adds snapjaw fires; yard states ride occupancy"><input type="checkbox" id="dressed" checked> dress</label>
       <label title="tint the haulage way so you can see the global layer's decision"><input type="checkbox" id="showart"> show artery</label>
+      <label title="tint rock the augment added (blind-claim model 2026-08-25). OFF is the honest judging view: augmented rock renders identically to natural rock, and the question is whether the site reads as a lie without this crutch"><input type="checkbox" id="showaug"> show augment</label>
       <label>zoom <select id="genzoom"><option value="6">S</option><option value="10" selected>M</option><option value="16">L</option></select></label>
       <span id="status"></span>
     </div>
@@ -2469,7 +2470,7 @@ const STAGES=[
 ];
 
 let applySpawn=false;
-function buildOnce(seed,K,forced,host,attempt){
+function buildOnce(seed,K,forced,host,attempt,aug){
   RNG=mulberry32(seed); NOISE_SEED=seed|0; PAINT_SEED=seed|0;
   CY.riverChance=K.riverPct/100; CY.marshChance=K.marshPct/100;
   CY.dogthorn=95*K.treePct/100; CY.witchwood=25*K.treePct/100; CY.starapple=5*K.treePct/100; K_HUG=K.hugCost; K_PINCH=K.pinchCost;
@@ -2479,6 +2480,16 @@ function buildOnce(seed,K,forced,host,attempt){
 
   if(host==='canyon'){
     canyon=genCanyon(g);
+    // AUGMENT APPLICATION (blind-claim model sim, USER greenlit 2026-08-25 on
+    // a friend's suggestion; StockadeMaker license - forts bulldoze a box, we
+    // thicken rock into the canyon minimally). The carve sees augmented cells
+    // as ordinary carvable mass; water is never converted.
+    if(aug&&aug.size){
+      // water clears too: polite rounds never claim water cells, but the
+      // desperate rung may dam shoreline water (the stockade license)
+      for(const i of aug){ g.c[i]=SOLID; g.host[i]=0; g.tree[i]=0; g.water[i]=0; }
+      g.augment=aug;
+    }
     // Spawn gate, sitting ON TOP of whether the terrain could host one at all.
     // Base-game reference (PopulationTables.xml, read 2026-08-18): a canyon
     // surface zone rolls StairsDownBuilder 5% / DromadTrader 2% / ManySnapjaws 4%
@@ -2645,17 +2656,145 @@ function buildOnce(seed,K,forced,host,attempt){
 // away. Takes the FIRST attempt that clears the bar rather than the best of N:
 // best-of-N would push every warren toward the top of what its band can do, and
 // flatten exactly the variance the stage axis lives on.
-function build(seed,K,forced,host){
+function build(seed,K,forced,host,aug){
   const tries = host==='canyon' ? Math.max(1,K.attempts|0) : 1;
   let last=null;
   for(let a=0;a<tries;a++){
-    const r=buildOnce(seed,K,forced,host,a);
+    const r=buildOnce(seed,K,forced,host,a,aug);
     if(!r.none){ r.attempt=a; return r }
     last=r;
     if(r.reason==='no band'||r.reason==='band never meets the canyon') break;
   }
   if(last) last.attemptsUsed=tries;
   return last;
+}
+
+// ------------------------------------------------- blind-claim augment model
+// USER GREENLIT 2026-08-25 ("let's try this, also"), on a friend's suggestion:
+// "pick the zones at random during worldgen, don't check if they have enough
+// space, when the zone is found by the player, force the zone into a state
+// that works for the procgen." Engine receipt: StockadeMaker (whose priority
+// slot our warrens borrowed) does Z.ClearBox + FillRoundHollowBox - forts
+// bulldoze the canyon blind. Ours is the minimal inverse: the carve gets the
+// REAL canyon first with every attempt and honesty gate; only a refusal (or
+// a build below the claimed stage) thickens rock into the canyon, nearest
+// the band first, until the claimed stage fits. Added rock is mostly hollowed
+// by the carve itself. The judging question lives in the render: with 'show
+// augment' OFF, does an augmented site read as a lie?
+function canyonGridOnly(seed,K){
+  RNG=mulberry32(seed); NOISE_SEED=seed|0; PAINT_SEED=seed|0;
+  CY.riverChance=K.riverPct/100; CY.marshChance=K.marshPct/100;
+  CY.dogthorn=95*K.treePct/100; CY.witchwood=25*K.treePct/100; CY.starapple=5*K.treePct/100;
+  const g=newGrid(); genCanyon(g); return g;
+}
+function growAugment(seed,K,aug,assigned,desperate){
+  // regenerate the canyon (deterministic per seed), apply the augment so far,
+  // then thicken. Guards: never water, never the zone border, and never a
+  // conversion that splits the remaining canyon floor into MORE pieces than
+  // it already has (the canyon must stay traversable).
+  const g=canyonGridOnly(seed,K);
+  if(aug.size) for(const i of aug){ g.c[i]=SOLID; g.host[i]=0; g.tree[i]=0; g.water[i]=0; }
+  // seed from the biggest band WITH DRY CANYON ACCESS, not the biggest band:
+  // a water-locked giant can never host a mouth (found by the census failure
+  // "band never meets the canyon", seed 420366) - growing a smaller dry-skinned
+  // band into the giant is exactly what a digger with a claim would do
+  const band=(()=>{
+    const lab=new Int32Array(W*H).fill(-1); const comps=[];
+    for(let s2=0;s2<W*H;s2++){
+      if(lab[s2]>=0||g.c[s2]===FLOOR||g.host[s2]) continue;
+      const id2=comps.length, cells=[], q2=[s2]; lab[s2]=id2;
+      while(q2.length){ const c2=q2.pop(), x=c2%W, y=(c2/W)|0; cells.push([x,y]);
+        for(const[dx,dy]of N4){ const nx=x+dx,ny=y+dy; if(!inb(nx,ny)) continue;
+          const ni=idx(nx,ny);
+          if(lab[ni]<0&&g.c[ni]!==FLOOR&&!g.host[ni]){ lab[ni]=id2; q2.push(ni); } } }
+      comps.push({mass:cells.length,cells});
+    }
+    comps.sort((a,b)=>b.mass-a.mass);
+    for(const c2 of comps){
+      const dry=c2.cells.some(([x,y])=>N4.some(([dx,dy])=>inb(x+dx,y+dy)
+        &&g.c[idx(x+dx,y+dy)]===FLOOR&&g.host[idx(x+dx,y+dy)]&&!g.water[idx(x+dx,y+dy)]));
+      if(dry) return c2;
+    }
+    return comps[0]||null;   // fully water-locked zone: no dry band anywhere
+  })();
+  // USABLE reach, not raw mass (census failures "no face opens onto enough
+  // rock" taught this): growRegion rind-excludes rock touching canyon floor,
+  // and fresh augment is ALL shell until it thickens - so the target is what
+  // the carve can actually flood from the best dry face
+  let have=0;
+  if(band){
+    const skin=band.cells.filter(([x,y])=>N4.some(([dx,dy])=>inb(x+dx,y+dy)
+      &&g.c[idx(x+dx,y+dy)]===FLOOR&&g.host[idx(x+dx,y+dy)]&&!g.water[idx(x+dx,y+dy)]))
+      .filter(([x,y])=>x>=1&&y>=1&&x<=W-2&&y<=H-2);
+    for(const m of skin.slice(0,10)){
+      const reach=growRegion(g,{x:m[0],y:m[1]},Infinity);
+      if(reach.size>have) have=reach.size;
+    }
+  }
+  // headroom 1.25: geology eats pools out of the band and the carve keeps its
+  // own slack; a bare-minimum band re-refuses and wastes a round (CLAUDE dial)
+  const need=Math.ceil(STAGES[assigned].area*1.25);
+  let want=need-have;
+  if(want<=0) want=Math.ceil(STAGES[assigned].area*0.15);   // reach said yes but the carve refused: thicken anyway
+  const floorComps=()=>{
+    const seen=new Uint8Array(W*H); let n=0;
+    for(let s2=0;s2<W*H;s2++){
+      if(seen[s2]||!(g.c[s2]===FLOOR&&g.host[s2]&&!g.water[s2])) continue;
+      n++; const q2=[s2]; seen[s2]=1; let h2=0;
+      while(h2<q2.length){ const c2=q2[h2++], x=c2%W, y=(c2/W)|0;
+        for(const[dx,dy]of N4){ const nx=x+dx,ny=y+dy; if(!inb(nx,ny)) continue;
+          const ni=idx(nx,ny);
+          if(!seen[ni]&&g.c[ni]===FLOOR&&g.host[ni]&&!g.water[ni]){ seen[ni]=1; q2.push(ni); } } }
+    }
+    return n;
+  };
+  const base=floorComps();
+  const q=[], inq=new Uint8Array(W*H);
+  // DESPERATE RUNG (the census's water-hemmed holdouts): shoreline water may
+  // be dammed and claimed - it is not canyon floor, so the connectivity guard
+  // is untouched; polite rounds never take water
+  const enq=(x,y)=>{ if(x<1||y<1||x>W-2||y>H-2) return; const i=idx(x,y);
+    if(inq[i]) return;
+    if(g.c[i]===FLOOR&&g.host[i]&&!g.water[i]){ inq[i]=1; q.push(i); return; }
+    if(desperate&&g.water[i]){ inq[i]=1; q.push(i); } };
+  for(const [x,y] of band?band.cells:[])
+    for(const[dx,dy]of N4) if(inb(x+dx,y+dy)) enq(x+dx,y+dy);
+  let head=0, added=0;
+  while(head<q.length&&added<want){
+    const i=q[head++], x=i%W, y=(i/W)|0;
+    const wasTree=g.tree[i], wasWater=g.water[i], wasHost=g.host[i];
+    g.c[i]=SOLID; g.host[i]=0; g.tree[i]=0; g.water[i]=0;   // tentative
+    if(!wasWater&&floorComps()>base){                       // water cells can't split floor
+      g.c[i]=FLOOR; g.host[i]=wasHost; g.tree[i]=wasTree; g.water[i]=wasWater; continue; }
+    aug.add(i); added++;
+    for(const[dx,dy]of N4) if(inb(x+dx,y+dy)) enq(x+dx,y+dy);
+  }
+  return added;
+}
+function buildAugmented(seed,K,assigned,host){
+  const aug=new Set(); let r=null, rounds=0, desperate=false;
+  let bestAug=null, bestStage=-1;   // a LATER, bigger augment can shift the
+  // carve and refuse where a smaller one stood - keep the best standing
+  // snapshot and replay it deterministically if the ladder ends on a refusal
+  for(let t=0;t<=K.augTries;t++){
+    r=build(seed,K,assigned,host,aug.size?aug:null);
+    if(!r.none && r.stageIdx>bestStage){ bestStage=r.stageIdx; bestAug=new Set(aug); }
+    if(!r.none && r.stageIdx>=+assigned) break;
+    if(t===K.augTries) break;
+    let grown=growAugment(seed,K,aug,+assigned,desperate);
+    if(!grown && !desperate){ desperate=true; grown=growAugment(seed,K,aug,+assigned,true); }
+    if(!grown) break;
+    rounds++;
+  }
+  if(r.none && bestAug){
+    r=build(seed,K,assigned,host,bestAug.size?bestAug:null);   // deterministic replay
+    r.augCells=bestAug.size; r.augRounds=rounds;
+    if(r.g&&bestAug.size&&!r.g.augment) r.g.augment=bestAug;
+    return r;
+  }
+  r.augCells=aug.size; r.augRounds=rounds;
+  if(r.g&&aug.size&&!r.g.augment) r.g.augment=aug;
+  return r;
 }
 
 // ---------------------------------------------------------------- knobs
@@ -2706,6 +2845,7 @@ const KNOBS=[
   ['network','hugCost','no hugging',0,600,260,'what a tunnel pays per side touching existing floor — this is what keeps corridors one cell apart instead of braiding'],
   ['network','emptyBase','reuse cost',0,400,200,'what a tunnel pays to thread EXISTING floor. Redrock uses 200 against a wall cost of 80, so hauls bore fresh passage instead of cutting through rooms'],
   ['network','attempts','tries per zone',1,8,4,'complete carves attempted from different faces before a zone is declared warren-less; the canyon itself never changes between tries'],
+  ['network','augTries','augment rounds',0,12,9,'blind-claim model (USER greenlit 2026-08-25, the friend\'s "force the zone into a state that works"): when a FORCED stage refuses or under-builds, rounds of band-thickening - canyon floor converted to carvable rock nearest the band, never water, never splitting the canyon floor - before accepting the shortfall. 0 = pure canyon truth. Fires only on forced-stage rolls; unforced rolls never augment. Headroom 1.25x and this default are CLAUDE dials'],
   ['network','minSite','worth the trip',0,200,70,'floor cells a site must reach, or the zone yields NO warren — a rumour is a promise'],
   ['network','campFloor','camp floor &ge;',80,250,130,'built floor a CAMP label requires; under it the site demotes to working. Stage honesty: the label sits on what got built (from the measured bands: working tops out ~188, camp p10 was 95)'],
   ['network','flourFloor','flourishing floor &ge;',120,350,210,'built floor a FLOURISHING label requires; under it the site demotes to camp (or further). Flourishing p10 was 123 before this bar - the low tail read as working-sized'],
@@ -2958,6 +3098,8 @@ function draw(cv,res,cell,drawMode,tintArt,useTiles,padded){
         if(!drawn) glyph(ctx,px,py,cw,ch,id2);
       }
       if(tintArt&&g.art[idx(x,y)]){ ctx.fillStyle='rgba(200,150,40,.28)'; ctx.fillRect(px,py,cw,ch) }
+      const sa=document.getElementById('showaug');
+      if(sa&&sa.checked&&g.augment&&g.augment.has(idx(x,y))){ ctx.fillStyle='rgba(255,0,180,.35)'; ctx.fillRect(px,py,cw,ch) }
     }
     return;
   }
@@ -2979,6 +3121,8 @@ function draw(cv,res,cell,drawMode,tintArt,useTiles,padded){
     // drawing mode stays a pure three-value view for holding against drawings
     if(!drawMode&&showItems&&v===FLOOR&&g.item[idx(x,y)])
       glyph(ctx,(x-x0)*cell,(y-y0)*cell,cell,cell,g.item[idx(x,y)]);
+    const sa2=document.getElementById('showaug');
+    if(sa2&&sa2.checked&&g.augment&&g.augment.has(idx(x,y))){ ctx.fillStyle='rgba(255,0,180,.35)'; ctx.fillRect((x-x0)*cell,(y-y0)*cell,cell,cell) }
   }
 }
 
@@ -3045,6 +3189,7 @@ function statsHtml(r){
     ['navigational loops', r.loops],
     ['artery max straight', r.artMax],
     ['corridor max straight', r.corMax],
+    ['augmented rock', r.augCells? `${r.augCells} cells / ${r.augRounds} round${r.augRounds===1?'':'s'}` : '—', !!r.augCells],
     ['dead ends', r.deadEnds ? `${r.deadEnds} (${r.deadEndCells} cells)` : 0],
     ['doorless pockets', r.doorless, r.doorless>0],
     ['connectivity repairs', r.repairs, r.repairs>0],
@@ -3077,18 +3222,25 @@ function render(r){
   $('stats').innerHTML=statsHtml(r);
   $('status').textContent=`${r.pockets.length} pockets, ${r.pillars} pillars`;
 }
+function rollBuild(s,stage){
+  // a forced stage is a CLAIM under the blind-claim model: it must stand, so
+  // it may augment. An unforced roll is exploration: canyon truth only.
+  return (stage!==''&&hostSel()==='canyon'&&K.augTries>0)
+    ? buildAugmented(s,K,stage,hostSel())
+    : build(s,K,stage===''?null:stage,hostSel());
+}
 function rollNew(seed){
   const stage=$('forcestage').value;
   const s = seed===undefined ? (Math.floor(Math.random()*1e9)) : seed;
   $('genseed').value=s;
-  render(build(s,K,stage===''?null:stage,hostSel()));
+  render(rollBuild(s,stage));
   pushHist(s,stage,K);
 }
 function rerollSame(){                 // same seed, current knobs (knob tuning)
   if(!current) return rollNew();
   const stage=$('forcestage').value;
   if(pairMode) return pairKind==='ab'? abLayout() : pairKind==='wind'? windAB() : twoUp();
-  render(build(current.seed,K,stage===''?null:stage,hostSel()));
+  render(rollBuild(current.seed,stage));
 }
 let pairKind=null;
 // THIS iteration against the LAST one (user direction 2026-08-18: "worry less
