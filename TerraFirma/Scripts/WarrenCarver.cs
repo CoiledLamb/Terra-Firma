@@ -2423,7 +2423,7 @@ namespace Cleo.TerraFirma.Scripts
 		}
 
 		/// <summary>One complete attempt (buildOnce). Grid-side only; ApplyToZone lands it.</summary>
-		private static Result BuildOnce(Zone Z, int seed, int? forced, int attempt, bool blockLayout, out Grid gridOut, out List<PocketRec> pocketsOut)
+		private static Result BuildOnce(Zone Z, int seed, int? forced, int attempt, bool blockLayout, bool dress, out Grid gridOut, out List<PocketRec> pocketsOut)
 		{
 			_state = (uint)seed; _noiseSeed = seed;
 			gridOut = null; pocketsOut = null;
@@ -2594,8 +2594,14 @@ namespace Cleo.TerraFirma.Scripts
 			int[] floorMin = { 0, CAMP_FLOOR, FLOUR_FLOOR };
 			while (si > 0 && m.Floor < floorMin[si]) { si--; degraded++; }
 			var roles = RegisterRoles(g, art, pockets, si, occupancy);
-			string dressStats = DressSite(g, art, pockets, roles, occupancy, m.Floor);
-			Helpers.VerifyLog("WARREN", $"dress: {dressStats}");
+			// dress is the pipeline's TAIL - after every layout roll - so a dry
+			// run (scout probe) may skip it without changing what it measures or
+			// what a winner's full rebuild produces (timesave 1, user 2026-08-25)
+			if (dress)
+			{
+				string dressStats = DressSite(g, art, pockets, roles, occupancy, m.Floor);
+				Helpers.VerifyLog("WARREN", $"dress: {dressStats}");
+			}
 			Helpers.VerifyLog("WARREN", $"carve: band {band.Mass}, mouth ({mouth.X},{mouth.Y}), stage {STAGES[si].Name} (wanted {STAGES[wanted].Name}, degraded {degraded}), " +
 				$"{pockets.Count} pockets, floor {m.Floor}, loops {m.Loops}, comps {m.Comps}, crosscuts {crosscuts}, infill {filled}, " +
 				$"aquifers {aq.Pools}p/{aq.Veins}v, breaches {breaches}, repairs {repairs}, trimmed {trimmed}, layout {(blockLayout ? "blocks" : "boxes")}");
@@ -2627,7 +2633,7 @@ namespace Cleo.TerraFirma.Scripts
 			Result last = null;
 			for (int a = 0; a < ATTEMPTS; a++)
 			{
-				var r = BuildOnce(Z, seed, forcedStage, a, false, out Grid g, out List<PocketRec> pockets);
+				var r = BuildOnce(Z, seed, forcedStage, a, false, apply, out Grid g, out List<PocketRec> pockets);
 				if (r.Built)
 				{
 					if (apply) ApplyToZone(Z, g);
@@ -2636,7 +2642,7 @@ namespace Cleo.TerraFirma.Scripts
 				last = r;
 				if (r.Reason.StartsWith("too little got built"))
 				{
-					var r2 = BuildOnce(Z, seed, forcedStage, a, true, out Grid g2, out List<PocketRec> pockets2);
+					var r2 = BuildOnce(Z, seed, forcedStage, a, true, apply, out Grid g2, out List<PocketRec> pockets2);
 					if (r2.Built)
 					{
 						Helpers.VerifyLog("WARREN", $"blocks rescued the face (attempt {a}, boxes built {r.Reason})");

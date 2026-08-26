@@ -35,7 +35,7 @@ namespace XRL.World.WorldBuilders
 	public class Cleo_TerraFirma_WarrenPlacement : IJoppaWorldBuilderExtension
 	{
 		public const int WARRENS_PER_WORLD = 25;   // ruled 2026-08-18; pig-farm frequency
-		public const int SCOUT_N = 50;             // CLAUDE dial (more = better tails, slower worldgen)
+		public const int SCOUT_N = 35;             // USER STRUCK 2026-08-25 (was 50): the soft ceiling; the 2x extension covers poor worlds
 		public const int QUOTA_FL = 5;             // CLAUDE dial; fl-reclaimed/world ~ this x 0.14
 		public const int QUOTA_CAMP = 9;           // CLAUDE dial; working fills the remainder
 		public const bool QUOTA_ROLLED = true;     // CLAUDE lean: +/-1 per world so worlds differ

@@ -1582,6 +1582,18 @@ errors, deployed hash-verified 3/3.
         flourishing-only shortfall (chasing the rare tier could double worldgen; the
         cascade covers it). Timing line grows "(extended for capacity)". Compile 0
         errors, deployed hash-verified, `log-confirmed pending`.
+      - **EMBARK 5 + TIMESAVES:** fl+1 exit margin forced a full run hunting insurance
+        against fl refusals, which are structurally impossible (probe replay) - margins
+        repriced fl 0 / camp +1 / total +2. USER FLAG: scout ticks were landing on the
+        farms/forts loading step (StepProgress advances the CURRENT entry; only NextStep
+        creates one) - both phases now own NextStep entries with honest MaxSteps.
+        **Timesave menu offered; USER RULED 2026-08-25 ("sure, we can do 1 and 3"):**
+        (1) dry runs skip the dress pass (pipeline tail, cannot change what the probe
+        measures or what winners rebuild), ~1s; (3) **SCOUT_N STRUCK 50 → 35** (the
+        first user-struck placement dial) - rich worlds unaffected, average save ~5s,
+        poor worlds ride the 2x extension (now 70). Declined for now: probe-grid reuse
+        (0.2s), background scouting (thread risk). Compile 0 errors, deployed
+        hash-verified 2/2, `log-confirmed pending`.
 
 **YARD PLACEMENT: AREA DECIDES — USER FLOAT 2026-08-25 ("what if we improved blockyard
 placement a bit when there's lots of open space outside?", with an in-game screenshot of a
