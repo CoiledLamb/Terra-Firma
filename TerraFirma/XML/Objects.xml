@@ -249,32 +249,30 @@ Perishes when unequipped." />
 		<tag Name="DynamicObjectsTable:Trinkets" /> <!-- SPAWN WIRED 2026-08-22: rides the crayon trinket pools via merges -->
 	</object>
 	<!-- GUT CISTERN (boar-vessel workstream 2026-08-26): sealed internal fresh-water tank worn
-	     on the plain Body slot, unremovable (USER RULED 2026-08-26: Body-slot item that can't
-	     be removed, no custom anatomy; then "a gut cistern is basically a natural weapon", and
-	     the recon agreed). NaturalEquipment = the engine's own organ grammar: forced-only
-	     unequip, no charge baggage (decomp; Cursed rejected as an IActivePart with power
-	     machinery). DELIBERATE OMISSIONS: no NaturalGear tag (Brain.CleanNaturalGear obliterates
-	     unequipped naturals from inventory at reequip, would eat the loot), no IsReal=false, no
-	     Natural intproperty; the item stays REAL so the death drop survives. Auto-equip rides
-	     the same PerformReequip path that arms every base boar's gore from inventoryobject.
-	     Ruled liquid shape: two LiquidProducers, zero C#; this one trickles pure fresh water
-	     into itself (producers tick on carried items, proven by our own take-stones Temporary
-	     bug). Sealed idiom = base Clue_BulgingWaterskin (Items.xml ~12605). WaterContainer
-	     chassis brings LeakWhenBroken free: a cracked cistern weeps its cargo. Drops with the
-	     creature on death, sealed; that drop IS the loot. PLAYER TRAP FLAGGED: a looted cistern
-	     equipped on a player's Body slot is also permanent; the description carries the tell.
-	     RATE and MaxVolume DRAFT and load-bearing (the money number), numbers sitting owed.
-	     Description DRAFT, signoff owed. Tile inherits the waterskin sprite, sprite debt filed. -->
+	     on the plain Body slot (USER RULED 2026-08-26: Body-slot item, no custom anatomy).
+	     REMOVABILITY RE-RULED same day ("yeag, sounds fine" to plain removable gear): the
+	     NaturalEquipment unremovable pass is REVERTED; a player who loots one may wear it
+	     freely. The boar keeps it in practice anyway: reequip only swaps for strictly better
+	     gear and a vessel never acquires any (decomp recon); the one strip path is dominating
+	     a vessel, accepted as earned. NaturalGear tag still deliberately absent
+	     (Brain.CleanNaturalGear obliterates unequipped naturals at reequip), IsReal stays true;
+	     the death drop survives. Auto-equip rides the same PerformReequip path that arms every
+	     base boar's gore from inventoryobject. Ruled liquid shape: two LiquidProducers, zero
+	     C#; this one trickles pure fresh water into itself (producers tick on carried items,
+	     proven by our own take-stones Temporary bug). Sealed idiom = base Clue_BulgingWaterskin
+	     (Items.xml ~12605). WaterContainer chassis brings LeakWhenBroken free: a cracked
+	     cistern weeps its cargo. Drops with the creature on death, sealed; that drop IS the
+	     loot. RATE and MaxVolume DRAFT and load-bearing (the money number), numbers sitting
+	     owed. Description DRAFT, signoff owed. Tile inherits the waterskin sprite, sprite debt
+	     filed. -->
 	<object Name="Cleo_TerraFirma_GutCistern" Inherits="WaterContainer">
 		<part Name="Render" DisplayName="gut cistern" ColorString="&amp;w" DetailColor="B" />
 		<part Name="Physics" Organic="true" Weight="5" />
 		<part Name="LiquidVolume" MaxVolume="16" Volume="0" StartVolume="0" InitialLiquid="water-1000" Sealed="true" ManualSeal="true" /> <!-- USER CATCH 2026-08-26: Sealed alone is PERMANENT (Unseal action only exists under ManualSeal, LiquidVolume decomp ~3008); ManualSeal added so the looted cistern can be opened. Producer self-fill ignores the seal (DistributeLiquid mixes directly), so it still fills while sealed and worn -->
-
 		<part Name="Armor" WornOn="Body" />
-		<part Name="NaturalEquipment" />
 		<part Name="LiquidProducer" Liquid="water" FillSelfOnly="true" VariableRate="1000-4000" WorksOnWearer="false" WorksOnSelf="true" />
 		<part Name="Commerce" Value="15" />
-		<part Name="Description" Short="A clay bladder rides where a stomach would go, warm and faintly sweating. Something inside strains the salt from what the body carries and hoards the fresh water for itself. Once a body takes it in, it does not come back out." /> <!-- DRAFT, signoff owed -->
+		<part Name="Description" Short="A clay bladder rides where a stomach would go, warm and faintly sweating. Something inside strains the salt from what the body carries and hoards the fresh water for itself." /> <!-- DRAFT, signoff owed; the does-not-come-back-out warning line died with the unremovable pass -->
 		<tag Name="Tier" Value="1" />
 	</object>
 </objects>
