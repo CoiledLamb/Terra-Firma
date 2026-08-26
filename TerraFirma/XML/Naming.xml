@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<naming>
+  <namestyles>
+    <!-- STONECARVER PERSONAL NAMES (migrated from Builder_StonecarverEpithet.cs 2026-08-26,
+         USER: "migrating the names sounds sensible"). The engine's namestyle schema IS the
+         junction architecture the banks were built on: prefixes Amount 1, infixes Amount 0-1
+         (the coin flip), postfixes Amount 1, TitleCase capitalization. Banks verbatim from
+         the C# arrays: ACCEPTED as-drafted 2026-08-14, five infix adds user-blessed
+         2026-08-15 after the roller demo. Junction discipline preserved: C-final prefixes,
+         VCV infixes, C-initial postfixes, so every join is collision-proof and no guard is
+         needed; keep that shape when adding words. Unweighted rows = the old uniform picks;
+         Weight= is legal per word if a name should lead.
+         The scope pins this style to the epithet builder's own request (Special match, the
+         goatfolk hero idiom, base Naming.xml:1297) so ordinary name generation never rolls
+         it and it never leaks into village naming. -->
+    <namestyle Name="Cleo_TerraFirma_Stonecarver" Format="TitleCase">
+      <scopes>
+        <scope Name="Main" Special="Cleo_TerraFirma_Stonecarver" Priority="200" Combine="false" />
+      </scopes>
+      <prefixes Amount="1">
+        <prefix Name="ar" />
+        <prefix Name="vel" />
+        <prefix Name="lar" />
+        <prefix Name="than" />
+        <prefix Name="ram" />
+        <prefix Name="sem" />
+        <prefix Name="cul" />
+        <prefix Name="tles" />
+        <prefix Name="pev" />
+        <prefix Name="ras" />
+        <prefix Name="mun" />
+        <prefix Name="spur" />
+      </prefixes>
+      <infixes Amount="0-1">
+        <infix Name="utha" />
+        <infix Name="athi" />
+        <infix Name="eni" />
+        <infix Name="ena" />
+        <infix Name="ari" />
+        <infix Name="ithi" />
+        <infix Name="aru" />
+        <infix Name="eli" />
+        <infix Name="anthi" />
+        <infix Name="elthu" />
+        <infix Name="arna" />
+        <infix Name="uni" />
+        <infix Name="avi" />
+      </infixes>
+      <postfixes Amount="1">
+        <postfix Name="tha" />
+        <postfix Name="thia" />
+        <postfix Name="na" />
+        <postfix Name="nia" />
+        <postfix Name="ce" />
+        <postfix Name="za" />
+        <postfix Name="til" />
+        <postfix Name="sa" />
+        <postfix Name="cna" />
+      </postfixes>
+    </namestyle>
+  </namestyles>
+</naming>

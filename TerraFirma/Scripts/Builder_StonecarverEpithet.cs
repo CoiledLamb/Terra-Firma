@@ -31,12 +31,15 @@ namespace Cleo.TerraFirma.Scripts
 	/// </summary>
 	public static class StonecarverEpithet
 	{
-		// ---- personal-name banks (ACCEPTED as-drafted 2026-08-14; five infix adds user-blessed
-		// 2026-08-15 after the roller demo). Junction architecture: C-final prefixes, VCV infixes,
-		// C-initial postfixes, so every join is collision-proof and no guard is needed.
-		private static readonly string[] Prefixes = { "ar", "vel", "lar", "than", "ram", "sem", "cul", "tles", "pev", "ras", "mun", "spur" };
-		private static readonly string[] Infixes = { "utha", "athi", "eni", "ena", "ari", "ithi", "aru", "eli", "anthi", "elthu", "arna", "uni", "avi" };
-		private static readonly string[] Postfixes = { "tha", "thia", "na", "nia", "ce", "za", "til", "sa", "cna" };
+		// ---- personal-name banks MOVED TO XML/Naming.xml 2026-08-26 (USER: "migrating the
+		// names sounds sensible"): the engine's namestyle schema is the junction architecture
+		// verbatim (prefixes Amount 1, infixes Amount 0-1, postfixes Amount 1, TitleCase),
+		// resolved by NameMaker through the Special-pinned scope, the goatfolk hero idiom.
+		// Editing the syllabary is an XML edit now, no recompile. The byname banks below stay
+		// HERE deliberately: their words are fused to the grant switches, and the ruled
+		// grammar makes the bank a curated manifest (a word may not enter until its
+		// mutation's NPC AI is committed), so the compile step is doing curation work.
+		private const string NAME_STYLE = "Cleo_TerraFirma_Stonecarver";
 
 		// ---- byname banks (materials FINAL 13 + crafts 13, RULED 2026-08-15)
 		private static readonly string[] Materials = { "stone", "flint", "scree", "cairn", "grit", "chalk", "spall", "marl", "cobble", "salt", "karst", "quartz", "lode" };
@@ -57,16 +60,20 @@ namespace Cleo.TerraFirma.Scripts
 
 		private static string Capitalize(string s) => s.IsNullOrEmpty() ? s : char.ToUpper(s[0]) + s.Substring(1);
 
-		/// <summary>Rolls a personal name from the etruscan-derived banks: prefix + 0-1 infix +
-		/// postfix. The infix coin-flip is the length dial the tracker flagged (shipping
-		/// InfixAmount 1 vs 0-2 is a taste call still owed).</summary>
+		/// <summary>Rolls a personal name from the etruscan-derived banks, which live in
+		/// XML/Naming.xml now (the infix coin-flip is the style's Amount="0-1"; the length
+		/// dial the tracker flagged is an XML edit today). A missing or broken style fails
+		/// LOUD with a placeholder name, never silently.</summary>
 		public static string RollPersonalName(out string pieces)
 		{
-			string prefix = Pick(Prefixes);
-			string infix = Stat.Random(0, 1) == 1 ? Pick(Infixes) : "";
-			string postfix = Pick(Postfixes);
-			pieces = infix.IsNullOrEmpty() ? $"{prefix}+{postfix}" : $"{prefix}+{infix}+{postfix}";
-			return Capitalize(prefix + infix + postfix);
+			pieces = "Naming.xml:" + NAME_STYLE;
+			string name = XRL.Names.NameMaker.MakeName(Special: NAME_STYLE, FailureOkay: true);
+			if (name.IsNullOrEmpty())
+			{
+				MetricsManager.LogError("TerraFirma: namestyle '" + NAME_STYLE + "' rolled no name (check XML/Naming.xml); placeholder used");
+				return "Nameless";
+			}
+			return name;
 		}
 
 		/// <summary>Rolls the two-axis byname. Material and craft are drawn independently -- the

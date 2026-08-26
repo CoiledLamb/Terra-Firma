@@ -1974,7 +1974,32 @@ obligation and full verification protocol spelled out in the brief.
     the object. Determinism note: the overseer roll moved from seeded Chance() to the
     ambient Generate lane where the rest of the crew already rolled.
   `[verify]` rides the population sweep: overseer frequency reads ~15/40/75 by stage
-  over many sites, the overseer line carries a real byname, tfcarverpack unchanged. Distribution-equal with
+  over many sites, the overseer line carries a real byname, tfcarverpack unchanged.
+
+  **PERSONAL-NAME BANKS TO NAMING.XML — USER 2026-08-26 ("migrating the names sounds
+  sensible"), BUILT same sitting: compile 0 errors, XML strict-valid + text rules OK,
+  deployed hash-verified 2/2 (new XML/Naming.xml + the builder), `log-confirmed
+  pending`.** Recon receipts: the engine's namestyle schema IS the junction
+  architecture verbatim (base Naming.xml `<prefixes Amount="1">` / `<infixes
+  Amount="0-2">` / `<postfixes Amount="1">` with per-word Weight and TitleCase);
+  selection is scope-driven and `Special=` pinning is the goatfolk hero idiom (base
+  Naming.xml:1297 `<scope Special="Hero" Faction="Goatfolk" Priority="200"/>`); mod
+  Naming.xml files load through `NameStyles.Init` (`ProcessNamingXmlFile(item,
+  item.IsMod)`). Shape: `Cleo_TerraFirma_Stonecarver` namestyle carries the three
+  banks verbatim (12 prefixes / 13 infixes at Amount 0-1, the old coin flip / 9
+  postfixes, unweighted = the old uniform picks; junction discipline documented in
+  the file); the builder's `RollPersonalName` calls `NameMaker.MakeName(Special:
+  ...)` and FAILS LOUD to a "Nameless" placeholder if the style rolls nothing. The
+  C# syllable arrays are deleted; the tracker's infix-length taste dial (1 vs 0-2)
+  is now an XML attribute edit. BYNAME BANKS DELIBERATELY NOT MIGRATED: material and
+  craft words are fused to the grant switches, and the ruled bank-as-manifest
+  grammar (a word may not enter until its mutation's NPC AI is committed) means the
+  compile step is doing curation work; recorded as the standing position.
+  Distribution note: name rolls moved from `Stat.Random` picks in our code to
+  NameMaker's own rolls, same ambient lane, distribution-equal per bank.
+  `[verify]` overseers and tfcarverpack legendaries still roll junction-clean names
+  (no double vowel-vowel or consonant-pile joins), no `TerraFirma: namestyle` errors
+  in Player.log. Distribution-equal with
     the pre-migration pass by construction (same rolls, same order, same percentages
     now read from XML).
   `[verify]` rides the population sweep above unchanged; additionally no `TerraFirma:`
