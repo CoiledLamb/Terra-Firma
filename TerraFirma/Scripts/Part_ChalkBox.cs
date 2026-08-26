@@ -61,7 +61,17 @@ namespace XRL.World.Parts
 		{
 			if (Uses >= 0 && ParentObject.IsReal && ParentObject.IsTakeable())
 			{
-				E.AddTag("{{y|(" + Uses + ")}}");
+				// serving-style count per the 2026-08-26 re-ruling (supersedes stack style,
+				// which misread as a stack of boxes): PreparedCookingIngredient's own
+				// bracket grammar verbatim, unit named so the number can't be a count of boxes
+				if (Uses == 1)
+				{
+					E.AddTag("{{y|[{{C|1}} stick]}}");
+				}
+				else
+				{
+					E.AddTag("{{y|[{{C|" + Uses + "}} sticks]}}");
+				}
 				// self-heal for the button count: the ability entry's DisplayName SERIALIZES,
 				// so a fresh load shows the previous session's stale total until something
 				// syncs; any render of a carried box (inventory open, message line) fixes it
