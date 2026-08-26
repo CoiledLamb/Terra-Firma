@@ -327,6 +327,25 @@ function genCanyon(g){
 // right?" — right, and this is where that gets answered instead of assumed. The
 // bands between canyon floor are the only rock we own; the site's footprint is
 // the largest rectangle that fits inside one, and the STAGE steps down until it
+// INTERIOR-CHECKING VOCABULARY (outside contributor via the user, 2026-08-25):
+// membership is a BASIS PREDICATE, and "inside" means nothing until you name
+// one - the same cell is inner on one basis and edge on another. touches4/8
+// are the shoreline tests (adjacency to cells satisfying pred, in-bounds
+// only); isOuterOf marks a region's own edge member (any of eight neighbors
+// falls outside the basis - the zone border counts as outside); isInnerOf
+// marks the enveloped core (cardinals all pass; strict demands every ordinal,
+// loose forgives exactly one - the staircase-wall case). The generator had
+// hand-rolled these six-plus times under different names before they arrived.
+const touches4=(x,y,pred)=>N4.some(([dx,dy])=>inb(x+dx,y+dy)&&pred(idx(x+dx,y+dy)));
+const touches8=(x,y,pred)=>N8.some(([dx,dy])=>inb(x+dx,y+dy)&&pred(idx(x+dx,y+dy)));
+const isOuterOf=(x,y,basis)=>N8.some(([dx,dy])=>{const nx=x+dx,ny=y+dy;return !inb(nx,ny)||!basis(idx(nx,ny))});
+const isInnerOf=(x,y,basis,strict=true)=>{let miss=0;
+  for(const[dx,dy]of N8){const nx=x+dx,ny=y+dy;
+    if(inb(nx,ny)&&basis(idx(nx,ny))) continue;
+    if(dx===0||dy===0) return false;
+    miss++;}
+  return miss===0||(!strict&&miss===1)};
+
 // does. A thin band cannot hold a flourishing warren, full stop.
 function largestBand(g){
   const lab=new Int32Array(W*H).fill(-1); let n=0; const cells=[];
@@ -361,7 +380,7 @@ function growRegion(g,mouth,budget){
   // touching the canyon, so half of all sites still had a DIAGONAL slip into
   // it — a second way in that the 4-adjacency mouth count never counted, and
   // which made "every site has exactly one mouth" true only of one geometry.
-  const onSkin=(x,y)=>N8.some(([dx,dy])=>inb(x+dx,y+dy)&&g.host[idx(x+dx,y+dy)]);
+  const onSkin=(x,y)=>touches8(x,y,i=>g.host[i]);   // the canyon's shoreline, rock side
   const mask=new Uint8Array(W*H), q=[[mouth.x,mouth.y]];
   mask[idx(mouth.x,mouth.y)]=1;
   let n=1, head=0;
@@ -457,7 +476,7 @@ function layArtery(g,K,wpRange,foot,fixed){
   // a jog may now DIG into adjacent owned rock (never the canyon, never its
   // rind, never the border), and maxRun forces a switchback when a heading
   // runs too long. The bias stays horizontal because the goal chase does.
-  const nearHost=(x,y)=>N8.some(([dx,dy])=>inb(x+dx,y+dy)&&g.host[idx(x+dx,y+dy)]);
+  const nearHost=(x,y)=>touches8(x,y,i=>g.host[i]);
   const diggable=(x,y)=> x>=1&&y>=1&&x<=W-2&&y<=H-2 && !g.host[idx(x,y)] && !nearHost(x,y);
   // the cap measures the CARVE, not the walk: shuffled waypoint bands re-cross
   // rows, and colinear passes merge into straights no walk streak ever saw.
@@ -931,7 +950,7 @@ function tunnelCost(g,x,y,emptyBase,noiseOn){
   // the SKIN against the canyon is what the single-mouth ruling protects. So the
   // skin is priced as a last resort — finite, so a boxed-in room can still get
   // out, but dear enough that a tunnel detours most of the zone first.
-  if(N4.some(([dx,dy])=>inb(x+dx,y+dy)&&g.host[idx(x+dx,y+dy)])) return 900+n;
+  if(touches4(x,y,i=>g.host[i])) return 900+n;   // the skin against the canyon, priced dear
   if(g.c[idx(x,y)]===FLOOR) return n+emptyBase;
   // THE MISSING TERM. emptyBase prices going THROUGH existing floor; nothing
   // priced running BESIDE it, so every tunnel hugged the last one and the carve
@@ -2250,7 +2269,7 @@ function componentCount(g){
 function digDeadEnds(g,K){
   const want=R(Math.min(K.deadEndMin,K.deadEndMax),Math.max(K.deadEndMin,K.deadEndMax));
   if(want<=0) return {dug:0,cells:0};
-  const nearHost=(x,y)=>N8.some(([dx,dy])=>inb(x+dx,y+dy)&&g.host[idx(x+dx,y+dy)]);
+  const nearHost=(x,y)=>touches8(x,y,i=>g.host[i]);
   const cands=[];
   for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){
     if(g.c[idx(x,y)]!==FLOOR||g.pocket[idx(x,y)]>=0) continue;   // corridors only
@@ -2369,7 +2388,7 @@ function placeAquifers(g,band,K){
   const n=R(K.aquiferMin,K.aquiferMax);
   if(!n) return {pools:0,veins:0};
   const interior=band.cells.filter(([x,y])=>x>4&&y>3&&x<W-5&&y<H-4
-    &&!N8.some(([dx,dy])=>inb(x+dx,y+dy)&&g.c[idx(x+dx,y+dy)]===FLOOR));
+    &&isInnerOf(x,y,i=>g.c[i]!==FLOOR));   // sealed pools seed only in the enveloped core of the mass
   if(!interior.length) return {pools:0,veins:0};
   const wet=(x,y)=>{ if(!inb(x,y)||x<1||y<1||x>W-2||y>H-2) return;
     g.c[idx(x,y)]=FLOOR; g.host[idx(x,y)]=1; g.water[idx(x,y)]=1; g.aqua[idx(x,y)]=1 };
@@ -2524,8 +2543,7 @@ function buildOnce(seed,K,forced,host,attempt,aug){
     // the mouth opens onto CANYON FLOOR, never onto the river. The hewer's own
     // line is that diggers don't breach aquifers, and with water counted as host
     // the skin filter was happily siting haul mouths in the water.
-    const skin=band.cells.filter(([x,y])=>N4.some(([dx,dy])=>inb(x+dx,y+dy)
-                             &&g.host[idx(x+dx,y+dy)]&&!g.water[idx(x+dx,y+dy)]))
+    const skin=band.cells.filter(([x,y])=>touches4(x,y,i=>g.host[i]&&!g.water[i]))
                          .filter(([x,y])=>x>=1&&y>=1&&x<=W-2&&y<=H-2);
     if(!skin.length) return {none:true,seed,g,canyon,band,stage:'no site',
                              reason:'band never meets the canyon',bandMass:band.mass};
@@ -2762,8 +2780,7 @@ function growAugment(seed,K,aug,assigned,desperate){
     }
     comps.sort((a,b)=>b.mass-a.mass);
     for(const c2 of comps){
-      const dry=c2.cells.some(([x,y])=>N4.some(([dx,dy])=>inb(x+dx,y+dy)
-        &&g.c[idx(x+dx,y+dy)]===FLOOR&&g.host[idx(x+dx,y+dy)]&&!g.water[idx(x+dx,y+dy)]));
+      const dry=c2.cells.some(([x,y])=>touches4(x,y,i=>g.c[i]===FLOOR&&g.host[i]&&!g.water[i]));
       if(dry) return c2;
     }
     return comps[0]||null;   // fully water-locked zone: no dry band anywhere
@@ -2774,8 +2791,7 @@ function growAugment(seed,K,aug,assigned,desperate){
   // the carve can actually flood from the best dry face
   let have=0;
   if(band){
-    const skin=band.cells.filter(([x,y])=>N4.some(([dx,dy])=>inb(x+dx,y+dy)
-      &&g.c[idx(x+dx,y+dy)]===FLOOR&&g.host[idx(x+dx,y+dy)]&&!g.water[idx(x+dx,y+dy)]))
+    const skin=band.cells.filter(([x,y])=>touches4(x,y,i=>g.c[i]===FLOOR&&g.host[i]&&!g.water[i]))
       .filter(([x,y])=>x>=1&&y>=1&&x<=W-2&&y<=H-2);
     for(const m of skin.slice(0,10)){
       const reach=growRegion(g,{x:m[0],y:m[1]},Infinity);
@@ -3168,9 +3184,8 @@ function draw(cv,res,cell,drawMode,tintArt,useTiles,padded){
     for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
       const solid=g.c[idx(x,y)]!==FLOOR;
       if(drawMode&&solid){
-        let near=false;
-        for(const[dx,dy]of N8){const nx=x+dx,ny=y+dy; if(inb(nx,ny)&&g.c[idx(nx,ny)]===FLOOR){near=true;break}}
-        if(!near){ ctx.fillStyle='#000'; ctx.fillRect((x-x0)*cw,(y-y0)*ch,cw,ch); continue }
+        // only mass on the floor's shoreline renders; the enveloped core is void
+        if(!touches8(x,y,i=>g.c[i]===FLOOR)){ ctx.fillStyle='#000'; ctx.fillRect((x-x0)*cw,(y-y0)*ch,cw,ch); continue }
       }
       const px=(x-x0)*cw, py=(y-y0)*ch;
       if(solid){
@@ -3238,9 +3253,7 @@ function draw(cv,res,cell,drawMode,tintArt,useTiles,padded){
                :g.tree[idx(x,y)]?['#000','#00c420','#cfc041','#d74200'][g.tree[idx(x,y)]]
                :(g.host[idx(x,y)]?'#3c4142':'#5f6568');
     else if(drawMode){
-      let near=false;
-      for(const[dx,dy]of N8){const nx=x+dx,ny=y+dy; if(inb(nx,ny)&&g.c[idx(nx,ny)]===FLOOR){near=true;break}}
-      col = near ? '#ffffff' : '#000000';
+      col = touches8(x,y,i=>g.c[i]===FLOOR) ? '#ffffff' : '#000000';   // shoreline mass white, enveloped core void
     } else col='#ffffff';
     ctx.fillStyle=col; ctx.fillRect((x-x0)*cell,(y-y0)*cell,cell,cell);
     // drawing mode stays a pure three-value view for holding against drawings

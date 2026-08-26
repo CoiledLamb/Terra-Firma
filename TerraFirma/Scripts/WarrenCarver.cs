@@ -275,10 +275,24 @@ namespace Cleo.TerraFirma.Scripts
 		// so crossing them risks nothing). The one-mouth law holds untouched: the
 		// carve still only opens cells the mask claims, and the mask never holds a
 		// rind or bubble cell. Sim catch-up flagged in TODO for all three parts.
+		// INTERIOR-CHECKING VOCABULARY (outside contributor via the user,
+		// 2026-08-25): membership is a BASIS PREDICATE, and "inside" means
+		// nothing until you name one. Touches4/8 are the shoreline tests
+		// (adjacency to cells satisfying pred); IsInnerOf marks the enveloped
+		// core (all eight neighbors pass, the zone border counting as outside).
+		// The carver had hand-rolled these under different names in half a
+		// dozen places before the vocabulary arrived; the sim mirrors them.
+		private static bool Touches4(Grid g, int x, int y, Func<int, bool> pred)
+			=> N4.Any(d => g.Inb(x + d[0], y + d[1]) && pred(g.Idx(x + d[0], y + d[1])));
+		private static bool Touches8(Grid g, int x, int y, Func<int, bool> pred)
+			=> N8.Any(d => g.Inb(x + d[0], y + d[1]) && pred(g.Idx(x + d[0], y + d[1])));
+		private static bool IsInnerOf(Grid g, int x, int y, Func<int, bool> basis)
+			=> !N8.Any(d => !g.Inb(x + d[0], y + d[1]) || !basis(g.Idx(x + d[0], y + d[1])));
+
 		private class RegionRec { public byte[] Mask; public int Size; public List<int> Cells; }
 		private static RegionRec GrowRegion(Grid g, Pt mouth, int budget, byte[] connected)
 		{
-			bool OnRind(int x, int y) => N8.Any(d => g.Inb(x + d[0], y + d[1]) && connected[g.Idx(x + d[0], y + d[1])] != 0);
+			bool OnRind(int x, int y) => Touches8(g, x, y, i => connected[i] != 0);   // the canyon's shoreline, rock side
 			var mask = new byte[g.W * g.H];
 			var seen = new byte[g.W * g.H];
 			var q = new List<int> { g.Idx(mouth.X, mouth.Y) };
@@ -845,7 +859,7 @@ namespace Cleo.TerraFirma.Scripts
 			double n = noiseOn ? Math.Abs(VNoise(x / 3.0, y)) * 160 : 0;
 			// the SKIN against the canyon is priced as a last resort: finite, so a
 			// boxed-in room can still get out, but dear enough to detour the zone
-			if (N4.Any(d => g.Inb(x + d[0], y + d[1]) && g.Host[g.Idx(x + d[0], y + d[1])] != 0)) return 900 + n;
+			if (Touches4(g, x, y, i => g.Host[i] != 0)) return 900 + n;
 			if (g.C[g.Idx(x, y)] == FLOOR) return n + emptyBase;
 			double hug = 0;
 			foreach (var d in N4) if (g.Inb(x + d[0], y + d[1]) && Wf(g, x + d[0], y + d[1])) hug += HUG_COST;
@@ -1022,7 +1036,7 @@ namespace Cleo.TerraFirma.Scripts
 			{
 				int x = i % g.W, y = i / g.W;
 				if (x <= 4 || y <= 3 || x >= g.W - 5 || y >= g.H - 4) return false;
-				return !N8.Any(d => g.Inb(x + d[0], y + d[1]) && g.C[g.Idx(x + d[0], y + d[1])] == FLOOR);
+				return IsInnerOf(g, x, y, i => g.C[i] != FLOOR);   // sealed pools seed only in the enveloped core of the mass
 			}).ToList();
 			if (interior.Count == 0) return rec;
 			void Wet(int x, int y)
@@ -2494,7 +2508,7 @@ namespace Cleo.TerraFirma.Scripts
 			{
 				int x = i % g.W, y = i / g.W;
 				if (x < 1 || y < 1 || x > g.W - 2 || y > g.H - 2) return false;
-				return N4.Any(d => g.Inb(x + d[0], y + d[1]) && connected[g.Idx(x + d[0], y + d[1])] != 0);
+				return Touches4(g, x, y, i2 => connected[i2] != 0);   // band cells on the dry canyon's shoreline
 			}).ToList();
 			if (skin.Count == 0) return new Result { Built = false, Reason = "band never meets the canyon", Seed = seed };
 			for (int i = skin.Count - 1; i > 0; i--) { int j = R(0, i); (skin[i], skin[j]) = (skin[j], skin[i]); }

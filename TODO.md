@@ -1722,6 +1722,20 @@ with no new containment logic. Same contributor as the blind-claim model and its
   and it is the engine-native TFMAP workflow: THE USER DRAWS THE CHAMBER (mapgen is the
   user's authorship lane), the carve seats it as a pocket. The figurine-table chamber,
   overseer quarters and shrine rooms are the obvious first tenants. UNRULED.
+- **VOCABULARY INTEGRATED — USER RULED same sitting ("can we integrate this into our own
+  code to clean it up a bit? fine if it causes some behavior to change"), BUILT + VERIFIED
+  both sides.** Sim gains `touches4/8`, `isOuterOf`, `isInnerOf`; C# WarrenCarver mirrors
+  `Touches4/8` + `IsInnerOf`. Converted: the rind/onSkin checks (x3 sim, x1 C#) · the
+  tunnel-cost skin toll (both) · the mouth-candidate skin filters (both, incl. growAugment's
+  dry-band pick) · both draw() crops (shoreline mass renders, enveloped core voids) · the
+  aquifer interior filter, now the isInnerOf showcase on both sides ("sealed pools seed only
+  in the enveloped core of the mass"; its border nuance is neutralized by the existing x>4
+  margins). NOT converted, deliberately: box-range nearness tests, accumulation loops, the
+  count-graded dress hints (corner/wall need counts, not booleans), and SolidOK
+  (articulation is not morphology). Verified: C# compiles 0 errors, both pinned specimens
+  reproduce BIT-EXACT post-refactor (180158 flourishing/385 aug/271 floor · 898284209
+  working/no defile); the fl-lane census reads 18/12 vs the pre-fuzz 17/13 baseline, which
+  is the fuzzy frontier's own RNG jitter, licensed. Deployed hash-verified.
 
 **YARD PLACEMENT: AREA DECIDES — USER FLOAT 2026-08-25 ("what if we improved blockyard
 placement a bit when there's lots of open space outside?", with an in-game screenshot of a
