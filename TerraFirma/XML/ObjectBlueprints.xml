@@ -102,6 +102,24 @@
          sets it); ONE eyeball iteration expected per the VFX law. -->
     <removepart Name="AnimatedMaterialFire" />
     <part Name="PrefabImposter" Prefab="Prefabs/Particles/CampfireFlames" Y="5" />
+    <!-- Extinguish goes to the COLD DISH, not the inherited "Campfire Remains"
+         (USER DOCKET 2026-08-26: "fire dishes should work and be placed like
+         campfires"): dousing a stone basin should not leave wood ash. -->
+    <part Name="Campfire" ExtinguishBlueprint="Cleo_TerraFirma_FireDishCold" />
+  </object>
+  <!-- The cold dish (same docket + the user's in-game find 2026-08-26: cold-flipped
+       dishes kept the flame overlay and lit colors, so they LOOKED lit while silently
+       refusing to cook; the old part-strip directive in WarrenCarver died for this).
+       A real blueprint in the Campfire/Campfire Remains idiom: no flame prefab, no
+       light, ash-grey on the same tile. The tense pass and the extinguish path both
+       land here now. DESCRIPTION IS CLAUDE DRAFT, user voice owed (the lit dish's
+       line is also still draft). -->
+  <object Name="Cleo_TerraFirma_FireDishCold" Inherits="Cleo_TerraFirma_FireDish">
+    <part Name="Render" Tile="firedish.png" DisplayName="cold fire dish" ColorString="&amp;K" TileColor="&amp;K" DetailColor="y" />
+    <part Name="Description" Short="A wide basin of dressed stone cradles a bed of cold ash." />
+    <removepart Name="Campfire" />
+    <removepart Name="LightSource" />
+    <removepart Name="PrefabImposter" />
   </object>
   <!-- Quarried block: RandomTile builder rotates the three user sprites. -->
   <!-- Quarry stone stacks (warren dress port 2026-08-23): the yard's three

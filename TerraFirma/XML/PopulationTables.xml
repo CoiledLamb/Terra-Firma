@@ -539,10 +539,11 @@
 	     Duplicate-blueprint rows are deliberate where two sim ids landed on one blueprint. -->
 	<!-- brazier REMOVED (USER RULED 2026-08-23: "remove chrome braziers with the blue
 	     flames from the roll" - base Brazier is chrome + blue flame, wrong hands entirely).
-	     Fire dish substituted: CLAUDE dial, the mod's own light furniture, strikeable. -->
+	     Fire dish substituted then, MOVED TO THE HEARTH POOL 2026-08-26 (USER DOCKET:
+	     "fire dishes should work and be placed like campfires rather than torches") -
+	     the dish is hearth furniture now, and torches are the light fixture. -->
 	<population Name="Cleo_TerraFirma_WarrenPool Light">
 		<group Name="Pool" Style="pickone">
-			<object Blueprint="Cleo_TerraFirma_FireDish" />
 			<object Blueprint="Torch" />
 		</group>
 	</population>
@@ -617,10 +618,12 @@
 			<object Blueprint="Kiln" />
 		</group>
 	</population>
+	<!-- fire dish joined from the light pool 2026-08-26 (the campfire-not-torch docket) -->
 	<population Name="Cleo_TerraFirma_WarrenPool Hearth">
 		<group Name="Pool" Style="pickone">
 			<object Blueprint="Oven" />
 			<object Blueprint="Campfire" />
+			<object Blueprint="Cleo_TerraFirma_FireDish" />
 		</group>
 	</population>
 	<population Name="Cleo_TerraFirma_WarrenPool Comfort">

@@ -1763,6 +1763,38 @@ obligation and full verification protocol spelled out in the brief.
   `[verify]` in-game feel check: dwellings lean cushion/stool/bedroll, klines and real
   beds read as finds; corridors carry no chalk claim marks.
 
+  **FIRE DISH GOES FULL CAMPFIRE — USER DOCKET 2026-08-26 ("fire dishes should work and
+  be placed like campfires rather than torches!") + USER BUG FIND same sitting ("fire
+  dishes don't seem to have the cook option in their menu, and pressing space on them
+  fails silently"). BUILT same sitting: compile 0 errors, XML strict-valid + text rules
+  OK, deployed hash-verified 3/3, `log-confirmed pending`.**
+  - **Diagnosis (decomp receipts):** base `XRL.World.Parts.Campfire` adds Cook to the
+    menu UNCONDITIONALLY (`GetInventoryActionsEvent`) and every in-part failure popups,
+    never silence - so silent space + missing menu entry means the PART IS ABSENT. The
+    only part-removal path was the tense pass's `firedish_cold` directive (dead/reclaimed
+    sites, ~45% of warrens), which stripped `Campfire`+`LightSource` but LEFT the flame
+    overlay and lit colors: cold dishes looked lit and silently refused to cook. The user
+    almost certainly met those. A live-site dish failing the same way would be a NEW bug;
+    none is known - flag with a log if seen.
+  - **Build:** real `Cleo_TerraFirma_FireDishCold` blueprint (inherits the dish; removes
+    `Campfire`/`LightSource`/`PrefabImposter`, ash-grey `&K`/y on the same tile - cold
+    finally LOOKS cold; DESCRIPTION CLAUDE DRAFT, voice owed alongside the lit dish's).
+    The lit dish's `Campfire` part now points `ExtinguishBlueprint` at the cold dish (the
+    engine's campfire-to-remains idiom; previously a doused stone dish left inherited
+    wooden "Campfire Remains"). Tense flip swaps blueprints like campfires do; the
+    `firedish_cold` part-strip directive DELETED (directives down to chalkline* +
+    yardboard). Cold-firedish art debt closed.
+  - **Placement:** dish left the Light pool for the Hearth pool (Oven/Campfire/FireDish);
+    torches are now the only sconce-style light, dishes place wall-hinted in hearth rooms
+    the way campfires do. GalleryFloor `Center` row unchanged (already sits like a fire
+    pit). Consequence accepted at the docket: dwelling lighting is all-torch now.
+  - **SIM CATCH-UP re-flagged:** sim light pool still rolls its brazier-era pair; hearth
+    membership and the cold-dish visual are game-side only until the sim's sitting.
+  `[verify]` in game: a lit dish at a live site opens the Cook menu on space; a dish in
+  an abandoned warren reads ash-grey cold, no flames, no light; dousing a lit dish with
+  water leaves a cold fire dish, not campfire remains; hearth rooms roll dishes, dwelling
+  light is torches.
+
 **BLIND-CLAIM PORTED, SCOUT RETIRED — USER RULED 2026-08-25 ("alright, i'll say go, let's
 try it"), BUILT + DEPLOYED same sitting; `log-confirmed pending` ON A FRESH EMBARK.**
 The full sim stack crossed: `BuildAugmented` ladder (real canyon first · polite thickening

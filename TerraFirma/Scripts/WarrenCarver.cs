@@ -1575,8 +1575,10 @@ namespace Cleo.TerraFirma.Scripts
 		// commons pre-etched walls (Part_Etchable integration gets its own look),
 		// basket contents poptables (DEBT PAID 2026-08-26: Stone/Food Basket child
 		// blueprints fill themselves via InventoryPopulationTable), catch basin (no confirmed
-		// base blueprint name; dropped from the liquid pool), cold-brazier and
-		// cold-firedish art (light parts stripped; sprite may still read lit).
+		// base blueprint name; dropped from the liquid pool), cold-brazier art.
+		// Cold-firedish art DEBT PAID 2026-08-26: real FireDishCold blueprint,
+		// ash-grey, no flame overlay (the user caught lit-looking cold dishes
+		// silently refusing to cook - part absent, so no menu and no popup).
 		private class Row { public int Wt; public string Id, Hint; public Row(int w, string id, string hint = null) { Wt = w; Id = id; Hint = hint; } }
 		// TABLE DATA MOVED TO XML 2026-08-26 (migration USER-greenlit 2026-08-25):
 		// the scatter tables and room pools live in TerraFirma/XML/PopulationTables.xml
@@ -1589,7 +1591,7 @@ namespace Cleo.TerraFirma.Scripts
 		// is deliberately never called. Grid item ids are REAL BLUEPRINT NAMES now
 		// (the old BP indirection died with the migration); the few ids that are
 		// not blueprints are placement directives PlaceItems resolves itself
-		// (chalkline*, yardboard, firedish_cold). Placement laws all stay here.
+		// (chalkline*, yardboard). Placement laws all stay here.
 		// SIM MIRROR: design/warren-lab-v2.html keeps its own JS copies (DRESS,
 		// ROOMPOOLS, NATURAL, PLAINTRACE, HALLTABLE + the ITEMS art layer, in sim
 		// ids). THE SIM LEADS: dress content changes hit the sim first, then port.
@@ -1610,7 +1612,7 @@ namespace Cleo.TerraFirma.Scripts
 		// Solid=true through Random Statue / Village Monument. Closes the gap the
 		// migration opened: a user-authored table row that is solid furniture now
 		// gets the articulation guard automatically instead of bypassing a list it
-		// was never in. Directive ids (chalkline*, yardboard, firedish_cold) have
+		// was never in. Directive ids (chalkline*, yardboard) have
 		// no blueprint and read not-solid, as before.
 		private static readonly Dictionary<string, bool> _solidCache = new Dictionary<string, bool>();
 		private static bool IsSolidItem(string id)
@@ -2391,7 +2393,7 @@ namespace Cleo.TerraFirma.Scripts
 			{
 				var flip = new Dictionary<string, string> {
 					{ "Campfire", "Campfire Remains" },
-					{ "Torchpost", "Unlit Torchpost" }, { "Cleo_TerraFirma_FireDish", "firedish_cold" }, { "Torch", null } };
+					{ "Torchpost", "Unlit Torchpost" }, { "Cleo_TerraFirma_FireDish", "Cleo_TerraFirma_FireDishCold" }, { "Torch", null } };
 				for (int i = 0; i < g.W * g.H; i++)
 				{
 					string it = g.Item[i];
@@ -2471,13 +2473,15 @@ namespace Cleo.TerraFirma.Scripts
 
 		// The BP sim-id map DIED with the poptable migration (2026-08-26): grid ids
 		// ARE blueprint names now, straight from the XML tables or the law code, so
-		// XML edits never need a recompile. Three placement DIRECTIVES survive as
+		// XML edits never need a recompile. Two placement DIRECTIVES survive as
 		// non-blueprint ids because they carry per-cell state a bare blueprint
-		// cannot: chalkline* (directional tile), yardboard (chalk text), and
-		// firedish_cold (the tense pass's part-stripped dish). The old map's
-		// verification duty inverts: an unknown blueprint is now refused LOUDLY at
-		// placement instead of silently skipped. (The retired bg.animation_table
-		// sketch vocab reservation lives on in the sim's ITEMS layer only.)
+		// cannot: chalkline* (directional tile) and yardboard (chalk text). The
+		// firedish_cold directive died the same day: the tense pass flips dishes
+		// to the real Cleo_TerraFirma_FireDishCold blueprint, the campfire idiom.
+		// The old map's verification duty inverts: an unknown blueprint is now
+		// refused LOUDLY at placement instead of silently skipped. (The retired
+		// bg.animation_table sketch vocab reservation lives on in the sim's ITEMS
+		// layer only.)
 		private static int PlaceItems(Zone Z, Grid g)
 		{
 			if (g.Item == null) return 0;
@@ -2501,14 +2505,6 @@ namespace Cleo.TerraFirma.Scripts
 					obj = GameObject.Create("Cleo_TerraFirma_Yard Board");
 					if (g.YardBoardText != null)
 						obj.RequirePart<XRL.World.Parts.Cleo_TerraFirma_ChalkWriting>().Text = g.YardBoardText;
-				}
-				else if (id == "firedish_cold")
-				{
-					obj = GameObject.Create("Cleo_TerraFirma_FireDish");
-					// the cold flip: light and heat stripped (sprite may still
-					// read lit - art polish flagged in TODO)
-					obj.RemovePart<XRL.World.Parts.LightSource>();
-					obj.RemovePart<XRL.World.Parts.Campfire>();
 				}
 				else
 				{
