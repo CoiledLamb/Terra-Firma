@@ -2034,7 +2034,28 @@ obligation and full verification protocol spelled out in the brief.
   `[verify]` sweep: occupancy mix reads ~55/25/20 over many sites, dead sites still
   flip fires/dishes/torchposts and shed torches, no `TerraFirma: config table`
   errors; then edit a weight in the XML and confirm the mix moves without a
-  recompile. Distribution-equal with
+  recompile.
+
+**ARCHITECTURE DOCTRINE — USER RULED 2026-08-26, verbatim, closing the migration era:**
+> "my opinion on how we should structure the mod is XML > C# > harmony. we should use
+> XML and copy base game idioms where possible, where we can't we use C#, and where C#
+> fails we genuinely consider what we're doing and if there's any other options before
+> moving to harmony"
+
+The escalation ladder governs every future build: engine XML idioms first (verified
+against Base, per the ground-truth rule), C# where XML cannot express it, Harmony only
+after a genuine stop-and-reconsider. Codified in CLAUDE.md the same sitting. State of
+compliance at the ruling: the migration era moved every constant-and-switch data layer
+to XML (dress, pools, baskets, board text, crew, placement hints, names, cold forms,
+occupancy/stage dials); the C# tier holds handlers, mutations, laws and dev tooling
+(surveyed 2026-08-26: no whole file is XML-expressible - the three near-misses and
+their grounds are in the sweep record above); the HARMONY TIER IS ONE LIVE PATCH
+(`Scanning.HasScanningFor` postfix, "no native hook exists") plus the parked Lithovore
+set on quarantine-hold. The gemstone-scan patch's native de-Harmony shape (option b of
+the 2026-08-12 sniff-out: Geomancy grants the engine's own `StructureScannerEquipped`
+property for the reveal window, cost = scope widening to all visible walls/creatures)
+is ALREADY ON FILE awaiting the user's call - under this doctrine it is the standing
+audit item for the harmony tier. Distribution-equal with
     the pre-migration pass by construction (same rolls, same order, same percentages
     now read from XML).
   `[verify]` rides the population sweep above unchanged; additionally no `TerraFirma:`
