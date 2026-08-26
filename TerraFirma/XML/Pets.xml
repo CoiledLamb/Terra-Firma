@@ -1,29 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <objects>
-  <object Name="Cleo_TerraFirma_BoarVessel" Inherits="BaseAnimal">
-    <!-- Passive = the engine's defensive-pet engagement flag (Brain.CanAcquireTarget returns false;
-         look text reads "Engagement style: defensive"). Added 2026-07-24 (user live-fire flag: the
-         vessel was picking fights; "it should be passive like ercolano"). The NoCombat tag below is
-         NOT an engine brain mechanism; Ercolano's peace comes from being animated furniture, and a
-         BaseAnimal brain needs this flag to match. -->
+  <!-- RE-PARENTED 2026-08-26 (inverted-hierarchy ruling 2026-08-11: "just because it was made
+       first doesn't mean it needs to be first"; wild form user-verified same day, passing the
+       ruled build-order gate). The wild base owns the animal: anatomy, brackish basin + salt
+       producer, bleed tags, species, gender, glaze tint, farm-prey brain. This layer is pet
+       privilege only. Child parts MERGE attribute-by-attribute over the parent's (base idiom,
+       e.g. corpse Render overrides), so lines here state only what differs. -->
+  <object Name="Cleo_TerraFirma_BoarVessel" Inherits="Cleo_TerraFirma_BaseBoarVessel">
+    <!-- Passive = the engine's defensive-pet engagement flag (Brain.CanAcquireTarget returns
+         false; look text reads "Engagement style: defensive"). Added 2026-07-24 (user live-fire
+         flag: the vessel was picking fights; "it should be passive like ercolano"). Note the
+         merge now also carries the parent's Swine/Prey factions; player-led standing outranks
+         faction feeling, watch on the one-boot check. -->
     <part Name="Brain" Passive="true" />
-    <!-- Boar part layout with the Stone category (user ruling 2026-08-06; see XML/Bodies.xml) -->
-    <part Name="Body" Anatomy="Cleo_TerraFirma_BoarVessel" />
     <!-- Husangeion (user ruling 2026-08-07): hus (pig) + aggeion (vessel), gamma-gamma as "ng".
-         Replaced Hûskévos — accented chars CANNOT render: the classic font indexes its glyph
+         Replaced Hûskévos; accented chars CANNOT render: the classic font indexes its glyph
          atlas by raw Unicode codepoint (û/251 drew as the √ glyph, é/233 as Θ), and the CP437
          slots those glyphs occupy are untypeable C1 controls. Display names must stay ASCII. -->
-    <part Name="Render" DisplayName="Husangeion" Tile="boar vessel.png" RenderString="b" ColorString="&amp;w" DetailColor="B" />
+    <part Name="Render" DisplayName="Husangeion" />
     <part Name="Description" Short="A roughly shaped piece of earth meant to resemble the common sow, mud still wet after decades of drying. Though the hands of whoever first worked this are unknown, their living record remains in this constant companion."></part>
+    <!-- Pure water is pet privilege (ruled; "fresh water stays a pet privilege"): these two
+         part-name merges override the parent's brackish start mix and salt producer. -->
     <part Name="LiquidVolume" MaxVolume="64" Volume="64" StartVolume="1d33-1" InitialLiquid="water-1000" ManualSeal="true" />
-    <!-- mood-ring glaze (user tweak 2026-08-07): DetailColor tracks the majority liquid in
-         the tank per end of turn; water's engine color IS the shipped B, cider overridden
-         to red per the user's example, wine lands purple natively. See Part_VesselTint.
-         Empty = NEGATIVE SPACE (user final rule 2026-08-07, third round: black detail reads
-         as "the channels fluid runs through" standing empty; the dry-clay brown "w" was the
-         interim pick and remains the one-char fallback if the hollow look misreads). -->
-    <part Name="Cleo_TerraFirma_VesselTint" EmptyColor="k" />
     <part Name="LiquidProducer" Liquid="water" VariableRate="200-2000" WorksOnWearer="false" WorksOnSelf="true" />
+    <!-- NO GUT CISTERN on the pet (USER RULED 2026-08-26: "the pet gut cistern i'm less keen
+         on"): the pet's whole body is already the accessible water source (drain the basin;
+         seal it if you don't want it drinking), and a companion's worn cistern is trivially
+         unequippable, which is either free loot or the cursed wrinkle returning. -->
+    <removeinventoryobject Blueprint="Cleo_TerraFirma_GutCistern" />
+    <!-- Pet-privilege statline (wild base runs boar-anchored DRAFT dice) -->
     <stat Name="Level" Value="1"></stat>
     <stat Name="AV" Value="5"></stat>
     <stat Name="Hitpoints" Value="100"></stat>
@@ -32,21 +37,7 @@
     <tag Name="Pet"/>
     <tag Name="StartingPet"/>
     <xtagGrammar Proper="true"></xtagGrammar>
-    <!-- it/its (user ruling 2026-08-07): "neuterperson" is the base creature idiom for
-         it-pronouns (every robot carries it); plain "neuter" is reserved for true objects -->
-    <tag Name="Gender" Value="neuterperson" />
     <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
-    <xtagTextFragments Skin="glaze" PoeticFeatures="artfulness,gentle stillness,childlike wonder" />
-	  <tag Name="Species" Value="oddity" />
     <tag Name="NoCombat"></tag>
-    <!-- a water vessel bleeds its cargo (user ruling 2026-08-06: "yeag have it bleedwater");
-         Bleeds=1 rides in from BaseAnimal, these tags swap what leaks. Base pattern: slime/oil/sap
-         bleeders. Prefix word "wet" is a DRAFT; swap freely.
-         Salt trace (user ruling 2026-08-07: "a tiny bit of salt"): 900/100 is the base game's
-         lightest brackish mix; mixed bleeds are precedented (wine-400,acid-600). Bleed only —
-         the drinkable cargo stays pure water. -->
-    <tag Name="BleedLiquid" Value="water-900,salt-100" />
-    <tag Name="BleedColor" Value="&amp;B" />
-    <tag Name="BleedPrefix" Value="{{B|wet}}" />
   </object>
 </objects>
