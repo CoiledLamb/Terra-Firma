@@ -1652,6 +1652,20 @@ never lie because the zone is MADE to fit at visit.
     converts (the fuzz can never starve the budget); desperate rounds never fuzz.
     Fuzz-lane census: zero failures retained. Both riders ride the same open port
     ruling as the model itself.
+  - **MOUTH-ACCESS LAW — USER FLAG same sitting ("seed 898284209 generated without a
+    mouth?") diagnosed + USER GREENLIT the cure ("let's try that"), BUILT + MEASURED.**
+    Diagnosis: the mouth EXISTED but opened onto a 48-cell basin the augment had sealed
+    off from every zone edge - and the unforced roll showed the disease pre-exists
+    augment (a river-cut canyon strands a shore naturally; no law ever demanded the
+    shore reach the zone edge). THE LAW, in buildOnce for every standing canyon carve:
+    flood the mouth's shore, water counted passable (Qud wades); if no zone edge is
+    reached, cut a Dijkstra defile to the nearest edge - rock cheap, floor cheaper,
+    rock-beside-warren-floor INFINITE so the cure can never mint a second mouth.
+    In-engine ForceConnections would brute-tunnel the same case; the defile is that
+    cure in the site's own language. **Measured: reported seed cured with a 7-cell
+    defile · unforced same seed needed NOTHING (its basin wades out through the river,
+    the check is honest about water) · sweep 37 mixed sites: 0 unreachable, 1 defile -
+    an insurance law, rare and cheap.** New stats row `access defile`.
 
 **YARD PLACEMENT: AREA DECIDES — USER FLOAT 2026-08-25 ("what if we improved blockyard
 placement a bit when there's lots of open space outside?", with an in-game screenshot of a

@@ -2625,6 +2625,57 @@ function buildOnce(seed,K,forced,host,attempt,aug){
   while(si>0 && m.floor<FLOORMIN[si]){ si--; degraded++ }
   const reg=registerRoles(g,art,pockets,K,si,occupancy);   // the contract: identity stamped at birth
   const dress=dressSite(g,art,pockets,K,reg.yard,occupancy);   // v1 tables on the registry; render-gated, always rolled
+  // MOUTH-ACCESS LAW (USER greenlit 2026-08-25, after seed 898284209's mouth
+  // opened onto a 48-cell basin the augment had sealed - and the unforced roll
+  // showed the disease PRE-EXISTS augment, a river-cut canyon strands a shore
+  // naturally): the mouth's shore must reach a zone edge. Water counts as
+  // passable for the CHECK (Qud wades); the defile that cures a failure runs
+  // Dijkstra with rock cheap, floor cheaper, and rock-beside-warren-floor
+  // INFINITE, so it can never mint a second mouth. In-engine ForceConnections
+  // would brute-tunnel this case; the defile is the same cure in the site's
+  // own language.
+  let defileCells=0;
+  if(host==='canyon'){
+    const pass=i2=>(g.c[i2]===FLOOR&&g.host[i2])||g.water[i2];
+    const mi=g.mouthIdx, mx2=mi%W, my2=(mi/W)|0;
+    const seen=new Uint8Array(W*H), q2=[];
+    for(const[dx,dy]of N4){ const nx=mx2+dx, ny=my2+dy; if(!inb(nx,ny)) continue;
+      const i2=idx(nx,ny); if(pass(i2)&&!seen[i2]){ seen[i2]=1; q2.push(i2); } }
+    let h2=0, touches=false;
+    while(h2<q2.length){ const c2=q2[h2++], cx=c2%W, cy=(c2/W)|0;
+      if(cx===0||cy===0||cx===W-1||cy===H-1){ touches=true; break; }
+      for(const[dx,dy]of N4){ const nx=cx+dx, ny=cy+dy; if(!inb(nx,ny)) continue;
+        const i2=idx(nx,ny); if(!seen[i2]&&pass(i2)){ seen[i2]=1; q2.push(i2); } } }
+    if(!touches&&q2.length){
+      const wfloor=i2=>g.c[i2]===FLOOR&&!g.host[i2];
+      const dcost=i2=>{ const x=i2%W, y=(i2/W)|0;
+        if(wfloor(i2)) return 25;
+        if(g.c[i2]!==FLOOR){
+          for(const[dx,dy]of N4){ const nx=x+dx, ny=y+dy;
+            if(inb(nx,ny)&&wfloor(idx(nx,ny))) return 1e6; }   // never beside the dig: one mouth stays one
+          return 2; }
+        return 0.5; };
+      const dist=new Float64Array(W*H).fill(Infinity), prev=new Int32Array(W*H).fill(-1), done=new Uint8Array(W*H);
+      const heap=[]; const hpush=v=>{heap.push(v);let a2=heap.length-1;
+        while(a2>0){const p2=(a2-1)>>1; if(heap[p2][0]<=heap[a2][0])break; [heap[p2],heap[a2]]=[heap[a2],heap[p2]]; a2=p2}};
+      const hpop=()=>{const t2=heap[0],l2=heap.pop();
+        if(heap.length){heap[0]=l2;let a2=0;for(;;){const b2=2*a2+1,c3=b2+1;let m2=a2;
+          if(b2<heap.length&&heap[b2][0]<heap[m2][0])m2=b2; if(c3<heap.length&&heap[c3][0]<heap[m2][0])m2=c3;
+          if(m2===a2)break; [heap[m2],heap[a2]]=[heap[a2],heap[m2]]; a2=m2}} return t2};
+      for(const s2 of q2){ dist[s2]=0; hpush([0,s2]); }
+      let hit=-1;
+      while(heap.length){ const [c2,cur]=hpop(); if(done[cur]) continue; done[cur]=1;
+        const cx=cur%W, cy=(cur/W)|0;
+        if(cx===0||cy===0||cx===W-1||cy===H-1){ hit=cur; break; }
+        for(const[dx,dy]of N4){ const nx=cx+dx, ny=cy+dy; if(!inb(nx,ny)) continue;
+          const ni=idx(nx,ny); if(done[ni]) continue;
+          const w2=dcost(ni); if(w2>=1e6) continue;
+          const nc=c2+w2;
+          if(nc<dist[ni]){ dist[ni]=nc; prev[ni]=cur; hpush([nc,ni]); } } }
+      for(let c2=hit;c2>=0;c2=prev[c2]){
+        if(g.c[c2]!==FLOOR){ g.c[c2]=FLOOR; g.host[c2]=1; g.tree[c2]=0; defileCells++; } }
+    }
+  }
   let hostFloor=0, trees=0, water=0;
   for(let i=0;i<W*H;i++){ if(g.host[i]) hostFloor++; if(g.tree[i]) trees++; if(g.water[i]) water++ }
   return {g,art,pockets,seed,stage:STAGES[si].name,stageIdx:si,crosscuts,repairs,filled,trimmed,preTrim,
@@ -2633,7 +2684,7 @@ function buildOnce(seed,K,forced,host,attempt,aug){
     bandMass: band?band.mass:null,
     fit: rect?[rect.x1-rect.x0+1, rect.y1-rect.y0+1]:null,
     floor:m.floor,loops:m.loops,comps:m.comps,artMax:arteryStraight(g),
-    corMax:corridorStraight(g),deadEnds:de.dug,deadEndCells:de.cells,
+    corMax:corridorStraight(g),deadEnds:de.dug,deadEndCells:de.cells,defileCells,
     halls:pockets.filter(p=>p.character==='hall').length,
     plains:pockets.filter(p=>p.character==='plain').length,
     doorless:pockets.filter(p=>p.entrances===0).length,
@@ -3264,6 +3315,7 @@ function statsHtml(r){
     ['artery max straight', r.artMax],
     ['corridor max straight', r.corMax],
     ['augmented rock', r.rebuilt? 'ZONE REBUILT (final rung)' : r.augCells? `${r.augCells} cells / ${r.augRounds} round${r.augRounds===1?'':'s'}` : '—', !!r.augCells||!!r.rebuilt],
+    ['access defile', r.defileCells? r.defileCells+' cells' : '—', !!r.defileCells],
     ['dead ends', r.deadEnds ? `${r.deadEnds} (${r.deadEndCells} cells)` : 0],
     ['doorless pockets', r.doorless, r.doorless>0],
     ['connectivity repairs', r.repairs, r.repairs>0],
