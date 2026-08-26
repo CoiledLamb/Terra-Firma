@@ -2104,10 +2104,13 @@ namespace Cleo.TerraFirma.Scripts
 				// "chalked with a date of arrival, and if they've left, a date of
 				// departure, styled in the games own vernacular. as well as
 				// potentially saying how much stone was quarried"). Chance 70 and
-				// the 60%-tally roll are CLAUDE dials; the LINES ARE DRAFT (user
-				// voice owed). Dates ride Calendar.GetDay/GetMonth - the engine's
-				// own marginalia vernacular; the tally is the site's true carved
-				// floor, so the board never lies about the dig it stands in.
+				// the 60%-tally roll are CLAUDE dials. THE LINES MOVED TO XML
+				// 2026-08-26 (user greenlight): tag templates on the
+				// Cleo_TerraFirma_Yard Board blueprint, =day=/=month=/=blocks=
+				// tokens filled here, so the owed voice sitting is an XML edit.
+				// This law still owns WHICH lines appear (occupancy) and the
+				// tally stays the site's true carved floor. Roll order is pinned:
+				// a missing template skips its line loudly, never a roll.
 				if (Chance(.7))
 				{
 					int bi = -1;
@@ -2116,19 +2119,36 @@ namespace Cleo.TerraFirma.Scripts
 							if (FreeI(g.Idx(x, y))) { bi = g.Idx(x, y); break; }
 					if (bi >= 0)
 					{
+						var boardBp = GameObjectFactory.Factory.GetBlueprint("Cleo_TerraFirma_Yard Board");
+						string Tpl(string tag)
+						{
+							string t = boardBp?.GetTag(tag, null);
+							if (t == null) MetricsManager.LogError("TerraFirma: yard board template tag '" + tag + "' missing (check ObjectBlueprints.xml); line skipped");
+							return t;
+						}
+						string Dated(string tpl, long t) => tpl.Replace("=day=", Calendar.GetDay(t)).Replace("=month=", Calendar.GetMonth(t));
 						long now = Calendar.TotalTimeTicks;
 						long Wrap(long t) { long y2 = 438000L; t %= y2; if (t < 0) t += y2; return t; }
+						var lines = new List<string>();
 						long arrival = Wrap(now - (long)R(45, 320) * 1200);
-						var lines = new List<string> { "arrived the " + Calendar.GetDay(arrival) + " of " + Calendar.GetMonth(arrival) };
+						string tArr = Tpl("Cleo_TerraFirma_ArrivedLine");
+						if (tArr != null) lines.Add(Dated(tArr, arrival));
 						if (occupancy != "in use")
 						{
 							long depart = Wrap(now - (long)R(8, 40) * 1200);
-							lines.Add("departed the " + Calendar.GetDay(depart) + " of " + Calendar.GetMonth(depart));
+							string tDep = Tpl("Cleo_TerraFirma_DepartedLine");
+							if (tDep != null) lines.Add(Dated(tDep, depart));
 						}
 						if (Chance(.6))
-							lines.Add(siteFloor + " blocks raised");
-						g.YardBoardText = string.Join("\n", lines);
-						Put(bi, "yardboard");
+						{
+							string tTal = Tpl("Cleo_TerraFirma_TallyLine");
+							if (tTal != null) lines.Add(tTal.Replace("=blocks=", siteFloor.ToString()));
+						}
+						if (lines.Count > 0)
+						{
+							g.YardBoardText = string.Join("\n", lines);
+							Put(bi, "yardboard");
+						}
 					}
 				}
 				if (state == "fresh")
@@ -2476,7 +2496,9 @@ namespace Cleo.TerraFirma.Scripts
 				}
 				else if (id == "yardboard")
 				{
-					obj = GameObject.Create("Chalkboard");
+					// the board blueprint declares the writing part; RequirePart
+					// only tolerates the tag being hand-stripped from the XML
+					obj = GameObject.Create("Cleo_TerraFirma_Yard Board");
 					if (g.YardBoardText != null)
 						obj.RequirePart<XRL.World.Parts.Cleo_TerraFirma_ChalkWriting>().Text = g.YardBoardText;
 				}

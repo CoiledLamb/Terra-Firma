@@ -185,6 +185,23 @@
     <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_FoodBasket Contents" />
   </object>
 
+  <!-- YARD LEDGER BOARD (setup USER-greenlit 2026-08-26: "that sounds fine, set that up").
+       The dress yard's chalkboard as its own blueprint, so the ledger LINES live here as
+       tags instead of C# strings; the =token= substitution style is the game's own
+       vernacular. THE LINES ARE STILL THE 2026-08-23 CLAUDE DRAFT and the user voice is
+       owed: editing these Values is now the whole voice sitting, no recompile. Tokens the
+       carver fills: =day= and =month= (Calendar, at carve time), =blocks= (the site's true
+       carved floor, so the board never lies about the dig it stands in). WarrenCarver
+       keeps deciding WHICH lines appear (the occupancy law); the write-verb part arrives
+       through the base Chalkboard merge in Merges.xml, the writing part is declared
+       here so the carver no longer bolts it on in code. -->
+  <object Name="Cleo_TerraFirma_Yard Board" Inherits="Chalkboard">
+    <part Name="Cleo_TerraFirma_ChalkWriting" />
+    <tag Name="Cleo_TerraFirma_ArrivedLine" Value="arrived the =day= of =month=" />
+    <tag Name="Cleo_TerraFirma_DepartedLine" Value="departed the =day= of =month=" />
+    <tag Name="Cleo_TerraFirma_TallyLine" Value="=blocks= blocks raised" />
+  </object>
+
   <!-- QUARRY CHEST (gear sitting 2026-08-23; user ruling: "making it a generalized loot table
        that merchant tables and chests can roll makes sense"). The MiningGear consumer for
        PLACED loot: a Chest variant whose inventory rolls the table, on the ChestBronzeIngots

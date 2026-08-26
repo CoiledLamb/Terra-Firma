@@ -1726,6 +1726,22 @@ obligation and full verification protocol spelled out in the brief.
     nugget) and a dwelling pantry basket (yuckwheat/preserves/jerky, occasionally bare);
     statues still never seal a room (articulation guard alive through the derived read).
 
+  **YARD BOARD LINES TO XML — USER GREENLIT 2026-08-26 ("that sounds fine, set that up"),
+  BUILT same sitting. Compile 0 errors, XML strict-valid + text rules OK, deployed
+  hash-verified 2/2 (WarrenCarver.cs, ObjectBlueprints.xml), `log-confirmed pending`.**
+  New `Cleo_TerraFirma_Yard Board` blueprint (Inherits Chalkboard, so it also inherits the
+  write-verb merge from Merges.xml): the `Cleo_TerraFirma_ChalkWriting` part is declared
+  there instead of bolted on in code, and the three ledger line templates ride tags
+  (`Cleo_TerraFirma_ArrivedLine` / `DepartedLine` / `TallyLine`) in the =token= style, the
+  game's own substitution vernacular. Tokens the carver fills: =day= =month= =blocks=.
+  **THE LINES ARE STILL THE 2026-08-23 CLAUDE DRAFT and the user voice is owed - the voice
+  sitting is now a plain XML edit of those three Values, no recompile.** The carver keeps
+  the laws: Chance 70 board roll, occupancy decides the departed line, 60% tally roll,
+  tally = the site's true carved floor. Roll order pinned - a missing tag skips its line
+  with a loud MetricsManager error, never a roll; a board with zero lines is not placed.
+  `[verify]` rides the sweep: a yard board still reads its arrived/departed/tally lines,
+  and the chalk write verb still works on it (merge inherited through the child).
+
 **BLIND-CLAIM PORTED, SCOUT RETIRED — USER RULED 2026-08-25 ("alright, i'll say go, let's
 try it"), BUILT + DEPLOYED same sitting; `log-confirmed pending` ON A FRESH EMBARK.**
 The full sim stack crossed: `BuildAugmented` ladder (real canyon first · polite thickening
