@@ -1,4 +1,8 @@
 #!/bin/bash
+# MIRROR NOTE 2026-08-26: the personal-name banks LIVE in TerraFirma/XML/Naming.xml
+# now (the migration landed them in the schema this script was always mimicking);
+# byname banks + grants live in Builder_StonecarverEpithet.cs. This roller keeps its
+# copies as the design-side demo tool - port changes rather than trusting these.
 # draft banks chopped from mysteriousetruscans.com/names.html
 # structure mimics Naming.xml: prefix x1, infix x0-2, postfix x1, TwoNameChance
 # scrubbed banks: junction architecture (prefix C-final, infix VCV, postfix C-initial)

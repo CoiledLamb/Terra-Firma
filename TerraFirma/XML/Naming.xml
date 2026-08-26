@@ -12,7 +12,9 @@
          Weight= is legal per word if a name should lead.
          The scope pins this style to the epithet builder's own request (Special match, the
          goatfolk hero idiom, base Naming.xml:1297) so ordinary name generation never rolls
-         it and it never leaks into village naming. -->
+         it and it never leaks into village naming.
+         DESIGN MIRROR: design/naming-bank-roller.sh keeps demo copies of these banks
+         (it mimicked this schema before the file existed); port changes there too. -->
     <namestyle Name="Cleo_TerraFirma_Stonecarver" Format="TitleCase">
       <scopes>
         <scope Name="Main" Special="Cleo_TerraFirma_Stonecarver" Priority="200" Combine="false" />
