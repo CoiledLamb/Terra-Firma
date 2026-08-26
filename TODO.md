@@ -1617,6 +1617,31 @@ errors, deployed hash-verified 3/3.
         (0.2s), background scouting (thread risk). Compile 0 errors, deployed
         hash-verified 2/2, `log-confirmed pending`.
 
+**BLIND-CLAIM PORTED, SCOUT RETIRED — USER RULED 2026-08-25 ("alright, i'll say go, let's
+try it"), BUILT + DEPLOYED same sitting; `log-confirmed pending` ON A FRESH EMBARK.**
+The full sim stack crossed: `BuildAugmented` ladder (real canyon first · polite thickening
+with fuzzy tracing · desperate water damming · keep-the-best replay · rebuild rung on
+total failure), the mouth-access law in BuildOnce (Dijkstra defile to the zone edge,
+rock-beside-warren-floor infinite), and ApplyToZone materialization: augmented rock that
+survives as rock becomes REAL `Shale` (the same blueprint Hills paints - added mass is
+indistinguishable from natural by construction), carve-opened augment cells shed plants
+and liquids, combat objects removed per the StockadeMaker ClearCombatObjectsFirst
+precedent (count logged), defiles obliterate walls. All four sim-found mechanisms ported
+intact (dry-access band seeding, usable-reach targeting, rationed rounds, keep-best).
+WarrenWorldBuilder shrank to the blind claimer: 25 claims at the pig-farm idiom,
+OVER-ASSIGNED stages shuffled by derived key (`ASSIGN_FL` 9 / `ASSIGN_CAMP` 8 / working 8,
+CLAUDE dials against sim attainment fl ~57% / camp ~87% - the ruled ~5/9/11 mix in
+expectation, binomial per-world spread). WarrenMaker routes staged claims through the
+ladder; wish carves stay pure canyon truth; **SettleRumor demoted to the exception-only
+belt** (the one path left where a claim could stand over nothing). DELETED: the scout
+pass, adaptive exit, extension, timing rig, loading-step machinery - worldgen returns to
+~0s and the embark hitch + display saga end structurally. Dials AUG_TRIES 9 / AUG_FUZZ 35
+mirror the sim. `[verify]` fresh embark: placement line shows 25 claims with assignment
+split · visiting any claim always finds a warren · `augment applied:`/`mouth-access law:`
+lines carry real-Hills fire rates for comparison against the sim's (working ~15-30% /
+camp ~80% / fl ~78%) · a rebuild-rung zone (rare) reads as a pinched-shut massif · no
+MODERROR, no orphaned finder. Compile 0 errors, deployed hash-verified 3/3.
+
 **BLIND-CLAIM AUGMENT MODEL — outside suggestion relayed by the USER 2026-08-25 ("pick the
 zones at random during worldgen, don't check if they have enough space, when the zone is
 found by the player, force the zone into a state that works for the procgen"), USER

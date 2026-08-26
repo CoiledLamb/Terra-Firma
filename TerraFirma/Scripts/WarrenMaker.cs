@@ -34,16 +34,25 @@ namespace XRL.World.ZoneBuilders
 			try
 			{
 				int? forced = Stage == "flourishing" ? 2 : Stage == "camp" ? 1 : Stage == "working" ? 0 : (int?)null;
-				var r = WarrenCarver.Build(Z, WarrenCarver.SeedFor(Z.ZoneID), forced);
+				// BLIND-CLAIM (user ruled the port 2026-08-25): a staged claim runs
+				// the augment ladder - the zone is made to fit, so the claim cannot
+				// lie. The wish/legacy path (no stage) stays pure canyon truth.
+				var r = forced.HasValue
+					? WarrenCarver.BuildAugmented(Z, WarrenCarver.SeedFor(Z.ZoneID), forced.Value)
+					: WarrenCarver.Build(Z, WarrenCarver.SeedFor(Z.ZoneID));
 				if (r.Built)
 					Helpers.VerifyLog("WARREN", $"builder done: {Z.ZoneID} -> {r.Stage}, {r.Occupancy}, attempt {r.Attempt}, {r.Layout}");
 				else
-					SettleRumor(Z);
+					SettleRumor(Z);   // under blind-claim this should be unreachable; kept as the belt
 			}
 			catch (System.Exception x)
 			{
 				Helpers.VerifyLog("WARREN", $"EXCEPTION in builder for {Z.ZoneID}: {x}");
 				MetricsManager.LogException("Cleo_TerraFirma_WarrenMaker", x);
+				// the belt's belt (demoted from placement to exception-only,
+				// 2026-08-25): an exception is the one path left where a claim
+				// could stand over nothing, and a silent lie is ruled invalid
+				SettleRumor(Z);
 			}
 			return true;
 		}

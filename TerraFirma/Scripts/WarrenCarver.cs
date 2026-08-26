@@ -69,6 +69,12 @@ namespace Cleo.TerraFirma.Scripts
 		public const int CAMP_FLOOR = 130;        // campFloor
 		public const int FLOUR_FLOOR = 210;       // flourFloor
 		public const int DRIFT_MAX = 10;          // driftMax (unused in box mode's tunnels)
+		// BLIND-CLAIM AUGMENT (user ruled the port 2026-08-25; outside contributor's
+		// model, sim-proven at zero failures over 90 assigned seeds). All dials
+		// mirror the sim knobs; sim-measured rates ride the TF-VERIFY lines so the
+		// real Hills terrain can be compared against them.
+		public const int AUG_TRIES = 9;           // augTries (nemesis seed needed 7)
+		public const int AUG_FUZZ = 35;           // augFuzz (fuzzy tracing, seam roughness)
 
 		private class Stage
 		{
@@ -123,6 +129,8 @@ namespace Cleo.TerraFirma.Scripts
 			public short[] Pocket;
 			public string[] Item;           // the dress layer: sim item ids, translated at placement
 			public string YardBoardText;    // the yard chalkboard's ledger lines (user concept 2026-08-23)
+			public HashSet<int> Augment;    // blind-claim: cells the augment converted to carvable mass
+			public List<int> Defile;        // mouth-access law + rebuild rung: rock opened into canyon floor
 			public int MouthIdx = -1;
 			public int[] MouthDist;
 			public Grid(int w, int h)
@@ -2437,11 +2445,19 @@ namespace Cleo.TerraFirma.Scripts
 		}
 
 		/// <summary>One complete attempt (buildOnce). Grid-side only; ApplyToZone lands it.</summary>
-		private static Result BuildOnce(Zone Z, int seed, int? forced, int attempt, bool blockLayout, bool dress, out Grid gridOut, out List<PocketRec> pocketsOut)
+		private static Result BuildOnce(Zone Z, int seed, int? forced, int attempt, bool blockLayout, bool dress, HashSet<int> aug, out Grid gridOut, out List<PocketRec> pocketsOut)
 		{
 			_state = (uint)seed; _noiseSeed = seed;
 			gridOut = null; pocketsOut = null;
 			var g = ReadHost(Z);
+			// AUGMENT APPLICATION (blind-claim port): the carve sees augmented cells
+			// as ordinary carvable mass. The real zone is untouched here - grid only;
+			// ApplyToZone materializes whatever survives as actual Shale.
+			if (aug != null && aug.Count > 0)
+			{
+				foreach (int ai in aug) { g.C[ai] = SOLID; g.Host[ai] = 0; g.Tree[ai] = 0; g.Water[ai] = 0; g.Aqua[ai] = 0; }
+				g.Augment = aug;
+			}
 			int si = forced ?? R(0, STAGES.Length - 1);
 			int wanted = si, degraded = 0;
 
@@ -2616,6 +2632,80 @@ namespace Cleo.TerraFirma.Scripts
 				string dressStats = DressSite(g, art, pockets, roles, occupancy, m.Floor);
 				Helpers.VerifyLog("WARREN", $"dress: {dressStats}");
 			}
+			// MOUTH-ACCESS LAW (user greenlit 2026-08-25, sim-proven on the sealed-
+			// basin seed): the mouth's shore must reach a zone edge. Water counts
+			// as passable for the CHECK (Qud wades); a stranded shore gets a
+			// Dijkstra defile to the nearest edge - rock cheap, floor cheaper, and
+			// rock-beside-warren-floor INFINITE so one mouth stays one. The sim
+			// measured this as an insurance law: 1 firing in 37 mixed sites.
+			{
+				bool Pass(int i2) => (g.C[i2] == FLOOR && g.Host[i2] != 0) || g.Water[i2] != 0;
+				int lmx = g.MouthIdx % g.W, lmy = g.MouthIdx / g.W;
+				var lseen2 = new byte[g.W * g.H]; var lq = new List<int>();
+				foreach (var d in N4)
+				{
+					int nx = lmx + d[0], ny = lmy + d[1]; if (!g.Inb(nx, ny)) continue;
+					int i2 = g.Idx(nx, ny);
+					if (Pass(i2) && lseen2[i2] == 0) { lseen2[i2] = 1; lq.Add(i2); }
+				}
+				int lh = 0; bool touchesEdge = false;
+				while (lh < lq.Count && !touchesEdge)
+				{
+					int c2 = lq[lh++], cx = c2 % g.W, cy = c2 / g.W;
+					if (cx == 0 || cy == 0 || cx == g.W - 1 || cy == g.H - 1) { touchesEdge = true; break; }
+					foreach (var d in N4)
+					{
+						int nx = cx + d[0], ny = cy + d[1]; if (!g.Inb(nx, ny)) continue;
+						int i2 = g.Idx(nx, ny);
+						if (lseen2[i2] == 0 && Pass(i2)) { lseen2[i2] = 1; lq.Add(i2); }
+					}
+				}
+				if (!touchesEdge && lq.Count > 0)
+				{
+					bool WFloor(int i2) => g.C[i2] == FLOOR && g.Host[i2] == 0;
+					double DCost(int i2)
+					{
+						int x2 = i2 % g.W, y2 = i2 / g.W;
+						if (WFloor(i2)) return 25;
+						if (g.C[i2] != FLOOR)
+						{
+							if (Touches4(g, x2, y2, WFloor)) return 1e6;   // never beside the dig
+							return 2;
+						}
+						return 0.5;
+					}
+					var ldist = new double[g.W * g.H]; for (int k = 0; k < ldist.Length; k++) ldist[k] = double.MaxValue;
+					var lprev = new int[g.W * g.H]; for (int k = 0; k < lprev.Length; k++) lprev[k] = -1;
+					var ldone = new byte[g.W * g.H];
+					var lheap = new List<(double, int)>();
+					void LPush((double, int) v) { lheap.Add(v); int a2 = lheap.Count - 1; while (a2 > 0) { int p2 = (a2 - 1) >> 1; if (lheap[p2].Item1 <= lheap[a2].Item1) break; (lheap[p2], lheap[a2]) = (lheap[a2], lheap[p2]); a2 = p2; } }
+					(double, int) LPop() { var t2 = lheap[0]; var l2 = lheap[lheap.Count - 1]; lheap.RemoveAt(lheap.Count - 1); if (lheap.Count > 0) { lheap[0] = l2; int a2 = 0; for (; ; ) { int b2 = 2 * a2 + 1, c3 = b2 + 1, m2 = a2; if (b2 < lheap.Count && lheap[b2].Item1 < lheap[m2].Item1) m2 = b2; if (c3 < lheap.Count && lheap[c3].Item1 < lheap[m2].Item1) m2 = c3; if (m2 == a2) break; (lheap[m2], lheap[a2]) = (lheap[a2], lheap[m2]); a2 = m2; } } return t2; }
+					foreach (int s2 in lq) { ldist[s2] = 0; LPush((0, s2)); }
+					int lhit = -1;
+					while (lheap.Count > 0)
+					{
+						var (lc, lcur) = LPop(); if (ldone[lcur] != 0) continue; ldone[lcur] = 1;
+						int cx = lcur % g.W, cy = lcur / g.W;
+						if (cx == 0 || cy == 0 || cx == g.W - 1 || cy == g.H - 1) { lhit = lcur; break; }
+						foreach (var d in N4)
+						{
+							int nx = cx + d[0], ny = cy + d[1]; if (!g.Inb(nx, ny)) continue;
+							int ni = g.Idx(nx, ny); if (ldone[ni] != 0) continue;
+							double w2 = DCost(ni); if (w2 >= 1e6) continue;
+							double nc = lc + w2;
+							if (nc < ldist[ni]) { ldist[ni] = nc; lprev[ni] = lcur; LPush((nc, ni)); }
+						}
+					}
+					if (lhit >= 0)
+					{
+						g.Defile = g.Defile ?? new List<int>();
+						for (int c2 = lhit; c2 >= 0; c2 = lprev[c2])
+							if (g.C[c2] != FLOOR) { g.C[c2] = FLOOR; g.Host[c2] = 1; g.Tree[c2] = 0; g.Defile.Add(c2); }
+						Helpers.VerifyLog("WARREN", $"mouth-access law: shore stranded, defile of {g.Defile.Count} cells cut to the zone edge");
+					}
+					else Helpers.VerifyLog("WARREN", "mouth-access law: shore stranded and NO defile route found");
+				}
+			}
 			Helpers.VerifyLog("WARREN", $"carve: band {band.Mass}, mouth ({mouth.X},{mouth.Y}), stage {STAGES[si].Name} (wanted {STAGES[wanted].Name}, degraded {degraded}), " +
 				$"{pockets.Count} pockets, floor {m.Floor}, loops {m.Loops}, comps {m.Comps}, crosscuts {crosscuts}, infill {filled}, " +
 				$"aquifers {aq.Pools}p/{aq.Veins}v, breaches {breaches}, repairs {repairs}, trimmed {trimmed}, layout {(blockLayout ? "blocks" : "boxes")}");
@@ -2642,12 +2732,12 @@ namespace Cleo.TerraFirma.Scripts
 		/// dry runs read a zone's CAPACITY: the scorer IS the builder, so score
 		/// and build cannot disagree, and a chosen flourishing carve is an exact
 		/// replay of its own probe (same seed, same forced stage).</summary>
-		public static Result Build(Zone Z, int seed, int? forcedStage = null, bool apply = true)
+		public static Result Build(Zone Z, int seed, int? forcedStage = null, bool apply = true, HashSet<int> aug = null)
 		{
 			Result last = null;
 			for (int a = 0; a < ATTEMPTS; a++)
 			{
-				var r = BuildOnce(Z, seed, forcedStage, a, false, apply, out Grid g, out List<PocketRec> pockets);
+				var r = BuildOnce(Z, seed, forcedStage, a, false, apply, aug, out Grid g, out List<PocketRec> pockets);
 				if (r.Built)
 				{
 					if (apply) ApplyToZone(Z, g);
@@ -2656,7 +2746,7 @@ namespace Cleo.TerraFirma.Scripts
 				last = r;
 				if (r.Reason.StartsWith("too little got built"))
 				{
-					var r2 = BuildOnce(Z, seed, forcedStage, a, true, apply, out Grid g2, out List<PocketRec> pockets2);
+					var r2 = BuildOnce(Z, seed, forcedStage, a, true, apply, aug, out Grid g2, out List<PocketRec> pockets2);
 					if (r2.Built)
 					{
 						Helpers.VerifyLog("WARREN", $"blocks rescued the face (attempt {a}, boxes built {r.Reason})");
@@ -2671,6 +2761,169 @@ namespace Cleo.TerraFirma.Scripts
 			return last ?? new Result { Built = false, Reason = "no attempt ran", Seed = seed };
 		}
 
+		// ============================================== blind-claim augment ladder
+		// (user ruled the port 2026-08-25; outside contributor's model, sim-proven
+		// zero failures over 90 assigned seeds. StockadeMaker license: forts
+		// bulldoze a box blind, ours is the minimal inverse.) The carve gets the
+		// REAL canyon first with every attempt and honesty gate; only a refusal
+		// or a build below the claimed stage thickens rock into the canyon.
+		// Four sim-found mechanisms, ported intact: dry-access band seeding
+		// (water-locked giants), usable-reach targeting (fresh augment is all
+		// rind-shell), rationed rounds (the guard trickles), keep-the-best
+		// (a bigger augment can un-stand a smaller success).
+
+		/// <summary>One round of band-thickening on a scratch grid; mutates aug.
+		/// desperate additionally claims shoreline water (damming - water is not
+		/// canyon floor, so the connectivity guard is untouched by it).</summary>
+		private static int GrowAugment(Zone Z, HashSet<int> aug, int assigned, bool desperate)
+		{
+			var g = ReadHost(Z);
+			if (aug.Count > 0) foreach (int ai in aug) { g.C[ai] = SOLID; g.Host[ai] = 0; g.Tree[ai] = 0; g.Water[ai] = 0; }
+			bool DryFloor(int i2) => g.C[i2] == FLOOR && g.Host[i2] != 0 && g.Water[i2] == 0;
+			// biggest band WITH dry canyon access, not the biggest band
+			var lab = new int[g.W * g.H]; for (int k = 0; k < lab.Length; k++) lab[k] = -1;
+			var comps = new List<List<int>>();
+			for (int s2 = 0; s2 < g.W * g.H; s2++)
+			{
+				if (lab[s2] >= 0 || g.C[s2] == FLOOR || g.Host[s2] != 0) continue;
+				int id2 = comps.Count; var cells = new List<int>();
+				var st = new Stack<int>(); st.Push(s2); lab[s2] = id2;
+				while (st.Count > 0)
+				{
+					int c2 = st.Pop(); cells.Add(c2);
+					int cx = c2 % g.W, cy = c2 / g.W;
+					foreach (var d in N4)
+					{
+						int nx = cx + d[0], ny = cy + d[1]; if (!g.Inb(nx, ny)) continue;
+						int ni = g.Idx(nx, ny);
+						if (lab[ni] < 0 && g.C[ni] != FLOOR && g.Host[ni] == 0) { lab[ni] = id2; st.Push(ni); }
+					}
+				}
+				comps.Add(cells);
+			}
+			if (comps.Count == 0) return 0;
+			comps.Sort((a, b) => b.Count.CompareTo(a.Count));
+			List<int> bandCells = null;
+			foreach (var c2 in comps)
+				if (c2.Any(i2 => Touches4(g, i2 % g.W, i2 / g.W, DryFloor))) { bandCells = c2; break; }
+			bandCells = bandCells ?? comps[0];
+			// USABLE reach from the best dry face, not raw mass (rind-shell lesson)
+			int have = 0;
+			var connected = new byte[g.W * g.H];
+			for (int k = 0; k < connected.Length; k++) if (DryFloor(k)) connected[k] = 1;
+			var skinCells = bandCells.Where(i2 =>
+			{
+				int x2 = i2 % g.W, y2 = i2 / g.W;
+				return x2 >= 1 && y2 >= 1 && x2 <= g.W - 2 && y2 <= g.H - 2 && Touches4(g, x2, y2, k2 => connected[k2] != 0);
+			}).Take(10).ToList();
+			foreach (int s2 in skinCells)
+			{
+				var reach = GrowRegion(g, new Pt { X = s2 % g.W, Y = s2 / g.W }, int.MaxValue, connected);
+				if (reach.Size > have) have = reach.Size;
+			}
+			int need = (int)Math.Ceiling(STAGES[assigned].Area * 1.25);
+			int want = need - have;
+			if (want <= 0) want = (int)Math.Ceiling(STAGES[assigned].Area * 0.15);
+			int FloorComps()
+			{
+				var seen = new byte[g.W * g.H]; int n2 = 0;
+				for (int s3 = 0; s3 < g.W * g.H; s3++)
+				{
+					if (seen[s3] != 0 || !DryFloor(s3)) continue;
+					n2++; var q3 = new List<int> { s3 }; seen[s3] = 1; int h3 = 0;
+					while (h3 < q3.Count)
+					{
+						int c3 = q3[h3++], cx = c3 % g.W, cy = c3 / g.W;
+						foreach (var d in N4)
+						{
+							int nx = cx + d[0], ny = cy + d[1]; if (!g.Inb(nx, ny)) continue;
+							int ni = g.Idx(nx, ny);
+							if (seen[ni] == 0 && DryFloor(ni)) { seen[ni] = 1; q3.Add(ni); }
+						}
+					}
+				}
+				return n2;
+			}
+			int baseComps = FloorComps();
+			var q = new List<int>(); var inq = new byte[g.W * g.H];
+			void Enq(int x2, int y2)
+			{
+				if (x2 < 1 || y2 < 1 || x2 > g.W - 2 || y2 > g.H - 2) return;
+				int i2 = g.Idx(x2, y2); if (inq[i2] != 0) return;
+				if (DryFloor(i2)) { inq[i2] = 1; q.Add(i2); return; }
+				if (desperate && g.Water[i2] != 0) { inq[i2] = 1; q.Add(i2); }
+			}
+			foreach (int i2 in bandCells)
+				foreach (var d in N4) if (g.Inb(i2 % g.W + d[0], i2 / g.W + d[1])) Enq(i2 % g.W + d[0], i2 / g.W + d[1]);
+			int head = 0, added = 0;
+			var fuzzed = new byte[g.W * g.H];
+			while (head < q.Count && added < want)
+			{
+				int i2 = q[head++], x2 = i2 % g.W, y2 = i2 / g.W;
+				// fuzzy tracing: the frontier passes a cell by once, roughening the seam
+				if (!desperate && AUG_FUZZ > 0 && fuzzed[i2] == 0 && Chance(AUG_FUZZ / 100.0)) { fuzzed[i2] = 1; q.Add(i2); continue; }
+				byte wasTree = g.Tree[i2], wasWater = g.Water[i2], wasHost = g.Host[i2];
+				g.C[i2] = SOLID; g.Host[i2] = 0; g.Tree[i2] = 0; g.Water[i2] = 0;   // tentative
+				if (wasWater == 0 && FloorComps() > baseComps)
+				{ g.C[i2] = FLOOR; g.Host[i2] = wasHost; g.Tree[i2] = wasTree; g.Water[i2] = wasWater; continue; }
+				aug.Add(i2); added++;
+				foreach (var d in N4) if (g.Inb(x2 + d[0], y2 + d[1])) Enq(x2 + d[0], y2 + d[1]);
+			}
+			return added;
+		}
+
+		/// <summary>The blind-claim entry: carve the claimed stage, thickening the
+		/// canyon only as far as refusal demands, wiping the zone only when nothing
+		/// else stands. Dry rounds; the winning configuration applies exactly once.</summary>
+		public static Result BuildAugmented(Zone Z, int seed, int assigned)
+		{
+			var aug = new HashSet<int>(); Result r = null; int rounds = 0; bool desperate = false;
+			HashSet<int> bestAug = null; int bestStage = -1;
+			for (int t = 0; t <= AUG_TRIES; t++)
+			{
+				r = Build(Z, seed, assigned, apply: false, aug.Count > 0 ? aug : null);
+				if (r.Built && r.StageIdx > bestStage) { bestStage = r.StageIdx; bestAug = new HashSet<int>(aug); }
+				if (r.Built && r.StageIdx >= assigned) { bestAug = new HashSet<int>(aug); break; }
+				if (t == AUG_TRIES) break;
+				int grown = GrowAugment(Z, aug, assigned, desperate);
+				if (grown == 0 && !desperate) { desperate = true; grown = GrowAugment(Z, aug, assigned, true); }
+				if (grown == 0) break;
+				rounds++;
+			}
+			if (bestAug != null)
+			{
+				var final = Build(Z, seed, assigned, apply: true, bestAug.Count > 0 ? bestAug : null);
+				Helpers.VerifyLog("WARREN", $"augment: {bestAug.Count} cells over {rounds} rounds -> {final.Stage} (claimed {STAGES[assigned].Name})");
+				return final;
+			}
+			// FINAL RUNG - wipe and rebuild (outside contributor; the engine's own
+			// ForceConnections closes reconnection for anything the defiles miss)
+			Helpers.VerifyLog("WARREN", $"augment ladder exhausted ({rounds} rounds) - REBUILD RUNG fires for {Z.ZoneID}");
+			return RebuildZone(Z, seed, assigned);
+		}
+
+		/// <summary>Record the dry border floor as the traversability contract, fill
+		/// everything else with mass, carve on the maximal band. Contract clusters
+		/// reconnect via the engine's ForceConnections at zone build; sim-verified
+		/// to stand a flourishing on a zone that had refused everything.</summary>
+		private static Result RebuildZone(Zone Z, int seed, int assigned)
+		{
+			var g0 = ReadHost(Z);
+			var aug = new HashSet<int>();
+			for (int i2 = 0; i2 < g0.W * g0.H; i2++) aug.Add(i2);
+			for (int x2 = 0; x2 < g0.W; x2++)
+				foreach (int y2 in new[] { 0, g0.H - 1 })
+					if (g0.C[g0.Idx(x2, y2)] == FLOOR && g0.Host[g0.Idx(x2, y2)] != 0 && g0.Water[g0.Idx(x2, y2)] == 0) aug.Remove(g0.Idx(x2, y2));
+			for (int y2 = 1; y2 < g0.H - 1; y2++)
+				foreach (int x2 in new[] { 0, g0.W - 1 })
+					if (g0.C[g0.Idx(x2, y2)] == FLOOR && g0.Host[g0.Idx(x2, y2)] != 0 && g0.Water[g0.Idx(x2, y2)] == 0) aug.Remove(g0.Idx(x2, y2));
+			var r = Build(Z, seed, assigned, apply: true, aug);
+			Helpers.VerifyLog("WARREN", r.Built
+				? $"rebuild rung: {Z.ZoneID} stood a {r.Stage} on the maximal band ({aug.Count} cells recast)"
+				: $"rebuild rung FAILED for {Z.ZoneID}: {r.Reason} - claim will not stand");
+			return r;
+		}
+
 		// (ProspectMark REMOVED same day it landed - the prospect fallback was
 		// superseded by the self-erasing ruling ("just stopped existing"). The
 		// mechanism lives in git history at c27bf12 if abandoned prospects ever
@@ -2683,6 +2936,42 @@ namespace Cleo.TerraFirma.Scripts
 		private static void ApplyToZone(Zone Z, Grid g)
 		{
 			int carved = 0, pools = 0, mossed = 0, padded = 0;
+			// AUGMENT MATERIALIZATION (blind-claim port): augmented cells that
+			// remain rock become real Shale - the same blueprint Hills paints, so
+			// added mass is indistinguishable from natural mass by construction.
+			// Cells the carve opened just shed their old ground (plants, liquids -
+			// the dam drains what it displaced). Combat objects are removed per
+			// the StockadeMaker precedent (ClearCombatObjectsFirst), logged.
+			if (g.Augment != null)
+			{
+				int walled = 0, openedIn = 0, displaced = 0;
+				foreach (int i in g.Augment)
+				{
+					Cell c = Z.GetCell(i % g.W, i / g.W);
+					if (c == null) continue;
+					foreach (GameObject o in c.GetObjectsWithPart("Combat").ToList()) { c.RemoveObject(o); displaced++; }
+					foreach (GameObject o in c.GetObjectsWithPart("LiquidVolume").ToList()) o.Obliterate();
+					foreach (GameObject o in c.GetObjectsWithPart("PlantProperties").ToList()) o.Obliterate();
+					if (g.C[i] != FLOOR)
+					{
+						if (!c.HasWall()) { c.AddObject(GameObject.Create("Shale")); walled++; }
+					}
+					else openedIn++;
+				}
+				Helpers.VerifyLog("WARREN", $"augment applied: {g.Augment.Count} cells ({walled} walled, {openedIn} opened into the dig, {displaced} combat objects removed)");
+			}
+			if (g.Defile != null && g.Defile.Count > 0)
+			{
+				int cut = 0;
+				foreach (int i in g.Defile)
+				{
+					Cell c = Z.GetCell(i % g.W, i / g.W);
+					if (c == null) continue;
+					foreach (GameObject wall in c.GetWalls().ToList()) wall.Obliterate();
+					cut++;
+				}
+				Helpers.VerifyLog("WARREN", $"defile applied: {cut} cells opened toward the zone edge");
+			}
 			for (int y = 0; y < g.H; y++)
 				for (int x = 0; x < g.W; x++)
 				{
