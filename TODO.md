@@ -1633,6 +1633,18 @@ never lie because the zone is MADE to fit at visit.
   overlay off (the canvas question this sim exists to answer) · (b) the water-damming
   desperate rung license · (c) over-assignment numbers for the stage mix · (d) the port
   ruling itself - adopt blind-claim, retiring scout-and-quota placement.**
+  - **TWO FURTHER CONSIDERATIONS from the same outside contributor (relayed by the user
+    2026-08-25), CLAUDE READS ATTACHED, both UNRULED:** (1) wipe-and-rebuild as the
+    ladder's final rung - record clear zone edges (the traversability contract), fill
+    with canyon wall, re-open the edges, carve fresh. Read: ADOPT AS DESIGNED-BUT-UNBUILT
+    insurance; the engine's own ForceConnections closes the reconnect half, and a wiped
+    zone is a maximal band so the standard pipeline runs unmodified over a synthetic
+    genCanyon - but the census ran 0-for-90 needing it, so it is logged, not built.
+    (2) structure-first generation with a "fuzzy" rock outline traced around placed
+    structures. Read: DECLINE as the generator (rooms-anywhere un-earns the band
+    negotiation that is the v2 anti-groan identity engine) · ADOPT the fuzzy-trace half
+    as boundary polish if judging ever flags blobby augment seams - noise-jittered
+    acceptance at the growth frontier, one knob, not an architecture.
 
 **YARD PLACEMENT: AREA DECIDES — USER FLOAT 2026-08-25 ("what if we improved blockyard
 placement a bit when there's lots of open space outside?", with an in-game screenshot of a
