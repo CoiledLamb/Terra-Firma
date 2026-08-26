@@ -10,16 +10,25 @@ namespace XRL.World.Parts
 	/// plot they are: N/S = top/bottom edges (horizontal), E/W = right/left edges (vertical),
 	/// corners named by position - chalklineNE is a rectangle's northeast corner, arms south+west.
 	/// Auto-tiling reads the four cardinal neighbors and picks the piece whose arms reach them,
-	/// and every placement or smear RE-TILES the neighbors so they reach back. No T-junction or
-	/// cross sprites exist yet (3-4 arm cells fall back to a straight); flagged to the user, who
-	/// offered to draw more.
+	/// and every placement or smear RE-TILES the neighbors so they reach back. Tees follow the
+	/// same position convention (chalklineTN sits on the north edge, stem reaching south into
+	/// the plot) and chalklineX is the four-way (user sprites 2026-08-25).
 	/// Smear: open to anyone adjacent; owned camp lines broadcast for help via native ownership
 	/// (BroadcastForHelp), player lines are unowned and wipe clean.
+	/// Trample (user shape 2026-08-23, amending the 08-22 "doesn't wear off" shape with traffic
+	/// wear): a creature stepping on the cell has a small chance to smear the line - the light
+	/// mote-scuff beat, never the deliberate smear's Hold, because any passing NPC could not be
+	/// allowed to hitch the game thread mid-move. Owner-faction walkers skip the roll entirely
+	/// (their own camp traffic minds its marks - and cannot anger itself); everyone else who
+	/// tramples an owned line gets the same help broadcast a deliberate smear does.
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_ChalkLine : IPart
 	{
 		public const string SMEAR_COMMAND = "Cleo_TerraFirma_SmearChalkLine";
+
+		/// <summary>Percent chance per step that a walker smears the line. CLAUDE DRAFT dial.</summary>
+		public const int TRAMPLE_SMEAR_CHANCE = 5;
 
 		/// <summary>The stroke direction this piece was drawn with; the re-tile fallback when
 		/// no neighboring chalk remains.</summary>
@@ -30,7 +39,8 @@ namespace XRL.World.Parts
 			return base.WantEvent(ID, cascade)
 				|| ID == GetInventoryActionsEvent.ID
 				|| ID == InventoryActionEvent.ID
-				|| ID == GetNavigationWeightEvent.ID;
+				|| ID == GetNavigationWeightEvent.ID
+				|| ID == ObjectEnteredCellEvent.ID;
 		}
 
 		/// <summary>Soft pathing nudge (user docket 2026-08-25, "a lower weight on chalk
@@ -40,6 +50,48 @@ namespace XRL.World.Parts
 		{
 			if (E.Smart)
 				E.MinWeight(2);
+			return base.HandleEvent(E);
+		}
+
+		public override bool HandleEvent(ObjectEnteredCellEvent E)
+		{
+			// walker gates on the Sticky chassis (solid, phase-matched) plus creature-and-grounded:
+			// fliers touch nothing, and webs WANT fliers where chalk does not
+			GameObject walker = E.Object;
+			if (walker != null && walker.IsCreature && !walker.IsFlying
+				&& walker.GetMatterPhase() <= 1 && walker.PhaseMatches(ParentObject))
+			{
+				string owner = ParentObject.Physics?.Owner;
+				// the Bed ownership guard, inverted: owner-matched walkers (tag, name, or
+				// faction) never roll - camp traffic minds its marks and cannot anger itself
+				bool ownerMatched = !owner.IsNullOrEmpty()
+					&& (walker.HasTagOrProperty(owner) || walker.DisplayNameOnly == owner || walker.BelongsToFaction(owner));
+				if (!ownerMatched && XRL.Rules.Stat.Random(1, 100) <= TRAMPLE_SMEAR_CHANCE)
+				{
+					if (!owner.IsNullOrEmpty())
+					{
+						// trampling camp chalk is the same vandalism as scrubbing it
+						ParentObject.Physics.BroadcastForHelp(walker);
+						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK", $"owned chalk line ({owner}) trampled by {walker.Blueprint}, help broadcast");
+					}
+					else
+					{
+						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK", $"chalk line trampled by {walker.Blueprint}");
+					}
+					if (walker.IsPlayer())
+					{
+						IComponent<GameObject>.AddPlayerMessage("Your steps smear the chalk line."); // DRAFT
+					}
+					else if (ParentObject.IsVisible())
+					{
+						IComponent<GameObject>.AddPlayerMessage(walker.Does("smear") + " the chalk line underfoot."); // DRAFT
+					}
+					Cell cell = ParentObject.CurrentCell;
+					Cleo.TerraFirma.Scripts.Cleo_TerraFirma_ChalkRevealFX.PlayScuff(cell);
+					ParentObject.Destroy();
+					RetileNeighbors(cell);
+				}
+			}
 			return base.HandleEvent(E);
 		}
 
@@ -70,6 +122,15 @@ namespace XRL.World.Parts
 				}
 				Cell cell = ParentObject.CurrentCell;
 				E.Actor.UseEnergy(1000, "Item SmearChalkLine");
+				// smear reveal, inverted (RULED 2026-08-23): floor-copy quads fly IN over the
+				// line; the removal happens behind the finished cover, whose exit is
+				// floor-over-floor and therefore invisible. 0 = unseen/classic/unpainted,
+				// remove immediately as before
+				float cover = Cleo.TerraFirma.Scripts.Cleo_TerraFirma_ChalkRevealFX.PlaySmear(cell);
+				if (cover > 0f)
+				{
+					Cleo.TerraFirma.Scripts.Cleo_TerraFirma_ChalkRevealFX.Hold(cover);
+				}
 				ParentObject.Destroy();
 				RetileNeighbors(cell);
 				E.RequestInterfaceExit();
@@ -121,8 +182,29 @@ namespace XRL.World.Parts
 
 		private static string PieceFor(bool n, bool s, bool e, bool w, Cell cell, string strokeDir)
 		{
-			// straights win when an opposing pair exists (also the 3-4 arm fallback: no
-			// T-junction or cross sprites in the kit yet)
+			// junctions first: four arms is the cross, three is a tee named for the plot
+			// edge it sits on (stem always reaches inward, matching the corner convention)
+			if (n && s && e && w)
+			{
+				return "X";
+			}
+			if (e && w && s)
+			{
+				return "TN";
+			}
+			if (e && w && n)
+			{
+				return "TS";
+			}
+			if (n && s && w)
+			{
+				return "TE";
+			}
+			if (n && s && e)
+			{
+				return "TW";
+			}
+			// straights win when an opposing pair exists
 			if (n && s)
 			{
 				return Vertical(cell);

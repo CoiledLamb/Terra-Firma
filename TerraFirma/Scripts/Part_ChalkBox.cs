@@ -29,11 +29,11 @@ namespace XRL.World.Parts
 
 		public override bool SameAs(IPart p)
 		{
-			if ((p as Cleo_TerraFirma_ChalkBox).Uses != Uses)
-			{
-				return false;
-			}
-			return base.SameAs(p);
+			// never engine-stack (user bug 2026-08-23: equal-Uses boxes stacked and the merge
+			// kept ONE pool - 10+10 read as x2 but spent as 10). Stacker rides base Item, the
+			// chain's root, so every stack path (cell spawn, pickup, trade) must be refused
+			// here; boxes COMBINE via MergeIntoCarried instead
+			return false;
 		}
 
 		public override bool WantEvent(int ID, int cascade)
@@ -129,6 +129,14 @@ namespace XRL.World.Parts
 
 		private void EnsureGrant(GameObject who)
 		{
+			if (who != null && who.IsCreature)
+			{
+				HealLegacyStack();
+				if (MergeIntoCarried(who))
+				{
+					return; // this box poured itself into a carried one and is gone
+				}
+			}
 			if (who != null && who.IsCreature && who.ActivatedAbilities != null)
 			{
 				ActivatedAbilityEntry existing = who.ActivatedAbilities.GetAbilityByCommand(DRAW_COMMAND);
@@ -154,6 +162,75 @@ namespace XRL.World.Parts
 					who.RegisterPartEvent(this, DRAW_COMMAND);
 				}
 				SyncAbilityName(who);
+			}
+		}
+
+		/// <summary>Boxes COMBINE instead of stacking (user shape 2026-08-23: "ideally all chalk
+		/// boxes will stack on to one, their charges combining"): a box arriving in a creature's
+		/// possession pours its sticks into a box already carried and disappears. The survivor is
+		/// the grant-holding box when one exists, so the registered command handler never moves.
+		/// Returns true if this box merged away.</summary>
+		private bool MergeIntoCarried(GameObject who)
+		{
+			if (Uses <= 0)
+			{
+				return false; // a spent husk has nothing to pour; the crumble path owns it
+			}
+			var others = CarriedBoxes(who, skip: ParentObject);
+			if (others.Count == 0)
+			{
+				return false;
+			}
+			Cleo_TerraFirma_ChalkBox survivor = null;
+			foreach (GameObject other in others)
+			{
+				Cleo_TerraFirma_ChalkBox part = other.GetPart<Cleo_TerraFirma_ChalkBox>();
+				if (part.AbilityID != Guid.Empty)
+				{
+					survivor = part;
+					break;
+				}
+			}
+			if (survivor == null)
+			{
+				survivor = others[0].GetPart<Cleo_TerraFirma_ChalkBox>();
+			}
+			survivor.HealLegacyStack(); // never pour into an unhealed engine-stack
+			int poured = Uses;
+			survivor.Uses += poured;
+			Uses = 0;
+			if (who.IsPlayer())
+			{
+				IComponent<GameObject>.AddPlayerMessage("You tip the new chalk into your box."); // DRAFT
+			}
+			// the crumble idiom for removing a box mid-event, belt included (spent boxes once
+			// lingered at zero; a merge husk carries the same risk)
+			GameObject husk = ParentObject;
+			bool destroyed = husk.Destroy();
+			bool gone = !GameObject.Validate(husk) || husk.IsInGraveyard();
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK",
+				$"box merge: +{poured} -> carried box now {survivor.Uses}, husk Destroy()={destroyed}, gone={gone}");
+			if (!gone && husk.InInventory != null)
+			{
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK", "merge BELT: husk survived Destroy in an inventory; obliterating");
+				husk.Obliterate();
+			}
+			SyncAbilityName(who);
+			return true;
+		}
+
+		/// <summary>An engine-stack of boxes from before the no-stack rule keeps ONE pool for the
+		/// whole stack. The player has been reading "(N) xK" as N sticks per box, so the heal
+		/// grants exactly that: one box, Uses multiplied out by the stack count.</summary>
+		private void HealLegacyStack()
+		{
+			Stacker stacker = ParentObject.Stacker;
+			if (stacker != null && stacker.StackCount > 1)
+			{
+				int k = stacker.StackCount;
+				Uses *= k;
+				stacker.StackCount = 1;
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK", $"legacy stack healed: x{k} -> one box, {Uses} uses");
 			}
 		}
 
@@ -291,13 +368,22 @@ namespace XRL.World.Parts
 			{
 				linePart.StrokeDir = dir;
 			}
+			// draw reveal (user shape 2026-08-23): the mask must exist BEFORE the line does --
+			// it wears the cell's floor paint, so the juice queue's spin-up frames render
+			// floor-over-floor and the stroke is born already hidden. Hold is the carve-swap
+			// lesson; 0 means unseen/classic/unpainted and the draw lands as before.
+			float settle = Cleo.TerraFirma.Scripts.Cleo_TerraFirma_ChalkRevealFX.Play(target);
+			if (settle > 0f)
+			{
+				Cleo.TerraFirma.Scripts.Cleo_TerraFirma_ChalkRevealFX.Hold(settle);
+			}
 			target.AddObject(line);
 			// no draw sfx by ruling 2026-08-22 (the tattoo-gun placeholder was removed; the
 			// sound pass picks a real one if any)
 			// the new piece reads its neighbors, and the neighbors reach back
 			linePart?.Retile();
 			Cleo_TerraFirma_ChalkLine.RetileNeighbors(target);
-			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK", $"line drawn {dir}, {Uses - 1} uses left");
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CHALK", $"line drawn {dir}, reveal {(settle > 0f ? "played" : "skipped")}, {Uses - 1} uses left");
 			actor.UseEnergy(1000, "Item DrawChalk");
 			ConsumeUse(actor);
 		}
@@ -305,6 +391,7 @@ namespace XRL.World.Parts
 		/// <summary>Spend one stroke; the board's write action calls this too. Crumbles at zero.</summary>
 		public void ConsumeUse(GameObject actor)
 		{
+			HealLegacyStack(); // a legacy engine-stack spends as one pool; make it whole first
 			Uses--;
 			GameObject box = ParentObject;
 			GameObject holder = box.InInventory ?? actor;
