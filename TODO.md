@@ -1689,6 +1689,27 @@ never lie because the zone is MADE to fit at visit.
     the check is honest about water) · sweep 37 mixed sites: 0 unreachable, 1 defile -
     an insurance law, rare and cheap.** New stats row `access defile`.
 
+**INTERIOR-CHECKING VOCABULARY — outside contribution (code + infographics) relayed by the
+USER 2026-08-25, READ + MAPPED, nothing built.** Two Cell extensions parameterized over a
+`Predicate<Cell> Basis`: `IsOuterCell` (any of the eight neighbors fails the basis = the
+region's own boundary member) and `IsInnerCell` (all cardinals pass; strict demands all
+ordinals, non-strict forgives exactly one diagonal - the staircase-wall/corner-worn case,
+their diagram's I6). THE THESIS, their F6 diagram: a cell has no answer to "am i inside?"
+until a basis says inside OF WHAT - the same cell is inner on the blue-region basis and
+edge on the contiguous-wall basis. The basis predicate IS the definition of inside, and
+swapping it re-asks the question of the same geometry. Sweep idiom rides the engine's own
+`ScopeDisposedList` pool; real usage composes the self-test (their second diagram: orange
+= wall cells with an exposed face, buried walls unmarked, interior pocket untouched).
+**CLAUDE MAPPING, for the port whenever a shared helper earns its keep: we have hand-rolled
+this operator pair at least six times without naming it** - the sim's rind/onSkin check ·
+the mouth-candidate skin filter · draw()'s mass-near-floor crop · the pocket wall ring ·
+the augment frontier · the moss halo's "accessible face" clause (plus the trimmer chasing
+inner-cells of floor). Converging them on one named pair would make each pass's basis
+predicate self-documenting. **Door quietly opened: the chalk plot as a basis** - the 08-18
+"items not respecting the chalk" fix was rectangle membership; `IsInnerCell` over a plot
+cell-set asks it properly for ANY shape, so non-rectangular yards become possible someday
+with no new containment logic. Same contributor as the blind-claim model and its riders.
+
 **YARD PLACEMENT: AREA DECIDES — USER FLOAT 2026-08-25 ("what if we improved blockyard
 placement a bit when there's lots of open space outside?", with an in-game screenshot of a
 yard wedged in a cramped chamber beside a wide-open doorstep), SIM BUILT + MEASURED same
