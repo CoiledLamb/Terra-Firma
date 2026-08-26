@@ -80,7 +80,9 @@ namespace XRL.World.WorldBuilders
 			{
 				var L = pool[i];
 				string zoneID = Zone.XYToID("JoppaWorld", L.X, L.Y, 10);
-				WorldCreationProgress.StepProgress($"Scouting canyons... ({i + 1}/{scoutN})");
+				// no per-scout counter: StepProgress keys on its TEXT, so a changing
+				// string mints a new display entry per call (user flag 2026-08-25,
+				// fifty "Scouting canyons" rows) - one line per phase, the lairs way
 				The.ZoneManager.AdjustZoneGenerationTierTo(zoneID);
 				Zone Z = The.ZoneManager.GetZone(zoneID);
 				if (Z == null) continue;
