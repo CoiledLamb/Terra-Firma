@@ -1709,6 +1709,19 @@ predicate self-documenting. **Door quietly opened: the chalk plot as a basis** -
 "items not respecting the chalk" fix was rectangle membership; `IsInnerCell` over a plot
 cell-set asks it properly for ANY shape, so non-rectangular yards become possible someday
 with no new containment logic. Same contributor as the blind-claim model and its riders.
+- **Also from the same exchange:** (1) `GetCellsInACosmeticCircle(Silent)` - an ellipse in
+  cell space (y squashed) so a circle reads ROUND ON SCREEN under Qud's tall tiles; the
+  Silent variant exists because the assembly's own area getters chatter into the log,
+  which for us would pollute the TF-VERIFY watcher too. Their 4/3 aspect vs our lab's
+  1.5 is an eyeball knob when a consumer exists; cosmetic shapes only, mechanical radii
+  stay grid-true. (2) **PREFAB RPM SETPIECES, padded and cased** - small hand-authored
+  map chunks padded 1-2 cells, encased in shale that fuses into the carve's rock
+  (needs the fissure wall's PaintWith/PaintPart fusion treatment at the seam), doored by
+  the carver's own connection machinery. CLAUDE READ: adopt as the PAYLOAD channel when
+  that lane lands, never the skeleton (band negotiation stays the identity engine) -
+  and it is the engine-native TFMAP workflow: THE USER DRAWS THE CHAMBER (mapgen is the
+  user's authorship lane), the carve seats it as a pocket. The figurine-table chamber,
+  overseer quarters and shrine rooms are the obvious first tenants. UNRULED.
 
 **YARD PLACEMENT: AREA DECIDES — USER FLOAT 2026-08-25 ("what if we improved blockyard
 placement a bit when there's lots of open space outside?", with an in-game screenshot of a
