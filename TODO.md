@@ -1817,6 +1817,35 @@ obligation and full verification protocol spelled out in the brief.
   Sim catch-up: dressDwelling in the lab has no such law yet, flagged with the others.
   `[verify]` hearth rooms roll oven-or-campfire, never both; oven+dish still possible.
 
+  **GARDEN BREACH — USER DOCKET 2026-08-26 (screenshot of tree-filled sealed clearings
+  inside the quarry rock: "can we breach them but not leave our warren generation? them
+  reading like garden pockets is honestly kind of beautiful"), talked out first at the
+  user's ask, GAME-SIDE DIRECT RULED same sitting ("game side directly works" - the sim
+  host grows no sealed clearings to measure, the fork was put to the user). BUILT:
+  compile 0 errors, deployed hash-verified 1/1, `log-confirmed pending`.**
+  - **Shape:** `BreachGardens`, the BreachAquifers idiom aimed at the clearings the
+    mouth-connectivity law dodges. Post-carve flood from the mouth marks the live
+    network; any pure-host, dry, sealed floor region of 4+ cells is a garden; per
+    garden the scan finds the THINNEST straight wall between garden and dig (max 6
+    cells, never through Aqua/Water rock, landing must be live carved floor - not
+    canyon, not another pocket); a 75% site gate rolls 1-2 cuts, spare gardens STAY
+    SEALED on purpose (dig-through discovery). Dials all CLAUDE
+    (GARDEN_BREACH_PCT/MAX/REACH/MIN), strikeable.
+  - **The "not leave our warren generation" clause lands structurally:** the garden
+    keeps its host ground - no pocket id, no role, no dress, no lighting, no tense
+    flip; every dress law keys on Host==0 or pocket membership, so the wild interior
+    is invariant by construction. Only the heading becomes carved floor, and it can
+    pick up corridor traces like any passage. Pass ordering: after TrimSlack (a 1-wide
+    heading reads as trimmable slack) and after MeasureG/stage honesty (a garden is
+    found, not built), before dress.
+  - **Flagged deltas:** new rolls enter the seed stream before dress, so unbuilt zones
+    re-roll their dress on existing seeds (layout laws unchanged). Wet clearings are
+    excluded in v1; a drowned grotto is its own sitting if wanted.
+  `[verify]` tfwarrens sweep: `gardens: N sealed, breached K` lines appear on
+  clearing-bearing sites; walk a breach in game - a short 1-wide cut from a corridor
+  into an untouched tree-filled clearing, no furniture inside, spare gardens still
+  sealed; no MODERROR.
+
 **BLIND-CLAIM PORTED, SCOUT RETIRED — USER RULED 2026-08-25 ("alright, i'll say go, let's
 try it"), BUILT + DEPLOYED same sitting; `log-confirmed pending` ON A FRESH EMBARK.**
 The full sim stack crossed: `BuildAugmented` ladder (real canyon first · polite thickening

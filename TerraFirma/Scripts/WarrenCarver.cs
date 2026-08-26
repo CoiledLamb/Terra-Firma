@@ -30,6 +30,12 @@ namespace Cleo.TerraFirma.Scripts
 		public const int BREACH_CHANCE = 45;      // breachChance
 		public const int BREACH_MAX = 2;          // breachMax
 		public const int BREACH_REACH = 5;        // breachReach
+		// garden breach (USER DOCKET 2026-08-26, "breach them but not leave our
+		// warren generation"; game-side direct RULED same sitting). Dials CLAUDE.
+		public const int GARDEN_BREACH_PCT = 75;  // per-site gate
+		public const int GARDEN_MAX = 2;          // breaches per site; extra gardens stay sealed
+		public const int GARDEN_REACH = 6;        // longest heading worth cutting
+		public const int GARDEN_MIN = 4;          // smallest clearing that counts as a garden
 		public const int MOSS_PCT = 35;           // mossPct (ported + dialed 2026-08-23)
 		public const int MOMENTUM = 55;           // momentum
 		public const int WANDER = 22;             // wander
@@ -1135,6 +1141,112 @@ namespace Cleo.TerraFirma.Scripts
 					int cx = t[0] + t[2] * i, cy = t[1] + t[3] * i;
 					if (!g.Inb(cx, cy) || g.Host[g.Idx(cx, cy)] != 0) { ok = false; break; }
 				}
+				if (!ok) continue;
+				for (int i = 0; i < t[4]; i++) g.C[g.Idx(t[0] + t[2] * i, t[1] + t[3] * i)] = FLOOR;
+				made++;
+			}
+			return made;
+		}
+
+		// GARDEN BREACH (USER DOCKET 2026-08-26, off the sealed-clearing screenshot:
+		// "can we breach them but not leave our warren generation? them reading like
+		// garden pockets is honestly kind of beautiful"; game-side direct RULED same
+		// sitting - the sim host grows no sealed clearings to measure). The
+		// BreachAquifers idiom aimed at the clearings the mouth law dodges: a short
+		// straight heading from the dig into a sealed pocket of host ground, cut at
+		// the thinnest wall. The garden STAYS HOST GROUND on purpose - no pocket id,
+		// no role, no dress, no lighting, no tense; every dress law keys on Host==0
+		// or pocket membership, so the wild interior is invariant by construction.
+		// Only the heading itself becomes carved floor. Runs after TrimSlack (a
+		// 1-wide heading reads as trimmable slack) and after MeasureG (a garden is
+		// found, not built - it never feeds stage honesty).
+		private static int BreachGardens(Grid g, out int found)
+		{
+			found = 0;
+			// the live network: everything walkable from the mouth
+			var live = new byte[g.W * g.H];
+			if (g.MouthIdx >= 0)
+			{
+				var q = new Queue<int>();
+				live[g.MouthIdx] = 1; q.Enqueue(g.MouthIdx);
+				while (q.Count > 0)
+				{
+					int c = q.Dequeue(); int cx = c % g.W, cy = c / g.W;
+					foreach (var d in N4)
+					{
+						int nx = cx + d[0], ny = cy + d[1];
+						if (!g.Inb(nx, ny)) continue;
+						int ni = g.Idx(nx, ny);
+						if (live[ni] == 0 && g.C[ni] == FLOOR) { live[ni] = 1; q.Enqueue(ni); }
+					}
+				}
+			}
+			// sealed clearings: pure host-floor regions the network cannot reach.
+			// Dry ones only for v1 (a drowned grotto is its own sitting).
+			var seen = new byte[g.W * g.H];
+			var gardens = new List<List<int>>();
+			for (int i0 = 0; i0 < g.W * g.H; i0++)
+			{
+				if (seen[i0] != 0 || live[i0] != 0 || g.C[i0] != FLOOR) continue;
+				var region = new List<int> { i0 };
+				var st = new Stack<int>(); st.Push(i0); seen[i0] = 1;
+				bool pureHost = true, wet = false;
+				while (st.Count > 0)
+				{
+					int c = st.Pop(); int cx = c % g.W, cy = c / g.W;
+					if (g.Host[c] == 0) pureHost = false;
+					if (g.Water[c] != 0) wet = true;
+					foreach (var d in N4)
+					{
+						int nx = cx + d[0], ny = cy + d[1];
+						if (!g.Inb(nx, ny)) continue;
+						int ni = g.Idx(nx, ny);
+						if (seen[ni] == 0 && live[ni] == 0 && g.C[ni] == FLOOR) { seen[ni] = 1; region.Add(ni); st.Push(ni); }
+					}
+				}
+				if (pureHost && !wet && region.Count >= GARDEN_MIN) gardens.Add(region);
+			}
+			found = gardens.Count;
+			if (gardens.Count == 0) return 0;
+			// one heading per garden, the thinnest wall between garden and dig
+			var cuts = new List<int[]>();   // x, y, dx, dy, len (start = first rock cell out from the garden)
+			foreach (var region in gardens)
+			{
+				int[] best = null;
+				foreach (int c in region)
+				{
+					int cx = c % g.W, cy = c / g.W;
+					foreach (var d in N4)
+					{
+						int rx = cx + d[0], ry = cy + d[1];
+						if (!g.Inb(rx, ry) || g.C[g.Idx(rx, ry)] == FLOOR) continue;
+						for (int dd = 1; dd <= GARDEN_REACH; dd++)
+						{
+							int fx = rx + d[0] * (dd - 1), fy = ry + d[1] * (dd - 1);
+							if (!g.Inb(fx, fy)) break;
+							int fi = g.Idx(fx, fy);
+							if (g.C[fi] == FLOOR)
+							{
+								// landing must be the DIG, not canyon or another pocket
+								if (live[fi] != 0 && g.Host[fi] == 0 && (best == null || dd - 1 < best[4]))
+									best = new[] { rx, ry, d[0], d[1], dd - 1 };
+								break;
+							}
+							if (g.Aqua[fi] != 0 || g.Water[fi] != 0) break;   // never cut through the water table
+						}
+					}
+				}
+				if (best != null && best[4] > 0) cuts.Add(best);
+			}
+			if (cuts.Count == 0) return 0;
+			int made = 0, want = Chance(GARDEN_BREACH_PCT / 100.0) ? R(1, GARDEN_MAX) : 0;
+			for (int k = 0; k < cuts.Count && made < want; k++)
+			{
+				int ci = R(0, cuts.Count - 1);
+				var t = cuts[ci]; cuts.RemoveAt(ci);
+				bool ok = true;
+				for (int i = 0; i < t[4]; i++)
+					if (g.C[g.Idx(t[0] + t[2] * i, t[1] + t[3] * i)] == FLOOR) { ok = false; break; }
 				if (!ok) continue;
 				for (int i = 0; i < t[4]; i++) g.C[g.Idx(t[0] + t[2] * i, t[1] + t[3] * i)] = FLOOR;
 				made++;
@@ -2712,6 +2824,12 @@ namespace Cleo.TerraFirma.Scripts
 			int[] floorMin = { 0, CAMP_FLOOR, FLOUR_FLOOR };
 			while (si > 0 && m.Floor < floorMin[si]) { si--; degraded++; }
 			var roles = RegisterRoles(g, art, pockets, si, occupancy);
+			// the garden breach sits between roles and dress: late enough that trim
+			// and the floor measure never see the heading, early enough that the cut
+			// can pick up corridor traces like any other passage
+			int gardenBreaches = BreachGardens(g, out int gardensFound);
+			if (gardensFound > 0)
+				Helpers.VerifyLog("WARREN", $"gardens: {gardensFound} sealed, breached {gardenBreaches}");
 			// dress is the pipeline's TAIL - after every layout roll - so a dry
 			// run (scout probe) may skip it without changing what it measures or
 			// what a winner's full rebuild produces (timesave 1, user 2026-08-25)
