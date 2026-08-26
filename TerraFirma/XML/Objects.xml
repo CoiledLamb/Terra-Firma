@@ -268,7 +268,7 @@ Perishes when unequipped." />
 	<object Name="Cleo_TerraFirma_GutCistern" Inherits="WaterContainer">
 		<part Name="Render" DisplayName="gut cistern" ColorString="&amp;w" DetailColor="B" />
 		<part Name="Physics" Organic="true" Weight="5" />
-		<part Name="LiquidVolume" MaxVolume="16" Volume="0" StartVolume="0" InitialLiquid="water-1000" Sealed="true" ManualSeal="true" /> <!-- USER CATCH 2026-08-26: Sealed alone is PERMANENT (Unseal action only exists under ManualSeal, LiquidVolume decomp ~3008); ManualSeal added so the looted cistern can be opened. Producer self-fill ignores the seal (DistributeLiquid mixes directly), so it still fills while sealed and worn -->
+		<part Name="LiquidVolume" MaxVolume="16" Volume="16" StartVolume="1d10-1" InitialLiquid="water-1000" Sealed="true" ManualSeal="true" /> <!-- USER CATCH 2026-08-26: Sealed alone is PERMANENT (Unseal action only exists under ManualSeal, LiquidVolume decomp ~3008); ManualSeal added so the looted cistern can be opened. Producer self-fill ignores the seal (DistributeLiquid mixes directly), so it still fills while sealed and worn. AGE ROLL StartVolume 1d10-1 DRAFT (second user live-fire catch: producers only tick in active zones at 1000-4000 turns/dram, so without a spawn roll every found cistern is newborn-empty); Volume=MaxVolume alongside StartVolume dice is the base Waterskin idiom -->
 		<part Name="Armor" WornOn="Body" />
 		<part Name="LiquidProducer" Liquid="water" FillSelfOnly="true" VariableRate="1000-4000" WorksOnWearer="false" WorksOnSelf="true" />
 		<part Name="Commerce" Value="15" />
