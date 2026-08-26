@@ -63,11 +63,13 @@ namespace XRL.World.WorldBuilders
 
 		private static void Place(JoppaWorldBuilder Builder)
 		{
-			// loading note: this is the one added step that does real work. DRAFT
-			// text, rides the release voice pass. StepProgress is the lairs
-			// builder's own in-phase idiom - no NextStep, the bar budget stands.
-			WorldCreationProgress.StepProgress("Scouting canyons...");
 			var pool = EnumeratePool(Builder);
+			// loading note: OUR OWN step entry (user flag 2026-08-25: ticks were
+			// landing on the farms/forts step - StepProgress only advances the
+			// CURRENT entry, and only NextStep creates one). MaxSteps is the
+			// ceiling; NextStep on the following phase auto-completes a bar the
+			// adaptive exit left partial. DRAFT text, rides the voice pass.
+			WorldCreationProgress.NextStep("Scouting canyons...", Math.Min(SCOUT_N * 2, pool.Count));
 			var rng = new Random(The.Game.GetWorldSeed("TFWARRENSCOUT"));
 			for (int i = pool.Count - 1; i > 0; i--)
 			{
@@ -139,7 +141,7 @@ namespace XRL.World.WorldBuilders
 			// assign biggest-first; carve immediately; a refusal burns no slot,
 			// the next capable spare steps up (refusals should be ~impossible for
 			// flourishing - an exact probe replay - and rare below it)
-			WorldCreationProgress.StepProgress("Raising quarry warrens...");
+			WorldCreationProgress.NextStep("Raising quarry warrens...", WARRENS_PER_WORLD);
 			var swClaim = new System.Diagnostics.Stopwatch();
 			swClaim.Start();
 			int sited = 0, refusals = 0;
