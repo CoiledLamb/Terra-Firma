@@ -36,6 +36,14 @@ namespace Cleo.TerraFirma.Scripts
 		public const int GARDEN_MAX = 2;          // breaches per site; extra gardens stay sealed
 		public const int GARDEN_REACH = 6;        // longest heading worth cutting
 		public const int GARDEN_MIN = 4;          // smallest clearing that counts as a garden
+		// population (USER DOCKET 2026-08-26 "time to implement populations of
+		// creatures into our warrens" - the spawn wiring ruling the pack table
+		// waited on since 2026-08-15). Overseer chance rides the stage axis per
+		// the 0-2 payloads ruling (2026-08-17: "an abandoned warren could have
+		// nothing, while a flourishing large warren could have a legendary
+		// overseer and a merchant"). All numbers CLAUDE dials.
+		public static readonly int[] OVERSEER_PCT = { 15, 40, 75 };   // by stage: working/camp/flourishing
+		public const int SNAPJAW_MIN = 2, SNAPJAW_MAX = 4;            // reclaimed denners
 		public const int MOSS_PCT = 35;           // mossPct (ported + dialed 2026-08-23)
 		public const int MOMENTUM = 55;           // momentum
 		public const int WANDER = 22;             // wander
@@ -2946,7 +2954,7 @@ namespace Cleo.TerraFirma.Scripts
 				var r = BuildOnce(Z, seed, forcedStage, a, false, apply, aug, out Grid g, out List<PocketRec> pockets);
 				if (r.Built)
 				{
-					if (apply) ApplyToZone(Z, g);
+					if (apply) { ApplyToZone(Z, g); PopulateSite(Z, g, pockets, r); }
 					return r;
 				}
 				last = r;
@@ -2956,7 +2964,7 @@ namespace Cleo.TerraFirma.Scripts
 					if (r2.Built)
 					{
 						Helpers.VerifyLog("WARREN", $"blocks rescued the face (attempt {a}, boxes built {r.Reason})");
-						if (apply) ApplyToZone(Z, g2);
+						if (apply) { ApplyToZone(Z, g2); PopulateSite(Z, g2, pockets2, r2); }
 						return r2;
 					}
 					last = r2;
@@ -3256,6 +3264,123 @@ namespace Cleo.TerraFirma.Scripts
 				}
 				Helpers.VerifyLog("WARREN", $"mouth ({mx},{my}) neighbors at apply: {string.Join(" | ", names)}");
 			}
+		}
+
+		// ---------------------------------------------------------------- population
+		// THE SPAWN WIRING (USER DOCKET 2026-08-26): occupancy decides WHO, the
+		// stage axis decides HOW MUCH, pocket roles decide WHERE. In-use sites get
+		// the rank-and-file pack (Cleo_TerraFirma_Stonecarver Pack, the table that
+		// waited on this ruling) placed by trade - hewers at the faces, masons in
+		// the commons, outriders toward the mouth - plus a stage-chanced overseer
+		// on the tfcarverpack recipe: plain chassis through the epithet builder,
+		// seated in the deepest dwelling. Reclaimed sites get snapjaw miners
+		// denned deep beside the crude fires the tense pass already lights.
+		// Abandoned sites get nobody, per the 0-2 payloads ruling's floor.
+		// Creature MIX rolls the engine's ambient rng (PopulationManager.Generate,
+		// the wish's own path); cell picks ride the carve seed. Zones build once,
+		// so the split is cosmetic; noted for honesty.
+		private static void PopulateSite(Zone Z, Grid g, List<PocketRec> pockets, Result r)
+		{
+			List<int[]> FreeCellsOf(PocketRec p)
+			{
+				var cs = new List<int[]>();
+				for (int y = p.In.Y0; y <= p.In.Y1; y++)
+					for (int x = p.In.X0; x <= p.In.X1; x++)
+					{
+						int i = g.Idx(x, y);
+						if (g.Pocket[i] != p.Id || g.C[i] != FLOOR || g.Water[i] != 0) continue;
+						Cell c = Z.GetCell(x, y);
+						if (c == null || c.IsSolid() || c.HasObjectWithPart("Combat")) continue;
+						cs.Add(new[] { x, y });
+					}
+				return cs;
+			}
+			bool Seat(GameObject who, List<PocketRec> prefer)
+			{
+				foreach (var p in prefer)
+				{
+					var cs = FreeCellsOf(p);
+					if (cs.Count == 0) continue;
+					var c = cs[R(0, cs.Count - 1)];
+					Z.GetCell(c[0], c[1]).AddObject(who);
+					return true;
+				}
+				// fallback: any open carved floor
+				var any = new List<int>();
+				for (int i = 0; i < g.W * g.H; i++)
+					if (g.C[i] == FLOOR && g.Host[i] == 0 && g.Water[i] == 0)
+					{
+						Cell c = Z.GetCell(i % g.W, i / g.W);
+						if (c != null && !c.IsSolid() && !c.HasObjectWithPart("Combat")) any.Add(i);
+					}
+				if (any.Count == 0) return false;
+				int pick = any[R(0, any.Count - 1)];
+				Z.GetCell(pick % g.W, pick / g.W).AddObject(who);
+				return true;
+			}
+			List<PocketRec> ByRole(string role, bool deepFirst)
+			{
+				var list = pockets.Where(p => p.Role == role).ToList();
+				list = deepFirst ? list.OrderByDescending(p => p.DepthRank).ToList() : list.OrderBy(p => p.DepthRank).ToList();
+				list.AddRange(pockets.Where(p => p.Role != role));
+				return list;
+			}
+			if (r.Occupancy == "abandoned")
+			{
+				Helpers.VerifyLog("WARREN", "population: abandoned, nobody home");
+				return;
+			}
+			if (r.Occupancy == "reclaimed")
+			{
+				// the newcomers den in the back, beside the fires the tense pass lit
+				var dens = pockets.OrderByDescending(p => p.DepthRank).ToList();
+				int want = R(SNAPJAW_MIN, SNAPJAW_MAX), placed = 0;
+				for (int n = 0; n < want; n++)
+				{
+					var sj = GameObject.Create("Cleo_TerraFirma_Snapjaw Miner");
+					if (sj != null && Seat(sj, dens)) placed++;
+				}
+				Helpers.VerifyLog("WARREN", $"population: reclaimed, {placed} snapjaw miners denned");
+				return;
+			}
+			// IN USE: the crew. Overseer first, so a cramped site still gets the
+			// thing worth looking at (the wish's own ordering).
+			string overseerNote = "none rolled";
+			if (Chance(OVERSEER_PCT[Math.Max(0, Math.Min(OVERSEER_PCT.Length - 1, r.StageIdx))] / 100.0))
+			{
+				var boss = GameObject.Create("Cleo_TerraFirma_Stonecarver");
+				if (boss != null)
+				{
+					var roll = StonecarverEpithet.Build(boss);
+					if (Seat(boss, ByRole("dwelling", deepFirst: true)))
+						overseerNote = $"{roll.PersonalName} {roll.Byname}";
+					else { boss.Obliterate(); overseerNote = "no seat"; }
+				}
+			}
+			var census = new Dictionary<string, int>();
+			int carvers = 0;
+			int packRolls = r.StageIdx >= 2 ? 2 : 1;   // a flourishing dig runs two shifts
+			for (int roll2 = 0; roll2 < packRolls; roll2++)
+			{
+				foreach (var entry in XRL.PopulationManager.Generate("Cleo_TerraFirma_Stonecarver Pack", (Dictionary<string, string>)null))
+				{
+					for (int n = 0; n < entry.Number; n++)
+					{
+						var who = GameObject.Create(entry.Blueprint);
+						if (who == null) continue;
+						List<PocketRec> prefer =
+							entry.Blueprint.Contains("Hewer") ? ByRole("face", deepFirst: true)
+							: entry.Blueprint.Contains("Mason") ? ByRole("commons", deepFirst: false)
+							: entry.Blueprint.Contains("Outrider") ? ByRole("plain", deepFirst: false)
+							: pockets.OrderBy(p => p.DepthRank).ToList();
+						if (!Seat(who, prefer)) { who.Obliterate(); continue; }
+						carvers++;
+						census[entry.Blueprint] = (census.TryGetValue(entry.Blueprint, out int v) ? v : 0) + 1;
+					}
+				}
+			}
+			Helpers.VerifyLog("WARREN", $"population: in use, stage {r.Stage}, overseer {overseerNote}, " +
+				$"{carvers} crew ({string.Join(", ", census.Select(kv => kv.Value + " " + kv.Key.Replace("Cleo_TerraFirma_", "")))})");
 		}
 	}
 }

@@ -1846,6 +1846,47 @@ obligation and full verification protocol spelled out in the brief.
   into an untouched tree-filled clearing, no furniture inside, spare gardens still
   sealed; no MODERROR.
 
+  **WARREN POPULATIONS WIRED — USER DOCKET 2026-08-26 ("alright, i think it's time to
+  implement populations of creatures into our warrens"): this IS the spawn wiring ruling
+  the pack table has waited on since 2026-08-15 ("Real placement waits on the spawn
+  wiring ruling"). BUILT: compile 0 errors, deployed hash-verified 1/1,
+  `log-confirmed pending`.** `PopulateSite` runs after ApplyToZone on both build paths.
+  The ruled structure it assembles, all citations standing:
+  - **Occupancy decides WHO** (the tense axis already carved): IN USE (55%) gets the
+    crew; RECLAIMED (20%) gets R(2,4) `Cleo_TerraFirma_Snapjaw Miner` denned deepest-first,
+    beside the crude fires the tense pass lights ("the newcomers den in the back");
+    ABANDONED (25%) gets NOBODY, the payloads ruling's floor ("an abandoned warren could
+    have nothing", USER RULED 2026-08-17).
+  - **Stage decides HOW MUCH:** rank and file roll `Cleo_TerraFirma_Stonecarver Pack`
+    (rank-and-file-only by the 08-15 ruling) once, TWICE at flourishing (CLAUDE dial,
+    "two shifts"); the OVERSEER rides stage chance 15/40/75 working/camp/flourishing
+    (CLAUDE dials against the ruled "prosperity buys population" gradient) and spawns on
+    the tfcarverpack recipe verbatim: plain `Cleo_TerraFirma_Stonecarver` chassis through
+    `StonecarverEpithet.Build`, so name-drives-kit and the pink legendary paint arrive
+    unchanged.
+  - **Pocket roles decide WHERE** (CLAUDE placement dials, the age-radiates-from-the-face
+    proposal's first partial use): hewers seat at FACES deep-first (they break rock),
+    masons in the COMMONS, outriders in PLAIN rooms mouth-ward (the watch), rockhound
+    anywhere shallow-first, overseer in the DEEPEST DWELLING. Every seat falls back to
+    any open pocket then any carved floor; a seatless creature is obliterated, not
+    stranded. Cells checked against the real zone (no walls, no combat objects, no water).
+  - **Reception rides the blueprints:** chassis faction `Cleo_TerraFirma_Quarriers-100`
+    (neutral at 0 rep per the faction entry), snapjaws arrive hostile because they are
+    snapjaws. Kits ride the blueprints' own tables. Determinism note: creature MIX rolls
+    ambient (`PopulationManager.Generate`, the wish's path), cell picks ride the carve
+    seed; zones build once so the split is cosmetic, logged for honesty.
+  - **Flagged open edges:** pack size vs pocket count is unmeasured (a small working site
+    can seat ~2-6 crew comfortably; two flourishing shifts could feel crowded - the dial
+    is `packRolls`); PathAsBurrower stays ON per the standing ruling with the user's own
+    watch condition ("revisit if it reads badly in play") - resident carvers tunneling out
+    of their own warren is the first thing to eyeball; the OTHER payloads (vine merchant,
+    gossip banks, camp recipe) are separate workstreams, deliberately not widened into.
+  `[verify]` fresh embark, visit warrens of each occupancy: in-use sites carry a working
+  crew placed by trade + occasional pink overseer with byname (log line `population:`
+  carries the census and the overseer name); reclaimed sites hold snapjaw miners deep by
+  their fires; abandoned sites are empty; nobody spawns in walls or water; carvers stay
+  neutral at first sight; no MODERROR.
+
 **BLIND-CLAIM PORTED, SCOUT RETIRED — USER RULED 2026-08-25 ("alright, i'll say go, let's
 try it"), BUILT + DEPLOYED same sitting; `log-confirmed pending` ON A FRESH EMBARK.**
 The full sim stack crossed: `BuildAugmented` ladder (real canyon first · polite thickening
