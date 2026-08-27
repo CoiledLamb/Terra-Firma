@@ -740,4 +740,17 @@
 			<object Blueprint="Boar Jerky" Number="1-2" Chance="55" />
 		</group>
 	</population>
+	<!-- BOAR VESSEL FARM PRESENCE (USER RULED 2026-08-27: "boar farms should have a small
+	     chance to roll 1 boar vessel amongst their herds"): name-matched merge JOINS the base
+	     Pigs group (base PopulationTables.xml:4112, Farm Pig w5 pickeach) rather than adding a
+	     rival group, per the standing merge discipline. Free coverage: dynamic village farm
+	     huts roll this same table via Villages_FarmHutContents_*Default, so generated pig
+	     farms inherit the chance too. CHANCE 15 DRAFT. -->
+	<population Name="StiltAnimalPen" Load="Merge">
+		<group Name="Types" Style="pickone">
+			<group Name="Pigs" Style="pickeach">
+				<object Blueprint="Cleo_TerraFirma_Farm Boar Vessel" Number="1" Chance="15" />
+			</group>
+		</group>
+	</population>
 </populations>

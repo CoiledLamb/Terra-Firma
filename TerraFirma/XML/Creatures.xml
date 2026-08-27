@@ -321,7 +321,23 @@
     <tag Name="BleedLiquid" Value="water-900,salt-100" />
     <tag Name="BleedColor" Value="&amp;B" />
     <tag Name="BleedPrefix" Value="{{B|wet}}" />
-    <tag Name="ExcludeFromDynamicEncounters" />
+    <!-- SPAWN WIRED 2026-08-27 (USER RULED: "same biomes as boar, honestly"; exclude tag
+         lifted): base Boar's four dynamic tables verbatim. Wild temperament kept as observed
+         and approved (USER RULED same day: "they can be hostile unless farmed? since they're
+         boar vessels"); the docile register lives on the Farm child below. -->
+    <tag Name="DynamicObjectsTable:DesertCanyon_Creatures" />
+    <tag Name="DynamicObjectsTable:Jungle_Creatures" />
+    <tag Name="DynamicObjectsTable:Hills_Creatures" />
+    <tag Name="DynamicObjectsTable:Flowerfields_Creatures" />
+  </object>
+  <!-- FARM BOAR VESSEL (USER RULED 2026-08-27, the "hostile unless farmed" split): base Farm
+       Goat / Farm Giant Beetle idiom verbatim: Prey-100 brain override + Grazer + its own
+       exclude tag (the parent's lift must not leak farm stock into wild pools). Spawns only
+       via the StiltAnimalPen Pigs-group merge (PopulationTables.xml). -->
+  <object Name="Cleo_TerraFirma_Farm Boar Vessel" Inherits="Cleo_TerraFirma_BaseBoarVessel">
+    <part Name="Brain" Hostile="false" Factions="Prey-100" />
+    <tag Name="Grazer" />
+    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
   </object>
   <!-- BOAR VESSEL CORPSE (USER RULED 2026-08-27: "corpse recolored brown and azure, butcherable
        for a gut cistern"): the vessel's own palette on the base splat, butchery gates the organ
