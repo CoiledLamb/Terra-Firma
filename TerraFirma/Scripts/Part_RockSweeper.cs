@@ -54,6 +54,13 @@ namespace XRL.World.Parts
 					continue;
 				if (who.FireEvent(Event.New("CommandTakeObject", "Object", item).SetSilent(Silent: true)))
 				{
+					// gut-mark (user live-fire catch 2026-08-27: the hound ate a stone, then the
+					// brain's reequip pass slotted it as a thrown weapon and threw it -- the
+					// beetlebum-wears-the-hat behavior, but it leaks the hoard). NoAIEquip is the
+					// engine's own skip: every AI equip branch honors it and players are exempt.
+					// Set per-instance so floor stones stay equipable by snapjaws; accepted wart:
+					// the mark rides spilled stones after death, so scavengers won't arm them.
+					item.SetIntProperty("NoAIEquip", 1);
 					// consume verb is a Claude DRAFT (one string to swap at text signoff)
 					DidXToY("crunch", item);
 					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("HOUND", $"{who.Blueprint} swallowed {item.Blueprint} (gut now {GutCount(who)})");
