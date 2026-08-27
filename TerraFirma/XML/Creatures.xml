@@ -314,7 +314,7 @@
     <stat Name="Level" Value="1" />
     <stat Name="AV" Value="3" /> <!-- DRAFT; base Boar AV 4 anchor, walks like a boar and breaks like a pot -->
     <stat Name="Hitpoints" Value="15" /> <!-- DRAFT; base Boar 13 -->
-    <inventoryobject Blueprint="Cleo_TerraFirma_GutCistern" Number="1" /> <!-- ruled: real equipment auto-equipped into the anatomy slot, NOT DefaultBehavior; worn gear drops with contents -->
+    <part Name="Corpse" CorpseChance="50" CorpseBlueprint="Cleo_TerraFirma_Boar Vessel Corpse" /> <!-- USER RULED 2026-08-27: cistern moved from worn equipment to corpse butchery (equipped was invisible + a trade/domination surface); CHANCE DRAFT -->
     <tag Name="Species" Value="oddity" />
     <tag Name="Gender" Value="neuterperson" />
     <xtagTextFragments Skin="glaze" PoeticFeatures="artfulness,gentle stillness,childlike wonder" />
@@ -322,5 +322,20 @@
     <tag Name="BleedColor" Value="&amp;B" />
     <tag Name="BleedPrefix" Value="{{B|wet}}" />
     <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
+  <!-- BOAR VESSEL CORPSE (USER RULED 2026-08-27: "corpse recolored brown and azure, butcherable
+       for a gut cistern"): the vessel's own palette on the base splat, butchery gates the organ
+       behind the kill (an inventory cistern was a trade surface, user catch). Base Corpse ships
+       Food (Gross/IllOnEat) + a Meat tag; both stripped, fired clay is not a meal. DisplayName
+       and description DRAFT, signoff owed. -->
+  <object Name="Cleo_TerraFirma_Boar Vessel Corpse" Inherits="Corpse">
+    <part Name="Render" DisplayName="boar vessel corpse" TileColor="&amp;w" ColorString="&amp;w" DetailColor="B" />
+    <part Name="Description" Short="Shards of a walking pot lie mouth up, holding their last shape out of habit." /> <!-- DRAFT, signoff owed -->
+    <part Name="Butcherable" OnSuccess="Cleo_TerraFirma_GutCistern" />
+    <part Name="Commerce" Value="4" />
+    <removepart Name="Food" />
+    <removetag Name="Meat" />
+    <intproperty Name="Bleeds" Value="0" />
+    <tag Name="Tier" Value="1" />
   </object>
 </objects>
