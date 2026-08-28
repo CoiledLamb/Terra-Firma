@@ -276,7 +276,7 @@
        DisplayName and description DRAFT, signoff owed. -->
   <object Name="Cleo_TerraFirma_AnimateFigurine" Inherits="BaseHumanoid">
     <part Name="Render" DisplayName="animate figurine" Tile="Items/figurine.png" RenderString="*" ColorString="&amp;y" DetailColor="K" />
-    <part Name="Description" Short="Someone spent longer on the face than the feet, and it walks like that is true." /> <!-- DRAFT, signoff owed -->
+    <part Name="Description" Short="Someone spent longer on the face than the feet, and =pronouns.subjective= =verb:walk:afterpronoun= like that is true." /> <!-- DRAFT, signoff owed -->
     <part Name="Brain" Hostile="False" Factions="Cleo_TerraFirma_Quarriers-100" />
     <part Name="Swarmer" />
     <part Name="MentalShield" />
@@ -307,7 +307,7 @@
     <part Name="Brain" Hostile="false" Factions="Swine-100,Prey-100" /> <!-- base Boar idiom + Prey-100 per user soft pick 2026-08-11 -->
     <part Name="Body" Anatomy="Cleo_TerraFirma_BoarVessel" /> <!-- the pet's own anatomy, shared; see XML/Bodies.xml -->
     <part Name="Render" DisplayName="boar vessel" Tile="boar vessel.png" RenderString="b" ColorString="&amp;w" DetailColor="B" />
-    <part Name="Description" Short="A pot in the rough shape of a sow grazes on nothing in particular. Brine sloshes in the open bowl of its back, and whatever once tended these herds has been gone a long time." /> <!-- DRAFT PLACEHOLDER, user-claimed text; swap wholesale at signoff -->
+    <part Name="Description" Short="A pot in the rough shape of a sow grazes on nothing in particular. Brine sloshes in the open bowl of =pronouns.possessive= back, and whatever once tended these herds has been gone a long time." /> <!-- DRAFT PLACEHOLDER, user-claimed text; swap wholesale at signoff -->
     <part Name="LiquidVolume" MaxVolume="64" Volume="64" StartVolume="1d33-1" InitialLiquid="water-800,salt-200" ManualSeal="true" /> <!-- basin; pet tank shape, brackish start mix DRAFT -->
     <part Name="Cleo_TerraFirma_VesselTint" EmptyColor="k" />
     <part Name="LiquidProducer" Liquid="salt" FillSelfOnly="true" VariableRate="500-5000" WorksOnWearer="false" WorksOnSelf="true" /> <!-- salty fill over time; RATE DRAFT. Pet overrides this by part-name replacement at re-parent -->
