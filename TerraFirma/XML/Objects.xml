@@ -150,7 +150,7 @@
 		<part Name="TinkerItem" Bits="003" CanDisassemble="true" CanBuild="true" />
 		<tag Name="TinkerCategory" Value="ammo and energy cells" />
 		<tag Name="DynamicObjectsTable:EnergyCells" /> <!-- SPAWN WIRED 2026-08-22: everywhere a tier-appropriate cell can spawn (sockets query this table with Tier{zonetier}; our Tier 3 tag does the filtering) -->
-		<part Name="Description" Short="a rumbling spiral milks out bursts of piezoelectric energy from chunks of earth." />
+		<part Name="Description" Short="A rumbling spiral milks out bursts of piezoelectric energy from chunks of earth." />
 		<part Name="Physics" Weight="5" />
 		<part Name="Commerce" Value="100" />
 		<part Name="Metal" />
@@ -166,7 +166,7 @@
 		<part Name="Physics" Organic="true" Weight="1" />
 		<part Name="Armor" AV="0" DV="0" WornOn="Floating Nearby" />
 		<part Name="Commerce" Value="200" />
-		<part Name="Description" Short="a hopping, diminutive thing scrapes idly at the earth. at hindsun it hums, biological processes becoming musical." />
+		<part Name="Description" Short="A hopping, diminutive thing scrapes idly at the earth. At hindsun it hums, biological processes becoming musical." />
 		<part Name="RulesDescription" Text="Sometimes pecks at enemies and scrapes at stone.
 Perishes when unequipped." />
 		<part Name="Springy" Factor="0.5" />
@@ -192,7 +192,7 @@ Perishes when unequipped." />
 		<part Name="Render" DisplayName="seismophone" RenderString="]" ColorString="&amp;y" TileColor="&amp;y" DetailColor="c" Tile="Items/sw_teleprojector.bmp" /> <!-- base teleprojector tile (coiled antennae read as listening wire); CLAUDE pick per the art-bar ruling, bespoke sprite lands if the user makes one -->
 		<part Name="Physics" Weight="2" />
 		<part Name="Commerce" Value="150" />
-		<part Name="Description" Short="a thin shim of wire encloses a whispering ear. when pressed against the earth, it speaks." />
+		<part Name="Description" Short="A thin shim of wire encloses a whispering ear. When pressed against the earth, it speaks." />
 		<part Name="RulesDescription" Text="Functions only while the wearer is beside a wall." /> <!-- DRAFT (Claude); the "Grants you Heightened Hearing at level 2." line is appended by the part itself -->
 		<part Name="Cleo_TerraFirma_Seismophone" />
 		<part Name="Examiner" Complexity="3" />
@@ -233,7 +233,7 @@ Perishes when unequipped." />
 	<object Name="Cleo_TerraFirma_ChalkLine" Inherits="InorganicObject">
 		<part Name="Render" DisplayName="chalk line" RenderString="&#196;" ColorString="&amp;Y" TileColor="&amp;Y" DetailColor="y" Tile="chalklineE.png" RenderLayer="1" />
 		<part Name="Physics" Takeable="false" Solid="false" />
-		<part Name="Description" Short="a stroke of white lime lies across the earth." />
+		<part Name="Description" Short="A stroke of white lime lies across the earth." />
 		<part Name="Cleo_TerraFirma_ChalkLine" />
 		<tag Name="ExcludeFromDynamicEncounters" />
 		<tag Name="NoSparkingQuest" />
