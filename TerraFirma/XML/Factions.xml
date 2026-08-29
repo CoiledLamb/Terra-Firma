@@ -24,6 +24,13 @@
          - feelings toward specific factions. The entry ships neutral to everyone rather than
            inventing a politics; the only attitudes stated are the two the base guilds both
            state (Girsh and Entropic hostility), which read as house style rather than opinion.
+         - RECEPTION RULED 2026-08-29 (user: "pack opens wary, maybe 100 rep with player.
+           check precedent, something like bey lah could be good"): InitialPlayerReputation
+           is now -200, the exact hindren-of-Bey-Lah number (base Factions.xml:1079), taken
+           over the floated 100 because the user pointed at the precedent as the good shape;
+           wary band, not hostile, same as Bey Lah reads in play. Interplay worth knowing:
+           the Stonecarver calling's +200 grant (Callings.xml) nets a stonecarver player to
+           exactly 0, so the guild is wary of strangers and neutral to its own by birth.
          - the water ritual. RULED 2026-08-15 to follow the guild pattern, and the absence of a
            node here IS the ruling. Note the two base guilds DISAGREE: Merchants' writes
            Join="false" alongside BuyMostValuableItem, because it has special ritual behaviour to
@@ -35,8 +42,11 @@
            Decomp WaterRitualJoinParty: the option shows when the faction allows it, the speaker
            is not already player led, and the speaker carries no WaterRitual/NoJoin xTag. Cost is
            roughly 200 rep scaled by the level gap, floor 50. That per creature xTag is the cheap
-           lever if the OVERSEER should ever differ from the rank and file, which is still live
-           next to the open "water ritual on the overseer" thread.
+           lever if the OVERSEER should ever differ from the rank and file.
+           OVERSEER RULED 2026-08-29 (user: "overseer doesn't differ. uses own dialogue bank"):
+           same water ritual as the rank and file, no xTag; its distinction is a dialogue bank
+           of its own, lines owed at the user's voice sitting (wiring rides the epithet builder
+           when the bank lands, since the overseer is any carver made legendary, not a blueprint).
        Emblem is stonecarver.png, the HUMAN body, RULED 2026-08-15. The mole emblem lasted about
        an hour: the user picked stonerat.png, then found it faced the wrong way and asked for it
        "flipped." Claude read that as colour inverted and swapped the channels, which answered a
@@ -59,7 +69,7 @@
     Old="false"
     Plural="false"
     FormatWithArticle="true"
-    InitialPlayerReputation="0"
+    InitialPlayerReputation="-200"
     PositiveSound="Sounds/Reputation/sfx_reputation_cragmensch_positive"
     NegativeSound="Sounds/Reputation/sfx_reputation_cragmensch_negative"
     HistoricalSignificance="1"

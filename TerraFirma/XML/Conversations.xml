@@ -54,13 +54,18 @@
 	     ADDRESS TERM: "wayfarer" is the user's, written inline. That is also the only way it
 	     can work; faction DefaultAddress has no conversation token, so Issachari hardcode
 	     "lack-salt" in their node text exactly like this. -->
+	<!-- FAREWELL RULED 2026-08-29 (user: "for the farewell, it could be rust and earth, or
+	     just the default live and drink"): the guild farewell is "Rust and earth." on the
+	     three carver roles (words the user's, capitalization editorial). The snapjaw miner
+	     keeps his "...live and drink." below on purpose; a hired snapjaw awkwardly aping the
+	     standard courtesy is its own beat, and one edit flips it if the user wants him guild-voiced. -->
 	<conversation ID="Cleo_TerraFirma_Outrider">
 		<node ID="Start">
 			<text>
 				mind the cairns, wayfarer. lest you knock one over.~
 				seen a few baboons today. not one made it further than a stone's throw.
 			</text>
-			<choice GotoID="End">Live and drink.</choice>
+			<choice GotoID="End">Rust and earth.</choice>
 		</node>
 	</conversation>
 
@@ -77,7 +82,7 @@
 				i sometimes wonder if the stones feel like we do. carving must hurt then, eh?~
 				don't know the name of the rocks around here, but they carve just the same.
 			</text>
-			<choice GotoID="End">Live and drink.</choice>
+			<choice GotoID="End">Rust and earth.</choice>
 		</node>
 	</conversation>
 
@@ -90,14 +95,15 @@
 	     Brine, so the soaking is salt water.
 	     The WITCHWOOD ask names an item the player stonecarver starts holding, 2 to 4 Witchwood
 	     Bark out of Cleo_StartingGear_Stonecarver. Stock HaveItem and TakeItem conversation parts
-	     could turn that into a real handover with no C#; not built, just flagged. -->
+	     could turn that into a real handover with no C#. DECLINED 2026-08-29 (user: "hewer's
+	     witchwood is a claude proposal i'm not taking"); the line stays flavor, not a fetch hook. -->
 	<conversation ID="Cleo_TerraFirma_Hewer">
 		<node ID="Start">
 			<text>
 				smashed through a wall last week, soaked my clothes. damn aquifers.~
 				overseer said we needed to square away more rock, but my back's been killing me... got any witchwood?
 			</text>
-			<choice GotoID="End">Live and drink.</choice>
+			<choice GotoID="End">Rust and earth.</choice>
 		</node>
 	</conversation>
 </conversations>

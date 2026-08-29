@@ -13,8 +13,10 @@ namespace XRL.World.Parts
 	/// radius 20 - nearby members of the owner's faction come running. Step channel
 	/// mirrors Cleo_TerraFirma_FallenRockPart (ObjectEnteredCellEvent, combat-object +
 	/// phase/flight gates). Members of the owner faction never topple their own
-	/// waystones. Owner assignment at spawn is DEFERRED: no warren faction exists yet
-	/// (population lane unbuilt), so the hostility channel is latent until one does.
+	/// waystones. Owner assignment WIRED 2026-08-29 (user: "please fix the trespass, it
+	/// was working off outdated information"; the old deferral note predated the guild,
+	/// which has existed since 2026-08-15): WarrenCarver stamps
+	/// Physics.Owner = "Cleo_TerraFirma_Quarriers" on warren-placed cairns at dress time.
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_CairnTopple : IPart

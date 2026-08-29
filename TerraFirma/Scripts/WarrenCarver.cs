@@ -2707,6 +2707,16 @@ namespace Cleo.TerraFirma.Scripts
 					}
 					obj = GameObject.Create(id);
 				}
+				// TRESPASS WIRED (USER RULED 2026-08-29, "please fix the trespass, it was
+				// working off outdated information"): warren-placed waystones and claim marks
+				// belong to the guild. Both parts already carry the ownership channel
+				// (Part_Cairn topple broadcast, Part_ChalkLine trample broadcast) and both
+				// exempt guild walkers, so camp traffic minds its own marks; only the Owner
+				// stamp was missing. Toppled cairns stamp too: an abandoned site's stones are
+				// still the guild's, and the channel is inert with no members in earshot.
+				if ((id.StartsWith("chalkline") || id == "Cleo_TerraFirma_Cairn" || id == "Cleo_TerraFirma_CairnToppled")
+					&& obj.Physics != null)
+					obj.Physics.Owner = "Cleo_TerraFirma_Quarriers";
 				c.AddObject(obj);
 				placed++;
 			}
