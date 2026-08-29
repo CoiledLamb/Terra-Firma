@@ -20,7 +20,8 @@ namespace XRL.World.Parts
 	{
 		public const string LOAD_COMMAND = "Cleo_TerraFirma_LoadGlowstoneLantern";
 		public const string UNLOAD_COMMAND = "Cleo_TerraFirma_UnloadGlowstoneLantern";
-		public const string SHARD_BLUEPRINT = "Cleo_TerraFirma_GlowstoneShard";
+		/// <summary>What the socket accepts and spawns. XML-settable since the 2026-08-29 ladder pass.</summary>
+		public string ShardBlueprint = "Cleo_TerraFirma_GlowstoneShard";
 		public const int STEADY_RADIUS = 8;
 
 		// USER TEXT, FINAL (delivered 2026-08-22 evening, swapped verbatim): the lit line
@@ -82,7 +83,7 @@ namespace XRL.World.Parts
 		{
 			if (StartLoaded && Shard == null)
 			{
-				GameObject shard = GameObject.Create(SHARD_BLUEPRINT);
+				GameObject shard = GameObject.Create(ShardBlueprint);
 				MoteProperties mote = shard?.GetPart<MoteProperties>();
 				if (mote != null)
 				{
@@ -197,7 +198,7 @@ namespace XRL.World.Parts
 			int bestFuel = -1;
 			foreach (GameObject item in actor.GetInventoryAndEquipmentReadonly())
 			{
-				if (item.Blueprint == SHARD_BLUEPRINT)
+				if (item.Blueprint == ShardBlueprint)
 				{
 					int fuel = item.GetPart<MoteProperties>()?.Fuel ?? 0;
 					if (fuel > bestFuel)

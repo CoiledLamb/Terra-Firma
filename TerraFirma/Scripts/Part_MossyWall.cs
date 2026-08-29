@@ -13,6 +13,10 @@ namespace XRL.World.Parts
 	[Serializable]
 	public class Cleo_TerraFirma_MossyWall : IPart
 	{
+		/// <summary>The adjective worn while ripe. XML-settable so any future harvestable
+		/// growth wall reuses this part with one attribute (2026-08-29 ladder pass).</summary>
+		public string Adjective = "{{green|mossy}}";
+
 		public override bool WantEvent(int ID, int cascade)
 		{
 			return base.WantEvent(ID, cascade) || ID == PooledEvent<GetDisplayNameEvent>.ID;
@@ -21,7 +25,7 @@ namespace XRL.World.Parts
 		public override bool HandleEvent(GetDisplayNameEvent E)
 		{
 			if (ParentObject.GetPart<Harvestable>()?.Ripe == true)
-				E.AddAdjective("{{green|mossy}}");
+				E.AddAdjective(Adjective);
 			return base.HandleEvent(E);
 		}
 	}

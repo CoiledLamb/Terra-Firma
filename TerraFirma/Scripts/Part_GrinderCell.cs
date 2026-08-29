@@ -25,8 +25,9 @@ namespace XRL.World.Parts
 		public const string FEED_COMMAND = "Cleo_TerraFirma_FeedGrinderCell";
 		public const string STOP_COMMAND = "Cleo_TerraFirma_StopGrinderCell";
 		public const string STONE_TAG = "Cleo_TerraFirma_IsAnyStone";
-		public const int CHARGE_PER_POUND = 50; // re-ruled 2026-08-23 ("raise the grind to *50 charge")
-		public const int TRICKLE_PER_TURN = 10;
+		// dials XML-settable since the 2026-08-29 ladder pass (were consts)
+		public int ChargePerPound = 50; // re-ruled 2026-08-23 ("raise the grind to *50 charge")
+		public int TricklePerTurn = 10;
 
 		/// <summary>Charge remaining in the stone currently being ground (weight x 50 at load).</summary>
 		public int StoneChargeLeft;
@@ -37,7 +38,8 @@ namespace XRL.World.Parts
 		public override bool SameAs(IPart p)
 		{
 			Cleo_TerraFirma_GrinderCell o = p as Cleo_TerraFirma_GrinderCell;
-			if (o.StoneChargeLeft != StoneChargeLeft || o.StoneName != StoneName)
+			if (o.StoneChargeLeft != StoneChargeLeft || o.StoneName != StoneName
+				|| o.ChargePerPound != ChargePerPound || o.TricklePerTurn != TricklePerTurn)
 			{
 				return false;
 			}
@@ -57,7 +59,7 @@ namespace XRL.World.Parts
 		/// <summary>Pounds of stone not yet ground away, derived from the fuel pool.</summary>
 		public int RemainingStoneWeight()
 		{
-			return (StoneChargeLeft + CHARGE_PER_POUND - 1) / CHARGE_PER_POUND;
+			return (StoneChargeLeft + ChargePerPound - 1) / ChargePerPound;
 		}
 
 		/// <summary>The waterskin law (user ruling 2026-08-22: "preserve the weight of what its
@@ -204,7 +206,7 @@ namespace XRL.World.Parts
 				}
 				pick = pick.SplitFromStack() ?? pick;
 				int weight = pick.GetPart<Physics>()?.Weight ?? 0;
-				StoneChargeLeft = Math.Max(weight, 1) * CHARGE_PER_POUND;
+				StoneChargeLeft = Math.Max(weight, 1) * ChargePerPound;
 				StoneName = pick.DisplayName;
 				SyncGrindAnimation(true);
 				ParentObject.FlushWeightCaches(); // the stone's weight moves into the cell, not into thin air
@@ -227,7 +229,7 @@ namespace XRL.World.Parts
 				EnergyCell cell = ParentObject.GetPart<EnergyCell>();
 				if (cell != null && cell.Charge < cell.MaxCharge)
 				{
-					int tick = Math.Min(TRICKLE_PER_TURN, Math.Min(StoneChargeLeft, cell.MaxCharge - cell.Charge));
+					int tick = Math.Min(TricklePerTurn, Math.Min(StoneChargeLeft, cell.MaxCharge - cell.Charge));
 					int weightBefore = RemainingStoneWeight();
 					cell.AddCharge(tick);
 					StoneChargeLeft -= tick;

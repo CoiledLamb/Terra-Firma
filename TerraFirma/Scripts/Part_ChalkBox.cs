@@ -21,8 +21,13 @@ namespace XRL.World.Parts
 		public const string DRAW_COMMAND = "Cleo_TerraFirma_CommandDrawChalk";
 		public const string LINE_BLUEPRINT = "Cleo_TerraFirma_ChalkLine";
 
-		/// <summary>Strokes left in the box; rolled 8-12 at creation (user number).</summary>
+		/// <summary>Strokes left in the box; rolled UsesMin-UsesMax at creation.</summary>
 		public int Uses = -1;
+
+		/// <summary>Creation roll bounds, 8-12 (user number 2026-08-22). XML-settable since the
+		/// 2026-08-29 ladder pass so a merchant's full box and a found stub can differ.</summary>
+		public int UsesMin = 8;
+		public int UsesMax = 12;
 
 		/// <summary>The draw ability this box granted its holder, if it was the granting box.</summary>
 		public Guid AbilityID = Guid.Empty;
@@ -52,7 +57,7 @@ namespace XRL.World.Parts
 		{
 			if (Uses < 0)
 			{
-				Uses = Stat.Random(8, 12);
+				Uses = Stat.Random(UsesMin, UsesMax);
 			}
 			return base.HandleEvent(E);
 		}

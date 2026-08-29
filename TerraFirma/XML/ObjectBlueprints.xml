@@ -5,8 +5,9 @@
        All three: Fur part + organic + AddsRep Baboons -100 per piece (quartzfur precedent;
        wearing dead monkey angers living monkeys, stacks per piece worn = self-balancing).
        Tiles are recolored base PLACEHOLDERS, sprite debt filed for all three.
-       Numbers all DRAFT (numbers sitting): bracer Bonus 25, gloves Chance 25, cloak
-       conditional DV 2 (Yurtmat parity), commerce/tier modest. Descriptions DRAFT. -->
+       Numbers all DRAFT (numbers sitting): gloves Chance 25, cloak conditional DV 2
+       (Yurtmat parity), commerce/tier modest; bracer is +2 throw range, USER NUMBER
+       2026-08-22 (see the bracer's own comment below). Descriptions DRAFT. -->
     <object Name="Cleo_TerraFirma_Cobblefur Bracer" Inherits="BaseArmlet">
     <part Name="Armor" AV="0" DV="0" WornOn="Arm" />
     <part Name="Render" DisplayName="{{y|granitefur}} bracer" RenderString="]" Tile="baboonskin_bracers.png" ColorString="&amp;r" DetailColor="y" /> <!-- user sprite 2026-08-22; rust/brown per the cloak ruling, family palette -->
@@ -14,7 +15,17 @@
     <part Name="Description" Short="A forearm's length of dun monkey fur, stiff with grit that never quite shakes out. The arm it wraps learns the short arc: how a stone leaves the hand already knowing where it lands." /> <!-- DRAFT, signoff owed -->
     <part Name="Physics" Weight="1" Organic="true" />
     <part Name="Fur" />
-    <part Name="Cleo_TerraFirma_CobblefurBracer" Bonus="25" />
+    <!-- MIGRATED to stock IntPropertyChanger 2026-08-29 (XML over C# ladder pass); the custom
+         Cleo_TerraFirma_CobblefurBracer part is deleted. Provenance carried over from its header:
+         +2 throw range is USER NUMBER 2026-08-22 ("swap the bonus to +2 throw range and dodge the
+         problem altogether"), replacing the old cap-aware accuracy lend after the accuracy exam
+         found an order-dependent overflow. ThrowRangeBonus is linear (GetThrowProfileEvent reads
+         the int property straight into Range), safe to stack; same property family as the
+         Parabolic Muscular Subroutine, whose BehaviorDescription phrasing this reuses.
+         NOTE: the old XML here said Bonus="25", a stale survivor of the pre-rework accuracy
+         number; the live game was granting +25 throw range against the ruled +2. Caught and
+         corrected in this migration, 2026-08-29. -->
+    <part Name="IntPropertyChanger" AffectedProperty="ThrowRangeBonus" Amount="2" ChargeUse="0" IsEMPSensitive="false" IsBootSensitive="false" IsTechScannable="false" MustBeUnderstood="false" BehaviorDescription="Your throw range is increased by 2." />
     <part Name="AddsRep" Faction="Baboons" Value="-100" />
     <tag Name="EquipSound" Value="sfx_equip_armor_fur" />
     <tag Name="Tier" Value="2" />

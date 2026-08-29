@@ -35,6 +35,9 @@ namespace XRL.World.Parts
 		/// sfx_statusEffect_stop (Effect.RemoveSound fires for effects dying on the player).</summary>
 		public bool HadSelfEffect;
 
+		// Since the 2026-08-29 ladder pass the blueprint's <part> line is the tuning seam
+		// (Objects.xml sets the same attributes); these ctor values are fail-safe fallbacks
+		// for a bare mount, restoring the IPoweredPart profile MutationOnEquip's ctor zeroes.
 		public Cleo_TerraFirma_Seismophone()
 		{
 			ClassName = "HeightenedHearing";

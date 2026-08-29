@@ -482,7 +482,8 @@ namespace XRL.World.Parts.Mutation
 		public GameObject MakeStone()
 		{
 			GameObject stone = GameObject.Create(Resonant ? BLUEPRINT_RESONANT : BLUEPRINT);
-			stone.SetIntProperty("NeverStack", 1);
+			// NeverStack moved to the blueprint tag (2026-08-29 ladder pass); Stacker checks
+			// HasPropertyOrTag so the tag form is equivalent, and the resonant child inherits it
 			string scaledDamage = GetThrowDamage(Level);
 			// FLAT PEN BONUS RETIRED (L20 pass, RULED 2026-08-09 "yeag, that sounds great"
 			// over the simmed menu): the mutation now raises the stone's Penetration CAP

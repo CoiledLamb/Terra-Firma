@@ -27,8 +27,9 @@ namespace XRL.World.Parts
 	{
 		public const string SMEAR_COMMAND = "Cleo_TerraFirma_SmearChalkLine";
 
-		/// <summary>Percent chance per step that a walker smears the line. CLAUDE DRAFT dial.</summary>
-		public const int TRAMPLE_SMEAR_CHANCE = 5;
+		/// <summary>Percent chance per step that a walker smears the line. CLAUDE DRAFT dial;
+		/// XML-settable since the 2026-08-29 ladder pass (was a const).</summary>
+		public int TrampleSmearChance = 5;
 
 		/// <summary>The stroke direction this piece was drawn with; the re-tile fallback when
 		/// no neighboring chalk remains.</summary>
@@ -66,7 +67,7 @@ namespace XRL.World.Parts
 				// faction) never roll - camp traffic minds its marks and cannot anger itself
 				bool ownerMatched = !owner.IsNullOrEmpty()
 					&& (walker.HasTagOrProperty(owner) || walker.DisplayNameOnly == owner || walker.BelongsToFaction(owner));
-				if (!ownerMatched && XRL.Rules.Stat.Random(1, 100) <= TRAMPLE_SMEAR_CHANCE)
+				if (!ownerMatched && XRL.Rules.Stat.Random(1, 100) <= TrampleSmearChance)
 				{
 					if (!owner.IsNullOrEmpty())
 					{

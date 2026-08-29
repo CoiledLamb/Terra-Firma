@@ -26,6 +26,11 @@ namespace XRL.World.Parts
 	{
 		public const string ANIMATE_COMMAND = "Cleo_TerraFirma_AnimateFigurine";
 
+		/// <summary>The walker chassis, previously a literal in two method bodies (creation
+		/// spawn + BuildWalker). XML-settable since the 2026-08-29 ladder pass; coincidentally
+		/// the same string as ANIMATE_COMMAND, which stays a command id.</summary>
+		public string WalkerBlueprint = "Cleo_TerraFirma_AnimateFigurine";
+
 		/// <summary>Flat charge per animation (RULED flat; number is a DIAL).</summary>
 		public int AnimationCost = 1000;
 
@@ -62,7 +67,7 @@ namespace XRL.World.Parts
 				Cell spot = ParentObject.CurrentCell?.GetFirstEmptyAdjacentCell(1, 2);
 				if (spot != null)
 				{
-					spot.AddObject(GameObject.Create("Cleo_TerraFirma_AnimateFigurine")).MakeActive();
+					spot.AddObject(GameObject.Create(WalkerBlueprint)).MakeActive();
 					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("FIGTABLE", "creation spawn: ambient figurine placed beside the table");
 				}
 				else
@@ -161,7 +166,7 @@ namespace XRL.World.Parts
 		/// figurine's identity and faction feeling + bond to the animator.</summary>
 		private GameObject BuildWalker(GameObject figurine, GameObject animator)
 		{
-			GameObject walker = GameObject.Create("Cleo_TerraFirma_AnimateFigurine");
+			GameObject walker = GameObject.Create(WalkerBlueprint);
 
 			// statue law, the mutation's own formulas - "statues in miniature"
 			walker.GetStat("Hitpoints").BaseValue = Cleo_TerraFirma_Stoneshaper.GetHP(StoneshaperLevel);

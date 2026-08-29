@@ -10,6 +10,7 @@
 		<part Name="Cleo_TerraFirma_StoneRearmOnTakePart" /> <!-- pickup re-arm (2026-08-12): a stone taken off the ground goes straight back into an empty thrown slot; resonant child inherits -->
 		<stag Name="Thrown" />
 		<tag Name="ExcludeFromDynamicEncounters" />
+		<tag Name="NeverStack" /> <!-- was SetIntProperty in MakeStone until 2026-08-29; Stacker checks HasPropertyOrTag, resonant child inherits -->
 	</object>
 	<object Name="Cleo_TerraFirma_EphemeralStoneResonant" Inherits="Cleo_TerraFirma_EphemeralStone">
 		<part Name="Render" DisplayName="{{C|resonant}} sculpted pebble" ColorString="&amp;C" TileColor="&amp;C" DetailColor="c" />
@@ -194,7 +195,10 @@ Perishes when unequipped." />
 		<part Name="Commerce" Value="150" />
 		<part Name="Description" Short="A thin shim of wire encloses a whispering ear. When pressed against the earth, it speaks." />
 		<part Name="RulesDescription" Text="Functions only while the wearer is beside a wall." /> <!-- DRAFT (Claude); the "Grants you Heightened Hearing at level 2." line is appended by the part itself -->
-		<part Name="Cleo_TerraFirma_Seismophone" />
+		<!-- the dials live here since the 2026-08-29 ladder pass; the ctor keeps the same values
+		     as fail-safe fallbacks for a bare mount (all XML-settable fields of base
+		     MutationOnEquip / IPoweredPart, verified against the shipped Items.xml idiom) -->
+		<part Name="Cleo_TerraFirma_Seismophone" ClassName="HeightenedHearing" Level="2" ChargeUse="1" IsEMPSensitive="true" IsPowerSwitchSensitive="true" IsTechScannable="true" />
 		<part Name="Examiner" Complexity="3" />
 		<part Name="EnergyCellSocket" SlotType="EnergyCell" />
 		<part Name="PowerSwitch" EnergyCost="100" FlippableWithoutUnderstanding="true" ActivateSuccessMessage="" ActivateFailureMessage="" DeactivateSuccessMessage="" DeactivateFailureMessage="" />

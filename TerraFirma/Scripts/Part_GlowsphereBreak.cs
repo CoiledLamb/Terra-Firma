@@ -26,7 +26,9 @@ namespace XRL.World.Parts
 	public class Cleo_TerraFirma_GlowsphereBreak : IPart
 	{
 		public const string COMMAND = "Cleo_TerraFirma_BreakGlowsphere";
-		public const string SHARD_BLUEPRINT = "Cleo_TerraFirma_GlowstoneShard";
+
+		/// <summary>What the sphere breaks into. XML-settable since the 2026-08-29 ladder pass.</summary>
+		public string ShardBlueprint = "Cleo_TerraFirma_GlowstoneShard";
 
 		public override bool WantEvent(int ID, int cascade)
 		{
@@ -62,7 +64,7 @@ namespace XRL.World.Parts
 				int count = Stat.Random(2, 3);
 				for (int i = 0; i < count; i++)
 				{
-					E.Actor.ReceiveObject(GameObject.Create(SHARD_BLUEPRINT));
+					E.Actor.ReceiveObject(GameObject.Create(ShardBlueprint));
 				}
 				if (E.Actor.IsPlayer())
 				{
@@ -100,7 +102,7 @@ namespace XRL.World.Parts
 				int count = Stat.Random(1, 3); // thrown yield RULED 2026-08-22 (user: "dial can be 1-3 instead of 1-2")
 				for (int i = 0; i < count; i++)
 				{
-					GameObject fragment = GameObject.Create(SHARD_BLUEPRINT);
+					GameObject fragment = GameObject.Create(ShardBlueprint);
 					cell.AddObject(fragment);
 					fragment.GetPart<MoteProperties>()?.Light(); // the crash site glows
 				}

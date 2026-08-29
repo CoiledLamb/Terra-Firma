@@ -22,6 +22,12 @@ namespace XRL.World.Parts
 		/// <summary>What the cairn becomes underfoot.</summary>
 		public string ToppledBlueprint = "Cleo_TerraFirma_CairnToppled";
 
+		/// <summary>Sound on topple (user note 3, 2026-08-25: base SmallBoulder's own impact
+		/// sound, medium fits a knee-high stack). Played via PlayWorldSound in the topple
+		/// handler, so the stock ImpactSound tag (a thrown-weapon seam) would never fire here;
+		/// a field is the honest XML dial. Settable since the 2026-08-29 ladder pass.</summary>
+		public string ToppleSound = "Sounds/Throw/sfx_throwing_stone_medium_impact";
+
 		/// <summary>Pathfinding weight advertised to smart actors (7 = FallenRockPart's own
 		/// mine-grade "route around", user docket 2026-08-25): nobody wanders through a
 		/// waystone by accident, so wildlife stops toppling them in the site's off-hours;
@@ -69,9 +75,7 @@ namespace XRL.World.Parts
 					toppled.Physics.Owner = owner;   // the scatter is still theirs
 				if (Visible())
 					XDidY(stepper, "topple", ParentObject.the + ParentObject.ShortDisplayName, "!", ColorAsBadFor: stepper);   // DRAFT line, voice pass owed
-				// rocks coming down (user note 3, 2026-08-25): base SmallBoulder's own
-				// impact sound, verified in Items.xml; medium fits a knee-high stack
-				ParentObject.PlayWorldSound("Sounds/Throw/sfx_throwing_stone_medium_impact", 1f);
+				ParentObject.PlayWorldSound(ToppleSound, 1f);
 				if (!string.IsNullOrEmpty(owner))
 					ParentObject.Physics?.BroadcastForHelp(stepper);   // the hostile act, engine's own trespass channel
 				Helpers.VerifyLog("CAIRN", $"toppled by {stepper.Blueprint}{(string.IsNullOrEmpty(owner) ? "" : $" (owner {owner}, help broadcast)")}");
