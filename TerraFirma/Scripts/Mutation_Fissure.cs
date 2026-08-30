@@ -1118,9 +1118,14 @@ namespace XRL.World.Parts.Mutation
 					continue;
 				if (!o.PhaseMatches(ParentObject))
 					return false; // out of phase with the wave: nothing to bounce it with
-				if (outCell != null && !outCell.IsSolid())
+				// audit fix 2026-08-29: DirectMoveTo can refuse for a non-player mover when the
+				// destination holds a non-hostile combatant (Physics.ProcessTargetedMove), so the
+				// return is read now. A refused outward fling means the way out is blocked by a
+				// body: fall through to the slam grammar (slammed against the blocker, per the
+				// 2026-08-08 ruling's geometry). A refused inward deposit leaves the occupant on
+				// the rim; the trailing StillHoldsCombatant check flips that to the debris downgrade.
+				if (outCell != null && !outCell.IsSolid() && o.DirectMoveTo(outCell))
 				{
-					o.DirectMoveTo(outCell);
 					Helpers.VerifyLog("FIS", $"rim eviction: {o.Blueprint} bounced clear to ({outCell.X},{outCell.Y})");
 				}
 				else if (inCell != null && !inCell.IsSolid())
@@ -1130,9 +1135,10 @@ namespace XRL.World.Parts.Mutation
 						"You were battered by a wave of earth.",
 						o.It + o.GetVerb("were", true, true) + " @@battered by a wave of earth.",
 						Attacker: ParentObject, Owner: ParentObject, Source: ParentObject);
-					if (GameObject.Validate(o) && o.CurrentCell == c)
-						o.DirectMoveTo(inCell);
-					Helpers.VerifyLog("FIS", $"rim eviction: {o.Blueprint} slammed for {slam} and deposited inside at ({inCell.X},{inCell.Y})");
+					if (GameObject.Validate(o) && o.CurrentCell == c && o.DirectMoveTo(inCell))
+						Helpers.VerifyLog("FIS", $"rim eviction: {o.Blueprint} slammed for {slam} and deposited inside at ({inCell.X},{inCell.Y})");
+					else
+						Helpers.VerifyLog("FIS", $"rim eviction: {o.Blueprint} slammed for {slam} but the deposit was refused -- the debris downgrade stands");
 				}
 				else
 				{

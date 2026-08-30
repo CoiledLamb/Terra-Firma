@@ -19,7 +19,7 @@ namespace XRL.World.Parts.Mutation
 	{
 		#region Fields
 		private const string COMMAND_ID = "Cleo_TerraFirma_CommandStoneshaper";
-		private const string DEFAULT_BEHAVIOR_BP = "Cleo_TerraFirma_StoneshaperStatueNaturalWeapon"; // the statues' fists; see ApplyStatueBuffs
+		internal const string DEFAULT_BEHAVIOR_BP = "Cleo_TerraFirma_StoneshaperStatueNaturalWeapon"; // the statues' fists; see ApplyStatueBuffs (internal: the stats part re-arms by this marker)
 
 		private const int BASE_DURATION = 100;
 		private const int TURNS_PER_LEVEL = 40;
@@ -479,6 +479,10 @@ namespace XRL.World.Parts.Mutation
 
 			// every carve takes the same cooldown; recasting after it swaps the living statue out
 			// (lifetime-as-cooldown display retired with the swap-down ruling, 2026-07-23)
+			// audit fix 2026-08-29: the engine charges nothing for ability commands (CommandEvent
+			// has no energy code; every base mutation charges itself), so without this the carve
+			// was a free action for player and NPC alike
+			actor.UseEnergy(1000, "Physical Mutation Stoneshaper");
 			CooldownMyActivatedAbility(ActivatedAbilityID, BASE_COOLDOWN);
 			return statue;
 		}
@@ -607,6 +611,7 @@ namespace XRL.World.Parts.Mutation
 				partsToReplace.Add(Statue.Body.GetPart("Body", true).First());
 			}
 			//MessageQueue.AddPlayerMessage($"adding natural weapon, part 2. replacing {partsToReplace.Count} parts...");
+			List<string> museMapLines = new();
 			foreach (var item in partsToReplace)
 			{
 				item.DefaultBehaviorBlueprint = DEFAULT_BEHAVIOR_BP;
@@ -621,6 +626,7 @@ namespace XRL.World.Parts.Mutation
 				{
 					item.DefaultBehavior.Render.DisplayName = museWeapon.Render.DisplayName;
 					item.DefaultBehavior.Render.Tile = museWeapon.Render.Tile;
+					museMapLines.Add($"{item.Type}\t{museWeapon.Render.DisplayName}\t{museWeapon.Render.Tile}");
 					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", $"muse weapon: statue {item.Type} armed as '{museWeapon.Render.DisplayName}' (mutation-formula stats)");
 				}
 				else
@@ -655,6 +661,10 @@ namespace XRL.World.Parts.Mutation
 			if (!infiniteDuration)
 				Statue.RemovePart<Leveler>();
 			Cleo_TerraFirma_StoneshaperStatueStatsPart statsPart = new(GetHP(Lv) - Statue.GetStatValue("Hitpoints"), (GetAV(Lv)) - Statue.GetStatValue("AV"));
+			// audit fix 2026-08-29: Body.RegenerateDefaultEquipment wipes in-place DefaultBehavior
+			// customization on any body-structure change; the stats part re-applies it from these
+			statsPart.NaturalWeaponDamage = GetNaturalDamage(Lv);
+			statsPart.MuseWeaponMap = string.Join("\n", museMapLines);
 			Statue.AddPart(statsPart);
 			if (WallProps != null)
 			{
@@ -682,7 +692,11 @@ namespace XRL.World.Parts.Mutation
 				Statue.SetPronounSet("it/its");
 			}
 			Statue.Brain.Allegiance.Clear();
-			Statue.Brain.BecomeCompanionOf(Sculptor, !infiniteDuration);
+			// audit fix 2026-08-29: the Trifling argument previously passed here is a silent no-op
+			// (Brain.BecomeCompanionOf never reads it; body is SetAlliedLeader + StopFight), so
+			// temporary and permanent statues were always identical companions. Pass nothing rather
+			// than encode a distinction the engine does not have.
+			Statue.Brain.BecomeCompanionOf(Sculptor);
 			//MessageQueue.AddPlayerMessage($"assigning convo script...");
 			Statue.RequirePart<ConversationScript>().ConversationID = "Cleo_TerraFirma_ConversationStoneshaperStatue";
 			// the statue fights AND draws aggro: nearby enemies must save vs Willpower or attack it instead of the sculptor.

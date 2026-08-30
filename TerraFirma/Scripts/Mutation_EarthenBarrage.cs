@@ -447,8 +447,10 @@ namespace XRL.World.Parts.Mutation
 					ParentObject.Fail("You have no stones available to throw.");
 				return false;
 			}
-			var thrownSlot = ParentObject.Body?.GetUnequippedPart("Thrown Weapon");
-			if (thrownSlot == null)
+			// GetUnequippedPart never returns null (fresh list, possibly empty) unless there is no
+			// Body at all -- an empty list is the actual "no free slot" signal
+			var thrownSlots = ParentObject.Body?.GetUnequippedPart("Thrown Weapon");
+			if (thrownSlots == null || thrownSlots.Count == 0)
 			{
 				if (!Silent)
 					ParentObject.Fail("You have no empty thrown weapon slots.");
@@ -544,7 +546,7 @@ namespace XRL.World.Parts.Mutation
 				return;
 			if (!IsOurStone(Stone) || !IsMyActivatedAbilityToggledOn(ActivatedAbilityID))
 				return;
-			if (ParentObject.GetFirstThrownWeapon() != null || ParentObject.Body?.GetUnequippedPart("Thrown Weapon") == null)
+			if (ParentObject.GetFirstThrownWeapon() != null || (ParentObject.Body?.GetUnequippedPart("Thrown Weapon")?.Count ?? 0) == 0)
 				return;
 			ParentObject.AutoEquip(Stone, true, Silent: true);
 			if (Stone.GetPart<Temporary>() is Temporary lease)

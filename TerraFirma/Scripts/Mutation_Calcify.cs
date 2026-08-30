@@ -154,8 +154,13 @@ namespace XRL.World.Parts.Mutation
 			if (here == null || there == null || here.ParentZone != there.ParentZone)
 				return null;
 			string dir = here.GetDirectionFromCell(there);
+			// audit fix 2026-08-29: GetCellFromDirection walks GLOBALLY into any live adjacent zone
+			// (GetCellFromDirectionGlobal, bLocalOnly false), so an edge cast could place walls next
+			// door and then feed the neighbor zone's local X/Y into this zone's repaint rectangle.
+			// Clamp the whole line to the caster's zone; a line shortened by the map edge is just a
+			// partial line, which the placer already accepts.
 			Cell anchor = here.GetCellFromDirection(dir);
-			if (anchor == null)
+			if (anchor == null || anchor.ParentZone != here.ParentZone)
 				return null;
 			int walls = GetWallsCreated(Level);
 			List<Cell> line = new List<Cell>(walls) { anchor };
@@ -164,9 +169,13 @@ namespace XRL.World.Parts.Mutation
 			while (line.Count < walls && (left != null || right != null))
 			{
 				left = left?.GetCellFromDirection(flanks[0]);
+				if (left != null && left.ParentZone != here.ParentZone)
+					left = null;
 				if (left != null && line.Count < walls)
 					line.Add(left);
 				right = right?.GetCellFromDirection(flanks[1]);
+				if (right != null && right.ParentZone != here.ParentZone)
+					right = null;
 				if (right != null && line.Count < walls)
 					line.Add(right);
 			}

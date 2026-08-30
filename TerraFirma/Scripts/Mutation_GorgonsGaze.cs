@@ -413,6 +413,9 @@ namespace XRL.World.Parts.Mutation
 			else
 			{
 				Cleo.TerraFirma.Scripts.StatueHelpers.ReturnPossessions(statue, Victim); // death was prevented -- give it all back
+				// the flag is persistent and gates ALL drop paths on every future death; unwind it
+				// the way the engine's Consumer part does (Consumer.cs:128)
+				Victim.ModIntProperty("SuppressCorpseDrops", -1, RemoveIfZero: true);
 				statue.Obliterate();
 			}
 		}
