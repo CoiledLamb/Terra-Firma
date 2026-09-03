@@ -15,7 +15,7 @@ Tweaks found and set aside: 208. They stay inline in the tracker if wanted at al
 | session-artifact | 4 |
 | **all** | **243** |
 
-## Missing (22)
+## Missing (21)
 
 Nothing in the records says this, in any wording. Grouped by the home the checker proposed; both the grouping and the inclusion are proposals.
 
@@ -26,11 +26,10 @@ Nothing in the records says this, in any wording. Grouped by the home the checke
 | 2026-08-13 | fact | rubble and boulders | You cannot share a cell with rubble or boulders | "that won't work for rubble or boulders since you can't share a space with them" |
 | 2026-08-16 | fact | faction join flag | join=false means members won't join the player, not vice versa | "so join=false actually means *they* won't join you, rather than you not being able to join them" |
 
-### guidelines/warrens (4)
+### guidelines/warrens (3)
 
 | when | nature | governs | gist | user's words |
 |---|---|---|---|---|
-| 2026-08-18 | guideline | warren generation | Procgen should feel like the drawings without being the drawing | "what i'm actually hoping is that the procgen produces something that feels or looks like the drawings, without trying to necessarily *be* the drawing, if that makes sense" |
 | 2026-08-19 | guideline | warren rooms | Fully define each room before building; no rooms hidden behind rare size gates | "can we make sure we're locking down what each room is fully before building this? don't wanna get surprised because some are locked behind rare size requirements" |
 | 2026-08-22 | guideline | warren procgen | Draw on the Broken Earth series for warren procgen ideas | "i'm thinking about if there's anything we could utilize from that for our warren procgen" |
 | 2026-08-23 | guideline | terra firma 2 | Warrens are the biggest meat of Terra Firma 2; will take tweaking | "it definitely is gonna take a bit of tweaking. this is the biggest meat of terra firma 2 imo" |
@@ -83,6 +82,7 @@ Nothing in the records says this, in any wording. Grouped by the home the checke
 ## Culled by the user
 
 - 2026-09-03: "quarrier dialogue uses elements of the broken earth trilogy" (2026-08-23) dropped. User: "the quarrier dialogue was just an experiment, not really a strict guideline".
+- 2026-09-03: "procgen produces something that feels or looks like the drawings, without trying to necessarily be the drawing" (2026-08-18) dropped. User: "procgen about drawing is pretty vague".
 - 2026-09-03: "qud tiles need to face a certain direction" dropped from ground-truth. User: "mostly irrelevant for you and also kind of vague".
 
 ## Recorded differently (24)
