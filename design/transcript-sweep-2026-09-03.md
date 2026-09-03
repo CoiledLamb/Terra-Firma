@@ -15,7 +15,7 @@ Tweaks found and set aside: 208. They stay inline in the tracker if wanted at al
 | session-artifact | 4 |
 | **all** | **243** |
 
-## Missing (20)
+## Missing (19)
 
 Nothing in the records says this, in any wording. Grouped by the home the checker proposed; both the grouping and the inclusion are proposals.
 
@@ -32,12 +32,6 @@ Nothing in the records says this, in any wording. Grouped by the home the checke
 |---|---|---|---|---|
 | 2026-08-19 | guideline | warren rooms | Fully define each room before building; no rooms hidden behind rare size gates | "can we make sure we're locking down what each room is fully before building this? don't wanna get surprised because some are locked behind rare size requirements" |
 | 2026-08-23 | guideline | terra firma 2 | Warrens are the biggest meat of Terra Firma 2; will take tweaking | "it definitely is gonna take a bit of tweaking. this is the biggest meat of terra firma 2 imo" |
-
-### guidelines/text (1)
-
-| when | nature | governs | gist | user's words |
-|---|---|---|---|---|
-| 2026-08-24 | guideline | quarrier voice | Capture diaspora/Sunderlies element: Qud subtly as their true home | "the thing i want to capture more is like the diaspora/sunderlies element. like, this subtle element of qud being their true homem" |
 
 ### guidelines/workflow (1)
 
@@ -83,6 +77,7 @@ Nothing in the records says this, in any wording. Grouped by the home the checke
 - 2026-09-03: "quarrier dialogue uses elements of the broken earth trilogy" (2026-08-23) dropped. User: "the quarrier dialogue was just an experiment, not really a strict guideline".
 - 2026-09-03: "procgen produces something that feels or looks like the drawings, without trying to necessarily be the drawing" (2026-08-18) dropped. User: "procgen about drawing is pretty vague".
 - 2026-09-03: "anything we could utilize from that for our warren procgen" (Broken Earth, 2026-08-22) dropped. User: "draw on broken earth for procgen was also an experiment".
+- 2026-09-03: "the diaspora/sunderlies element ... qud being their true home" (2026-08-24) dropped. User: "a sort of glossed over read about of what that conversation was about. i wouldn't include it as a guideline". Note for future sweeps: the gist compressed a conversation into a slogan, which is the summary failure the sweep was meant to avoid.
 - 2026-09-03: "qud tiles need to face a certain direction" dropped from ground-truth. User: "mostly irrelevant for you and also kind of vague".
 
 ## Recorded differently (24)
