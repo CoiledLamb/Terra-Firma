@@ -15,17 +15,16 @@ Tweaks found and set aside: 208. They stay inline in the tracker if wanted at al
 | session-artifact | 4 |
 | **all** | **243** |
 
-## Missing (25)
+## Missing (24)
 
 Nothing in the records says this, in any wording. Grouped by the home the checker proposed; both the grouping and the inclusion are proposals.
 
-### ground-truth (3)
+### ground-truth (2)
 
 | when | nature | governs | gist | user's words |
 |---|---|---|---|---|
 | 2026-08-13 | fact | rubble and boulders | You cannot share a cell with rubble or boulders | "that won't work for rubble or boulders since you can't share a space with them" |
 | 2026-08-16 | fact | faction join flag | join=false means members won't join the player, not vice versa | "so join=false actually means *they* won't join you, rather than you not being able to join them" |
-| 2026-08-16 | fact | sprites | Qud tiles need to face a certain direction | "i edited it because qud tiles need to face a certain direction and it was facing the wrong way" |
 
 ### guidelines/warrens (4)
 
@@ -78,6 +77,10 @@ Nothing in the records says this, in any wording. Grouped by the home the checke
 | 2026-08-25 | decision | shipped Textures | .aseprite source (stoneandbees) moved out of the shipped dev folder | "moved stoneandbees out of the dev folder" |
 | 2026-08-26 | decision | docket artifact | Squatters belong to warren tab, provisioner to creatures tab | "squatters can go to warren, provisioner can go to creatures" |
 | 2026-08-26 | decision | credits | Credits go in the Steam forum, not GitHub/manifest | "nah it's fine, no one should care about the github for this, credits in the steam forum should do" |
+
+## Culled by the user
+
+- 2026-09-03: "qud tiles need to face a certain direction" dropped from ground-truth. User: "mostly irrelevant for you and also kind of vague".
 
 ## Recorded differently (24)
 
