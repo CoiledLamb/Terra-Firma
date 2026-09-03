@@ -15,7 +15,7 @@ Tweaks found and set aside: 208. They stay inline in the tracker if wanted at al
 | session-artifact | 4 |
 | **all** | **243** |
 
-## Missing (24)
+## Missing (22)
 
 Nothing in the records says this, in any wording. Grouped by the home the checker proposed; both the grouping and the inclusion are proposals.
 
@@ -35,12 +35,10 @@ Nothing in the records says this, in any wording. Grouped by the home the checke
 | 2026-08-22 | guideline | warren procgen | Draw on the Broken Earth series for warren procgen ideas | "i'm thinking about if there's anything we could utilize from that for our warren procgen" |
 | 2026-08-23 | guideline | terra firma 2 | Warrens are the biggest meat of Terra Firma 2; will take tweaking | "it definitely is gonna take a bit of tweaking. this is the biggest meat of terra firma 2 imo" |
 
-### guidelines/text (3)
+### guidelines/text (1)
 
 | when | nature | governs | gist | user's words |
 |---|---|---|---|---|
-| 2026-07-23 | guideline | lore | Read the game's books and absorb its tone before proposing stonecutter lore | "i'd like you to read the books and get familiar with the lore and tone of the game as closely as possible before suggesting anything" |
-| 2026-08-23 | guideline | quarrier dialogue | Quarrier dialogue uses Broken Earth elements; earth-centric voice | "i'm trying to come up with some quarrier dialogue that uses elements of the broken earth trilogy, so their voices come off as more earth centric" |
 | 2026-08-24 | guideline | quarrier voice | Capture diaspora/Sunderlies element: Qud subtly as their true home | "the thing i want to capture more is like the diaspora/sunderlies element. like, this subtle element of qud being their true homem" |
 
 ### guidelines/workflow (1)
@@ -78,8 +76,13 @@ Nothing in the records says this, in any wording. Grouped by the home the checke
 | 2026-08-26 | decision | docket artifact | Squatters belong to warren tab, provisioner to creatures tab | "squatters can go to warren, provisioner can go to creatures" |
 | 2026-08-26 | decision | credits | Credits go in the Steam forum, not GitHub/manifest | "nah it's fine, no one should care about the github for this, credits in the steam forum should do" |
 
+## Filed after the user's look
+
+- 2026-09-03: "read the books and get familiar with the lore and tone of the game as closely as possible before suggesting anything" (2026-07-23) filed into `design/guidelines/text.md`. User: "reading the lore before proposing things are great".
+
 ## Culled by the user
 
+- 2026-09-03: "quarrier dialogue uses elements of the broken earth trilogy" (2026-08-23) dropped. User: "the quarrier dialogue was just an experiment, not really a strict guideline".
 - 2026-09-03: "qud tiles need to face a certain direction" dropped from ground-truth. User: "mostly irrelevant for you and also kind of vague".
 
 ## Recorded differently (24)
