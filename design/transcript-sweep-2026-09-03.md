@@ -15,49 +15,22 @@ Tweaks found and set aside: 208. They stay inline in the tracker if wanted at al
 | session-artifact | 4 |
 | **all** | **243** |
 
-## Missing (19)
+## Missing (0)
 
-Nothing in the records says this, in any wording. Grouped by the home the checker proposed; both the grouping and the inclusion are proposals.
-
-### ground-truth (2)
+The remaining 19 were culled in a batch on 2026-09-03. User, on the list as a whole: "most of these to be asides or snippets from conversations where it would be extremely generous to call them rulings. most are very contextual, some even have maybes in it". The classifiers had been told to be inclusive; that instruction was the overreach. The rows are kept below so nothing has to be re-swept.
 
 | when | nature | governs | gist | user's words |
 |---|---|---|---|---|
 | 2026-08-13 | fact | rubble and boulders | You cannot share a cell with rubble or boulders | "that won't work for rubble or boulders since you can't share a space with them" |
 | 2026-08-16 | fact | faction join flag | join=false means members won't join the player, not vice versa | "so join=false actually means *they* won't join you, rather than you not being able to join them" |
-
-### guidelines/warrens (2)
-
-| when | nature | governs | gist | user's words |
-|---|---|---|---|---|
 | 2026-08-19 | guideline | warren rooms | Fully define each room before building; no rooms hidden behind rare size gates | "can we make sure we're locking down what each room is fully before building this? don't wanna get surprised because some are locked behind rare size requirements" |
 | 2026-08-23 | guideline | terra firma 2 | Warrens are the biggest meat of Terra Firma 2; will take tweaking | "it definitely is gonna take a bit of tweaking. this is the biggest meat of terra firma 2 imo" |
-
-### guidelines/workflow (1)
-
-| when | nature | governs | gist | user's words |
-|---|---|---|---|---|
 | 2026-08-19 | guideline | brainstorm ideas | Creature and item ideas must tie into real Qud mechanics | "make sure they actually tie into qud mechanics" |
-
-### guidelines/mutations (3)
-
-| when | nature | governs | gist | user's words |
-|---|---|---|---|---|
 | 2026-07-21 | guideline | gorgon's gaze | Physical Gorgon's Gaze needs to be stronger than Ego-scaling Sunder Mind | "as a mental mutation, sunder mind scales naturally with a player's ego stat. while gorgon's gaze is a physical mutation, so it will need to be a bit stronger to compensate" |
 | 2026-08-04 | guideline | mutation kit | gap vs Atlas: no secondary utility for the rocks you make | "the biggest thing his kit has that this doesn't is a secondary utility for all the rocks you're making" |
 | 2026-08-04 | guideline | mutation roster | role map: sense/CC+protection/hard protection/allies/blasting/petrify | "sense - geomancy fissure - crowd control aoe + protection calcify - hard protection/control stoneshaper - making allies to defend you earthen barrage - blasting chunks of earth at your foes gorgon's gaze - petrifying foes into statues" |
-
-### decisions (2)
-
-| when | nature | governs | gist | user's words |
-|---|---|---|---|---|
 | 2026-08-12 | decision | stonecarver roster | Cut the lamp-carrier role if it creates tension | "hmmm... we could just cut it if there's tension, it's not a huge deal" |
 | 2026-08-22 | decision | carver families | Families are flavor data, not engine factions (simmering) | "yeag, i lean flavor data families as well. just simmering for now" |
-
-### tracker-inline (9)
-
-| when | nature | governs | gist | user's words |
-|---|---|---|---|---|
 | 2026-07-22 | fact | stone blueprints | Existing stone blueprints were cleared with the commissioned author; Claude may edit XML | "you can do the XML if you want, it's not that big of a deal - it'd just be modifying the existing ones we already have that have been cleared with the person i commissioned this from" |
 | 2026-07-22 | decision | clutter stone | Delete the clutter stone | "you can delete the clutter stone" |
 | 2026-08-17 | decision | sifrah | Sifrah won't be relevant much longer; leave it out of the analysis | "take sifrah out of the equation here since it won't be relevant much longer" |
