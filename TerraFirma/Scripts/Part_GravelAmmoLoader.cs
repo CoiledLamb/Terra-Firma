@@ -180,7 +180,16 @@ namespace XRL.World.Parts
 		public override bool HandleEvent(GetMissileWeaponProjectileEvent E) { E.Blueprint = ProjectileObject; return false; }
 		public override bool HandleEvent(GetDisplayNameEvent E)
 		{
-			if (E.Understood()) E.AddMissileWeaponDamageTag(GetMissileWeaponPerformanceEvent.GetFor(ParentObject.Equipped, ParentObject));
+			// MagazineAmmoLoader's inventory/equipment readout idiom. The chamber holds
+			// a reserve rather than an ammo object, so label the remaining firing bursts.
+			if (E.Understood())
+			{
+				if (E.Cutoff >= 1100)
+					E.AddMissileWeaponDamageTag(GetMissileWeaponPerformanceEvent.GetFor(ParentObject.Equipped, ParentObject));
+				if (!E.Reference)
+					E.AddTag(Bursts == 0 ? "{{y|[{{K|empty}}]}}"
+						: "{{y|[gravel: " + Bursts + (Bursts == 1 ? " burst]}}" : " bursts]}}"), -5);
+			}
 			return base.HandleEvent(E);
 		}
 		public override bool HandleEvent(StripContentsEvent E)

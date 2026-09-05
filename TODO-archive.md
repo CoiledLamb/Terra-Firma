@@ -1,5 +1,9 @@
 # Terra Firma TODO archive (resolved history)
 
+## Gravel shotgun ammo label (2026-09-05)
+
+Added MagazineAmmoLoader-style bracketed ammo labels to GetDisplayNameEvent, so inventory/equipment show remaining gravel bursts or empty. Matches stock understood/reference/cutoff handling. Build and text checks passed; loader deployed and hash-verified. Visual check remains with V17.
+
 ## Gravel shotgun (2026-09-05)
 
 Built and deployed one-stone chamber: exact Small Stone/Large Stone whitelist, 5 weight per burst, 2/3 bursts respectively, no top-up or collectible gravel. Inherits Pump Shotgun's eight-projectile firing profile and a temporary pellet blueprint with 1d2 damage/base penetration 4. Custom IPoweredPart follows MagazineAmmoLoader reload/status events and GrinderCell's extrinsic-weight reserve; MissileWeapon.Fire copies pellets after one LoadAmmoEvent per AmmoPerAction. XML owns whitelist, consumption and reload cost. General Guns loot and quarry provisioner stock wired; merchant 15% is CLAUDE PROPOSAL tuning. Pump art, tier 3 and value are provisional; new text is draft. `tfgravel` grants the identified gun and both ammo sizes. Build passed with zero errors (134 warnings), XML/text/reference checks passed, and all four deployed files were hash-verified. In-game behavior, state persistence and acquisition remain open under V17.
