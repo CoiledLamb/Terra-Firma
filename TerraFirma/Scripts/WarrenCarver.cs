@@ -3486,13 +3486,10 @@ namespace Cleo.TerraFirma.Scripts
 				}
 				// A wall-bound shop must never fall back to a floor cell or block a passage.
 				if (walls.Count == 0) return false;
-				// GenericInventoryRestocker.PerformStock otherwise uses the current generation
-				// context on every restock. Pin this shop to its home zone (Zone.NewTier).
-				who.SetIntProperty("InventoryTier", Math.Max(1, Math.Min(8, Z.NewTier)));
 				Cell selected = walls[R(0, walls.Count - 1)];
 				selected.AddObject(who);
 				merchantPlaced = true;
-				Helpers.VerifyLog("WARREN", $"vine merchant seated on wall ({selected.X},{selected.Y}), stock tier {who.GetIntProperty("InventoryTier")}");
+				Helpers.VerifyLog("WARREN", $"vine merchant seated on wall ({selected.X},{selected.Y})");
 				return true;
 			}
 			bool SeatByHint(GameObject who, string hint)

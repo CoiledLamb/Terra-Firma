@@ -376,13 +376,13 @@
 	     consumers moved to the Carver ladders above. Its load-bearing findings survive there
 	     and in the journal: weighted flat beats {ownertier} parameterization because a missing
 	     rung fails silently, and mismatched knife-and-hammer pairs are a ruled feature.) -->
-	<!-- GenericInventoryRestocker.PerformStock supplies InventoryTier as zonetier.
-	     Placement pins that tier to the home zone so later restocks keep the same market.
+	<!-- Fixed wares tier follows DromadTrader1's stock-table idiom.
+	     Base WorldTerrain.xml: TerrainDesertCanyon carries RegionTier=1.
 	     Two chalk boxes per stock; other supplement counts are CLAUDE PROPOSAL dials.
 	     Regional food follows the canyon warren basket's existing pantry. -->
 	<population Name="Cleo_TerraFirma_VineMerchantWares">
 		<group Name="Wares" Style="pickeach">
-			<table Name="Tier{zonetier}Wares" />
+			<table Name="Tier1Wares" />
 			<table Name="Cleo_TerraFirma_MiningGear" Number="2-3" />
 			<object Blueprint="Pickaxe" Number="1-2" />
 			<object Blueprint="Cleo_TerraFirma_BoxOfChalk" Number="2" />

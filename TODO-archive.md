@@ -2,6 +2,8 @@
 
 ## Vine merchant (2026-09-05)
 
+Follow-up built and deployed: replaced Tier{zonetier}Wares with fixed Tier1Wares and removed placement-time InventoryTier stamping. Desert canyon RegionTier is 1 in base WorldTerrain.xml; fixed restock tables follow DromadTrader1. Mining supplies, chalk and regional food remain the same. Build/XML/text checks passed; two deployed files hash-verified. V15 now checks fixed-tier behavior.
+
 Built and deployed the Jilted Lover-derived vine merchant. Wild encounter tags and grabbing kit removed; Consortium/Quarriers membership, stock GenericMerchant dialogue and GenericInventoryRestocker added. Wares use Tier{zonetier}Wares plus 2-3 MiningGear rolls, 1-2 pickaxes, two chalk boxes, yuckwheat, starapple preserves and boar jerky. Supplement quantities except the two chalk boxes are CLAUDE PROPOSAL tuning. Camp/flourishing occupied-site tables request one; placement enforces the cap, requires a wall beside open carved floor and pins InventoryTier to the home zone. Build passed with zero errors, all 16 XML files parsed, text checks passed, all eight tier tables and supplement IDs resolved, and three deployed files were hash-verified. V15 holds in-game checks; T04 holds custom voice/name work.
 
 ## Glowsphere and lantern XML configuration (2026-09-05)
