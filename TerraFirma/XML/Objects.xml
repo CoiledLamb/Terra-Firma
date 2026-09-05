@@ -1,5 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <objects>
+	<!-- Pump Shotgun firing profile; stone chamber replaces the magazine.
+	     CLAUDE PROPOSAL: working name, descriptive/rules text and inherited art/value/tier.
+	     Acquisition: inherited Guns tag plus quarry provisioner stock. -->
+	<object Name="Cleo_TerraFirma_Gravel Shotgun" Inherits="Pump Shotgun">
+		<part Name="Render" DisplayName="gravel shotgun" />
+		<part Name="Description" Short="A stone-fed shotgun with a grinding chamber." />
+		<part Name="RulesDescription" Text="Loads one small or large stone at a time. Each 5 pounds of stone supplies one eight-projectile burst. The chamber must be spent before loading another stone." />
+		<removepart Name="MagazineAmmoLoader" />
+		<part Name="Cleo_TerraFirma_GravelAmmoLoader" StoneBlueprints="Small Stone,Large Stone" ProjectileObject="Cleo_TerraFirma_GravelProjectile" WeightPerBurst="5" ReloadEnergy="1000" />
+		<tag Name="Mods" Value="MissileWeaponMods,FirearmMods,CommonMods,RifleMods" />
+		<removepart Name="TinkerItem" />
+	</object>
+	<object Name="Cleo_TerraFirma_GravelProjectile" Inherits="ProjectileShotgunPellet">
+		<part Name="Render" DisplayName="blast of gravel" />
+	</object>
 	<object Name="Cleo_TerraFirma_EphemeralStone" Inherits="BaseStone">
 		<part Name="Render" DisplayName="sculpted pebble" Tile="Items/sw_smallstone.bmp" />
 		<part Name="Physics" Weight="1" Category="Thrown Weapons" />

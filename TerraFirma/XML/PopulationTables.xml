@@ -382,6 +382,8 @@
 	     Regional food follows the canyon warren basket's existing pantry. -->
 	<population Name="Cleo_TerraFirma_VineMerchantWares">
 		<group Name="Wares" Style="pickeach">
+			<!-- CLAUDE PROPOSAL stock frequency; general Guns loot also includes it. -->
+			<object Blueprint="Cleo_TerraFirma_Gravel Shotgun" Number="1" Chance="15" />
 			<table Name="Tier1Wares" />
 			<table Name="Cleo_TerraFirma_MiningGear" Number="2-3" />
 			<object Blueprint="Pickaxe" Number="1-2" />

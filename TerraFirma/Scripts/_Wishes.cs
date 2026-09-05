@@ -703,6 +703,19 @@ namespace Cleo.TerraFirma.Scripts
 			Helpers.VerifyLog("JINGLE", $"audition {pick.Key} negative");
 		}
 
+		/// <summary>Gravel shotgun and both supported stone sizes for a manual playtest.</summary>
+		[WishCommand(Command = "tfgravel")]
+		public static void GravelShotgunKit()
+		{
+			if (The.Player == null) return;
+			GameObject gun = GameObject.Create("Cleo_TerraFirma_Gravel Shotgun");
+			gun.MakeUnderstood();
+			The.Player.ReceiveObject(gun);
+			The.Player.ReceiveObject(GameObject.Create("Small Stone"));
+			The.Player.ReceiveObject(GameObject.Create("Large Stone"));
+			MessageQueue.AddPlayerMessage("tfgravel: gravel shotgun, small stone and large stone received.", Capitalize: false);
+		}
+
 		/// <summary>Glowstone pair dev door (2026-08-22): a glowsphere to break, a lantern to
 		/// load. Everything else about the loop is reachable from these two.</summary>
 		[WishCommand(Command = "tflantern")]
