@@ -1,5 +1,9 @@
 # Terra Firma TODO archive (resolved history)
 
+## MiningGear nylon bodypack (2026-09-05)
+
+Added base Nylon Bodypack as an independent 15% roll for one pack in MiningGear (chance is CLAUDE PROPOSAL tuning). Its tier 3 matches the pool's miner's helmet, headlamp and gas mask. Existing consumers inherit the roll. Build passed with zero errors; all 16 XML files parsed, text checks passed, the row was verified under MiningGear, and the deployed population file was hash-verified. In-game acquisition verification remains open as V16.
+
 ## Vine merchant (2026-09-05)
 
 Follow-up built and deployed: replaced Tier{zonetier}Wares with fixed Tier1Wares and removed placement-time InventoryTier stamping. Desert canyon RegionTier is 1 in base WorldTerrain.xml; fixed restock tables follow DromadTrader1. Mining supplies, chalk and regional food remain the same. Build/XML/text checks passed; two deployed files hash-verified. V15 now checks fixed-tier behavior.

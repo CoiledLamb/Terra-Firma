@@ -408,6 +408,9 @@
 				<object Weight="40" Blueprint="Boar-skin gloves" Number="1" />
 				<object Weight="15" Blueprint="Cleo_TerraFirma_Cobblefur Gloves" Number="1" />
 			</group>
+			<!-- Tier 3, like the miner's helmet/headlamp/gas mask above.
+			     Optional back-slot work gear; 15 percent is CLAUDE PROPOSAL tuning. -->
+			<object Blueprint="Nylon Bodypack" Number="1" Chance="15" />
 		</group>
 	</population>
 	<!-- Granite baboon troop wiring (user ruling 2026-08-22: "it should spawn in all 3" - the
