@@ -211,7 +211,7 @@
 	     was the delegated call; Floating Glowsphere deliberately unmerged (inherits LightSource,
 	     not Glowsphere - whether it breaks too is an open fork). -->
 	<object Name="Glowsphere" Load="Merge">
-		<part Name="Cleo_TerraFirma_GlowsphereBreak" />
+		<part Name="Cleo_TerraFirma_GlowsphereBreak" ShardBlueprint="Cleo_TerraFirma_GlowstoneShard" BreakYield="2-3" ThrowYield="1-3" GlowDuration="30-60" />
 		<!-- thrown glowspheres also break (user 2026-08-22): damage on hit rides this part;
 		     the shatter/scatter/phosphorescent lives in Part_GlowsphereBreak. 1d4 = DIAL. -->
 		<part Name="ThrownWeapon" Damage="1d4" />

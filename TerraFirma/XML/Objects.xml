@@ -88,7 +88,7 @@
 	<!-- Glowstone pair (2026-08-22): descriptions are USER TEXT FINAL, mechanics per the same
 	     sitting's rulings - shards ride base MoteProperties verbatim (user: "let's just use
 	     moteproperties on this one"; Fuel 5000 is a Claude dial ~4.2 in-game days, mote parity);
-	     the lantern socket, steady radius, and half-rate burn live in Part_GlowstoneLantern.cs.
+	     the lantern socket behavior lives in Part_GlowstoneLantern.cs; tuning is set below.
 	     Acquisition = breaking a glowsphere (Merges.xml) or wish only; spawn layer unruled.
 	     Known wart, flagged: MoteProperties' burnout verb is hardcoded "dissipates". -->
 	<object Name="Cleo_TerraFirma_GlowstoneShard" Inherits="LightSource">
@@ -117,7 +117,10 @@
 	<object Name="Cleo_TerraFirma_GlowstoneLantern" Inherits="LightSource">
 		<part Name="Render" DisplayName="lantern" RenderString="}" ColorString="&amp;K" TileColor="&amp;K" DetailColor="Y" Tile="lantern_unlit.png" RenderLayer="5" />
 		<part Name="LightSource" Lit="false" Radius="8" />
-		<part Name="Cleo_TerraFirma_GlowstoneLantern" />
+		<part Name="Cleo_TerraFirma_GlowstoneLantern" ShardBlueprint="Cleo_TerraFirma_GlowstoneShard" BurnInterval="2"
+		      LitTile="lantern_lit.png" UnlitTile="lantern_unlit.png"
+		      LitDescription="A wrought metal cage and panes of crystal enclose a phosphorescent shard, amplifying its flickering glow."
+		      UnlitDescription="A wrought metal cage and panes of crystal enclose an inert wire socket." />
 		<part Name="Physics" Weight="2" />
 		<part Name="Commerce" Value="15" /> <!-- re-dialed 2026-08-22 from 25: torch 1 / glowsphere 40 anchors; lantern+fragment = 20, half a permanent glowsphere -->
 		<!-- description is state-swapped by the part; both lines USER TEXT FINAL 2026-08-22

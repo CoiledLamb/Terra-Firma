@@ -29,6 +29,17 @@ namespace XRL.World.Parts
 
 		/// <summary>What the sphere breaks into. XML-settable since the 2026-08-29 ladder pass.</summary>
 		public string ShardBlueprint = "Cleo_TerraFirma_GlowstoneShard";
+		// Blueprint tuning; defaults preserve behavior for existing saved objects.
+		public string BreakYield = "2-3";
+		public string ThrowYield = "1-3";
+		public string GlowDuration = "30-60";
+
+		public override bool SameAs(IPart p)
+		{
+			return p is Cleo_TerraFirma_GlowsphereBreak o
+				&& o.ShardBlueprint == ShardBlueprint && o.BreakYield == BreakYield
+				&& o.ThrowYield == ThrowYield && o.GlowDuration == GlowDuration && base.SameAs(p);
+		}
 
 		public override bool WantEvent(int ID, int cascade)
 		{
@@ -61,7 +72,7 @@ namespace XRL.World.Parts
 					return false;
 				}
 				GameObject sphere = ParentObject.SplitFromStack() ?? ParentObject;
-				int count = Stat.Random(2, 3);
+				int count = BreakYield.RollCached();
 				for (int i = 0; i < count; i++)
 				{
 					E.Actor.ReceiveObject(GameObject.Create(ShardBlueprint));
@@ -86,7 +97,7 @@ namespace XRL.World.Parts
 				GameObject target = E.GetGameObjectParameter("Defender");
 				if (GameObject.Validate(target) && target.IsCreature && !target.HasEffect<Luminous>())
 				{
-					target.ApplyEffect(new Luminous(Stat.Random(30, 60))); // duration DIAL, matches the fragment rider
+					target.ApplyEffect(new Luminous(GlowDuration.RollCached()));
 					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHARD", $"thrown glowsphere marked {target.Blueprint} phosphorescent");
 				}
 			}
@@ -99,7 +110,7 @@ namespace XRL.World.Parts
 			Cell cell = ParentObject.CurrentCell;
 			if (cell != null)
 			{
-				int count = Stat.Random(1, 3); // thrown yield RULED 2026-08-22 (user: "dial can be 1-3 instead of 1-2")
+				int count = ThrowYield.RollCached();
 				for (int i = 0; i < count; i++)
 				{
 					GameObject fragment = GameObject.Create(ShardBlueprint);

@@ -1,5 +1,9 @@
 # Terra Firma TODO archive (resolved history)
 
+## Glowsphere and lantern XML configuration (2026-09-05)
+
+Built and deployed: glowsphere BreakYield/ThrowYield/GlowDuration now come from Merges.xml (2-3, 1-3, 30-60). Lantern BurnInterval, lit/unlit tiles and descriptions come from Objects.xml; its existing LightSource Radius now controls the radius without a script override. Original defaults retained in the configurable fields, with stacking comparisons covering configuration differences. Build passed with zero errors; 16 XML files parsed, text checks passed, and four deployed files were hash-verified. In-game regression checks remain open as V14 in TODO.md.
+
 ## Warren loot wiring (2026-09-05)
 
 B05/B06 built and deployed to the development mod. Socket, gallery-bay and room-storage chest rolls now use the existing stocked Quarry Chest; the room-storage cap recognizes that variant. Stone baskets retain their existing contents and add a provisional 25% chance of one chalk box. Build passed with zero errors; all 16 XML files parsed and text checks passed. The three deployed files were hash-verified. In-game checks remain open as V13 in TODO.md.

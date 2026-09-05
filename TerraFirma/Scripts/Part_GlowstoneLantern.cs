@@ -22,17 +22,21 @@ namespace XRL.World.Parts
 		public const string UNLOAD_COMMAND = "Cleo_TerraFirma_UnloadGlowstoneLantern";
 		/// <summary>What the socket accepts and spawns. XML-settable since the 2026-08-29 ladder pass.</summary>
 		public string ShardBlueprint = "Cleo_TerraFirma_GlowstoneShard";
-		public const int STEADY_RADIUS = 8;
+		// Radius belongs to the blueprint's stock LightSource part.
+		public int BurnInterval = 2;
+		public string LitTile = "lantern_lit.png";
+		public string UnlitTile = "lantern_unlit.png";
 
 		// USER TEXT, FINAL (delivered 2026-08-22 evening, swapped verbatim): the lit line
 		// supersedes the original locked description ("a wrought metal cage encloses a
 		// flickering shard."), the unlit line retires the placeholder debt.
-		public const string LIT_DESCRIPTION = "A wrought metal cage and panes of crystal enclose a phosphorescent shard, amplifying its flickering glow.";
-		public const string UNLIT_DESCRIPTION = "A wrought metal cage and panes of crystal enclose an inert wire socket.";
+		// XML-settable, with the original defaults for existing saved objects.
+		public string LitDescription = "A wrought metal cage and panes of crystal enclose a phosphorescent shard, amplifying its flickering glow.";
+		public string UnlitDescription = "A wrought metal cage and panes of crystal enclose an inert wire socket.";
 
 		public GameObject Shard;
 
-		/// <summary>Half-rate burn phase: fuel ticks only when this flips to 0.</summary>
+		/// <summary>Elapsed turns in the burn interval; fuel ticks when this wraps to 0.</summary>
 		public int BurnPhase;
 
 		/// <summary>
@@ -47,11 +51,14 @@ namespace XRL.World.Parts
 		public override bool SameAs(IPart p)
 		{
 			// never stack two lanterns if either holds a shard
-			if ((p as Cleo_TerraFirma_GlowstoneLantern).Shard != null || Shard != null)
+			if (!(p is Cleo_TerraFirma_GlowstoneLantern o) || o.Shard != null || Shard != null)
 			{
 				return false;
 			}
-			return base.SameAs(p);
+			return o.ShardBlueprint == ShardBlueprint && o.BurnInterval == BurnInterval
+				&& o.BurnPhase == BurnPhase && o.LitTile == LitTile && o.UnlitTile == UnlitTile
+				&& o.LitDescription == LitDescription && o.UnlitDescription == UnlitDescription
+				&& o.StartLoaded == StartLoaded && o.StartFuel == StartFuel && base.SameAs(p);
 		}
 
 		public override IPart DeepCopy(GameObject Parent, Func<GameObject, GameObject> MapInv)
@@ -159,7 +166,7 @@ namespace XRL.World.Parts
 				MoteProperties mote = Shard.GetPart<MoteProperties>();
 				if (mote != null)
 				{
-					BurnPhase = 1 - BurnPhase;
+					BurnPhase = (BurnPhase + 1) % Math.Max(1, BurnInterval);
 					if (BurnPhase == 0 && mote.Fuel > 0)
 					{
 						mote.Fuel--;
@@ -268,12 +275,11 @@ namespace XRL.World.Parts
 			if (light != null)
 			{
 				light.Lit = lit;
-				light.Radius = STEADY_RADIUS;
 			}
 			Render render = ParentObject.GetPart<Render>();
 			if (render != null)
 			{
-				render.Tile = lit ? "lantern_lit.png" : "lantern_unlit.png";
+				render.Tile = lit ? LitTile : UnlitTile;
 			}
 			// the y/Y AnimatedMaterialGeneric approach is GONE (user live-catch 2026-08-22:
 			// "lantern flickers between white and grey, not the colors the shard flickers -
@@ -288,7 +294,7 @@ namespace XRL.World.Parts
 			Description desc = ParentObject.GetPart<Description>();
 			if (desc != null)
 			{
-				desc.Short = lit ? LIT_DESCRIPTION : UNLIT_DESCRIPTION;
+				desc.Short = lit ? LitDescription : UnlitDescription;
 			}
 		}
 	}
