@@ -3463,8 +3463,41 @@ namespace Cleo.TerraFirma.Scripts
 						locs.Add(Genkit.Location2D.Get(i % g.W, i / g.W));
 				return warrenArea = new Genkit.LocationList(locs);
 			}
+			bool merchantPlaced = false;
+			bool SeatMerchant(GameObject who)
+			{
+				if (merchantPlaced) return false;
+				var walls = new List<Cell>();
+				var seen = new HashSet<int>();
+				for (int i = 0; i < g.W * g.H; i++)
+				{
+					if (g.C[i] != FLOOR || g.Host[i] != 0 || g.Water[i] != 0) continue;
+					int x = i % g.W, y = i / g.W;
+					Cell approach = Z.GetCell(x, y);
+					if (approach == null || approach.IsSolid()) continue;
+					foreach (var d in N4)
+					{
+						int wx = x + d[0], wy = y + d[1];
+						if (!g.Inb(wx, wy)) continue;
+						Cell wall = Z.GetCell(wx, wy);
+						if (wall == null || !wall.HasWall() || wall.HasObjectWithPart("Combat")) continue;
+						if (seen.Add(g.Idx(wx, wy))) walls.Add(wall);
+					}
+				}
+				// A wall-bound shop must never fall back to a floor cell or block a passage.
+				if (walls.Count == 0) return false;
+				// GenericInventoryRestocker.PerformStock otherwise uses the current generation
+				// context on every restock. Pin this shop to its home zone (Zone.NewTier).
+				who.SetIntProperty("InventoryTier", Math.Max(1, Math.Min(8, Z.NewTier)));
+				Cell selected = walls[R(0, walls.Count - 1)];
+				selected.AddObject(who);
+				merchantPlaced = true;
+				Helpers.VerifyLog("WARREN", $"vine merchant seated on wall ({selected.X},{selected.Y}), stock tier {who.GetIntProperty("InventoryTier")}");
+				return true;
+			}
 			bool SeatByHint(GameObject who, string hint)
 			{
+				if (hint == "Cleo_TerraFirma_MerchantWall") return SeatMerchant(who);
 				var engineHints = new List<string>();
 				string trade = null, denRole = null; int tradePct = 100, outsidePct = -1; bool den = false;
 				foreach (string raw in (hint ?? "").Split(','))

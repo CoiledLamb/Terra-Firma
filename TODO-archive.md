@@ -1,5 +1,9 @@
 # Terra Firma TODO archive (resolved history)
 
+## Vine merchant (2026-09-05)
+
+Built and deployed the Jilted Lover-derived vine merchant. Wild encounter tags and grabbing kit removed; Consortium/Quarriers membership, stock GenericMerchant dialogue and GenericInventoryRestocker added. Wares use Tier{zonetier}Wares plus 2-3 MiningGear rolls, 1-2 pickaxes, two chalk boxes, yuckwheat, starapple preserves and boar jerky. Supplement quantities except the two chalk boxes are CLAUDE PROPOSAL tuning. Camp/flourishing occupied-site tables request one; placement enforces the cap, requires a wall beside open carved floor and pins InventoryTier to the home zone. Build passed with zero errors, all 16 XML files parsed, text checks passed, all eight tier tables and supplement IDs resolved, and three deployed files were hash-verified. V15 holds in-game checks; T04 holds custom voice/name work.
+
 ## Glowsphere and lantern XML configuration (2026-09-05)
 
 Built and deployed: glowsphere BreakYield/ThrowYield/GlowDuration now come from Merges.xml (2-3, 1-3, 30-60). Lantern BurnInterval, lit/unlit tiles and descriptions come from Objects.xml; its existing LightSource Radius now controls the radius without a script override. Original defaults retained in the configurable fields, with stacking comparisons covering configuration differences. Build passed with zero errors; 16 XML files parsed, text checks passed, and four deployed files were hash-verified. In-game regression checks remain open as V14 in TODO.md.

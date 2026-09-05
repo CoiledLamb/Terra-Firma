@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
  <objects> 
+  <!-- Jilted Lover chassis, with its wild grabber and spawn lanes removed.
+       Merchant HP/AV copy BaseMerchant; intellect and ego copy Yurl (CLAUDE PROPOSAL
+       tuning). Working name; stock GenericMerchant speech until a custom voice lands. -->
+  <object Name="Cleo_TerraFirma_Vine Merchant" Inherits="Jilted Lover">
+    <part Name="Render" DisplayName="vine merchant" />
+    <part Name="Brain" Hostile="false" Wanders="false" Mobile="false" LivesOnWalls="true" Factions="Consortium-100,Cleo_TerraFirma_Quarriers-50" />
+    <removepart Name="JiltedLoverProperties" />
+    <removeinventoryobject Blueprint="Lovers_Thorns" />
+    <part Name="Corpse" CorpseChance="0" />
+    <stat Name="Hitpoints" Value="70" />
+    <stat Name="AV" Value="3" />
+    <stat Name="Intelligence" sValue="22" />
+    <stat Name="Ego" sValue="19" />
+    <part Name="ConversationScript" ConversationID="GenericMerchant" />
+    <part Name="GenericInventoryRestocker" Table="Cleo_TerraFirma_VineMerchantWares" />
+    <part Name="Interesting" />
+    <tag Name="Role" Value="NPC" />
+    <tag Name="NoSleep" />
+    <tag Name="DynamicObjectsTable:DesertCanyon_Creatures" Value="*delete" />
+    <tag Name="DynamicObjectsTable:Flowerfields_Creatures" Value="*delete" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
+
   <object Name="Cleo_TerraFirma_Burrowing Urchin" Inherits="BaseUrchin">
     <part Name="Render" DisplayName="burrowing urchin" ColorString="&amp;w" DetailColor="g" />
     <part Name="Description" Short="A moss covered ball of spines tumbles across the earth, prying open crevices and bits of scrap to nest in the dank spaces within." />
