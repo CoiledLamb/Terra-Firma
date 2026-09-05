@@ -1,5 +1,9 @@
 # Terra Firma TODO archive (resolved history)
 
+## Quarry provisioner name (2026-09-05)
+
+Vine merchant DisplayName changed to the user-supplied "quarry provisioner"; blueprint ID retained. Build, XML/name and text checks passed; Creatures.xml deployed and hash-verified. Custom description/greeting remain under T04, and fresh-spawn name verification accompanies V15.
+
 ## MiningGear nylon bodypack (2026-09-05)
 
 Added base Nylon Bodypack as an independent 15% roll for one pack in MiningGear (chance is CLAUDE PROPOSAL tuning). Its tier 3 matches the pool's miner's helmet, headlamp and gas mask. Existing consumers inherit the roll. Build passed with zero errors; all 16 XML files parsed, text checks passed, the row was verified under MiningGear, and the deployed population file was hash-verified. In-game acquisition verification remains open as V16.

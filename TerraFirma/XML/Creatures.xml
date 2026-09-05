@@ -2,9 +2,9 @@
  <objects> 
   <!-- Jilted Lover chassis, with its wild grabber and spawn lanes removed.
        Merchant HP/AV copy BaseMerchant; intellect and ego copy Yurl (CLAUDE PROPOSAL
-       tuning). Working name; stock GenericMerchant speech until a custom voice lands. -->
+       tuning). Stock GenericMerchant speech until a custom voice lands. -->
   <object Name="Cleo_TerraFirma_Vine Merchant" Inherits="Jilted Lover">
-    <part Name="Render" DisplayName="vine merchant" />
+    <part Name="Render" DisplayName="quarry provisioner" />
     <part Name="Brain" Hostile="false" Wanders="false" Mobile="false" LivesOnWalls="true" Factions="Consortium-100,Cleo_TerraFirma_Quarriers-50" />
     <removepart Name="JiltedLoverProperties" />
     <removeinventoryobject Blueprint="Lovers_Thorns" />
