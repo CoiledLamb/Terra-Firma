@@ -1734,6 +1734,18 @@ namespace Cleo.TerraFirma.Scripts
 		private static Row[] T_NATURAL => _tNatural ?? (_tNatural = LoadDressTable("Natural"));
 		private static Row[] T_PLAINTRACE => _tPlainTrace ?? (_tPlainTrace = LoadDressTable("PlainTrace"));
 		private static Row[] T_HALLTABLE => _tHallTable ?? (_tHallTable = LoadDressTable("HallTable"));
+		// 2026-08-29 sitting, ported 2026-09-05: the plaza leisure register and the
+		// work-face scatter (both USER asks, weights CLAUDE dials, XML-editable)
+		private static Row[] _tPlaza, _tWorkScatter;
+		private static Row[] T_PLAZA => _tPlaza ?? (_tPlaza = LoadDressTable("Plaza"));
+		private static Row[] T_WORKSCATTER => _tWorkScatter ?? (_tWorkScatter = LoadDressTable("WorkScatter"));
+		// the monument family behind the "Village Monument" meta-row (USER 2026-08-29:
+		// "just a couple of the monuments spawning"): Seat resolves the parent id to
+		// one of these seven, site cap 2, over-cap rolls fall back to a statue.
+		// Base Furniture.xml:5619-5652; Birdhouse IS the "stone columbary" by display name.
+		private static readonly string[] MONUMENTS = {
+			"Village Monument Obelisk", "Village Monument Amphora", "Village Monument Birdhouse",
+			"Village Monument Diptych", "Village Monument Stele", "Village Monument Monolith", "Village Monument Orb" };
 		// SOLIDITY IS READ OFF THE BLUEPRINT (2026-08-26, replacing a hardcoded
 		// three-name set): Physics Solid= is the engine's own truth, and blueprint
 		// Parts are inheritance-baked at load (ObjectBlueprintLoader.Bake merges
@@ -1883,11 +1895,14 @@ namespace Cleo.TerraFirma.Scripts
 		};
 		private const double DWELLDENSITY = 0.3;   // v1's engine-faithful number
 
-		private static string DressSite(Grid g, Artery art, List<PocketRec> pockets, RolesRec roles, string occupancy, int siteFloor)
+		private static string DressSite(Grid g, Artery art, List<PocketRec> pockets, RolesRec roles, string occupancy, int siteFloor, int si)
 		{
 			g.Item = new string[g.W * g.H];
 			var placed = new Dictionary<string, int>();
 			int items = 0, tableItems = 0, refused = 0, topups = 0;
+			int monuments = 0, bunkrooms = 0, bunkBeds = 0, bunkShort = 0, plazas = 0, plazaItems = 0, workScatter = 0;
+			bool bunkNone = false;
+			var bunk = new HashSet<int>();   // dwelling ids chosen for the bunk rider (filled at BUNK PICK below)
 			var misses = new List<(Row[] tbl, PocketRec p, List<int[]> cs)>();
 			bool SolidItem(int i) => IsSolidItem(g.Item[i]);
 			bool IsFree(int i) => g.C[i] == FLOOR && g.Item[i] == null && g.Art[i] == 0 && g.Water[i] == 0 && g.Tree[i] == 0 && i != g.MouthIdx;
@@ -1940,6 +1955,7 @@ namespace Cleo.TerraFirma.Scripts
 			// the doorway rule: furniture stays off any cell open to floor outside the pocket
 			bool Threshold(PocketRec p, int x, int y)
 			{
+				if (p.Id < 0) return false;   // plaza pseudo-pocket: interior-open by construction, membership mixed, the id test cannot apply
 				foreach (var d in N4)
 				{
 					int nx = x + d[0], ny = y + d[1];
@@ -1953,6 +1969,13 @@ namespace Cleo.TerraFirma.Scripts
 				string item = rolled, hint = null;
 				int bar = rolled.IndexOf('|');
 				if (bar >= 0) { hint = rolled.Substring(bar + 1); item = rolled.Substring(0, bar); }
+				// the monument meta-row resolves here so every path (gallery roll,
+				// rescue, warren-floor top-up) honors the site cap of 2
+				if (item == "Village Monument")
+				{
+					if (monuments >= 2) item = "Random Stone Statue";
+					else { monuments++; item = MONUMENTS[R(0, MONUMENTS.Length - 1)]; }
+				}
 				bool solid = IsSolidItem(item);
 				bool Legal(int[] c2) => IsFree(g.Idx(c2[0], c2[1])) && !Threshold(p, c2[0], c2[1]) && (!solid || SolidOK(c2[0], c2[1]));
 				int[] c = null;
@@ -1982,6 +2005,16 @@ namespace Cleo.TerraFirma.Scripts
 				{
 					var ok = cs.Where(Legal).ToList();
 					if (ok.Count == 0) { if (solid) refused++; return false; }
+					// ANCHORING (USER FLAG 2026-08-29: rooms read empty partly from
+					// "not being super specific with where things are placed"): an
+					// unhinted item seats against a wall when a wall cell is free, so
+					// sparse dress reads as furnishing instead of dropped litter.
+					// Garbage is exempt - litter IS scatter, and its midden growth clumps it.
+					if (item != "Garbage")
+					{
+						var wa = ok.Where(WallHug).ToList();
+						if (wa.Count > 0) ok = wa;
+					}
 					c = ok[R(0, ok.Count - 1)];
 				}
 				Put(g.Idx(c[0], c[1]), item); tableItems++;
@@ -2008,7 +2041,9 @@ namespace Cleo.TerraFirma.Scripts
 			void DressFace(PocketRec p)
 			{
 				var cs = CellsOf(p); if (cs.Count == 0) return;
-				int rolls = Math.Max(1, Math.Min(3, (int)Math.Round(cs.Count / 30.0)));
+				// one roll per ~18 floor cells, 1-4 (was /30 cap 3; rescaled on the
+				// 08-29 sparse-dress flag, big faces were outrunning their rolls)
+				int rolls = Math.Max(1, Math.Min(4, (int)Math.Round(cs.Count / 18.0)));
 				for (int i = 0; i < rolls; i++)
 				{
 					string rolled = i == 0 ? WRollNo(T_SOCKET) : WRoll(T_SOCKET);
@@ -2029,11 +2064,74 @@ namespace Cleo.TerraFirma.Scripts
 					var adj = cs.Where(a => Math.Abs(a[0] - sc[0]) <= 1 && Math.Abs(a[1] - sc[1]) <= 1).ToList();
 					if (adj.Count > 0 && !Seat(p, WRoll(T_GALLERYBAY), adj)) misses.Add((T_GALLERYBAY, p, adj));
 				}
-				if (!Seat(p, WRoll(T_GALLERYFLOOR), cs)) misses.Add((T_GALLERYFLOOR, p, cs));
+				// centrepiece rolls follow the span like the plain/face fix (was ONE
+				// roll regardless of size); "go light" keeps the cap at 3. 08-29 commons sitting.
+				int frolls = Math.Max(1, Math.Min(3, (int)Math.Round(cs.Count / 24.0)));
+				for (int fi = 0; fi < frolls; fi++)
+					if (!Seat(p, WRoll(T_GALLERYFLOOR), cs)) misses.Add((T_GALLERYFLOOR, p, cs));
 				// pre-etched commons walls: NOT PORTED yet (Part_Etchable markov
 				// integration gets its own sitting) - flagged in TODO
 			}
 			// DWELLING: v1's typed-room grammar whole
+			// WALL RUNS (bunk rework, sitting 2026-09-05; user: "i mainly just don't
+			// want them fighting the existing props in the room"): a run is a
+			// straight line of free, wall-hugging, non-doorway cells along one wall.
+			// Bunks seat as a run so 2-3 bedrolls read as one bed-row, and they seat
+			// FIRST so the typed dress fills around them instead of the reverse.
+			bool WallHug(int[] c2)
+			{
+				foreach (var d in N4)
+				{
+					int nx = c2[0] + d[0], ny = c2[1] + d[1];
+					if (!g.Inb(nx, ny) || g.C[g.Idx(nx, ny)] != FLOOR) return true;
+				}
+				return false;
+			}
+			List<List<int[]>> WallRuns(PocketRec p, List<int[]> cs)
+			{
+				var ok = cs.Where(c2 => IsFree(g.Idx(c2[0], c2[1])) && !Threshold(p, c2[0], c2[1]) && WallHug(c2)).ToList();
+				var key = new HashSet<int>(ok.Select(c2 => g.Idx(c2[0], c2[1])));
+				var runs = new List<List<int[]>>();
+				for (int axis = 0; axis < 2; axis++)   // 0 = horizontal, 1 = vertical
+				{
+					var seen = new HashSet<int>();
+					foreach (var c2 in ok)
+					{
+						if (seen.Contains(g.Idx(c2[0], c2[1]))) continue;
+						int x = c2[0], y = c2[1];
+						while (true)   // walk back to the run's start
+						{
+							int px = axis == 1 ? x : x - 1, py = axis == 1 ? y - 1 : y;
+							if (g.Inb(px, py) && key.Contains(g.Idx(px, py))) { x = px; y = py; } else break;
+						}
+						var run = new List<int[]>();
+						while (g.Inb(x, y) && key.Contains(g.Idx(x, y)))
+						{
+							run.Add(new[] { x, y }); seen.Add(g.Idx(x, y));
+							if (axis == 1) y++; else x++;
+						}
+						runs.Add(run);
+					}
+				}
+				return runs;
+			}
+			int LongestWallRun(PocketRec p)
+			{
+				int best = 0;
+				foreach (var r in WallRuns(p, CellsOf(p))) if (r.Count > best) best = r.Count;
+				return best;
+			}
+			// seat `want` copies of item as one contiguous wall run; returns the count placed
+			int SeatRun(PocketRec p, string item, int want, List<int[]> cs)
+			{
+				var runs = WallRuns(p, cs); if (runs.Count == 0) return 0;
+				var cands = runs.Where(r => r.Count >= want).ToList();
+				if (cands.Count == 0) { int L = runs.Max(r => r.Count); cands = runs.Where(r => r.Count == L).ToList(); want = L; }
+				var run = cands[R(0, cands.Count - 1)];
+				int off = R(0, run.Count - want);
+				for (int k = 0; k < want; k++) { Put(g.Idx(run[off + k][0], run[off + k][1]), item); tableItems++; }
+				return want;
+			}
 			void DressDwelling(PocketRec p)
 			{
 				var cs = CellsOf(p); if (cs.Count == 0) return;
@@ -2041,6 +2139,16 @@ namespace Cleo.TerraFirma.Scripts
 				double x = Rng() * tot; RoomType type = null;
 				foreach (var t in ROOMTYPES) { x -= t.Wt; if (x < 0) { type = t; break; } }
 				if (type == null) return;
+				// BUNK RIDER (USER 2026-08-29 ask, reworked 2026-09-05): the chosen
+				// dwelling sleeps a crew - 2-3 bedrolls as ONE wall run, seated before
+				// the typed rows so the props fill around the bedding. Outside the
+				// density budget, as the 08-29 ask said "extra". CLAUDE dials.
+				if (bunk.Contains(p.Id))
+				{
+					int want2 = R(2, 3), got = SeatRun(p, "Bedroll", want2, cs);
+					bunkrooms++; bunkBeds += got;
+					if (got < want2) bunkShort++;
+				}
 				int WallsAround(int[] c2)
 				{
 					int n = 0;
@@ -2080,8 +2188,13 @@ namespace Cleo.TerraFirma.Scripts
 							if (row.Hint == "wall") return WallsAround(c2) >= 1;
 							return true;
 						}).ToList();
-						if (cands.Count == 0) cands = cs.Where(Legal).ToList();
-						if (cands.Count == 0) { if (solid) refused++; break; }
+						// BUILT FIXTURES HOLD THE WALL (USER 2026-08-29, the mid-floor
+						// kiln): kiln/oven/anvil are masonry - corner, then any wall,
+						// then REFUSE, never open floor. Light furniture keeps the fallback.
+						bool heavy = item == "Kiln" || item == "Oven" || item == "Anvil";
+						if (cands.Count == 0 && heavy) cands = cs.Where(c2 => Legal(c2) && WallsAround(c2) >= 1).ToList();
+						else if (cands.Count == 0) cands = cs.Where(Legal).ToList();
+						if (cands.Count == 0) { if (solid || heavy) refused++; break; }
 						var c = cands[R(0, cands.Count - 1)];
 						Put(g.Idx(c[0], c[1]), item); budget--; tableItems++;
 						// cluster stamps riding a centerpiece roll: the hookah-circle
@@ -2350,6 +2463,22 @@ namespace Cleo.TerraFirma.Scripts
 					}
 				}
 			}
+			// BUNK PICK (2026-09-05): one dwelling per site, a second at 35% when the
+			// site has 3+ dwellings (the 08-29 site law, unchanged). Picked by LONGEST
+			// free wall run, ties random, so a cramped room never gets the bunks; a
+			// dwelling with no 2-run is ineligible.
+			{
+				var dws = pockets.Where(p2 => p2.Role == "dwelling").ToList();
+				if (dws.Count > 0)
+				{
+					int bunks = 1 + ((dws.Count >= 3 && Chance(.35)) ? 1 : 0);
+					var scored = dws.Select(p2 => (p: p2, run: LongestWallRun(p2))).Where(s2 => s2.run >= 2).ToList();
+					for (int i2 = scored.Count - 1; i2 > 0; i2--) { int j2 = R(0, i2); (scored[i2], scored[j2]) = (scored[j2], scored[i2]); }
+					scored = scored.OrderByDescending(s2 => s2.run).ToList();   // stable: ties keep the shuffle
+					foreach (var s2 in scored.Take(bunks)) bunk.Add(s2.p.Id);
+					if (bunk.Count == 0) bunkNone = true;
+				}
+			}
 			foreach (var p in pockets)
 			{
 				if (p.Role == "face") DressFace(p);
@@ -2365,10 +2494,89 @@ namespace Cleo.TerraFirma.Scripts
 					// not forever one-roll regardless of size. Sim-measured:
 					// big plains 2.9 items avg, site totals unmoved.
 					var cs = CellsOf(p);
-					int rolls = Math.Max(1, Math.Min(3, cs.Count / 24 + 1));
+					// rescaled on the 08-29 sparse-dress flag (was /24 cap 3): big plain
+					// halls were the emptiest rooms on the census. RULE 9 stands, the
+					// 74% Nothing weight stands; only the roll COUNT follows floor area.
+					int rolls = Math.Max(1, Math.Min(5, cs.Count / 12 + 1));
 					for (int ri = 0; ri < rolls; ri++)
 						if (cs.Count > 0 && !Seat(p, WRoll(T_PLAINTRACE), cs)) misses.Add((T_PLAINTRACE, p, cs));
 				}
+			}
+			// PLAZA = COMMONS/LEISURE (USER RULED 2026-08-29, both halves: "big open
+			// place in the center is commons/leisure i think" and "i think working
+			// sites can have leisure too"). Plaza-scale spans in the UNCLAIMED mass
+			// and big PLAIN rooms take a light leisure dress at EVERY stage; density
+			// rides the stage axis (leisure grows toward flourishing). Detection:
+			// 3x3-all-open cores, blobbed N4; 4+ cores = a plaza; dress cells = cores
+			// + open rim. The artery stays clear (IsFree refuses it). Divisors +
+			// weights CLAUDE dials. Sim-measured before port.
+			{
+				bool OpenU(int i2)
+				{
+					if (g.C[i2] != FLOOR || g.Host[i2] != 0 || g.Water[i2] != 0) return false;
+					int pid2 = g.Pocket[i2];
+					return pid2 < 0 || (pid2 < pockets.Count && pockets[pid2].Role == "plain");
+				}
+				var pcore = new byte[g.W * g.H];
+				for (int y = 1; y < g.H - 1; y++)
+					for (int x = 1; x < g.W - 1; x++)
+					{
+						bool ok = true;
+						for (int dy = -1; dy <= 1 && ok; dy++)
+							for (int dx = -1; dx <= 1; dx++)
+								if (!OpenU(g.Idx(x + dx, y + dy))) { ok = false; break; }
+						if (ok) pcore[g.Idx(x, y)] = 1;
+					}
+				var pseen = new byte[g.W * g.H];
+				var plazaRec = new PocketRec { Id = -1, Role = "plaza" };
+				for (int i2 = 0; i2 < g.W * g.H; i2++)
+				{
+					if (pcore[i2] == 0 || pseen[i2] != 0) continue;
+					var cores = new List<int> { i2 }; pseen[i2] = 1;
+					for (int h2 = 0; h2 < cores.Count; h2++)
+					{
+						int c2 = cores[h2], x = c2 % g.W, y = c2 / g.W;
+						foreach (var d in N4)
+						{
+							int nx = x + d[0], ny = y + d[1];
+							if (!g.Inb(nx, ny)) continue;
+							int ni = g.Idx(nx, ny);
+							if (pcore[ni] != 0 && pseen[ni] == 0) { pseen[ni] = 1; cores.Add(ni); }
+						}
+					}
+					if (cores.Count < 4) continue;
+					var cellSet = new HashSet<int>(cores);
+					foreach (var c2 in cores)
+					{
+						int x = c2 % g.W, y = c2 / g.W;
+						for (int dy = -1; dy <= 1; dy++)
+							for (int dx = -1; dx <= 1; dx++)
+							{
+								int ni = g.Idx(x + dx, y + dy);
+								if (OpenU(ni)) cellSet.Add(ni);
+							}
+					}
+					var cs3 = cellSet.Select(ci => new[] { ci % g.W, ci / g.W }).ToList();
+					int D = si == 2 ? 8 : si == 1 ? 11 : 14;   // leisure grows with the stage
+					int prolls = Math.Max(1, Math.Min(6, (int)Math.Round(cs3.Count / (double)D)));
+					int before = items;
+					while (prolls-- > 0) Seat(plazaRec, WRoll(T_PLAZA), cs3);
+					plazas++; plazaItems += items - before;
+				}
+			}
+			// WORK FACES READ AS WORKED (USER 2026-08-29; corrected same sitting to
+			// the FACE ROOMS at every stage, not working-stage sites: "the roots of it
+			// being a work area are always visible"). Stones, stacks, torches,
+			// pickaxes, rarely a still-lit dropped headlamp/helmet, on top of the
+			// socket dress. Seat anchoring + artery + threshold laws apply. CLAUDE dials.
+			foreach (var p2 in pockets)
+			{
+				if (p2.Role != "face") continue;
+				var cs4 = CellsOf(p2); if (cs4.Count == 0) continue;
+				int wrolls = Math.Max(2, Math.Min(6, (int)Math.Round(cs4.Count / 8.0)));
+				int before = items;
+				while (wrolls-- > 0) Seat(p2, WRoll(T_WORKSCATTER), cs4);
+				workScatter += items - before;
 			}
 			if (roles.YardRect != null) DressYard(roles.YardRect, roles.YardState ?? "working", roles.YardDesc != null && roles.YardDesc.StartsWith("outside"));
 			// WARREN FLOOR: only the tail is cut - Nothing-rolled spaces re-roll
@@ -2526,6 +2734,7 @@ namespace Cleo.TerraFirma.Scripts
 							if (!g.Inb(f[0], f[1])) continue;
 							if (!inC.Contains(g.Idx(f[0], f[1])) || !IsFree(g.Idx(f[0], f[1]))) continue;
 							if (!PostOK(f[0], f[1])) continue;
+							if (g.Art[g.Idx(f[0], f[1])] != 0) continue;   // light the shoulder, not the roadbed (08-29 path-clutter flag)
 							Put(g.Idx(f[0], f[1]), "Torchpost"); posts.Add(new[] { f[0], f[1] });
 							pocketPosts++;
 							break;   // one flank per doorway - a lone flank is fine, the pair was the floodlight
@@ -2539,7 +2748,7 @@ namespace Cleo.TerraFirma.Scripts
 				{
 					var m = mq.Dequeue();
 					int mi = g.Idx(m[0], m[1]);
-					if (g.C[mi] == FLOOR && g.Host[mi] == 0 && g.Item[mi] == null && mi != g.MouthIdx)
+					if (g.C[mi] == FLOOR && g.Host[mi] == 0 && g.Item[mi] == null && mi != g.MouthIdx && g.Art[mi] == 0)
 					{
 						bool hug = false;
 						foreach (var d in N4) if (g.Inb(m[0] + d[0], m[1] + d[1]) && g.C[g.Idx(m[0] + d[0], m[1] + d[1])] != FLOOR) hug = true;
@@ -2655,12 +2864,17 @@ namespace Cleo.TerraFirma.Scripts
 					: p.Role == "commons" ? T_GALLERYFLOOR : null;
 				if (tbl == null) continue;
 				var cs = CellsOf(p); if (cs.Count == 0) continue;
-				bool hasItem = false;
-				foreach (var c2 in cs) if (g.Item[g.Idx(c2[0], c2[1])] != null) { hasItem = true; break; }
-				if (hasItem) continue;
+				// widened on the 08-29 sparse-dress flag: a BIG room (20+ floor cells)
+				// at one item reads as bare as a small room at zero, so the rescue
+				// covers both - zero anywhere, or <=1 at size. One re-roll either way.
+				int have = 0;
+				foreach (var c2 in cs) if (g.Item[g.Idx(c2[0], c2[1])] != null) have++;
+				if (have > 1 || (have == 1 && cs.Count < 20)) continue;
 				if (Seat(p, WRollNo(tbl), cs)) roomFloored++;
 			}
-			return $"{items} items, {tableItems} table, {topups} topups, {roomFloored} room-floored, {refused} solid-refused";
+			return $"{items} items, {tableItems} table, {topups} topups, {roomFloored} room-floored, {refused} solid-refused, "
+				+ $"{bunkrooms} bunkroom ({bunkBeds} beds, {bunkShort} short{(bunkNone ? ", no bunk-able dwelling" : "")}), "
+				+ $"{plazas} plaza ({plazaItems} leisure), {workScatter} work-scatter, {monuments} monuments";
 		}
 
 		// The BP sim-id map DIED with the poptable migration (2026-08-26): grid ids
@@ -2925,7 +3139,7 @@ namespace Cleo.TerraFirma.Scripts
 			// what a winner's full rebuild produces (timesave 1, user 2026-08-25)
 			if (dress)
 			{
-				string dressStats = DressSite(g, art, pockets, roles, occupancy, m.Floor);
+				string dressStats = DressSite(g, art, pockets, roles, occupancy, m.Floor, si);
 				Helpers.VerifyLog("WARREN", $"dress: {dressStats}");
 			}
 			// MOUTH-ACCESS LAW (user greenlit 2026-08-25, sim-proven on the sealed-

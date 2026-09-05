@@ -532,7 +532,8 @@
 	     NATURAL, PLAINTRACE, HALLTABLE + the ITEMS art table, in sim ids). THE SIM LEADS;
 	     when a sitting changes dress content, change the sim first and port here. -->
 
-	<!-- FACE sockets: one roll per ~30 floor cells. The first roll skips the nothing row
+	<!-- FACE sockets: one roll per ~18 floor cells, 1-4 (rescaled from /30 cap 3 at the 08-29
+	     sparse-dress sitting, ported 2026-09-05). The first roll skips the nothing row
 	     in code (a face is never sterile, 2026-08-23 ruling); the weights are untouched.
 	     nugget row weight 1 (USER RULED 2026-08-25, weights delegated): quarry product
 	     tumbled free at the work face, rare on purpose, ~1 in 111 rolls. -->
@@ -553,37 +554,60 @@
 			<object Weight="1" Blueprint="Copper Nugget" />
 		</group>
 	</population>
-	<!-- COMMONS gallery: one roll per spur bay -->
+	<!-- COMMONS gallery tables reworked at the 2026-08-29 commons sitting, ported 2026-09-05
+	     (USER vocabulary, verbatim: "hammered dulcimer, chalkboard, statues, and monuments;
+	     carved diptych, ceramic amphora, colossal orb, stone columbary, stone monolith, stone
+	     obelisk, stone stele. we should go light though, with just a couple of the monuments
+	     spawning, and mostly just use our leisure item vocab"; corrected same sitting: "commons
+	     can have quarried stacks; they should have some more items that are in the leisure
+	     pool, like pitchers and seating"). Stacks STAY, pitchers and seating carry more weight
+	     beside the music/writing/monument adds. Nothing weights eased slightly: the commons has
+	     no honest-plainness defense (measured 1.4 gallery items per hall before the sitting).
+	     "Village Monument" is the base PARENT blueprint and reads as a META-ROW: WarrenCarver
+	     resolves it to one of the seven spoken monuments (Obelisk, Amphora, Birdhouse = the
+	     stone columbary, Diptych, Stele, Monolith, Orb) with a site cap of 2; over-cap rolls
+	     fall back to a statue. Weights CLAUDE, delegated. -->
+	<!-- one roll per spur bay -->
 	<population Name="Cleo_TerraFirma_WarrenDress GalleryBay">
 		<group Name="Rolls" Style="pickone">
-			<object Weight="50" Blueprint="*None" />
-			<object Weight="18" Blueprint="Random Stone Statue" />
-			<object Weight="12" Blueprint="LargeBoulder" />
-			<object Weight="10" Blueprint="Cleo_TerraFirma_QuarryStones2" />
-			<object Weight="5" Blueprint="Cleo_TerraFirma_Quarry Chest" />
-			<object Weight="5" Blueprint="Torch" />
-			<object Weight="6" Blueprint="Wine Pitcher" />
-		</group>
-	</population>
-	<!-- COMMONS gallery: one roll beside each pillar -->
-	<population Name="Cleo_TerraFirma_WarrenDress GalleryPillar">
-		<group Name="Rolls" Style="pickone">
-			<object Weight="62" Blueprint="*None" />
-			<object Weight="20" Blueprint="Random Stone Statue" />
-			<object Weight="10" Blueprint="Torch" />
-			<object Weight="8" Blueprint="Cleo_TerraFirma_QuarryStones1" />
+			<object Weight="40" Blueprint="*None" />
+			<object Weight="12" Blueprint="Random Stone Statue" />
+			<object Weight="7" Blueprint="LargeBoulder" />
+			<object Weight="7" Blueprint="Cleo_TerraFirma_QuarryStones2" />
+			<object Weight="7" Blueprint="Hammered Dulcimer" />
 			<object Weight="8" Blueprint="Bench" />
 			<object Weight="6" Blueprint="Floor Cushion" />
+			<object Weight="6" Blueprint="Wine Pitcher" />
+			<object Weight="5" Blueprint="Cider Vase" />
+			<object Weight="4" Blueprint="Kline" />
+			<object Weight="4" Blueprint="Cleo_TerraFirma_Quarry Chest" />
+			<object Weight="3" Blueprint="Torch" />
 		</group>
 	</population>
-	<!-- COMMONS gallery: one centerpiece roll on the whole floor -->
+	<!-- one roll beside each pillar -->
+	<population Name="Cleo_TerraFirma_WarrenDress GalleryPillar">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="48" Blueprint="*None" />
+			<object Weight="14" Blueprint="Random Stone Statue" />
+			<object Weight="8" Blueprint="Chalkboard" />
+			<object Weight="7" Blueprint="Torch" />
+			<object Weight="8" Blueprint="Bench" />
+			<object Weight="7" Blueprint="Floor Cushion" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_QuarryStones1" />
+			<object Weight="5" Blueprint="Cider Vase" />
+		</group>
+	</population>
+	<!-- centerpiece rolls on the whole floor: one per ~24 floor cells, 1-3 (was one roll
+	     regardless of size; "go light" keeps the cap at 3) -->
 	<population Name="Cleo_TerraFirma_WarrenDress GalleryFloor">
 		<group Name="Rolls" Style="pickone">
-			<object Weight="47" Blueprint="*None" />
-			<object Weight="25" Blueprint="LargeBoulder" Hint="Center" />
-			<object Weight="15" Blueprint="Random Stone Statue" Hint="Center" />
-			<object Weight="5" Blueprint="Village Monument Stele" Hint="Center" />
-			<object Weight="8" Blueprint="Cleo_TerraFirma_FireDish" Hint="Center" />
+			<object Weight="34" Blueprint="*None" />
+			<object Weight="18" Blueprint="LargeBoulder" Hint="Center" />
+			<object Weight="13" Blueprint="Random Stone Statue" Hint="Center" />
+			<object Weight="10" Blueprint="Village Monument" Hint="Center" />
+			<object Weight="9" Blueprint="Cleo_TerraFirma_FireDish" Hint="Center" />
+			<object Weight="7" Blueprint="Hammered Dulcimer" Hint="Center" />
+			<object Weight="5" Blueprint="Chalkboard" Hint="Center" />
 		</group>
 	</population>
 	<!-- NATURAL scatter: geology showing through the floor, corridors included.
@@ -599,7 +623,8 @@
 		</group>
 	</population>
 	<!-- PLAIN rooms: human traces, the hall-table register; circulation rooms, not
-	     furnished ones. Size-scaled roll count lives in code (one per 24 floor, cap 3). -->
+	     furnished ones. Size-scaled roll count lives in code (one per 12 floor, cap 5; was
+	     /24 cap 3 until the 08-29 sparse-dress sitting, ported 2026-09-05). -->
 	<population Name="Cleo_TerraFirma_WarrenDress PlainTrace">
 		<group Name="Rolls" Style="pickone">
 			<object Weight="74" Blueprint="*None" />
@@ -619,6 +644,49 @@
 			<object Weight="10" Blueprint="Torch" Hint="Cleo_TerraFirma_Face" />
 			<object Weight="7" Blueprint="Garbage" />
 			<object Weight="5" Blueprint="Pickaxe" Hint="Cleo_TerraFirma_Face" />
+		</group>
+	</population>
+	<!-- PLAZA, the leisure register (USER RULED 2026-08-29, two statements: "big open place
+	     in the center is commons/leisure i think" and, striking a stage gate, "i think working
+	     sites can have leisure too, it kind of flattens them to be *just* work"). WarrenCarver
+	     detects plaza-scale spans (3x3-open cores, 4+ blobbed) in the unclaimed mass and big
+	     plain rooms and rolls this table over them at EVERY stage; roll count per span rides
+	     the stage (floor/14 working, /11 camp, /8 flourishing, cap 6). Leisure-forward with one
+	     stack row so the work roots stay visible. Weights CLAUDE dials. Ported 2026-09-05. -->
+	<population Name="Cleo_TerraFirma_WarrenDress Plaza">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="46" Blueprint="*None" />
+			<object Weight="10" Blueprint="Bench" />
+			<object Weight="8" Blueprint="Floor Cushion" />
+			<object Weight="7" Blueprint="Cider Vase" />
+			<object Weight="6" Blueprint="Wine Pitcher" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_QuarryStones1" />
+			<object Weight="5" Blueprint="Torch" />
+			<object Weight="4" Blueprint="Kline" />
+			<object Weight="4" Blueprint="Hammered Dulcimer" />
+			<object Weight="2" Blueprint="Random Stone Statue" />
+			<object Weight="2" Blueprint="Cleo_TerraFirma_FireDish" />
+		</group>
+	</population>
+	<!-- WORK-FACE SCATTER (USER 2026-08-29: "having them be sparser makes sense, but they
+	     currently read as very empty; this is the strongest place for quarried stones, rocks,
+	     random torches and pickaxes imo. maybe even rarely a headlamp or miner's helmet";
+	     corrected same sitting to the face ROOMS at every stage, not working-stage sites).
+	     Rolled on top of the socket dress, floor/8 rolls per face, 2-6. Headlamp and Miner's
+	     Helmet are base lit LightSources (Items.xml), so a dropped light still burning is the
+	     read. Weights CLAUDE dials. Ported 2026-09-05. -->
+	<population Name="Cleo_TerraFirma_WarrenDress WorkScatter">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="30" Blueprint="*None" />
+			<object Weight="15" Blueprint="Small Stone" />
+			<object Weight="12" Blueprint="SmallBoulder" />
+			<object Weight="13" Blueprint="Cleo_TerraFirma_QuarryStones1" />
+			<object Weight="8" Blueprint="Torch" />
+			<object Weight="8" Blueprint="Pickaxe" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_Stone Basket" />
+			<object Weight="4" Blueprint="Cleo_TerraFirma_QuarryStones2" />
+			<object Weight="2" Blueprint="Headlamp" />
+			<object Weight="2" Blueprint="Miner's Helmet" />
 		</group>
 	</population>
 
