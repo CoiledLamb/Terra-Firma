@@ -94,6 +94,7 @@
       <label title="v1's dress tables on the v2 registry (ported 2026-08-18): work evidence on the face, gallery on the commons, typed rooms in dwellings, the quarry-yard recipe on the block yard, natural stones warren-wide. Render toggle only; the dress always rolls, so the census sees it either way. Tense pass landed 2026-08-18: abandoned goes dark with heavy trash, reclaimed adds snapjaw fires; yard states ride occupancy"><input type="checkbox" id="dressed" checked> dress</label>
       <label title="tint the haulage way so you can see the global layer's decision"><input type="checkbox" id="showart"> show artery</label>
       <label title="tint rock the augment added (blind-claim model 2026-08-25). OFF is the honest judging view: augmented rock renders identically to natural rock, and the question is whether the site reads as a lie without this crutch"><input type="checkbox" id="showaug"> show augment</label>
+      <label title="tint every registered room by role (orange face / violet commons / green dwelling / blue plain, grey infill). UNTINTED floor is unclaimed carve — corridors, junctions, crosscut spans — which no dress table owns (added 2026-08-29 when a plaza-sized span raised exactly this question; ~55% of flourishing floor measures unclaimed)"><input type="checkbox" id="showrooms"> show rooms</label>
       <label>zoom <select id="genzoom"><option value="6">S</option><option value="10" selected>M</option><option value="16">L</option></select></label>
       <span id="status"></span>
     </div>
@@ -1454,7 +1455,55 @@ const ITEMS={
   nugget:{g:'*',fg:'#b8722c',qt:['sw_nugget'],tc:'w',dc:'y'},
   bracelet1:{g:'"',fg:'#d05050',qt:['sw_necklace'],tc:'R',dc:'W'},
   bracelet2:{g:'"',fg:'#50a0d0',qt:['sw_necklace'],tc:'B',dc:'Y'},
-  bracelet3:{g:'"',fg:'#70c070',qt:['sw_necklace'],tc:'G',dc:'W'}
+  bracelet3:{g:'"',fg:'#70c070',qt:['sw_necklace'],tc:'G',dc:'W'},
+  // ---- the quarry power grid (electrical recon 2026-08-29). Mill = the ruled
+  // anchor (USER 2026-08-26: "quarry electricity is riding on the potential
+  // piezoelectric mill ... a stationary electrical producer that 'grinds' the
+  // earth"; restated 2026-08-29: "a piezoelectric mill that churns the earth").
+  // Blueprint truths: base Millstone renders char 15 &y/w on sw_millstone_1
+  // (Furniture.xml:1016) - the user's named sprite; PowerLine renders char 197
+  // &c, and its Broken state swaps the paint to sw_broken_wire
+  // (Furniture.xml:830-848). Wall runs never appear here - a wire entering a
+  // wall is ModWired, same sprite recolored (see the draw pass). Live vs dead
+  // rides occupancy: powered grid = flourishing signal, dead grid = abandoned
+  // (USER 08-24 site-state ruling). The rig may lack the wire sprites; the
+  // glyph fallback carries those cells.
+  mill:{g:'☼',fg:'#c9c19a',qt:['sw_millstone_1'],tc:'y',dc:'w'},
+  mill_dead:{g:'☼',fg:'#5a5a52',qt:['sw_millstone_1'],tc:'k',dc:'K'},
+  // reserved 2026-08-24 at the table build ("bg.animation_table"); first sketch
+  // use. Base table tile in stone greys per the build, cyan detail = powered.
+  'bg.animation_table':{g:'π',fg:'#8fd4d0',qt:['sw_table_low'],tc:'y',dc:'C'},
+  animation_table_dark:{g:'π',fg:'#5a5a52',qt:['sw_table_low'],tc:'k',dc:'K'},
+  powerline:{g:'┼',fg:'#39c5c8',qt:['sw_wire'],tc:'c',dc:'W'},
+  powerline_dead:{g:'┼',fg:'#4a4f52',qt:['sw_wire'],tc:'k',dc:'K'},
+  powerline_broken:{g:'%',fg:'#4a4f52',qt:['sw_broken_wire'],tc:'k',dc:'K'},
+  // include ruling 2026-08-29 ("include both", with the kilns): base Rock
+  // Tumbler truth - char 209 &W on sw_rock_tumbler, Tier 3, tumbles contents
+  // into the seven Polished gems (Furniture.xml:1322, Items.xml:11611-11659)
+  rock_tumbler:{g:'╤',fg:'#d8d8c8',qt:['sw_rock_tumbler'],tc:'y',dc:'W'},
+  // ---- commons pool sitting 2026-08-29 (USER vocabulary, verbatim: "hammered
+  // dulcimer, chalkboard, statues, and monuments - carved diptych, ceramic
+  // amphora, colossal orb, stone columbary, stone monolith, stone obelisk,
+  // stone stele. we should go light though, with just a couple of the
+  // monuments spawning, and mostly just use our leisure item vocab").
+  // Blueprint truths: Hammered Dulcimer char 13 &w/W (Furniture.xml:5157),
+  // Chalkboard char 223 &K/&y/w (4975), Village Monument * family (5619-5655,
+  // display names exactly as spoken; the amphora even collects water). The
+  // stele already lives above as bg.village_monument_stele. Monument tiles
+  // are Terrain/sw_monument* - the rig may not stock them, glyph fallback
+  // carries those cells. Weights CLAUDE, delegated.
+  dulcimer:{g:'♪',fg:'#c9b98a',qt:['sw_dulcimer'],tc:'w',dc:'W'},
+  chalkboard:{g:'▄',fg:'#9aa8a3',qt:['sw_monster_whiteboard'],tc:'y',dc:'w'},
+  mon_obelisk:{g:'|',fg:'#d8d0c0',solid:1,qt:['sw_monument1'],tc:'W',dc:'w'},
+  mon_amphora:{g:'¿',fg:'#c97b4a',solid:1,qt:['sw_monument2'],tc:'W',dc:'w'},
+  mon_columbary:{g:'|',fg:'#b1c9c3',solid:1,qt:['sw_monument3'],tc:'W',dc:'w'},
+  mon_diptych:{g:'|',fg:'#d8d0c0',solid:1,qt:['sw_monument4'],tc:'W',dc:'w'},
+  mon_monolith:{g:'|',fg:'#8a9a95',solid:1,qt:['sw_monument6'],tc:'W',dc:'w'},
+  mon_orb:{g:'O',fg:'#d8d0c0',solid:1,qt:['sw_monument8'],tc:'W',dc:'w'},
+  // working-scatter rares 2026-08-29: base Headlamp / Miner's Helmet, both
+  // render ']' and both lit in the blueprint - dropped work lights
+  headlamp:{g:']',fg:'#e0d8a0',qt:['sw_headlamp'],tc:'y',dc:'W'},
+  miners_helmet:{g:']',fg:'#c9b98a',qt:['sw_miners_helmet'],tc:'y',dc:'W'}
 };
 const STACKSETS={stack1:['stack1','stack1a','stack1b'],stack2:['stack2','stack2a','stack2b'],stack3:['stack3','stack3a','stack3b']};
 const DRESS={
@@ -1468,10 +1517,22 @@ const DRESS={
   // nugget weight 1 joined 2026-08-25 (USER RULED, weights delegated): quarry
   // product tumbled free at the work face, ~1 in 110 rolls
   socket:[[55,null],[18,'stack1'],[8,{i:'straytorch',hint:'face'}],[5,{i:'pickaxe',hint:'face'}],[5,'trash'],[2,'chest'],[4,'bg.floor_cushion'],[3,'bg.bedroll'],[2,'pitcher_wine'],[4,'basket_stones'],[2,'bg.vase'],[2,'bg.clay_jug'],[1,'nugget']],
-  gallerybay:[[50,null],[18,'bg.random_stone_statue'],[12,'largeboulder'],[10,'stack2'],[5,'chest'],[5,'straytorch'],[6,'pitcher_wine']],
-  gallerypillar:[[62,null],[20,'bg.random_stone_statue'],[10,'straytorch'],[8,'stack1'],[8,'bg.bench'],[6,'bg.floor_cushion']],
-  galleryfloor:[[47,null],[25,{i:'largeboulder',hint:'center'}],[15,{i:'bg.random_stone_statue',hint:'center'}],[5,{i:'bg.village_monument_stele',hint:'center'}],[8,{i:'firedish',hint:'center'}]]
+  // gallery tables reworked at the 2026-08-29 commons sitting (USER vocab
+  // above; corrected same sitting - "commons can have quarried stacks - they
+  // should have some more items that are in the leisure pool is what i meant,
+  // like pitchers and seating" - so the stacks STAY and pitchers/seating
+  // carry more weight beside the music/writing/monument adds; the old stele
+  // row folded into the site-capped 'monument' meta-id, resolved in seat()).
+  // Nothing weights eased slightly - the commons has no honest-plainness
+  // defense (measured 1.4 gallery items/hall before this sitting).
+  gallerybay:[[40,null],[12,'bg.random_stone_statue'],[7,'largeboulder'],[7,'stack2'],[7,'dulcimer'],[8,'bg.bench'],[6,'bg.floor_cushion'],[6,'pitcher_wine'],[5,'pitcher_cider'],[4,'kline'],[4,'chest'],[3,'straytorch']],
+  gallerypillar:[[48,null],[14,'bg.random_stone_statue'],[8,'chalkboard'],[7,'straytorch'],[8,'bg.bench'],[7,'bg.floor_cushion'],[6,'stack1'],[5,'pitcher_cider']],
+  galleryfloor:[[34,null],[18,{i:'largeboulder',hint:'center'}],[13,{i:'bg.random_stone_statue',hint:'center'}],[10,{i:'monument',hint:'center'}],[9,{i:'firedish',hint:'center'}],[7,{i:'dulcimer',hint:'center'}],[5,{i:'chalkboard',hint:'center'}]]
 };
+// the seven monuments, resolved from the 'monument' meta-id at seat time with
+// a site-wide cap of 2 (USER: "just a couple of the monuments spawning");
+// over-cap rolls fall back to a statue
+const MONUMENTS=['mon_obelisk','mon_amphora','mon_columbary','mon_diptych','bg.village_monument_stele','mon_monolith','mon_orb'];
 const NATURAL=[[55,null],[10,'stone'],[15,'loosestone'],[20,'pebble']];
 // plain-ROLE rooms are no longer skipped outright (USER FLAG 2026-08-18: a
 // working site "generated dressed pretty light" - on small sites most rooms
@@ -1479,6 +1540,19 @@ const NATURAL=[[55,null],[10,'stone'],[15,'loosestone'],[20,'pebble']];
 // the hall-table register: circulation rooms, not furnished ones. RULE 9 is
 // untouched - plainness still means something, it just isn't sterile.
 const PLAINTRACE=[[74,null],[10,{i:'straytorch',hint:'face'}],[7,'trash'],[5,{i:'pickaxe',hint:'face'}],[3,'bg.floor_cushion'],[2,'pitcher_cider']];
+// the plaza leisure register (USER RULED 2026-08-29, two statements: "big
+// open place in the center is commons/leisure i think" + "i think working
+// sites can have leisure too, it kind of flattens them to be *just* work").
+// Leisure-forward with one stack row so the work roots stay visible per the
+// stage-axis ruling. Weights CLAUDE dials.
+const PLAZATABLE=[[46,null],[10,'bg.bench'],[8,'bg.floor_cushion'],[7,'pitcher_cider'],[6,'pitcher_wine'],[6,'stack1'],[5,'straytorch'],[4,'kline'],[4,'dulcimer'],[2,'bg.random_stone_statue'],[2,'firedish']];
+// working-stage scatter (USER 2026-08-29: "having them be sparser makes
+// sense, but they currently read as very empty - this is the strongest place
+// for quarried stones, rocks, random torches and pickaxes imo. maybe even
+// rarely a headlamp or miner's helmet"). Base truths: Headlamp
+// (Items.xml:5154) and Miner's Helmet (5167), both lit LightSources - a
+// dropped light still burning is the read. Weights CLAUDE dials.
+const WORKTABLE=[[30,null],[15,'stone'],[12,'loosestone'],[13,'stack1'],[8,'straytorch'],[8,'pickaxe'],[6,'basket_stones'],[4,'stack2'],[2,'headlamp'],[2,'miners_helmet']];
 const ROOMPOOLS={
   // MIRROR: game-side copy is Cleo_TerraFirma_WarrenPool * in
   // TerraFirma/XML/PopulationTables.xml (see the DRESS mirror note)
@@ -1545,7 +1619,7 @@ const ROOMTYPES=[
 ];
 const DWELLDENSITY=0.3;   // v1's engine-faithful number (measured against village huts)
 
-function dressSite(g,art,pockets,K,yardRec,occupancy){
+function dressSite(g,art,pockets,K,yardRec,occupancy,si){
   g.item=new Array(W*H).fill(null);
   const placed={}, S={items:0,nothing:0,refused:0,types:{},typeItems:{},tableItems:0,placed};
   const misses=[];   // Nothing-rolled table opportunities, kept for the warren floor
@@ -1576,12 +1650,17 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
       if(g.pocket[idx(x,y)]===p.id&&g.c[idx(x,y)]===FLOOR) cs.push([x,y]); return cs };
   // the doorway rule: furniture stays off any cell open to floor outside the
   // pocket - a chest in a doorway reads as a mistake even when nothing blocks
-  const threshold=(p,x,y)=>{ for(const[dx,dy]of N4){const nx=x+dx,ny=y+dy;
+  const threshold=(p,x,y)=>{ if(p.plaza) return false;   // plaza cells are interior-open by construction; membership is mixed so the id test cannot apply
+    for(const[dx,dy]of N4){const nx=x+dx,ny=y+dy;
     if(inb(nx,ny)&&g.c[idx(nx,ny)]===FLOOR&&g.pocket[idx(nx,ny)]!==p.id) return true} return false };
   // one table result into one space (v1's rollSpace, minus the registry walk)
   const seat=(p,item,cs)=>{
     if(!item){ S.nothing++; return false }
     let hint=null; if(typeof item==='object'){ hint=item.hint; item=item.i }
+    // the monument meta-id resolves here so every path (gallery roll, rescue,
+    // warren-floor top-up) honors the site cap of 2
+    if(item==='monument') item = S.monuments>=2 ? 'bg.random_stone_statue'
+      : (S.monuments=(S.monuments||0)+1, MONUMENTS[R(0,MONUMENTS.length-1)]);
     if(STACKSETS[item]) item=STACKSETS[item][R(0,2)];
     const solid=!!(ITEMS[item]&&ITEMS[item].solid);
     const legal=([x,y])=>isFree(idx(x,y)) && !threshold(p,x,y) && (!solid||solidOK(x,y));
@@ -1597,8 +1676,18 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
         const dd=(cc[0]-cx)*(cc[0]-cx)+(cc[1]-cy)*(cc[1]-cy);
         if(dd<best){ best=dd; c=cc } }
     }
-    if(!c){ const ok=cs.filter(legal);
+    if(!c){ let ok=cs.filter(legal);
       if(!ok.length){ if(solid) S.refused++; else S.nothing++; return false }
+      // ANCHORING (USER FLAG 2026-08-29: rooms read empty partly from "not
+      // being super specific with where things are placed"): an unhinted item
+      // seats against a wall when a wall cell is free, so sparse dress reads
+      // as deliberate furnishing instead of dropped litter. Trash is exempt -
+      // litter IS scatter, and its midden growth already clumps it.
+      if(item!=='trash'){
+        const wa=ok.filter(([wx,wy])=>{ for(const[dx,dy]of N4){const nx=wx+dx,ny=wy+dy;
+          if(inb(nx,ny)&&g.c[idx(nx,ny)]!==FLOOR) return true} return false });
+        if(wa.length) ok=wa;
+      }
       c=ok[R(0,ok.length-1)] }
     put(idx(c[0],c[1]),item); S.tableItems++;
     if(item==='trash'&&!chance(.55)){      // middens grow (user 2026-08-14)
@@ -1612,9 +1701,11 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
     return true;
   };
   // FACE: v1's socket was a BITE; a v2 face is a whole room, so it takes one
-  // socket roll per ~30 floor cells, 1-3 (CLAUDE adaptation dial)
+  // socket roll per ~18 floor cells, 1-4 (CLAUDE adaptation dial; was /30 cap
+  // 3 - rescaled on the 08-29 sparse-dress flag, big faces were outrunning
+  // their rolls)
   const dressFace=p=>{ const cs=cellsOf(p); if(!cs.length) return;
-    const rolls=Math.max(1,Math.min(3,Math.round(cs.length/30)));
+    const rolls=Math.max(1,Math.min(4,Math.round(cs.length/18)));
     for(let i=0;i<rolls;i++)
       if(!seat(p,wroll(DRESS.socket),cs)) misses.push([DRESS.socket,p,cs]) };
   // COMMONS: the gallery tables land on the carve's own articulation - one
@@ -1627,7 +1718,12 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
     for(const sc of (p.spurCells||[])){
       const adj=cs.filter(a=>Math.abs(a[0]-sc[0])<=1&&Math.abs(a[1]-sc[1])<=1);
       if(adj.length&&!seat(p,wroll(DRESS.gallerybay),adj)) misses.push([DRESS.gallerybay,p,adj]) }
-    if(!seat(p,wroll(DRESS.galleryfloor),cs)) misses.push([DRESS.galleryfloor,p,cs]);
+    // centrepiece rolls follow the span like the plain/face fix (was ONE roll
+    // regardless of size - a 48-cell hall got a 20-cell hall's dress); "go
+    // light" keeps the cap at 3. CLAUDE dial, 08-29 commons sitting.
+    const frolls=Math.max(1,Math.min(3,Math.round(cs.length/24)));
+    for(let fi=0;fi<frolls;fi++)
+      if(!seat(p,wroll(DRESS.galleryfloor),cs)) misses.push([DRESS.galleryfloor,p,cs]);
     // PRE-ETCHED WALLS (gallery-is-commons ruling; USER RULED 2026-08-18 the
     // text side: engine MARKOV text via Part_Etchable at port - no user text
     // debt here). The sim marks 2-4 wall cells of the commons ring as etched.
@@ -1643,6 +1739,41 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
   };
   // DWELLING: v1's typed-room grammar whole - type roll, light first, signature
   // rows ahead of the shuffle, budget 0.3 of floor, hints as preferences
+  // WALL RUNS (bunk rework, sitting 2026-09-05; user: "i mainly just don't want
+  // them fighting the existing props in the room"): a run is a straight line
+  // of free, wall-hugging, non-doorway cells along one wall. Bunks seat as a
+  // run so 2-3 bedrolls read as one bed-row, and they seat FIRST so the typed
+  // dress fills around them instead of the reverse (the 08-29 pass seated
+  // them last, on leftover wall cells, one per wall).
+  const wallHug=([cx,cy])=>{ for(const[dx,dy]of N4){const nx=cx+dx,ny=cy+dy;
+    if(!inb(nx,ny)||g.c[idx(nx,ny)]!==FLOOR) return true} return false };
+  const wallRuns=(p,cs)=>{
+    const ok=cs.filter(c=>isFree(idx(c[0],c[1]))&&!threshold(p,c[0],c[1])&&wallHug(c));
+    const key=new Set(ok.map(([x,y])=>idx(x,y)));
+    const runs=[];
+    for(const axis of [0,1]){                   // 0 = horizontal, 1 = vertical
+      const seen=new Set();
+      for(const c of ok){ const i0=idx(c[0],c[1]); if(seen.has(i0)) continue;
+        // walk back to the run's start, then forward to its end
+        let [x,y]=c; while(true){ const px=axis?x:x-1, py=axis?y-1:y;
+          if(inb(px,py)&&key.has(idx(px,py))) {x=px;y=py} else break }
+        const run=[]; while(inb(x,y)&&key.has(idx(x,y))){ run.push([x,y]); seen.add(idx(x,y)); if(axis) y++; else x++ }
+        runs.push(run) }
+    }
+    return runs;
+  };
+  const longestWallRun=p=>{ const cs=cellsOf(p); let best=0;
+    for(const r of wallRuns(p,cs)) if(r.length>best) best=r.length; return best };
+  // seat `want` copies of item as one contiguous wall run; returns the count placed
+  const seatRun=(p,item,want,cs)=>{
+    const runs=wallRuns(p,cs); if(!runs.length) return 0;
+    let cands=runs.filter(r=>r.length>=want);
+    if(!cands.length){ const L=Math.max(...runs.map(r=>r.length)); cands=runs.filter(r=>r.length===L); want=L }
+    const run=cands[R(0,cands.length-1)];
+    const off=R(0,run.length-want);
+    for(let k=0;k<want;k++){ const [x,y]=run[off+k]; put(idx(x,y),item); S.tableItems++ }
+    return want;
+  };
   const dressDwelling=p=>{
     const cs=cellsOf(p); if(!cs.length) return;
     let tot=0; for(const t of ROOMTYPES) tot+=t[0];
@@ -1650,6 +1781,15 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
     for(const t of ROOMTYPES){ x-=t[0]; if(x<0){ type=t; break } }
     if(!type) return;
     S.types[type[1]]=(S.types[type[1]]||0)+1;
+    // BUNK RIDER (USER 2026-08-29 ask, reworked 2026-09-05): the chosen
+    // dwelling sleeps a crew - 2-3 bedrolls as ONE wall run, seated before
+    // the typed rows so the props fill around the bedding. Outside the
+    // density budget, as the 08-29 ask said "extra". CLAUDE dials.
+    if(BUNK.has(p.id)){
+      const want2=R(2,3), got=seatRun(p,'bg.bedroll',want2,cs);
+      S.bunkrooms=(S.bunkrooms||0)+1; S.bunkBeds=(S.bunkBeds||0)+got;
+      if(got<want2) S.bunkShort=(S.bunkShort||0)+1;
+    }
     const wallsAround=([cx,cy])=>{ let n=0;
       for(const[dx,dy]of N4){const nx=cx+dx,ny=cy+dy;
         if(!inb(nx,ny)||g.c[idx(nx,ny)]!==FLOOR) n++ } return n };
@@ -1680,8 +1820,16 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
           if(row.hint==='corner') return wallsAround(c)>=2;
           if(row.hint==='wall') return wallsAround(c)>=1;
           return true });
-        if(!cands.length) cands=cs.filter(legal);
-        if(!cands.length){ if(solid) S.refused++; break }
+        // BUILT FIXTURES HOLD THE WALL (USER 2026-08-29, the mid-floor kiln:
+        // "a kiln in the middle alongside some quarried stones" - the old
+        // fallback dropped the hint entirely when no corner was free, and the
+        // kiln's brick-pile stamp then dressed the squat). Kiln/oven/anvil are
+        // masonry: corner, then any wall, then REFUSE - never open floor.
+        // Light furniture keeps the anywhere-fallback.
+        const heavy=item==='kiln'||item==='bg.oven'||item==='bg.anvil';
+        if(!cands.length&&heavy) cands=cs.filter(c=>legal(c)&&wallsAround(c)>=1);
+        else if(!cands.length) cands=cs.filter(legal);
+        if(!cands.length){ if(solid||heavy) S.refused++; break }
         const c=cands[R(0,cands.length-1)];
         put(idx(c[0],c[1]),item); budget--; S.tableItems++;
         S.typeItems[type[1]]=(S.typeItems[type[1]]||0)+1;
@@ -1886,6 +2034,21 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
       }
     }
   };
+  // BUNK PICK (2026-09-05): one dwelling per site, a second at 35% when the
+  // site has 3+ dwellings (the 08-29 site law, unchanged). Picked by LONGEST
+  // free wall run, ties random, so a cramped room never gets the bunks; a
+  // dwelling with no 2-run is ineligible.
+  const BUNK=new Set();
+  { const dws=pockets.filter(p2=>p2.role==='dwelling');
+    if(dws.length){
+      const bunks=1+((dws.length>=3&&chance(.35))?1:0);
+      const scored=dws.map(p2=>({p:p2,run:longestWallRun(p2)})).filter(s2=>s2.run>=2);
+      for(let i2=scored.length-1;i2>0;i2--){const j2=R(0,i2);[scored[i2],scored[j2]]=[scored[j2],scored[i2]]}
+      scored.sort((a,b)=>b.run-a.run);
+      for(const s2 of scored.slice(0,bunks)) BUNK.add(s2.p.id);
+      if(!BUNK.size) S.bunkNone=1;
+    }
+  }
   for(const p of pockets){
     if(p.role==='face') dressFace(p);
     else if(p.role==='commons') dressCommons(p);
@@ -1898,10 +2061,80 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
       // per roll untouched; RULE 9 stands, a plain room is still allowed to
       // be plain, it just is not forever one-roll regardless of size.
       const cs=cellsOf(p);
-      const rolls=Math.max(1,Math.min(3,Math.floor(cs.length/24)+1));
+      // rescaled on the 08-29 sparse-dress flag (was /24 cap 3): big plain
+      // halls were the emptiest rooms on the census - half of plain rooms sat
+      // at exactly one item. RULE 9 stands, the 74% Nothing weight stands;
+      // only the roll COUNT follows the floor area now. CLAUDE dial.
+      const rolls=Math.max(1,Math.min(5,Math.floor(cs.length/12)+1));
       for(let ri=0;ri<rolls;ri++)
         if(cs.length&&!seat(p,wroll(PLAINTRACE),cs)) misses.push([PLAINTRACE,p,cs]);
     }
+  }
+  // (the 08-29 post-dress bunk pass moved UP: see BUNK PICK before the
+  // dispatch loop and the bunk rider inside dressDwelling, 2026-09-05)
+  // PLAZA = COMMONS/LEISURE (USER RULED 2026-08-29, both halves: "big open
+  // place in the center is commons/leisure i think" and, striking Claude's
+  // stage gate, "i think working sites can have leisure too, it kind of
+  // flattens them to be *just* work"). Plaza-scale spans in the UNCLAIMED
+  // mass take a light leisure dress at EVERY stage; density rides the stage
+  // axis instead (leisure grows toward flourishing, the ruled growth story,
+  // echoing the 08-18 "more leisure spots for worksites" break-spot ruling).
+  // Detection: 3x3-all-open cores, blobbed N4; 4+ cores = a plaza; dress
+  // cells = cores + open rim. MEASURED FIRST (2026-08-29): the unclaimed
+  // mass alone contains ZERO 3x3-open cells - corridors run <=2 wide - so
+  // plaza-shaped openings live in big PLAIN rooms and the open fringe they
+  // merge with; the detector spans both (commons/dwellings/face keep their
+  // own registers and are excluded). The artery stays clear (isFree refuses
+  // it). Divisors + weights CLAUDE dials.
+  S.plazas=0; S.plazaItems=0;
+  {
+    const openU=i2=>{ if(g.c[i2]!==FLOOR||g.host[i2]||g.water[i2]) return false;
+      const pid2=g.pocket[i2];
+      return pid2<0 || (pockets[pid2]&&pockets[pid2].role==='plain') };
+    const pcore=new Uint8Array(W*H);
+    for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){
+      let ok=true;
+      for(let dy=-1;dy<=1&&ok;dy++)for(let dx=-1;dx<=1;dx++)
+        if(!openU(idx(x+dx,y+dy))){ ok=false; break }
+      if(ok) pcore[idx(x,y)]=1;
+    }
+    const pseen=new Uint8Array(W*H);
+    for(let i2=0;i2<W*H;i2++){
+      if(!pcore[i2]||pseen[i2]) continue;
+      const cores=[i2]; pseen[i2]=1;
+      for(let h2=0;h2<cores.length;h2++){ const c2=cores[h2], x=c2%W, y=(c2/W)|0;
+        for(const[dx,dy]of N4){ const ni=idx(x+dx,y+dy);
+          if(pcore[ni]&&!pseen[ni]){ pseen[ni]=1; cores.push(ni) } } }
+      if(cores.length<4) continue;
+      const cellSet=new Set(cores);
+      for(const c2 of cores){ const x=c2%W,y=(c2/W)|0;
+        for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+          const ni=idx(x+dx,y+dy); if(openU(ni)) cellSet.add(ni) } }
+      const cs3=[...cellSet].map(ci=>[ci%W,(ci/W)|0]);
+      const D = si===2?8 : si===1?11 : 14;   // leisure grows with the stage
+      let rolls=Math.max(1,Math.min(6,Math.round(cs3.length/D)));
+      const before=S.items;
+      while(rolls-->0) seat({id:-1,plaza:true},wroll(PLAZATABLE),cs3);
+      S.plazas++; S.plazaItems+=S.items-before;
+    }
+  }
+  // WORK FACES READ AS WORKED (USER 2026-08-29, the sparse-work flag;
+  // CORRECTED same sitting - Claude first gated this to working-STAGE sites,
+  // user: "why on working stage sites only? i meant the working face
+  // sections of camps" - so the scatter belongs to the FACE ROOMS at every
+  // stage, which the stage-axis ruling already promised: "the roots of it
+  // being a work area are always visible"). Stones, stacks, torches,
+  // pickaxes, rarely a still-lit dropped headlamp/helmet, on top of the
+  // socket dress. Seat anchoring + artery + threshold laws apply. CLAUDE
+  // dials.
+  S.workScatter=0;
+  for(const p2 of pockets){
+    if(p2.role!=='face') continue;
+    const cs4=cellsOf(p2); if(!cs4.length) continue;
+    let rolls=Math.max(2,Math.min(6,Math.round(cs4.length/8)));
+    const before=S.items;
+    while(rolls-->0) seat(p2,wroll(WORKTABLE),cs4);
+    S.workScatter+=S.items-before;
   }
   if(yardRec&&yardRec.rect) dressYard(yardRec.rect, yardRec.state||'working', yardRec.where);
   // WARREN FLOOR - v1's law, ported on the user's flag 2026-08-18 (a working
@@ -2058,6 +2291,7 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
         for(const[fx,fy]of[[e.gx-ay,e.gy-ax],[e.gx+ay,e.gy+ax]]){
           if(!inC.has(idx(fx,fy))||!isFree(idx(fx,fy))) continue;
           if(!postOK(fx,fy)) continue;
+          if(g.art&&g.art[idx(fx,fy)]) continue;   // light the shoulder, not the roadbed (08-29 path-clutter flag; the haulage law applies to lights too)
           put(idx(fx,fy),'bg.torchpost'); posts.push([fx,fy]);
         }
       }
@@ -2067,7 +2301,7 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
     while(mq.length){
       const [mx,my,md]=mq.shift();
       const mi=idx(mx,my);
-      if(g.c[mi]===FLOOR&&!g.host[mi]&&!g.item[mi]&&mi!==g.mouthIdx){
+      if(g.c[mi]===FLOOR&&!g.host[mi]&&!g.item[mi]&&mi!==g.mouthIdx&&!(g.art&&g.art[mi])){
         let hug=false;
         for(const[dx,dy]of N4) if(inb(mx+dx,my+dy)&&g.c[idx(mx+dx,my+dy)]!==FLOOR) hug=true;
         if(hug){ put(mi,'bg.torchpost'); break }
@@ -2169,7 +2403,12 @@ function dressSite(g,art,pockets,K,yardRec,occupancy){
     for(const p of pockets){
       const tbl=roomTbl(p); if(!tbl) continue;
       const cs=cellsOf(p); if(!cs.length) continue;
-      if(cs.some(([x,y])=>g.item[idx(x,y)])) continue;
+      // widened on the 08-29 sparse-dress flag: a BIG room (20+ floor cells)
+      // at one item reads as bare as a small room at zero, so the rescue now
+      // covers both - zero anywhere, or <=1 at size. One re-roll either way;
+      // count variance above the floor stays untouched. CLAUDE dial.
+      let have=0; for(const[x,y]of cs) if(g.item[idx(x,y)]) have++;
+      if(have>1||(have===1&&cs.length<20)) continue;
       if(seat(p,wrollNo(tbl),cs)) S.roomFloor++;
     }
   }
@@ -2475,6 +2714,161 @@ function breachAquifers(g,K){
   return made;
 }
 
+// ============================================================ POWER GRID (2026-08-29)
+// The quarry's electrical network, sim-first. Provenance chain: mill promoted
+// to the quarry-grid anchor (USER 2026-08-26: "quarry electricity is riding on
+// the potential piezoelectric mill ... a stationary electrical producer that
+// 'grinds' the earth"); wired-not-broadcast + grid-as-site-state-signal (USER
+// 2026-08-24: powered mill + lit table = flourishing, dead mill + dark table =
+// abandoned); restated 2026-08-29 at the recon delivery ("the generator will
+// be a piezoelectric mill that churns the earth"). Full decomp receipts in
+// TODO under the mill entry.
+// Base-game mechanics this mirrors (XRL.World.ZoneBuilders.PowerGrid, via
+// RuinPowerGridWidget at BeforeZoneBuilt): consumers pathfind to their best
+// producer, laying PowerLine in the open and merging into walls as ModWired
+// (the wall keeps its sprite, gains a wired adjective - so wall runs render
+// as a recolor, the moss/etch idiom). Runtime capacity = min ChargeRate on
+// the network; broken segments drop out.
+// Sim scope: flourishing only, one producer (the mill) + the one ruled
+// consumer (the animation table). Wall runs CHEAP (the shoddy hidden-in-rock
+// aesthetic), open floor DEAR (an exposed line is placed furniture), artery
+// dearer still (a PowerLine is walkable in game, so clearing the haul road is
+// taste, not law). Abandoned rolls per-cell breakage on exposed lines only, a
+// nod to the ruin widgets' DamageChance idiom; wired walls keep their wiring
+// (in game a wall loses its run only when destroyed). ALL siting/breakage
+// dials CLAUDE, unruled; the port lands as blueprints + one widget, not this
+// code.
+function layPowerGrid(g,pockets,reg,si,occupancy,K){
+  if(si!==2) return null;                    // powered grid = flourishing signal
+  const live = occupancy==='in use';
+  // THE WIRED ROLL (USER FLOAT 2026-08-29: "something like 50-75% for
+  // flourishing warrens, so not all of them have them"; knob default 75 =
+  // CLAUDE lean, unruled - 50 tips ~37% of worlds into never seeing a mill,
+  // 75 costs ~8 points over always-wired since 1 world in 7 already rolls
+  // zero flourishing). An unwired site is a real outcome, not a failure:
+  // the animation table still seats - it runs on its internal cell by the
+  // 08-24 ruling - but no mill, no tumbler, no wire.
+  const wired=chance((K.wiredPct===undefined?75:K.wiredPct)/100);
+  const isFree=i=>g.c[i]===FLOOR && !g.host[i] && !g.item[i] && !g.water[i] && !g.tree[i] && !g.art[i] && i!==g.mouthIdx;
+  const wallAdj=i=>{ const x=i%W,y=(i/W)|0;
+    for(const[dx,dy]of N4){const nx=x+dx,ny=y+dy; if(inb(nx,ny)&&g.c[idx(nx,ny)]!==FLOOR) return true} return false };
+  const wallN=i=>{ const x=i%W,y=(i/W)|0; let n=0;
+    for(const[dx,dy]of N4){const nx=x+dx,ny=y+dy; if(inb(nx,ny)&&g.c[idx(nx,ny)]!==FLOOR) n++} return n };
+  const artAdj=i=>{ const x=i%W,y=(i/W)|0;
+    if(g.art[i]) return true;
+    for(const[dx,dy]of N4){const nx=x+dx,ny=y+dy; if(inb(nx,ny)&&g.art[idx(nx,ny)]) return true} return false };
+  const seatIn=cs=>{ const ix=cs.map(([x,y])=>idx(x,y));
+    const wa=ix.filter(i=>isFree(i)&&wallAdj(i));
+    if(wa.length) return wa[R(0,wa.length-1)];
+    const fr=ix.filter(isFree);
+    return fr.length? fr[R(0,fr.length-1)] : -1 };
+  // mill seating (USER 2026-08-29: "the mill should spawn next to a wall or in
+  // a corner or something so it doesn't block paths"): wall adjacency is a
+  // REQUIREMENT, corners (2+ cardinal walls) win over flat wall runs, artery
+  // cells and their neighbors are out so the haul road never narrows, and
+  // there is no open-floor fallback - an unseatable mill reports unplaced
+  // (loud in stats) rather than standing in a walkway.
+  const seatMill=cs=>{ const ix=cs.map(([x,y])=>idx(x,y))
+      .filter(i=>isFree(i)&&wallAdj(i)&&!artAdj(i));
+    if(!ix.length) return -1;
+    let best=0; for(const i of ix) best=Math.max(best,wallN(i));
+    const top=ix.filter(i=>wallN(i)===best);
+    return top[R(0,top.length-1)] };
+  const cellsOf=p=>{ const cs=[];
+    for(let y=p.in.y0;y<=p.in.y1;y++)for(let x=p.in.x0;x<=p.in.x1;x++)
+      if(g.pocket[idx(x,y)]===p.id&&g.c[idx(x,y)]===FLOOR) cs.push([x,y]); return cs };
+  // producer: the mill grinds the earth at the work end - block yard first
+  // (the work register's center), then the face. CLAUDE siting dial.
+  let millI=-1;
+  if(wired){
+    if(reg.yard&&reg.yard.rect){ const r2=reg.yard.rect, cs=[];
+      for(let y=r2.y0;y<=r2.y1;y++)for(let x=r2.x0;x<=r2.x1;x++)
+        if(g.c[idx(x,y)]===FLOOR) cs.push([x,y]);
+      millI=seatMill(cs); }
+    if(millI<0){ const face=pockets.find(p=>p.role==='face');
+      if(face) millI=seatMill(cellsOf(face)); }
+    if(millI<0) for(const p of pockets){ if(p.role==='commons') continue;
+      millI=seatMill(cellsOf(p)); if(millI>=0) break; }
+    if(millI<0) return {state:'unplaced',walls:0,lines:0,broken:0};
+  }
+  // consumer: the animation table, the ruled wired endpoint - commons first
+  // (leisure is where flourishing shows), then a dwelling. Seats on unwired
+  // sites too (internal cell): millI=-1 never collides with a real seat.
+  let tabI=-1;
+  for(const role of ['commons','dwelling','plain','face']){
+    for(const p of pockets){ if(p.role!==role) continue;
+      const s2=seatIn(cellsOf(p)); if(s2>=0&&s2!==millI){ tabI=s2; break } }
+    if(tabI>=0) break; }
+  if(tabI<0) return {state: wired?'unplaced':'unwired',walls:0,lines:0,broken:0};
+  g.item[tabI]= live?'bg.animation_table':'animation_table_dark';
+  if(!wired) return {state:'unwired',walls:0,lines:0,broken:0};
+  g.item[millI]= live?'mill':'mill_dead';
+  // consumer roster, per the include ruling (USER 2026-08-29: "include both"):
+  // the animation table (ruled 08-24) + base Rock Tumbler seated at the work
+  // end + every kiln the dress already placed - base Kiln is ALREADY a grid
+  // consumer blueprint (ElectricalPowerTransmission IsConsumer,
+  // Furniture.xml:1106), so at port time the kilns wire for free.
+  let tumI=-1;
+  for(const role of ['face','plain','dwelling']){
+    for(const p of pockets){ if(p.role!==role) continue;
+      const s2=seatIn(cellsOf(p)); if(s2>=0){ tumI=s2; break } }
+    if(tumI>=0) break; }
+  if(tumI>=0) g.item[tumI]='rock_tumbler';   // no glow to kill: one sprite both tenses
+  const consumers=[tabI];
+  if(tumI>=0) consumers.push(tumI);
+  for(let i=0;i<W*H;i++) if(g.item[i]==='kiln') consumers.push(i);
+  // the wire: Dijkstra each consumer -> mill, weights mirroring the base
+  // builder's lean. Rock is passable only where it faces warren floor (a run
+  // through the untouched band would wire rock no digger ever opened);
+  // existing wire is near-free and other consumers conduct through their own
+  // transmission part - both are the base builder's shared-trunk discount, so
+  // later consumers tap the first run instead of laying a second.
+  const wireCells=new Set(), endpoints=new Set([millI,...consumers]);
+  const cost=i=>{ const x=i%W,y=(i/W)|0;
+    if(wireCells.has(i)) return 0.2;
+    if(endpoints.has(i)) return 0.3;
+    if(g.water[i]||g.tree[i]||i===g.mouthIdx) return Infinity;
+    if(g.c[i]!==FLOOR)
+      return touches8(x,y,i2=>g.c[i2]===FLOOR&&!g.host[i2])? 1 : Infinity;
+    if(g.host[i]) return Infinity;
+    if(g.item[i]) return 12;                 // route around furniture
+    if(g.art[i]) return Infinity;            // the haulage law, hard: no line on the roadbed (08-29 path-clutter flag); wire crosses the road through rock or not at all
+    return 3; };
+  const heap=[]; const hpush=v=>{heap.push(v);let a2=heap.length-1;
+    while(a2>0){const p2=(a2-1)>>1; if(heap[p2][0]<=heap[a2][0])break; [heap[p2],heap[a2]]=[heap[a2],heap[p2]]; a2=p2}};
+  const hpop=()=>{const t2=heap[0],l2=heap.pop();
+    if(heap.length){heap[0]=l2;let a2=0;for(;;){const b2=2*a2+1,c3=b2+1;let m2=a2;
+      if(b2<heap.length&&heap[b2][0]<heap[m2][0])m2=b2; if(c3<heap.length&&heap[c3][0]<heap[m2][0])m2=c3;
+      if(m2===a2)break; [heap[m2],heap[a2]]=[heap[a2],heap[m2]]; a2=m2}} return t2};
+  if(!g.wire) g.wire=new Uint8Array(W*H);    // wall-run overlay: 2 live / 1 dead
+  let walls=0,lines=0,broken=0,wiredN=0;
+  for(const cI of consumers){
+    const dist=new Float64Array(W*H).fill(Infinity), prev=new Int32Array(W*H).fill(-1), done=new Uint8Array(W*H);
+    heap.length=0; dist[cI]=0; hpush([0,cI]);
+    let reached=false;
+    while(heap.length){ const [c2,cur]=hpop(); if(done[cur]) continue; done[cur]=1;
+      if(cur===millI){ reached=true; break }
+      const cx=cur%W, cy=(cur/W)|0;
+      for(const[dx,dy]of N4){ const nx=cx+dx, ny=cy+dy; if(!inb(nx,ny)) continue;
+        const ni=idx(nx,ny); if(done[ni]) continue;
+        const w2=cost(ni); if(w2===Infinity) continue;
+        const nc=c2+w2;
+        if(nc<dist[ni]){ dist[ni]=nc; prev[ni]=cur; hpush([nc,ni]); } } }
+    if(!reached) continue;                   // this consumer stays dark; tally stays honest
+    wiredN++;
+    for(let i=prev[millI]; i>=0&&i!==cI; i=prev[i]){
+      if(endpoints.has(i)||wireCells.has(i)) continue;
+      wireCells.add(i);
+      if(g.c[i]!==FLOOR){ g.wire[i]= live?2:1; walls++ }
+      else if(!g.item[i]){
+        if(occupancy==='abandoned'&&chance(.12)){ g.item[i]='powerline_broken'; broken++ }
+        else g.item[i]= live?'powerline':'powerline_dead';
+        lines++ } }
+  }
+  if(!wiredN) return {state:'unrouted',consumers:consumers.length,walls:0,lines:0,broken:0};
+  return {state: live?'live':'dead', consumers:consumers.length, wired:wiredN, walls, lines, broken};
+}
+
 // ---------------------------------------------------------------- stages
 // The artery grows with the stage too — accretion, not a fixed skeleton that
 // gets more stuff hung on it. A young dig does not span the zone.
@@ -2651,7 +3045,7 @@ function buildOnce(seed,K,forced,host,attempt,aug){
   const FLOORMIN=[0,K.campFloor,K.flourFloor];
   while(si>0 && m.floor<FLOORMIN[si]){ si--; degraded++ }
   const reg=registerRoles(g,art,pockets,K,si,occupancy);   // the contract: identity stamped at birth
-  const dress=dressSite(g,art,pockets,K,reg.yard,occupancy);   // v1 tables on the registry; render-gated, always rolled
+  const dress=dressSite(g,art,pockets,K,reg.yard,occupancy,si);   // v1 tables on the registry; render-gated, always rolled
   // MOUTH-ACCESS LAW (USER greenlit 2026-08-25, after seed 898284209's mouth
   // opened onto a 48-cell basin the augment had sealed - and the unforced roll
   // showed the disease PRE-EXISTS augment, a river-cut canyon strands a shore
@@ -2703,10 +3097,14 @@ function buildOnce(seed,K,forced,host,attempt,aug){
         if(g.c[c2]!==FLOOR){ g.c[c2]=FLOOR; g.host[c2]=1; g.tree[c2]=0; defileCells++; } }
     }
   }
+  // power grid AFTER the defile (it carves floor; wiring first could orphan a
+  // wall run into open ground) and after demotion, so a demoted flourishing
+  // sheds its grid the way it sheds commons eligibility
+  const grid=layPowerGrid(g,pockets,reg,si,occupancy,K);
   let hostFloor=0, trees=0, water=0;
   for(let i=0;i<W*H;i++){ if(g.host[i]) hostFloor++; if(g.tree[i]) trees++; if(g.water[i]) water++ }
   return {g,art,pockets,seed,stage:STAGES[si].name,stageIdx:si,crosscuts,repairs,filled,trimmed,preTrim,
-    roles:reg.tally, yard:reg.yard, dress,
+    roles:reg.tally, yard:reg.yard, dress, grid,
     canyon,band,rect,degraded,occupancy,squatters,wanted:STAGES[wanted].name,hostFloor,trees,water,aquifer,breaches,
     bandMass: band?band.mass:null,
     fit: rect?[rect.x1-rect.x0+1, rect.y1-rect.y0+1]:null,
@@ -2949,6 +3347,7 @@ function buildAugmented(seed,K,assigned,host){
 const KNOBS=[
   ['spawn','abandonedPct','abandoned %',0,80,25,'share of warrens standing empty. A rumour that does not pay off is fine — Qud has abandoned villages (user ruled 2026-08-18)'],
   ['spawn','reclaimedPct','reclaimed %',0,80,20,'share taken over by snapjaws — miner-weighted, and their pickaxes path through walls, so a reclaimed warren gets CHEWED. The rest are in use'],
+  ['spawn','wiredPct','wired %',0,100,75,'flourishing only: chance the site rolls its power grid (mill + wire + tumbler; the animation table seats either way on its internal cell). USER FLOAT 2026-08-29 "50-75%, so not all of them have them"; 75 default = CLAUDE lean, unruled - at ~2 flourishing/world, 75 leaves ~22% of worlds with no wired warren vs 13.5% at always-wired (zero-flourishing worlds already exist)'],
   ['spawn','squatterPct','squatter %',0,100,35,'of ABANDONED sites, the share where somebody moved into the ruin: 1-2 hermits or trash monks, or 2-3 cave spiders (USER RULED 2026-08-25: squatters are a sub-roll within abandoned, so the reclaimed knobs stand untouched). 35 and the count bands are CLAUDE dials; creature placement is game-side and unported pending the nod'],
   ['spawn','worldWarrens','warrens / world',1,400,25,'how many warrens a world gets. Base game sites exactly 25 pig farms, 25 starapple farms and 25 snapjaw forts in canyon terrain, so 25 puts a warren at pig-farm frequency. Spread over the 1251 canyon surface zones an authored world carries'],
   ['geology','aquiferMin','aquifers min',0,4,0,'pools of standing water sealed inside the band. Most are never seen; the warren keeps a cell clear of them by the same guard that keeps it out of the canyon'],
@@ -3202,7 +3601,13 @@ function draw(cv,res,cell,drawMode,tintArt,useTiles,padded){
         // moss and etching recolor the SAME wall sprite through the palette -
         // the v1 idiom; the wall autotile is untouched. Moss wears the v1
         // user-pick colors: TileColor K #155352, DetailColor g #009403
-        const special = (g.moss&&g.moss[idx(x,y)])? tinted(nm2,'K','g')
+        // wired walls (power grid pass): ModWired truth is the SAME wall tile
+        // plus an adjective, so the sim recolors like moss/etch does. Wire
+        // wins over moss on a shared cell so the run reads continuous - a
+        // render dial, not a law.
+        const wi=g.wire?g.wire[idx(x,y)]:0;
+        const special = wi? tinted(nm2, wi===2?'c':'K', wi===2?'W':'c')
+                      : (g.moss&&g.moss[idx(x,y)])? tinted(nm2,'K','g')
                       : (g.etch&&g.etch[idx(x,y)])? tinted(nm2,'r','Y') : null;
         if(special) ctx.drawImage(special,px,py,cw,ch);
         else {
@@ -3249,6 +3654,14 @@ function draw(cv,res,cell,drawMode,tintArt,useTiles,padded){
       if(tintArt&&g.art[idx(x,y)]){ ctx.fillStyle='rgba(200,150,40,.28)'; ctx.fillRect(px,py,cw,ch) }
       const sa=document.getElementById('showaug');
       if(sa&&sa.checked&&g.augment&&g.augment.has(idx(x,y))){ ctx.fillStyle='rgba(255,0,180,.35)'; ctx.fillRect(px,py,cw,ch) }
+      // room-claim overlay (2026-08-29): tinted floor is registered, bare
+      // floor is unclaimed carve no dress table owns
+      const sr=document.getElementById('showrooms');
+      if(sr&&sr.checked&&!solid&&g.pocket&&g.pocket[idx(x,y)]>=0&&res.pockets){
+        const pk=res.pockets[g.pocket[idx(x,y)]];
+        ctx.fillStyle=pk?({face:'rgba(224,112,48,.30)',commons:'rgba(177,84,207,.30)',dwelling:'rgba(0,196,32,.24)',plain:'rgba(74,144,208,.30)'}[pk.role]||'rgba(160,160,160,.26)'):'rgba(160,160,160,.26)';
+        ctx.fillRect(px,py,cw,ch);
+      }
     }
     return;
   }
@@ -3265,11 +3678,25 @@ function draw(cv,res,cell,drawMode,tintArt,useTiles,padded){
       col = touches8(x,y,i=>g.c[i]===FLOOR) ? '#ffffff' : '#000000';   // shoreline mass white, enveloped core void
     } else col='#ffffff';
     ctx.fillStyle=col; ctx.fillRect((x-x0)*cell,(y-y0)*cell,cell,cell);
+    // wired walls in the flat view: the wire glyph over the mass (drawmode
+    // excluded - that view stays three-value for holding against drawings)
+    if(!drawMode&&v!==FLOOR&&g.wire&&g.wire[idx(x,y)]){
+      ctx.fillStyle = g.wire[idx(x,y)]===2? '#39c5c8':'#4a4f52';
+      ctx.font='bold '+Math.round(cell*.8)+'px Consolas,monospace';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('┼',(x-x0)*cell+cell/2,(y-y0)*cell+cell/2+1);
+    }
     // drawing mode stays a pure three-value view for holding against drawings
     if(!drawMode&&showItems&&v===FLOOR&&g.item[idx(x,y)])
       glyph(ctx,(x-x0)*cell,(y-y0)*cell,cell,cell,g.item[idx(x,y)]);
     const sa2=document.getElementById('showaug');
     if(sa2&&sa2.checked&&g.augment&&g.augment.has(idx(x,y))){ ctx.fillStyle='rgba(255,0,180,.35)'; ctx.fillRect((x-x0)*cell,(y-y0)*cell,cell,cell) }
+    const sr2=document.getElementById('showrooms');
+    if(sr2&&sr2.checked&&v===FLOOR&&g.pocket&&g.pocket[idx(x,y)]>=0&&res.pockets){
+      const pk2=res.pockets[g.pocket[idx(x,y)]];
+      ctx.fillStyle=pk2?({face:'rgba(224,112,48,.30)',commons:'rgba(177,84,207,.30)',dwelling:'rgba(0,196,32,.24)',plain:'rgba(74,144,208,.30)'}[pk2.role]||'rgba(160,160,160,.26)'):'rgba(160,160,160,.26)';
+      ctx.fillRect((x-x0)*cell,(y-y0)*cell,cell,cell);
+    }
   }
 }
 
@@ -3327,8 +3754,11 @@ function statsHtml(r){
     ['pockets', `${r.pockets.length} &middot; ${r.halls}h ${r.plains}p`],
     ['roles', r.roles?`${r.roles.face}face ${r.roles.dwelling}dw ${r.roles.plain}pl${r.roles.commons?' &middot; commons':''}`:'—'],
     ['block yard', r.yard?`${r.yard.state||'?'} &middot; ${r.yard.where} (${r.yard.cells} cells)`:'none', !r.yard],
-    ['dress', r.dress?`${r.dress.items} item(s)${r.dress.refused?` &middot; ${r.dress.refused} refused`:''}${r.dress.roomFloor?` &middot; ${r.dress.roomFloor} room-floored`:''}`:'—'],
+    ['dress', r.dress?`${r.dress.items} item(s)${r.dress.refused?` &middot; ${r.dress.refused} refused`:''}${r.dress.roomFloor?` &middot; ${r.dress.roomFloor} room-floored`:''}${r.dress.bunkrooms?` &middot; ${r.dress.bunkrooms} bunkroom${r.dress.bunkrooms>1?'s':''} (${r.dress.bunkBeds} beds${r.dress.bunkShort?`, ${r.dress.bunkShort} short`:''})`:''}${r.dress.bunkNone?` &middot; no bunk-able dwelling`:''}`:'—'],
     ['dwelling types', r.dress&&Object.keys(r.dress.types).length? Object.entries(r.dress.types).map(([k,v])=>v+' '+k).join(', ') : '—'],
+    ['plazas', r.dress&&r.dress.plazas? `${r.dress.plazas} &middot; ${r.dress.plazaItems} leisure item(s)` : '—'],
+    ['work scatter', r.dress&&r.dress.workScatter? r.dress.workScatter+' item(s)' : '—'],
+    ['power grid', r.grid? `${r.grid.state}${r.grid.consumers?` &middot; ${r.grid.wired||0}/${r.grid.consumers} wired`:''}${r.grid.walls+r.grid.lines?` &middot; ${r.grid.walls} wall / ${r.grid.lines} line`:''}${r.grid.broken?` &middot; ${r.grid.broken} broken`:''}` : '—', !!r.grid&&(r.grid.state==='unplaced'||r.grid.state==='unrouted'||(r.grid.wired||0)<(r.grid.consumers||0))],
     ['infill rooms', r.filled],
     ['pillars / spurs', `${r.pillars} / ${r.spurs}`],
     ['partitions', r.partitions],
@@ -3465,6 +3895,7 @@ $('hist-keep').onclick=()=>{if(hpos>=0){KEPT.add(hpos);paintHist()}};
 $('forcestage').onchange=()=>rollNew();
 $('host').onchange=()=>rollNew();
 $('dressed').onchange=()=>{ if(current&&!pairMode) render(current) };
+$('showrooms').onchange=()=>{ if(current&&!pairMode) render(current) };
 $('census').onclick=()=>{
   const stage=$('forcestage').value, t0=performance.now();
   const NL=String.fromCharCode(10);
