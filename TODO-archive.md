@@ -1,5 +1,9 @@
 # Terra Firma TODO archive (resolved history)
 
+## Gravel shotgun text reduction (2026-09-05)
+
+Removed the explanatory RulesDescription paragraph. Chamber behavior and ammo labels remain. Build/XML/text checks passed; Objects.xml deployed and hash-verified. Fresh-item appearance remains part of V17.
+
 ## Gravel shotgun ammo label (2026-09-05)
 
 Added MagazineAmmoLoader-style bracketed ammo labels to GetDisplayNameEvent, so inventory/equipment show remaining gravel bursts or empty. Matches stock understood/reference/cutoff handling. Build and text checks passed; loader deployed and hash-verified. Visual check remains with V17.

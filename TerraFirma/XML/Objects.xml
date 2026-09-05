@@ -6,7 +6,6 @@
 	<object Name="Cleo_TerraFirma_Gravel Shotgun" Inherits="Pump Shotgun">
 		<part Name="Render" DisplayName="gravel shotgun" />
 		<part Name="Description" Short="A stone-fed shotgun with a grinding chamber." />
-		<part Name="RulesDescription" Text="Loads one small or large stone at a time. Each 5 pounds of stone supplies one eight-projectile burst. The chamber must be spent before loading another stone." />
 		<removepart Name="MagazineAmmoLoader" />
 		<part Name="Cleo_TerraFirma_GravelAmmoLoader" StoneBlueprints="Small Stone,Large Stone" ProjectileObject="Cleo_TerraFirma_GravelProjectile" WeightPerBurst="5" ReloadEnergy="1000" />
 		<tag Name="Mods" Value="MissileWeaponMods,FirearmMods,CommonMods,RifleMods" />
