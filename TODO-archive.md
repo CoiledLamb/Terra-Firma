@@ -1,5 +1,11 @@
 # Terra Firma TODO archive (resolved history)
 
+## Warren loot wiring (2026-09-05)
+
+B05/B06 built and deployed to the development mod. Socket, gallery-bay and room-storage chest rolls now use the existing stocked Quarry Chest; the room-storage cap recognizes that variant. Stone baskets retain their existing contents and add a provisional 25% chance of one chalk box. Build passed with zero errors; all 16 XML files parsed and text checks passed. The three deployed files were hash-verified. In-game checks remain open as V13 in TODO.md.
+
+---
+
 Moved verbatim out of TODO.md on 2026-08-06 to keep the live tracker scannable.
 Nothing here is deleted history: build records, verify-session logs, superseded
 specs kept for reference, decomp ground truth, and the automated-harness saga.

@@ -526,7 +526,7 @@
 			<object Weight="8" Blueprint="Torch" Hint="Cleo_TerraFirma_Face" />
 			<object Weight="5" Blueprint="Pickaxe" Hint="Cleo_TerraFirma_Face" />
 			<object Weight="5" Blueprint="Garbage" />
-			<object Weight="2" Blueprint="Chest" />
+			<object Weight="2" Blueprint="Cleo_TerraFirma_Quarry Chest" />
 			<object Weight="4" Blueprint="Floor Cushion" />
 			<object Weight="3" Blueprint="Bedroll" />
 			<object Weight="2" Blueprint="Wine Pitcher" />
@@ -543,7 +543,7 @@
 			<object Weight="18" Blueprint="Random Stone Statue" />
 			<object Weight="12" Blueprint="LargeBoulder" />
 			<object Weight="10" Blueprint="Cleo_TerraFirma_QuarryStones2" />
-			<object Weight="5" Blueprint="Chest" />
+			<object Weight="5" Blueprint="Cleo_TerraFirma_Quarry Chest" />
 			<object Weight="5" Blueprint="Torch" />
 			<object Weight="6" Blueprint="Wine Pitcher" />
 		</group>
@@ -626,7 +626,7 @@
 	     row stays the plain empty basket -->
 	<population Name="Cleo_TerraFirma_WarrenPool Storage">
 		<group Name="Pool" Style="pickone">
-			<object Blueprint="Chest" />
+			<object Blueprint="Cleo_TerraFirma_Quarry Chest" />
 			<object Blueprint="Woven Basket" />
 			<object Blueprint="Cleo_TerraFirma_Food Basket" />
 		</group>
@@ -731,6 +731,8 @@
 			<object Blueprint="Small Stone" Number="2-4" />
 			<object Blueprint="Cleo_TerraFirma_Rock_Pebbles" Number="0-1" />
 			<object Blueprint="Copper Nugget" Number="1" Chance="5" />
+			<!-- Optional work supply alongside the rocks; 25 percent is a provisional dial. -->
+			<object Blueprint="Cleo_TerraFirma_BoxOfChalk" Number="1" Chance="25" />
 		</group>
 	</population>
 	<population Name="Cleo_TerraFirma_FoodBasket Contents">

@@ -239,8 +239,8 @@
        roll syntax is the templar-grenades idiom from creature inventories; the inventoryobject
        parser is shared across blueprint types, verify-at-boot item filed. Contents rhyme with
        the quarrier spine on purpose: the stash holds what the crew carries. The warren
-       dressing can place this instead of a plain Chest where a site reads worked; that
-       placement lives in the warren workstream's file and is theirs to wire. Vine merchant
+       dressing places this in the socket, gallery-bay, and room-storage chest rolls.
+       The room-storage chest cap counts this variant too. Vine merchant
        restock joins when that blueprint lands (intent recorded in TODO.md). Counts and
        chances CLAUDE DRAFT; DisplayName DRAFT, signoff owed. -->
   <object Name="Cleo_TerraFirma_Quarry Chest" Inherits="Chest">

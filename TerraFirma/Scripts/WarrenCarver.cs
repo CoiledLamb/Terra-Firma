@@ -2070,7 +2070,7 @@ namespace Cleo.TerraFirma.Scripts
 						// ONE OVEN PER SITE - an oven is built masonry, a camp builds one
 						if (pool.Contains("Oven") && placed.ContainsKey("Oven")) pool = pool.Where(i2 => i2 != "Oven").ToArray();
 						string item = pool[R(0, pool.Length - 1)];
-						if (item == "Chest") { if (roomChests >= 1) item = "Woven Basket"; else roomChests++; }
+						if (item == "Chest" || item == "Cleo_TerraFirma_Quarry Chest") { if (roomChests >= 1) item = "Woven Basket"; else roomChests++; }
 						bool solid = IsSolidItem(item);
 						bool Legal(int[] c2) => IsFree(g.Idx(c2[0], c2[1])) && !Threshold(p, c2[0], c2[1]) && (!solid || SolidOK(c2[0], c2[1]));
 						var cands = cs.Where(c2 =>
