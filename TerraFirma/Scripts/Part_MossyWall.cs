@@ -20,7 +20,8 @@ namespace XRL.World.Parts
 		public override bool WantEvent(int ID, int cascade)
 		{
 			return base.WantEvent(ID, cascade) || ID == PooledEvent<GetDisplayNameEvent>.ID
-				|| ID == GetInventoryActionsEvent.ID || ID == InventoryActionEvent.ID;
+				|| ID == GetInventoryActionsEvent.ID || ID == InventoryActionEvent.ID
+				|| ID == EndTurnEvent.ID;
 		}
 
 		private const string HarvestCommand = "Cleo_TerraFirma_HarvestMoss";
@@ -30,6 +31,17 @@ namespace XRL.World.Parts
 			return actor?.CurrentCell != null && ParentObject.CurrentCell != null
 				&& actor.CurrentCell.ParentZone == ParentObject.CurrentCell.ParentZone
 				&& actor.DistanceTo(ParentObject) <= 1;
+		}
+
+		public override bool HandleEvent(EndTurnEvent E)
+		{
+			// Harvestable.ObjectEnteringCellEvent only gathers from the entered cell.
+			// Walls need an adjacent check; use its automatic path so the player's
+			// Harvestry toggle, hostile checks, yield and energy cost remain native.
+			GameObject actor = The.Player;
+			if (CanReach(actor) && actor.CurrentCell != ParentObject.CurrentCell)
+				ParentObject.GetPart<Harvestable>()?.AttemptHarvest(actor, Automatic: true);
+			return base.HandleEvent(E);
 		}
 
 		public override bool HandleEvent(GetInventoryActionsEvent E)
