@@ -240,11 +240,42 @@ Perishes when unequipped." />
 		<part Name="Physics" Weight="200" Takeable="false" Organic="false" />
 		<part Name="Description" Short="placeholder description >:)" /> <!-- USER WRITES IT, statue-maker placeholder per the batch ruling -->
 		<part Name="Cleo_TerraFirma_AnimationTablePart" />
+		<!-- Codex PROPOSAL: grid supply is used before the table's existing internal cell. -->
+		<part Name="ElectricalPowerTransmission" ChargeRate="1000" IsConsumer="true" />
 		<part Name="EnergyCell" Charge="0" MaxCharge="5000" StartCharge="1000-3000" />
 		<part Name="Examiner" Complexity="3" />
 		<part Name="MissileCover" Percentage="10" />
 		<tag Name="Tier" Value="3" />
 		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
+	<!-- Codex PROPOSAL: B02 mill. Provisional rates use the cell's 50 charge/lb and
+	     25000 capacity; native FusionReactor supplies 100/turn without explosions.
+	     Circuitry holds transient passive output; EnergyCell holds fed bursts.
+	     Natural-stone gating has no native XML condition and is omitted. Static base art. -->
+	<object Name="Cleo_TerraFirma_PiezoelectricMill" Inherits="MountedFurniture">
+		<part Name="Render" DisplayName="piezoelectric mill" ColorString="&amp;y" DetailColor="w" RenderString="15" Tile="Items/sw_millstone_1.bmp" />
+		<part Name="Description" Short="placeholder description &gt;:)" />
+		<part Name="Physics" Weight="300" Takeable="false" Solid="false" />
+		<part Name="FusionReactor" ChargeRate="100" ExplodeChance="0" CatastrophicDisable="false" Description="piezoelectric mill" NameForStatus="Earth grinding" />
+		<part Name="Circuitry" StartCharge="100" MaxCharge="100" />
+		<part Name="EnergyCell" MaxCharge="25000" StartCharge="2500-10000" IsRechargeable="false" />
+		<part Name="ElectricalPowerTransmission" ChargeRate="1000" IsProducer="true" />
+		<part Name="PowerSwitch" SecurityClearance="0" />
+		<part Name="Cleo_TerraFirma_PiezoelectricMill" ChargePerPound="50" FeedEnergy="1000" />
+		<part Name="Examiner" Complexity="3" />
+		<stat Name="AV" Value="15" />
+		<stat Name="Hitpoints" Value="300" />
+		<tag Name="Tier" Value="3" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
+	<!-- Codex PROPOSAL: the lab's dormant initial state only; no new repair system. -->
+	<object Name="Cleo_TerraFirma_PiezoelectricMillDormant" Inherits="Cleo_TerraFirma_PiezoelectricMill">
+		<part Name="PowerSwitch" Active="false" />
+		<part Name="Circuitry" StartCharge="0" />
+		<part Name="EnergyCell" Charge="0" StartCharge="0" />
+	</object>
+	<object Name="Cleo_TerraFirma_AnimationTableDormant" Inherits="Cleo_TerraFirma_AnimationTable">
+		<part Name="EnergyCell" Charge="0" StartCharge="0" />
 	</object>
 	<!-- Box of chalk + chalk line (design sitting 2026-08-22, all four forks user-ruled:
 	     auto-orient strokes, draw adjacent, chalkboard writing typed AND markov, 8-12 uses).

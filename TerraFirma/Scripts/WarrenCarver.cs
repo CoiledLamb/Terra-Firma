@@ -16,7 +16,7 @@ namespace Cleo.TerraFirma.Scripts
 	/// built zone, so the carve answers actual canyon geometry, rivers included.
 	/// All decisions log as [TF-VERIFY] [WARREN].
 	/// </summary>
-	public static class WarrenCarver
+	public static partial class WarrenCarver
 	{
 		// ---------------------------------------------------------------- knobs
 		// The sim's DEFAULTS, frozen at port time. Sim knob ids in comments.
@@ -152,6 +152,7 @@ namespace Cleo.TerraFirma.Scripts
 			public byte[] C, Art, Host, Water, Aqua, Tree, Region, Marker;
 			public short[] Pocket;
 			public string[] Item;           // the dress layer: sim item ids, translated at placement
+			public Dictionary<int, bool> PowerWires; // Codex PROPOSAL: index -> broken exposed line
 			public string YardBoardText;    // the yard chalkboard's ledger lines (user concept 2026-08-23)
 			public HashSet<int> Augment;    // blind-claim: cells the augment converted to carvable mass
 			public List<int> Defile;        // mouth-access law + rebuild rung: rock opened into canyon floor
@@ -3221,6 +3222,7 @@ namespace Cleo.TerraFirma.Scripts
 					else Helpers.VerifyLog("WARREN", "mouth-access law: shore stranded and NO defile route found");
 				}
 			}
+			if (dress) LayPowerGrid(g, pockets, roles, si, occupancy);
 			Helpers.VerifyLog("WARREN", $"carve: band {band.Mass}, mouth ({mouth.X},{mouth.Y}), stage {STAGES[si].Name} (wanted {STAGES[wanted].Name}, degraded {degraded}), " +
 				$"{pockets.Count} pockets, floor {m.Floor}, loops {m.Loops}, comps {m.Comps}, crosscuts {crosscuts}, infill {filled}, " +
 				$"aquifers {aq.Pools}p/{aq.Veins}v, breaches {breaches}, repairs {repairs}, trimmed {trimmed}, layout {(blockLayout ? "blocks" : "boxes")}");
@@ -3547,6 +3549,7 @@ namespace Cleo.TerraFirma.Scripts
 				mossed++;
 			}
 			int dressed = PlaceItems(Z, g);
+			ApplyPowerWires(Z, g);
 			Helpers.VerifyLog("WARREN", $"applied: {carved} cells carved ({padded} padded), {pools} pool cells, {mossed} mossy walls, {dressed} dress items");
 			// mouth forensics (round 3): the first live warren carved green and was
 			// then found sealed. Name the mouth's neighbors at apply time so a

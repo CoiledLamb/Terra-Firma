@@ -834,4 +834,17 @@
 			</group>
 		</group>
 	</population>
+	<!-- Codex PROPOSAL: B02 lab defaults, interpreted as seeded labels, not blueprints. -->
+	<population Name="Cleo_TerraFirma_WarrenWiring">
+		<group Style="pickone">
+			<object Blueprint="wired" Weight="75" />
+			<object Blueprint="unwired" Weight="25" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenWireDamage">
+		<group Style="pickone">
+			<object Blueprint="intact" Weight="88" />
+			<object Blueprint="broken" Weight="12" />
+		</group>
+	</population>
 </populations>
