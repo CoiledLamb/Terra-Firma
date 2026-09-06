@@ -387,25 +387,21 @@
 		</group>
 	</population>
 	<population Name="Cleo_TerraFirma_MiningGear">
-		<group Name="Gear" Style="pickeach">
-			<group Name="Headgear" Style="pickone">
-				<object Weight="20" Blueprint="Leather Cap" Number="1" />
-				<object Weight="20" Blueprint="Vinewood Sap Mask" Number="1" />
-				<object Weight="13" Blueprint="Goggles" Number="1" />
-				<object Weight="12" Blueprint="Witchwood Wreath" Number="1" />
-				<object Weight="10" Blueprint="Miner's Helmet" Number="1" />
-				<object Weight="10" Blueprint="Headlamp" Number="1" />
-				<object Weight="8" Blueprint="Gas Mask" Number="1" />
-				<object Weight="7" Blueprint="Knollworm Skull" Number="1" />
-			</group>
-			<group Name="Gloves" Style="pickone" Chance="35">
-				<object Weight="45" Blueprint="Leather Gloves" Number="1" />
-				<object Weight="40" Blueprint="Boar-skin gloves" Number="1" />
-				<object Weight="15" Blueprint="Cleo_TerraFirma_Cobblefur Gloves" Number="1" />
-			</group>
-			<!-- Tier 3, like the miner's helmet/headlamp/gas mask above.
-			     Optional back-slot work gear; 15 percent is CLAUDE PROPOSAL tuning. -->
-			<object Blueprint="Nylon Bodypack" Number="1" Chance="15" />
+		<!-- One item per roll. CLAUDE PROPOSAL weights preserve the former bundle's
+		     relative item frequencies: headgear 100, gloves 35, bodypack 15, scaled by 20. -->
+		<group Name="Gear" Style="pickone">
+			<object Weight="400" Blueprint="Leather Cap" Number="1" />
+			<object Weight="400" Blueprint="Vinewood Sap Mask" Number="1" />
+			<object Weight="260" Blueprint="Goggles" Number="1" />
+			<object Weight="240" Blueprint="Witchwood Wreath" Number="1" />
+			<object Weight="200" Blueprint="Miner's Helmet" Number="1" />
+			<object Weight="200" Blueprint="Headlamp" Number="1" />
+			<object Weight="160" Blueprint="Gas Mask" Number="1" />
+			<object Weight="140" Blueprint="Knollworm Skull" Number="1" />
+			<object Weight="315" Blueprint="Leather Gloves" Number="1" />
+			<object Weight="280" Blueprint="Boar-skin gloves" Number="1" />
+			<object Weight="105" Blueprint="Cleo_TerraFirma_Cobblefur Gloves" Number="1" />
+			<object Weight="300" Blueprint="Nylon Bodypack" Number="1" />
 		</group>
 	</population>
 	<!-- Granite baboon troop wiring (user ruling 2026-08-22: "it should spawn in all 3" - the
