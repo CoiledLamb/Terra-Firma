@@ -2931,6 +2931,11 @@ namespace Cleo.TerraFirma.Scripts
 				if ((id.StartsWith("chalkline") || id == "Cleo_TerraFirma_Cairn" || id == "Cleo_TerraFirma_CairnToppled")
 					&& obj.Physics != null)
 					obj.Physics.Owner = "Cleo_TerraFirma_Quarriers";
+				// Loose goods and storage use the same guild ownership as claim marks.
+				// Preserve any more specific owner supplied by a blueprint.
+				if (obj.Physics != null && (obj.Physics.Takeable || obj.HasPart<XRL.World.Parts.Inventory>())
+					&& string.IsNullOrEmpty(obj.Physics.Owner))
+					obj.Physics.Owner = "Cleo_TerraFirma_Quarriers";
 				c.AddObject(obj);
 				placed++;
 			}
