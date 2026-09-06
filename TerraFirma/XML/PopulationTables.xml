@@ -8,15 +8,8 @@
  		<object Blueprint="Cleo_TerraFirma_Splintered Mallet" Number="1" />
 		<object Blueprint="Ash-Stained Robes" Number="1" />
 		<object Blueprint="Sandals" Number="1" />
-		<!-- Fixed sap mask retired for MiningGear rolls, gear sitting 2026-08-23 (user: "rather
-		     than a vinewood sap mask strictly on stonecarver, we could maybe give them one
-		     mining goods table item, with a low chance for 2"). Second-roll chance CLAUDE
-		     DRAFT. Two consequences to eyeball, both accepted as dials: a roll can open on a
-		     miner's helmet (always-on radius-6 light) which loosens the torch economy the 9-15
-		     torches below price in, and each roll's glove group means "one item" sometimes
-		     arrives as headgear plus gloves. -->
+		<object Blueprint="Vinewood Sap Mask" Number="1" />
 		<table Name="Cleo_TerraFirma_MiningGear" />
-		<table Name="Cleo_TerraFirma_MiningGear" Chance="15" />
 		<object Blueprint="Bubble Level" Number="1" />
 		<object Blueprint="Random Copper Figurine" Number="1" />
 		<table Name="Cleo_Stonecarver_Maquette"/>
