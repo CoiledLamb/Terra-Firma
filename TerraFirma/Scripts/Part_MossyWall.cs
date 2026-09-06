@@ -20,11 +20,8 @@ namespace XRL.World.Parts
 		public override bool WantEvent(int ID, int cascade)
 		{
 			return base.WantEvent(ID, cascade) || ID == PooledEvent<GetDisplayNameEvent>.ID
-				|| ID == GetInventoryActionsEvent.ID || ID == InventoryActionEvent.ID
 				|| ID == EndTurnEvent.ID;
 		}
-
-		private const string HarvestCommand = "Cleo_TerraFirma_HarvestMoss";
 
 		private bool CanReach(GameObject actor)
 		{
@@ -41,29 +38,6 @@ namespace XRL.World.Parts
 			GameObject actor = The.Player;
 			if (CanReach(actor) && actor.CurrentCell != ParentObject.CurrentCell)
 				ParentObject.GetPart<Harvestable>()?.AttemptHarvest(actor, Automatic: true);
-			return base.HandleEvent(E);
-		}
-
-		public override bool HandleEvent(GetInventoryActionsEvent E)
-		{
-			// Harvestable supplies the harvest itself; expose its action through the
-			// distant-object menu only when the actor is actually within arm's reach.
-			if (CanReach(E.Actor) && ParentObject.GetPart<Harvestable>()?.IsHarvestable() == true
-				&& E.Actor.HasPart<Skill.CookingAndGathering_Harvestry>())
-				E.AddAction("Harvest", "harvest moss", HarvestCommand, null, 'h',
-					Default: 15, Override: true, WorksAtDistance: true);
-			return base.HandleEvent(E);
-		}
-
-		public override bool HandleEvent(InventoryActionEvent E)
-		{
-			if (E.Command == HarvestCommand)
-			{
-				if (CanReach(E.Actor)
-					&& ParentObject.GetPart<Harvestable>()?.AttemptHarvest(E.Actor) == true)
-					E.RequestInterfaceExit();
-				return false;
-			}
 			return base.HandleEvent(E);
 		}
 
