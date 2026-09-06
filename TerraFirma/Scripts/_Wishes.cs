@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using XRL;
 using XRL.Messages;
 using XRL.Rules;
@@ -713,7 +713,7 @@ namespace Cleo.TerraFirma.Scripts
 			The.Player.ReceiveObject(gun);
 			The.Player.ReceiveObject(GameObject.Create("Small Stone"));
 			The.Player.ReceiveObject(GameObject.Create("Large Stone"));
-			MessageQueue.AddPlayerMessage("tfgravel: gravel shotgun, small stone and large stone received.", Capitalize: false);
+			MessageQueue.AddPlayerMessage("tfgravel: grinder shotgun, small stone and large stone received.", Capitalize: false);
 		}
 
 		/// <summary>Glowstone pair dev door (2026-08-22): a glowsphere to break, a lantern to

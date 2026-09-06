@@ -135,7 +135,7 @@ namespace XRL.World.Parts
 		private bool Ready() => Bursts > 0 && !IsDisabled(UseCharge: false);
 		public override bool HandleEvent(CheckLoadAmmoEvent E)
 		{
-			if (!Ready()) { E.Message = Bursts == 0 ? "The gravel chamber is empty." : "The gravel shotgun cannot fire."; return false; }
+			if (!Ready()) { E.Message = Bursts == 0 ? "The gravel chamber is empty." : "The grinder shotgun cannot fire."; return false; }
 			return base.HandleEvent(E);
 		}
 		public override bool HandleEvent(CheckReadyToFireEvent E) => Ready() && base.HandleEvent(E);
@@ -146,7 +146,7 @@ namespace XRL.World.Parts
 		}
 		public override bool HandleEvent(LoadAmmoEvent E)
 		{
-			if (!Ready()) { E.Message = "The gravel shotgun cannot fire."; return false; }
+			if (!Ready()) { E.Message = "The grinder shotgun cannot fire."; return false; }
 			GameObject projectile = GameObject.Create(ProjectileObject, 0, 0, null, null, null, "Projectile");
 			if (projectile == null) return false;
 			E.Projectile = projectile;
@@ -188,7 +188,7 @@ namespace XRL.World.Parts
 					E.AddMissileWeaponDamageTag(GetMissileWeaponPerformanceEvent.GetFor(ParentObject.Equipped, ParentObject));
 				if (!E.Reference)
 					E.AddTag(Bursts == 0 ? "{{y|[{{K|empty}}]}}"
-						: "{{y|[gravel: " + Bursts + (Bursts == 1 ? " burst]}}" : " bursts]}}"), -5);
+						: "{{y|[gravel burst x" + Bursts + "]}}", -5);
 			}
 			return base.HandleEvent(E);
 		}
