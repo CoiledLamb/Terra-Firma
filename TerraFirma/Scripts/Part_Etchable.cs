@@ -398,6 +398,16 @@ namespace XRL.World.Parts
 		/// Render part serializes with the object, so the flip rides saves for free. The zone
 		/// painter only rewrites Tile paths (decomp-checked), so repaints don't stomp it.
 		/// Objects with no detail color or matching channels skip the flip silently.</summary>
+		// Codex PROPOSAL: world generation uses the existing inscription and static
+		// etched face, without playing the interactive carving animation.
+		public bool SetGeneratedInscription(string text)
+		{
+			if (string.IsNullOrWhiteSpace(text) || !Inscription.IsNullOrEmpty() || LimbInscriptions.Count != 0) return false;
+			Inscription = text;
+			ApplyEtchedLook();
+			return true;
+		}
+
 		private void ApplyEtchedLook()
 		{
 			Render render = ParentObject.Render;

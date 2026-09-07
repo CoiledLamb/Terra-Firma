@@ -326,4 +326,50 @@ Perishes when unequipped." />
 		<part Name="Description" Short="A clay bladder rides where a stomach would go, warm and faintly sweating. Something inside strains the salt from what the body carries and hoards the fresh water for itself." /> <!-- DRAFT, signoff owed; the does-not-come-back-out warning line died with the unremovable pass -->
 		<tag Name="Tier" Value="1" />
 	</object>
+    <!-- Codex PROPOSAL: B07 native RandomStatue.BaseBlueprint variants. All subjects
+         carry DesertCanyon_Creatures in shipped Creatures.xml. Commons only. -->
+    <object Name="Cleo_TerraFirma_CanyonStatueBaboon" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Baboon" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueBoar" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Boar" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueDog" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Dog" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueDragonfly" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="GiantDragonfly" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueGlowcrow" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Glowcrow" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueChameleon" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Horned Chameleon" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueTortoise" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="IrritableTortoise" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueSalamander" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Salamander" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueTwoHeadedBoar" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Two-Headed Boar" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueSalthopper" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Salthopper" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueEquimax" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Equimax" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
 </objects>

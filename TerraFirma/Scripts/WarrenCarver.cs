@@ -153,6 +153,7 @@ namespace Cleo.TerraFirma.Scripts
 			public short[] Pocket;
 			public string[] Item;           // the dress layer: sim item ids, translated at placement
 			public Dictionary<int, bool> PowerWires; // Codex PROPOSAL: index -> broken exposed line
+			public HashSet<int> EtchedWalls; // Codex PROPOSAL: commons ring cells
 			public string YardBoardText;    // the yard chalkboard's ledger lines (user concept 2026-08-23)
 			public HashSet<int> Augment;    // blind-claim: cells the augment converted to carvable mass
 			public List<int> Defile;        // mouth-access law + rebuild rung: rock opened into canyon floor
@@ -1740,6 +1741,8 @@ namespace Cleo.TerraFirma.Scripts
 		private static Row[] _tPlaza, _tWorkScatter;
 		private static Row[] T_PLAZA => _tPlaza ?? (_tPlaza = LoadDressTable("Plaza"));
 		private static Row[] T_WORKSCATTER => _tWorkScatter ?? (_tWorkScatter = LoadDressTable("WorkScatter"));
+		private static Row[] _tStatues;
+		private static Row[] T_STATUES => _tStatues ?? (_tStatues = LoadDressTable("StatueLikeness"));
 		// the monument family behind the "Village Monument" meta-row (USER 2026-08-29:
 		// "just a couple of the monuments spawning"): Seat resolves the parent id to
 		// one of these seven, site cap 2, over-cap rolls fall back to a statue.
@@ -1977,6 +1980,9 @@ namespace Cleo.TerraFirma.Scripts
 					if (monuments >= 2) item = "Random Stone Statue";
 					else { monuments++; item = MONUMENTS[R(0, MONUMENTS.Length - 1)]; }
 				}
+				// Codex PROPOSAL: only commons statue rolls use the canyon-fauna pool.
+				if (p.Role == "commons" && item == "Random Stone Statue") item = WRoll(T_STATUES);
+				if (item == null) return false;
 				bool solid = IsSolidItem(item);
 				bool Legal(int[] c2) => IsFree(g.Idx(c2[0], c2[1])) && !Threshold(p, c2[0], c2[1]) && (!solid || SolidOK(c2[0], c2[1]));
 				int[] c = null;
@@ -2070,8 +2076,7 @@ namespace Cleo.TerraFirma.Scripts
 				int frolls = Math.Max(1, Math.Min(3, (int)Math.Round(cs.Count / 24.0)));
 				for (int fi = 0; fi < frolls; fi++)
 					if (!Seat(p, WRoll(T_GALLERYFLOOR), cs)) misses.Add((T_GALLERYFLOOR, p, cs));
-				// pre-etched commons walls: NOT PORTED yet (Part_Etchable markov
-				// integration gets its own sitting) - flagged in TODO
+				PlanCommonsEtchings(g, p);
 			}
 			// DWELLING: v1's typed-room grammar whole
 			// WALL RUNS (bunk rework, sitting 2026-09-05; user: "i mainly just don't
@@ -3520,6 +3525,8 @@ namespace Cleo.TerraFirma.Scripts
 						}
 					}
 				}
+			// Etch the underlying face before moss captures its harvest-restoration palette.
+			ApplyCommonsEtchings(Z, g);
 			// MOSS AS A LIVING COAT (USER RULED 2026-08-23: "shale that has grown
 			// mossy should be prefixed green|mossy shale. the moss should be
 			// harvestable, reverting the wall to its basic form"). Stock
@@ -3579,8 +3586,8 @@ namespace Cleo.TerraFirma.Scripts
 		// waited on this ruling) plus a stage-chanced overseer on the
 		// tfcarverpack recipe: plain chassis through the epithet builder, seated
 		// in the deepest dwelling. Reclaimed sites get snapjaw miners denned deep
-		// beside the crude fires the tense pass already lights. Abandoned sites
-		// get nobody, per the 0-2 payloads ruling's floor.
+		// beside the crude fires the tense pass already lights. Codex PROPOSAL:
+		// abandoned/reclaimed sites also get independent visitor and web rolls.
 		// Creature MIX rolls the engine's ambient rng (PopulationManager.Generate,
 		// the wish's own path); cell picks ride the carve seed. Zones build once,
 		// so the split is cosmetic; noted for honesty.
@@ -3716,6 +3723,8 @@ namespace Cleo.TerraFirma.Scripts
 			}
 			bool SeatByHint(GameObject who, string hint)
 			{
+				if (hint == "Cleo_TerraFirma_Web" || hint == "Cleo_TerraFirma_SpiderWeb")
+					return SeatWarrenWeb(Z, g, who, hint == "Cleo_TerraFirma_SpiderWeb");
 				if (hint == "Cleo_TerraFirma_MerchantWall") return SeatMerchant(who);
 				var engineHints = new List<string>();
 				string trade = null, denRole = null; int tradePct = 100, outsidePct = -1; bool den = false;
@@ -3781,17 +3790,16 @@ namespace Cleo.TerraFirma.Scripts
 					}
 				return placed;
 			}
-			if (r.Occupancy == "abandoned")
+			if (r.Occupancy == "abandoned" || r.Occupancy == "reclaimed")
 			{
-				Helpers.VerifyLog("WARREN", "population: abandoned, nobody home");
-				return;
-			}
-			if (r.Occupancy == "reclaimed")
-			{
-				// the newcomers den in the back, beside the fires the tense pass
-				// lit; who they are and how many now lives in the table
-				int denned = PlaceTable("Cleo_TerraFirma_WarrenReclaimers", null);
-				Helpers.VerifyLog("WARREN", $"population: reclaimed, {denned} denned");
+				// Codex PROPOSAL: independent XML visitor rolls supplement reclaimed miners.
+				// Native factions are untouched. Web bonuses require a spider actually placed.
+				int denned = r.Occupancy == "reclaimed" ? PlaceTable("Cleo_TerraFirma_WarrenReclaimers", null) : 0;
+				var visitors = new Dictionary<string, int>();
+				int guests = PlaceTable("Cleo_TerraFirma_WarrenVisitors", visitors);
+				int webs = PlaceTable("Cleo_TerraFirma_WarrenSparseWebs", null);
+				if (visitors.ContainsKey("Cave Spider")) webs += PlaceTable("Cleo_TerraFirma_WarrenSpiderWebs", null);
+				Helpers.VerifyLog("WARREN", $"population: {r.Occupancy}, miners={denned}, visitors={guests} ({string.Join(", ", visitors.Select(v => v.Value + " " + v.Key))}), webs={webs}");
 				return;
 			}
 			// IN USE: the crew, whole, from the stage's own table - shift count

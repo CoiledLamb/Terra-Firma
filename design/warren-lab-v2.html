@@ -2987,19 +2987,18 @@ function buildOnce(seed,K,forced,host,attempt,aug){
   const oRoll=R(1,100);
   const occupancy = oRoll<=K.abandonedPct ? 'abandoned'
                   : oRoll<=K.abandonedPct+K.reclaimedPct ? 'reclaimed' : 'in use';
-  // SQUATTERS - a sub-roll WITHIN abandoned (USER RULED 2026-08-25, "sub roll
-  // makes sense"): a couple of hermits, trash monks, or spiders move into some
-  // ruins; the rest stay truly empty, and the ruled reclaimed knobs are
-  // untouched. Names verified against Base Creatures.xml (Scrap-clad Hermit /
-  // Hide-Sheathed Hermit / Trash Monk / Cave Spider; Phase Spider CUT by user
-  // ruling 2026-08-26 - not canyon fauna, its only static base table is
-  // CryotubeContents). The sim
-  // rolls the STATE; creature placement is game-side and deliberately unported
-  // pending the user's nod (it shares machinery with the open reclaimed fork).
+  // Codex PROPOSAL: independent visitors in abandoned AND reclaimed sites.
+  // Miners remain the reclaimed population; native factions are untouched.
+  // Mirrors WarrenVisitors / WarrenSparseWebs / WarrenSpiderWebs in XML.
+  // This lab models counts; creature and associated-web seating is game-side.
   let squatters=null;
-  if(occupancy==='abandoned' && chance(K.squatterPct/100)){
-    const kind=pick(['hermits','trash monks','spiders']);
-    squatters={kind, n: kind==='spiders'? R(2,3) : R(1,2)};
+  if(occupancy!=='in use'){
+    const hermits=chance(K.squatterPct/100)?R(1,2):0;
+    const spiders=chance(K.spiderPct/100)?R(2,3):0;
+    const webs=(chance(K.webPct/100)?R(2,4):0)+(spiders?R(2,8):0);
+    if(hermits||spiders||webs) squatters={
+      kind:[hermits?'hermit pool':null,spiders?'cave spiders':null,webs?`${webs} webs`:null].filter(Boolean).join(' + '),
+      n:hermits+spiders,hermits,spiders,webs};
   }
   const S=STAGES[si];
   const art=layArtery(g,K,S.wp,S.foot,fixed);
@@ -3348,7 +3347,9 @@ const KNOBS=[
   ['spawn','abandonedPct','abandoned %',0,80,25,'share of warrens standing empty. A rumour that does not pay off is fine — Qud has abandoned villages (user ruled 2026-08-18)'],
   ['spawn','reclaimedPct','reclaimed %',0,80,20,'share taken over by snapjaws — miner-weighted, and their pickaxes path through walls, so a reclaimed warren gets CHEWED. The rest are in use'],
   ['spawn','wiredPct','wired %',0,100,75,'flourishing only: chance the site rolls its power grid (mill + wire + tumbler; the animation table seats either way on its internal cell). USER FLOAT 2026-08-29 "50-75%, so not all of them have them"; 75 default = CLAUDE lean, unruled - at ~2 flourishing/world, 75 leaves ~22% of worlds with no wired warren vs 13.5% at always-wired (zero-flourishing worlds already exist)'],
-  ['spawn','squatterPct','squatter %',0,100,35,'of ABANDONED sites, the share where somebody moved into the ruin: 1-2 hermits or trash monks, or 2-3 cave spiders (USER RULED 2026-08-25: squatters are a sub-roll within abandoned, so the reclaimed knobs stand untouched). 35 and the count bands are CLAUDE dials; creature placement is game-side and unported pending the nod'],
+  ['spawn','squatterPct','hermit %',0,100,35,'Codex PROPOSAL: independent chance of 1-2 hermits or trash monks in abandoned/reclaimed sites'],
+  ['spawn','spiderPct','spider %',0,100,35,'Codex PROPOSAL: independent chance of 2-3 cave spiders in abandoned/reclaimed sites, accompanied by 2-8 webs'],
+  ['spawn','webPct','sparse web %',0,100,25,'Codex PROPOSAL: independent 2-4 webs in abandoned/reclaimed sites, even without spiders'],
   ['spawn','worldWarrens','warrens / world',1,400,25,'how many warrens a world gets. Base game sites exactly 25 pig farms, 25 starapple farms and 25 snapjaw forts in canyon terrain, so 25 puts a warren at pig-farm frequency. Spread over the 1251 canyon surface zones an authored world carries'],
   ['geology','aquiferMin','aquifers min',0,4,0,'pools of standing water sealed inside the band. Most are never seen; the warren keeps a cell clear of them by the same guard that keeps it out of the canyon'],
   ['geology','aquiferMax','aquifers max',0,6,2,''],

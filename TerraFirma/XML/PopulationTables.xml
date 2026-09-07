@@ -847,4 +847,52 @@
 			<object Blueprint="broken" Weight="12" />
 		</group>
 	</population>
+	<!-- Codex PROPOSAL: B07 counts and equal-weight canyon animal likenesses.
+	     EtchCount entries are seeded labels, never spawned blueprints. -->
+	<population Name="Cleo_TerraFirma_WarrenEtchCount">
+		<group Style="pickone">
+			<object Blueprint="2" Weight="1" />
+			<object Blueprint="3" Weight="1" />
+			<object Blueprint="4" Weight="1" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenDress StatueLikeness">
+		<group Style="pickone">
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueBaboon" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueBoar" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueDog" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueDragonfly" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueGlowcrow" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueChameleon" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueTortoise" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueSalamander" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueTwoHeadedBoar" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueSalthopper" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueEquimax" Weight="1" />
+		</group>
+	</population>
+	<!-- Codex PROPOSAL: independent 35% visitor rolls, retaining the lab count bands.
+	     Shale Cave Critters / Rustwells permit co-occurring hermits and spiders.
+	     No changes to native factions. These tables are called only for abandoned/reclaimed. -->
+	<population Name="Cleo_TerraFirma_WarrenVisitors">
+		<group Style="pickeach">
+			<table Name="Cleo_TerraFirma_WarrenHermits" Chance="35" />
+			<object Blueprint="Cave Spider" Number="2-3" Chance="35" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenHermits">
+		<group Style="pickone">
+			<object Blueprint="Scrap-clad Hermit" Number="1-2" Weight="1" />
+			<object Blueprint="Hide-Sheathed Hermit" Number="1-2" Weight="1" />
+			<object Blueprint="Trash Monk" Number="1-2" Weight="1" />
+		</group>
+	</population>
+	<!-- Codex PROPOSAL: sparse 25% roll; counts follow IsolatedRuinsPocketDecoration.
+	     Additional webs use CaveSpiderLair's 2-8 count and require placed spiders. -->
+	<population Name="Cleo_TerraFirma_WarrenSparseWebs">
+		<object Blueprint="Web" Number="2-4" Chance="25" Hint="Cleo_TerraFirma_Web" />
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenSpiderWebs">
+		<object Blueprint="Web" Number="2-8" Hint="Cleo_TerraFirma_SpiderWeb" />
+	</population>
 </populations>
