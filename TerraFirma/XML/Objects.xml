@@ -253,7 +253,7 @@ Perishes when unequipped." />
 	     Circuitry holds transient passive output; EnergyCell holds fed bursts.
 	     Natural-stone gating has no native XML condition and is omitted. Static base art. -->
 	<object Name="Cleo_TerraFirma_PiezoelectricMill" Inherits="MountedFurniture">
-		<part Name="Render" DisplayName="piezoelectric mill" ColorString="&amp;y" DetailColor="w" RenderString="15" Tile="Items/sw_millstone_1.bmp" />
+		<part Name="Render" DisplayName="piezoelectric mill" ColorString="&amp;y" TileColor="&amp;y" DetailColor="W" RenderString="15" Tile="Items/sw_millstone_1.bmp" />
 		<part Name="Description" Short="placeholder description &gt;:)" />
 		<part Name="Physics" Weight="300" Takeable="false" Solid="false" />
 		<part Name="FusionReactor" ChargeRate="100" ExplodeChance="0" CatastrophicDisable="false" Description="piezoelectric mill" NameForStatus="Earth grinding" />
