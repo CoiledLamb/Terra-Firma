@@ -54,7 +54,7 @@
          mute by inheritance and by intent. Contrast the Husangeion, which opted out the other
          way: it takes PetResponse lines rather than a conversation. -->
     <inventoryobject Blueprint="BigDog_Bite" Number="1" />
-    <part Name="Description" Short="Dust grays =pronouns.possessive= coat and =pronouns.possessive= muzzle is worn smooth as riverstone. When =pronouns.subjective= =verb:trot:afterpronoun=, something in =pronouns.possessive= belly clicks and settles, stone against swallowed stone." /> <!-- DRAFT, signoff owed -->
+    <part Name="Description" Short="Nose to the ground, =pronouns.subjective= =verb:hunt:afterpronoun= for bits of spall amongst the desert scrub. As =pronouns.subjective= =verb:trot:afterpronoun=, the stones in =pronouns.possessive= stomach click and settle against each other." />
     <tag Name="Role" Value="Brute" />
     <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
   </object>
