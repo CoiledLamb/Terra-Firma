@@ -168,7 +168,7 @@
 		<part Name="TinkerItem" Bits="003" CanDisassemble="true" CanBuild="true" />
 		<tag Name="TinkerCategory" Value="ammo and energy cells" />
 		<tag Name="DynamicObjectsTable:EnergyCells" /> <!-- SPAWN WIRED 2026-08-22: everywhere a tier-appropriate cell can spawn (sockets query this table with Tier{zonetier}; our Tier 3 tag does the filtering) -->
-		<part Name="Description" Short="A rumbling spiral milks out bursts of piezoelectric energy from chunks of earth." />
+		<part Name="Description" Short="A rumbling spiral milks out bursts of energy from chunks of earth." />
 		<part Name="Physics" Weight="5" />
 		<part Name="Commerce" Value="100" />
 		<part Name="Metal" />
@@ -254,7 +254,7 @@ Perishes when unequipped." />
 	     Natural-stone gating has no native XML condition and is omitted. Static base art. -->
 	<object Name="Cleo_TerraFirma_PiezoelectricMill" Inherits="MountedFurniture">
 		<part Name="Render" DisplayName="piezoelectric mill" ColorString="&amp;y" TileColor="&amp;y" DetailColor="W" RenderString="15" Tile="Items/sw_millstone_1.bmp" />
-		<part Name="Description" Short="placeholder description &gt;:)" />
+		<part Name="Description" Short="A rumbling spiral is encased in flaking steel housing, bolted to the earth like a suckling to an udder. It churns, siphoning electricity from the strain." />
 		<part Name="Physics" Weight="300" Takeable="false" Solid="false" />
 		<part Name="FusionReactor" ChargeRate="100" ExplodeChance="0" CatastrophicDisable="false" Description="piezoelectric mill" NameForStatus="Earth grinding" />
 		<part Name="Circuitry" StartCharge="100" MaxCharge="100" />
