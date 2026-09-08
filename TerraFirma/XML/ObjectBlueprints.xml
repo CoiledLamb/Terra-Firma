@@ -103,7 +103,7 @@
          r is the shale family inverted (blocks are &r/w), CLAUDE rendering
          call, strikeable. -->
     <part Name="Render" Tile="firedish.png" DisplayName="carved fire dish" ColorString="&amp;w" TileColor="&amp;w" DetailColor="r" />
-    <part Name="Description" Short="A wide basin of dressed stone cradles a bed of embers." />
+    <part Name="Description" Short="A chunk of earth is lathed into a finely smoothed bowl. Twigs of dogthorn crackle faintly, their twisting forms reduced to smoke and ash." />
     <!-- USER 2026-08-23 (fire dish now rolls the dwelling light pool, so both
          were loud): no flash when lit, i.e. Campfire's inherited
          AnimatedMaterialFire strobe goes; the dish is dressed stone, it does
