@@ -196,7 +196,7 @@
   <object Name="Cleo_TerraFirma_QuarriedBlock" Inherits="Furniture">
     <part Name="Render" Tile="quarrybricks1.png" DisplayName="quarried stone" RenderString="#" ColorString="&amp;r" TileColor="&amp;r" DetailColor="w" Occluding="false" />
     <builder Name="RandomTile" Tiles="quarrybricks1.png,quarrybricks2.png,quarrybricks3.png" />
-    <part Name="Description" Short="Canyon stone, cut square and stacked for the crossing." />
+    <part Name="Description" Short="The earth is split and partitioned to exact specifications, then arranged into a lattice-grid to preserve an optimal amount of space." /> <!-- Description approved 2026-09-08. -->
     <part Name="Physics" Takeable="false" Weight="500" />
   </object>
 
