@@ -7,7 +7,7 @@
 			<p>Walls are placed in a contiguous shape, beginning adjacent to you. Only empty spaces will form walls.</p>
 			<!-- rebalance 2026-08-06: walls are true copies of the source stone, so the per-level
 			     HP stat is gone; replacement sentence DRAFT, awaiting signoff -->
-			<p>Creates <stat Name="WallNum" /> walls, true copies of the local stone.</p>
+			<p>Creates <stat Name="WallNum" /> walls.</p>
 			<statline Name="Cooldown" />
 		</description>
 		<UITile Tile="Abilities/abil_calcify.png" Foreground="w" Detail="C" />
