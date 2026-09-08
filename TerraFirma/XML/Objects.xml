@@ -210,7 +210,7 @@ Perishes when unequipped." />
 		<part Name="Render" DisplayName="seismophone" RenderString="]" ColorString="&amp;y" TileColor="&amp;y" DetailColor="c" Tile="Items/sw_teleprojector.bmp" /> <!-- base teleprojector tile (coiled antennae read as listening wire); CLAUDE pick per the art-bar ruling, bespoke sprite lands if the user makes one -->
 		<part Name="Physics" Weight="2" />
 		<part Name="Commerce" Value="150" />
-		<part Name="Description" Short="A thin shim of wire encloses a whispering ear. When pressed against the earth, it speaks." />
+		<part Name="Description" Short="An aluminum sheath enclosing a glittering filament connects to a whispering ear. When pressed against the earth, it speaks." />
 		<part Name="RulesDescription" Text="Functions only while the wearer is beside a wall." /> <!-- DRAFT (Claude); the "Grants you Heightened Hearing at level 2." line is appended by the part itself -->
 		<!-- the dials live here since the 2026-08-29 ladder pass; the ctor keeps the same values
 		     as fail-safe fallbacks for a bare mount (all XML-settable fields of base
@@ -295,7 +295,7 @@ Perishes when unequipped." />
 		<part Name="Render" DisplayName="box of chalk" RenderString="&#248;" ColorString="&amp;Y" TileColor="&amp;Y" DetailColor="y" Tile="Items/sw_crayons.bmp" RenderLayer="5" /> <!-- base crayons tile, detail greyed per ruling -->
 		<part Name="Physics" Weight="1" />
 		<part Name="Commerce" Value="10" />
-		<part Name="Description" Short="Fragmented tubes of lime sketch out concepts, ideoforms, and diagrams, only to be smeared away by the passage of time." /> <!-- USER TEXT FINAL 2026-08-22 evening, supersedes the lowercase figments draft -->
+		<part Name="Description" Short="Fragmented cylinders of limestone sketch out concepts, ideoforms, and diagrams. Their impermanent thought-dust is devoured by the monster." />
 		<part Name="Cleo_TerraFirma_ChalkBox" />
 		<tag Name="Tier" Value="1" />
 		<tag Name="DynamicObjectsTable:Trinkets" /> <!-- SPAWN WIRED 2026-08-22: rides the crayon trinket pools via merges -->
