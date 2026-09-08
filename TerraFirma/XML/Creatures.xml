@@ -369,7 +369,7 @@
        and description DRAFT, signoff owed. -->
   <object Name="Cleo_TerraFirma_Boar Vessel Corpse" Inherits="Corpse">
     <part Name="Render" DisplayName="boar vessel corpse" TileColor="&amp;w" ColorString="&amp;w" DetailColor="B" />
-    <part Name="Description" Short="Shards of a walking pot lie mouth up, holding their last shape out of habit." /> <!-- DRAFT, signoff owed -->
+    <part Name="Description" Short="Shards of a shattered pictograph lie inert on the ground, where once they trotted under the salt sun." />
     <part Name="Butcherable" OnSuccess="Cleo_TerraFirma_GutCistern" />
     <part Name="Commerce" Value="4" />
     <removepart Name="Food" />
