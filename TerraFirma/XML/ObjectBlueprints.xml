@@ -128,7 +128,7 @@
        voice owed (the lit dish's line is also still draft). -->
   <object Name="Cleo_TerraFirma_FireDishCold" Inherits="Cleo_TerraFirma_FireDish">
     <part Name="Render" DisplayName="cold fire dish" />
-    <part Name="Description" Short="A wide basin of dressed stone cradles a bed of cold ash." />
+    <part Name="Description" Short="A chunk of earth is lathed into a finely smoothed bowl. The lingering dogthorn twigs, half-burned, make you picture the songs and idle chatter that might have once filled the air around it." />
     <removepart Name="Campfire" />
     <removepart Name="LightSource" />
     <removepart Name="PrefabImposter" />
