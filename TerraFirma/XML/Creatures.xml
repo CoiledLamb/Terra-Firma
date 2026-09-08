@@ -107,7 +107,7 @@
          this one matches. Base does give conversations to some beasts (Reptiles, Frogs, Worms,
          Plants), each a single emote plus a themed farewell, so the door is one line wide if it
          ever reopens. He expresses through the inherited sound tags instead. -->
-    <part Name="Description" Short="Grit clings to =pronouns.possessive= coat in dun sheets, and around =pronouns.objective= the air is never quite still: pebbles circle =pronouns.possessive= shoulders in a lazy orbit, waiting to be thrown." /> <!-- DRAFT, signoff owed -->
+    <part Name="Description" Short="Grit is caked onto =pronouns.possessive= hunched figure like a second skin. Periodically you catch the glint of a wayward stone rising from the earth into =pronouns.possessive= scheming hands." /> <!-- Description approved 2026-09-08. -->
     <!-- SPAWN WIRED 2026-08-22 (user: "it should spawn in all 3"): exclude tag LIFTED, so the
          parent Baboon tags deliver Hills_Creatures + DesertCanyon_Creatures + the Baboons pool by
          inheritance; troop merges live in PopulationTables.xml. First real debut wiring on the branch. -->

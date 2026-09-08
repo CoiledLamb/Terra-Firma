@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <objects>
 	<!-- Pump Shotgun firing profile; stone chamber replaces the magazine.
-	     CLAUDE PROPOSAL: descriptive text and inherited art/value/tier.
+	     Description approved 2026-09-08; CLAUDE PROPOSAL: inherited art/value/tier.
 	     Acquisition: inherited Guns tag plus quarry provisioner stock. -->
 	<object Name="Cleo_TerraFirma_Gravel Shotgun" Inherits="Pump Shotgun">
 		<part Name="Render" DisplayName="grinder shotgun" />
-		<part Name="Description" Short="A stone-fed shotgun with a grinding chamber." />
+		<part Name="Description" Short="A stone grinder has been fitted onto the familiar shape of a pump shotgun. A percussive shriek accompanies the pull of its trigger as a hail of pebbles spews from its maw." />
 		<removepart Name="MagazineAmmoLoader" />
 		<part Name="Cleo_TerraFirma_GravelAmmoLoader" StoneBlueprints="Small Stone,Large Stone" ProjectileObject="Cleo_TerraFirma_GravelProjectile" WeightPerBurst="5" ReloadEnergy="1000" />
 		<tag Name="Mods" Value="MissileWeaponMods,FirearmMods,CommonMods,RifleMods" />
