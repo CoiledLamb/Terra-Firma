@@ -285,7 +285,7 @@ Perishes when unequipped." />
 	<object Name="Cleo_TerraFirma_ChalkLine" Inherits="InorganicObject">
 		<part Name="Render" DisplayName="chalk line" RenderString="&#196;" ColorString="&amp;Y" TileColor="&amp;Y" DetailColor="y" Tile="chalklineE.png" RenderLayer="1" />
 		<part Name="Physics" Takeable="false" Solid="false" />
-		<part Name="Description" Short="A stroke of white lime lies across the earth." />
+		<part Name="Description" Short="A white smear of chalk partitions space arbitrarily. It clings to passing boots, dissolving the divide." />
 		<part Name="Cleo_TerraFirma_ChalkLine" />
 		<tag Name="ExcludeFromDynamicEncounters" />
 		<tag Name="NoSparkingQuest" />
