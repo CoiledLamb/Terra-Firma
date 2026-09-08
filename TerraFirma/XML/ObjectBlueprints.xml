@@ -149,6 +149,7 @@
        this item's effect is planned work, not quarantined. -->
   <object Name="Cleo_TerraFirma_MossClump" Inherits="Snack">
     <part Name="Render" DisplayName="clump of {{K|cave}}{{green|moss}}" ColorString="&amp;g" DetailColor="K" RenderString="%" Tile="Items/sw_grave_moss_clump.bmp" />
+    <part Name="Description" Short="A glistening carpet of moss holds the earth in its folds. Grit coats its tufts, promising the texture of salted pebbles." />
     <part Name="Physics" Weight="1" Organic="true" />
     <part Name="Commerce" Value="1" />
     <tag Name="ExcludeFromDynamicEncounters" />
