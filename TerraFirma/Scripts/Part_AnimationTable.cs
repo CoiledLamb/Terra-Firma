@@ -177,7 +177,7 @@ namespace XRL.World.Parts
 
 			// description echo (RULED 2026-08-24, "the description should copy the figurine
 			// description"): the walker wears the item's own text verbatim, material and
-			// depicted-creature passage included; the chassis draft stays for mason escorts
+			// depicted-creature passage included, replacing its generated ambient identity.
 			Description figDesc = figurine.GetPart<Description>();
 			Description walkerDesc = walker.GetPart<Description>();
 			if (figDesc != null && walkerDesc != null)

@@ -299,7 +299,8 @@
        DisplayName and description DRAFT, signoff owed. -->
   <object Name="Cleo_TerraFirma_AnimateFigurine" Inherits="BaseHumanoid">
     <part Name="Render" DisplayName="animate figurine" Tile="Items/figurine.png" RenderString="*" ColorString="&amp;y" DetailColor="K" />
-    <part Name="Description" Short="Someone spent longer on the face than the feet, and =pronouns.subjective= =verb:walk:afterpronoun= like that is true." /> <!-- DRAFT, signoff owed -->
+    <part Name="Description" Short="" />
+    <builder Name="Cleo_TerraFirma_AnimateFigurineIdentity" Population="Cleo_TerraFirma_AnimateFigurineIdentity" />
     <part Name="Brain" Hostile="False" Factions="Cleo_TerraFirma_Quarriers-100" />
     <part Name="Swarmer" />
     <part Name="MentalShield" />

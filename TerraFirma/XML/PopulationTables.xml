@@ -19,6 +19,13 @@
 		<object Blueprint="Salthopper Chip" Number="2-4" />
     </group>
   </population>
+  <!-- Codex PROPOSAL: equal stone/base-pool shares; base pool retains its own material weights. -->
+  <population Name="Cleo_TerraFirma_AnimateFigurineIdentity">
+    <group Name="Identity" Style="pickone">
+      <object Blueprint="Cleo_TerraFirma_Random Stone Figurine" Weight="1" />
+      <table Name="Figurines 1" Weight="1" />
+    </group>
+  </population>
   	<population Name="Cleo_Stonecarver_Maquette">
 		<!-- Stone added 2026-08-15 (user: "it's fine to add this"), closing the 08-14 material
 		     ladder ruling on the XML side. HEADS UP, this table is SHARED: it seeds the PLAYER
