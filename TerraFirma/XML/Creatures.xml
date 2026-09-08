@@ -124,7 +124,6 @@
     <inventoryobject Blueprint="Pickaxe" Number="1" />
     <!-- overrides the ConversationID inherited from base Snapjaw (2026-08-16); bank in Conversations.xml -->
     <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_SnapjawMiner" />
-    <part Name="Description" Short="Quarry dust grays =pronouns.possessive= tussocked fur, and =pronouns.possessive= knuckles are chipped white from wall-work. =pronouns.Subjective= =verb:eye:afterpronoun= every rockface like a shut door." /> <!-- DRAFT, signoff owed -->
     <tag Name="Role" Value="Minion" />
     <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
   </object>
