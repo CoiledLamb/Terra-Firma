@@ -206,7 +206,7 @@
 
   <object Name="Cleo_TerraFirma_Hewer" Inherits="Cleo_TerraFirma_Stonecarver">
     <part Name="Render" DisplayName="quarry {{r|hewer}}" ColorString="&amp;r" /> <!-- "quarry x" naming, lean closed out as RULED 2026-08-23; mole variants inherit -->
-    <part Name="Description" Short="=pronouns.Subjective= =verb:read:afterpronoun= the rock face the way a reader finds a paragraph break, and =pronouns.subjective= =verb:open:afterpronoun= it there." /> <!-- DRAFT, signoff owed -->
+    <part Name="Description" Short="=pronouns.Possessive= eyes flit from wall to wall like a firefly under the Beetle Moon. It's impossible to tell whether =pronouns.subjective= =verb:are:afterpronoun= judging what weight the stone can bear or finding the weakest spot to strike." />
     <mutation Name="Cleo_TerraFirma_Fissure" Level="4" /> <!-- level DRAFT -->
     <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Hewer" /> <!-- mole hewer inherits this -->
     <tag Name="Role" Value="Brute" /> <!-- DRAFT -->
