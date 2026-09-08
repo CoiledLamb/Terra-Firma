@@ -32,10 +32,9 @@
 		<description>
 			<p>Attune your sculpted stones to a keening resonance, or still them again.</p>
 			<br />
-			<p>Resonant stones penetrate as vibro weapons, meeting armor at its own frequency.</p>
+			<p>Resonant stones penetrate as vibro weapons.</p>
 			<!-- AV/DV clause cut with the whorl stat shifts (rebalance 2026-08-06) -->
 			<p>While attuned, your gravel whorl deflects light-based projectiles instead of physical ones.</p>
-			<p>Attuning retunes the stone in your hand at no cost. Direct beams pass through the whorl in either mode.</p>
 		</description>
 		<UITile Tile="Abilities/abil_attunestone.png" Foreground="C" Detail="c" />
 	</ability>
