@@ -15,7 +15,6 @@
 	<ability Command="Cleo_TerraFirma_CommandEarthenBarrage">
 		<description>
 			<p>When enabled, automatically retrieves stones from your reserves to use as thrown weapons.</p>
-			<p>Thrown pebbles will continually be replaced as long as you have reserves remaining.</p>
 			<br />
 			<!-- daze rider cut 2026-08-06 (rebalance pass); pen line reworked 2026-08-09
 			     (flat bonus retired for a Strength-filled cap) DRAFT wording, user signoff owed -->
