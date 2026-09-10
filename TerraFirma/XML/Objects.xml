@@ -323,7 +323,7 @@ Perishes when unequipped." />
 		<part Name="LiquidVolume" MaxVolume="16" Volume="16" StartVolume="1d10-1" InitialLiquid="water-1000" ManualSeal="true" /> <!-- USER RULED 2026-08-27: starts UNSEALED now that it arrives via butchery (the sealed-in-life fiction retired with the equipment shape); ManualSeal kept so it can be sealed by hand. AGE ROLL StartVolume 1d10-1 DRAFT (user live-fire catch: producers only tick in active zones at 1000-4000 turns/dram, so without a spawn roll every found cistern is newborn-empty); Volume=MaxVolume alongside StartVolume dice is the base Waterskin idiom -->
 		<part Name="LiquidProducer" Liquid="water" FillSelfOnly="true" VariableRate="1000-4000" WorksOnWearer="false" WorksOnSelf="true" /> <!-- USER RULED 2026-08-27: no longer equipment (Armor part removed) — the cistern is a butchery yield off the vessel corpse; still trickles while carried (take-stones tick precedent), the pocket-purifier utility -->
 		<part Name="Commerce" Value="15" />
-		<part Name="Description" Short="A lump of clay crudely shaped in the form of a gullet once collected purified water from a salted basin. Still warm and wet with condensation, the container twitches and yearns for the memory of water." />
+		<part Name="Description" Short="A lump of clay crudely shaped in the form of a gullet once collected a purified trickle from a salted basin. Still warm and wet with condensation, the container twitches and yearns for the memory of water." />
 		<tag Name="Tier" Value="1" />
 	</object>
     <!-- Codex PROPOSAL: B07 native RandomStatue.BaseBlueprint variants. All subjects
