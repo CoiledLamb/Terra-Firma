@@ -151,7 +151,6 @@ namespace XRL.World.Parts
                 // Skip overlays where real walls occupy the destination or the short rise path.
                 string skip = RiseSeconds <= 0 ? "animation disabled"
                     : !target.ParentZone.IsActive() ? "inactive zone"
-                    : !target.IsVisible() ? "unseen cell"
                     : target.GetFirstWall() != null ? "real wall in destination"
                     : y + 1 < target.ParentZone.Height && target.ParentZone.GetCell(x, y + 1).GetFirstWall() != null
                         ? "real wall immediately south" : null;

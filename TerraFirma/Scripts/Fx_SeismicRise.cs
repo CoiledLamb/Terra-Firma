@@ -77,11 +77,11 @@ namespace Cleo.TerraFirma.Scripts
             Arrival.Begin();
         }
 
-        private bool Visible() => QudObject.Validate(Projection) && Projection.CurrentCell == Cell
-            && Cell.ParentZone.IsActive() && Cell.IsVisible() && Cell.GetFirstWall() == null;
+        private bool CanContinue() => QudObject.Validate(Projection) && Projection.CurrentCell == Cell
+            && Cell.ParentZone.IsActive() && Cell.GetFirstWall() == null;
 
         // CombatJuiceManager.clearUpToTurn calls finish even before duration unless this refuses it.
-        public override bool canFinishUpToTurn() => t >= duration || !Visible()
+        public override bool canFinishUpToTurn() => t >= duration || !CanContinue()
             || System.Diagnostics.Stopwatch.GetTimestamp() >= Arrival.Deadline;
 
         private void Report(string reason)
@@ -105,7 +105,7 @@ namespace Cleo.TerraFirma.Scripts
 
         public override void start()
         {
-            if (!Visible()) { Report("not visible/valid at start"); Arrival.FinishArrival(); return; }
+            if (!CanContinue()) { Report("invalid at start"); Arrival.FinishArrival(); return; }
             var tile = new Renderable(Projection.Render.Tile, Projection.Render.RenderString, "&C", null, 'c');
             Sprite = SpriteManager.GetPooledSprite(tile, Transparent: true);
             Foreground = Sprite.color;
@@ -119,14 +119,20 @@ namespace Cleo.TerraFirma.Scripts
         public override void update()
         {
             if (Sprite == null) return;
-            if (!Visible() || t >= duration || System.Diagnostics.Stopwatch.GetTimestamp() >= Arrival.Deadline)
+            if (!CanContinue() || t >= duration || System.Diagnostics.Stopwatch.GetTimestamp() >= Arrival.Deadline)
             {
-                Report(!Visible() ? "lost visibility/validity" : t >= duration ? "completed" : "timeout");
+                Report(!CanContinue() ? "lost validity" : t >= duration ? "completed" : "timeout");
                 Arrival.FinishArrival();
                 Sprite.transform.position = Rest + new Vector3(0, 0, 100);
                 return;
             }
-            if (t < Delay) return;
+            // Visibility gates drawing, never the lifetime of a valid rise.
+            // The clock continues offscreen; when sight returns, draw its current position.
+            if (t < Delay || !Cell.IsVisible())
+            {
+                Sprite.transform.position = Rest + new Vector3(0, 0, 100);
+                return;
+            }
             Sprite.color = Foreground;
             Sprite.backcolor = Background;
             Sprite.detailcolor = Detail;
