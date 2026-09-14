@@ -12,6 +12,7 @@ namespace XRL.World.Parts
     public class Cleo_TerraFirma_SeismicShufflers : IPart
     {
         public int PreviewDuration = 2;
+        public int PassiveRadius = 1;
         public Guid AbilityID;
         public string CommandID;
         public List<GameObject> Projections = new List<GameObject>();
@@ -33,7 +34,9 @@ namespace XRL.World.Parts
                 {
                     CommandID = "Cleo_TerraFirma_SeismicPeek_" + Guid.NewGuid().ToString("N");
                     AbilityID = E.Actor.AddActivatedAbility("Seismic Peek", CommandID, "Items",
-                        "Briefly project walls from one stratum below. Prototype: no charge cost.", "~");
+                        "Project walls from one stratum below in a 5x5 area with its corners omitted. " +
+                        "Real walls take priority. The preview does not permanently map this area. " +
+                        "Prototype: two-turn duration, no charge cost.", "~");
                 }
             }
             return base.HandleEvent(E);
@@ -69,9 +72,18 @@ namespace XRL.World.Parts
                 Cell below = Below(wearer.CurrentCell);
                 if (below != null)
                 {
-                    below.SetExplored();
+                    int mapped = 0;
+                    for (int dy = -PassiveRadius; dy <= PassiveRadius; dy++)
+                    for (int dx = -PassiveRadius; dx <= PassiveRadius; dx++)
+                    {
+                        int x = below.X + dx, y = below.Y + dy;
+                        if (x < 0 || y < 0 || x >= below.ParentZone.Width || y >= below.ParentZone.Height)
+                            continue;
+                        below.ParentZone.GetCell(x, y).SetExplored();
+                        mapped++;
+                    }
                     Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHUFFLERS",
-                        $"mapped {below.ParentZone.ZoneID}@{below.X},{below.Y}");
+                        $"mapped {mapped} cells around {below.ParentZone.ZoneID}@{below.X},{below.Y}");
                 }
             }
             return base.HandleEvent(E);
