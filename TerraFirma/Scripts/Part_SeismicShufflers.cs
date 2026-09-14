@@ -149,12 +149,18 @@ namespace XRL.World.Parts
                 Cell target = origin.ParentZone.GetCell(x, y);
                 Cleo.TerraFirma.Scripts.SeismicRise arrival = null;
                 // Skip overlays where real walls occupy the destination or the short rise path.
-                if (RiseSeconds > 0 && target.IsVisible() && target.ParentZone.IsActive()
-                    && target.GetFirstWall() == null
-                    && (y + 1 >= target.ParentZone.Height || target.ParentZone.GetCell(x, y + 1).GetFirstWall() == null))
+                string skip = RiseSeconds <= 0 ? "animation disabled"
+                    : !target.ParentZone.IsActive() ? "inactive zone"
+                    : !target.IsVisible() ? "unseen cell"
+                    : target.GetFirstWall() != null ? "real wall in destination"
+                    : y + 1 < target.ParentZone.Height && target.ParentZone.GetCell(x, y + 1).GetFirstWall() != null
+                        ? "real wall immediately south" : null;
+                if (skip == null)
                     arrival = new Cleo.TerraFirma.Scripts.SeismicRise(projection, target,
                         XRL.Rules.Stat.RandomCosmetic(0, Math.Max(0, RiseStaggerMs)) / 1000f,
                         RiseSeconds, RisePixels);
+                else
+                    Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHUFFLERS-RISE", $"{x},{y}: skipped ({skip})");
                 // Hide before insertion so there is no frame showing the final wall before its rise.
                 target.AddObject(projection);
                 if (arrival != null)

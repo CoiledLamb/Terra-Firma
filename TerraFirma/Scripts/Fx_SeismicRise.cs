@@ -40,6 +40,9 @@ namespace XRL.World.Parts
 
         public override bool HandleEvent(EndTurnEvent E)
         {
+            if (Rising && System.Diagnostics.Stopwatch.GetTimestamp() >= Deadline)
+                Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHUFFLERS-RISE",
+                    $"timeout fallback at {ParentObject.CurrentCell?.X},{ParentObject.CurrentCell?.Y}");
             if (!Rising || System.Diagnostics.Stopwatch.GetTimestamp() >= Deadline)
                 FinishArrival();
             return base.HandleEvent(E);
@@ -60,6 +63,7 @@ namespace Cleo.TerraFirma.Scripts
         private ex3DSprite2 Sprite;
         private Vector3 Rest;
         private Color Foreground, Background, Detail;
+        private bool Reported;
 
         public SeismicRise(QudObject projection, Cell cell, float delay, float rise, float distance)
         {
@@ -76,9 +80,21 @@ namespace Cleo.TerraFirma.Scripts
         private bool Visible() => QudObject.Validate(Projection) && Projection.CurrentCell == Cell
             && Cell.ParentZone.IsActive() && Cell.IsVisible() && Cell.GetFirstWall() == null;
 
+        // CombatJuiceManager.clearUpToTurn calls finish even before duration unless this refuses it.
+        public override bool canFinishUpToTurn() => t >= duration || !Visible()
+            || System.Diagnostics.Stopwatch.GetTimestamp() >= Arrival.Deadline;
+
+        private void Report(string reason)
+        {
+            if (Reported) return;
+            Reported = true;
+            Helpers.VerifyLog("SHUFFLERS-RISE",
+                $"{Cell.X},{Cell.Y}: {reason}; elapsed={t:F3}s delay={Delay:F3}s duration={duration:F3}s");
+        }
+
         public override void start()
         {
-            if (!Visible()) { Arrival.FinishArrival(); return; }
+            if (!Visible()) { Report("not visible/valid at start"); Arrival.FinishArrival(); return; }
             var tile = new Renderable(Projection.Render.Tile, Projection.Render.RenderString, "&C", null, 'c');
             Sprite = SpriteManager.GetPooledSprite(tile, Transparent: true);
             Foreground = Sprite.color;
@@ -94,6 +110,7 @@ namespace Cleo.TerraFirma.Scripts
             if (Sprite == null) return;
             if (!Visible() || t >= duration || System.Diagnostics.Stopwatch.GetTimestamp() >= Arrival.Deadline)
             {
+                Report(!Visible() ? "lost visibility/validity" : t >= duration ? "completed" : "timeout");
                 Arrival.FinishArrival();
                 Sprite.transform.position = Rest + new Vector3(0, 0, 100);
                 return;
@@ -109,6 +126,7 @@ namespace Cleo.TerraFirma.Scripts
 
         public override void finish()
         {
+            Report(t >= duration ? "completed" : "forced finish before completion");
             Arrival.FinishArrival();
             if (Sprite != null) { SpriteManager.Return(Sprite); Sprite = null; }
             base.finish();
