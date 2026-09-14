@@ -14,6 +14,9 @@ namespace XRL.World.Parts
         public int PreviewDuration = 2;
         public int PassiveRadius = 1;
         public int PeekChargeUse = 100;
+        public string PeekTile;
+        public string PeekColor = "&y";
+        public char PeekDetailColor = 'C';
         public Guid AbilityID;
         public string CommandID;
         public List<GameObject> Projections = new List<GameObject>();
@@ -44,6 +47,10 @@ namespace XRL.World.Parts
                         "Project holograms of nearby walls one stratum below you.\n\n" +
                         $"Area: 5x5, excluding corners\nDuration: {PreviewDuration} rounds\nCharge use: {PeekChargeUse}", "~");
                 }
+                // ActivatedAbilityEntry.GetUITile honors an explicit renderable before XML defaults.
+                var ability = E.Actor.GetPart<ActivatedAbilities>()?.GetAbility(AbilityID);
+                if (ability != null && !string.IsNullOrEmpty(PeekTile))
+                    ability.UITileDefault = new ConsoleLib.Console.Renderable(PeekTile, "~", PeekColor, null, PeekDetailColor);
             }
             return base.HandleEvent(E);
         }
