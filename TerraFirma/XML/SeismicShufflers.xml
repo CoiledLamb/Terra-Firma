@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<objects>
+  <!-- Codex PROPOSAL: test-only stats, borrowed art, and functional draft text.
+       Wish-only until the passive mapping and stationary holograms are verified. -->
+  <object Name="Cleo_TerraFirma_SeismicShufflers" Inherits="BaseBoot">
+    <part Name="Render" DisplayName="seismic shufflers" Tile="Items/sw_boots_tech.bmp" ColorString="&amp;C" DetailColor="c" />
+    <part Name="Armor" WornOn="Feet" AV="0" DV="0" />
+    <part Name="Physics" Weight="7" />
+    <part Name="Commerce" Value="0" />
+    <part Name="Description" Short="Prototype boots for surveying the stratum below." />
+    <part Name="RulesDescription" Text="Walking maps the cell one stratum below for later exploration. Seismic Peek briefly projects nearby lower-floor walls. Prototype: no charge cost; no custom rise or disappearance animation." />
+    <part Name="Cleo_TerraFirma_SeismicShufflers" PreviewDuration="2" />
+    <tag Name="Tier" Value="1" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
+  <!-- Eater Hologram precedent: layer 6, non-solid/non-occluding, native material and
+       invulnerability. Wall sprites only: no wall tags, painting, or gameplay parts. -->
+  <object Name="Cleo_TerraFirma_SeismicProjection" Inherits="Item">
+    <part Name="Render" DisplayName="holographic wall" RenderString="219" RenderLayer="6" ColorString="&amp;C" DetailColor="c" Occluding="false" RenderIfDark="true" />
+    <part Name="Physics" Weight="0" Takeable="false" Solid="false" />
+    <part Name="Description" Short="A temporary projection of a wall one stratum below." />
+    <part Name="HologramMaterial" />
+    <part Name="HologramInvulnerability" />
+    <part Name="Temporary" Duration="2" />
+    <tag Name="IgnoresGravity" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
+</objects>
