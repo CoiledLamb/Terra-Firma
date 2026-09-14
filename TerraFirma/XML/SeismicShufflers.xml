@@ -12,7 +12,7 @@
     <part Name="EnergyCellSocket" SlotType="EnergyCell" />
     <part Name="AIDefensiveEnergyCellReload" />
     <part Name="AIPassiveEnergyCellReload" />
-    <part Name="Cleo_TerraFirma_SeismicShufflers" PreviewDuration="2" PassiveRadius="1" ChargeUse="1" PeekChargeUse="100" PeekTile="Abilities/seismic peek.png" PeekColor="&amp;C" PeekDetailColor="y" />
+    <part Name="Cleo_TerraFirma_SeismicShufflers" PreviewDuration="2" PassiveRadius="1" ChargeUse="1" PeekChargeUse="100" RiseSeconds="0.25" RiseStaggerMs="250" RisePixels="8" PeekTile="Abilities/seismic peek.png" PeekColor="&amp;C" PeekDetailColor="y" />
     <tag Name="Tier" Value="3" />
     <tag Name="ExcludeFromDynamicEncounters" />
   </object>
@@ -23,6 +23,7 @@
     <part Name="Physics" Weight="0" Takeable="false" Solid="false" />
     <part Name="Description" Short="A temporary projection of a wall one stratum below." />
     <part Name="HologramMaterial" />
+    <part Name="Cleo_TerraFirma_SeismicArrival" />
     <part Name="HologramInvulnerability" />
     <part Name="Temporary" Duration="2" />
     <tag Name="IgnoresGravity" />

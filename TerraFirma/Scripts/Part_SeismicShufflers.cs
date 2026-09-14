@@ -14,6 +14,9 @@ namespace XRL.World.Parts
         public int PreviewDuration = 2;
         public int PassiveRadius = 1;
         public int PeekChargeUse = 100;
+        public float RiseSeconds = 0.25f;
+        public int RiseStaggerMs = 250;
+        public float RisePixels = 8f;
         public string PeekTile;
         public string PeekColor = "&y";
         public char PeekDetailColor = 'C';
@@ -140,6 +143,14 @@ namespace XRL.World.Parts
                 projection.GetPart<Temporary>().Duration = Math.Max(1, PreviewDuration);
                 projection.GetPart<Temporary>().LastTurn = The.Game.Turns;
                 origin.ParentZone.GetCell(x, y).AddObject(projection);
+                Cell target = projection.CurrentCell;
+                // Skip overlays where real walls occupy the destination or the short rise path.
+                if (RiseSeconds > 0 && target.IsVisible() && target.ParentZone.IsActive()
+                    && target.GetFirstWall() == null
+                    && (y + 1 >= target.ParentZone.Height || target.ParentZone.GetCell(x, y + 1).GetFirstWall() == null))
+                    CombatJuiceManager.enqueueEntry(new Cleo.TerraFirma.Scripts.SeismicRise(projection, target,
+                        XRL.Rules.Stat.RandomCosmetic(0, Math.Max(0, RiseStaggerMs)) / 1000f,
+                        RiseSeconds, RisePixels), async: true);
                 Projections.Add(projection);
                 walls++;
             }
