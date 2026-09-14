@@ -113,6 +113,10 @@ namespace XRL.World.Parts
             GameObject wearer = Wearer;
             if (wearer == null || !wearer.IsPlayer())
                 return false;
+            // Temporary expiry invalidates/removes projections; stale references must not block a new peek.
+            foreach (GameObject projection in Projections)
+                if (GameObject.Validate(projection) && projection.CurrentCell != null)
+                    return wearer.Fail("Wait for the current projection to disappear.");
             Cell origin = wearer.CurrentCell;
             Cell below = Below(origin);
             if (below == null)
