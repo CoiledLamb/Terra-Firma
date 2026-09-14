@@ -15,16 +15,34 @@ namespace XRL.World.Parts
         [NonSerialized] public bool Rising;
         [NonSerialized] public long Deadline;
 
-        public override bool Render(RenderEvent E)
+        public void Begin()
         {
-            if (Rising && System.Diagnostics.Stopwatch.GetTimestamp() < Deadline)
-            {
-                E.Tile = null;
-                E.RenderString = "";
-                return false;
-            }
+            Rising = true;
+            Deadline = System.Diagnostics.Stopwatch.GetTimestamp() + 2 * System.Diagnostics.Stopwatch.Frequency;
+            ParentObject.Render.Visible = false;
+        }
+
+        public void FinishArrival()
+        {
             Rising = false;
-            return base.Render(E);
+            if (QudObject.Validate(ParentObject) && ParentObject.Render != null)
+                ParentObject.Render.Visible = true;
+        }
+
+        public override bool WantEvent(int ID, int cascade) => base.WantEvent(ID, cascade)
+            || ID == AfterGameLoadedEvent.ID || ID == EndTurnEvent.ID;
+
+        public override bool HandleEvent(AfterGameLoadedEvent E)
+        {
+            FinishArrival();
+            return base.HandleEvent(E);
+        }
+
+        public override bool HandleEvent(EndTurnEvent E)
+        {
+            if (!Rising || System.Diagnostics.Stopwatch.GetTimestamp() >= Deadline)
+                FinishArrival();
+            return base.HandleEvent(E);
         }
     }
 }
@@ -52,8 +70,7 @@ namespace Cleo.TerraFirma.Scripts
             Distance = distance;
             duration = Delay + Rise;
             Arrival = projection.GetPart<Cleo_TerraFirma_SeismicArrival>();
-            Arrival.Rising = true;
-            Arrival.Deadline = System.Diagnostics.Stopwatch.GetTimestamp() + 2 * System.Diagnostics.Stopwatch.Frequency;
+            Arrival.Begin();
         }
 
         private bool Visible() => QudObject.Validate(Projection) && Projection.CurrentCell == Cell
@@ -61,7 +78,7 @@ namespace Cleo.TerraFirma.Scripts
 
         public override void start()
         {
-            if (!Visible()) { Arrival.Rising = false; return; }
+            if (!Visible()) { Arrival.FinishArrival(); return; }
             var tile = new Renderable(Projection.Render.Tile, Projection.Render.RenderString, "&C", null, 'c');
             Sprite = SpriteManager.GetPooledSprite(tile, Transparent: true);
             Foreground = Sprite.color;
@@ -77,7 +94,7 @@ namespace Cleo.TerraFirma.Scripts
             if (Sprite == null) return;
             if (!Visible() || t >= duration || System.Diagnostics.Stopwatch.GetTimestamp() >= Arrival.Deadline)
             {
-                Arrival.Rising = false;
+                Arrival.FinishArrival();
                 Sprite.transform.position = Rest + new Vector3(0, 0, 100);
                 return;
             }
@@ -92,7 +109,7 @@ namespace Cleo.TerraFirma.Scripts
 
         public override void finish()
         {
-            Arrival.Rising = false;
+            Arrival.FinishArrival();
             if (Sprite != null) { SpriteManager.Return(Sprite); Sprite = null; }
             base.finish();
         }
