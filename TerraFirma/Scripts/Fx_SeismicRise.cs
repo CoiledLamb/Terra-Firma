@@ -89,7 +89,18 @@ namespace Cleo.TerraFirma.Scripts
             if (Reported) return;
             Reported = true;
             Helpers.VerifyLog("SHUFFLERS-RISE",
-                $"{Cell.X},{Cell.Y}: {reason}; elapsed={t:F3}s delay={Delay:F3}s duration={duration:F3}s");
+                $"{Cell.X},{Cell.Y}: {reason}; elapsed={t:F3}s delay={Delay:F3}s duration={duration:F3}s; {CheckDetails()}");
+        }
+
+        private string CheckDetails()
+        {
+            bool valid = QudObject.Validate(Projection);
+            Cell current = valid ? Projection.CurrentCell : null;
+            return $"projectionValid={valid}, sameCell={current == Cell}, " +
+                $"currentCell={(current == null ? "none" : current.X + "," + current.Y)}, " +
+                $"zoneActive={Cell.ParentZone.IsActive()}, cellVisible={Cell.IsVisible()}, " +
+                $"destinationWall={Cell.GetFirstWall()?.Blueprint ?? "none"}, " +
+                $"timedOut={System.Diagnostics.Stopwatch.GetTimestamp() >= Arrival.Deadline}";
         }
 
         public override void start()
