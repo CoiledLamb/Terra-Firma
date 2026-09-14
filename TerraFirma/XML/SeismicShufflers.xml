@@ -8,7 +8,7 @@
     <part Name="Physics" Weight="7" />
     <part Name="Commerce" Value="0" />
     <part Name="Description" Short="Prototype boots for surveying the stratum below." />
-    <part Name="RulesDescription" Text="Each step maps a 3x3 area one stratum below for later exploration. Seismic Peek briefly projects lower-floor walls in a 5x5 area with its corners omitted, without permanently mapping that area. Real walls take priority over projections. Prototype: no charge cost; no custom rise or disappearance animation." />
+    <part Name="RulesDescription" Text="Each step maps a 3x3 area one stratum below you. You may activate this item to briefly project holograms of nearby walls on that stratum." />
     <part Name="Cleo_TerraFirma_SeismicShufflers" PreviewDuration="2" PassiveRadius="1" />
     <tag Name="Tier" Value="1" />
     <tag Name="ExcludeFromDynamicEncounters" />
