@@ -3,7 +3,7 @@
   <!-- Codex PROPOSAL: borrowed art, placeholder value and flavor description.
        Wish-only while art and remaining balance are unfinished. -->
   <object Name="Cleo_TerraFirma_SeismicShufflers" Inherits="BaseBoot">
-    <part Name="Render" DisplayName="seismic shufflers" Tile="Items/sw_boots_tech.bmp" ColorString="&amp;C" DetailColor="c" />
+    <part Name="Render" DisplayName="seismic shufflers" Tile="Items/sw_boots_tech.bmp" ColorString="&amp;y" DetailColor="C" />
     <part Name="Armor" WornOn="Feet" AV="1" DV="0" />
     <part Name="Physics" Weight="7" />
     <part Name="Commerce" Value="0" />
