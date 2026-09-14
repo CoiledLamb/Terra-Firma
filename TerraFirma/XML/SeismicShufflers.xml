@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <objects>
-  <!-- Codex PROPOSAL: test-only stats, borrowed art, and functional draft text.
-       Wish-only until the passive mapping and stationary holograms are verified. -->
+  <!-- Codex PROPOSAL: borrowed art, placeholder value and flavor description.
+       Wish-only while art and remaining balance are unfinished. -->
   <object Name="Cleo_TerraFirma_SeismicShufflers" Inherits="BaseBoot">
     <part Name="Render" DisplayName="seismic shufflers" Tile="Items/sw_boots_tech.bmp" ColorString="&amp;C" DetailColor="c" />
-    <part Name="Armor" WornOn="Feet" AV="0" DV="0" />
+    <part Name="Armor" WornOn="Feet" AV="1" DV="0" />
     <part Name="Physics" Weight="7" />
     <part Name="Commerce" Value="0" />
     <part Name="Description" Short="Prototype boots for surveying the stratum below." />
     <part Name="RulesDescription" Text="Each step maps a 3x3 area one stratum below you. You may activate this item to briefly project holograms of nearby walls on that stratum." />
-    <part Name="Cleo_TerraFirma_SeismicShufflers" PreviewDuration="2" PassiveRadius="1" />
-    <tag Name="Tier" Value="1" />
+    <part Name="EnergyCellSocket" SlotType="EnergyCell" />
+    <part Name="AIDefensiveEnergyCellReload" />
+    <part Name="AIPassiveEnergyCellReload" />
+    <part Name="Cleo_TerraFirma_SeismicShufflers" PreviewDuration="2" PassiveRadius="1" ChargeUse="1" PeekChargeUse="100" />
+    <tag Name="Tier" Value="3" />
     <tag Name="ExcludeFromDynamicEncounters" />
   </object>
   <!-- Eater Hologram precedent: layer 6, non-solid/non-occluding, native material and

@@ -4,18 +4,25 @@ using XRL.Wish;
 
 namespace XRL.World.Parts
 {
-    // Codex PROPOSAL: wish-only prototype. No charge cost, final stats, or custom VFX yet.
+    // Wish-only while art and remaining balance are unfinished.
     // EnteredCell registration follows Yurtmat/CobblefurCloak. Lower-zone access uses
     // Cell.GetCellFromDirectionGlobal; Temporary owns projection expiry and zone thaw.
     [Serializable]
     [HasWishCommand]
-    public class Cleo_TerraFirma_SeismicShufflers : IPart
+    public class Cleo_TerraFirma_SeismicShufflers : IPoweredPart
     {
         public int PreviewDuration = 2;
         public int PassiveRadius = 1;
+        public int PeekChargeUse = 100;
         public Guid AbilityID;
         public string CommandID;
         public List<GameObject> Projections = new List<GameObject>();
+
+        public Cleo_TerraFirma_SeismicShufflers()
+        {
+            ChargeUse = 1;
+            WorksOnEquipper = true;
+        }
 
         public override bool SameAs(IPart p) => false;
 
@@ -34,9 +41,8 @@ namespace XRL.World.Parts
                 {
                     CommandID = "Cleo_TerraFirma_SeismicPeek_" + Guid.NewGuid().ToString("N");
                     AbilityID = E.Actor.AddActivatedAbility("Seismic Peek", CommandID, "Items",
-                        "Project walls from one stratum below in a 5x5 area with its corners omitted. " +
-                        "Real walls take priority. The preview does not permanently map this area. " +
-                        "Prototype: two-turn duration, no charge cost.", "~");
+                        "Project holograms of nearby walls one stratum below you.\n\n" +
+                        $"Area: 5x5, excluding corners\nDuration: {PreviewDuration} rounds\nCharge use: {PeekChargeUse}", "~");
                 }
             }
             return base.HandleEvent(E);
@@ -70,7 +76,8 @@ namespace XRL.World.Parts
             if (wearer != null && wearer.IsPlayer() && E.Object == wearer && !E.Forced && !E.System)
             {
                 Cell below = Below(wearer.CurrentCell);
-                if (below != null)
+                // StrideMason likewise charges only when its movement effect can run.
+                if (below != null && IsReady(UseCharge: true))
                 {
                     int mapped = 0;
                     for (int dy = -PassiveRadius; dy <= PassiveRadius; dy++)
@@ -100,6 +107,8 @@ namespace XRL.World.Parts
             Cell below = Below(origin);
             if (below == null)
                 return wearer.Fail("There is no lower stratum to scan here.");
+            if (!IsReady(UseCharge: true, ChargeUse: PeekChargeUse))
+                return wearer.Fail("The seismic shufflers cannot power a scan.");
 
             ClearProjections();
             int walls = 0;
