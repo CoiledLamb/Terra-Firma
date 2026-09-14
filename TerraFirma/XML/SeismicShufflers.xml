@@ -12,7 +12,7 @@
     <part Name="EnergyCellSocket" SlotType="EnergyCell" />
     <part Name="AIDefensiveEnergyCellReload" />
     <part Name="AIPassiveEnergyCellReload" />
-    <part Name="Cleo_TerraFirma_SeismicShufflers" PreviewDuration="2" PassiveRadius="1" ChargeUse="1" PeekChargeUse="100" PeekTile="Mutations/clairvoyance.bmp" PeekColor="&amp;y" PeekDetailColor="C" />
+    <part Name="Cleo_TerraFirma_SeismicShufflers" PreviewDuration="2" PassiveRadius="1" ChargeUse="1" PeekChargeUse="100" PeekTile="Abilities/seismic peek.png" PeekColor="&amp;y" PeekDetailColor="C" />
     <tag Name="Tier" Value="3" />
     <tag Name="ExcludeFromDynamicEncounters" />
   </object>
