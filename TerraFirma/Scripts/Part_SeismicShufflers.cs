@@ -4,7 +4,7 @@ using XRL.Wish;
 
 namespace XRL.World.Parts
 {
-    // Wish-only while art and remaining balance are unfinished.
+    // Acquisition and balance are configured in XML.
     // EnteredCell registration follows Yurtmat/CobblefurCloak. Lower-zone access uses
     // Cell.GetCellFromDirectionGlobal; Temporary owns projection expiry and zone thaw.
     [Serializable]
