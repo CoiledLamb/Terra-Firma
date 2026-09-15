@@ -47,8 +47,8 @@ namespace XRL.World.Parts
                 {
                     CommandID = "Cleo_TerraFirma_SeismicPeek_" + Guid.NewGuid().ToString("N");
                     AbilityID = E.Actor.AddActivatedAbility("Seismic Peek", CommandID, "Items",
-                        "Project holograms of nearby walls one stratum below you.\n\n" +
-                        $"Area: 5x5, excluding corners\nDuration: {PreviewDuration} rounds\nCharge use: {PeekChargeUse}", "~");
+                        "You briefly project holograms of nearby walls one stratum below you.\n\n" +
+                        $"Duration: {PreviewDuration} rounds\nLow charge draw on activate.", "~");
                 }
                 // ActivatedAbilityEntry.GetUITile honors an explicit renderable before XML defaults.
                 var ability = E.Actor.GetPart<ActivatedAbilities>()?.GetAbility(AbilityID);
