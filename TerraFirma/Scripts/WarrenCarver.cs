@@ -2967,6 +2967,9 @@ namespace Cleo.TerraFirma.Scripts
 			public string Layout = "boxes";
 			public int Floor, Pockets, Degraded, Attempt, Seed;
 			public int AquiferPools, AquiferVeins;
+			// Codex PROPOSAL: null on older saved measurements, never inferred as natural.
+			public string BuildMethod;
+			public int AugmentCells, WinningAugmentRounds, ExploredAugmentRounds;
 		}
 
 		/// <summary>One complete attempt (buildOnce). Grid-side only; ApplyToZone lands it.</summary>
@@ -3249,6 +3252,8 @@ namespace Cleo.TerraFirma.Scripts
 				Roles = roles.Tally, Yard = roles.YardDesc, Layout = blockLayout ? "blocks" : "boxes",
 				Floor = m.Floor, Pockets = pockets.Count, Degraded = degraded, Attempt = attempt, Seed = seed,
 				AquiferPools = aq.Pools, AquiferVeins = aq.Veins,
+				BuildMethod = aug != null && aug.Count > 0 ? "augmented" : "natural",
+				AugmentCells = aug?.Count ?? 0,
 			};
 		}
 
@@ -3411,12 +3416,12 @@ namespace Cleo.TerraFirma.Scripts
 		public static Result BuildAugmented(Zone Z, int seed, int assigned)
 		{
 			var aug = new HashSet<int>(); Result r = null; int rounds = 0; bool desperate = false;
-			HashSet<int> bestAug = null; int bestStage = -1;
+			HashSet<int> bestAug = null; int bestStage = -1, bestRounds = 0;
 			for (int t = 0; t <= AUG_TRIES; t++)
 			{
 				r = Build(Z, seed, assigned, apply: false, aug.Count > 0 ? aug : null);
-				if (r.Built && r.StageIdx > bestStage) { bestStage = r.StageIdx; bestAug = new HashSet<int>(aug); }
-				if (r.Built && r.StageIdx >= assigned) { bestAug = new HashSet<int>(aug); break; }
+				if (r.Built && r.StageIdx > bestStage) { bestStage = r.StageIdx; bestAug = new HashSet<int>(aug); bestRounds = rounds; }
+				if (r.Built && r.StageIdx >= assigned) { bestAug = new HashSet<int>(aug); bestRounds = rounds; break; }
 				if (t == AUG_TRIES) break;
 				int grown = GrowAugment(Z, aug, assigned, desperate);
 				if (grown == 0 && !desperate) { desperate = true; grown = GrowAugment(Z, aug, assigned, true); }
@@ -3426,13 +3431,17 @@ namespace Cleo.TerraFirma.Scripts
 			if (bestAug != null)
 			{
 				var final = Build(Z, seed, assigned, apply: true, bestAug.Count > 0 ? bestAug : null);
+				final.WinningAugmentRounds = bestRounds;
+				final.ExploredAugmentRounds = rounds;
 				Helpers.VerifyLog("WARREN", $"augment: {bestAug.Count} cells over {rounds} rounds -> {final.Stage} (claimed {STAGES[assigned].Name})");
 				return final;
 			}
 			// FINAL RUNG - wipe and rebuild (outside contributor; the engine's own
 			// ForceConnections closes reconnection for anything the defiles miss)
 			Helpers.VerifyLog("WARREN", $"augment ladder exhausted ({rounds} rounds) - REBUILD RUNG fires for {Z.ZoneID}");
-			return RebuildZone(Z, seed, assigned);
+			var rebuilt = RebuildZone(Z, seed, assigned);
+			rebuilt.ExploredAugmentRounds = rounds;
+			return rebuilt;
 		}
 
 		/// <summary>Record the dry border floor as the traversability contract, fill
@@ -3451,6 +3460,8 @@ namespace Cleo.TerraFirma.Scripts
 				foreach (int x2 in new[] { 0, g0.W - 1 })
 					if (g0.C[g0.Idx(x2, y2)] == FLOOR && g0.Host[g0.Idx(x2, y2)] != 0 && g0.Water[g0.Idx(x2, y2)] == 0) aug.Remove(g0.Idx(x2, y2));
 			var r = Build(Z, seed, assigned, apply: true, aug);
+			r.BuildMethod = "rebuild";
+			r.AugmentCells = aug.Count;
 			Helpers.VerifyLog("WARREN", r.Built
 				? $"rebuild rung: {Z.ZoneID} stood a {r.Stage} on the maximal band ({aug.Count} cells recast)"
 				: $"rebuild rung FAILED for {Z.ZoneID}: {r.Reason} - claim will not stand");

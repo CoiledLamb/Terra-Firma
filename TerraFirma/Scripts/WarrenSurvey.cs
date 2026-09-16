@@ -58,6 +58,21 @@ namespace Cleo.TerraFirma.Scripts
 			{
 				text.AppendLine($"Stages: working {built.Count(r => r.Stage == "working")}, camp {built.Count(r => r.Stage == "camp")}, flourishing {built.Count(r => r.Stage == "flourishing")}");
 				text.AppendLine($"Layouts: boxes {built.Count(r => r.Layout == "boxes")}, blocks {built.Count(r => r.Layout == "blocks")}");
+				var natural = built.Where(r => r.BuildMethod == "natural").ToList();
+				var augmented = built.Where(r => r.BuildMethod == "augmented").ToList();
+				var rebuilt = built.Where(r => r.BuildMethod == "rebuild").ToList();
+				text.AppendLine($"Build methods: natural {natural.Count}, augmented {augmented.Count}, rebuild {rebuilt.Count}, unknown {built.Count - natural.Count - augmented.Count - rebuilt.Count}");
+				if (augmented.Count > 0)
+				{
+					text.AppendLine($"Augmented sites: cells mean {augmented.Average(r => r.AugmentCells):0.0}, total {augmented.Sum(r => r.AugmentCells)}, max {augmented.Max(r => r.AugmentCells)}");
+					text.AppendLine($"Winning growth rounds: mean {augmented.Average(r => r.WinningAugmentRounds):0.0}, max {augmented.Max(r => r.WinningAugmentRounds)}");
+				}
+				var known = built.Where(r => r.BuildMethod != null).ToList();
+				if (known.Count > 0)
+					text.AppendLine($"Growth rounds explored: {known.Sum(r => r.ExploredAugmentRounds)} across {known.Count} measured successes (includes discarded growth).");
+				if (rebuilt.Count > 0)
+					text.AppendLine($"Rebuild footprint: {rebuilt.Sum(r => r.AugmentCells)} cells total, including existing rock.");
+				text.AppendLine("Natural = no added rock in the winning plan. Older results have unknown methods; details are logged per zone.");
 				text.AppendLine($"Floor cells: mean {built.Average(r => r.Floor):0.0}, min {built.Min(r => r.Floor)}, max {built.Max(r => r.Floor)}");
 				text.AppendLine($"Rooms: mean {built.Average(r => r.Pockets):0.0}, min {built.Min(r => r.Pockets)}, max {built.Max(r => r.Pockets)}");
 				text.AppendLine($"Aquifer sites: {built.Count(r => r.AquiferPools > 0)}/{built.Count}; pools {built.Sum(r => r.AquiferPools)}, veins {built.Sum(r => r.AquiferVeins)}");
