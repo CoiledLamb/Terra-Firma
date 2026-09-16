@@ -1763,10 +1763,15 @@ namespace Cleo.TerraFirma.Scripts
 		// gets the articulation guard automatically instead of bypassing a list it
 		// was never in. Directive ids (chalkline*, yardboard) have
 		// no blueprint and read not-solid, as before.
+		// Codex PROPOSAL: recognize the same directives that PlaceItems translates,
+		// before calling the engine's error-reporting blueprint lookup.
+		private static bool IsPlacementDirective(string id)
+			=> id != null && (id.StartsWith("chalkline", StringComparison.Ordinal) || id == "yardboard");
+
 		private static readonly Dictionary<string, bool> _solidCache = new Dictionary<string, bool>();
 		private static bool IsSolidItem(string id)
 		{
-			if (id == null) return false;
+			if (id == null || IsPlacementDirective(id)) return false;
 			if (!_solidCache.TryGetValue(id, out bool s))
 				_solidCache[id] = s = GameObjectFactory.Factory.GetBlueprint(id)?.GetPartParameter("Physics", "Solid", false) ?? false;
 			return s;
@@ -2790,6 +2795,7 @@ namespace Cleo.TerraFirma.Scripts
 				var flipCache = new Dictionary<string, string>();
 				string ColdFormOf(string id)
 				{
+					if (IsPlacementDirective(id)) return null;
 					if (flipCache.TryGetValue(id, out string known)) return known;
 					string to = null;
 					var bp = GameObjectFactory.Factory.GetBlueprint(id);
