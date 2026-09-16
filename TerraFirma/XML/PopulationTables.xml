@@ -100,6 +100,14 @@
 			<object Weight="20" Blueprint="reclaimed" />
 		</group>
 	</population>
+	<!-- Codex PROPOSAL: site-level aquifer gate; conditional pool count is 1-2.
+	     Retries replay the same seeded roll. Suitable geology is still required. -->
+	<population Name="Cleo_TerraFirma_WarrenAquifers">
+		<group Name="Roll" Style="pickone">
+			<object Weight="80" Blueprint="dry" />
+			<object Weight="20" Blueprint="aquifer" />
+		</group>
+	</population>
 	<population Name="Cleo_TerraFirma_WarrenStage">
 		<group Name="Roll" Style="pickone">
 			<object Weight="1" Blueprint="working" />

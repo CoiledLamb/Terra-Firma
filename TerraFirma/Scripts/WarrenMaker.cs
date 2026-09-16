@@ -6,23 +6,14 @@ using XRL.Wish;
 namespace XRL.World.ZoneBuilders
 {
 	/// <summary>
-	/// Warren v2 zone builder (first port pass 2026-08-23). Stamped per-zone by the
-	/// placement extension (WarrenWorldBuilder) at priority 6000 - the same slot
-	/// SnapjawStockadeMaker carves its fort in, i.e. after the canyon, the river and
-	/// the zone template have all finished. Seed derives from the ZoneID so a zone
-	/// carves identically however many times it rebuilds.
-	/// ALWAYS returns true: a zone whose band refuses every attempt yields no warren,
-	/// and that is a legal outcome by ruling (2026-08-18, "a rumor leading to
-	/// something that doesn't pay off is fine" - Qud has abandoned villages). The
-	/// refusal logs loudly instead.
+	/// Codex PROPOSAL: terrain-led warren builder, registered at priority 6000.
+	/// Layout is zone-seeded. Failed sites are recorded and their map notes erased.
+	/// Always return true so deterministic carve errors cannot cause rebuild loops.
 	/// </summary>
 	public class Cleo_TerraFirma_WarrenMaker
 	{
-		/// <summary>Assigned stage from the scout pass (AddZoneBuilder key/value,
-		/// scout-and-quota port 2026-08-25). Under scout placement the warren is
-		/// carved AT WORLDGEN and this builder only runs if the engine ever
-		/// REBUILDS the zone - same seed, same stage, same warren. Empty = the
-		/// wish/legacy path, which rolls its own stage.</summary>
+		/// <summary>Compatibility field for builders already queued in saved worlds.
+		/// Ignored by the terrain-led experiment; new claims do not set it.</summary>
 		public string Stage;
 
 		public bool BuildZone(Zone Z)
@@ -33,37 +24,29 @@ namespace XRL.World.ZoneBuilders
 			// must therefore degrade to an honest no-warren, never a loop.
 			try
 			{
-				int? forced = Stage == "flourishing" ? 2 : Stage == "camp" ? 1 : Stage == "working" ? 0 : (int?)null;
-				// BLIND-CLAIM (user ruled the port 2026-08-25): a staged claim runs
-				// the augment ladder - the zone is made to fit, so the claim cannot
-				// lie. The wish/legacy path (no stage) stays pure canyon truth.
-				var r = forced.HasValue
-					? WarrenCarver.BuildAugmented(Z, WarrenCarver.SeedFor(Z.ZoneID), forced.Value)
-					: WarrenCarver.Build(Z, WarrenCarver.SeedFor(Z.ZoneID));
+				var r = WarrenCarver.BuildTerrain(Z, WarrenCarver.SeedFor(Z.ZoneID));
+				WarrenSurvey.Record(Z.ZoneID, r);
 				if (r.Built)
 					Helpers.VerifyLog("WARREN", $"builder done: {Z.ZoneID} -> {r.Stage}, {r.Occupancy}, attempt {r.Attempt}, {r.Layout}");
 				else
-					SettleRumor(Z);   // under blind-claim this should be unreachable; kept as the belt
+					SettleRumor(Z);
 			}
 			catch (System.Exception x)
 			{
 				Helpers.VerifyLog("WARREN", $"EXCEPTION in builder for {Z.ZoneID}: {x}");
 				MetricsManager.LogException("Cleo_TerraFirma_WarrenMaker", x);
-				// the belt's belt (demoted from placement to exception-only,
-				// 2026-08-25): an exception is the one path left where a claim
-				// could stand over nothing, and a silent lie is ruled invalid
+				WarrenSurvey.Record(Z.ZoneID, new WarrenCarver.Result
+				{
+					Reason = "exception: " + x.GetType().Name,
+					Seed = WarrenCarver.SeedFor(Z.ZoneID)
+				});
 				SettleRumor(Z);
 			}
 			return true;
 		}
 
-		/// <summary>SELF-ERASING RUMORS (RULED 2026-08-23 evening, superseding the
-		/// same-day prospect fallback: "i'd prefer if the 10 or so failed carves
-		/// just stopped existing, so that we end up with 25 somewhat real
-		/// warrens"): a refused zone erases its own promise outright - note
-		/// deleted whether or not the player holds it, orphaned LocationFinder
-		/// widget swept, no physical mark. With the 35-claim overclaim, the world
-		/// converges on ~25 real sites and the journal never lied.</summary>
+		/// <summary>Remove a refused site's map note and orphaned finder.
+		/// Other settlement/encounter references remain a separate audit edge.</summary>
 		private static void SettleRumor(Zone Z)
 		{
 			Qud.API.JournalMapNote note = null;
@@ -99,7 +82,7 @@ namespace XRL.World.ZoneBuilders
 			Zone Z = The.Player?.CurrentZone;
 			if (Z == null) return;
 			int seed = XRL.Rules.Stat.Random(1, int.MaxValue - 1);
-			var r = WarrenCarver.Build(Z, seed);
+			var r = WarrenCarver.BuildTerrain(Z, seed);
 			MessageQueue.AddPlayerMessage(r.Built
 				? $"tfwarrenv2: {r.Stage} warren, {r.Occupancy}, {r.Floor} floor, {r.Pockets} pockets (seed {r.Seed}, attempt {r.Attempt}). Roles in the log."
 				: $"tfwarrenv2: {{{{R|no site}}}} - {r.Reason} (seed {r.Seed}).");

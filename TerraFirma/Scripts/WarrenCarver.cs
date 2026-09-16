@@ -23,7 +23,7 @@ namespace Cleo.TerraFirma.Scripts
 		// occupancy + stage weights MOVED to PopulationTables.xml 2026-08-26
 		// (Cleo_TerraFirma_WarrenOccupancy / WarrenStage, the weighted-config
 		// idiom); rolled seeded via RollLabelTable at the old draw points
-		public const int AQUIFER_MIN = 0;         // aquiferMin
+		public const int AQUIFER_MIN = 1;         // conditional count after the XML per-site gate
 		public const int AQUIFER_MAX = 2;         // aquiferMax
 		public const int POOL_MIN = 6;            // poolMin
 		public const int POOL_MAX = 18;           // poolMax
@@ -1063,9 +1063,12 @@ namespace Cleo.TerraFirma.Scripts
 		private class AquiferRec { public int Pools, Veins; }
 		private static AquiferRec PlaceAquifers(Grid g, Band band)
 		{
-			int n = R(AQUIFER_MIN, AQUIFER_MAX);
 			var rec = new AquiferRec();
-			if (n == 0) return rec;
+			// Codex PROPOSAL: one seeded site-level roll, replayed identically on retries.
+			// The 20/80 dial lives in XML; existing terrain water is unaffected.
+			if (RollLabelTable(ref _aquiferRows, "Cleo_TerraFirma_WarrenAquifers",
+				new[] { "dry", "aquifer" }) != "aquifer") return rec;
+			int n = R(AQUIFER_MIN, AQUIFER_MAX);
 			var interior = band.Cells.Where(i =>
 			{
 				int x = i % g.W, y = i / g.W;
@@ -1854,7 +1857,7 @@ namespace Cleo.TerraFirma.Scripts
 		// at the exact points the old constant draws sat - one Rng() draw either
 		// way, so zone determinism holds. A missing table or unknown label fails
 		// LOUD to a known value; the carve laws key on exact label spellings.
-		private static Row[] _occupancyRows, _stageRows;
+		private static Row[] _occupancyRows, _stageRows, _aquiferRows;
 		private static string RollLabelTable(ref Row[] cache, string table, string[] known)
 		{
 			if (cache == null)
@@ -2957,6 +2960,7 @@ namespace Cleo.TerraFirma.Scripts
 			public int StageIdx = -1;   // index into STAGES; the scout's capacity read
 			public string Layout = "boxes";
 			public int Floor, Pockets, Degraded, Attempt, Seed;
+			public int AquiferPools, AquiferVeins;
 		}
 
 		/// <summary>One complete attempt (buildOnce). Grid-side only; ApplyToZone lands it.</summary>
@@ -3238,8 +3242,15 @@ namespace Cleo.TerraFirma.Scripts
 				Built = true, Stage = STAGES[si].Name, StageIdx = si, Occupancy = occupancy,
 				Roles = roles.Tally, Yard = roles.YardDesc, Layout = blockLayout ? "blocks" : "boxes",
 				Floor = m.Floor, Pockets = pockets.Count, Degraded = degraded, Attempt = attempt, Seed = seed,
+				AquiferPools = aq.Pools, AquiferVeins = aq.Veins,
 			};
 		}
+
+		/// <summary>Codex PROPOSAL: terrain-led experiment. Start with the largest
+		/// budget and let reach/floor checks demote it. Never augment or recast terrain.
+		/// The existing retry policy accepts the first licensed layout.</summary>
+		public static Result BuildTerrain(Zone Z, int seed, bool apply = true)
+			=> Build(Z, seed, forcedStage: 2, apply: apply);
 
 		/// <summary>The retry contract (build): same canyon every attempt, first
 		/// attempt that clears the bar wins, and no-warren stays a legal outcome
