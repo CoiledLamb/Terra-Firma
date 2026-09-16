@@ -152,6 +152,7 @@ namespace Cleo.TerraFirma.Scripts
 			public byte[] C, Art, Host, Water, Aqua, Tree, Region, Marker;
 			public short[] Pocket;
 			public string[] Item;           // the dress layer: sim item ids, translated at placement
+			public int SiteTopups;          // Codex PROPOSAL: comparison telemetry only
 			public Dictionary<int, bool> PowerWires; // Codex PROPOSAL: index -> broken exposed line
 			public HashSet<int> EtchedWalls; // Codex PROPOSAL: commons ring cells
 			public string YardBoardText;    // the yard chalkboard's ledger lines (user concept 2026-08-23)
@@ -1907,7 +1908,7 @@ namespace Cleo.TerraFirma.Scripts
 		};
 		private const double DWELLDENSITY = 0.3;   // v1's engine-faithful number
 
-		private static string DressSite(Grid g, Artery art, List<PocketRec> pockets, RolesRec roles, string occupancy, int siteFloor, int si)
+		private static string DressSite(Grid g, Artery art, List<PocketRec> pockets, RolesRec roles, string occupancy, int siteFloor, int si, bool siteTopup = true)
 		{
 			g.Item = new string[g.W * g.H];
 			var placed = new Dictionary<string, int>();
@@ -2606,7 +2607,7 @@ namespace Cleo.TerraFirma.Scripts
 				return null;
 			}
 			int fguard = 0;
-			while (tableItems < wantFloor && misses.Count > 0 && fguard++ < 12)
+			while (siteTopup && tableItems < wantFloor && misses.Count > 0 && fguard++ < 12)
 			{
 				int mi = R(0, misses.Count - 1);
 				var (tbl, p, cs) = misses[mi]; misses.RemoveAt(mi);
@@ -2887,6 +2888,7 @@ namespace Cleo.TerraFirma.Scripts
 				if (have > 1 || (have == 1 && cs.Count < 20)) continue;
 				if (Seat(p, WRollNo(tbl), cs)) roomFloored++;
 			}
+			g.SiteTopups = topups;
 			return $"{items} items, {tableItems} table, {topups} topups, {roomFloored} room-floored, {refused} solid-refused, "
 				+ $"{bunkrooms} bunkroom ({bunkBeds} beds, {bunkShort} short{(bunkNone ? ", no bunk-able dwelling" : "")}), "
 				+ $"{plazas} plaza ({plazaItems} leisure), {workScatter} work-scatter, {monuments} monuments";
@@ -2973,7 +2975,7 @@ namespace Cleo.TerraFirma.Scripts
 		}
 
 		/// <summary>One complete attempt (buildOnce). Grid-side only; ApplyToZone lands it.</summary>
-		private static Result BuildOnce(Zone Z, int seed, int? forced, int attempt, bool blockLayout, bool dress, HashSet<int> aug, out Grid gridOut, out List<PocketRec> pocketsOut)
+		private static Result BuildOnce(Zone Z, int seed, int? forced, int attempt, bool blockLayout, bool dress, HashSet<int> aug, out Grid gridOut, out List<PocketRec> pocketsOut, bool siteTopup = true)
 		{
 			_state = (uint)seed; _noiseSeed = seed;
 			gridOut = null; pocketsOut = null;
@@ -3163,7 +3165,7 @@ namespace Cleo.TerraFirma.Scripts
 			// what a winner's full rebuild produces (timesave 1, user 2026-08-25)
 			if (dress)
 			{
-				string dressStats = DressSite(g, art, pockets, roles, occupancy, m.Floor, si);
+				string dressStats = DressSite(g, art, pockets, roles, occupancy, m.Floor, si, siteTopup);
 				Helpers.VerifyLog("WARREN", $"dress: {dressStats}");
 			}
 			// MOUTH-ACCESS LAW (user greenlit 2026-08-25, sim-proven on the sealed-
@@ -3278,7 +3280,7 @@ namespace Cleo.TerraFirma.Scripts
 				var r = BuildOnce(Z, seed, forcedStage, a, false, apply, aug, out Grid g, out List<PocketRec> pockets);
 				if (r.Built)
 				{
-					if (apply) { ApplyToZone(Z, g); PopulateSite(Z, g, pockets, r); }
+					if (apply) { CompareFurnishing(Z, seed, forcedStage, a, false, aug, g, pockets, r); ApplyToZone(Z, g); PopulateSite(Z, g, pockets, r); }
 					return r;
 				}
 				last = r;
@@ -3288,7 +3290,7 @@ namespace Cleo.TerraFirma.Scripts
 					if (r2.Built)
 					{
 						Helpers.VerifyLog("WARREN", $"blocks rescued the face (attempt {a}, boxes built {r.Reason})");
-						if (apply) { ApplyToZone(Z, g2); PopulateSite(Z, g2, pockets2, r2); }
+						if (apply) { CompareFurnishing(Z, seed, forcedStage, a, true, aug, g2, pockets2, r2); ApplyToZone(Z, g2); PopulateSite(Z, g2, pockets2, r2); }
 						return r2;
 					}
 					last = r2;

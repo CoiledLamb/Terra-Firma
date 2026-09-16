@@ -87,6 +87,9 @@ namespace Cleo.TerraFirma.Scripts
 
 		[WishCommand(Command = "tfwarrenstats")]
 		public static void Survey()
+			=> RunSurvey(true);
+
+		internal static void RunSurvey(bool showReport)
 		{
 			if (The.Game == null) return;
 			// Import remaining old-world claims without pretending already-built sites
@@ -96,7 +99,7 @@ namespace Cleo.TerraFirma.Scripts
 			var records = Read();
 			if (records.Count == 0)
 			{
-				Popup.Show("tfwarrenstats: no registered claims or stonecarver map notes in this world.");
+				if (showReport) Popup.Show("tfwarrenstats: no registered claims or stonecarver map notes in this world.");
 				return;
 			}
 			MessageQueue.AddPlayerMessage("tfwarrenstats: building unvisited claims. This may take a moment.");
@@ -122,7 +125,7 @@ namespace Cleo.TerraFirma.Scripts
 				Helpers.VerifyLog("WARREN-STATS", pair.Key + " " + JsonConvert.SerializeObject(pair.Value));
 			string report = Summarize(records) + $"\nThis survey: {generated} zones loaded, {errors} load errors, {timer.Elapsed.TotalSeconds:0.0}s. Details in Player.log.";
 			Helpers.VerifyLog("WARREN-STATS", report);
-			Popup.Show(report);
+			if (showReport) Popup.Show(report);
 		}
 	}
 }
