@@ -224,7 +224,7 @@
 
   <object Name="Cleo_TerraFirma_Mason" Inherits="Cleo_TerraFirma_Stonecarver">
     <part Name="Render" DisplayName="quarry {{y|mason}}" ColorString="&amp;y" />
-    <part Name="Description" Short="The wrinkles in =pronouns.possessive= grit-caked hands hold the memories of countless forms: a humble glowpad or a hulking slumberling. All things are possible with the right application of force and pressure to a hunk of stone." />
+    <part Name="Description" Short="The wrinkles in =pronouns.possessive= grit-caked hands hold the memories of countless forms: a humble glowpad, a hulking slumberling. All things are possible with the right application of force and pressure to a hunk of stone." />
     <mutation Name="Cleo_TerraFirma_Stoneshaper" Level="4" /> <!-- level DRAFT -->
     <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Mason" /> <!-- mole mason inherits this -->
     <!-- Role RECON 2026-08-15 (user: "we should investigate creature AI roles more thoroughly").
