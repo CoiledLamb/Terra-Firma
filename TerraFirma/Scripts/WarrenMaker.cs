@@ -6,14 +6,14 @@ using XRL.Wish;
 namespace XRL.World.ZoneBuilders
 {
 	/// <summary>
-	/// Codex PROPOSAL: terrain-led warren builder, registered at priority 6000.
+	/// Restored staged warren builder, registered at priority 6000.
 	/// Layout is zone-seeded. Failed sites are recorded and their map notes erased.
 	/// Always return true so deterministic carve errors cannot cause rebuild loops.
 	/// </summary>
 	public class Cleo_TerraFirma_WarrenMaker
 	{
-		/// <summary>Compatibility field for builders already queued in saved worlds.
-		/// Ignored by the terrain-led experiment; new claims do not set it.</summary>
+		/// <summary>Assigned stage from world placement. Staged claims use the
+		/// augmentation ladder; empty retains the original unstaged build path.</summary>
 		public string Stage;
 
 		public bool BuildZone(Zone Z)
@@ -24,7 +24,10 @@ namespace XRL.World.ZoneBuilders
 			// must therefore degrade to an honest no-warren, never a loop.
 			try
 			{
-				var r = WarrenCarver.BuildTerrain(Z, WarrenCarver.SeedFor(Z.ZoneID));
+				int? forced = Stage == "flourishing" ? 2 : Stage == "camp" ? 1 : Stage == "working" ? 0 : (int?)null;
+				var r = forced.HasValue
+					? WarrenCarver.BuildAugmented(Z, WarrenCarver.SeedFor(Z.ZoneID), forced.Value)
+					: WarrenCarver.Build(Z, WarrenCarver.SeedFor(Z.ZoneID));
 				WarrenSurvey.Record(Z.ZoneID, r);
 				if (r.Built)
 					Helpers.VerifyLog("WARREN", $"builder done: {Z.ZoneID} -> {r.Stage}, {r.Occupancy}, attempt {r.Attempt}, {r.Layout}");
@@ -82,7 +85,7 @@ namespace XRL.World.ZoneBuilders
 			Zone Z = The.Player?.CurrentZone;
 			if (Z == null) return;
 			int seed = XRL.Rules.Stat.Random(1, int.MaxValue - 1);
-			var r = WarrenCarver.BuildTerrain(Z, seed);
+			var r = WarrenCarver.Build(Z, seed);
 			MessageQueue.AddPlayerMessage(r.Built
 				? $"tfwarrenv2: {r.Stage} warren, {r.Occupancy}, {r.Floor} floor, {r.Pockets} pockets (seed {r.Seed}, attempt {r.Attempt}). Roles in the log."
 				: $"tfwarrenv2: {{{{R|no site}}}} - {r.Reason} (seed {r.Seed}).");

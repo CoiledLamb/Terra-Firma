@@ -3246,12 +3246,6 @@ namespace Cleo.TerraFirma.Scripts
 			};
 		}
 
-		/// <summary>Codex PROPOSAL: terrain-led experiment. Start with the largest
-		/// budget and let reach/floor checks demote it. Never augment or recast terrain.
-		/// The existing retry policy accepts the first licensed layout.</summary>
-		public static Result BuildTerrain(Zone Z, int seed, bool apply = true)
-			=> Build(Z, seed, forcedStage: 2, apply: apply);
-
 		/// <summary>The retry contract (build): same canyon every attempt, first
 		/// attempt that clears the bar wins, and no-warren stays a legal outcome
 		/// (a rumour that does not pay off is fine - ruled, abandoned villages).

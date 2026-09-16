@@ -10,14 +10,14 @@ using XRL.Wish;
 
 namespace Cleo.TerraFirma.Scripts
 {
-	/// <summary>Codex PROPOSAL: saved, per-zone measurements for the terrain-led
-	/// experiment. Null means registered but unmeasured. Failed claims remain here
+	/// <summary>Codex PROPOSAL: saved, per-zone measurements for restored staged
+	/// generation. Null means registered but unmeasured. Failed claims remain here
 	/// after their journal notes disappear; repeat surveys never carve a built zone.
 	/// Uses XRLGame.Get/SetStringGameState, serialized by XRLGame.SaveGame.</summary>
 	[HasWishCommand]
 	public static class WarrenSurvey
 	{
-		private const string StateKey = "Cleo_TerraFirma_WarrenSurvey_Terrain_v1";
+		private const string StateKey = "Cleo_TerraFirma_WarrenSurvey_Staged_v1";
 
 		private static Dictionary<string, WarrenCarver.Result> Read()
 		{
@@ -50,7 +50,7 @@ namespace Cleo.TerraFirma.Scripts
 			var measured = records.Values.Where(r => r != null).ToList();
 			var built = measured.Where(r => r.Built).ToList();
 			var failed = measured.Where(r => !r.Built).ToList();
-			var text = new StringBuilder("Warren survey: terrain-led, no rock augmentation\n");
+			var text = new StringBuilder("Warren survey: restored generation (staged claims use augmentation)\n");
 			text.AppendLine($"Registered claims: {records.Count}; measured: {measured.Count}; unmeasured: {records.Count - measured.Count}");
 			text.AppendLine($"Built: {built.Count}; failed: {failed.Count}" +
 				(measured.Count > 0 ? $"; success: {100.0 * built.Count / measured.Count:0.0}%" : ""));
@@ -75,7 +75,7 @@ namespace Cleo.TerraFirma.Scripts
 		{
 			if (The.Game == null) return;
 			// Import remaining old-world claims without pretending already-built sites
-			// have terrain-led results. New worlds register every claim during placement.
+			// have current results. New worlds register every claim during placement.
 			foreach (var note in Qud.API.JournalAPI.MapNotes.ToList())
 				if (note.Attributes != null && note.Attributes.Contains("stonecarver")) Register(note.ZoneID);
 			var records = Read();
