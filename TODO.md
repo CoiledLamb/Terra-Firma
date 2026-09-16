@@ -2823,3 +2823,5 @@ Once compiling, smoke-test each (via `rockwineverytime` wish):
 - [ ] Save → quit → load with every mutation mid-effect (serialization is the likeliest breakage point)
 
 Approved description edits, 2026-09-15: mason now lists 'a humble glowpad, a hulking slumberling'; chalk line now says 'arbitrarily partitions space'. Build, text/XML checks, and dev deployment hashes passed; in-game display verification pending.
+
+Approved piezoelectric cell description, 2026-09-16: 'Within a worn aluminum casing, a rumbling spiral milks out bursts of energy from chunks of earth.' Build, text/XML checks, and dev deployment hash passed; in-game display verification pending.

@@ -168,7 +168,7 @@
 		<part Name="TinkerItem" Bits="003" CanDisassemble="true" CanBuild="true" />
 		<tag Name="TinkerCategory" Value="ammo and energy cells" />
 		<tag Name="DynamicObjectsTable:EnergyCells" /> <!-- SPAWN WIRED 2026-08-22: everywhere a tier-appropriate cell can spawn (sockets query this table with Tier{zonetier}; our Tier 3 tag does the filtering) -->
-		<part Name="Description" Short="A rumbling spiral milks out bursts of energy from chunks of earth." />
+		<part Name="Description" Short="Within a worn aluminum casing, a rumbling spiral milks out bursts of energy from chunks of earth." />
 		<part Name="Physics" Weight="5" />
 		<part Name="Commerce" Value="100" />
 		<part Name="Metal" />
