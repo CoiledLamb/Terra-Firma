@@ -236,7 +236,7 @@ Perishes when unequipped." />
 	     animation cost are CLAUDE DIALS. Spawn layer: wish tffigtable + the warren painter's
 	     sketch vocabulary (bg.animation_table); poptable wiring is its own open ruling. -->
 	<object Name="Cleo_TerraFirma_AnimationTable" Inherits="Furniture">
-		<part Name="Render" DisplayName="animation table" RenderString="227" Tile="animation_table.png" ColorString="&amp;y" TileColor="&amp;y" DetailColor="K" Occluding="false" RenderIfDark="true" />
+		<part Name="Render" DisplayName="animation table" RenderString="227" Tile="animation_table.png" ColorString="&amp;y" TileColor="&amp;y" DetailColor="w" Occluding="false" RenderIfDark="true" />
 		<part Name="Physics" Weight="200" Takeable="false" Organic="false" />
 		<part Name="Description" Short="A rough-hewn surface holds countless half-finished projects: a body with mismatched limbs here, a half-formed grubworm there. An age-old electrical device threads a cord of sensation through their little bodies, urging those able to stand to rise and enter the wider world." />
 		<part Name="Cleo_TerraFirma_AnimationTablePart" />
