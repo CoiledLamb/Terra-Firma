@@ -56,6 +56,8 @@ namespace XRL.World.Parts
 			return base.WantEvent(ID, cascade)
 				|| (ID == EnteredCellEvent.ID && !CreationSpawnDone)
 				|| ID == GetInventoryActionsEvent.ID
+				|| ID == CanSmartUseEvent.ID
+				|| ID == CommandSmartUseEvent.ID
 				|| ID == InventoryActionEvent.ID;
 		}
 
@@ -78,11 +80,32 @@ namespace XRL.World.Parts
 			return base.HandleEvent(E);
 		}
 
+		// Codex PROPOSAL: native furniture smart-use route, sharing the menu handler.
+		private bool CanAnimate(GameObject actor)
+		{
+			return actor != null && actor != ParentObject && ParentObject.Understood()
+				&& actor.PhaseMatches(ParentObject) && actor.FlightCanReach(ParentObject)
+				&& FindCarriedFigurines(actor).Count > 0;
+		}
+
+		public override bool HandleEvent(CanSmartUseEvent E)
+		{
+			if (CanAnimate(E.Actor)) return false;
+			return base.HandleEvent(E);
+		}
+
+		public override bool HandleEvent(CommandSmartUseEvent E)
+		{
+			if (CanAnimate(E.Actor))
+				InventoryActionEvent.Check(ParentObject, E.Actor, ParentObject, ANIMATE_COMMAND);
+			return base.HandleEvent(E);
+		}
+
 		public override bool HandleEvent(GetInventoryActionsEvent E)
 		{
 			if (FindCarriedFigurines(E.Actor).Count > 0)
 			{
-				E.AddAction("Animate", "animate a figurine", ANIMATE_COMMAND, null, 'a', FireOnActor: false);
+				E.AddAction("Animate", "animate a figurine", ANIMATE_COMMAND, null, 'a', FireOnActor: false, Default: 10);
 			}
 			return base.HandleEvent(E);
 		}
