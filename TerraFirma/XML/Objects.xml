@@ -372,4 +372,39 @@ Perishes when unequipped." />
         <part Name="RandomStatue" BaseBlueprint="Equimax" />
         <tag Name="ExcludeFromDynamicEncounters" />
     </object>
+  <!-- Codex PROPOSAL: existing naming vocabulary, one definition per word.
+       DataBucket/xtag are engine data stores; these blueprints are never instantiated.
+       Stat attributes are flat base-value additions; min..max is an inclusive roll.
+       Each xtag has equal selection weight. Mutation levels remain at four.
+       LodeMarker preserves the existing marker, not a working gear bonus. -->
+  <object Name="Cleo_TerraFirma_NamingMaterials" Inherits="DataBucket">
+    <xtagstone Strength="1" Toughness="1" />
+    <xtagflint Agility="2" />
+    <xtagscree AV="1..2" />
+    <xtagcairn Ego="2" />
+    <xtaggrit Willpower="2" />
+    <xtagchalk Intelligence="2" />
+    <xtagspall DV="2" />
+    <xtagmarl Hitpoints="10" />
+    <xtagcobble MoveSpeed="-15" />
+    <xtagsalt HeatResistance="50" />
+    <xtagkarst ColdResistance="50" />
+    <xtagquartz ElectricResistance="50" />
+    <xtaglode LodeMarker="true" />
+  </object>
+  <object Name="Cleo_TerraFirma_NamingCrafts" Inherits="DataBucket">
+    <xtagsmith Mutation="Cleo_TerraFirma_Fissure" Level="4" />
+    <xtagknapper Mutation="Cleo_TerraFirma_Fissure" Level="4" />
+    <xtagdelver Mutation="Cleo_TerraFirma_Fissure" Level="4" />
+    <xtagwright Mutation="Cleo_TerraFirma_Stoneshaper" Level="4" />
+    <xtagsetter Mutation="Cleo_TerraFirma_Stoneshaper" Level="4" />
+    <xtaggraver Mutation="Cleo_TerraFirma_Stoneshaper" Level="4" />
+    <xtagward Mutation="Cleo_TerraFirma_EarthenBarrage" Level="4" />
+    <xtagcarter Mutation="Cleo_TerraFirma_EarthenBarrage" Level="4" />
+    <xtagslinger Mutation="Cleo_TerraFirma_EarthenBarrage" Level="4" />
+    <xtagaugur Mutation="Cleo_TerraFirma_Geomancy" Level="4" />
+    <xtagreader Mutation="Cleo_TerraFirma_Geomancy" Level="4" />
+    <xtagreeve Ego="2" Willpower="2" />
+    <xtagscribe Intelligence="2" Willpower="2" />
+  </object>
 </objects>

@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using XRL.Rules;
 using XRL.World;
 using XRL.World.ObjectBuilders;
@@ -7,43 +9,15 @@ using XRL.World.Parts.Mutation;
 
 namespace Cleo.TerraFirma.Scripts
 {
-	/// <summary>
-	/// The stonecarver legendary builder: rolls the byname FIRST, then grants what the byname
-	/// promises. Straight off the base game's own goatfolk pattern (decomp `GoatfolkHero1.cs`:
-	/// MakeEpithet, then a switch on the name text that hands out mutations, stats and gear --
-	/// Mamon Souldrinker drains life BECAUSE the generator named him Souldrinker).
-	///
-	/// RULED 2026-08-15 (name-drives-kit + the two-axis amendment): the byname is one compound
-	/// word whose MATERIAL half grants a perk and whose CRAFT half grants the kit, so the name
-	/// is the whole character sheet. The epithet bank IS the mutation pool -- a mutation is
-	/// rollable if and only if a craft word vouches for it, and a word may not enter the bank
-	/// until that mutation's NPC AI is committed.
-	///
-	/// WORD COUNT PER COLUMN = SPAWN WEIGHT. Fissure 3 : Stoneshaper 3 : Earthen Barrage 3 :
-	/// Geomancy 2 : office 2. Re-weighting the roster is a vocabulary edit, nothing else.
-	///
-	/// STILL OPEN, deliberately not decided here:
-	///   - the BASELINE KIT under the grant (what a carver carries before the byname tops it
-	///     up). This builder adds only what the byname promises; the base blueprint is bare.
-	///   - Gorgon's Gaze has no craft word yet, so no carver can roll it.
-	///   - Calcify's word (limewright floated) waits on its NPC AI cost check, as does Geomancy's.
-	///   - Every mutation LEVEL below is a Claude placeholder for the numbers sitting.
-	/// </summary>
+	// Codex PROPOSAL: existing vocabulary and grants share XML definitions. Descriptions
+	// are derived from those grants, rather than maintained in a second set of switches.
+	// Engine precedents: Data.xml DataBucket; HeroMaker.ResolveTemplateTag;
+	// GameObject.AddBaseStat changes BaseValue directly (BoostStat is proportional).
 	public static class StonecarverEpithet
 	{
-		// ---- personal-name banks MOVED TO XML/Naming.xml 2026-08-26 (USER: "migrating the
-		// names sounds sensible"): the engine's namestyle schema is the junction architecture
-		// verbatim (prefixes Amount 1, infixes Amount 0-1, postfixes Amount 1, TitleCase),
-		// resolved by NameMaker through the Special-pinned scope, the goatfolk hero idiom.
-		// Editing the syllabary is an XML edit now, no recompile. The byname banks below stay
-		// HERE deliberately: their words are fused to the grant switches, and the ruled
-		// grammar makes the bank a curated manifest (a word may not enter until its
-		// mutation's NPC AI is committed), so the compile step is doing curation work.
 		private const string NAME_STYLE = "Cleo_TerraFirma_Stonecarver";
-
-		// ---- byname banks (materials FINAL 13 + crafts 13, RULED 2026-08-15)
-		private static readonly string[] Materials = { "stone", "flint", "scree", "cairn", "grit", "chalk", "spall", "marl", "cobble", "salt", "karst", "quartz", "lode" };
-		private static readonly string[] Crafts = { "smith", "knapper", "delver", "wright", "setter", "graver", "ward", "carter", "slinger", "augur", "reader", "reeve", "scribe" };
+		private const string MATERIAL_BANK = "Cleo_TerraFirma_NamingMaterials";
+		private const string CRAFT_BANK = "Cleo_TerraFirma_NamingCrafts";
 
 		public struct Roll
 		{
@@ -56,14 +30,105 @@ namespace Cleo.TerraFirma.Scripts
 			public string NamePieces;
 		}
 
-		private static string Pick(string[] bank) => bank[Stat.Random(0, bank.Length - 1)];
+		private sealed class StatGrant
+		{
+			public string Stat;
+			public int Minimum;
+			public int Maximum;
 
-		private static string Capitalize(string s) => s.IsNullOrEmpty() ? s : char.ToUpper(s[0]) + s.Substring(1);
+			public string Describe()
+			{
+				string amount = Minimum.ToString(CultureInfo.InvariantCulture);
+				if (Minimum >= 0) amount = "+" + amount;
+				if (Maximum != Minimum) amount += " to +" + Maximum.ToString(CultureInfo.InvariantCulture);
+				return amount + " base " + Stat + (Maximum != Minimum ? " (rolled)" : "");
+			}
+		}
 
-		/// <summary>Rolls a personal name from the etruscan-derived banks, which live in
-		/// XML/Naming.xml now (the infix coin-flip is the style's Amount="0-1"; the length
-		/// dial the tracker flagged is an XML edit today). A missing or broken style fails
-		/// LOUD with a placeholder name, never silently.</summary>
+		private sealed class Definition
+		{
+			public readonly List<StatGrant> Stats = new List<StatGrant>();
+			public BaseMutation Mutation;
+			public int Level;
+			public bool LodeMarker;
+
+			public string Describe()
+			{
+				var pieces = new List<string>();
+				foreach (var grant in Stats) pieces.Add(grant.Describe());
+				if (Mutation != null) pieces.Add(Mutation.GetDisplayName() + " (level " + Level + ")");
+				if (LodeMarker) pieces.Add("wealth marker only (gear bonus not implemented)");
+				return string.Join(", ", pieces);
+			}
+
+			public void Apply(GameObject target)
+			{
+				foreach (var grant in Stats)
+					target.AddBaseStat(grant.Stat, Stat.Random(grant.Minimum, grant.Maximum));
+				if (Mutation != null)
+				{
+					var mutations = target.RequirePart<Mutations>();
+					if (!mutations.HasMutation(Mutation.GetType().Name)) mutations.AddMutation(Mutation, Level);
+				}
+				if (LodeMarker) target.SetIntProperty("Cleo_TerraFirma_LodeWealth", 1);
+			}
+		}
+
+		private static Dictionary<string, Dictionary<string, string>> Bank(string id)
+		{
+			var bank = GameObjectFactory.Factory.GetBlueprint(id)?.xTags;
+			if (bank == null || bank.Count == 0) throw new InvalidOperationException("Missing naming bank: " + id);
+			return bank;
+		}
+
+		private static string Pick(string id)
+		{
+			var words = new List<string>(Bank(id).Keys);
+			return words[Stat.Random(0, words.Count - 1)];
+		}
+
+		private static Definition Read(string bank, string word)
+		{
+			if (word == null || !Bank(bank).TryGetValue(word, out var fields))
+				throw new InvalidOperationException("Unknown naming word: " + bank + "/" + word);
+			var definition = new Definition();
+			foreach (var field in fields)
+			{
+				switch (field.Key)
+				{
+					case "Mutation":
+						switch (field.Value)
+						{
+							case "Cleo_TerraFirma_Fissure": definition.Mutation = new Cleo_TerraFirma_Fissure(); break;
+							case "Cleo_TerraFirma_Stoneshaper": definition.Mutation = new Cleo_TerraFirma_Stoneshaper(); break;
+							case "Cleo_TerraFirma_EarthenBarrage": definition.Mutation = new Cleo_TerraFirma_EarthenBarrage(); break;
+							case "Cleo_TerraFirma_Geomancy": definition.Mutation = new Cleo_TerraFirma_Geomancy(); break;
+							default: throw new InvalidOperationException("Unsupported naming mutation: " + field.Value);
+						}
+						break;
+					case "Level": definition.Level = int.Parse(field.Value, CultureInfo.InvariantCulture); break;
+					case "LodeMarker": definition.LodeMarker = bool.Parse(field.Value); break;
+					case "Strength": case "Toughness": case "Agility": case "Ego":
+					case "Willpower": case "Intelligence": case "AV": case "DV":
+					case "Hitpoints": case "MoveSpeed": case "HeatResistance":
+					case "ColdResistance": case "ElectricResistance":
+						var range = field.Value.Split(new[] { ".." }, StringSplitOptions.None);
+						if (range.Length > 2) throw new InvalidOperationException("Invalid naming range: " + field.Value);
+						int min = int.Parse(range[0], CultureInfo.InvariantCulture);
+						int max = int.Parse(range[range.Length - 1], CultureInfo.InvariantCulture);
+						if (max < min) throw new InvalidOperationException("Reversed naming range: " + field.Value);
+						definition.Stats.Add(new StatGrant { Stat = field.Key, Minimum = min, Maximum = max });
+						break;
+					default: throw new InvalidOperationException("Unknown naming field: " + field.Key);
+				}
+			}
+			if ((definition.Mutation != null && definition.Level <= 0) || (definition.Mutation == null && definition.Level != 0))
+				throw new InvalidOperationException("Naming mutation/level mismatch: " + word);
+			if (definition.Stats.Count == 0 && definition.Mutation == null && !definition.LodeMarker)
+				throw new InvalidOperationException("Empty naming definition: " + word);
+			return definition;
+		}
+
 		public static string RollPersonalName(out string pieces)
 		{
 			pieces = "Naming.xml:" + NAME_STYLE;
@@ -76,127 +141,30 @@ namespace Cleo.TerraFirma.Scripts
 			return name;
 		}
 
-		/// <summary>Rolls the two-axis byname. Material and craft are drawn independently -- the
-		/// perk axis and the kit axis do not constrain each other.</summary>
 		public static Roll RollByname()
 		{
 			Roll roll = default(Roll);
-			roll.Material = Pick(Materials);
-			roll.Craft = Pick(Crafts);
-			roll.Byname = Capitalize(roll.Material + roll.Craft);
+			roll.Material = Pick(MATERIAL_BANK);
+			roll.Craft = Pick(CRAFT_BANK);
+			roll.Byname = char.ToUpperInvariant(roll.Material[0]) + roll.Material.Substring(1) + roll.Craft;
 			roll.PersonalName = RollPersonalName(out roll.NamePieces);
 			roll.PerkText = DescribePerk(roll.Material);
 			roll.KitText = DescribeKit(roll.Craft);
 			return roll;
 		}
 
-		/// <summary>Material half -> the perk (the clan-effect axis). Magnitude discipline from
-		/// the goatfolk precedent: single stats ~+2, combos +1/+1.</summary>
-		public static string DescribePerk(string material)
-		{
-			switch (material)
-			{
-				case "stone": return "+1 Strength, +1 Toughness";
-				case "flint": return "+2 Agility";
-				case "scree": return "+1-2 AV (rolled)";
-				case "cairn": return "+2 Ego";
-				case "grit": return "+2 Willpower";
-				case "chalk": return "+2 Intelligence";
-				case "spall": return "+2 DV";
-				case "marl": return "+HP";
-				case "cobble": return "faster MoveSpeed";
-				case "salt": return "heat resistance 50";
-				case "karst": return "cold resistance 50";
-				case "quartz": return "electrical resistance 50";
-				case "lode": return "wealth (richer gear population)";
-				default: return "(no perk mapped)";
-			}
-		}
+		public static string DescribePerk(string material) => Read(MATERIAL_BANK, material).Describe();
+		public static string DescribeKit(string craft) => Read(CRAFT_BANK, craft).Describe();
 
-		/// <summary>Craft half -> the kit. Office words (reeve/scribe) grant no mutation on
-		/// purpose: kit words vs office words is the grammar of the bank.</summary>
-		public static string DescribeKit(string craft)
-		{
-			switch (craft)
-			{
-				case "smith":
-				case "knapper":
-				case "delver": return "Fissure";
-				case "wright":
-				case "setter":
-				case "graver": return "Stoneshaper";
-				case "ward":
-				case "carter":
-				case "slinger": return "Earthen Barrage";
-				case "augur":
-				case "reader": return "Geomancy";
-				case "reeve": return "office: +Ego, +Willpower";
-				case "scribe": return "office: +Intelligence, +Willpower";
-				default: return "(no kit mapped)";
-			}
-		}
-
-		/// <summary>Applies a roll to a real creature: names it, hangs the byname as its epithet,
-		/// pays the material perk, grants the craft kit. Naming precedes grants, same as the
-		/// goatfolk builder -- there is no ordering race.</summary>
 		public static void ApplyRoll(GameObject GO, Roll roll)
 		{
+			// Validate both definitions before changing the creature.
+			var material = Read(MATERIAL_BANK, roll.Material);
+			var craft = Read(CRAFT_BANK, roll.Craft);
 			GO.GiveProperName(roll.PersonalName, Force: true);
 			GO.RequirePart<Epithets>().AddEpithet(roll.Byname, -40);
-
-			switch (roll.Material)
-			{
-				case "stone": GO.BoostStat("Strength", 1); GO.BoostStat("Toughness", 1); break;
-				case "flint": GO.BoostStat("Agility", 2); break;
-				case "scree": GO.BoostStat("AV", Stat.Random(1, 2)); break;
-				case "cairn": GO.BoostStat("Ego", 2); break;
-				case "grit": GO.BoostStat("Willpower", 2); break;
-				case "chalk": GO.BoostStat("Intelligence", 2); break;
-				case "spall": GO.BoostStat("DV", 2); break;
-				case "marl": GO.BoostStat("Hitpoints", 10); break;
-				// MoveSpeed is inverted (lower is faster); -0.75 is Clan Yr's own idiom
-				case "cobble": GO.BoostStat("MoveSpeed", -0.75); break;
-				case "salt": GO.BoostStat("HeatResistance", 50); break;
-				case "karst": GO.BoostStat("ColdResistance", 50); break;
-				case "quartz": GO.BoostStat("ElectricResistance", 50); break;
-				case "lode": GO.SetIntProperty("Cleo_TerraFirma_LodeWealth", 1); break; // gear population rides the wiring pass
-			}
-
-			Mutations mutations = GO.RequirePart<Mutations>();
-			switch (roll.Craft)
-			{
-				case "smith":
-				case "knapper":
-				case "delver":
-					if (!mutations.HasMutation("Cleo_TerraFirma_Fissure"))
-						mutations.AddMutation(new Cleo_TerraFirma_Fissure(), 4);
-					break;
-				case "wright":
-				case "setter":
-				case "graver":
-					if (!mutations.HasMutation("Cleo_TerraFirma_Stoneshaper"))
-						mutations.AddMutation(new Cleo_TerraFirma_Stoneshaper(), 4);
-					break;
-				case "ward":
-				case "carter":
-				case "slinger":
-					if (!mutations.HasMutation("Cleo_TerraFirma_EarthenBarrage"))
-						mutations.AddMutation(new Cleo_TerraFirma_EarthenBarrage(), 4);
-					break;
-				case "augur":
-				case "reader":
-					if (!mutations.HasMutation("Cleo_TerraFirma_Geomancy"))
-						mutations.AddMutation(new Cleo_TerraFirma_Geomancy(), 4);
-					break;
-				case "reeve":
-					GO.BoostStat("Ego", 2);
-					GO.BoostStat("Willpower", 2);
-					break;
-				case "scribe":
-					GO.BoostStat("Intelligence", 2);
-					GO.BoostStat("Willpower", 2);
-					break;
-			}
+			material.Apply(GO);
+			craft.Apply(GO);
 		}
 
 		/// <summary>Stamps the legendary layer the goatfolk way, NOT through `HeroMaker.MakeHero`.
