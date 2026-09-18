@@ -375,8 +375,7 @@ Perishes when unequipped." />
   <!-- Codex PROPOSAL: existing naming vocabulary, one definition per word.
        DataBucket/xtag are engine data stores; these blueprints are never instantiated.
        Stat attributes are flat base-value additions; min..max is an inclusive roll.
-       Each xtag has equal selection weight. Mutation levels remain at four.
-       LodeMarker preserves the existing marker, not a working gear bonus. -->
+       Each xtag has equal selection weight. Mutation levels remain at four. -->
   <object Name="Cleo_TerraFirma_NamingMaterials" Inherits="DataBucket">
     <xtagstone Strength="1" Toughness="1" />
     <xtagflint Agility="2" />
@@ -390,7 +389,7 @@ Perishes when unequipped." />
     <xtagsalt HeatResistance="50" />
     <xtagkarst ColdResistance="50" />
     <xtagquartz ElectricResistance="50" />
-    <xtaglode LodeMarker="true" />
+    <xtagslate AcidResistance="50" />
   </object>
   <object Name="Cleo_TerraFirma_NamingCrafts" Inherits="DataBucket">
     <xtagsmith Mutation="Cleo_TerraFirma_Fissure" Level="4" />

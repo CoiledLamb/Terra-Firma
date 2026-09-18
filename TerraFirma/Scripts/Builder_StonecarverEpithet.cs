@@ -50,14 +50,12 @@ namespace Cleo.TerraFirma.Scripts
 			public readonly List<StatGrant> Stats = new List<StatGrant>();
 			public BaseMutation Mutation;
 			public int Level;
-			public bool LodeMarker;
 
 			public string Describe()
 			{
 				var pieces = new List<string>();
 				foreach (var grant in Stats) pieces.Add(grant.Describe());
 				if (Mutation != null) pieces.Add(Mutation.GetDisplayName() + " (level " + Level + ")");
-				if (LodeMarker) pieces.Add("wealth marker only (gear bonus not implemented)");
 				return string.Join(", ", pieces);
 			}
 
@@ -70,7 +68,6 @@ namespace Cleo.TerraFirma.Scripts
 					var mutations = target.RequirePart<Mutations>();
 					if (!mutations.HasMutation(Mutation.GetType().Name)) mutations.AddMutation(Mutation, Level);
 				}
-				if (LodeMarker) target.SetIntProperty("Cleo_TerraFirma_LodeWealth", 1);
 			}
 		}
 
@@ -107,11 +104,10 @@ namespace Cleo.TerraFirma.Scripts
 						}
 						break;
 					case "Level": definition.Level = int.Parse(field.Value, CultureInfo.InvariantCulture); break;
-					case "LodeMarker": definition.LodeMarker = bool.Parse(field.Value); break;
 					case "Strength": case "Toughness": case "Agility": case "Ego":
 					case "Willpower": case "Intelligence": case "AV": case "DV":
 					case "Hitpoints": case "MoveSpeed": case "HeatResistance":
-					case "ColdResistance": case "ElectricResistance":
+					case "ColdResistance": case "ElectricResistance": case "AcidResistance":
 						var range = field.Value.Split(new[] { ".." }, StringSplitOptions.None);
 						if (range.Length > 2) throw new InvalidOperationException("Invalid naming range: " + field.Value);
 						int min = int.Parse(range[0], CultureInfo.InvariantCulture);
@@ -124,7 +120,7 @@ namespace Cleo.TerraFirma.Scripts
 			}
 			if ((definition.Mutation != null && definition.Level <= 0) || (definition.Mutation == null && definition.Level != 0))
 				throw new InvalidOperationException("Naming mutation/level mismatch: " + word);
-			if (definition.Stats.Count == 0 && definition.Mutation == null && !definition.LodeMarker)
+			if (definition.Stats.Count == 0 && definition.Mutation == null)
 				throw new InvalidOperationException("Empty naming definition: " + word);
 			return definition;
 		}
