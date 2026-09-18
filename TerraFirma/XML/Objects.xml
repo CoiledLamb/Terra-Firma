@@ -390,6 +390,32 @@ Perishes when unequipped." />
     <xtagkarst ColdResistance="50" />
     <xtagquartz ElectricResistance="50" />
     <xtagslate AcidResistance="50" />
+    <!-- Tradeoff sub-bank (user-closed 2026-09-18, alongside the pure words, uniform draw).
+         Each word nets the same +2 as a pure word with a higher ceiling: attributes +3/-1,
+         armor +2/-1, resists plus or minus 50, Hitpoints +15/-10, MoveSpeed -20/+10.
+         The word is the only telling the player gets (goatfolk contract), so every rock
+         has to teach its own tradeoff. -->
+    <xtagchert Agility="3" Ego="-1" />
+    <xtagshard Agility="3" Hitpoints="-10" />
+    <xtagsand Agility="3" Willpower="-1" />
+    <xtagcrag Toughness="3" Ego="-1" />
+    <xtagcoal Strength="3" HeatResistance="-50" />
+    <xtagore Strength="3" Ego="-1" />
+    <xtagclod Strength="3" Intelligence="-1" />
+    <xtagtor Willpower="3" MoveSpeed="10" />
+    <xtagtalc DV="3" Strength="-1" />
+    <xtagspar DV="3" Toughness="-1" />
+    <xtagslag AV="2" Ego="-1" />
+    <xtagtuff MoveSpeed="-20" Hitpoints="-10" />
+    <xtaggeode Ego="3" Toughness="-1" />
+    <xtagmarble Ego="3" AcidResistance="-50" />
+    <xtagshale DV="3" AV="-1" />
+    <xtagcinder HeatResistance="50" Hitpoints="-10" />
+    <xtagsilt Hitpoints="15" MoveSpeed="10" />
+    <xtagpeat Hitpoints="15" HeatResistance="-50" />
+    <xtagamber Intelligence="3" Agility="-1" />
+    <xtagclay Hitpoints="15" AV="-1" />
+    <xtagmica Intelligence="3" Willpower="-1" />
   </object>
   <object Name="Cleo_TerraFirma_NamingCrafts" Inherits="DataBucket">
     <xtagsmith Mutation="Cleo_TerraFirma_Fissure" Level="4" />

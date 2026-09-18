@@ -36,11 +36,13 @@ namespace Cleo.TerraFirma.Scripts
 			public int Minimum;
 			public int Maximum;
 
+			private static string Signed(int value) =>
+				(value >= 0 ? "+" : "") + value.ToString(CultureInfo.InvariantCulture);
+
 			public string Describe()
 			{
-				string amount = Minimum.ToString(CultureInfo.InvariantCulture);
-				if (Minimum >= 0) amount = "+" + amount;
-				if (Maximum != Minimum) amount += " to +" + Maximum.ToString(CultureInfo.InvariantCulture);
+				string amount = Signed(Minimum);
+				if (Maximum != Minimum) amount += " to " + Signed(Maximum);
 				return amount + " base " + Stat + (Maximum != Minimum ? " (rolled)" : "");
 			}
 		}
