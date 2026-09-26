@@ -3,7 +3,7 @@
 - status: terminal (escalated 2026-09-02)
 - ruled: 2026-08-11
 - user: "can we quarantine the first iteration of fissure, all the rocks it added, and lithovore, so they're not counted for conversations like these?"
-- source: `TODO.md:2689`, held content in `TODO-quarantine.md`
+- source: `JOURNAL.md:2689`, held content in `TODO-quarantine.md`
 - expires with: nothing
 
 ## Escalation, 2026-09-02

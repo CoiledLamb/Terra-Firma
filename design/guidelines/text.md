@@ -16,7 +16,7 @@ they live in CLAUDE.md with hooks behind them.
 
 - ruled: 2026-07-24
 - user, 2026-07-25 (found by the transcript sweep; the tracker line itself has no quote): "this is why all the text in the mod is a draft - needs a human to write it or at least look over and sign off. so increasing text debt is as much of a concern as sprite debt, to me"
-- source: `TODO.md:2593`
+- source: `JOURNAL.md:2593`
 - applies to: anything a player reads. Descriptions, level text, greetings, the manifest.
 - shape: text debt clears at sign-off, not at generation, and weighs the same as sprite debt. Context at the ruling: Claude asserted a wrong basic fact the same session it pitched writing an anchor book.
 

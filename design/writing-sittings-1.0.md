@@ -1,12 +1,14 @@
 # Writing sittings — the 1.0 burn-down sheet
 
 Compiled 2026-07-26 (release-scope conversation; user OK'd the sheet). Every text debt the
-sign-off policy puts on the user, consolidated from TODO.md + the polish worklist so it
+sign-off policy puts on the user, consolidated from the old TODO (now JOURNAL.md) + the polish worklist so it
 burns down in scheduled sittings instead of ambushing the release. **Policy reminder
 (RULED 2026-07-24): all AI-produced text is DRAFT until the user rewrites or signs off;
 text debt clears at sign-off, not at generation.** Claude drafts raw material only where
-asked. Trackers stay the source of truth — this sheet is an index; tick here AND close the
-home entry.
+asked. This is a historical inventory, not the current completion list. Use
+[TODO.md](../TODO.md), T01/T02, for current work and record completion there.
+The [warren writing inventory](writing-sitting-warren-2026-09-05.md) is the newer map of that lane.
+Quarantined and superseded entries below are not release obligations merely because they remain unchecked.
 
 **Priority order (user, 2026-07-26): "quarrier faction name + text > mutation
 descriptions > burp family status > rock and status descriptions."** Mapped to the

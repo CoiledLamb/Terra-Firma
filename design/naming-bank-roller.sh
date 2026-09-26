@@ -59,7 +59,7 @@ roll_family() {
   cap "$n"
 }
 
-for i in $(seq 1 12); do
+for i in $(seq 1 ${1:-12}); do
   p=$(roll_personal)
   f=$(roll_family)
   # byname is hero-epithet-only in game (ruled 2026-08-15); demo shows the full sheet

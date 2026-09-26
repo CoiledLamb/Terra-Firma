@@ -3,7 +3,7 @@
 - status: live
 - ruled: 2026-08-26
 - user: "rockslime, burrowbee, burrowing urchin, stone eating centipede, trapdoor spider all go on the maybe list. if i can fit any in, they go in, if i can't, they don't. so miner, rockhound, granite baboons, and boar vessels are confirmed in for right now"
-- source: `TODO.md:2707`
+- source: `JOURNAL.md:2707`
 - expires with: the Part 2 creature pass
 
 ## Confirmed

@@ -6,7 +6,7 @@ Directional. Meant to bend, argued from, not enforced. Provenance is a field on 
 
 - ruled: 2026-08-06
 - user: "I need to make sure every level up increases something on the mutations, including on calcify"
-- source: `TODO.md:458`
+- source: `JOURNAL.md:458`
 - applies to: every leveled mod mutation. At the ruling, Calcify was the only one with dead levels; fixed with a stepping cooldown the same day.
 - note: this is checkable by an audit over the level tables and could graduate to a constraint. Not yet.
 
@@ -14,7 +14,7 @@ Directional. Meant to bend, argued from, not enforced. Provenance is a field on 
 
 - ruled: 2026-07-22
 - user: "gotta be able to fight back"
-- source: `TODO.md:2500`
+- source: `JOURNAL.md:2500`
 - applies to: stonecarver types and any wild creature carrying a mod mutation. Whichever mutations land on a roster commit their AI handler work; the handlers are shared infrastructure.
 
 ## Riding along, a fact rather than a guideline
