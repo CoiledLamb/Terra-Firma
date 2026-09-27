@@ -39,10 +39,11 @@ namespace XRL.World.Parts
 		public const string TOOL_TAG = "Cleo_TerraFirma_EtchTool";
 		public const string CORPUS = "LibraryCorpus.json";
 		// AskString whitelist: prose punctuation, no markup metacharacters
-		// internal (was private) 2026-08-22: the box of chalk writes chalkboards with the same
-		// prose whitelist and cap - one charset law for all carved/chalked words
-		internal const string TYPED_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,!?'-:;()";
-		internal const int TYPED_MAX = 60;
+		// public (was private, then internal) 2026-09-27: the box of chalk writes chalkboards with
+		// the same prose whitelist and cap - one charset law for all carved/chalked words - and
+		// the chalk now lives in the TerraFirma2 assembly, which cannot see internal members
+		public const string TYPED_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,!?'-:;()";
+		public const int TYPED_MAX = 60;
 		// Garble dials (feedback 2026-08-06, REROUTED 2026-08-07 through the graffiti law --
 		// user, with the graffitied-canvas screenshot: "i want the garbled text to work like
 		// graffiti"). Slip chance = (CEILING - pairTier) * PCT feeds Grammar.Obfuscate's

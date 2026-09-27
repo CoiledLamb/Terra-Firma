@@ -739,8 +739,9 @@ namespace Cleo.TerraFirma.Scripts
 		/// finish(). Fractions are of the stored rect in atlas space, y-up (SpriteBuilder's
 		/// UV math puts textureInfo.y at the tile's BOTTOM edge); callers skip rotated and
 		/// diced infos. Unity-side only (ScriptableObject.CreateInstance) -- call from a
-		/// juice entry's start()/update(), never the game thread.</summary>
-		internal static exTextureInfo CloneSubRect(exTextureInfo src, float fx, float fy, float fw, float fh)
+		/// juice entry's start()/update(), never the game thread. Public because the chalk
+		/// reveal in the TerraFirma2 assembly calls it.</summary>
+		public static exTextureInfo CloneSubRect(exTextureInfo src, float fx, float fy, float fw, float fh)
 		{
 			exTextureInfo sub = ScriptableObject.CreateInstance<exTextureInfo>();
 			sub.texture = src.texture;

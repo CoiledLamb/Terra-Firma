@@ -1,27 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
- <objects> 
-  <!-- Jilted Lover chassis, with its wild grabber and spawn lanes removed.
-       Merchant HP/AV copy BaseMerchant; intellect and ego copy Yurl (CLAUDE PROPOSAL
-       tuning). Stock GenericMerchant speech until a custom voice lands. -->
-  <object Name="Cleo_TerraFirma_Vine Merchant" Inherits="Jilted Lover">
-    <part Name="Render" DisplayName="quarry provisioner" />
-    <part Name="Brain" Hostile="false" Wanders="false" Mobile="false" LivesOnWalls="true" Factions="Consortium-100,Cleo_TerraFirma_Quarriers-50" />
-    <removepart Name="JiltedLoverProperties" />
-    <removeinventoryobject Blueprint="Lovers_Thorns" />
-    <part Name="Corpse" CorpseChance="0" />
-    <stat Name="Hitpoints" Value="70" />
-    <stat Name="AV" Value="3" />
-    <stat Name="Intelligence" sValue="22" />
-    <stat Name="Ego" sValue="19" />
-    <part Name="ConversationScript" ConversationID="GenericMerchant" />
-    <part Name="GenericInventoryRestocker" Table="Cleo_TerraFirma_VineMerchantWares" />
-    <part Name="Interesting" />
-    <tag Name="Role" Value="NPC" />
-    <tag Name="NoSleep" />
-    <tag Name="DynamicObjectsTable:DesertCanyon_Creatures" Value="*delete" />
-    <tag Name="DynamicObjectsTable:Flowerfields_Creatures" Value="*delete" />
-    <tag Name="ExcludeFromDynamicEncounters" />
-  </object>
+ <objects>
 
   <object Name="Cleo_TerraFirma_Burrowing Urchin" Inherits="BaseUrchin">
     <part Name="Render" DisplayName="burrowing urchin" ColorString="&amp;w" DetailColor="g" />
@@ -59,65 +37,6 @@
     <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
   </object>
 
-  <!-- Snapjaw miner (user sprite 2026-08-12; build green-lit 2026-08-13). Behavior PARENT in
-       the base two-layer idiom (Snapjaw Scavenger precedent): tier children, if ruled in at
-       wiring, are pure InventoryPopulationTable swaps on top of this. The pickaxe IS the AI
-       (recon 2026-08-13, banked in TODO): DiggingTool installs Digging on the wielder, Drill
-       answers PathAsBurrowerEvent, so he tunnels while traveling and fights through walls to
-       reach a target with zero C#. Placement leans banked (any snapjaw group + sometimes
-       canyon-wild); ExcludeFromDynamicEncounters = controlled debut (Snapjaw parent tags would
-       otherwise seed him into canyon, saltmarsh, and hills pools TODAY, ahead of the wiring
-       pass and the party-table merge). HP is DRAFT (Hunter-grade 6 over base 3, he swings a
-       real tool); Role DRAFT Minion; render colors PLACEHOLDER. Description identity kept
-       NEUTRAL on purpose: what a miner snapjaw wants is still the user's open call. -->
-  <!-- Cobble baboon (settled 2026-08-13 sitting; user structure ruling: creature plain,
-       "-fur" reserved for the pelt items, quartz/quartzfur grammar. NAME LOCKED cobble
-       same day, superseding Claude's gravel pick: "gravel baboon" + the Gravel Whorl effect
-       title colliding in every combat sentence of his signature moment was the user's
-       (correct) log-legibility fear; gravel = considered-and-passed alternate. Chassis:
-       Baboon child, so the StoneScavenger merge, pocket Small Stones, AIThrowAndScoot,
-       Skirmisher role, and the Hills/DesertCanyon table tags all arrive by inheritance
-       (canyon habitat RULED 2026-08-15, user: "it's fine for the cobble
-       baboon to be in desert canyons" and it costs nothing, the parent tags deliver it.
-       Provenance note: this comment previously recorded the lean as "confirmed by silence on
-       the alternative," which was consent read off an absence; now it is an actual ruling).
-       Signature: Earthen Barrage — NPC auto-arm shipped 2026-08-06 (mutation re-sculpts
-       every EndTurn, base AI throws the slot natively), so the whole creature is this one
-       XML block. Differentiation from base Quartz Baboon on file: quartz = stone SKIN
-       (armor/reflect, L22 subterrane); gravel = stone THROWN (barrage/whorl, early canyon).
-       STATS + EB LEVEL DRAFT (Hulking-grade body, EB 4 for a visible whorl), numbers
-       sitting owed. Tile = recolored base baboon PLACEHOLDER, sprite debt filed.
-       Corpse: custom, CorpseChance 15 DRAFT (down from the inherited 40; he will be a
-       common canyon spawn and 40% would carpet the canyon in pelts; quartz ships at 6).
-       Butchery = the cobblefur family (bracer/gloves/cloak, quartzfur three-piece idiom),
-       table in PopulationTables.xml. ExcludeFromDynamicEncounters = controlled debut,
-       lift at the spawn-wiring pass. -->
-  <object Name="Cleo_TerraFirma_Cobble Baboon" Inherits="Baboon">
-    <part Name="Render" DisplayName="granite baboon" Tile="Creatures/sw_quartz_baboon.bmp" ColorString="&amp;y" DetailColor="r" /> <!-- RENAMED granite 2026-08-22 (user; supersedes the cobble lock); interim = base quartz baboon tile in grey/brown until the friend-made sprites land -->
-    <stat Name="Hitpoints" Value="18" />
-    <stat Name="Level" Value="6" /> <!-- numbers sitting 2026-08-22: EB2 + slightly-above-parity chassis (base Baboon 15/L5), user-ruled -->
-    <stat Name="Strength" Boost="2" />
-    <stat Name="AV" Value="2" /> <!-- lowered from base-parity 3 (user 2026-08-22); the whorl tops it up when stones bank -->
-    <!-- mutation nodes resolve by CLASS name, not display name (caught 2026-08-14: the display
-         name loaded as a MODERROR + unnamed-node warn and the baboon spawned barrage-less) -->
-    <mutation Name="Cleo_TerraFirma_EarthenBarrage" Level="2" /> <!-- RULED 2026-08-22 down from 4: 1d6+3 with per-pen rolls two-shots fresh characters and baboons troop; EB2 = 1d6+1, whorl still banks 4 stones -->
-    <part Name="Corpse" CorpseChance="15" CorpseBlueprint="Cleo_TerraFirma_Cobble Baboon Corpse" />
-    <!-- NO ConversationScript, RULED 2026-08-16. Not an oversight and not a debt: BaseBaboon,
-         Baboon and Quartz Baboon all ship without one, so baboons are unclickable in base and
-         this one matches. Base does give conversations to some beasts (Reptiles, Frogs, Worms,
-         Plants), each a single emote plus a themed farewell, so the door is one line wide if it
-         ever reopens. He expresses through the inherited sound tags instead. -->
-    <part Name="Description" Short="Grit is caked onto =pronouns.possessive= hunched figure like a second skin. Periodically you catch the glint of a wayward stone rising from the earth into =pronouns.possessive= scheming hands." /> <!-- Description approved 2026-09-08. -->
-    <!-- SPAWN WIRED 2026-08-22 (user: "it should spawn in all 3"): exclude tag LIFTED, so the
-         parent Baboon tags deliver Hills_Creatures + DesertCanyon_Creatures + the Baboons pool by
-         inheritance; troop merges live in PopulationTables.xml. First real debut wiring on the branch. -->
-  </object>
-  <object Name="Cleo_TerraFirma_Cobble Baboon Corpse" Inherits="Baboon Corpse">
-    <part Name="Render" DisplayName="granite baboon corpse" />
-    <part Name="Butcherable" OnSuccess="@Cleo_TerraFirma_Cobblefur Items" />
-    <tag Name="Tier" Value="2" />
-  </object>
-
   <object Name="Cleo_TerraFirma_Snapjaw Miner" Inherits="Snapjaw">
     <part Name="Render" DisplayName="snapjaw miner" Tile="snapjaw miner.png" ColorString="&amp;w" DetailColor="y" />
     <stat Name="Hitpoints" Value="6" />
@@ -126,193 +45,6 @@
     <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_SnapjawMiner" />
     <tag Name="Role" Value="Minion" />
     <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
-  </object>
-
-  <!-- BASE STONECARVER BODY (2026-08-15, opened for the legendary roller wish). This is a
-       CHASSIS, not a roster entry: no profession, no role tag, no gear. Profession-first
-       structure is RULED (user 2026-08-15, "it's a qud idiom") but the professions themselves,
-       their DetailColors past the ruled overseer pink / outrider blue / mason grey, and the
-       BASELINE KIT under the epithet grant are all still owed. Deliberately bare so the
-       legendary builder's output is the only thing you see.
-       Human half of the compressed two-body shape; stonerat.png (mole half) has no blueprint
-       yet either. Faction is inherited Humanoids-100 because the carver faction entry is
-       scheduled AFTER the NPC build by ruling. ExcludeFromDynamicEncounters: wish-door only. -->
-  <object Name="Cleo_TerraFirma_Stonecarver" Inherits="BaseHumanoid">
-    <!-- COLORS SETTLED 2026-08-15 (user, final: "let's have main color light grey, detail dark
-         grey, and then do detail dark grey on the rest of them"). DetailColor is set HERE ONLY on
-         purpose: the roles override ColorString and nothing else, so every carver inherits the
-         same dark ground, and "the rest of them" is expressed by inheritance rather than by four
-         copies free to drift apart.
-         Three things fall out of this, worth knowing before anyone dials it. The MASON stops
-         rendering flat, which it had been since the earlier carrier flip left it light grey on
-         light grey, a Claude bug. The LEGENDARY finally reads as asked back at the first pack,
-         pink over dark grey, because MakeLegendary paints ColorString and leaves DetailColor
-         alone. And every earlier colour pass this day is superseded by this one line: the interim
-         brown/white base, the carrier flip, and the channel argument behind them.
-         The one durable fact from all that churn: the pixel count was a measurement, the channel
-         it mapped to was a guess, and colours here get judged by eye, never inferred. -->
-    <part Name="Render" DisplayName="stonecarver" Tile="stonecarver.png" ColorString="&amp;y" DetailColor="K" />
-    <!-- Faction landed 2026-08-15. Replaces the inherited Humanoids-100 from BaseHumanoid, and
-         every role inherits it from here. Neutral to the player at 0 starting rep by the faction
-         entry, so a pack is not automatically hostile; whether quarriers should OPEN friendly,
-         wary or hostile is a real design call and is deliberately not made here. -->
-    <part Name="Brain" Factions="Cleo_TerraFirma_Quarriers-100" />
-    <!-- Bare spine on the chassis. This is what an OVERSEER carries, since the ruled structure is
-         the goatfolk one: the hero inherits the ordinary kit and the EPITHET tops it up. Nothing
-         bespoke, which is what keeps the byname load bearing instead of decorative, and it gives
-         the "lode" material perk something to bite (richer gear populations, by name alone). -->
-    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Quarrier Kit" />
-    <part Name="Description" Short="Chalk dust has worked so far into the creases of =pronouns.possessive= hands that the lines read like a map of somewhere quarried." /> <!-- DRAFT, and deliberately identity-neutral: the professions carry who these people are, and they are not built yet -->
-    <stat Name="Level" Value="10" /> <!-- CLAUDE PLACEHOLDER, numbers sitting owed -->
-    <!-- NOTE the missing "*noinherit" here, unlike every other creature in this file: that marker
-         stops a tag reaching children, and the whole point on this blueprint is that every role
-         built on top INHERITS the spawn gate. Caught while adding the roster: with the marker in
-         place the roles would have shipped ungated, ahead of any spawn wiring ruling. -->
-    <tag Name="ExcludeFromDynamicEncounters" />
-  </object>
-
-  <!-- THE ROSTER, built 2026-08-15. Roles were RULED 2026-07-22 (hewer / mason / outrider /
-       drover / provisioner / overseer); this pass builds three of them, per the user's rulings
-       the same day: PROVISIONER CUT (its trade role moved to the vine merchant 08-11 and packs
-       no longer trade, so nothing was left for it to do), DROVER OUT OF THIS PASS (still bounded
-       by the open beast design), and OVERSEER needs no blueprint at all because it was ruled as
-       "same blueprint, legendary" back at the color map: any carver the hero builder touches
-       becomes one, and the pink comes with it.
-       Profession-first structure is RULED 2026-08-15 ("it's a qud idiom"): the profession is the
-       face (name, description, camp presence), the mutation is the engine it works with, and the
-       Role tag is NOT the AI layer (see the Role recon in TODO; it is difficulty, spawn weight,
-       XP and a Minion stat penalty). COLOR CARRIER FLIPPED 2026-08-15 at the user's call: the
-       role rides ColorString, the shared grey sits in DetailColor. Legendaries are deliberately
-       NOT flipped, their pink stays where the hero convention puts it.
-       Mason grey RULED 2026-08-15 with its consequence accepted: it overlaps the grey-creature-
-       means-statue register the stonefrog uses. The user took the product rhyme (a mason makes
-       statues, statues are grey) over the exclusivity.
-       DRAFT and owed: every mutation LEVEL (numbers sitting), every Role tag, all descriptions,
-       and the mole variants' display names. NO GEAR: kits are the next pass by the user's own
-       sequencing, so a role currently carries its mutation and nothing else. -->
-
-  <!-- THE OVERSEER AS A BLUEPRINT (2026-08-26): the goatfolk-hero idiom exactly - base
-       "Goatfolk Hero 1" is a blueprint carrying <builder Name="GoatfolkHero1"/> and tables
-       name it as a plain row (base Creatures.xml:4715, PopulationTables.xml:4026). This
-       OVERRIDES the 2026-08-15 "the overseer got no blueprint" ruling - USER RULED
-       2026-08-26 ("we can override the standing ruling, if it works better this way").
-       The spirit survives: this child adds NO stats, no body, no gear - it is the chassis
-       wearing an on-switch, and any carver the builder touches still becomes an overseer.
-       What it buys: the overseer is an ordinary table row (Chance=, Hint=, even
-       ForceName-style builder params someday), spawnable by name from any wish or table. -->
-  <object Name="Cleo_TerraFirma_Overseer" Inherits="Cleo_TerraFirma_Stonecarver">
-    <builder Name="Cleo_TerraFirma_StonecarverLegendary" />
-  </object>
-
-  <object Name="Cleo_TerraFirma_Hewer" Inherits="Cleo_TerraFirma_Stonecarver">
-    <part Name="Render" DisplayName="quarry {{r|hewer}}" ColorString="&amp;r" /> <!-- "quarry x" naming, lean closed out as RULED 2026-08-23; mole variants inherit -->
-    <part Name="Description" Short="=pronouns.Possessive= eyes flit from wall to wall like a firefly under the Beetle Moon. It's impossible to tell whether =pronouns.subjective= =verb:are:afterpronoun= judging what weight the stone can bear or finding the weakest spot to strike." />
-    <mutation Name="Cleo_TerraFirma_Fissure" Level="4" /> <!-- level DRAFT -->
-    <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Hewer" /> <!-- mole hewer inherits this -->
-    <tag Name="Role" Value="Brute" /> <!-- DRAFT -->
-    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Hewer Kit" />
-    <!-- Jackhammer, gear sitting 2026-08-23 (user: "the hewer could sometimes spawn with a
-         nanopneumatic jackhammer?"; the digging-tool veto reversed same sitting, "they dig
-         their environment"). Graverobber precedent, base Creatures.xml:7207: AlwaysEquipAsWeapon
-         makes the bearer actually wield it (two hands plus back). The socket self-slots a chem
-         cell half the time (EnergyCellSocket creation defaults) and the item ships its own AI
-         cell-reload parts; charged means burrower pathing, dead still bashes walls via the
-         Digging part. Chance CLAUDE DRAFT. Mole hewer inherits it, stacking with its own
-         claws, deliberately. -->
-    <inventoryobject Blueprint="Nanopneumatic Jackhammer" Chance="25" IntProperties="AlwaysEquipAsWeapon:1" />
-  </object>
-
-  <object Name="Cleo_TerraFirma_Mason" Inherits="Cleo_TerraFirma_Stonecarver">
-    <part Name="Render" DisplayName="quarry {{y|mason}}" ColorString="&amp;y" />
-    <part Name="Description" Short="The wrinkles in =pronouns.possessive= grit-caked hands hold the memories of countless forms: a humble glowpad, a hulking slumberling. All things are possible with the right application of force and pressure to a hunk of stone." />
-    <mutation Name="Cleo_TerraFirma_Stoneshaper" Level="4" /> <!-- level DRAFT -->
-    <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Mason" /> <!-- mole mason inherits this -->
-    <!-- Role RECON 2026-08-15 (user: "we should investigate creature AI roles more thoroughly").
-         Role is NOT an AI layer, whatever the tracker said: nothing under XRL.World.Parts or
-         XRL.World.AI reads it. It feeds difficulty rating, dynamic spawn weight, XP value, and a
-         stat penalty. The first draft here said Minion, which was actively wrong: Minion docks a
-         boost step off ALL SIX attributes, reads 5 levels weaker than it is, quarters its own
-         level in a threat check, and pays 20x XP instead of 50x. A mason is a peer profession,
-         not a mook. Summoner is the honest tag AND the literal truth (Stoneshaper summons statue
-         companions); it rates +4 difficulty, so the con warning matches what the fight becomes. -->
-    <tag Name="Role" Value="Summoner" />
-    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Mason Kit" />
-    <!-- Figurine escort, role-texture pitch 2026-08-23; count RULED same day (user: "figurine
-         count can be 2-4"). HasGuards grammar, blueprint pinned; the mole mason inherits the
-         swarm by descent, deliberately. See the pitch entry in TODO.md, quarriers section. -->
-    <part Name="Cleo_TerraFirma_HasFigurinesPart" NumberOfFigurines="2-4" />
-  </object>
-
-  <object Name="Cleo_TerraFirma_Outrider" Inherits="Cleo_TerraFirma_Stonecarver">
-    <part Name="Render" DisplayName="quarry {{B|outrider}}" ColorString="&amp;B" />
-    <part Name="Description" Short="=pronouns.Possessive= eyes move uncertainly from your gait to your arms. What did you come to =pronouns.possessive= quarry for, traveler? A nearby stone rises from the earth in anticipation of your answer." />
-    <mutation Name="Cleo_TerraFirma_EarthenBarrage" Level="4" /> <!-- level DRAFT -->
-    <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Outrider" /> <!-- mole outrider inherits this -->
-    <tag Name="Role" Value="Artillery" /> <!-- DRAFT -->
-    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Outrider Kit" />
-  </object>
-
-  <!-- MOLE HALF of the two-body shape. The mole-folk species axis had sat as an unratified user
-       float since 2026-08-07; RATIFIED BY BUILDING 2026-08-15 at the user's direction (they chose
-       both bodies for this pass). Each variant is a thin child of its own role, so the profession
-       stays the identity and only the body changes: stonerat.png plus Burrowing Claws.
-       PathAsBurrower is ON, i.e. left at its default (user 2026-08-15, lifting Claude's caution:
-       "i'm not super precious about quarry design and giving some pickaxes and burrowing claws
-       pathasburrower part is pretty much fine, unless i see it in game and it works out badly").
-       Claude had switched it OFF on the reasoning that a warren is hand painted and they would
-       tunnel straight out of it. That was a CAUTION, never a ruling, and the user has now
-       explicitly accepted the risk. WATCH CONDITION, in the user's own words: revisit if it reads
-       badly in play. Mole carvers now tunnel while traveling.
-       Species tag left inherited on purpose. Building the body does not require claiming the
-       species string, and what these people ARE is the user's lore call, not a side effect.
-       DISPLAY NAMES COLLAPSED 2026-08-16 (user: "they do not need to be mole x, they can just be
-       the role"). The DisplayName override is GONE from all three, so each mole variant inherits
-       its role name from its parent and a mole mason is simply a mason. Only the tile differs.
-       Consequence accepted by the ruling: the two bodies are no longer tellable apart in a log or
-       a message line, which is exactly what the draft names existed to do. Eyes only from here. -->
-
-  <object Name="Cleo_TerraFirma_Mole Hewer" Inherits="Cleo_TerraFirma_Hewer">
-    <part Name="Render" Tile="stonerat.png" />
-    <mutation Name="BurrowingClaws" Level="4" />
-  </object>
-
-  <object Name="Cleo_TerraFirma_Mole Mason" Inherits="Cleo_TerraFirma_Mason">
-    <part Name="Render" Tile="stonerat.png" />
-    <mutation Name="BurrowingClaws" Level="4" />
-  </object>
-
-  <object Name="Cleo_TerraFirma_Mole Outrider" Inherits="Cleo_TerraFirma_Outrider">
-    <part Name="Render" Tile="stonerat.png" />
-    <mutation Name="BurrowingClaws" Level="4" />
-  </object>
-
-  <!-- ANIMATE FIGURINE (built 2026-08-23; pitch is the USER'S, "a small swarm of animate stone
-       figurines with the swarmer bonus could spawn alongside them", count 2-4 RULED same day).
-       Spawned only by the mason's Cleo_TerraFirma_HasFigurinesPart; never free-range, hence the
-       encounter gate. Swarmer decompiled: +1 melee to-hit and +1 to penetration rolls per other
-       swarmer beyond the first who is adjacent to the target, so the swarm sharpens as it
-       surrounds. Render is the figurine item tile walking (the mason's pocket maquette, woken),
-       stone grey per the roster color ruling; the corpse drop closes the loop, a killed one
-       sometimes reverts to the inert stone figurine curio (chance CLAUDE DRAFT). MentalShield:
-       there is no mind in there to reach. ALL STATS CLAUDE PLACEHOLDER, numbers sitting owed;
-       DisplayName and description DRAFT, signoff owed. -->
-  <object Name="Cleo_TerraFirma_AnimateFigurine" Inherits="BaseHumanoid">
-    <part Name="Render" DisplayName="animate figurine" Tile="Items/figurine.png" RenderString="*" ColorString="&amp;y" DetailColor="K" />
-    <part Name="Description" Short="" />
-    <builder Name="Cleo_TerraFirma_AnimateFigurineIdentity" Population="Cleo_TerraFirma_AnimateFigurineIdentity" />
-    <part Name="Brain" Hostile="False" Factions="Cleo_TerraFirma_Quarriers-100" />
-    <part Name="Swarmer" />
-    <part Name="MentalShield" />
-    <part Name="Corpse" CorpseChance="50" CorpseBlueprint="Cleo_TerraFirma_Random Stone Figurine" />
-    <stat Name="Level" Value="5" />
-    <stat Name="Hitpoints" Value="12" />
-    <stat Name="AV" Value="3" />
-    <stat Name="DV" Value="2" />
-    <stat Name="Strength" Value="14" />
-    <stat Name="Toughness" Value="12" />
-    <stat Name="Agility" Value="16" />
-    <tag Name="Role" Value="Minion" />
-    <tag Name="ExcludeFromDynamicEncounters" />
   </object>
   <!-- BOAR VESSEL, wild base (NAME RULED 2026-08-26, user: "boar over pig"; full design record
        in TODO.md creature roster). INVERTED HIERARCHY ruling 2026-08-11: this base owns the
@@ -337,44 +69,15 @@
     <stat Name="Level" Value="1" />
     <stat Name="AV" Value="3" /> <!-- DRAFT; base Boar AV 4 anchor, walks like a boar and breaks like a pot -->
     <stat Name="Hitpoints" Value="15" /> <!-- DRAFT; base Boar 13 -->
-    <part Name="Corpse" CorpseChance="50" CorpseBlueprint="Cleo_TerraFirma_Boar Vessel Corpse" /> <!-- USER RULED 2026-08-27: cistern moved from worn equipment to corpse butchery (equipped was invisible + a trade/domination surface); CHANCE DRAFT -->
     <tag Name="Species" Value="oddity" />
     <tag Name="Gender" Value="neuterperson" />
     <xtagTextFragments Skin="glaze" PoeticFeatures="artfulness,gentle stillness,childlike wonder" />
     <tag Name="BleedLiquid" Value="water-900,salt-100" />
     <tag Name="BleedColor" Value="&amp;B" />
     <tag Name="BleedPrefix" Value="{{B|wet}}" />
-    <!-- SPAWN WIRED 2026-08-27 (USER RULED: "same biomes as boar, honestly"; exclude tag
-         lifted): base Boar's four dynamic tables verbatim. Wild temperament kept as observed
-         and approved (USER RULED same day: "they can be hostile unless farmed? since they're
-         boar vessels"); the docile register lives on the Farm child below. -->
-    <tag Name="DynamicObjectsTable:DesertCanyon_Creatures" />
-    <tag Name="DynamicObjectsTable:Jungle_Creatures" />
-    <tag Name="DynamicObjectsTable:Hills_Creatures" />
-    <tag Name="DynamicObjectsTable:Flowerfields_Creatures" />
-  </object>
-  <!-- FARM BOAR VESSEL (USER RULED 2026-08-27, the "hostile unless farmed" split): base Farm
-       Goat / Farm Giant Beetle idiom verbatim: Prey-100 brain override + Grazer + its own
-       exclude tag (the parent's lift must not leak farm stock into wild pools). Spawns only
-       via the StiltAnimalPen Pigs-group merge (PopulationTables.xml). -->
-  <object Name="Cleo_TerraFirma_Farm Boar Vessel" Inherits="Cleo_TerraFirma_BaseBoarVessel">
-    <part Name="Brain" Hostile="false" Factions="Prey-100" />
-    <tag Name="Grazer" />
-    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
-  </object>
-  <!-- BOAR VESSEL CORPSE (USER RULED 2026-08-27: "corpse recolored brown and azure, butcherable
-       for a gut cistern"): the vessel's own palette on the base splat, butchery gates the organ
-       behind the kill (an inventory cistern was a trade surface, user catch). Base Corpse ships
-       Food (Gross/IllOnEat) + a Meat tag; both stripped, fired clay is not a meal. DisplayName
-       and description DRAFT, signoff owed. -->
-  <object Name="Cleo_TerraFirma_Boar Vessel Corpse" Inherits="Corpse">
-    <part Name="Render" DisplayName="boar vessel corpse" TileColor="&amp;w" ColorString="&amp;w" DetailColor="B" />
-    <part Name="Description" Short="Shards of a shattered pictograph lie inert on the ground, where once they trotted under the salt sun." />
-    <part Name="Butcherable" OnSuccess="Cleo_TerraFirma_GutCistern" />
-    <part Name="Commerce" Value="4" />
-    <removepart Name="Food" />
-    <removetag Name="Meat" />
-    <intproperty Name="Bleeds" Value="0" />
-    <tag Name="Tier" Value="1" />
+    <!-- Split 2026-09-27: Terra Firma keeps this body for Husangeion only. The wild spawn
+         tables and the butcherable corpse are Terra Firma 2 content, merged back onto this
+         blueprint by TerraFirma2/XML/Creatures.xml, which also removes this exclude tag. -->
+    <tag Name="ExcludeFromDynamicEncounters" />
   </object>
 </objects>

@@ -1,0 +1,889 @@
+<?xml version="1.0" encoding="utf-8"?>
+<populations>
+  <!-- Codex PROPOSAL: equal stone/base-pool shares; base pool retains its own material weights. -->
+  <population Name="Cleo_TerraFirma_AnimateFigurineIdentity">
+    <group Name="Identity" Style="pickone">
+      <object Blueprint="Cleo_TerraFirma_Random Stone Figurine" Weight="1" />
+      <table Name="Figurines 1" Weight="1" />
+    </group>
+  </population>
+	<!-- Cobble baboon butchery (2026-08-13): quartzfur three-piece idiom, equal weights
+	     mirroring the base Quartz Baboon Corpse table. Weights DRAFT, numbers sitting. -->
+	<population Name="Cleo_TerraFirma_Cobblefur Items">
+		<group Name="Items" Style="pickone" Weight="1">
+		<object Blueprint="Cleo_TerraFirma_Cobblefur Bracer" Number="1" Weight="20"/>
+		<object Blueprint="Cleo_TerraFirma_Cobblefur Gloves" Number="1" Weight="20"/>
+		<object Blueprint="Cleo_TerraFirma_Cobblefur Cloak" Number="1" Weight="20"/>
+	 </group>
+	</population>
+
+	<!-- Stonecarver pack (built 2026-08-15, SnapjawParty1 idiom). The mix the user asked for:
+	     "i imagined the pack would spawn a mix of each type from a poptable, with one leader."
+	     The LEADER IS NOT IN HERE. An overseer is any carver the hero builder touches (ruled at
+	     the color map: "same blueprint, legendary"), so whoever spawns it makes one and the
+	     table only supplies rank and file.
+	     ROCKHOUND RULED IN 2026-08-15 (user: "once we make packs spawn in base game, they should
+	     include a rockhound sometimes"), sometimes being the operative word: chance entry, not a
+	     fixture. ALL WEIGHTS ARE DRAFT. Mole variants sit lower than their human twins purely so
+	     the split is visible while testing, which is not a design position on how many there are.
+	     Nothing references this table outside the tfcarverpack wish yet. Real placement waits on
+	     the spawn wiring ruling. -->
+	<!-- WARREN PLACEMENT HINTS joined 2026-08-26 (the creature-placement migration, USER:
+	     "isn't there basegame precedent for doing something like this with population
+	     tables rather than cs?" then "let's go, send it"). Consumed by WarrenCarver's
+	     PopulateSite, never by the wish (tfcarverpack ignores hints by construction).
+	     Vocabulary: Cleo_TerraFirma_Trade:ROLE:PCT = PCT% chance to seat in a random
+	     pocket of that carve role (face/commons/dwelling/plain), else anywhere - the
+	     bias-not-law ruling; Cleo_TerraFirma_OutsidePost:PCT = a biased outrider may
+	     post outside near the mouth instead (the trail watch). ANY OTHER hint string
+	     is handed to the engine's own consumer (ZoneBuilderSandbox.PlaceObjectInArea)
+	     over the warren's carved floor, so the full base-game vocabulary - AlongWall,
+	     InsideCorner, AdjacentToBlueprint:X and friends - is legal here too. All
+	     percentages CLAUDE dials. -->
+	<population Name="Cleo_TerraFirma_Stonecarver Pack">
+		<group Name="Creatures" Style="pickeach">
+			<object Chance="100" Number="1-2" Blueprint="Cleo_TerraFirma_Hewer" Hint="Cleo_TerraFirma_Trade:face:55" />
+			<object Chance="75" Number="1-2" Blueprint="Cleo_TerraFirma_Outrider" Hint="Cleo_TerraFirma_Trade:plain:55,Cleo_TerraFirma_OutsidePost:50" />
+			<object Chance="60" Number="1" Blueprint="Cleo_TerraFirma_Mason" Hint="Cleo_TerraFirma_Trade:commons:55" />
+			<object Chance="35" Number="1" Blueprint="Cleo_TerraFirma_Mole Hewer" Hint="Cleo_TerraFirma_Trade:face:55" />
+			<object Chance="30" Number="1" Blueprint="Cleo_TerraFirma_Mole Outrider" Hint="Cleo_TerraFirma_Trade:plain:55,Cleo_TerraFirma_OutsidePost:50" />
+			<object Chance="25" Number="1" Blueprint="Cleo_TerraFirma_Mole Mason" Hint="Cleo_TerraFirma_Trade:commons:55" />
+			<object Chance="15" Number="1" Blueprint="Cleo_TerraFirma_Rockhound" />
+		</group>
+	</population>
+	<!-- WARREN DIALS AS WEIGHTED CONFIG TABLES (2026-08-26, the last clean migration
+	     pair). The base game's own tables-as-config idiom (the PowerGridReplace family:
+	     rows are labels the roller interprets, not blueprints). Rolled by WarrenCarver
+	     with the CARVE SEED at the exact points the old constant draws sat, so zone
+	     determinism holds; edit weights freely, never the label spellings (the carve
+	     laws key on these exact strings, and an unknown label falls back loudly to the
+	     first row). Occupancy weights were ABANDONED_PCT 25 / RECLAIMED_PCT 20; the
+	     stage roll was uniform. -->
+	<population Name="Cleo_TerraFirma_WarrenOccupancy">
+		<group Name="Roll" Style="pickone">
+			<object Weight="55" Blueprint="in use" />
+			<object Weight="25" Blueprint="abandoned" />
+			<object Weight="20" Blueprint="reclaimed" />
+		</group>
+	</population>
+	<!-- Codex PROPOSAL: site-level aquifer gate; conditional pool count is 1-2.
+	     Retries replay the same seeded roll. Suitable geology is still required. -->
+	<population Name="Cleo_TerraFirma_WarrenAquifers">
+		<group Name="Roll" Style="pickone">
+			<object Weight="80" Blueprint="dry" />
+			<object Weight="20" Blueprint="aquifer" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenStage">
+		<group Name="Roll" Style="pickone">
+			<object Weight="1" Blueprint="working" />
+			<object Weight="1" Blueprint="camp" />
+			<object Weight="1" Blueprint="flourishing" />
+		</group>
+	</population>
+
+	<!-- PER-STAGE CREW TABLES (2026-08-26, the stage-scaling migration; overseer-as-row
+	     rides the USER-RULED override of the no-blueprint ruling, same day). PopulateSite
+	     picks the table by the rolled stage: prosperity buys population per the 0-2
+	     payloads ruling. The overseer is an ordinary Chance= row on the goatfolk-hero
+	     idiom - the Cleo_TerraFirma_Overseer blueprint carries the epithet builder, so
+	     the row needs nothing special - seated deepest-dwelling by its Den hint. The
+	     flourishing table references the pack TWICE: the two-shift dig. Chances 15/40/75
+	     and the shift count are CLAUDE dials (were the OVERSEER_PCT and packRolls knobs,
+	     migrated here). -->
+	<population Name="Cleo_TerraFirma_WarrenCrew Working">
+		<group Name="Crew" Style="pickeach">
+			<table Name="Cleo_TerraFirma_Stonecarver Pack" />
+			<object Chance="15" Number="1" Blueprint="Cleo_TerraFirma_Overseer" Hint="Cleo_TerraFirma_Den:dwelling" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenCrew Camp">
+		<group Name="Crew" Style="pickeach">
+			<table Name="Cleo_TerraFirma_Stonecarver Pack" />
+			<object Chance="40" Number="1" Blueprint="Cleo_TerraFirma_Overseer" Hint="Cleo_TerraFirma_Den:dwelling" />
+			<object Number="1" Blueprint="Cleo_TerraFirma_Vine Merchant" Hint="Cleo_TerraFirma_MerchantWall" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenCrew Flourishing">
+		<group Name="Crew" Style="pickeach">
+			<table Name="Cleo_TerraFirma_Stonecarver Pack" />
+			<table Name="Cleo_TerraFirma_Stonecarver Pack" />
+			<object Chance="75" Number="1" Blueprint="Cleo_TerraFirma_Overseer" Hint="Cleo_TerraFirma_Den:dwelling" />
+			<object Number="1" Blueprint="Cleo_TerraFirma_Vine Merchant" Hint="Cleo_TerraFirma_MerchantWall" />
+		</group>
+	</population>
+	<!-- Reclaimed warrens: the newcomers who denned in the abandoned dig. Consumed by
+	     PopulateSite when occupancy rolls reclaimed. Cleo_TerraFirma_Den = seat
+	     deepest-first, beside the crude fires the tense pass lights; the clumping is
+	     the point, snapjaws den together. Cleo_TerraFirma_Den:ROLE prefers that carve
+	     role's pockets deepest-first (the overseer's dwelling seat). Number range
+	     CLAUDE dial (was the SNAPJAW_MIN/MAX knob pair, migrated here). -->
+	<population Name="Cleo_TerraFirma_WarrenReclaimers">
+		<group Name="Denners" Style="pickeach">
+			<object Number="2-4" Blueprint="Cleo_TerraFirma_Snapjaw Miner" Hint="Cleo_TerraFirma_Den" />
+		</group>
+	</population>
+
+	<!-- QUARRIER KITS (2026-08-15). Shape is the user's: "rather than use player base armor, we
+	     could do something like generate tier appropriate armor with a few items biased to roll
+	     each time." That is the base game's own idiom, and HumanoidEquipment is the model.
+	     The piece that makes it work is {ownertier}, a substitution token resolving the tier off
+	     the OWNING creature, so one table scales itself and no per tier duplicates are needed.
+	     GetTier is an explicit Tier tag if present, else (Level minus 1) / 5 + 1. Our chassis sits
+	     at Level 10 with no Tier tag, so carvers currently roll TIER 2 gear. That coupling is now
+	     load bearing: raising the roster level raises what they wear, and the level is still a
+	     Claude placeholder awaiting the numbers sitting.
+	     Entries with no Chance in a pickeach group fire every time, which is the "biased to roll
+	     each time" half: the signature four are certain, the armor is rolled.
+	     Kept LIGHT per the standing note. Figurines stay OUT of this shared spine: the user ruled
+	     them onto the MASON only (see that kit below), so they are a role tell rather than a
+	     pack wide loot floor. If they should ever spread, a Figurines {ownertier} line at a low
+	     chance is all it takes and the tier table already exists. -->
+	<!-- SPINE LIGHTENED 2026-08-22 (user: "let's lighten up the quarrier kit spine so it just
+	     has what's absolutely essential/misc items"). EtchTools and the armor group moved DOWN:
+	     hewer and mason carry both verbatim (current behavior preserved until their own lock
+	     sittings), the outrider replaced both with its locked bespoke kit below. The spine is
+	     now water, light, shoes, and a semi-common carried pickaxe; nothing else is
+	     universal. -->
+	<!-- Spine light + shoes RULED 2026-08-22 (user: "lets have an 80% chance for tier 1 shoes,
+	     and vary torches so they can also be lanterns with shards and rarely glowspheres").
+	     Light weights CLAUDE DRAFT. The lantern entry is the LOADED variant so it arrives
+	     burning; this is the mod lantern's first walking-around acquisition road. Shoes pinned
+	     to tier 1 by the ruling, decoupled from the ownertier ladder. -->
+	<population Name="Cleo_TerraFirma_Quarrier Kit">
+		<group Name="Equipment" Style="pickeach">
+			<object Blueprint="HalfFullWaterskin" Number="1" />
+			<group Name="Light" Style="pickone">
+				<object Weight="70" Blueprint="Torch" Number="2-5" />
+				<object Weight="25" Blueprint="Cleo_TerraFirma_GlowstoneLanternLoaded" Number="1" />
+				<object Weight="5" Blueprint="Glowsphere" Number="1" />
+			</group>
+			<table Name="Shoes 1" Chance="80" />
+			<!-- Pickaxe on the spine, gear sitting 2026-08-23 (user: "why not add the pickaxe
+			     as a semi-common item on the spine instead?", then "it's fine if they don't
+			     *use* the pickaxes, i just mean why not have them carry them?"): a carried work
+			     tool beside the waterskin, flavor first. Snapjaw miner precedent in-pack
+			     (Creatures.xml, plain inventoryobject pick). The Carver Hammer rung variant was
+			     REJECTED on ground truth: Pickaxe is Skill="Axe" (base Items.xml:11170), so as
+			     a striker it would break that carver's Cudgel-gated etching. Digging note: a
+			     pack pick is inert; only a WIELDED one grants Digging and burrower pathing, and
+			     pick-vs-hammer equip scoring is close, so spine picks make organic diggers,
+			     not guaranteed ones. Chance CLAUDE DRAFT. -->
+			<object Blueprint="Pickaxe" Chance="35" Number="1" />
+		</group>
+	</population>
+
+	<!-- Role kits: the spine plus ONE signature item, per the pitch the user accepted. The
+	     discipline is that the mutation is the job and the item is only the tell.
+	     HISTORY, superseded: the hewer originally took the dust mask INSTEAD of a pickaxe
+	     because DiggingTool paths NPCs through walls. That veto is REVERSED, RULED 2026-08-23
+	     (user: "i don't like that veto, i think it makes sense for quarriers to have digging
+	     tools especially if it means they dig their environment"): tunneling is accepted
+	     behavior now, and the ground truth pass found the mole variants were latent tunnelers
+	     all along (BurrowingClaws paths-as-burrower by default; see the gear sitting record in
+	     TODO.md). The jackhammer rides the hewer BLUEPRINT (Creatures.xml), not this kit, on
+	     the graverobber precedent. Headgear rolls from the MiningGear table; the mask lives on
+	     as a common rung there. Arms: the 2026-08-22 etch-tool ruling lands here as sequenced;
+	     both kits roll the Carver Knife and Carver Hammer ladders and the near-duplicate
+	     EtchTools table is scrubbed, its provenance journaled at the 08-23 gear sitting.
+	     Same-pool RULED same sitting (user: "let's have all 3 quarriers use the same weapon
+	     pool. we'll have bucklers/shields as a special get for outriders"): the outrider's
+	     arms already rolled these ladders, so all three roles now share one arms
+	     distribution, and shields stay the outrider's alone. -->
+	<population Name="Cleo_TerraFirma_Hewer Kit">
+		<group Name="Equipment" Style="pickeach">
+			<table Name="Cleo_TerraFirma_Quarrier Kit" />
+			<table Name="Cleo_TerraFirma_MiningGear" />
+			<!-- Fissure stones, role-texture pitch 2026-08-23; count RULED same day (user: "amount
+			     should be 2-3"). The sower precedent: grenades in plain inventory get thrown by
+			     stock AI. Whoever fells the hewer inherits the unspent ones, deliberately. -->
+			<object Blueprint="Cleo_TerraFirma_FissureStone" Number="2-3" />
+			<table Name="Cleo_TerraFirma_Carver Knife" />
+			<table Name="Cleo_TerraFirma_Carver Hammer" />
+			<group Name="Armor" Style="pickone">
+				<table Weight="40" Name="DynamicInheritsTable:Armor:Tier{ownertier}" Chance="75" Number="1" />
+				<table Weight="60" Name="Armor {ownertier}" Chance="75" Number="1" />
+			</group>
+		</group>
+	</population>
+
+	<!-- Mason carries a MAQUETTE, RULED 2026-08-15 (user: "rather than a bubble level, give the
+	     mason a figurine"), superseding the bubble level from the pitch. It reuses the mod's own
+	     Cleo_Stonecarver_Maquette, which is the exact table in the PLAYER calling kit: copper
+	     figurine 1-2, or a silver one. So a mason carries what a player stonecarver carries, and
+	     they read as kin rather than as loot. It also lands the temptation half of the kit pitch
+	     but SCOPED to one role rather than smeared across the pack: a silver figurine on the
+	     quiet one is a specific thing to want, and the figurine rep economy is already on file. -->
+	<population Name="Cleo_TerraFirma_Mason Kit">
+		<group Name="Equipment" Style="pickeach">
+			<table Name="Cleo_TerraFirma_Quarrier Kit" />
+			<table Name="Cleo_Stonecarver_Maquette" />
+			<!-- Headgear at a chance rather than the hewer's guarantee: the quiet one is
+			     sometimes bare-headed. Chance CLAUDE DRAFT (gear sitting 2026-08-23). -->
+			<table Name="Cleo_TerraFirma_MiningGear" Chance="65" />
+			<!-- Carver ladders replace EtchTools here too (etch-tool ruling of 2026-08-22
+			     landing as sequenced at the 08-23 gear sitting). -->
+			<table Name="Cleo_TerraFirma_Carver Knife" />
+			<table Name="Cleo_TerraFirma_Carver Hammer" />
+			<group Name="Armor" Style="pickone">
+				<table Weight="40" Name="DynamicInheritsTable:Armor:Tier{ownertier}" Chance="75" Number="1" />
+				<table Weight="60" Name="Armor {ownertier}" Chance="75" Number="1" />
+			</group>
+		</group>
+	</population>
+
+	<!-- OUTRIDER KIT LOCKED 2026-08-22 (design sitting; structure is the USER'S, weights are
+	     CLAUDE DRAFT pending ratification). User shape, verbatim: "dagger + hammer, or
+	     dagger/hammer + shield. dagger + hammer could also have a buckler. a random baboon table
+	     item with a bias towards bracers for synergy" and the chest list below.
+	     Arms note: the dagger and hammer ARE the etch pair's parents (steel chisel inherits
+	     Steel Dagger, steel mallet inherits Steel Hammer), so the outrider now carries the
+	     un-reskinned truth of what the role held before; the etch-tool removal ruling arrives
+	     here first. AMENDED same day: arms now roll the material ladder tables below
+	     (blunted/steel/carbide per the user, steel rung swapped to Steel Utility Knife). Buckler/shield ride the Arm slot, so they coexist with the pelt items.
+	     Pelt group replaces the fixed bracer: bias 60/20/20 per the user's "bias towards
+	     bracers". The old ecology note stands: pelt items carry AddsRep Baboons -100, baboons
+	     hate the wearer, free faction texture. -->
+	<population Name="Cleo_TerraFirma_Outrider Kit">
+		<group Name="Equipment" Style="pickeach">
+			<table Name="Cleo_TerraFirma_Quarrier Kit" />
+			<!-- personal effects (USER 2026-08-23: "beaded bracelet, baboon neck ring"; un-parks
+			     the held-off personal-effect line). Beaded bracelet = base Bracelet1/2/3
+			     colorways; neck ring = base Blood-stained neck-ring (displays "neck-ring").
+			     Chance and weights CLAUDE DRAFT. -->
+			<group Name="PersonalEffects" Style="pickone" Chance="15">
+				<object Weight="20" Blueprint="Bracelet1" />
+				<object Weight="20" Blueprint="Bracelet2" />
+				<object Weight="20" Blueprint="Bracelet3" />
+				<object Weight="40" Blueprint="Blood-stained neck-ring" />
+			</group>
+			<group Name="Arms" Style="pickone">
+				<group Weight="40" Name="ToolPair" Style="pickeach">
+					<table Name="Cleo_TerraFirma_Carver Knife" />
+					<table Name="Cleo_TerraFirma_Carver Hammer" />
+				</group>
+				<group Weight="20" Name="ToolPairBuckler" Style="pickeach">
+					<table Name="Cleo_TerraFirma_Carver Knife" />
+					<table Name="Cleo_TerraFirma_Carver Hammer" />
+					<object Blueprint="Steel Buckler" Number="1" />
+				</group>
+				<group Weight="20" Name="DaggerShield" Style="pickeach">
+					<table Name="Cleo_TerraFirma_Carver Knife" />
+					<object Blueprint="Steel Shield" Number="1" />
+				</group>
+				<group Weight="20" Name="HammerShield" Style="pickeach">
+					<table Name="Cleo_TerraFirma_Carver Hammer" />
+					<object Blueprint="Steel Shield" Number="1" />
+				</group>
+			</group>
+			<group Name="Pelt" Style="pickone">
+				<object Weight="60" Blueprint="Cleo_TerraFirma_Cobblefur Bracer" Number="1" />
+				<object Weight="20" Blueprint="Cleo_TerraFirma_Cobblefur Gloves" Number="1" />
+				<object Weight="20" Blueprint="Cleo_TerraFirma_Cobblefur Cloak" Number="1" />
+			</group>
+			<!-- Chest: flint-spike pauldrons (Weight 25) and mudskin girdle (Weight 25) join
+			     these entries when their blueprints land (both fully shaped in TODO.md, same
+			     sitting). Until then the live weights normalize among themselves; final
+			     proportions arrive with that build. The workwear subgroup is the user's
+			     "instead of none" fallback: every outrider wears SOMETHING on the chest. -->
+			<group Name="Chest" Style="pickone">
+				<object Weight="12" Blueprint="Bark Armor" Number="1" />
+				<object Weight="12" Blueprint="Studded Leather Armor" Number="1" />
+				<object Weight="6" Blueprint="Ring Mail" Number="1" />
+				<object Weight="6" Blueprint="Chain Mail" Number="1" />
+				<object Weight="8" Blueprint="Furs" Number="1" />
+				<object Weight="8" Blueprint="Leather Armor" Number="1" />
+				<group Weight="10" Name="Workwear" Style="pickone">
+					<object Weight="25" Blueprint="Sooty Smock" Number="1" />
+					<object Weight="25" Blueprint="Ash-Stained Robes" Number="1" />
+					<object Weight="25" Blueprint="Cloth Overalls" Number="1" />
+					<object Weight="25" Blueprint="Leather Apron" Number="1" />
+				</group>
+			</group>
+		</group>
+	</population>
+
+	<!-- OUTRIDER MATERIAL LADDER, RULED 2026-08-22 (user: "blunted/splintered - steel - carbide
+	     is my lean" and "for the steel dagger, we could use steel utility knives"; the carbide
+	     rung steered to tier 3 same sitting: base Dagger3/Cudgel3 render as plain carbide dagger
+	     and carbide hammer). Weights CLAUDE DRAFT, the EtchTools 90/10 shape with a poverty
+	     floor added. Knife and hammer roll SEPARATELY on purpose: mismatched pairs were ruled a
+	     feature at the EtchTools sitting and the same logic rides here. The etch wrinkle once
+	     noted here is RETIRED: the gate went skill-based the same day (any Cudgel-skill striker
+	     plus any ShortBlades-skill edge etches; borrowed weapons carve two tiers below their
+	     own), so every knife-and-hammer outrider is etch-capable, not just the blunted rung.
+	     2026-08-23 gear sitting: the hewer and mason kits now roll these same two ladders (the
+	     etch-tool ruling landing as sequenced), so this is the PACK arms distribution, no
+	     longer outrider-only; the near-duplicate EtchTools table was scrubbed the same pass. -->
+	<population Name="Cleo_TerraFirma_Carver Knife">
+		<group Name="Knife" Style="pickone">
+			<object Weight="15" Blueprint="Cleo_TerraFirma_Blunted Chisel" Number="1" />
+			<object Weight="75" Blueprint="Steel Utility Knife" Number="1" />
+			<object Weight="10" Blueprint="Dagger3" Number="1" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_Carver Hammer">
+		<group Name="Hammer" Style="pickone">
+			<object Weight="15" Blueprint="Cleo_TerraFirma_Splintered Mallet" Number="1" />
+			<object Weight="75" Blueprint="Steel Hammer" Number="1" />
+			<object Weight="10" Blueprint="Cudgel3" Number="1" />
+		</group>
+	</population>
+
+	<!-- MINING GEAR (gear sitting 2026-08-23; structure is the USER'S: "a mining gear table for
+	     things like, gas masks, mining helmets, headlamps, knollworm skulls ... we could also
+	     expand it with some more common ones like leather caps, witchwood wreaths, goggles, and
+	     vinewood sap masks", expanded same sitting with basic gloves and the granitefur pair).
+	     One shared workwear distribution for the pack: hewer rolls it always (his old
+	     guaranteed mask became a common rung), mason at a chance; the outrider kit is LOCKED
+	     and deliberately not touched. All weights CLAUDE DRAFT pending ratification; every
+	     blueprint verified real at the sitting, slots and riders cited in the TODO.md record.
+	     Riders worth knowing, all deliberate: miner's helmet and headlamp are always-on light
+	     sources (radius 6 and 3), so some carvers arrive self-lit; goggles carry AddsRep
+	     Insects +50; the witchwood wreath harvests into Witchwood Bark, i.e. a carver can wear
+	     the very thing the hewer's dialogue asks for; knollworm skull is +1 Ego. Headgear is
+	     one pickone ON PURPOSE (one headgear identity per carver, variety across the pack);
+	     gloves are a second group at a chance, so hands arrive independently of hats. The
+	     granitefur rung carries AddsRep Baboons -100, so a gloved carver inherits the baboon
+	     grudge the outrider pelt already runs; ecology spreading to the pack is deliberate.
+	     (The EtchTools table that lived here, 2026-08-15 to 2026-08-23, is scrubbed: its two
+	     consumers moved to the Carver ladders above. Its load-bearing findings survive there
+	     and in the journal: weighted flat beats {ownertier} parameterization because a missing
+	     rung fails silently, and mismatched knife-and-hammer pairs are a ruled feature.) -->
+	<!-- Fixed wares tier follows DromadTrader1's stock-table idiom.
+	     Base WorldTerrain.xml: TerrainDesertCanyon carries RegionTier=1.
+	     Two chalk boxes per stock; other supplement counts are CLAUDE PROPOSAL dials.
+	     Regional food follows the canyon warren basket's existing pantry. -->
+	<population Name="Cleo_TerraFirma_VineMerchantWares">
+		<group Name="Wares" Style="pickeach">
+			<!-- CLAUDE PROPOSAL stock frequency; general Guns loot also includes it. -->
+			<object Blueprint="Cleo_TerraFirma_Gravel Shotgun" Number="1" Chance="15" />
+			<table Name="Tier1Wares" />
+			<table Name="Cleo_TerraFirma_MiningGear" Number="2-3" />
+			<object Blueprint="Pickaxe" Number="1-2" />
+			<object Blueprint="Cleo_TerraFirma_BoxOfChalk" Number="2" />
+			<object Blueprint="Yuckwheat Stem" Number="2-4" />
+			<object Blueprint="Starapple Preserves" Number="1-2" />
+			<object Blueprint="Boar Jerky" Number="1-3" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_MiningGear">
+		<!-- One item per roll. CLAUDE PROPOSAL weights preserve the former bundle's
+		     relative item frequencies: headgear 100, gloves 35, bodypack 15, scaled by 20. -->
+		<group Name="Gear" Style="pickone">
+			<object Weight="400" Blueprint="Leather Cap" Number="1" />
+			<object Weight="400" Blueprint="Vinewood Sap Mask" Number="1" />
+			<object Weight="260" Blueprint="Goggles" Number="1" />
+			<object Weight="240" Blueprint="Witchwood Wreath" Number="1" />
+			<object Weight="200" Blueprint="Miner's Helmet" Number="1" />
+			<object Weight="200" Blueprint="Headlamp" Number="1" />
+			<object Weight="160" Blueprint="Gas Mask" Number="1" />
+			<object Weight="140" Blueprint="Knollworm Skull" Number="1" />
+			<object Weight="315" Blueprint="Leather Gloves" Number="1" />
+			<object Weight="280" Blueprint="Boar-skin gloves" Number="1" />
+			<object Weight="105" Blueprint="Cleo_TerraFirma_Cobblefur Gloves" Number="1" />
+			<object Weight="300" Blueprint="Nylon Bodypack" Number="1" />
+			<!-- Codex PROPOSAL weight: uncommon surveying equipment in the shared mining pool. -->
+			<object Weight="100" Blueprint="Cleo_TerraFirma_SeismicShufflers" Number="1" />
+		</group>
+	</population>
+	<!-- Granite baboon troop wiring (user ruling 2026-08-22: "it should spawn in all 3" - the
+	     dynamic pools arrive via inherited parent tags in Creatures.xml; these merges put him in
+	     baboon SOCIETY, the weird cousin who learned to juggle. Chances/numbers DRAFT. -->
+	<population Name="BaboonParty" Load="Merge">
+		<group Name="Baboons" Style="pickeach">
+			<object Chance="33" Number="0-1" Blueprint="Cleo_TerraFirma_Cobble Baboon" />
+		</group>
+	</population>
+	<population Name="BigBaboonParty" Load="Merge">
+		<group Name="Baboons" Style="pickeach">
+			<object Chance="90" Number="1-2" Blueprint="Cleo_TerraFirma_Cobble Baboon" />
+		</group>
+	</population>
+	<!-- Item spawn wiring 2026-08-22 (user rulings, one lane each; all weights DRAFT):
+	     lantern = trinkets (tag on blueprint) + the light-source utility table glowspheres live
+	     in, at half a glowsphere's weight · cricket = the Symbiotic Firefly's exact artifact
+	     ladder, same weights · chalk box = the crayons' eight trinket tables at the crayons'
+	     own 35 · granitefur = ape fur's Armor-table idiom one tier down (ape fur = Armor 3C
+	     w10 each; ours = Armor 2C w10 each). Fragments need no lane: breaking spheres IS the
+	     acquisition (ruled "agreed, done"). -->
+	<population Name="Utility 2" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_GlowstoneLantern" />
+		</group>
+	</population>
+	<population Name="Artifact 0R" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="20" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
+		</group>
+	</population>
+	<population Name="Artifact 1R" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="20" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
+		</group>
+	</population>
+	<population Name="Artifact 2R" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
+		</group>
+	</population>
+	<population Name="Artifact 3R" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="5" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
+			<!-- Codex PROPOSAL weight for tier-3 surveying equipment. -->
+			<object Weight="5" Number="1" Blueprint="Cleo_TerraFirma_SeismicShufflers" />
+		</group>
+	</population>
+	<population Name="Artifact 4R" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="1" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
+		</group>
+	</population>
+	<population Name="Trinkets 1" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="35" Number="1" Blueprint="Cleo_TerraFirma_BoxOfChalk" />
+		</group>
+	</population>
+	<population Name="Trinkets 2" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="35" Number="1" Blueprint="Cleo_TerraFirma_BoxOfChalk" />
+		</group>
+	</population>
+	<population Name="Trinkets 3" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="35" Number="1" Blueprint="Cleo_TerraFirma_BoxOfChalk" />
+		</group>
+	</population>
+	<population Name="Trinkets 4" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="35" Number="1" Blueprint="Cleo_TerraFirma_BoxOfChalk" />
+		</group>
+	</population>
+	<population Name="Trinkets 5" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="35" Number="1" Blueprint="Cleo_TerraFirma_BoxOfChalk" />
+		</group>
+	</population>
+	<population Name="Trinkets 6" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="35" Number="1" Blueprint="Cleo_TerraFirma_BoxOfChalk" />
+		</group>
+	</population>
+	<population Name="Trinkets 7" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="35" Number="1" Blueprint="Cleo_TerraFirma_BoxOfChalk" />
+		</group>
+	</population>
+	<population Name="Trinkets 8" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="35" Number="1" Blueprint="Cleo_TerraFirma_BoxOfChalk" />
+		</group>
+	</population>
+	<population Name="Armor 2C" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_Cobblefur Bracer" />
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_Cobblefur Gloves" />
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_Cobblefur Cloak" />
+		</group>
+	</population>
+	<!-- Codex PROPOSAL weights: rare tier-3 equipment; quarry chests already roll MiningGear. -->
+	<population Name="Armor 3R" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_SeismicShufflers" />
+		</group>
+	</population>
+
+	<!-- ================= WARREN DRESS TABLES (migrated from WarrenCarver.cs 2026-08-26;
+	     migration itself USER-GREENLIT 2026-08-25, dials CLAUDE unless struck) =================
+	     These tables are the warren dress system's DATA: which blueprint, what weight, what
+	     spatial hint. The placement LAWS (budgets, one oven per site, one chest per room,
+	     articulation guard, re-roll floors, cluster stamps) stay in WarrenCarver.cs, which is
+	     the ONLY consumer of these tables. It reads them through PopulationManager's parsed
+	     structures and rolls with the carver's own zone-seeded RNG, so warren rebuilds stay
+	     deterministic; the engine's Generate path (ambient RNG, Stat.NextULong in
+	     XRL.PopulationList.Generate) is deliberately not used.
+	     Idioms, all verified in base PopulationTables.xml and the decompile:
+	     - Blueprint="*None" is the engine's weighted nothing row (base PopulationTables.xml:6852,
+	       PowerGridReplace); the roller interprets the sentinel, nothing spawns.
+	     - Hint vocabulary is the engine's own, consumed in our case by WarrenCarver.Seat:
+	       Center matches ZoneBuilderSandbox.PlaceObjectInArea's Center (the area centroid);
+	       Cleo_TerraFirma_Face is OUR hint (deepest cell from the mouth, the work face) with
+	       no engine equivalent, legal here because the engine never reads these tables.
+	     - Row ORDER is load-bearing for seed determinism: same seed walks rows in order.
+	       Reorder and every warren re-dresses (distribution identical, exact items drift).
+	     Weights carry their provenance from the C# tables' comments, copied across verbatim
+	     where they existed. Editing weights or adding rows here needs NO recompile.
+	     SIM MIRROR: design/warren-lab-v2.html keeps its own JS copies (DRESS, ROOMPOOLS,
+	     NATURAL, PLAINTRACE, HALLTABLE + the ITEMS art table, in sim ids). THE SIM LEADS;
+	     when a sitting changes dress content, change the sim first and port here. -->
+
+	<!-- FACE sockets: one roll per ~18 floor cells, 1-4 (rescaled from /30 cap 3 at the 08-29
+	     sparse-dress sitting, ported 2026-09-05). The first roll skips the nothing row
+	     in code (a face is never sterile, 2026-08-23 ruling); the weights are untouched.
+	     nugget row weight 1 (USER RULED 2026-08-25, weights delegated): quarry product
+	     tumbled free at the work face, rare on purpose, ~1 in 111 rolls. -->
+	<population Name="Cleo_TerraFirma_WarrenDress Socket">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="55" Blueprint="*None" />
+			<object Weight="18" Blueprint="Cleo_TerraFirma_QuarryStones1" />
+			<object Weight="8" Blueprint="Torch" Hint="Cleo_TerraFirma_Face" />
+			<object Weight="5" Blueprint="Pickaxe" Hint="Cleo_TerraFirma_Face" />
+			<object Weight="5" Blueprint="Garbage" />
+			<object Weight="2" Blueprint="Cleo_TerraFirma_Quarry Chest" />
+			<object Weight="4" Blueprint="Floor Cushion" />
+			<object Weight="3" Blueprint="Bedroll" />
+			<object Weight="2" Blueprint="Wine Pitcher" />
+			<object Weight="4" Blueprint="Cleo_TerraFirma_Stone Basket" />
+			<object Weight="2" Blueprint="Vase" />
+			<object Weight="2" Blueprint="Jug" />
+			<object Weight="1" Blueprint="Copper Nugget" />
+		</group>
+	</population>
+	<!-- COMMONS gallery tables reworked at the 2026-08-29 commons sitting, ported 2026-09-05
+	     (USER vocabulary, verbatim: "hammered dulcimer, chalkboard, statues, and monuments;
+	     carved diptych, ceramic amphora, colossal orb, stone columbary, stone monolith, stone
+	     obelisk, stone stele. we should go light though, with just a couple of the monuments
+	     spawning, and mostly just use our leisure item vocab"; corrected same sitting: "commons
+	     can have quarried stacks; they should have some more items that are in the leisure
+	     pool, like pitchers and seating"). Stacks STAY, pitchers and seating carry more weight
+	     beside the music/writing/monument adds. Nothing weights eased slightly: the commons has
+	     no honest-plainness defense (measured 1.4 gallery items per hall before the sitting).
+	     "Village Monument" is the base PARENT blueprint and reads as a META-ROW: WarrenCarver
+	     resolves it to one of the seven spoken monuments (Obelisk, Amphora, Birdhouse = the
+	     stone columbary, Diptych, Stele, Monolith, Orb) with a site cap of 2; over-cap rolls
+	     fall back to a statue. Weights CLAUDE, delegated. -->
+	<!-- one roll per spur bay -->
+	<population Name="Cleo_TerraFirma_WarrenDress GalleryBay">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="40" Blueprint="*None" />
+			<object Weight="12" Blueprint="Random Stone Statue" />
+			<object Weight="7" Blueprint="LargeBoulder" />
+			<object Weight="7" Blueprint="Cleo_TerraFirma_QuarryStones2" />
+			<object Weight="7" Blueprint="Hammered Dulcimer" />
+			<object Weight="8" Blueprint="Bench" />
+			<object Weight="6" Blueprint="Floor Cushion" />
+			<object Weight="6" Blueprint="Wine Pitcher" />
+			<object Weight="5" Blueprint="Cider Vase" />
+			<object Weight="4" Blueprint="Kline" />
+			<object Weight="4" Blueprint="Cleo_TerraFirma_Quarry Chest" />
+			<object Weight="3" Blueprint="Torch" />
+		</group>
+	</population>
+	<!-- one roll beside each pillar -->
+	<population Name="Cleo_TerraFirma_WarrenDress GalleryPillar">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="48" Blueprint="*None" />
+			<object Weight="14" Blueprint="Random Stone Statue" />
+			<object Weight="8" Blueprint="Chalkboard" />
+			<object Weight="7" Blueprint="Torch" />
+			<object Weight="8" Blueprint="Bench" />
+			<object Weight="7" Blueprint="Floor Cushion" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_QuarryStones1" />
+			<object Weight="5" Blueprint="Cider Vase" />
+		</group>
+	</population>
+	<!-- centerpiece rolls on the whole floor: one per ~24 floor cells, 1-3 (was one roll
+	     regardless of size; "go light" keeps the cap at 3) -->
+	<population Name="Cleo_TerraFirma_WarrenDress GalleryFloor">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="34" Blueprint="*None" />
+			<object Weight="18" Blueprint="LargeBoulder" Hint="Center" />
+			<object Weight="13" Blueprint="Random Stone Statue" Hint="Center" />
+			<object Weight="10" Blueprint="Village Monument" Hint="Center" />
+			<object Weight="9" Blueprint="Cleo_TerraFirma_FireDish" Hint="Center" />
+			<object Weight="7" Blueprint="Hammered Dulcimer" Hint="Center" />
+			<object Weight="5" Blueprint="Chalkboard" Hint="Center" />
+		</group>
+	</population>
+	<!-- NATURAL scatter: geology showing through the floor, corridors included.
+	     Fallen rock OUT of dress (USER RULED 2026-08-25 "replace it with basegame rocks"):
+	     Small Stone = the takeable pocket rock, SmallBoulder = the robbed-yard block remnant,
+	     so it reads chunkier. Picks CLAUDE dials, both verified (base Items.xml:3016/3049). -->
+	<population Name="Cleo_TerraFirma_WarrenDress Natural">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="55" Blueprint="*None" />
+			<object Weight="10" Blueprint="Small Stone" />
+			<object Weight="15" Blueprint="SmallBoulder" />
+			<object Weight="20" Blueprint="Cleo_TerraFirma_Rock_Pebbles" />
+		</group>
+	</population>
+	<!-- PLAIN rooms: human traces, the hall-table register; circulation rooms, not
+	     furnished ones. Size-scaled roll count lives in code (one per 12 floor, cap 5; was
+	     /24 cap 3 until the 08-29 sparse-dress sitting, ported 2026-09-05). -->
+	<population Name="Cleo_TerraFirma_WarrenDress PlainTrace">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="74" Blueprint="*None" />
+			<object Weight="10" Blueprint="Torch" Hint="Cleo_TerraFirma_Face" />
+			<object Weight="7" Blueprint="Garbage" />
+			<object Weight="5" Blueprint="Pickaxe" Hint="Cleo_TerraFirma_Face" />
+			<object Weight="3" Blueprint="Floor Cushion" />
+			<object Weight="2" Blueprint="Cider Vase" />
+		</group>
+	</population>
+	<!-- CORRIDORS: the sparsest table, one roll per non-artery segment. The chalk line row
+	     is a claim mark chalked against the passage wall; WarrenCarver picks the walled side
+	     and the directional piece itself. -->
+	<population Name="Cleo_TerraFirma_WarrenDress HallTable">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="74" Blueprint="*None" />
+			<object Weight="10" Blueprint="Torch" Hint="Cleo_TerraFirma_Face" />
+			<object Weight="7" Blueprint="Garbage" />
+			<object Weight="5" Blueprint="Pickaxe" Hint="Cleo_TerraFirma_Face" />
+		</group>
+	</population>
+	<!-- PLAZA, the leisure register (USER RULED 2026-08-29, two statements: "big open place
+	     in the center is commons/leisure i think" and, striking a stage gate, "i think working
+	     sites can have leisure too, it kind of flattens them to be *just* work"). WarrenCarver
+	     detects plaza-scale spans (3x3-open cores, 4+ blobbed) in the unclaimed mass and big
+	     plain rooms and rolls this table over them at EVERY stage; roll count per span rides
+	     the stage (floor/14 working, /11 camp, /8 flourishing, cap 6). Leisure-forward with one
+	     stack row so the work roots stay visible. Weights CLAUDE dials. Ported 2026-09-05. -->
+	<population Name="Cleo_TerraFirma_WarrenDress Plaza">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="46" Blueprint="*None" />
+			<object Weight="10" Blueprint="Bench" />
+			<object Weight="8" Blueprint="Floor Cushion" />
+			<object Weight="7" Blueprint="Cider Vase" />
+			<object Weight="6" Blueprint="Wine Pitcher" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_QuarryStones1" />
+			<object Weight="5" Blueprint="Torch" />
+			<object Weight="4" Blueprint="Kline" />
+			<object Weight="4" Blueprint="Hammered Dulcimer" />
+			<object Weight="2" Blueprint="Random Stone Statue" />
+			<object Weight="2" Blueprint="Cleo_TerraFirma_FireDish" />
+		</group>
+	</population>
+	<!-- WORK-FACE SCATTER (USER 2026-08-29: "having them be sparser makes sense, but they
+	     currently read as very empty; this is the strongest place for quarried stones, rocks,
+	     random torches and pickaxes imo. maybe even rarely a headlamp or miner's helmet";
+	     corrected same sitting to the face ROOMS at every stage, not working-stage sites).
+	     Rolled on top of the socket dress, floor/8 rolls per face, 2-6. Headlamp and Miner's
+	     Helmet are base lit LightSources (Items.xml), so a dropped light still burning is the
+	     read. Weights CLAUDE dials. Ported 2026-09-05. -->
+	<population Name="Cleo_TerraFirma_WarrenDress WorkScatter">
+		<group Name="Rolls" Style="pickone">
+			<object Weight="30" Blueprint="*None" />
+			<object Weight="15" Blueprint="Small Stone" />
+			<object Weight="12" Blueprint="SmallBoulder" />
+			<object Weight="13" Blueprint="Cleo_TerraFirma_QuarryStones1" />
+			<object Weight="8" Blueprint="Torch" />
+			<object Weight="8" Blueprint="Pickaxe" />
+			<object Weight="6" Blueprint="Cleo_TerraFirma_Stone Basket" />
+			<object Weight="4" Blueprint="Cleo_TerraFirma_QuarryStones2" />
+			<object Weight="2" Blueprint="Headlamp" />
+			<object Weight="2" Blueprint="Miner's Helmet" />
+		</group>
+	</population>
+
+	<!-- ============ WARREN ROOM POOLS (dwelling furniture, uniform picks) ============
+	     Consumed by WarrenCarver.DressDwelling: the room-type recipes (which pool, how many,
+	     corner or wall or free placement) are LAWS and stay in code; these pools are the
+	     furniture vocabulary each recipe draws from. Rows default to Weight 1, i.e. a
+	     uniform pick, matching the migrated arrays; explicit Weight works and is respected.
+	     Duplicate-blueprint rows are deliberate where two sim ids landed on one blueprint. -->
+	<!-- brazier REMOVED (USER RULED 2026-08-23: "remove chrome braziers with the blue
+	     flames from the roll" - base Brazier is chrome + blue flame, wrong hands entirely).
+	     Fire dish substituted then, MOVED TO THE HEARTH POOL 2026-08-26 (USER DOCKET:
+	     "fire dishes should work and be placed like campfires rather than torches") -
+	     the dish is hearth furniture now, and torches are the light fixture. -->
+	<population Name="Cleo_TerraFirma_WarrenPool Light">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Torch" />
+		</group>
+	</population>
+	<!-- third row is the sim's pantry basket (basket_food): the canyon-preserves basket,
+	     contents debt paid 2026-08-26 (see the basket contents tables below); the second
+	     row stays the plain empty basket -->
+	<population Name="Cleo_TerraFirma_WarrenPool Storage">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Cleo_TerraFirma_Quarry Chest" />
+			<object Blueprint="Woven Basket" />
+			<object Blueprint="Cleo_TerraFirma_Food Basket" />
+		</group>
+	</population>
+	<!-- Seating weighted 2026-08-26 (USER: "let's add weights to some of the poptables.
+	     seating and sleep seem like a good place to start"; the numbers are CLAUDE DRAFT).
+	     The shape is camp economics: cushions and stools are what a quarry camp actually
+	     sits on, the bench is the shared middle, the folding chair is manufactured goods,
+	     and the kline is the luxury recliner, rare enough that finding one says something
+	     about whoever hauled it down here. -->
+	<population Name="Cleo_TerraFirma_WarrenPool Seating">
+		<group Name="Pool" Style="pickone">
+			<object Weight="30" Blueprint="Floor Cushion" />
+			<object Weight="15" Blueprint="Canvas Folding Chair" />
+			<object Weight="10" Blueprint="Kline" />
+			<object Weight="20" Blueprint="Bench" />
+			<object Weight="25" Blueprint="Stool" />
+		</group>
+	</population>
+	<!-- Sleep weighted the same sitting (CLAUDE DRAFT): bedrolls are camp bedding and
+	     dominate, the cot is the seasoned camp's upgrade, and a real bed is rare on
+	     purpose, someone SETTLED here. -->
+	<population Name="Cleo_TerraFirma_WarrenPool Sleep">
+		<group Name="Pool" Style="pickone">
+			<object Weight="15" Blueprint="Bed" />
+			<object Weight="55" Blueprint="Bedroll" />
+			<object Weight="30" Blueprint="Folding Cot" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenPool Centre">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Table" />
+			<object Blueprint="Workbench" />
+		</group>
+	</population>
+	<!-- vases + clay jugs joined 2026-08-24 (USER: "let's add vases and clay jugs for
+	     variety"). Base Vase's own description places it in a canyon dweller's home-kiln;
+	     both carry RandomColors, so glaze variety rolls per spawn. Catch basin still out
+	     (no confirmed base blueprint name). Double Wine Pitcher row is deliberate: the sim
+	     had bg.wine_pitcher and pitcher_wine as separate entries on one blueprint. -->
+	<population Name="Cleo_TerraFirma_WarrenPool Liquid">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Wine Pitcher" />
+			<object Blueprint="Wine Pitcher" />
+			<object Blueprint="Cider Vase" />
+			<object Blueprint="Vase" />
+			<object Blueprint="Jug" />
+		</group>
+	</population>
+	<!-- the stone basket is the sim's basket_stones, a mason's rock hamper
+	     (contents debt paid 2026-08-26) -->
+	<population Name="Cleo_TerraFirma_WarrenPool Crafts">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Workbench" />
+			<object Blueprint="Anvil" />
+			<object Blueprint="Pickaxe" />
+			<object Blueprint="Random Stone Statue" />
+			<object Blueprint="Cleo_TerraFirma_QuarryStones1" />
+			<object Blueprint="Cleo_TerraFirma_QuarryStones2" />
+			<object Blueprint="Cleo_TerraFirma_QuarryStones3" />
+			<object Blueprint="Cleo_TerraFirma_Random Stone Figurine" />
+			<object Blueprint="Cleo_TerraFirma_Stone Basket" />
+			<object Blueprint="Kiln" />
+		</group>
+	</population>
+	<!-- fire dish joined from the light pool 2026-08-26 (the campfire-not-torch docket) -->
+	<population Name="Cleo_TerraFirma_WarrenPool Hearth">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Oven" />
+			<object Blueprint="Campfire" />
+			<object Blueprint="Cleo_TerraFirma_FireDish" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenPool Comfort">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Hookah" />
+		</group>
+	</population>
+	<!-- keepsake joined 2026-08-25 (USER: bracelets + nuggets as rare table spawns, leans
+	     delegated): a personal effect in a dwelling. Base Bracelet1/2/3 are the beaded
+	     trade goods bartered up the Svy. -->
+	<population Name="Cleo_TerraFirma_WarrenPool Keepsake">
+		<group Name="Pool" Style="pickone">
+			<object Blueprint="Bracelet1" />
+			<object Blueprint="Bracelet2" />
+			<object Blueprint="Bracelet3" />
+		</group>
+	</population>
+
+	<!-- ============ WARREN BASKET CONTENTS (port debt paid 2026-08-26) ============
+	     The two tables the USER RULED 2026-08-18 ("one for stones (baskets of earth), and
+	     one for canyon specific preserved foods (yuckwheat, starapples jam, boar jerky)").
+	     Consumed by the InventoryPopulationTable tag on the basket blueprints in
+	     ObjectBlueprints.xml, i.e. the engine fills them at spawn; the warren carver never
+	     reads these. Food names verified against base Foods.xml, not invented: Yuckwheat
+	     Stem (:520), Starapple Preserves (:681, the jam), Boar Jerky (:978). Numbers and
+	     chances CLAUDE DRAFT: the pantry can roll picked-over-empty about 1 time in 20,
+	     and the nugget rides the stone basket at 5 (the rare-table-spawn lean of
+	     2026-08-25, quarry product in a rock hamper). -->
+	<population Name="Cleo_TerraFirma_StoneBasket Contents">
+		<group Name="Contents" Style="pickeach">
+			<object Blueprint="Small Stone" Number="2-4" />
+			<object Blueprint="Cleo_TerraFirma_Rock_Pebbles" Number="0-1" />
+			<object Blueprint="Copper Nugget" Number="1" Chance="5" />
+			<!-- Optional work supply alongside the rocks; 25 percent is a provisional dial. -->
+			<object Blueprint="Cleo_TerraFirma_BoxOfChalk" Number="1" Chance="25" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_FoodBasket Contents">
+		<group Name="Contents" Style="pickeach">
+			<object Blueprint="Yuckwheat Stem" Number="1-3" Chance="80" />
+			<object Blueprint="Starapple Preserves" Number="1" Chance="45" />
+			<object Blueprint="Boar Jerky" Number="1-2" Chance="55" />
+		</group>
+	</population>
+	<!-- BOAR VESSEL FARM PRESENCE (USER RULED 2026-08-27: "boar farms should have a small
+	     chance to roll 1 boar vessel amongst their herds"): name-matched merge JOINS the base
+	     Pigs group (base PopulationTables.xml:4112, Farm Pig w5 pickeach) rather than adding a
+	     rival group, per the standing merge discipline. Free coverage: dynamic village farm
+	     huts roll this same table via Villages_FarmHutContents_*Default, so generated pig
+	     farms inherit the chance too. CHANCE 15 DRAFT. -->
+	<population Name="StiltAnimalPen" Load="Merge">
+		<group Name="Types" Style="pickone">
+			<group Name="Pigs" Style="pickeach">
+				<object Blueprint="Cleo_TerraFirma_Farm Boar Vessel" Number="1" Chance="15" />
+			</group>
+		</group>
+	</population>
+	<!-- Codex PROPOSAL: B02 lab defaults, interpreted as seeded labels, not blueprints. -->
+	<population Name="Cleo_TerraFirma_WarrenWiring">
+		<group Style="pickone">
+			<object Blueprint="wired" Weight="75" />
+			<object Blueprint="unwired" Weight="25" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenWireDamage">
+		<group Style="pickone">
+			<object Blueprint="intact" Weight="88" />
+			<object Blueprint="broken" Weight="12" />
+		</group>
+	</population>
+	<!-- Codex PROPOSAL: B07 counts and equal-weight canyon animal likenesses.
+	     EtchCount entries are seeded labels, never spawned blueprints. -->
+	<population Name="Cleo_TerraFirma_WarrenEtchCount">
+		<group Style="pickone">
+			<object Blueprint="2" Weight="1" />
+			<object Blueprint="3" Weight="1" />
+			<object Blueprint="4" Weight="1" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenDress StatueLikeness">
+		<group Style="pickone">
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueBaboon" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueBoar" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueDog" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueDragonfly" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueGlowcrow" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueChameleon" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueTortoise" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueSalamander" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueTwoHeadedBoar" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueSalthopper" Weight="1" />
+			<object Blueprint="Cleo_TerraFirma_CanyonStatueEquimax" Weight="1" />
+		</group>
+	</population>
+	<!-- Codex PROPOSAL: independent 35% visitor rolls, retaining the lab count bands.
+	     Shale Cave Critters / Rustwells permit co-occurring hermits and spiders.
+	     No changes to native factions. These tables are called only for abandoned/reclaimed. -->
+	<population Name="Cleo_TerraFirma_WarrenVisitors">
+		<group Style="pickeach">
+			<table Name="Cleo_TerraFirma_WarrenHermits" Chance="35" />
+			<object Blueprint="Cave Spider" Number="2-3" Chance="35" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenHermits">
+		<group Style="pickone">
+			<object Blueprint="Scrap-clad Hermit" Number="1-2" Weight="1" />
+			<object Blueprint="Hide-Sheathed Hermit" Number="1-2" Weight="1" />
+			<object Blueprint="Trash Monk" Number="1-2" Weight="1" />
+		</group>
+	</population>
+	<!-- Codex PROPOSAL: sparse 25% roll; counts follow IsolatedRuinsPocketDecoration.
+	     Additional webs use CaveSpiderLair's 2-8 count and require placed spiders. -->
+	<population Name="Cleo_TerraFirma_WarrenSparseWebs">
+		<object Blueprint="Web" Number="2-4" Chance="25" Hint="Cleo_TerraFirma_Web" />
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenSpiderWebs">
+		<object Blueprint="Web" Number="2-8" Hint="Cleo_TerraFirma_SpiderWeb" />
+	</population>
+</populations>

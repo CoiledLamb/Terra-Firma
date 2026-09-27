@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<objects>
+	<!-- Pump Shotgun firing profile; stone chamber replaces the magazine.
+	     Description approved 2026-09-08; CLAUDE PROPOSAL: inherited art/value/tier.
+	     Acquisition: inherited Guns tag plus quarry provisioner stock. -->
+	<object Name="Cleo_TerraFirma_Gravel Shotgun" Inherits="Pump Shotgun">
+		<part Name="Render" DisplayName="grinder shotgun" />
+		<part Name="Description" Short="A stone grinder has been fitted onto the familiar shape of a pump shotgun. A percussive shriek accompanies the pull of its trigger as a hail of pebbles spews from its maw." />
+		<removepart Name="MagazineAmmoLoader" />
+		<part Name="Cleo_TerraFirma_GravelAmmoLoader" StoneBlueprints="Small Stone,Large Stone" ProjectileObject="Cleo_TerraFirma_GravelProjectile" WeightPerBurst="5" ReloadEnergy="1000" />
+		<tag Name="Mods" Value="MissileWeaponMods,FirearmMods,CommonMods,RifleMods" />
+		<removepart Name="TinkerItem" />
+	</object>
+	<object Name="Cleo_TerraFirma_GravelProjectile" Inherits="ProjectileShotgunPellet">
+		<part Name="Render" DisplayName="blast of gravel" />
+	</object>
+	<!-- Glowstone pair (2026-08-22): descriptions are USER TEXT FINAL, mechanics per the same
+	     sitting's rulings - shards ride base MoteProperties verbatim (user: "let's just use
+	     moteproperties on this one"; Fuel 5000 is a Claude dial ~4.2 in-game days, mote parity);
+	     the lantern socket behavior lives in Part_GlowstoneLantern.cs; tuning is set below.
+	     Acquisition = breaking a glowsphere (Merges.xml) or wish only; spawn layer unruled.
+	     Known wart, flagged: MoteProperties' burnout verb is hardcoded "dissipates". -->
+	<object Name="Cleo_TerraFirma_GlowstoneShard" Inherits="LightSource">
+		<part Name="Render" DisplayName="{{Y|glowsphere}} fragment" RenderString="'" ColorString="&amp;Y" DetailColor="y" Tile="glowsphere_shard.png" RenderLayer="5" />
+		<part Name="LightSource" Lit="false" Radius="6" />
+		<part Name="MoteProperties" Fuel="5000" />
+		<part Name="Physics" Weight="1" />
+		<part Name="Commerce" Value="5" />
+		<part Name="Description" Short="A razor shard of a shattered phosphorescent opal-like weeps light that drifts away like smoke. Its glow is waning, but, struck by the high salt sun, it yet reflects memories of wholeness." /> <!-- USER TEXT FINAL 2026-08-22 evening, supersedes the harvest-dawn string -->
+
+		<!-- NO Stacker on purpose (2026-08-22): a stack is ONE object, so stacked shards would
+		     share a single Fuel pool and die together - the 2-3-per-sphere ruling only means
+		     anything if each shard burns alone. (Base Luminous Mote carries this wart; its motes
+		     just rarely arrive in multiples.) -->
+		<part Name="ItemElements" Elements="stars::1" />
+		<!-- combat rider (user ruling 2026-08-22): phosphorescent (= base Luminous, verbatim) on
+		     any hit; thrown-only bleed chance behind a pens>0 gate. ThrownWeapon = Small Stone
+		     parity (1d2). Dials in the part are CLAUDE numbers. -->
+		<part Name="ThrownWeapon" Damage="1d2" />
+		<part Name="Cleo_TerraFirma_GlowstoneShardOnHit" />
+		<stag Name="Thrown" />
+		<part Name="AnimatedMaterialGeneric" AnimationLength="200" ColorStringAnimationFrames="0=&amp;Y,100=&amp;y" DetailColorAnimationFrames="0=y,100=Y" />
+		<tag Name="Tier" Value="2" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
+	<object Name="Cleo_TerraFirma_GlowstoneLantern" Inherits="LightSource">
+		<part Name="Render" DisplayName="lantern" RenderString="}" ColorString="&amp;K" TileColor="&amp;K" DetailColor="Y" Tile="lantern_unlit.png" RenderLayer="5" />
+		<part Name="LightSource" Lit="false" Radius="8" />
+		<part Name="Cleo_TerraFirma_GlowstoneLantern" ShardBlueprint="Cleo_TerraFirma_GlowstoneShard" BurnInterval="2"
+		      LitTile="lantern_lit.png" UnlitTile="lantern_unlit.png"
+		      LitDescription="A wrought metal cage and panes of crystal enclose a phosphorescent shard, amplifying its flickering glow."
+		      UnlitDescription="A wrought metal cage and panes of crystal enclose an inert wire socket." />
+		<part Name="Physics" Weight="2" />
+		<part Name="Commerce" Value="15" /> <!-- re-dialed 2026-08-22 from 25: torch 1 / glowsphere 40 anchors; lantern+fragment = 20, half a permanent glowsphere -->
+		<!-- description is state-swapped by the part; both lines USER TEXT FINAL 2026-08-22
+		     (the lit line superseded the original locked string the same day) -->
+		<part Name="Description" Short="A wrought metal cage and panes of crystal enclose an inert wire socket." />
+		<tag Name="Tier" Value="3" />
+		<tag Name="DynamicObjectsTable:Trinkets" /> <!-- SPAWN WIRED 2026-08-22: trinket loot + the Utility 2 light-source table (PopulationTables.xml) -->
+	</object>
+	<!-- Kit variant (quarrier spine light group, RULED 2026-08-22): spawns with a part-burned
+	     fragment already socketed via the part's StartLoaded/StartFuel dials, so an NPC's lantern
+	     arrives as a light in use. Kept out of trinket loot and dynamic encounters: the empty
+	     lantern above is the loot-facing blueprint, this one exists for kit tables. -->
+	<object Name="Cleo_TerraFirma_GlowstoneLanternLoaded" Inherits="Cleo_TerraFirma_GlowstoneLantern">
+		<part Name="Cleo_TerraFirma_GlowstoneLantern" StartLoaded="true" StartFuel="2000-4500" />
+		<tag Name="DynamicObjectsTable:Trinkets" Value="*delete" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
+	<!-- Piezoelectric cell (renamed from "grinder cell" 2026-08-22, user: "piezoelectric makes sense" - the grind-verb overlap with the mill bugged them; internal GrinderCell ids stay per the glowstone precedent). Description USER TEXT FINAL; shape + numbers user-approved
+	     same sitting (10/turn trickle, no boulder cap, grinds anywhere). High-capacity fidget
+	     cousin: fidget 2500/easy, this 25000/earned. DIALS RE-RULED 2026-08-23 (user, after
+	     the ModHighCapacity numbers: "lower the starting charge to 2500-10000, lower the cap
+	     to 25000, and raise the grind to *50 charge"; supersedes the 50k cap and the
+	     2500-25000 spawn roll). StartCharge rolls at creation, base idiom. -->
+	<object Name="Cleo_TerraFirma_GrinderCell" Inherits="Energy Cell">
+		<part Name="Render" DisplayName="{{c|piezoelectric}} {{y|cell}}" RenderString="&#231;" ColorString="&amp;c" TileColor="&amp;c" DetailColor="y" Tile="grinder_cell.png" RenderLayer="5" />
+		<part Name="EnergyCell" Charge="0" MaxCharge="25000" StartCharge="2500-10000" />
+		<part Name="Cleo_TerraFirma_GrinderCell" />
+		<!-- TINKERABLE BY RULING (user 2026-08-22: "only one i'd want tinkerable are the
+		     seismophone and the grinder cell"). Bits="003" = CLAUDE dial on the cell-family
+		     ladder (fidget t1 001, solar t2 002, thermo t5 024). -->
+		<part Name="TinkerItem" Bits="003" CanDisassemble="true" CanBuild="true" />
+		<tag Name="TinkerCategory" Value="ammo and energy cells" />
+		<tag Name="DynamicObjectsTable:EnergyCells" /> <!-- SPAWN WIRED 2026-08-22: everywhere a tier-appropriate cell can spawn (sockets query this table with Tier{zonetier}; our Tier 3 tag does the filtering) -->
+		<part Name="Description" Short="Within a worn aluminum casing, a rumbling spiral milks out bursts of energy from chunks of earth." />
+		<part Name="Physics" Weight="5" />
+		<part Name="Commerce" Value="100" />
+		<part Name="Metal" />
+		<tag Name="Tier" Value="3" />
+		<!-- exclude tag LIFTED at the 2026-08-22 spawn wiring -->
+	</object>
+	<!-- Symbiotic mole cricket (2026-08-22): description USER TEXT FINAL; replaces the Fresh-air
+	     trio's attendant chisel (user reflavor). Symbiotic Firefly chassis with DestroyOnUnequip
+	     INCLUDED BY RULING - one companion, one goodbye. Behavior in Part_MoleCricket.cs; the
+	     *maybe* etch rider stays open. Acquisition unruled: wish-only. User sprite. -->
+	<object Name="Cleo_TerraFirma_MoleCricket" Inherits="Item">
+		<part Name="Render" DisplayName="symbiotic {{w-y-w-K sequence|mole cricket}}" RenderString="'" ColorString="&amp;w" DetailColor="y" Tile="mole_cricket.png" RenderLayer="5" />
+		<part Name="Physics" Organic="true" Weight="1" />
+		<part Name="Armor" AV="0" DV="0" WornOn="Floating Nearby" />
+		<part Name="Commerce" Value="200" />
+		<part Name="Description" Short="A hopping, diminutive thing scrapes idly at the earth. At hindsun it hums, biological processes becoming musical." />
+		<part Name="RulesDescription" Text="Sometimes pecks at enemies and scrapes at stone.
+Perishes when unequipped." />
+		<part Name="Springy" Factor="0.5" />
+		<part Name="DestroyOnUnequip" Message="Your symbiotic mole cricket perishes." /> <!-- DRAFT (user flag 2026-08-23: the part's default is "The mote of light is extinguished."; verb from the user-approved rules line) -->
+		<part Name="Cleo_TerraFirma_MoleCricket" />
+		<part Name="AddsRep" Faction="Insects,Cleo_TerraFirma_Quarriers" Value="200" /> <!-- RULED 2026-08-22: +200 each, insects AND the guild - the symbiosis pays both ways -->
+		<tag Name="Tier" Value="2" />
+		<stag Name="Floating" />
+		<tag Name="LiveAnimal" />
+		<!-- exclude LIFTED 2026-08-22; rides the Symbiotic Firefly artifact tables via PopulationTables.xml merges -->
+	</object>
+	<!-- Seismophone (name RULED 2026-08-22, wall-ear retired; description USER TEXT FINAL,
+	     NOT among the evening re-delivery's superseded three, so the lowercase original ships).
+	     Mechanic per the user: "grants heightened hearing when you're adjacent to a wall and
+	     it's powered." Pre-build rulings 2026-08-23: ANY wall counts; hearing level 2 (radius 7);
+	     tier 3; the aquifer liquid-ping half SKIPPED; grant toggles silently. The conditional
+	     lives in Part_Seismophone.cs, a MutationOnEquip subclass riding the base part's own
+	     re-check events. Powered profile = night-vision goggles grammar (socket + switch,
+	     1 charge/turn). Acquisition: tinkering (ruled) or wish tfseismophone; dynamic loot and
+	     the stonecarver kit-spread lane stay unwired, that lane is its own docket. -->
+	<object Name="Cleo_TerraFirma_Seismophone" Inherits="BaseHelmet">
+		<part Name="Armor" AV="0" DV="1" WornOn="Head" />
+		<part Name="Render" DisplayName="seismophone" RenderString="]" ColorString="&amp;y" TileColor="&amp;y" DetailColor="c" Tile="Items/sw_teleprojector.bmp" /> <!-- base teleprojector tile (coiled antennae read as listening wire); CLAUDE pick per the art-bar ruling, bespoke sprite lands if the user makes one -->
+		<part Name="Physics" Weight="2" />
+		<part Name="Commerce" Value="150" />
+		<part Name="Description" Short="An aluminum sheath enclosing a glittering filament connects to a whispering ear. When pressed against the earth, it speaks." />
+		<part Name="RulesDescription" Text="Functions only while the wearer is beside a wall." /> <!-- DRAFT (Claude); the "Grants you Heightened Hearing at level 2." line is appended by the part itself -->
+		<!-- the dials live here since the 2026-08-29 ladder pass; the ctor keeps the same values
+		     as fail-safe fallbacks for a bare mount (all XML-settable fields of base
+		     MutationOnEquip / IPoweredPart, verified against the shipped Items.xml idiom) -->
+		<part Name="Cleo_TerraFirma_Seismophone" ClassName="HeightenedHearing" Level="2" ChargeUse="1" IsEMPSensitive="true" IsPowerSwitchSensitive="true" IsTechScannable="true" />
+		<part Name="Examiner" Complexity="3" />
+		<part Name="EnergyCellSocket" SlotType="EnergyCell" />
+		<part Name="PowerSwitch" EnergyCost="100" FlippableWithoutUnderstanding="true" ActivateSuccessMessage="" ActivateFailureMessage="" DeactivateSuccessMessage="" DeactivateFailureMessage="" />
+		<part Name="Metal" />
+		<part Name="ItemElements" Elements="circuitry::2" />
+		<!-- TINKERABLE BY RULING (user 2026-08-22: "only one i'd want tinkerable are the
+		     seismophone and the grinder cell"). Bits="0003" = night-vision goggles parity, tier 3. -->
+		<part Name="TinkerItem" Bits="0003" CanDisassemble="true" CanBuild="true" />
+		<tag Name="EquipSound" Value="sfx_equip_armor_artifact_light" />
+		<tag Name="Mods" Value="HelmetMods,HeadwearMods,CommonMods,ElectronicsMods" />
+		<tag Name="Tier" Value="3" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
+	<!-- Figurine animation table (design sitting 2026-08-24, all forks user-ruled; build
+	     docket opened same day, "lets build it"). Internal EnergyCell BY RULING - no socket,
+	     so the cell is tinker-rechargeable but unstealable. Exchange verb lives in
+	     Part_AnimationTable.cs (target-side per the ergonomics ruling). Cell numbers +
+	     animation cost are CLAUDE DIALS. Spawn layer: wish tffigtable + the warren painter's
+	     sketch vocabulary (bg.animation_table); poptable wiring is its own open ruling. -->
+	<object Name="Cleo_TerraFirma_AnimationTable" Inherits="Furniture">
+		<part Name="Render" DisplayName="animation table" RenderString="227" Tile="animation_table.png" ColorString="&amp;y" TileColor="&amp;y" DetailColor="w" Occluding="false" RenderIfDark="true" />
+		<part Name="Physics" Weight="200" Takeable="false" Organic="false" />
+		<part Name="Description" Short="A rough-hewn surface holds countless half-finished projects: a body with mismatched limbs here, a half-formed grubworm there. An age-old electrical device threads a cord of sensation through their little bodies, urging those able to stand to rise and enter the wider world." />
+		<part Name="Cleo_TerraFirma_AnimationTablePart" />
+		<!-- Codex PROPOSAL: grid supply is used before the table's existing internal cell. -->
+		<part Name="ElectricalPowerTransmission" ChargeRate="1000" IsConsumer="true" />
+		<part Name="EnergyCell" Charge="0" MaxCharge="5000" StartCharge="1000-3000" />
+		<part Name="Examiner" Complexity="3" />
+		<part Name="MissileCover" Percentage="10" />
+		<tag Name="Tier" Value="3" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
+	<!-- Codex PROPOSAL: B02 mill. Provisional rates use the cell's 50 charge/lb and
+	     25000 capacity; native FusionReactor supplies 100/turn without explosions.
+	     Circuitry holds transient passive output; EnergyCell holds fed bursts.
+	     Natural-stone gating has no native XML condition and is omitted. Static base art. -->
+	<object Name="Cleo_TerraFirma_PiezoelectricMill" Inherits="MountedFurniture">
+		<part Name="Render" DisplayName="piezoelectric mill" ColorString="&amp;y" TileColor="&amp;y" DetailColor="W" RenderString="15" Tile="Items/sw_millstone_1.bmp" />
+		<part Name="Description" Short="A rumbling spiral is encased in flaking steel housing, bolted to the earth like a suckling to an udder. It churns, siphoning electricity from the strain." />
+		<part Name="Physics" Weight="300" Takeable="false" Solid="false" />
+		<part Name="FusionReactor" ChargeRate="100" ExplodeChance="0" CatastrophicDisable="false" Description="piezoelectric mill" NameForStatus="Earth grinding" />
+		<part Name="Circuitry" StartCharge="100" MaxCharge="100" />
+		<part Name="EnergyCell" MaxCharge="25000" StartCharge="2500-10000" IsRechargeable="false" />
+		<part Name="ElectricalPowerTransmission" ChargeRate="1000" IsProducer="true" />
+		<part Name="PowerSwitch" SecurityClearance="0" />
+		<part Name="Cleo_TerraFirma_PiezoelectricMill" ChargePerPound="50" FeedEnergy="1000" />
+		<part Name="Examiner" Complexity="3" />
+		<stat Name="AV" Value="15" />
+		<stat Name="Hitpoints" Value="300" />
+		<tag Name="Tier" Value="3" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
+	<!-- Codex PROPOSAL: the lab's dormant initial state only; no new repair system. -->
+	<object Name="Cleo_TerraFirma_PiezoelectricMillDormant" Inherits="Cleo_TerraFirma_PiezoelectricMill">
+		<part Name="PowerSwitch" Active="false" />
+		<part Name="Circuitry" StartCharge="0" />
+		<part Name="EnergyCell" Charge="0" StartCharge="0" />
+	</object>
+	<object Name="Cleo_TerraFirma_AnimationTableDormant" Inherits="Cleo_TerraFirma_AnimationTable">
+		<part Name="EnergyCell" Charge="0" StartCharge="0" />
+	</object>
+	<!-- Box of chalk + chalk line (design sitting 2026-08-22, all four forks user-ruled:
+	     auto-orient strokes, draw adjacent, chalkboard writing typed AND markov, 8-12 uses).
+	     Description PENDING (user writes it). Line sprites = the eight chalkline*.png user
+	     sprites, finally shipping. Camp-painted lines get Physics Owner at the painter pass;
+	     player-drawn ones are unowned and smear clean. Acquisition unruled: wish-only. -->
+	<object Name="Cleo_TerraFirma_ChalkLine" Inherits="InorganicObject">
+		<part Name="Render" DisplayName="chalk line" RenderString="&#196;" ColorString="&amp;Y" TileColor="&amp;Y" DetailColor="y" Tile="chalklineE.png" RenderLayer="1" />
+		<part Name="Physics" Takeable="false" Solid="false" />
+		<part Name="Description" Short="A white smear of chalk arbitrarily partitions space. It clings to passing boots, dissolving the divide." />
+		<part Name="Cleo_TerraFirma_ChalkLine" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+		<tag Name="NoSparkingQuest" />
+		<tag Name="ExcludeFromQuests" />
+	</object>
+	<object Name="Cleo_TerraFirma_BoxOfChalk" Inherits="Tool">
+		<part Name="Render" DisplayName="box of chalk" RenderString="&#248;" ColorString="&amp;Y" TileColor="&amp;Y" DetailColor="y" Tile="Items/sw_crayons.bmp" RenderLayer="5" /> <!-- base crayons tile, detail greyed per ruling -->
+		<part Name="Physics" Weight="1" />
+		<part Name="Commerce" Value="10" />
+		<part Name="Description" Short="Fragmented cylinders of limestone sketch out concepts, ideoforms, and diagrams. Their impermanent thought-dust is devoured by the monster." />
+		<part Name="Cleo_TerraFirma_ChalkBox" />
+		<tag Name="Tier" Value="1" />
+		<tag Name="DynamicObjectsTable:Trinkets" /> <!-- SPAWN WIRED 2026-08-22: rides the crayon trinket pools via merges -->
+	</object>
+	<!-- GUT CISTERN (boar-vessel workstream 2026-08-26): sealed internal fresh-water tank worn
+	     on the plain Body slot (USER RULED 2026-08-26: Body-slot item, no custom anatomy).
+	     REMOVABILITY RE-RULED same day ("yeag, sounds fine" to plain removable gear): the
+	     NaturalEquipment unremovable pass is REVERTED; a player who loots one may wear it
+	     freely. The boar keeps it in practice anyway: reequip only swaps for strictly better
+	     gear and a vessel never acquires any (decomp recon); the one strip path is dominating
+	     a vessel, accepted as earned. NaturalGear tag still deliberately absent
+	     (Brain.CleanNaturalGear obliterates unequipped naturals at reequip), IsReal stays true;
+	     the death drop survives. Auto-equip rides the same PerformReequip path that arms every
+	     base boar's gore from inventoryobject. Ruled liquid shape: two LiquidProducers, zero
+	     C#; this one trickles pure fresh water into itself (producers tick on carried items,
+	     proven by our own take-stones Temporary bug). Sealed idiom = base Clue_BulgingWaterskin
+	     (Items.xml ~12605). WaterContainer chassis brings LeakWhenBroken free: a cracked
+	     cistern weeps its cargo. Drops with the creature on death, sealed; that drop IS the
+	     loot. RATE and MaxVolume DRAFT and load-bearing (the money number), numbers sitting
+	     owed. Description DRAFT, signoff owed. Tile inherits the waterskin sprite, sprite debt
+	     filed. -->
+	<object Name="Cleo_TerraFirma_GutCistern" Inherits="WaterContainer">
+		<part Name="Render" DisplayName="gut cistern" ColorString="&amp;w" DetailColor="B" />
+		<part Name="Physics" Organic="true" Weight="5" />
+		<part Name="LiquidVolume" MaxVolume="16" Volume="16" StartVolume="1d10-1" InitialLiquid="water-1000" ManualSeal="true" /> <!-- USER RULED 2026-08-27: starts UNSEALED now that it arrives via butchery (the sealed-in-life fiction retired with the equipment shape); ManualSeal kept so it can be sealed by hand. AGE ROLL StartVolume 1d10-1 DRAFT (user live-fire catch: producers only tick in active zones at 1000-4000 turns/dram, so without a spawn roll every found cistern is newborn-empty); Volume=MaxVolume alongside StartVolume dice is the base Waterskin idiom -->
+		<part Name="LiquidProducer" Liquid="water" FillSelfOnly="true" VariableRate="1000-4000" WorksOnWearer="false" WorksOnSelf="true" /> <!-- USER RULED 2026-08-27: no longer equipment (Armor part removed) — the cistern is a butchery yield off the vessel corpse; still trickles while carried (take-stones tick precedent), the pocket-purifier utility -->
+		<part Name="Commerce" Value="15" />
+		<part Name="Description" Short="A lump of clay crudely shaped in the form of a gullet once collected a purified trickle from a salted basin. Still warm and wet with condensation, the container twitches and yearns for the memory of water." />
+		<tag Name="Tier" Value="1" />
+	</object>
+    <!-- Codex PROPOSAL: B07 native RandomStatue.BaseBlueprint variants. All subjects
+         carry DesertCanyon_Creatures in shipped Creatures.xml. Commons only. -->
+    <object Name="Cleo_TerraFirma_CanyonStatueBaboon" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Baboon" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueBoar" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Boar" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueDog" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Dog" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueDragonfly" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="GiantDragonfly" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueGlowcrow" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Glowcrow" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueChameleon" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Horned Chameleon" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueTortoise" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="IrritableTortoise" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueSalamander" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Salamander" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueTwoHeadedBoar" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Two-Headed Boar" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueSalthopper" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Salthopper" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+    <object Name="Cleo_TerraFirma_CanyonStatueEquimax" Inherits="Random Stone Statue">
+        <part Name="RandomStatue" BaseBlueprint="Equimax" />
+        <tag Name="ExcludeFromDynamicEncounters" />
+    </object>
+  <!-- Codex PROPOSAL: existing naming vocabulary, one definition per word.
+       DataBucket/xtag are engine data stores; these blueprints are never instantiated.
+       Stat attributes are flat base-value additions; min..max is an inclusive roll.
+       Each xtag has equal selection weight. Mutation levels remain at four. -->
+  <object Name="Cleo_TerraFirma_NamingMaterials" Inherits="DataBucket">
+    <xtagstone Strength="1" Toughness="1" />
+    <xtagflint Agility="2" />
+    <xtagscree AV="1..2" />
+    <xtagcairn Ego="2" />
+    <xtaggrit Willpower="2" />
+    <xtagchalk Intelligence="2" />
+    <xtagspall DV="2" />
+    <xtagmarl Hitpoints="10" />
+    <xtagcobble MoveSpeed="-15" />
+    <xtagsalt HeatResistance="50" />
+    <xtagkarst ColdResistance="50" />
+    <xtagquartz ElectricResistance="50" />
+    <xtagslate AcidResistance="50" />
+    <!-- Tradeoff sub-bank (user-closed 2026-09-18, alongside the pure words, uniform draw).
+         Each word nets the same +2 as a pure word with a higher ceiling: attributes +3/-1,
+         armor +2/-1, resists plus or minus 50, Hitpoints +15/-10, MoveSpeed -20/+10.
+         The word is the only telling the player gets (goatfolk contract), so every rock
+         has to teach its own tradeoff. -->
+    <xtagchert Agility="3" Ego="-1" />
+    <xtagshard Agility="3" Hitpoints="-10" />
+    <xtagsand Agility="3" Willpower="-1" />
+    <xtagcrag Toughness="3" Ego="-1" />
+    <xtagcoal Strength="3" HeatResistance="-50" />
+    <xtagore Strength="3" Ego="-1" />
+    <xtagclod Strength="3" Intelligence="-1" />
+    <xtagtor Willpower="3" MoveSpeed="10" />
+    <xtagtalc DV="3" Strength="-1" />
+    <xtagspar DV="3" Toughness="-1" />
+    <xtagslag AV="2" Ego="-1" />
+    <xtagtuff MoveSpeed="-20" Hitpoints="-10" />
+    <xtaggeode Ego="3" Toughness="-1" />
+    <xtagmarble Ego="3" AcidResistance="-50" />
+    <xtagshale DV="3" AV="-1" />
+    <xtagcinder HeatResistance="50" Hitpoints="-10" />
+    <xtagsilt Hitpoints="15" MoveSpeed="10" />
+    <xtagpeat Hitpoints="15" HeatResistance="-50" />
+    <xtagamber Intelligence="3" Agility="-1" />
+    <xtagclay Hitpoints="15" AV="-1" />
+    <xtagmica Intelligence="3" Willpower="-1" />
+  </object>
+  <object Name="Cleo_TerraFirma_NamingCrafts" Inherits="DataBucket">
+    <xtagsmith Mutation="Cleo_TerraFirma_Fissure" Level="4" />
+    <xtagknapper Mutation="Cleo_TerraFirma_Fissure" Level="4" />
+    <xtagdelver Mutation="Cleo_TerraFirma_Fissure" Level="4" />
+    <xtagwright Mutation="Cleo_TerraFirma_Stoneshaper" Level="4" />
+    <xtagsetter Mutation="Cleo_TerraFirma_Stoneshaper" Level="4" />
+    <xtaggraver Mutation="Cleo_TerraFirma_Stoneshaper" Level="4" />
+    <xtagward Mutation="Cleo_TerraFirma_EarthenBarrage" Level="4" />
+    <xtagcarter Mutation="Cleo_TerraFirma_EarthenBarrage" Level="4" />
+    <xtagslinger Mutation="Cleo_TerraFirma_EarthenBarrage" Level="4" />
+    <xtagaugur Mutation="Cleo_TerraFirma_Geomancy" Level="4" />
+    <xtagreader Mutation="Cleo_TerraFirma_Geomancy" Level="4" />
+    <xtagreeve Ego="2" Willpower="2" />
+    <xtagscribe Intelligence="2" Willpower="2" />
+  </object>
+</objects>

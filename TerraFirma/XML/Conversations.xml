@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <conversations>
 	<conversation ID="Cleo_TerraFirma_ConversationStoneshaperStatue">
 		<start ID="IsVain" IfSpeakerHaveProperty="Cleo_TerraFirma_IsVain" >
@@ -34,76 +34,6 @@
 				bite wall? grehehe.
 			</text>
 			<choice GotoID="End">...live and drink.</choice>
-		</node>
-	</conversation>
-
-	<!-- OUTRIDER (user-written 2026-08-16). First quarrier to get a voice. Unlike the miner
-	     there was nothing to override: BaseHumanoid carries no ConversationScript, so before
-	     this the whole guild was mute.
-	     Wired on the OUTRIDER, not on the stonecarver chassis, per the profession-first ruling
-	     of 2026-08-15: the profession is the face, so the bank belongs to it. The chassis needs
-	     no conversation of its own as long as every carver in play has a profession, which the
-	     roster currently guarantees.
-	     Cleo_TerraFirma_Mole Outrider inherits this by descent, i.e. both bodies speak with one
-	     voice. That is what profession-first predicts; it is not a separate ruling, and a mole
-	     specific bank is one ConversationID away if the user wants the split.
-	     Water ritual, trade and join-party choices arrive FREE: base Conversations.xml opens
-	     with BaseConversation, "inherited by all conversations by default," which carries the
-	     WaterRitualChoice and its whole subtree. Relevant here because the Quarriers ship with
-	     WaterRitualJoin defaulting true, so a written bank is all recruitability needed.
-	     ADDRESS TERM: "wayfarer" is the user's, written inline. That is also the only way it
-	     can work; faction DefaultAddress has no conversation token, so Issachari hardcode
-	     "lack-salt" in their node text exactly like this. -->
-	<!-- FAREWELL RULED 2026-08-29 (user: "for the farewell, it could be rust and earth, or
-	     just the default live and drink"): the guild farewell is "Rust and earth." on the
-	     three carver roles (words the user's, capitalization editorial). The snapjaw miner
-	     keeps his "...live and drink." below on purpose; a hired snapjaw awkwardly aping the
-	     standard courtesy is its own beat, and one edit flips it if the user wants him guild-voiced. -->
-	<conversation ID="Cleo_TerraFirma_Outrider">
-		<node ID="Start">
-			<text>
-				mind the cairns, wayfarer. lest you knock one over.~
-				seen a few baboons today. not one made it further than a stone's throw.
-			</text>
-			<choice GotoID="End">Rust and earth.</choice>
-		</node>
-	</conversation>
-
-	<!-- MASON (user-written 2026-08-16). Same wiring shape as the outrider: on the role, so
-	     Cleo_TerraFirma_Mole Mason inherits it by descent and both bodies speak as one mason.
-	     Precedent for a trade having its own bank rather than sharing a guild one is the Stilt
-	     itself: BaseMerchant points at GenericMerchant, and then every named trade on the
-	     Stiltgrounds overrides it with a bank of its own. The vintner talks about wine. -->
-	<conversation ID="Cleo_TerraFirma_Mason">
-		<node ID="Start">
-			<text>
-				stones talk sometimes. just gotta listen real close, and you can hear em singing.~
-				need something sculpted? man, boar, fish?~
-				i sometimes wonder if the stones feel like we do. carving must hurt then, eh?~
-				don't know the name of the rocks around here, but they carve just the same.
-			</text>
-			<choice GotoID="End">Rust and earth.</choice>
-		</node>
-	</conversation>
-
-	<!-- HEWER (user-written 2026-08-16). Third role wired, same shape: on the role, so
-	     Cleo_TerraFirma_Mole Hewer inherits it.
-	     Two hooks in these lines that other systems already own, recorded so nobody "fixes" them:
-	     the AQUIFER line is the exception to a rule the warren generator encodes (warren-lab.html
-	     wetChance seals one brine pocket per warren, and wetAvoid exists so tunnels visibly bend
-	     around it, hover text "diggers don't breach aquifers"). This hewer is the digger who did.
-	     Brine, so the soaking is salt water.
-	     The WITCHWOOD ask names an item the player stonecarver starts holding, 2 to 4 Witchwood
-	     Bark out of Cleo_StartingGear_Stonecarver. Stock HaveItem and TakeItem conversation parts
-	     could turn that into a real handover with no C#. DECLINED 2026-08-29 (user: "hewer's
-	     witchwood is a claude proposal i'm not taking"); the line stays flavor, not a fetch hook. -->
-	<conversation ID="Cleo_TerraFirma_Hewer">
-		<node ID="Start">
-			<text>
-				smashed through a wall last week, soaked my clothes. damn aquifers.~
-				overseer said we needed to square away more rock, but my back's been killing me... got any witchwood?
-			</text>
-			<choice GotoID="End">Rust and earth.</choice>
 		</node>
 	</conversation>
 </conversations>

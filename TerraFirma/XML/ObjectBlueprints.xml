@@ -1,59 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <objects>
-    <!-- Cobblefur family (settled 2026-08-13 sitting): the cobble baboon's butchery drops,
-       quartz/quartzfur grammar (user's catch: "-fur" is base's loot-contract suffix).
-       All three: Fur part + organic + AddsRep Baboons -100 per piece (quartzfur precedent;
-       wearing dead monkey angers living monkeys, stacks per piece worn = self-balancing).
-       Tiles are recolored base PLACEHOLDERS, sprite debt filed for all three.
-       Numbers all DRAFT (numbers sitting): gloves Chance 25, cloak conditional DV 2
-       (Yurtmat parity), commerce/tier modest; bracer is +2 throw range, USER NUMBER
-       2026-08-22 (see the bracer's own comment below). Descriptions DRAFT. -->
-    <object Name="Cleo_TerraFirma_Cobblefur Bracer" Inherits="BaseArmlet">
-    <part Name="Armor" AV="0" DV="0" WornOn="Arm" />
-    <part Name="Render" DisplayName="{{y|granitefur}} bracer" RenderString="]" Tile="baboonskin_bracers.png" ColorString="&amp;r" DetailColor="y" /> <!-- user sprite 2026-08-22; rust/brown per the cloak ruling, family palette -->
-    <part Name="Commerce" Value="50" /> <!-- numbers sitting 2026-08-22 -->
-    <part Name="Description" Short="A forearm's length of dun monkey fur, stiff with grit that never quite shakes out. The arm it wraps learns the short arc: how a stone leaves the hand already knowing where it lands." /> <!-- DRAFT, signoff owed -->
-    <part Name="Physics" Weight="1" Organic="true" />
-    <part Name="Fur" />
-    <!-- MIGRATED to stock IntPropertyChanger 2026-08-29 (XML over C# ladder pass); the custom
-         Cleo_TerraFirma_CobblefurBracer part is deleted. Provenance carried over from its header:
-         +2 throw range is USER NUMBER 2026-08-22 ("swap the bonus to +2 throw range and dodge the
-         problem altogether"), replacing the old cap-aware accuracy lend after the accuracy exam
-         found an order-dependent overflow. ThrowRangeBonus is linear (GetThrowProfileEvent reads
-         the int property straight into Range), safe to stack; same property family as the
-         Parabolic Muscular Subroutine, whose BehaviorDescription phrasing this reuses.
-         NOTE: the old XML here said Bonus="25", a stale survivor of the pre-rework accuracy
-         number; the live game was granting +25 throw range against the ruled +2. Caught and
-         corrected in this migration, 2026-08-29. -->
-    <part Name="IntPropertyChanger" AffectedProperty="ThrowRangeBonus" Amount="2" ChargeUse="0" IsEMPSensitive="false" IsBootSensitive="false" IsTechScannable="false" MustBeUnderstood="false" BehaviorDescription="Your throw range is increased by 2." />
-    <part Name="AddsRep" Faction="Baboons" Value="-100" />
-    <tag Name="EquipSound" Value="sfx_equip_armor_fur" />
-    <tag Name="Tier" Value="2" />
-  </object>
-    <object Name="Cleo_TerraFirma_Cobblefur Gloves" Inherits="BaseGlove">
-    <part Name="Armor" AV="0" DV="1" WornOn="Hands" />
-    <part Name="Render" DisplayName="{{y|granitefur}} gloves" RenderString="]" Tile="catching_gloves.png" ColorString="&amp;r" DetailColor="y" /> <!-- user sprite 2026-08-22 -->
-    <part Name="Commerce" Value="75" /> <!-- numbers sitting 2026-08-22 -->
-    <part Name="Description" Short="Dun fur was shorn from a dead monkey and sewn into a pair of gloves. The palms remember catching." /> <!-- DRAFT, signoff owed -->
-    <part Name="Physics" Weight="5" Organic="true" />
-    <part Name="Fur" />
-    <part Name="Cleo_TerraFirma_CobblefurGloves" Chance="25" />
-    <part Name="AddsRep" Faction="Baboons" Value="-100" />
-    <tag Name="EquipSound" Value="sfx_equip_armor_fur" />
-    <tag Name="Tier" Value="2" />
-  </object>
-    <object Name="Cleo_TerraFirma_Cobblefur Cloak" Inherits="BaseCloak">
-    <part Name="Armor" AV="1" DV="0" WornOn="Back" />
-    <part Name="Render" DisplayName="{{y|granitefur}} cloak" RenderString="]" Tile="Items/sw_cloak_panther.bmp" ColorString="&amp;r" DetailColor="y" /> <!-- RULED 2026-08-22: recolored base panther cloak, primary rust red, detail brown -->
-    <part Name="Commerce" Value="60" /> <!-- numbers sitting 2026-08-22 -->
-    <part Name="Description" Short="Hung from the shoulders, the pelt reads as one more heap of canyon scree. Among strewn stones its wearer is a shape the eye forgives." /> <!-- DRAFT, signoff owed -->
-    <part Name="Physics" Weight="3" Organic="true" />
-    <part Name="Fur" />
-    <part Name="Cleo_TerraFirma_CobblefurCloak" Bonus="2" />
-    <part Name="AddsRep" Faction="Baboons" Value="-100" />
-    <tag Name="EquipSound" Value="sfx_equip_armor_fur" />
-    <tag Name="Tier" Value="2" />
-  </object>
     <object Name="Cleo_TerraFirma_Blunted Chisel" Inherits="BaseDagger">
     <part Name="Render" DisplayName="blunted chisel" Tile="blunted_chisel.png" DetailColor="y" ColorString="&amp;w"/>
     <part Name="MeleeWeapon" MaxStrengthBonus="2" BaseDamage="1d2" />
@@ -118,42 +64,6 @@
          campfires"): dousing a stone basin should not leave wood ash. -->
     <part Name="Campfire" ExtinguishBlueprint="Cleo_TerraFirma_FireDishCold" />
   </object>
-  <!-- The cold dish (same docket + the user's in-game find 2026-08-26: cold-flipped
-       dishes kept the flame overlay and lit colors, so they LOOKED lit while silently
-       refusing to cook; the old part-strip directive in WarrenCarver died for this).
-       A real blueprint in the Campfire/Campfire Remains idiom: no flame prefab, no
-       light. Colors stay the ruled brown, USER RULED 2026-08-26 ("no need for the ash
-       grey recolor"): cold reads through the dead flames and the name. The tense pass
-       and the extinguish path both land here now. DESCRIPTION IS CLAUDE DRAFT, user
-       voice owed (the lit dish's line is also still draft). -->
-  <object Name="Cleo_TerraFirma_FireDishCold" Inherits="Cleo_TerraFirma_FireDish">
-    <part Name="Render" DisplayName="cold fire dish" />
-    <part Name="Description" Short="A chunk of earth has been lathed into a finely smoothed bowl. Within it, charred dogthorn cradles the half-spoken echoes of idle chatter." />
-    <removepart Name="Campfire" />
-    <removepart Name="LightSource" />
-    <removepart Name="PrefabImposter" />
-  </object>
-  <!-- Quarried block: RandomTile builder rotates the three user sprites. -->
-  <!-- Quarry stone stacks (warren dress port 2026-08-23): the yard's three
-       grades, user sprites (quarrystones 1a/1b through 3a/3b). Grade 1 is the
-       column being filled NOW, grade 3 is finished stock; the yard recipe reads
-       time through them (fill ordering RULED 2026-07-27). DisplayName DRAFT;
-       descriptions deliberately absent, ride the release text pass. -->
-  <!-- Moss clump (USER RULED 2026-08-23: wall moss is harvestable, wall reverts).
-       Mirrors base's own Clump of Grave Moss (a Snack): tile is that clump
-       RECOLORED PLACEHOLDER (sprite debt filed, house convention); description
-       absent for the release pass. NAME FORMAT USER-RULED same day ("clump of
-       (dark grey)cave(green)moss" - no space, split-colored); dark grey mapped
-       to the K code, CLAUDE rendering call, strikeable. COOKING: gets an effect
-       later per the user - only the lithovore cooking conversation is benched;
-       this item's effect is planned work, not quarantined. -->
-  <object Name="Cleo_TerraFirma_MossClump" Inherits="Snack">
-    <part Name="Render" DisplayName="clump of {{K|cave}}{{green|moss}}" ColorString="&amp;g" DetailColor="K" RenderString="%" Tile="Items/sw_grave_moss_clump.bmp" />
-    <part Name="Description" Short="A glistening carpet of moss holds the earth in its folds. Grit coats its tufts, promising the texture of salted pebbles." />
-    <part Name="Physics" Weight="1" Organic="true" />
-    <part Name="Commerce" Value="1" />
-    <tag Name="ExcludeFromDynamicEncounters" />
-  </object>
 
   <object Name="Cleo_TerraFirma_QuarryStones1" Inherits="Furniture">
     <part Name="Render" Tile="quarrystones1a.png" DisplayName="stack of quarried stone" RenderString="#" ColorString="&amp;r" TileColor="&amp;r" DetailColor="w" Occluding="false" />
@@ -166,82 +76,7 @@
   <object Name="Cleo_TerraFirma_QuarryStones2" Inherits="Cleo_TerraFirma_QuarryStones1" />
   <object Name="Cleo_TerraFirma_QuarryStones3" Inherits="Cleo_TerraFirma_QuarryStones1" />
 
-  <!-- trail cairn (user float 2026-08-24, sprites landed 2026-08-25). cairn1 is the
-       STANDING stack, cairn2 the toppled scatter; the first cut wrongly rolled both as
-       RandomTile variants (user flag 2026-08-25). Shale colors and both descriptions are
-       USER TEXT FINAL 2026-08-25. -->
-  <object Name="Cleo_TerraFirma_Cairn" Inherits="Furniture">
-    <!-- colors swapped w/r (user note 1, 2026-08-25) -->
-    <part Name="Render" Tile="cairn1.png" DisplayName="cairn" RenderString="007" ColorString="&amp;w" TileColor="&amp;w" DetailColor="r" Occluding="false" />
-    <part Name="Description" Short="A waystone for those with eyes to the earth, this stack of rocks inhabits an unresolved superposition of endurance and fragility." />
-    <!-- walkable ON PURPOSE (user docket 2026-08-25): it topples when stepped on, so it
-         must be steppable; the topple part carries the ownership trespass channel -->
-    <part Name="Physics" Solid="false" Takeable="false" Weight="400" />
-    <part Name="Cleo_TerraFirma_CairnTopple" />
-    <tag Name="ExcludeFromDynamicEncounters" />
-    <tag Name="NoSparkingQuest" />
-  </object>
-  <object Name="Cleo_TerraFirma_CairnToppled" Inherits="Cleo_TerraFirma_Cairn">
-    <part Name="Render" Tile="cairn2.png" DisplayName="toppled cairn" RenderString="007" ColorString="&amp;w" TileColor="&amp;w" DetailColor="r" Occluding="false" />
-    <part Name="Description" Short="These scattered rocks once formed a waystone; now, only traces of their former order remain." />
-    <part Name="Physics" Solid="false" Takeable="false" Weight="400" />
-    <!-- already fallen: inheriting the topple part made stepping on the scatter
-         print a second topple (user note 2, 2026-08-25) and re-topple forever -->
-    <removepart Name="Cleo_TerraFirma_CairnTopple" />
-  </object>
-
   <object Name="Cleo_TerraFirma_QuarriedBlock" Inherits="Cleo_TerraFirma_QuarryStones1" />
-
-  <!-- WARREN BASKETS (port debt paid 2026-08-26; the two tables are USER-RULED 2026-08-18:
-       "we could make our own pop tables - one for stones (baskets of earth), and one for
-       canyon specific preserved foods (yuckwheat, starapples jam, boar jerky)"). The
-       Preserved Food Basket idiom exactly (base Furniture.xml:4001): inherit Woven Basket,
-       add one InventoryPopulationTable tag; GameObjectFactory fills the inventory from the
-       named table at spawn (engine rng, same as vase glazes rolling per spawn). Render and
-       name stay the plain basket's on purpose: which basket it is, you learn by opening it.
-       Contents tables live in PopulationTables.xml beside the warren dress tables. -->
-  <object Name="Cleo_TerraFirma_Stone Basket" Inherits="Woven Basket">
-    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_StoneBasket Contents" />
-  </object>
-  <object Name="Cleo_TerraFirma_Food Basket" Inherits="Woven Basket">
-    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_FoodBasket Contents" />
-  </object>
-
-  <!-- YARD LEDGER BOARD (setup USER-greenlit 2026-08-26: "that sounds fine, set that up").
-       The dress yard's chalkboard as its own blueprint, so the ledger LINES live here as
-       tags instead of C# strings; the =token= substitution style is the game's own
-       vernacular. THE LINES ARE STILL THE 2026-08-23 CLAUDE DRAFT and the user voice is
-       owed: editing these Values is now the whole voice sitting, no recompile. Tokens the
-       carver fills: =day= and =month= (Calendar, at carve time), =blocks= (the site's true
-       carved floor, so the board never lies about the dig it stands in). WarrenCarver
-       keeps deciding WHICH lines appear (the occupancy law); the write-verb part arrives
-       through the base Chalkboard merge in Merges.xml, the writing part is declared
-       here so the carver no longer bolts it on in code. -->
-  <object Name="Cleo_TerraFirma_Yard Board" Inherits="Chalkboard">
-    <part Name="Cleo_TerraFirma_ChalkWriting" />
-    <tag Name="Cleo_TerraFirma_ArrivedLine" Value="arrived the =day= of =month=" />
-    <tag Name="Cleo_TerraFirma_DepartedLine" Value="departed the =day= of =month=" />
-    <tag Name="Cleo_TerraFirma_TallyLine" Value="=blocks= blocks raised" />
-  </object>
-
-  <!-- QUARRY CHEST (gear sitting 2026-08-23; user ruling: "making it a generalized loot table
-       that merchant tables and chests can roll makes sense"). The MiningGear consumer for
-       PLACED loot: a Chest variant whose inventory rolls the table, on the ChestBronzeIngots
-       grammar (base Furniture.xml:3521, inherit Chest + inventoryobject lines). The @-table
-       roll syntax is the templar-grenades idiom from creature inventories; the inventoryobject
-       parser is shared across blueprint types, verify-at-boot item filed. Contents rhyme with
-       the quarrier spine on purpose: the stash holds what the crew carries. The warren
-       dressing places this in the socket, gallery-bay, and room-storage chest rolls.
-       The room-storage chest cap counts this variant too. Vine merchant
-       restock joins when that blueprint lands (intent recorded in TODO.md). Counts and
-       chances CLAUDE DRAFT; DisplayName DRAFT, signoff owed. -->
-  <object Name="Cleo_TerraFirma_Quarry Chest" Inherits="Chest">
-    <part Name="Render" DisplayName="quarry chest" />
-    <part Name="Inventory" />
-    <inventoryobject Blueprint="@Cleo_TerraFirma_MiningGear" Number="1-2" />
-    <inventoryobject Blueprint="Pickaxe" Chance="35" />
-    <inventoryobject Blueprint="Torch" Number="1-3" Chance="50" />
-  </object>
 
   <!-- STONE FIGURINE (2026-08-15). Closes the XML half of the FIGURINE MATERIAL LADDER ruling of
        2026-08-14 (user: "figurines on the floor have a chance to spawn stone (or wood?) instead
@@ -260,31 +95,20 @@
     <part Name="RandomFigurine" Material="stone" />
     <tag Name="Tier" Value="1" />
   </object>
-
-  <!-- FISSURE STONE (built 2026-08-23; pitch is the USER'S, "rocks that when thrown, make a
-       fissure detonation at the center of their tile, then are destroyed"; RULED same day:
-       payload is the pulses only, never the redoubt ring; Level 2, so 3d4/2d3/1d3 dice, stun 1
-       round at DC 16; 2-3 per hewer in the kit). Grammar is the goatfolk sower's seed exactly
-       (base Creatures.xml:4663): BaseThrownWeapon plus an IGrenade part in plain inventory, no
-       AI part needed, stock combat AI throws it, AfterThrownEvent detonates it at the landing
-       cell and the part destroys the stone after. PV rides the thrower's Strength mod per the
-       fissure grammar, so a looted stone scales with whoever throws it while the dice stay
-       pinned. No Examiner: carved stone, understood on sight. DetonatedSound is Fissure's own
-       verified slam. Tile is the fallen-rock family's, kin to what the detonation scatters.
-       FLAVOR NOTE 2026-08-24: a "lump of primordial clay" pass landed here for a few hours by
-       misread; the user meant it for the FIGURINE grenade (unbuilt, see TODO roster flags).
-       Name and description here are CLAUDE GUT by the user's license ("go with your gut and
-       i'll edit it later however i desire"), so both are freely editable, no signoff gate.
-       Commerce and Weight CLAUDE DRAFT. -->
-  <object Name="Cleo_TerraFirma_FissureStone" Inherits="BaseThrownWeapon">
-    <part Name="Render" DisplayName="fissure stone" Tile="Items/sw_smallboulder.bmp" RenderString="*" ColorString="&amp;y" DetailColor="K" />
-    <part Name="Description" Short="A fist of quarried stone, scored to a lattice of fault lines. It is waiting for one hard landing." /> <!-- CLAUDE GUT, user edits at will -->
-    <part Name="Stacker" />
-    <part Name="Physics" Category="Grenades" Weight="10" />
-    <part Name="Commerce" Value="20" />
-    <part Name="Cleo_TerraFirma_FissureStonePart" Level="2" />
-    <tag Name="DetonatedSound" Value="Sounds/Throw/sfx_throwing_stone_large_impact" />
-    <tag Name="ExcludeFromTurretStock" />
+  <!-- The cold dish (same docket + the user's in-game find 2026-08-26: cold-flipped
+       dishes kept the flame overlay and lit colors, so they LOOKED lit while silently
+       refusing to cook; the old part-strip directive in WarrenCarver died for this).
+       A real blueprint in the Campfire/Campfire Remains idiom: no flame prefab, no
+       light. Colors stay the ruled brown, USER RULED 2026-08-26 ("no need for the ash
+       grey recolor"): cold reads through the dead flames and the name. The tense pass
+       and the extinguish path both land here now. DESCRIPTION IS CLAUDE DRAFT, user
+       voice owed (the lit dish's line is also still draft). -->
+  <object Name="Cleo_TerraFirma_FireDishCold" Inherits="Cleo_TerraFirma_FireDish">
+    <part Name="Render" DisplayName="cold fire dish" />
+    <part Name="Description" Short="A chunk of earth has been lathed into a finely smoothed bowl. Within it, charred dogthorn cradles the half-spoken echoes of idle chatter." />
+    <removepart Name="Campfire" />
+    <removepart Name="LightSource" />
+    <removepart Name="PrefabImposter" />
   </object>
 
   <!-- PROPER ETCH TOOLS thread RETIRED 2026-08-22 (user: "let's remove the added chisels and

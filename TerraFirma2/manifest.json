@@ -1,0 +1,9 @@
+{
+    "id": "Cleo_TerraFirma2",
+    "title": "Terra Firma 2",
+    "version": "0.1.0",
+    "author": "Cleo, Ceres et al.",
+    "dependencies": {
+        "Cleo_TerraFirma": "*"
+    }
+}
