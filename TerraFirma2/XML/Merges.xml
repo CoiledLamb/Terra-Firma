@@ -45,4 +45,10 @@
 	<object Name="Torch" Load="Merge">
 		<tag Name="Cleo_TerraFirma_ColdForm" Value="" />
 	</object>
+	<!-- Carving (spec closed 2026-09-29): the verb lives on the target, etching's rule and
+	     etching's merge root. The part's own gate asks for natural stone and worn gaslight
+	     gauntlets, so the action stays hidden otherwise. -->
+	<object Name="Wall" Load="Merge">
+		<part Name="Cleo_TerraFirma_Carvable" />
+	</object>
 </objects>

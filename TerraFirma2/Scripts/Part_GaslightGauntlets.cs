@@ -1,5 +1,4 @@
 using System;
-using Cleo.TerraFirma.Scripts;
 using XRL.World.Anatomy;
 
 namespace XRL.World.Parts
@@ -18,15 +17,12 @@ namespace XRL.World.Parts
 	/// RegenerateDefaultEquipmentEvent (cascades to equipment), where a still-worn pair
 	/// re-applies. Equip and unequip just ask the body to regenerate.
 	///
-	/// Carving: an inventory action on the worn pair turns an adjacent natural stone wall into
-	/// an inert statue of a creature chosen in the shared carving picker, through the
-	/// Stoneshaper's MakeStatueOfCreatureFromWall (the StatueMaker prototype's flow).
+	/// Carving lives on the wall, not here (etching's rule: the verb belongs to the target);
+	/// see Cleo_TerraFirma_Carvable. This part only supplies the charge and FindWorn.
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_GaslightGauntlets : IPart
 	{
-		public const string COMMAND_CARVE = "Cleo_TerraFirma_CarveWithGauntlets";
-
 		public string FistObject = "Cleo_TerraFirma_GaslightFist";
 		public string ChargedName = "{{gaslight|gaslight}} gauntlets";
 		public string UnchargedName = "gaslight gauntlets";
@@ -44,9 +40,8 @@ namespace XRL.World.Parts
 		public override bool WantEvent(int ID, int cascade)
 		{
 			if (!base.WantEvent(ID, cascade) && ID != EquippedEvent.ID && ID != UnequippedEvent.ID
-				&& ID != PooledEvent<RegenerateDefaultEquipmentEvent>.ID && ID != PooledEvent<GetDisplayNameEvent>.ID
-				&& ID != GetInventoryActionsEvent.ID)
-				return ID == InventoryActionEvent.ID;
+				&& ID != PooledEvent<RegenerateDefaultEquipmentEvent>.ID)
+				return ID == PooledEvent<GetDisplayNameEvent>.ID;
 			return true;
 		}
 
@@ -106,65 +101,17 @@ namespace XRL.World.Parts
 			}
 		}
 
-		public override bool HandleEvent(GetInventoryActionsEvent E)
+		/// <summary>The gauntlets an actor is properly wearing, or null.</summary>
+		public static GameObject FindWorn(GameObject Actor)
 		{
-			if (ParentObject.Equipped != null && ParentObject.Equipped == E.Actor)
-				E.AddAction("Carve", "carve", COMMAND_CARVE, null, 'v', Default: 10);
-			return base.HandleEvent(E);
-		}
-
-		public override bool HandleEvent(InventoryActionEvent E)
-		{
-			if (E.Command == COMMAND_CARVE && E.Actor != null && E.Actor.IsPlayer())
+			if (Actor == null)
+				return null;
+			foreach (GameObject item in Actor.GetEquippedObjectsReadonly())
 			{
-				if (Carve(E.Actor))
-					E.RequestInterfaceExit();
+				if (item.HasPart<Cleo_TerraFirma_GaslightGauntlets>() && item.IsEquippedProperly())
+					return item;
 			}
-			return base.HandleEvent(E);
-		}
-
-		/// <summary>Returns true when a statue was carved and the turn spent.</summary>
-		private bool Carve(GameObject Actor)
-		{
-			if (Actor.OnWorldMap())
-				return Actor.Fail("You cannot carve anything here.");
-			if (!CanPay(CarveCharge))
-				return Actor.Fail(ParentObject.Does("click", int.MaxValue, null, null, "merely") + "."); // base IActivePart unpowered line
-
-			Cell cell = Actor.Physics.PickDestinationCell(1, RequireCombat: false, Label: "Choose an adjacent wall to carve.");
-			if (cell == null)
-				return false;
-			GameObject wall = cell.GetFirstWall();
-			if (wall == null || !cell.IsAdjacentTo(Actor.CurrentCell))
-				return Actor.Fail("You must choose an adjacent wall.");
-			var props = wall.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>();
-			if (!Cleo_TerraFirma_StoneshaperWallProperties.IsNaturalStone(props))
-				return Actor.Fail("You can only carve natural stone.");
-
-			string subject = Cleo_TerraFirma_CarvingPicker.Pick("");
-			if (subject == null)
-				return false;
-
-			GameObject muse = GameObjectFactory.Factory.CreateSampleObject(subject);
-			GameObject statue = muse == null ? null : Mutation.Cleo_TerraFirma_Stoneshaper.MakeStatueOfCreatureFromWall(muse, wall, string.Empty, props);
-			if (statue == null)
-			{
-				muse?.Obliterate();
-				return Actor.Fail("The stone will not take that shape.");
-			}
-			if (!ParentObject.UseCharge(CarveCharge, LiveOnly: false, 0L))
-			{
-				muse.Obliterate();
-				statue.Obliterate();
-				return Actor.Fail(ParentObject.Does("click", int.MaxValue, null, null, "merely") + ".");
-			}
-			wall.Obliterate();
-			cell.AddObject(statue);
-			IComponent<GameObject>.XDidYToZ(Actor, "carve", "a statue of", muse, EndMark: "!", ColorAsGoodFor: Actor, IndefiniteObject: true, Source: Actor);
-			PlayWorldSound("Sounds/Throw/sfx_throwing_stone_small_impact", 1f, SourceCell: cell);
-			muse.Obliterate();
-			Actor.UseEnergy(1000, "Item Gaslight Gauntlets Carve");
-			return true;
+			return null;
 		}
 	}
 
@@ -190,18 +137,12 @@ namespace XRL.World.Parts
 		{
 			if (E.Weapon == ParentObject && E.Attacker != null)
 			{
-				foreach (GameObject item in E.Attacker.GetEquippedObjectsReadonly())
+				GameObject worn = Cleo_TerraFirma_GaslightGauntlets.FindWorn(E.Attacker);
+				var gauntlets = worn?.GetPart<Cleo_TerraFirma_GaslightGauntlets>();
+				if (gauntlets != null && worn.UseCharge(gauntlets.PunchCharge, LiveOnly: false, 0L))
 				{
-					var gauntlets = item.GetPart<Cleo_TerraFirma_GaslightGauntlets>();
-					if (gauntlets != null && item.IsEquippedProperly())
-					{
-						if (item.UseCharge(gauntlets.PunchCharge, LiveOnly: false, 0L))
-						{
-							E.PenetrationBonus += PenetrationBonus;
-							E.MaxPenetrationBonus += PenetrationBonus;
-						}
-						break;
-					}
+					E.PenetrationBonus += PenetrationBonus;
+					E.MaxPenetrationBonus += PenetrationBonus;
 				}
 			}
 			return base.HandleEvent(E);
