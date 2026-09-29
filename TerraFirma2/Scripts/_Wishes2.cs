@@ -344,7 +344,7 @@ namespace Cleo.TerraFirma.Scripts
 		[WishCommand(Command = "tfcarvepick")]
 		public static void CarvePickTest()
 		{
-			string pick = Cleo_TerraFirma_CarvingPicker.Pick("carving test");
+			string pick = Cleo_TerraFirma_CarvingPicker.Pick("");
 			if (pick == null)
 			{
 				MessageQueue.AddPlayerMessage("[tfcarvepick] cancelled");

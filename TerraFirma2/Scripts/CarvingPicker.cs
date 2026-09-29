@@ -15,12 +15,21 @@ namespace Cleo.TerraFirma.Scripts
 	/// Popup.PickOption with hotkeys); each creature row carries its sprite through PickOption's
 	/// Icons, built from the blueprint alone (Renderable(GameObjectBlueprint)), so listing never
 	/// instantiates a creature. Returns a creature blueprint name, or null on escape.
-	/// Menu labels are DRAFT, user text owed.
+	/// Wording copies base item naming (verb-first sentences with periods, "What would you like
+	/// to name?", "Enter a new name for..."). DRAFT until the user signs off.
+	/// The intro icon is the base [statue] / sultan shrine tile (Terrain/tile_tombstone1.png).
 	/// </summary>
 	public static class Cleo_TerraFirma_CarvingPicker
 	{
 		public const string LAST_LOOKED_STATE = "Cleo_TerraFirma_CarvingLastLooked";
 		private const int SEARCH_MAX_RESULTS = 40;
+
+		/// <summary>Base Random Statue's own render (ObjectBlueprints: [statue], &amp;y / y),
+		/// the same tile the sultan shrines use.</summary>
+		private static IRenderable StatueIcon()
+		{
+			return new Renderable("Terrain/tile_tombstone1.png", "|", "&y", null, 'y');
+		}
 
 		/// <summary>Base's random-figurine pool (RandomFigurine: GetASampleCreature, minus
 		/// NoFigurine), which is EncountersAPI's creature pool: dynamic-encounter eligible and
@@ -50,22 +59,22 @@ namespace Cleo.TerraFirma.Scripts
 				GameObjectBlueprint last = GetLastLooked();
 				if (last != null)
 				{
-					labels.Add("Last looked at: " + last.CachedDisplayNameStripped);
+					labels.Add("Carve the last creature you looked at: " + last.CachedDisplayNameStripped + ".");
 					icons.Add(new Renderable(last));
 					actions.Add("last");
 				}
-				labels.Add("Local fauna");
+				labels.Add("Choose a creature native to this area.");
 				icons.Add(null);
 				actions.Add("local");
-				labels.Add("Search by name");
+				labels.Add("Search for a creature by name.");
 				icons.Add(null);
 				actions.Add("search");
-				labels.Add("Random");
+				labels.Add("Choose a creature at random.");
 				icons.Add(null);
 				actions.Add("random");
 
-				int choice = Popup.PickOption(Title, "What will you carve?", "", "Sounds/UI/ui_notification_question",
-					labels.ToArray(), Hotkeys(labels.Count), icons.ToArray(), AllowEscape: true);
+				int choice = Popup.PickOption(Title, "What would you like to carve?", "", "Sounds/UI/ui_notification_question",
+					labels.ToArray(), Hotkeys(labels.Count), icons.ToArray(), IntroIcon: StatueIcon(), AllowEscape: true);
 				if (choice < 0)
 					return null;
 
@@ -75,7 +84,7 @@ namespace Cleo.TerraFirma.Scripts
 					case "last":
 						return last.Name;
 					case "local":
-						result = PickFromList(Title, LocalFauna(), "Nothing lives here that you could carve.");
+						result = PickFromList(Title, LocalFauna(), "Choose a creature native to this area.", "There are no creatures native to this area.");
 						break;
 					case "search":
 						result = Search(Title);
@@ -109,7 +118,7 @@ namespace Cleo.TerraFirma.Scripts
 
 		private static string Search(string Title)
 		{
-			string query = Popup.AskString("Carve what creature?", "", "Sounds/UI/ui_notification", null, null, 40, 1, ReturnNullForEscape: true);
+			string query = Popup.AskString("Enter the name of a creature.", "", "Sounds/UI/ui_notification", null, null, 40, 1, ReturnNullForEscape: true);
 			if (string.IsNullOrWhiteSpace(query))
 				return null;
 			query = query.Trim().ToLower();
@@ -128,7 +137,7 @@ namespace Cleo.TerraFirma.Scripts
 			});
 			if (matches.Count > SEARCH_MAX_RESULTS)
 				matches.RemoveRange(SEARCH_MAX_RESULTS, matches.Count - SEARCH_MAX_RESULTS);
-			return PickFromList(Title, matches, "You can't think of any creature by that name.");
+			return PickFromList(Title, matches, "Choose a creature.", "You don't know of any creature by that name.");
 		}
 
 		private static int Rank(string Name, string Query)
@@ -138,7 +147,7 @@ namespace Cleo.TerraFirma.Scripts
 			return Name.StartsWith(Query) ? 1 : 2;
 		}
 
-		private static string PickFromList(string Title, List<GameObjectBlueprint> Options, string EmptyMessage)
+		private static string PickFromList(string Title, List<GameObjectBlueprint> Options, string Intro, string EmptyMessage)
 		{
 			if (Options.Count == 0)
 			{
@@ -152,7 +161,7 @@ namespace Cleo.TerraFirma.Scripts
 				labels[i] = Options[i].CachedDisplayNameStripped;
 				icons[i] = new Renderable(Options[i]);
 			}
-			int choice = Popup.PickOption(Title, null, "", "Sounds/UI/ui_notification", labels, Hotkeys(labels.Length), icons, AllowEscape: true);
+			int choice = Popup.PickOption(Title, Intro, "", "Sounds/UI/ui_notification", labels, Hotkeys(labels.Length), icons, IntroIcon: StatueIcon(), AllowEscape: true);
 			return choice < 0 ? null : Options[choice].Name;
 		}
 
