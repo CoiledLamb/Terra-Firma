@@ -85,7 +85,7 @@
        shale biomes, Hills and DesertCanyon (Hills.cs, Redrock.cs), like Starapple Preserves. -->
   <object Name="Cleo_TerraFirma_CrushedCaveMoss" Inherits="Preservable">
     <part Name="Render" DisplayName="crushed {{K|cave}} {{green|moss}}" RenderString="%" ColorString="&amp;g" TileColor="&amp;g" DetailColor="K" RenderLayer="5" Tile="Items/sw_grave_moss_crushed.bmp" />
-    <part Name="Description" Short="A blanket of verdant moss was plucked from its swaddlehome, ground in a mortar and pestle, its remains interred in a glass vessel." /> <!-- user text 2026-09-29 -->
+    <part Name="Description" Short="A blanket of verdant moss was plucked from its swaddlehome, ground in a mortar, and interred in a glass vessel." /> <!-- user text 2026-09-29 -->
     <part Name="Commerce" Value="2" />
     <part Name="PreparedCookingIngredient" type="Cleo_TerraFirma_caveMoss" charges="1" />
     <tag Name="Plant" />
