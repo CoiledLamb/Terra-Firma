@@ -297,12 +297,12 @@
 				<object Weight="20" Blueprint="Cleo_TerraFirma_Cobblefur Gloves" Number="1" />
 				<object Weight="20" Blueprint="Cleo_TerraFirma_Cobblefur Cloak" Number="1" />
 			</group>
-			<!-- Chest: flint-spike pauldrons (Weight 25) and mudskin girdle (Weight 25) join
-			     these entries when their blueprints land (both fully shaped in TODO.md, same
-			     sitting). Until then the live weights normalize among themselves; final
-			     proportions arrive with that build. The workwear subgroup is the user's
+			<!-- Chest: flint-spike pauldrons and mudskin girdle joined at their reserved
+			     Weight 25 each (built 2026-09-29). The workwear subgroup is the user's
 			     "instead of none" fallback: every outrider wears SOMETHING on the chest. -->
 			<group Name="Chest" Style="pickone">
+				<object Weight="25" Blueprint="Cleo_TerraFirma_FlintSpikePauldrons" Number="1" />
+				<object Weight="25" Blueprint="Cleo_TerraFirma_MudskinGirdle" Number="1" />
 				<object Weight="12" Blueprint="Bark Armor" Number="1" />
 				<object Weight="12" Blueprint="Studded Leather Armor" Number="1" />
 				<object Weight="6" Blueprint="Ring Mail" Number="1" />
