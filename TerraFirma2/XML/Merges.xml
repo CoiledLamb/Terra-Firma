@@ -51,4 +51,61 @@
 	<object Name="Wall" Load="Merge">
 		<part Name="Cleo_TerraFirma_Carvable" />
 	</object>
+	<!-- Lathe carving (spec closed 2026-09-29): the verb lives on the base Lathe; each input
+	     names the base figurine blueprint it becomes (Items.xml "Random X Figurine" set, whose
+	     RandomFigurine Material already carries base's rep value). -->
+	<object Name="Lathe" Load="Merge">
+		<part Name="Cleo_TerraFirma_LatheCarving" />
+	</object>
+	<object Name="Copper Nugget" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Copper Figurine" />
+	</object>
+	<object Name="Silver Nugget" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Silver Figurine" />
+	</object>
+	<object Name="Gold Nugget" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Gold Figurine" />
+	</object>
+	<object Name="Rough Agate" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Agate Figurine" />
+	</object>
+	<object Name="Polished Agate" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Agate Figurine" />
+	</object>
+	<object Name="Rough Topaz" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Topaz Figurine" />
+	</object>
+	<object Name="Polished Topaz" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Topaz Figurine" />
+	</object>
+	<object Name="Rough Jasper" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Jasper Figurine" />
+	</object>
+	<object Name="Polished Jasper" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Jasper Figurine" />
+	</object>
+	<object Name="Rough Amethyst" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Amethyst Figurine" />
+	</object>
+	<object Name="Polished Amethyst" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Amethyst Figurine" />
+	</object>
+	<object Name="Rough Sapphire" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Sapphire Figurine" />
+	</object>
+	<object Name="Polished Sapphire" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Sapphire Figurine" />
+	</object>
+	<object Name="Rough Emerald" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Emerald Figurine" />
+	</object>
+	<object Name="Polished Emerald" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Emerald Figurine" />
+	</object>
+	<object Name="Rough Peridot" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Peridot Figurine" />
+	</object>
+	<object Name="Polished Peridot" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Peridot Figurine" />
+	</object>
 </objects>
