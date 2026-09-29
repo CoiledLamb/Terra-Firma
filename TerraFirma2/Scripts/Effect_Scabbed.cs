@@ -8,7 +8,10 @@ namespace XRL.World.Effects
 	/// interval, shown as a status for legibility). Name "scabbed" user-picked 2026-09-29.
 	/// Applied and fed by <see cref="Cleo_TerraFirma_MudskinGirdle"/>; the AV rides this
 	/// effect's StatShifter (PartiallyPetrified idiom), so removal is one call.
-	/// No start/flake messages yet: those strings are the user's, owed.
+	/// Messages on the edges only, Carapace precedent (tighten/loosen through EmitMessage, which
+	/// shows for visible wearers): one when the first stack sets, one when the last flakes off.
+	/// Middle steps stay silent; each rides a bleed tick that already prints. Lines approved
+	/// 2026-09-29; the NPC flake variant names the wearer (CLAUDE PROPOSAL).
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_Scabbed : Effect
@@ -32,6 +35,8 @@ namespace XRL.World.Effects
 		/// <summary>One bleed tick: one step harder, up to the cap, and the flake clock restarts.</summary>
 		public void Harden()
 		{
+			if (Stacks == 0)
+				IComponent<GameObject>.EmitMessage(Object, Object.Poss("girdle") + " hardens.");
 			if (Stacks < Cap)
 				Stacks++;
 			Countdown = FlakeInterval;
@@ -69,6 +74,9 @@ namespace XRL.World.Effects
 				Countdown = FlakeInterval;
 				if (Stacks <= 0)
 				{
+					IComponent<GameObject>.EmitMessage(Object, Object.IsPlayer()
+						? "The last of the mud flakes off."
+						: "The last of the mud flakes off " + Object.poss("girdle") + ".");
 					Object.RemoveEffect(this);
 					return base.HandleEvent(E);
 				}
