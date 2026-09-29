@@ -6,7 +6,7 @@
     <part Name="Armor" WornOn="Feet" AV="1" DV="0" />
     <part Name="Physics" Weight="7" />
     <part Name="Commerce" Value="50" />
-    <part Name="Description" Short="when connected with the earth, a spark of energy traces fault lines and plate connections. the other step completes the circuit, relaying that information back to the body. a holographic driver is activated with a tap of the heel, revealing caverns unseen to the naked eye." />
+    <part Name="Description" Short="When connected with the earth, a spark of energy traces fault lines and plate connections. The other step completes the circuit, relaying that information back to the body. A holographic driver is activated with a tap of the heel, revealing caverns unseen to the naked eye." />
     <part Name="RulesDescription" Text="Each step maps a 3x3 area one stratum below you. You may activate this item to briefly project holograms of nearby walls on that stratum." />
     <part Name="EnergyCellSocket" SlotType="EnergyCell" />
     <part Name="AIDefensiveEnergyCellReload" />
