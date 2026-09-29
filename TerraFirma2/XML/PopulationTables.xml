@@ -401,6 +401,8 @@
 			<object Weight="300" Blueprint="Nylon Bodypack" Number="1" />
 			<!-- Codex PROPOSAL weight: uncommon surveying equipment in the shared mining pool. -->
 			<object Weight="100" Blueprint="Cleo_TerraFirma_SeismicShufflers" Number="1" />
+			<!-- CLAUDE PROPOSAL weight: the carving tool rides the same mining pool as the shufflers. -->
+			<object Weight="100" Blueprint="Cleo_TerraFirma_GaslightGauntlets" Number="1" />
 		</group>
 	</population>
 	<!-- Granite baboon troop wiring (user ruling 2026-08-22: "it should spawn in all 3" - the

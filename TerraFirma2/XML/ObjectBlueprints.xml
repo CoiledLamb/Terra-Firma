@@ -249,4 +249,32 @@
     <tag Name="EquipSound" Value="sfx_equip_armor_leather" />
     <tag Name="Tier" Value="2" />
   </object>
+  <!-- Gaslight gauntlets (carving spec closed 2026-09-29). Hands, tier 4, 1 AV / 0 DV, metal
+       (user). Tile = base plastifer gloves, green with yellow detail (user). Gaslight family
+       conventions from the base Gaslight Chisel: cell socket, charged-only light radius 4,
+       Examiner complexity 4, Tinker bits 0004, commerce 120. Weight 3 matches plastifer.
+       Behavior in Part_GaslightGauntlets.cs. Description owed from the user. -->
+  <object Name="Cleo_TerraFirma_GaslightGauntlets" Inherits="BaseGauntlet">
+    <part Name="Armor" AV="1" DV="0" WornOn="Hands" />
+    <part Name="Render" DisplayName="gaslight gauntlets" RenderString="]" Tile="Items/sw_gloves_skintight.bmp" ColorString="&amp;g" DetailColor="W" />
+    <part Name="Commerce" Value="120" />
+    <part Name="Physics" Weight="3" />
+    <part Name="Metal" />
+    <part Name="Examiner" Alternate="UnknownGloves" Complexity="4" />
+    <part Name="EnergyCellSocket" SlotType="EnergyCell" />
+    <part Name="AIOffensiveEnergyCellReload" />
+    <part Name="AIPassiveEnergyCellReload" />
+    <part Name="LightSource" OnlyIfCharged="true" Radius="4" />
+    <part Name="TinkerItem" Bits="0004" CanDisassemble="true" CanBuild="true" />
+    <part Name="Cleo_TerraFirma_GaslightGauntlets" PunchCharge="100" CarveCharge="1000" />
+    <tag Name="Mods" Value="GauntletMods,CommonMods,ElectronicsMods" />
+    <tag Name="EquipSound" Value="sfx_equip_armor_metal_light" />
+    <tag Name="Tier" Value="4" />
+  </object>
+  <!-- The fist the gauntlets lend while worn: 1d4 (user), +5 PV per charged swing (part). -->
+  <object Name="Cleo_TerraFirma_GaslightFist" Inherits="DefaultFist">
+    <part Name="Render" DisplayName="gaslight fist" Tile="Creatures/natural-weapon-fist.bmp" ColorString="&amp;g" DetailColor="W" />
+    <part Name="MeleeWeapon" MaxStrengthBonus="1000" BaseDamage="1d4" Skill="Cudgel" Stat="Strength" />
+    <part Name="Cleo_TerraFirma_GaslightFist" PenetrationBonus="5" />
+  </object>
 </objects>
