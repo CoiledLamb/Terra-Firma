@@ -76,6 +76,7 @@ The previous TODO is preserved byte-for-byte in [JOURNAL.md](JOURNAL.md), includ
 - [ ] **B14 — Review the remaining reachable audit edges.** Assess warren liquid-container masking, failed-rumor settlement references, null-channel moss restoration, rebuild connectivity, cross-zone statue expiry, and Lovesick muse copying. Finish: each relevant finding has a repro, a bounded fix, or an explicit accepted limitation. The [audit's final reachability correction](assumption-audit-2026-08-29.md) excludes catalog-only findings from this pass.
 
 - [ ] **B15 — Mix quarrier placement more randomly.** **Codex PROPOSAL task wording:** distribute quarriers more randomly through the warren, reducing grouping by profession. Finish: fresh sites show professions intermingled rather than concentrated in separate groups by type.
+  Built 2026-09-29, XML only: pack rows lost their trade hints, so every quarrier seats in a random pocket (goatfolk village and Kyakukya precedent). New `Cleo_TerraFirma_Outrider Post` table in each crew table seats exactly one outrider outside (7:3 human:mole); pack outriders are off shift and roam inside. Adds one outrider per warren; pack chances unchanged. XML parse and text rules passed, deployed with hash matched. Awaiting a fresh-world look.
 
 ## Content awaiting its own design/build sitting
 

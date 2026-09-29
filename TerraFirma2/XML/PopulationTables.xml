@@ -42,12 +42,12 @@
 	     percentages CLAUDE dials. -->
 	<population Name="Cleo_TerraFirma_Stonecarver Pack">
 		<group Name="Creatures" Style="pickeach">
-			<object Chance="100" Number="1-2" Blueprint="Cleo_TerraFirma_Hewer" Hint="Cleo_TerraFirma_Trade:face:55" />
-			<object Chance="75" Number="1-2" Blueprint="Cleo_TerraFirma_Outrider" Hint="Cleo_TerraFirma_Trade:plain:55,Cleo_TerraFirma_OutsidePost:50" />
-			<object Chance="60" Number="1" Blueprint="Cleo_TerraFirma_Mason" Hint="Cleo_TerraFirma_Trade:commons:55" />
-			<object Chance="35" Number="1" Blueprint="Cleo_TerraFirma_Mole Hewer" Hint="Cleo_TerraFirma_Trade:face:55" />
-			<object Chance="30" Number="1" Blueprint="Cleo_TerraFirma_Mole Outrider" Hint="Cleo_TerraFirma_Trade:plain:55,Cleo_TerraFirma_OutsidePost:50" />
-			<object Chance="25" Number="1" Blueprint="Cleo_TerraFirma_Mole Mason" Hint="Cleo_TerraFirma_Trade:commons:55" />
+			<object Chance="100" Number="1-2" Blueprint="Cleo_TerraFirma_Hewer" />
+			<object Chance="75" Number="1-2" Blueprint="Cleo_TerraFirma_Outrider" />
+			<object Chance="60" Number="1" Blueprint="Cleo_TerraFirma_Mason" />
+			<object Chance="35" Number="1" Blueprint="Cleo_TerraFirma_Mole Hewer" />
+			<object Chance="30" Number="1" Blueprint="Cleo_TerraFirma_Mole Outrider" />
+			<object Chance="25" Number="1" Blueprint="Cleo_TerraFirma_Mole Mason" />
 			<object Chance="15" Number="1" Blueprint="Cleo_TerraFirma_Rockhound" />
 		</group>
 	</population>
@@ -91,14 +91,29 @@
 	     flourishing table references the pack TWICE: the two-shift dig. Chances 15/40/75
 	     and the shift count are CLAUDE dials (were the OVERSEER_PCT and packRolls knobs,
 	     migrated here). -->
+	<!-- MIXED CREW + ONE POST (B15, 2026-09-29). The pack rows carry no hint, so every
+	     quarrier seats in a random pocket; trades no longer cluster by room. Precedent:
+	     GoatfolkParty/GoatfolkVillageYurt (VillageMaker.cs:175) place villagers with no
+	     role hint, and Kyakukya fills fixed seats with rolled species. Exactly one outrider
+	     stands the trail watch per crew; outriders rolled by the pack are off shift and
+	     roam inside. Trade:plain:100 then OutsidePost:100 means always outside, falling back
+	     to a plain room only when the mouth has no open ground. 7:3 human:mole CLAUDE dial. -->
+	<population Name="Cleo_TerraFirma_Outrider Post">
+		<group Name="Body" Style="pickone">
+			<object Weight="7" Number="1" Blueprint="Cleo_TerraFirma_Outrider" Hint="Cleo_TerraFirma_Trade:plain:100,Cleo_TerraFirma_OutsidePost:100" />
+			<object Weight="3" Number="1" Blueprint="Cleo_TerraFirma_Mole Outrider" Hint="Cleo_TerraFirma_Trade:plain:100,Cleo_TerraFirma_OutsidePost:100" />
+		</group>
+	</population>
 	<population Name="Cleo_TerraFirma_WarrenCrew Working">
 		<group Name="Crew" Style="pickeach">
+			<table Name="Cleo_TerraFirma_Outrider Post" />
 			<table Name="Cleo_TerraFirma_Stonecarver Pack" />
 			<object Chance="15" Number="1" Blueprint="Cleo_TerraFirma_Overseer" Hint="Cleo_TerraFirma_Den:dwelling" />
 		</group>
 	</population>
 	<population Name="Cleo_TerraFirma_WarrenCrew Camp">
 		<group Name="Crew" Style="pickeach">
+			<table Name="Cleo_TerraFirma_Outrider Post" />
 			<table Name="Cleo_TerraFirma_Stonecarver Pack" />
 			<object Chance="40" Number="1" Blueprint="Cleo_TerraFirma_Overseer" Hint="Cleo_TerraFirma_Den:dwelling" />
 			<object Number="1" Blueprint="Cleo_TerraFirma_Vine Merchant" Hint="Cleo_TerraFirma_MerchantWall" />
@@ -106,6 +121,7 @@
 	</population>
 	<population Name="Cleo_TerraFirma_WarrenCrew Flourishing">
 		<group Name="Crew" Style="pickeach">
+			<table Name="Cleo_TerraFirma_Outrider Post" />
 			<table Name="Cleo_TerraFirma_Stonecarver Pack" />
 			<table Name="Cleo_TerraFirma_Stonecarver Pack" />
 			<object Chance="75" Number="1" Blueprint="Cleo_TerraFirma_Overseer" Hint="Cleo_TerraFirma_Den:dwelling" />
