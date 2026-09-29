@@ -105,14 +105,27 @@ namespace XRL.World.Parts
 
 		public override bool WantEvent(int ID, int cascade)
 		{
-			if (!base.WantEvent(ID, cascade) && ID != GetInventoryActionsEvent.ID)
+			if (!base.WantEvent(ID, cascade) &&
+				ID != GetInventoryActionsEvent.ID &&
+				ID != CanSmartUseEvent.ID &&
+				ID != CommandSmartUseEvent.ID)
 				return ID == InventoryActionEvent.ID;
 			return true;
 		}
 
+		// Space restacks: the Harvestable precedent, a ground object whose one use changes it.
+		// Same routing as our animation table: smart-use forwards to the inventory action.
+		public override bool HandleEvent(CanSmartUseEvent E) => false;
+
+		public override bool HandleEvent(CommandSmartUseEvent E)
+		{
+			InventoryActionEvent.Check(ParentObject, E.Actor, ParentObject, COMMAND);
+			return base.HandleEvent(E);
+		}
+
 		public override bool HandleEvent(GetInventoryActionsEvent E)
 		{
-			E.AddAction("Restack", "restack", COMMAND, null, 'r', FireOnActor: false);
+			E.AddAction("Restack", "restack", COMMAND, null, 'r', FireOnActor: false, Default: 10);
 			return base.HandleEvent(E);
 		}
 
@@ -123,13 +136,11 @@ namespace XRL.World.Parts
 				Cell here = ParentObject.CurrentCell;
 				if (here == null)
 					return false;
-				// a stack under someone's feet would topple the moment they stepped back on
-				if (here.HasObject(o => o.IsCombatObject()))
-				{
-					if (E.Actor.IsPlayer())
-						XRL.UI.Popup.ShowFail("Someone is standing in the way."); // DRAFT
-					return false;
-				}
+				// a stack under someone's feet would topple the moment they stepped back on.
+				// Wording follows base Door.cs:657 ("cannot be closed with X in the way").
+				GameObject blocker = here.GetFirstObject(o => o.IsCombatObject());
+				if (blocker != null)
+					return E.Actor.ShowFailure(ParentObject.T() + " cannot be restacked with " + (blocker.IsPlayer() ? "you" : blocker.t()) + " in the way.");
 				GameObject standing = GameObject.Create(StandingBlueprint);
 				string owner = ParentObject.Physics?.Owner;
 				if (!string.IsNullOrEmpty(owner) && standing.Physics != null)
