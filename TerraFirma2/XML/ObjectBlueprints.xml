@@ -73,7 +73,43 @@
     <part Name="Description" Short="A glistening carpet of moss holds the earth in its folds. Grit coats its tufts, promising the texture of salted pebbles." />
     <part Name="Physics" Weight="1" Organic="true" />
     <part Name="Commerce" Value="1" />
+    <part Name="Food" Satiation="Snack" Message="It's like eating salted grit, with a loamy aftertaste." /> <!-- user text 2026-09-29 -->
+    <!-- base Clump of Grave Moss -> Crushed Grave Moss, 3 per clump (Foods.xml:510) -->
+    <part Name="PreservableItem" Result="Cleo_TerraFirma_CrushedCaveMoss" Number="3" />
     <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
+
+  <!-- CRUSHED CAVE MOSS (2026-09-29): the cooking ingredient, base Crushed Grave Moss shape
+       (Foods.xml:847). Name user-approved; description and sprite owed by the user (base
+       grave-moss tile stands in until the sprite lands). World ingredient tables are the
+       shale biomes, Hills and DesertCanyon (Hills.cs, Redrock.cs), like Starapple Preserves. -->
+  <object Name="Cleo_TerraFirma_CrushedCaveMoss" Inherits="Preservable">
+    <part Name="Render" DisplayName="crushed {{K|cave}}{{green|moss}}" RenderString="%" ColorString="&amp;g" TileColor="&amp;g" DetailColor="K" RenderLayer="5" Tile="Items/sw_grave_moss_crushed.bmp" />
+    <part Name="Commerce" Value="2" />
+    <part Name="PreparedCookingIngredient" type="Cleo_TerraFirma_caveMoss" charges="1" />
+    <tag Name="Plant" />
+    <tag Name="DynamicObjectsTable:Hills_Ingredients" />
+    <tag Name="DynamicObjectsTable:DesertCanyon_Ingredients" />
+  </object>
+
+  <!-- The cooked moss pebble: Earthen Barrage's sculpted pebble with its placeholder
+       damage pinned as real numbers, so Barrage edits cannot change the meal (1d8, PV 4,
+       30-turn expiry inherited). Not IsOurStone, so Barrage scaling never touches it. -->
+  <object Name="Cleo_TerraFirma_MossPebble" Inherits="Cleo_TerraFirma_EphemeralStone">
+    <part Name="ThrownWeapon" Penetration="4" Damage="1d8" Attributes="Cudgel" />
+  </object>
+
+  <!-- Cave moss cooking domain. The engine requires this exact name shape
+       (ProceduralCookingIngredient_ + type), so the Cleo_TerraFirma_ prefix sits in the type.
+       Weights copy regenLowtier (Data.xml:341); menu text copies base phrasing. -->
+  <object Name="ProceduralCookingIngredient_Cleo_TerraFirma_caveMoss" Inherits="IngredientMapping">
+    <tag Name="CookingDomain" Value="Cleo_TerraFirma_caveMoss" />
+    <tag Name="Units" Value="Cleo_TerraFirma_CookingDomainCaveMoss_UnitEarthenBarrage" />
+    <tag Name="Triggers" Value="Cleo_TerraFirma_CookingDomainCaveMoss_OnThrowStone" />
+    <tag Name="Actions" Value="Cleo_TerraFirma_CookingDomainCaveMoss_Pebble_ProceduralCookingTriggeredAction" />
+    <tag Name="Description" Value="stone-based" />
+    <tag Name="RandomWeight" Value="10" />
+    <tag Name="RandomHighTierWeight" Value="0" />
   </object>
 
   <!-- trail cairn (user float 2026-08-24, sprites landed 2026-08-25). cairn1 is the

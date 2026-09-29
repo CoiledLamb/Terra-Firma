@@ -6,6 +6,11 @@
 	<object Name="Shale" Load="Merge">
 		<part Name="Cleo_TerraFirma_ShaleMoss" StartRipeChance="1:20" />
 	</object>
+	<!-- Stone-throw signal (2026-09-29): base fires AfterThrown on the item only; this forwards
+	     it to the thrower for the cave moss cooking trigger. Every BaseStone child inherits it. -->
+	<object Name="BaseStone" Load="Merge">
+		<part Name="Cleo_TerraFirma_StoneThrowSignal" />
+	</object>
 	<!-- Cobblefur cloak cover (RULED 2026-08-13, adjacent-scope sitting): base Rubble is a
 	     solid wall-layer heap outside the BaseStone tree, so the cloak's "amid rubble" check
 	     can't see it via IsAnyStone, and widening IsAnyStone is off the table (load-bearing;
