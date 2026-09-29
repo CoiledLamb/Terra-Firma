@@ -52,8 +52,8 @@ namespace XRL.World.Parts
 
 		public override bool HandleEvent(GetShortDescriptionEvent E)
 		{
-			// DRAFT rules line, user text owed
-			E.Postfix.AppendRules("Bleeding hardens it: +1 AV per turn spent bleeding, up to +" + Cap + ". The hardening flakes off over time.");
+			// rules line approved 2026-09-29
+			E.Postfix.AppendRules("+1 AV each turn you take bleeding damage, up to +" + Cap + ". Loses 1 AV for every " + FlakeInterval + " turns you go without bleeding.");
 			return base.HandleEvent(E);
 		}
 	}

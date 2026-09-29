@@ -47,8 +47,8 @@ namespace XRL.World.Parts
 
 		public override bool HandleEvent(GetShortDescriptionEvent E)
 		{
-			// DRAFT rules line, user text owed
-			E.Postfix.AppendRules("Adjacent attackers who strike you in melee must make a Toughness save (difficulty " + GetSaveTarget() + ") or start bleeding.");
+			// rules line approved 2026-09-29
+			E.Postfix.AppendRules("Creatures who damage you with melee attacks begin bleeding (Toughness save, difficulty " + GetSaveTarget() + ").");
 			return base.HandleEvent(E);
 		}
 	}
