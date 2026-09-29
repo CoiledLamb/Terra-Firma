@@ -98,6 +98,7 @@
     <!-- already fallen: inheriting the topple part made stepping on the scatter
          print a second topple (user note 2, 2026-08-25) and re-topple forever -->
     <removepart Name="Cleo_TerraFirma_CairnTopple" />
+    <part Name="Cleo_TerraFirma_CairnRestack" /> <!-- B09 2026-09-29: restack to standing, owner kept, no rep effect -->
   </object>
 
   <!-- WARREN BASKETS (port debt paid 2026-08-26; the two tables are USER-RULED 2026-08-18:
