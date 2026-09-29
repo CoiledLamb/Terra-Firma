@@ -12,9 +12,10 @@
 # TF2 compile-checks against the STRIPPED TF1 (the pair subscribers load), so any TF2 run
 # prepares TF1's stripped copy first; -Mod TF2 skips only TF1's zip and staging. TF2 stages
 # to Mods\TerraFirma2Beta as Cleo_TerraFirma2Beta, and its dependency on Cleo_TerraFirma is
-# rewritten to Cleo_TerraFirmaBeta, the id the uploaded TF1 carries. Titles are never
-# rewritten: the staged manifest ships to subscribers (the workshop page title comes from
-# workshop.json instead, SteamWorkshopUploaderView), so a staging-only title would leak.
+# rewritten to Cleo_TerraFirmaBeta, the id the uploaded TF1 carries. The staged manifest
+# ships to subscribers (the workshop page title comes from workshop.json instead,
+# SteamWorkshopUploaderView), so the dev/staging distinction lives on the dev side: dev
+# manifests are titled "... (dev)" and staging strips the suffix (2026-09-29).
 #
 # Steps: copy tree -> strip .cs (real lexer: strings, verbatim strings, interpolation
 # holes with nested strings all handled; line count preserved) -> scrub date tokens from
@@ -310,6 +311,7 @@ function Release-Mod($cfg) {
 function Rewrite-Manifest([string]$manifestPath, $cfg) {
     $manifestText = [System.IO.File]::ReadAllText($manifestPath)
     $manifestText = $manifestText -replace ('"id"\s*:\s*"' + [regex]::Escape($cfg.IdFrom) + '"'), ('"id": "' + $cfg.IdTo + '"')
+    $manifestText = $manifestText -replace '("title"\s*:\s*"[^"]*?) \(dev\)"', '$1"'
     foreach ($dep in $cfg.DepRewrites.Keys) {
         # only a dependency KEY matches: the exact quoted id followed by a colon
         $manifestText = $manifestText -replace ('"' + [regex]::Escape($dep) + '"(\s*:)'), ('"' + $cfg.DepRewrites[$dep] + '"$1')
@@ -319,13 +321,14 @@ function Rewrite-Manifest([string]$manifestPath, $cfg) {
     # fail closed: the staged manifest must carry the staged id and every rewritten dependency
     $check = Get-Content $manifestPath -Raw | ConvertFrom-Json
     if ($check.id -ne $cfg.IdTo) { throw "manifest id rewrite failed for $($cfg.Src) -- staging aborted" }
+    if ($check.title -match '\(dev\)') { throw "dev title survived staging for $($cfg.Src) -- staging aborted" }
     foreach ($dep in $cfg.DepRewrites.Keys) {
         $deps = $check.dependencies
         if ($null -eq $deps -or $null -eq $deps.($cfg.DepRewrites[$dep]) -or $null -ne $deps.$dep) {
             throw "dependency rewrite $dep -> $($cfg.DepRewrites[$dep]) failed for $($cfg.Src) -- staging aborted"
         }
     }
-    Write-Host "manifest ok: $($cfg.Src) -> id $($check.id)$(if ($check.dependencies) { ', deps ' + (($check.dependencies.PSObject.Properties | % { $_.Name }) -join ',') })"
+    Write-Host "manifest ok: $($cfg.Src) -> '$($check.title)', id $($check.id)$(if ($check.dependencies) { ', deps ' + (($check.dependencies.PSObject.Properties | % { $_.Name }) -join ',') })"
 }
 
 # ---------------------------------------------------------------- run
