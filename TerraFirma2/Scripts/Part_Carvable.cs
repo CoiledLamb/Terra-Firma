@@ -9,7 +9,8 @@ namespace XRL.World.Parts
 	/// action shows only while the player wears gaslight gauntlets and the wall is natural
 	/// stone, so walls stay quiet otherwise. The gauntlets pay the charge; the subject comes
 	/// from the shared carving picker; the statue is the Stoneshaper's
-	/// MakeStatueOfCreatureFromWall (the StatueMaker prototype's flow), inert.
+	/// MakeStatueOfCreatureFromWall (the StatueMaker prototype's flow), inert, revealed with the
+	/// Stoneshaper's own carve VFX (PlayCarveReveal).
 	/// Refusal and success lines DRAFT.
 	/// </summary>
 	[Serializable]
@@ -78,12 +79,16 @@ namespace XRL.World.Parts
 				statue.Obliterate();
 				return Actor.Fail(worn.Does("click", int.MaxValue, null, null, "merely") + ".");
 			}
+			// the Stoneshaper's own reveal (user 2026-09-29): block, three breaks, smoke, splatter
+			GameObject wall = ParentObject;
+			Mutation.Cleo_TerraFirma_Stoneshaper.PlayCarveReveal(cell, wall, statue, () =>
+			{
+				wall.Obliterate();
+				cell.AddObject(statue, true, Silent: true);
+			});
 			IComponent<GameObject>.XDidYToZ(Actor, "carve", "a statue of", muse, EndMark: "!", ColorAsGoodFor: Actor, IndefiniteObject: true, Source: Actor);
-			PlayWorldSound("Sounds/Throw/sfx_throwing_stone_small_impact", 1f, SourceCell: cell);
 			muse.Obliterate();
 			Actor.UseEnergy(1000, "Item Gaslight Gauntlets Carve");
-			ParentObject.Obliterate();
-			cell.AddObject(statue);
 			return true;
 		}
 	}

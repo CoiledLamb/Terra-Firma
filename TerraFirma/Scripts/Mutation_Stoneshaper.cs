@@ -431,47 +431,7 @@ namespace XRL.World.Parts.Mutation
 				walls.ForEach(x => x.Obliterate());
 				targetWallCell.AddObject(statue, true, Silent: true);
 			}
-			Cleo_TerraFirma_StoneRiseFX.Schedule schedule = null;
-			Zone zone = targetWallCell.ParentZone;
-			if (!Cleo_TerraFirma_StoneRiseFX.HarnessMute && zone != null && zone.IsActive() && targetWallCell.IsVisible())
-				schedule = Cleo_TerraFirma_StoneRiseFX.PlayCarveReveal(targetWallCell, refWall);
-			if (schedule != null)
-			{
-				ScreenBuffer buf = ScreenBuffer.GetScrapBuffer1(bLoadFromCurrent: true);
-				TextConsole console = Popup._TextConsole;
-				float swapAt = schedule.SettleTimes[targetWallCell];
-				bool swapped = false;
-				int breaksPlayed = 0;
-				float t = 0f;
-				float end = schedule.Total + 0.08f;
-				while (t < end)
-				{
-					if (!swapped && swapAt <= t)
-					{
-						PlaceStatue();
-						swapped = true;
-					}
-					while (breaksPlayed < schedule.BreakTimes.Count && schedule.BreakTimes[breaksPlayed] <= t)
-					{
-						PlayWorldSound("Sounds/Damage/sfx_damage_stone", 1f, Combat: true, SourceCell: targetWallCell);
-						breaksPlayed++;
-					}
-					XRLCore.Core.RenderBaseToBuffer(buf);
-					console.DrawBuffer(buf);
-					Thread.Sleep(40);
-					t += 0.04f;
-				}
-				if (!swapped)
-					PlaceStatue();
-				// smoke only AFTER the reveal (RULED 2026-08-05: mid-carve smoke hid the statue;
-				// "have the smoke spawn at the end", "a random amount of puffs ... between 1-4")
-				Cleo_TerraFirma_Fissure.SmokePuff(targetWallCell, Stat.Random(1, 4));
-			}
-			else
-				PlaceStatue();
-			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", $"carve reveal: {(schedule != null ? schedule.Total.ToString("0.00") + "s, block + 6 debris / 3 breaks" : "instant (unseen or harness-muted)")}");
-			statue.Splatter($"&{statue.GetForegroundColor()}*");
-			PlayWorldSound("Sounds/Throw/sfx_throwing_stone_small_impact", 1f, Combat: true, SourceCell: targetWallCell);
+			PlayCarveReveal(targetWallCell, refWall, statue, PlaceStatue);
 
 			if (lovesick != null && actor.IsPlayer())
 				Popup.Show($"You attempt to picture {target.the} {target.DisplayName} in your mind, but all you can think about is {lovesick.Beauty.the} {lovesick.Beauty.DisplayName}…!");
@@ -735,6 +695,58 @@ namespace XRL.World.Parts.Mutation
 			Statue.SetStringProperty("CustomDeathVerb", "expired");
 			Statue.Obliterate(Silent: true);
 			cell?.AddObject(inert, true, Silent: true);
+		}
+
+		/// <summary>
+		/// The carve reveal, shared by this mutation and the gaslight gauntlets' wall carving
+		/// (TF2 Cleo_TerraFirma_Carvable, user 2026-09-29: "play stoneshaper's vfx too").
+		/// Lifted verbatim from the cast: block over the cell, hidden swap via Place, three
+		/// breaks with stone sounds, smoke after the reveal, splatter and impact sound.
+		/// Unseen, inactive-zone and harness-muted carves just Place.
+		/// </summary>
+		public static void PlayCarveReveal(Cell targetWallCell, GameObject refWall, GameObject statue, Action Place)
+		{
+			Cleo_TerraFirma_StoneRiseFX.Schedule schedule = null;
+			Zone zone = targetWallCell.ParentZone;
+			if (!Cleo_TerraFirma_StoneRiseFX.HarnessMute && zone != null && zone.IsActive() && targetWallCell.IsVisible())
+				schedule = Cleo_TerraFirma_StoneRiseFX.PlayCarveReveal(targetWallCell, refWall);
+			if (schedule != null)
+			{
+				ScreenBuffer buf = ScreenBuffer.GetScrapBuffer1(bLoadFromCurrent: true);
+				TextConsole console = Popup._TextConsole;
+				float swapAt = schedule.SettleTimes[targetWallCell];
+				bool swapped = false;
+				int breaksPlayed = 0;
+				float t = 0f;
+				float end = schedule.Total + 0.08f;
+				while (t < end)
+				{
+					if (!swapped && swapAt <= t)
+					{
+						Place();
+						swapped = true;
+					}
+					while (breaksPlayed < schedule.BreakTimes.Count && schedule.BreakTimes[breaksPlayed] <= t)
+					{
+						targetWallCell.PlayWorldSound("Sounds/Damage/sfx_damage_stone", 1f, Combat: true);
+						breaksPlayed++;
+					}
+					XRLCore.Core.RenderBaseToBuffer(buf);
+					console.DrawBuffer(buf);
+					Thread.Sleep(40);
+					t += 0.04f;
+				}
+				if (!swapped)
+					Place();
+				// smoke only AFTER the reveal (RULED 2026-08-05: mid-carve smoke hid the statue;
+				// "have the smoke spawn at the end", "a random amount of puffs ... between 1-4")
+				Cleo_TerraFirma_Fissure.SmokePuff(targetWallCell, Stat.Random(1, 4));
+			}
+			else
+				Place();
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", $"carve reveal: {(schedule != null ? schedule.Total.ToString("0.00") + "s, block + 6 debris / 3 breaks" : "instant (unseen or harness-muted)")}");
+			statue.Splatter($"&{statue.GetForegroundColor()}*");
+			targetWallCell.PlayWorldSound("Sounds/Throw/sfx_throwing_stone_small_impact", 1f, Combat: true);
 		}
 
 		/// <summary>
