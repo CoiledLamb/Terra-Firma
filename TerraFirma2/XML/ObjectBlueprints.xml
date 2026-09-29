@@ -258,7 +258,7 @@
     <part Name="Armor" AV="1" DV="0" WornOn="Hands" />
     <part Name="Render" DisplayName="gaslight gauntlets" RenderString="]" Tile="Items/sw_gloves_skintight.bmp" ColorString="&amp;g" DetailColor="W" />
     <part Name="Commerce" Value="120" />
-    <part Name="Description" Short="Through bores in a wooden grip draws a short and tapered beam of pale light. In motion it heats to steel-melting temperature and whirrs matter away." /> <!-- USER TEXT 2026-09-29, gaslight family template -->
+    <part Name="Description" Short="Through bores in a wooden grip draw short and tapered beams of pale light. In motion they heat to steel-melting temperature and whirr matter away." /> <!-- USER TEXT 2026-09-29, gaslight family template -->
     <part Name="Physics" Weight="3" />
     <part Name="Metal" />
     <part Name="Examiner" Alternate="UnknownGloves" Complexity="4" />
