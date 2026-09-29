@@ -31,6 +31,14 @@ namespace Cleo.TerraFirma.Scripts
 				&& EncountersAPI.IsEligibleForDynamicEncounters(BP);
 		}
 
+		/// <summary>Looser gate for a creature the player actually looked at: any real creature
+		/// counts, including village residents and uniques that the dynamic pool excludes
+		/// (Joppa's residents were the first miss, 2026-09-29). Only NoFigurine still bars it.</summary>
+		public static bool IsLookCarvable(GameObjectBlueprint BP)
+		{
+			return BP != null && !BP.IsBaseBlueprint() && !BP.HasTag("NoFigurine");
+		}
+
 		public static string Pick(string Title)
 		{
 			while (true)
@@ -178,7 +186,7 @@ namespace Cleo.TerraFirma.Scripts
 			if (string.IsNullOrEmpty(name))
 				return null;
 			GameObjectBlueprint bp = GameObjectFactory.Factory.GetBlueprintIfExists(name);
-			return IsCarvable(bp) ? bp : null;
+			return IsLookCarvable(bp) ? bp : null;
 		}
 	}
 }
@@ -204,11 +212,11 @@ namespace XRL.World.Parts
 			if (E.ID == "LookedAt")
 			{
 				GameObject seen = E.GetGameObjectParameter("Object");
-				if (seen != null && seen != ParentObject && seen.IsCreature
-					&& Cleo.TerraFirma.Scripts.Cleo_TerraFirma_CarvingPicker.IsCarvable(seen.GetBlueprint()))
-				{
+				bool keep = seen != null && seen != ParentObject && seen.IsCreature
+					&& Cleo.TerraFirma.Scripts.Cleo_TerraFirma_CarvingPicker.IsLookCarvable(seen.GetBlueprint());
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CARVE", $"LookedAt {seen?.Blueprint ?? "null"} creature={seen?.IsCreature} kept={keep}");
+				if (keep)
 					The.Game?.SetStringGameState(Cleo.TerraFirma.Scripts.Cleo_TerraFirma_CarvingPicker.LAST_LOOKED_STATE, seen.Blueprint);
-				}
 			}
 			return base.FireEvent(E);
 		}
@@ -225,12 +233,14 @@ namespace Cleo.TerraFirma.Scripts
 		public void mutate(GameObject player)
 		{
 			player?.RequirePart<Cleo_TerraFirma_LookMemory>();
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CARVE", $"look memory attached at new game: {player?.HasPart<Cleo_TerraFirma_LookMemory>()}");
 		}
 
 		[XRL.CallAfterGameLoaded]
 		public static void OnLoaded()
 		{
 			The.Player?.RequirePart<Cleo_TerraFirma_LookMemory>();
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CARVE", $"look memory attached on load: {The.Player?.HasPart<Cleo_TerraFirma_LookMemory>()}");
 		}
 	}
 }
