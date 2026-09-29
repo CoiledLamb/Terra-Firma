@@ -225,13 +225,14 @@
        The blunted chisel + splintered mallet above STAY: starter kit, kept by ruling. -->
   <!-- C01 body pair (shaped 2026-08-22, built 2026-09-29). Tier 2 for both, user-approved
        2026-09-29. Tiles per the 08-22 sitting: girdle = base bark armor, pauldrons = base
-       studded leather. Colors, weights and commerce are CLAUDE PROPOSAL. Descriptions and
-       all strings are the user's, owed; the rules lines come from the parts, DRAFT. -->
+       studded leather. Colors, weights and commerce are CLAUDE PROPOSAL. Descriptions are user text
+       2026-09-29; any other strings are the user's, owed; the rules lines come from the parts, DRAFT. -->
   <object Name="Cleo_TerraFirma_MudskinGirdle" Inherits="BaseArmor">
     <part Name="Armor" AV="1" DV="1" WornOn="Body" />
     <part Name="Render" DisplayName="mudskin girdle" RenderString="]" Tile="Items/sw_armor1.bmp" ColorString="&amp;w" DetailColor="r" />
     <part Name="Commerce" Value="20" />
     <part Name="Physics" Weight="12" Organic="true" />
+    <part Name="Description" Short="Clay is shaped to the skin in a makeshift cask. When pierced, it hardens reflexively." /> <!-- USER TEXT 2026-09-29 -->
     <part Name="Cleo_TerraFirma_MudskinGirdle" Cap="2" FlakeInterval="20" />
     <tag Name="EquipSound" Value="sfx_equip_armor_leather" />
     <tag Name="Tier" Value="2" />
@@ -241,6 +242,7 @@
     <part Name="Render" DisplayName="flint-spike pauldrons" RenderString="]" Tile="Items/sw_leather_armor.bmp" ColorString="&amp;w" DetailColor="K" />
     <part Name="Commerce" Value="20" />
     <part Name="Physics" Weight="15" Organic="true" />
+    <part Name="Description" Short="Shards of flint are knapped to needle points and arranged like rows of blackened, glaring teeth." /> <!-- USER TEXT 2026-09-29 -->
     <part Name="Cleo_TerraFirma_FlintSpikePauldrons" Damage="1d3" />
     <xtagGrammar iArticle="a pair of" />
     <tag Name="Gender" Value="plural" />
