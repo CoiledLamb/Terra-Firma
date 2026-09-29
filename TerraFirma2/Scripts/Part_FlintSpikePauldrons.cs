@@ -35,6 +35,7 @@ namespace XRL.World.Parts
 			if (wearer != null && E.Object == wearer && ParentObject.IsEquippedProperly()
 				&& attacker != null && attacker != wearer && GameObject.Validate(attacker)
 				&& !E.Indirect && E.Projectile == null
+				&& E.Weapon != null   // melee hits carry their weapon (Combat TakeDamage); breaths, blasts and quills don't
 				&& E.Damage != null && E.Damage.Amount > 0
 				&& !E.Damage.HasAttribute("Thrown") && !E.Damage.HasAttribute("reflected")
 				&& attacker.CurrentCell != null && wearer.CurrentCell != null

@@ -35,10 +35,12 @@ namespace Cleo.TerraFirma.Scripts
 
 		/// <summary>Looser gate for a creature the player actually looked at: any real creature
 		/// counts, including village residents and uniques that the dynamic pool excludes
-		/// (Joppa's residents were the first miss, 2026-09-29). Only NoFigurine still bars it.</summary>
+		/// (Joppa's residents were the first miss, 2026-09-29). Only NoFigurine still bars it.
+		/// The Creature tag (base Creature root) keeps out animated items and statues, whose
+		/// IsCreature comes from an animation property on a non-creature blueprint.</summary>
 		public static bool IsLookCarvable(GameObjectBlueprint BP)
 		{
-			return BP != null && !BP.IsBaseBlueprint() && !BP.HasTag("NoFigurine");
+			return BP != null && !BP.IsBaseBlueprint() && BP.HasTag("Creature") && !BP.HasTag("NoFigurine");
 		}
 
 		public static string Pick(string Title)

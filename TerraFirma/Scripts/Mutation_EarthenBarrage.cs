@@ -201,6 +201,11 @@ namespace XRL.World.Parts.Mutation
 				GO.RemoveEffect(AssocWhorl);
 				AssocWhorl = null;
 			}
+			// the held lease is only sustained while the mutation stands: hand leftover stones the
+			// promised 50-100 round lifetime instead of 9999 (audit 2026-09-29)
+			foreach (GameObject stone in GO.GetInventoryAndEquipment(IsOurStone))
+				if (stone.GetPart<Temporary>() is Temporary lease && lease.Duration > ROCK_LIFETIME_MAX)
+					lease.Duration = Stat.Random(ROCK_LIFETIME_MIN, ROCK_LIFETIME_MAX);
 			return base.Unmutate(GO);
 		}
 

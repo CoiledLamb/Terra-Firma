@@ -3624,12 +3624,29 @@ namespace Cleo.TerraFirma.Scripts
 			{
 				if (g.MouthIdx < 0) return false;
 				int mx = g.MouthIdx % g.W, my = g.MouthIdx / g.W;
+				// reachable from the mouth over dry, tree-free floor (audit 2026-09-29: a post could
+				// land in an unbreached garden or across water); 8-way, as creatures walk
+				var reach = new bool[g.W * g.H];
+				var fq = new Queue<int>();
+				reach[g.MouthIdx] = true; fq.Enqueue(g.MouthIdx);
+				while (fq.Count > 0)
+				{
+					int cur = fq.Dequeue();
+					foreach (var d in N8)
+					{
+						int nx = cur % g.W + d[0], ny = cur / g.W + d[1];
+						if (!g.Inb(nx, ny)) continue;
+						int ni = g.Idx(nx, ny);
+						if (reach[ni] || g.C[ni] != FLOOR || g.Water[ni] != 0 || g.Tree[ni] != 0) continue;
+						reach[ni] = true; fq.Enqueue(ni);
+					}
+				}
 				var posts = new List<int>();
 				for (int y = Math.Max(0, my - OUTRIDER_POST_RADIUS); y <= Math.Min(g.H - 1, my + OUTRIDER_POST_RADIUS); y++)
 					for (int x = Math.Max(0, mx - OUTRIDER_POST_RADIUS); x <= Math.Min(g.W - 1, mx + OUTRIDER_POST_RADIUS); x++)
 					{
 						int i = g.Idx(x, y);
-						if (g.C[i] != FLOOR || g.Host[i] == 0 || g.Water[i] != 0) continue;
+						if (!reach[i] || g.C[i] != FLOOR || g.Host[i] == 0 || g.Water[i] != 0) continue;
 						Cell c = Z.GetCell(x, y);
 						if (c == null || c.IsSolid() || c.HasObjectWithPart("Combat")) continue;
 						posts.Add(i);

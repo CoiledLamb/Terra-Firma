@@ -133,10 +133,12 @@ namespace XRL.World.Effects
 
 		public override bool HandleEvent(EndTurnEvent E)
 		{
-			// if whatever was petrifying us is dead or gone mid-gaze, nothing will ever release us -- release ourselves
-			if (!Receding && !GameObject.Validate(Initiator))
+			// if whatever was petrifying us is dead or gone mid-gaze, nothing will ever release us -- release ourselves.
+			// "Gone" includes another zone (audit 2026-09-29): a victim teleported away leaves the gazer's zone
+			// suspended, so its gaze tick never runs again to let go.
+			if (!Receding && (!GameObject.Validate(Initiator) || Initiator.CurrentZone != base.Object?.CurrentZone))
 			{
-				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("GAZE", "DEAD-GORGON RELEASE: initiator invalid mid-gaze, effect self-recedes (the trap fix firing)");
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("GAZE", "DEAD-GORGON RELEASE: initiator invalid or in another zone mid-gaze, effect self-recedes (the trap fix firing)");
 				UpdateData(null, true);
 			}
 			RefreshDisplayName();

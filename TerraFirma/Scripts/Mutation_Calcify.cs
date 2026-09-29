@@ -193,8 +193,6 @@ namespace XRL.World.Parts.Mutation
 				targeted = PickNpcWallLine(E.Target ?? ParentObject.Target);
 			if (targeted.IsNullOrEmpty())
 				return false;
-			UseEnergy(1000, $"Physical Mutation {Name}");
-			CooldownMyActivatedAbility(ActivatedAbilityID, GetCooldown(Level));
 			// the stone call, harmonized with Fissure's carve gate (RULED 2026-08-04: "we should
 			// harmonize the stone call as well"): only TRUE GEOLOGY answers. The zone's default
 			// wall must itself be natural stone, neighbor borrowing demands the Natural flag,
@@ -231,6 +229,11 @@ namespace XRL.World.Parts.Mutation
 				planCells.Add(cell);
 				planBps.Add(bp ?? "Cleo_TerraFirma_WallCalcify");
 			}
+			// nothing empty to fill: refuse before the turn and cooldown are spent (audit 2026-09-29)
+			if (planCells.Count == 0)
+				return false;
+			UseEnergy(1000, $"Physical Mutation {Name}");
+			CooldownMyActivatedAbility(ActivatedAbilityID, GetCooldown(Level));
 			PlayWorldSound("Sounds/Throw/sfx_throwing_stone_large_impact", 1f, Combat: true); // the slam covers the rise
 			// USER 2026-08-05 ("possible screen shake add for calcify"), RULED + BUILT 2026-08-14: one
 			// small shake beside the slam -- gentler than the redoubt's descending beats (0.3+); visibility

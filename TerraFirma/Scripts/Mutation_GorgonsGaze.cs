@@ -397,7 +397,7 @@ namespace XRL.World.Parts.Mutation
 		{
 			// feel round 1: the completion shower -- a hard burst of rock debris under the statue swap
 			Cleo_TerraFirma_GorgonPetrifyFX.RockPops(Victim, 10, Burst: true);
-			The.Player.PlayWorldSound("burn_blast", 1f, Combat: true);
+			Victim.PlayWorldSound("burn_blast", 1f, Combat: true); // at the statue, not the player (audit 2026-09-29)
 			if (Victim.IsPlayer())
 				Achievement.TURNED_STONE.Unlock();
 			Victim.SetIntProperty("SuppressCorpseDrops", 1);
