@@ -156,6 +156,8 @@
        ForceName-style builder params someday), spawnable by name from any wish or table. -->
   <object Name="Cleo_TerraFirma_Overseer" Inherits="Cleo_TerraFirma_Stonecarver">
     <builder Name="Cleo_TerraFirma_StonecarverLegendary" />
+    <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Overseer" />
+    <part Name="GivesRep" /> <!-- Goatfolk Hero 1 idiom, base Creatures.xml:4717; unlocks the water ritual -->
   </object>
 
   <object Name="Cleo_TerraFirma_Hewer" Inherits="Cleo_TerraFirma_Stonecarver">

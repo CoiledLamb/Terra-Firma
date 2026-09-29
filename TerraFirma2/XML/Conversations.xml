@@ -70,4 +70,17 @@
 			<choice GotoID="End">Rust and earth.</choice>
 		</node>
 	</conversation>
+
+	<!-- OVERSEER (user-written WIP 2026-09-29, bank still growing toward 7-9). Wired on the
+	     Cleo_TerraFirma_Overseer blueprint alongside GivesRep, which is what unlocks the
+	     BaseConversation WaterRitualChoice (IfSpeakerHavePart="GivesRep"). -->
+	<conversation ID="Cleo_TerraFirma_Overseer">
+		<node ID="Start">
+			<text>
+				ain't easy work overseein' a warren like this, wayfarer.~
+				make sure not to find yourself on the wrong side of the outrider, and you'll do fine.
+			</text>
+			<choice GotoID="End">Rust and earth.</choice>
+		</node>
+	</conversation>
 </conversations>
