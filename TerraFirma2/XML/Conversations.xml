@@ -83,4 +83,20 @@
 			<choice GotoID="End">Rust and earth.</choice>
 		</node>
 	</conversation>
+
+	<!-- QUARRY PROVISIONER (user-written WIP 2026-09-29). Replaces GenericMerchant; the Trade
+	     choice arrives free from BaseConversation (base Conversations.xml:92). "wayfarer" on
+	     purpose: the vine counts itself part of the crew. "stonesup" is the user's coinage, to
+	     sup on stone: a tool that eats rock. Farewell follows the crew. -->
+	<conversation ID="Cleo_TerraFirma_VineMerchant">
+		<node ID="Start">
+			<text>
+				come, wayfarer. my stonesup tools are yours to work.~
+				helmets, lights, picks... make certain of the stock you buy now, for a missing piece could prove fatal.~
+				the rocks here are loose. with my wares, you could be rid of them altogether.~
+				ah, to feel the sunlight on your skin, wayfarer. tell me, is it sweeter than the taste of fresh water?
+			</text>
+			<choice GotoID="End">Rust and earth.</choice>
+		</node>
+	</conversation>
 </conversations>

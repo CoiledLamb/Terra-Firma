@@ -2,7 +2,7 @@
  <objects> 
   <!-- Jilted Lover chassis, with its wild grabber and spawn lanes removed.
        Merchant HP/AV copy BaseMerchant; intellect and ego copy Yurl (CLAUDE PROPOSAL
-       tuning). Stock GenericMerchant speech until a custom voice lands. -->
+       tuning). Own bank since 2026-09-29 (Conversations.xml). -->
   <object Name="Cleo_TerraFirma_Vine Merchant" Inherits="Jilted Lover">
     <part Name="Render" DisplayName="quarry provisioner" />
     <part Name="Brain" Hostile="false" Wanders="false" Mobile="false" LivesOnWalls="true" Factions="Consortium-100,Cleo_TerraFirma_Quarriers-50" />
@@ -13,7 +13,7 @@
     <stat Name="AV" Value="3" />
     <stat Name="Intelligence" sValue="22" />
     <stat Name="Ego" sValue="19" />
-    <part Name="ConversationScript" ConversationID="GenericMerchant" />
+    <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_VineMerchant" /> <!-- T04 bank, 2026-09-29 -->
     <part Name="GenericInventoryRestocker" Table="Cleo_TerraFirma_VineMerchantWares" />
     <part Name="Interesting" />
     <tag Name="Role" Value="NPC" />
