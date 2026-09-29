@@ -22,7 +22,7 @@ namespace XRL.World.Effects
 		}
 	}
 
-	/// <summary>Condition: whenever the eater throws a stone. Base fires AfterThrown only
+	/// <summary>Condition: whenever the eater throws a stone, 50% (user 2026-09-29). Base fires AfterThrown only
 	/// on the thrown item, so Cleo_TerraFirma_StoneThrowSignal (merged onto BaseStone)
 	/// forwards it to the thrower as THREW_STONE.</summary>
 	[Serializable]
@@ -32,7 +32,7 @@ namespace XRL.World.Effects
 
 		public override string GetTriggerDescription()
 		{
-			return "whenever @thisCreature throw@s a stone,";
+			return "whenever @thisCreature throw@s a stone, there's a 50% chance";
 		}
 
 		public override void Register(GameObject Object, IEventRegistrar Registrar)
@@ -43,7 +43,9 @@ namespace XRL.World.Effects
 
 		public override bool FireEvent(Event E)
 		{
-			if (E.ID == THREW_STONE)
+			// frequent-event triggers carry a chance in base (CookingDomainTongue_OnStuck's 50%);
+			// Earthen Barrage keeps stones coming, so an unrolled trigger fires every throw
+			if (E.ID == THREW_STONE && 50.in100())
 				Trigger();
 			return base.FireEvent(E);
 		}
