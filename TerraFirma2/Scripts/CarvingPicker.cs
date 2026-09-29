@@ -1,0 +1,236 @@
+using System;
+using System.Collections.Generic;
+using ConsoleLib.Console;
+using Qud.API;
+using XRL;
+using XRL.UI;
+using XRL.World;
+using XRL.World.Parts;
+
+namespace Cleo.TerraFirma.Scripts
+{
+	/// <summary>
+	/// Carving subject picker (design/carving-spec-2026-09-29.md), shared by the lathe and the
+	/// gaslight gauntlets. Shape and call are base item naming's (ItemNaming "Rename": one
+	/// Popup.PickOption with hotkeys); each creature row carries its sprite through PickOption's
+	/// Icons, built from the blueprint alone (Renderable(GameObjectBlueprint)), so listing never
+	/// instantiates a creature. Returns a creature blueprint name, or null on escape.
+	/// Menu labels are DRAFT, user text owed.
+	/// </summary>
+	public static class Cleo_TerraFirma_CarvingPicker
+	{
+		public const string LAST_LOOKED_STATE = "Cleo_TerraFirma_CarvingLastLooked";
+		private const int SEARCH_MAX_RESULTS = 40;
+
+		/// <summary>Base's random-figurine pool (RandomFigurine: GetASampleCreature, minus
+		/// NoFigurine), which is EncountersAPI's creature pool: dynamic-encounter eligible and
+		/// tagged Creature.</summary>
+		public static bool IsCarvable(GameObjectBlueprint BP)
+		{
+			return BP != null && BP.HasTag("Creature") && !BP.HasTag("NoFigurine")
+				&& EncountersAPI.IsEligibleForDynamicEncounters(BP);
+		}
+
+		public static string Pick(string Title)
+		{
+			while (true)
+			{
+				var labels = new List<string>();
+				var icons = new List<IRenderable>();
+				var actions = new List<string>();
+
+				GameObjectBlueprint last = GetLastLooked();
+				if (last != null)
+				{
+					labels.Add("Last looked at: " + last.CachedDisplayNameStripped);
+					icons.Add(new Renderable(last));
+					actions.Add("last");
+				}
+				labels.Add("Local fauna");
+				icons.Add(null);
+				actions.Add("local");
+				labels.Add("Search by name");
+				icons.Add(null);
+				actions.Add("search");
+				labels.Add("Random");
+				icons.Add(null);
+				actions.Add("random");
+
+				int choice = Popup.PickOption(Title, "What will you carve?", "", "Sounds/UI/ui_notification_question",
+					labels.ToArray(), Hotkeys(labels.Count), icons.ToArray(), AllowEscape: true);
+				if (choice < 0)
+					return null;
+
+				string result = null;
+				switch (actions[choice])
+				{
+					case "last":
+						return last.Name;
+					case "local":
+						result = PickFromList(Title, LocalFauna(), "Nothing lives here that you could carve.");
+						break;
+					case "search":
+						result = Search(Title);
+						break;
+					case "random":
+						return EncountersAPI.GetACreatureBlueprint(IsCarvable);
+				}
+				if (result != null)
+					return result;
+				// escape from a sub-list returns to the top menu, as base nested popups do
+			}
+		}
+
+		/// <summary>Creatures from the current zone's spawn table. Base populates a terrain from
+		/// every creature tagged DynamicObjectsTable:{Terrain}_Creatures, where {Terrain} is the
+		/// world terrain object's Terrain tag (e.g. TerrainDesertCanyon: Terrain=DesertCanyon).</summary>
+		public static List<GameObjectBlueprint> LocalFauna()
+		{
+			var list = new List<GameObjectBlueprint>();
+			string terrain = The.Player?.CurrentZone?.GetTerrainObject()?.GetTag("Terrain");
+			if (string.IsNullOrEmpty(terrain))
+				return list;
+			string table = "DynamicObjectsTable:" + terrain + "_Creatures";
+			foreach (GameObjectBlueprint bp in GameObjectFactory.Factory.BlueprintList)
+			{
+				if (bp.HasTag(table) && IsCarvable(bp))
+					list.Add(bp);
+			}
+			return Dedupe(list);
+		}
+
+		private static string Search(string Title)
+		{
+			string query = Popup.AskString("Carve what creature?", "", "Sounds/UI/ui_notification", null, null, 40, 1, ReturnNullForEscape: true);
+			if (string.IsNullOrWhiteSpace(query))
+				return null;
+			query = query.Trim().ToLower();
+			var matches = new List<GameObjectBlueprint>();
+			foreach (GameObjectBlueprint bp in GameObjectFactory.Factory.BlueprintList)
+			{
+				if (IsCarvable(bp) && bp.CachedDisplayNameStrippedLC.Contains(query))
+					matches.Add(bp);
+			}
+			matches = Dedupe(matches);
+			// exact and prefix matches first, then the rest alphabetically
+			matches.Sort((a, b) =>
+			{
+				int ra = Rank(a.CachedDisplayNameStrippedLC, query), rb = Rank(b.CachedDisplayNameStrippedLC, query);
+				return ra != rb ? ra.CompareTo(rb) : string.Compare(a.CachedDisplayNameStrippedLC, b.CachedDisplayNameStrippedLC, StringComparison.Ordinal);
+			});
+			if (matches.Count > SEARCH_MAX_RESULTS)
+				matches.RemoveRange(SEARCH_MAX_RESULTS, matches.Count - SEARCH_MAX_RESULTS);
+			return PickFromList(Title, matches, "You can't think of any creature by that name.");
+		}
+
+		private static int Rank(string Name, string Query)
+		{
+			if (Name == Query)
+				return 0;
+			return Name.StartsWith(Query) ? 1 : 2;
+		}
+
+		private static string PickFromList(string Title, List<GameObjectBlueprint> Options, string EmptyMessage)
+		{
+			if (Options.Count == 0)
+			{
+				Popup.Show(EmptyMessage);
+				return null;
+			}
+			var labels = new string[Options.Count];
+			var icons = new IRenderable[Options.Count];
+			for (int i = 0; i < Options.Count; i++)
+			{
+				labels[i] = Options[i].CachedDisplayNameStripped;
+				icons[i] = new Renderable(Options[i]);
+			}
+			int choice = Popup.PickOption(Title, null, "", "Sounds/UI/ui_notification", labels, Hotkeys(labels.Length), icons, AllowEscape: true);
+			return choice < 0 ? null : Options[choice].Name;
+		}
+
+		/// <summary>One row per display name: base variants that share a name (village
+		/// and tier copies) would otherwise list the same creature several times.</summary>
+		private static List<GameObjectBlueprint> Dedupe(List<GameObjectBlueprint> List)
+		{
+			var seen = new HashSet<string>();
+			var result = new List<GameObjectBlueprint>();
+			foreach (GameObjectBlueprint bp in List)
+			{
+				if (seen.Add(bp.CachedDisplayNameStrippedLC))
+					result.Add(bp);
+			}
+			result.Sort((a, b) => string.Compare(a.CachedDisplayNameStrippedLC, b.CachedDisplayNameStrippedLC, StringComparison.Ordinal));
+			return result;
+		}
+
+		private static char[] Hotkeys(int Count)
+		{
+			var keys = new char[Count];
+			char c = 'a';
+			for (int i = 0; i < Count; i++)
+				keys[i] = c <= 'z' ? c++ : ' ';
+			return keys;
+		}
+
+		private static GameObjectBlueprint GetLastLooked()
+		{
+			string name = The.Game?.GetStringGameState(LAST_LOOKED_STATE);
+			if (string.IsNullOrEmpty(name))
+				return null;
+			GameObjectBlueprint bp = GameObjectFactory.Factory.GetBlueprintIfExists(name);
+			return IsCarvable(bp) ? bp : null;
+		}
+	}
+}
+
+namespace XRL.World.Parts
+{
+	/// <summary>
+	/// Remembers the last creature the player looked at, for the carving picker. Base Look
+	/// fires "LookedAt" on the player with the object (XRL.UI.Look). The memory lives in game
+	/// state, so this part holds nothing and costs nothing to serialize.
+	/// </summary>
+	[Serializable]
+	public class Cleo_TerraFirma_LookMemory : IPart
+	{
+		public override void Register(GameObject Object, IEventRegistrar Registrar)
+		{
+			Registrar.Register("LookedAt");
+			base.Register(Object, Registrar);
+		}
+
+		public override bool FireEvent(Event E)
+		{
+			if (E.ID == "LookedAt")
+			{
+				GameObject seen = E.GetGameObjectParameter("Object");
+				if (seen != null && seen != ParentObject && seen.IsCreature
+					&& Cleo.TerraFirma.Scripts.Cleo_TerraFirma_CarvingPicker.IsCarvable(seen.GetBlueprint()))
+				{
+					The.Game?.SetStringGameState(Cleo.TerraFirma.Scripts.Cleo_TerraFirma_CarvingPicker.LAST_LOOKED_STATE, seen.Blueprint);
+				}
+			}
+			return base.FireEvent(E);
+		}
+	}
+}
+
+namespace Cleo.TerraFirma.Scripts
+{
+	/// <summary>Attaches the look memory to new players and to players in loaded saves.</summary>
+	[XRL.PlayerMutator]
+	[XRL.HasCallAfterGameLoaded]
+	public class Cleo_TerraFirma_LookMemoryInstaller : XRL.IPlayerMutator
+	{
+		public void mutate(GameObject player)
+		{
+			player?.RequirePart<Cleo_TerraFirma_LookMemory>();
+		}
+
+		[XRL.CallAfterGameLoaded]
+		public static void OnLoaded()
+		{
+			The.Player?.RequirePart<Cleo_TerraFirma_LookMemory>();
+		}
+	}
+}

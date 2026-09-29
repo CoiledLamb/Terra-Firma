@@ -31,6 +31,7 @@ The previous TODO is preserved byte-for-byte in [JOURNAL.md](JOURNAL.md), includ
    - Detail: T01, B11, D03. The older writing inventory contains superseded placeholders; filter it through current completion entries.
 
 4. **Carving (lathe + gaslight gauntlets): spec closed 2026-09-29, see [design/carving-spec-2026-09-29.md](design/carving-spec-2026-09-29.md).** Build order: subject picker, then lathe, then gauntlets. Description owed from the user.
+   - Subject picker built 2026-09-29 (`CarvingPicker.cs`): top menu with last looked at (hidden until a creature is looked at; a player part records base `LookedAt` into game state, added by PlayerMutator and on load), local fauna from the terrain's `DynamicObjectsTable:{Terrain}_Creatures`, search by name (40 results max, exact and prefix first), random; sprites via `Renderable(GameObjectBlueprint)`, NoFigurine excluded, duplicate names collapsed, escape from a sub-list returns to the top. Menu labels DRAFT. Both builds 0 errors, text rules passed, deployed with hashes matched. In game: wish `tfcarvepick`, look at a creature first, try each option, check sprites and an underground zone (local fauna is empty there).
 
 5. **Design cave moss food effect and polish spawning/acquisition — harvest foundation built; special food effect unbuilt.**
    - Present: wall moss placement, harvestable clumps, approved description, native manual harvesting verified in play, and an implemented adjacent auto-harvest path. The clump currently inherits Snack without a custom food effect.

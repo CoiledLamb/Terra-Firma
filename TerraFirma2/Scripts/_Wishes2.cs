@@ -339,6 +339,21 @@ namespace Cleo.TerraFirma.Scripts
 
 		private static int JingleIndex = -1;
 
+		/// <summary>Carving picker test (carving spec 2026-09-29): opens the shared subject
+		/// picker and reports the choice. Nothing is carved or consumed.</summary>
+		[WishCommand(Command = "tfcarvepick")]
+		public static void CarvePickTest()
+		{
+			string pick = Cleo_TerraFirma_CarvingPicker.Pick("carving test");
+			if (pick == null)
+			{
+				MessageQueue.AddPlayerMessage("[tfcarvepick] cancelled");
+				return;
+			}
+			GameObjectBlueprint bp = GameObjectFactory.Factory.GetBlueprintIfExists(pick);
+			MessageQueue.AddPlayerMessage("[tfcarvepick] " + pick + " (" + bp?.CachedDisplayNameStripped + ")");
+		}
+
 		[WishCommand(Command = "tfjingle")]
 		public static void JingleAudition()
 		{
