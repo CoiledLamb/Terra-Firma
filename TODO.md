@@ -144,6 +144,8 @@ V17 follow-up: user reports shotgun gameplay verified. Approved name/readout now
 
 V17 text follow-up: explanatory RulesDescription removed and deployed; verify on a fresh shotgun. The earlier rules-text draft is retired.
 
+Failure-message conventions 2026-09-29: etching's reach/tool refusals now popup (base deliberate-action refusals); shufflers' unpowered peek uses base IActivePart "merely click"; mill, chalk box and animation table refusals name their object via ParentObject instead of hardcoded nouns. Both builds 0 errors, text rules passed, five files deployed with hashes matched. In-game display check remains.
+
 These are batches of remaining checks, not instructions to rebuild the feature. Record an observed verdict; static inspection and log messages alone do not close an eyes-on check. Use a disposable character for save/load harnesses that overwrite saves.
 
 - [ ] **V01 — Stoneshaper.** Re-arm after limb regeneration; one-turn carve cost; weird anatomy and Lovesick; `tfstatueai` follow/attack behavior; rough-statue wording; copy generation 1/2 free then degradation; wall-picker seed; gray-wall reveal; expiry/swap/combat-death popup distinctions; inert loot and level-10 permanence. Journal: 62–63, 134–135, 425–427, 474.

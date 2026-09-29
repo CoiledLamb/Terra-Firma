@@ -52,12 +52,12 @@ namespace XRL.World.Parts
 			var cell = ParentObject.GetPart<EnergyCell>();
 			if (cell == null || !IsReady(UseCharge: false, IgnoreCharge: true))
 			{
-				if (E.Actor.IsPlayer()) Popup.ShowFail("The mill is not running."); // Codex PROPOSAL
+				if (E.Actor.IsPlayer()) Popup.ShowFail(ParentObject.Does("are") + " not running."); // Codex PROPOSAL
 				return false;
 			}
 			if (cell.Charge >= cell.MaxCharge || ChargePerPound <= 0)
 			{
-				if (E.Actor.IsPlayer()) Popup.ShowFail("The mill cannot store any more charge."); // Codex PROPOSAL
+				if (E.Actor.IsPlayer()) Popup.ShowFail(ParentObject.T() + " cannot store any more charge."); // Codex PROPOSAL
 				return false;
 			}
 			var stones = E.Actor.GetInventoryDirect(IsFood);

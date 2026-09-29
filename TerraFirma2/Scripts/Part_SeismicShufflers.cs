@@ -122,7 +122,7 @@ namespace XRL.World.Parts
             if (below == null)
                 return wearer.Fail("There is no lower stratum to scan here.");
             if (!IsReady(UseCharge: true, ChargeUse: PeekChargeUse))
-                return wearer.Fail("The seismic shufflers cannot power a scan.");
+                return wearer.Fail(ParentObject.Does("click", int.MaxValue, null, null, "merely") + "."); // base IActivePart unpowered line
 
             ClearProjections();
             int walls = 0;

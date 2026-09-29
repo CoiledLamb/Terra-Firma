@@ -251,13 +251,13 @@ namespace XRL.World.Parts
 				return;
 			if (actor.DistanceTo(ParentObject) > 1)
 			{
-				IComponent<GameObject>.AddPlayerMessage("You cannot reach " + ParentObject.t() + "."); // DRAFT
+				actor.Fail("You cannot reach " + ParentObject.t() + "."); // DRAFT; popup per base deliberate-action refusals
 				return;
 			}
 			int toolTier = GetEtchToolTier(actor);
 			if (toolTier < 0)
 			{
-				IComponent<GameObject>.AddPlayerMessage("You want a hammer and a knife for that."); // DRAFT (safety branch; the verb is hidden without tools)
+				actor.Fail("You want a hammer and a knife for that."); // DRAFT (safety branch; the verb is hidden without tools)
 				return;
 			}
 			// bodied statues lead with the limb question, the tattoo gun's own idiom (user ruling

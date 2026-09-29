@@ -349,7 +349,7 @@ namespace XRL.World.Parts
 			{
 				if (actor.IsPlayer())
 				{
-					Popup.ShowFail("The box is empty."); // DRAFT
+					Popup.ShowFail(ParentObject.Does("are") + " empty."); // DRAFT
 				}
 				return;
 			}

@@ -124,7 +124,7 @@ namespace XRL.World.Parts
 				if (ParentObject.QueryCharge() < AnimationCost)
 				{
 					if (E.Actor.IsPlayer())
-						Popup.ShowFail("The table lies dormant; its cell wants for charge."); // DRAFT
+						Popup.ShowFail(ParentObject.Does("lie") + " dormant; its cell wants for charge."); // DRAFT
 					return false;
 				}
 				GameObject pick;
@@ -150,7 +150,7 @@ namespace XRL.World.Parts
 				if (spot == null)
 				{
 					if (E.Actor.IsPlayer())
-						Popup.ShowFail("There is no open ground beside the table."); // DRAFT
+						Popup.ShowFail("There is no open ground beside " + ParentObject.t() + "."); // DRAFT
 					return false;
 				}
 				if (!ParentObject.UseCharge(AnimationCost))
