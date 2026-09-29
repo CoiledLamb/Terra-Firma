@@ -30,9 +30,7 @@ The previous TODO is preserved byte-for-byte in [JOURNAL.md](JOURNAL.md), includ
    - Remaining: expand the crew bark banks, write the overseer's bank, add its missing conversation/water-ritual wiring, finish remaining site/faction text, and reconcile overseer perk descriptions with actual grants. Then verify conversation, ritual and perks on fresh residents.
    - Detail: T01, B11, D03. The older writing inventory contains superseded placeholders; filter it through current completion entries.
 
-4. **Implement lathe carving and crysteel gauntlets — pre-implementation.**
-   - Present: prior lathe/figurine exploration, but no custom lathe-carving or crysteel-gauntlet implementation was found in the current mod source. Existing lathed furniture descriptions are flavor, not this behavior.
-   - Remaining: recover/review the intended interaction, specify the gauntlets' role, settle inputs/outputs and costs, verify applicable engine precedents, then build the behavior, acquisition and player text. Test resource consumption, result identity and failure/cancellation paths. The user has paired these features; this snapshot does not invent the gauntlets' mechanics or treat exploratory recipes as settled.
+4. **Carving (lathe + gaslight gauntlets): spec closed 2026-09-29, see [design/carving-spec-2026-09-29.md](design/carving-spec-2026-09-29.md).** Build order: subject picker, then lathe, then gauntlets. Description owed from the user.
 
 5. **Design cave moss food effect and polish spawning/acquisition — harvest foundation built; special food effect unbuilt.**
    - Present: wall moss placement, harvestable clumps, approved description, native manual harvesting verified in play, and an implemented adjacent auto-harvest path. The clump currently inherits Snack without a custom food effect.

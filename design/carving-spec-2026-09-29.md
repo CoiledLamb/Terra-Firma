@@ -1,7 +1,6 @@
 # Carving: gaslight gauntlets, lathe, subject picker (spec, 2026-09-29)
 
-**CLAUDE PROPOSAL** until the user closes it. Answers given in chat on 2026-09-29 are folded in;
-they are this sheet's inputs, not rulings. Beta top-ten heading #4 ("lathe carving and
+Closed 2026-09-29, in effect. The "Open at build, mine" items at the end stay CLAUDE PROPOSAL. Beta top-ten heading #4 ("lathe carving and
 crysteel gauntlets") is this work; "crysteel" was a slip for gaslight.
 
 Concept (user): carving builds off etching by adding base-game verbs that do interesting
