@@ -232,7 +232,7 @@
     <part Name="Render" DisplayName="mudskin girdle" RenderString="]" Tile="Items/sw_armor1.bmp" ColorString="&amp;w" DetailColor="r" />
     <part Name="Commerce" Value="20" />
     <part Name="Physics" Weight="12" Organic="true" />
-    <part Name="Description" Short="Clay is shaped to the skin in a makeshift cask. When pierced, it hardens reflexively." /> <!-- USER TEXT 2026-09-29 -->
+    <part Name="Description" Short="Clay is shaped to the skin in a makeshift cast. When pierced, it hardens reflexively." /> <!-- USER TEXT 2026-09-29 -->
     <part Name="Cleo_TerraFirma_MudskinGirdle" Cap="2" FlakeInterval="20" />
     <tag Name="EquipSound" Value="sfx_equip_armor_leather" />
     <tag Name="Tier" Value="2" />
@@ -242,7 +242,7 @@
     <part Name="Render" DisplayName="flint-spike pauldrons" RenderString="]" Tile="Items/sw_leather_armor.bmp" ColorString="&amp;w" DetailColor="K" />
     <part Name="Commerce" Value="20" />
     <part Name="Physics" Weight="15" Organic="true" />
-    <part Name="Description" Short="Shards of flint are knapped to needle points and arranged like rows of blackened, glaring teeth." /> <!-- USER TEXT 2026-09-29 -->
+    <part Name="Description" Short="Shards of flint are knapped to needle points and arranged like rows of blackened, gleaming teeth." /> <!-- USER TEXT 2026-09-29 -->
     <part Name="Cleo_TerraFirma_FlintSpikePauldrons" Damage="1d3" />
     <xtagGrammar iArticle="a pair of" />
     <tag Name="Gender" Value="plural" />
