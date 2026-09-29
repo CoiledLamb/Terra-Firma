@@ -26,8 +26,8 @@
 	<conversation ID="Cleo_TerraFirma_Outrider">
 		<node ID="Start">
 			<text>
-				mind the cairns, wayfarer. lest you knock one over.~
-				seen a few baboons today. not one made it further than a stone's throw.
+				Mind the cairns, wayfarer, lest you knock one over.~
+				Seen a few baboons today. Not one made it further than a stone's throw.
 			</text>
 			<choice GotoID="End">Rust and earth.</choice>
 		</node>
@@ -41,10 +41,10 @@
 	<conversation ID="Cleo_TerraFirma_Mason">
 		<node ID="Start">
 			<text>
-				stones talk sometimes. just gotta listen real close, and you can hear em singing.~
-				need something sculpted? man, boar, fish?~
-				i sometimes wonder if the stones feel like we do. carving must hurt then, eh?~
-				don't know the name of the rocks around here, but they carve just the same.
+				Stones talk sometimes. Just gotta listen real close, and you can hear 'em singing.~
+				Need something sculpted? Man, boar, fish?~
+				I sometimes wonder if the stones feel like we do. Carving must hurt then, eh?~
+				Don't know the name of the rocks around here, but they carve just the same.
 			</text>
 			<choice GotoID="End">Rust and earth.</choice>
 		</node>
@@ -64,8 +64,8 @@
 	<conversation ID="Cleo_TerraFirma_Hewer">
 		<node ID="Start">
 			<text>
-				smashed through a wall last week, soaked my clothes. damn aquifers.~
-				overseer said we needed to square away more rock, but my back's been killing me... got any witchwood?
+				Smashed through a wall last week, soaked my clothes. Damn aquifers.~
+				Overseer said we needed to square away more rock, but my back's been killing me... got any witchwood?
 			</text>
 			<choice GotoID="End">Rust and earth.</choice>
 		</node>
@@ -77,8 +77,8 @@
 	<conversation ID="Cleo_TerraFirma_Overseer">
 		<node ID="Start">
 			<text>
-				ain't easy work overseein' a warren like this, wayfarer.~
-				make sure not to find yourself on the wrong side of the outrider, and you'll do fine.
+				Ain't easy work overseein' a warren like this, wayfarer.~
+				Make sure not to find yourself on the wrong side of the outrider, and you'll do fine.
 			</text>
 			<choice GotoID="End">Rust and earth.</choice>
 		</node>
