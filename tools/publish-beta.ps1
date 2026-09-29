@@ -3,7 +3,18 @@
 # obviously ai, and it's probably easier to just pull them out than find that voice").
 # The repo keeps every comment; this emits publish\TerraFirma + a dated zip.
 #
-#   powershell -NoProfile -ExecutionPolicy Bypass -File tools\publish-beta.ps1
+#   powershell -NoProfile -ExecutionPolicy Bypass -File tools\publish-beta.ps1 [-Mod TF1|TF2|Both] [-CheckOnly]
+#
+# -CheckOnly: strip, validate and compile-check, then test the manifest rewrites on a temp
+# copy. No zip, and the staging folders (the upload sources) are left untouched.
+#
+# Two mods since the 2026-09-27 split (R02, 2026-09-29): the same pipeline runs per mod.
+# TF2 compile-checks against the STRIPPED TF1 (the pair subscribers load), so any TF2 run
+# prepares TF1's stripped copy first; -Mod TF2 skips only TF1's zip and staging. TF2 stages
+# to Mods\TerraFirma2Beta as Cleo_TerraFirma2Beta, and its dependency on Cleo_TerraFirma is
+# rewritten to Cleo_TerraFirmaBeta, the id the uploaded TF1 carries. Titles are never
+# rewritten: the staged manifest ships to subscribers (the workshop page title comes from
+# workshop.json instead, SteamWorkshopUploaderView), so a staging-only title would leak.
 #
 # Steps: copy tree -> strip .cs (real lexer: strings, verbatim strings, interpolation
 # holes with nested strings all handled; line count preserved) -> scrub date tokens from
@@ -17,16 +28,29 @@
 # before a zip is produced.
 
 param(
+    [ValidateSet("TF1", "TF2", "Both")]
+    [string]$Mod = "Both",
+    [switch]$CheckOnly,
     [string]$RepoRoot = (Split-Path -Parent $PSScriptRoot),
     [string]$QudLib = "C:\Program Files (x86)\Steam\steamapps\common\Caves of Qud\CoQ_Data\Managed"
 )
 
 $ErrorActionPreference = "Stop"
-$src = Join-Path $RepoRoot "TerraFirma"
 $pubRoot = Join-Path $RepoRoot "publish"
-$dst = Join-Path $pubRoot "TerraFirma"
+$modsRoot = Join-Path $env:USERPROFILE "AppData\LocalLow\Freehold Games\CavesOfQud\Mods"
 
-if (-not (Test-Path $src)) { throw "source folder not found: $src" }
+# per-mod settings; DepRewrites maps a dev dependency id to the id its staged copy carries
+$Mods = @{
+    TF1 = @{ Src = "TerraFirma";  ZipName = "CoQ_TerraFirma_beta";  Stage = "TerraFirmaBeta";
+             IdFrom = "Cleo_TerraFirma";  IdTo = "Cleo_TerraFirmaBeta";  DepRewrites = @{} }
+    TF2 = @{ Src = "TerraFirma2"; ZipName = "CoQ_TerraFirma2_beta"; Stage = "TerraFirma2Beta";
+             IdFrom = "Cleo_TerraFirma2"; IdTo = "Cleo_TerraFirma2Beta";
+             DepRewrites = @{ "Cleo_TerraFirma" = "Cleo_TerraFirmaBeta" } }
+}
+foreach ($k in $Mods.Keys) {
+    $p = Join-Path $RepoRoot $Mods[$k].Src
+    if (-not (Test-Path $p)) { throw "source folder not found: $p" }
+}
 
 # ---------------------------------------------------------------- text rules (fail closed)
 # Runs against the REPO source, not the stripped copy, so violations report real file/line
@@ -170,102 +194,157 @@ function Tidy-Lines([string[]]$original, [string[]]$stripped) {
     return $keep
 }
 
-# ---------------------------------------------------------------- copy tree
-if (Test-Path $dst) { Remove-Item -Recurse -Force $dst }
-New-Item -ItemType Directory -Force $dst | Out-Null
-Copy-Item -Recurse "$src\*" $dst
+# ---------------------------------------------------------------- strip one mod
+# copy tree -> strip .cs + date scrub + leak guard -> strip .xml + strict validate, into
+# publish\<Src>.
+function Strip-Mod($cfg) {
+    $src = Join-Path $RepoRoot $cfg.Src
+    $dst = Join-Path $pubRoot $cfg.Src
+    if (Test-Path $dst) { Remove-Item -Recurse -Force $dst }
+    New-Item -ItemType Directory -Force $dst | Out-Null
+    Copy-Item -Recurse "$src\*" $dst
 
-$csCount = 0; $xmlCount = 0
-
-# ---------------------------------------------------------------- strip .cs
-$dateToken = ' ?\b20\d{2}-\d{2}-\d{2}\b'  # optional leading space so "cut 2026-07-25)" tidies to "cut)"
-$datesScrubbed = 0
-foreach ($f in Get-ChildItem $dst -Recurse -Filter *.cs) {
-    $raw = [System.IO.File]::ReadAllText($f.FullName)
-    $strippedText = [TfCommentStripper]::Strip($raw)
-    $tidy = Tidy-Lines ($raw -split "\r?\n") ($strippedText -split "\r?\n")
-    # date scrub: comments are gone, so any surviving date lives in a runtime string
-    $scrubbed = New-Object System.Collections.Generic.List[string]
-    foreach ($line in $tidy) {
-        $datesScrubbed += ([regex]::Matches($line, $dateToken)).Count
-        $scrubbed.Add(($line -replace $dateToken, ''))
+    $csCount = 0; $xmlCount = 0
+    $dateToken = ' ?\b20\d{2}-\d{2}-\d{2}\b'  # optional leading space so "cut 2026-07-25)" tidies to "cut)"
+    foreach ($f in Get-ChildItem $dst -Recurse -Filter *.cs) {
+        $raw = [System.IO.File]::ReadAllText($f.FullName)
+        $strippedText = [TfCommentStripper]::Strip($raw)
+        $tidy = Tidy-Lines ($raw -split "\r?\n") ($strippedText -split "\r?\n")
+        # date scrub: comments are gone, so any surviving date lives in a runtime string
+        $scrubbed = New-Object System.Collections.Generic.List[string]
+        foreach ($line in $tidy) { $scrubbed.Add(($line -replace $dateToken, '')) }
+        [System.IO.File]::WriteAllLines($f.FullName, $scrubbed, (New-Object System.Text.UTF8Encoding $true))
+        $csCount++
     }
-    [System.IO.File]::WriteAllLines($f.FullName, $scrubbed, (New-Object System.Text.UTF8Encoding $true))
-    $csCount++
-}
 
-# leak guard: a date surviving the scrub means the pattern missed something -- abort
-foreach ($f in Get-ChildItem $dst -Recurse -Filter *.cs) {
-    $leak = Select-String -Path $f.FullName -Pattern '\b20\d{2}-\d{2}-\d{2}\b'
-    if ($leak) {
-        $leak | ForEach-Object { Write-Host $_ }
-        throw "date token survived the scrub in $($f.Name) -- publish aborted"
+    # leak guard: a date surviving the scrub means the pattern missed something -- abort
+    foreach ($f in Get-ChildItem $dst -Recurse -Filter *.cs) {
+        $leak = Select-String -Path $f.FullName -Pattern '\b20\d{2}-\d{2}-\d{2}\b'
+        if ($leak) {
+            $leak | ForEach-Object { Write-Host $_ }
+            throw "date token survived the scrub in $($f.Name) -- publish aborted"
+        }
     }
-}
 
-# ---------------------------------------------------------------- strip .xml
-foreach ($f in Get-ChildItem $dst -Recurse -Filter *.xml) {
-    $raw = [System.IO.File]::ReadAllText($f.FullName)
-    $strippedText = [regex]::Replace($raw, '<!--[\s\S]*?-->', {
-        param($m)
-        # preserve line count for the tidy pass
-        ("`n" * ([regex]::Matches($m.Value, "`n").Count))
-    })
-    $tidy = Tidy-Lines ($raw -split "\r?\n") ($strippedText -split "\r?\n")
-    [System.IO.File]::WriteAllLines($f.FullName, $tidy, (New-Object System.Text.UTF8Encoding $true))
-    $x = New-Object System.Xml.XmlDocument
-    $x.Load($f.FullName)   # strict-validate or abort
-    $xmlCount++
+    foreach ($f in Get-ChildItem $dst -Recurse -Filter *.xml) {
+        $raw = [System.IO.File]::ReadAllText($f.FullName)
+        $strippedText = [regex]::Replace($raw, '<!--[\s\S]*?-->', {
+            param($m)
+            # preserve line count for the tidy pass
+            ("`n" * ([regex]::Matches($m.Value, "`n").Count))
+        })
+        $tidy = Tidy-Lines ($raw -split "\r?\n") ($strippedText -split "\r?\n")
+        [System.IO.File]::WriteAllLines($f.FullName, $tidy, (New-Object System.Text.UTF8Encoding $true))
+        $x = New-Object System.Xml.XmlDocument
+        $x.Load($f.FullName)   # strict-validate or abort
+        $xmlCount++
+    }
+    Write-Host "$($cfg.Src): $csCount .cs stripped, $xmlCount .xml stripped + validated"
 }
 
 # ---------------------------------------------------------------- compile check
-$buildDir = Join-Path $pubRoot "_compilecheck"
-if (Test-Path $buildDir) { Remove-Item -Recurse -Force $buildDir }
-New-Item -ItemType Directory -Force $buildDir | Out-Null
-Copy-Item (Join-Path $RepoRoot "TerraFirma.csproj") $buildDir
-Copy-Item -Recurse $dst (Join-Path $buildDir "TerraFirma")
-Push-Location $buildDir
-try {
-    $build = & dotnet build TerraFirma.csproj -p:QudLibPath="$QudLib" 2>&1
-    $errors = $build | Select-String -Pattern "error CS\d|error MSB\d"
-    if ($LASTEXITCODE -ne 0 -or $errors) {
-        $errors | ForEach-Object { Write-Host $_ }
-        throw "stripped copy FAILED to compile -- publish aborted, nothing zipped"
+# Mirrors the repo layout so both csproj files resolve unchanged: TerraFirma.csproj beside
+# TerraFirma\, and build\TerraFirma2\TerraFirma2.csproj reaching ..\..\TerraFirma2 and
+# ..\..\TerraFirma.csproj. TF2 therefore builds against the stripped TF1.
+function Compile-Check([bool]$withTF2) {
+    $buildDir = Join-Path $pubRoot "_compilecheck"
+    if (Test-Path $buildDir) { Remove-Item -Recurse -Force $buildDir }
+    New-Item -ItemType Directory -Force $buildDir | Out-Null
+    Copy-Item (Join-Path $RepoRoot "TerraFirma.csproj") $buildDir
+    Copy-Item -Recurse (Join-Path $pubRoot "TerraFirma") (Join-Path $buildDir "TerraFirma")
+    $projects = @("TerraFirma.csproj")
+    if ($withTF2) {
+        $tf2Proj = Join-Path $buildDir "build\TerraFirma2"
+        New-Item -ItemType Directory -Force $tf2Proj | Out-Null
+        Copy-Item (Join-Path $RepoRoot "build\TerraFirma2\TerraFirma2.csproj") $tf2Proj
+        Copy-Item -Recurse (Join-Path $pubRoot "TerraFirma2") (Join-Path $buildDir "TerraFirma2")
+        $projects += "build\TerraFirma2\TerraFirma2.csproj"
     }
+    Push-Location $buildDir
+    try {
+        foreach ($proj in $projects) {
+            $build = & dotnet build $proj -p:QudLibPath="$QudLib" 2>&1
+            $errors = $build | Select-String -Pattern "error CS\d|error MSB\d"
+            if ($LASTEXITCODE -ne 0 -or $errors) {
+                $errors | ForEach-Object { Write-Host $_ }
+                throw "stripped copy of $proj FAILED to compile -- publish aborted, nothing zipped"
+            }
+            Write-Host "compile check green: $proj"
+        }
+    }
+    finally { Pop-Location }
+    Remove-Item -Recurse -Force $buildDir
 }
-finally { Pop-Location }
-Remove-Item -Recurse -Force $buildDir
 
-# ---------------------------------------------------------------- zip
-$stamp = Get-Date -Format "yyyy-MM-dd"
-$zip = Join-Path $pubRoot "CoQ_TerraFirma_beta_$stamp.zip"
-if (Test-Path $zip) { Remove-Item -Force $zip }
-Compress-Archive -Path $dst -DestinationPath $zip
+# ---------------------------------------------------------------- zip + stage one mod
+# (2026-08-06, workshop plan): the stripped tree also lands as a STANDING second mod with
+# its manifest id rewritten -- two local mods cannot share an id (ModManager.RegisterMod
+# skips the duplicate), and this one exists solely as the in-game uploader's source. It
+# stays unapproved in the mod manager, so it never loads content. workshop.json (the item
+# identity, written by the game's first upload) and preview.png survive refreshes.
+function Release-Mod($cfg) {
+    $dst = Join-Path $pubRoot $cfg.Src
+    $stamp = Get-Date -Format "yyyy-MM-dd"
+    $zip = Join-Path $pubRoot "$($cfg.ZipName)_$stamp.zip"
+    if (Test-Path $zip) { Remove-Item -Force $zip }
+    Compress-Archive -Path $dst -DestinationPath $zip
 
-# ---------------------------------------------------------------- stage for workshop upload
-# (2026-08-06, workshop plan): the stripped tree also lands as a STANDING second mod at
-# Mods\TerraFirmaBeta with its manifest id rewritten -- two local mods cannot share an id
-# (ModManager.RegisterMod skips the duplicate), and this one exists solely as the in-game
-# uploader's source. It stays unapproved in the mod manager, so it never loads content.
-# workshop.json (the item identity, written by the game's first upload) and preview.png
-# are preserved across refreshes.
-$stage = Join-Path $env:USERPROFILE "AppData\LocalLow\Freehold Games\CavesOfQud\Mods\TerraFirmaBeta"
-$preserve = @{}
-foreach ($p in @("workshop.json", "preview.png")) {
-    $pp = Join-Path $stage $p
-    if (Test-Path $pp) { $preserve[$p] = [System.IO.File]::ReadAllBytes($pp) }
+    $stage = Join-Path $modsRoot $cfg.Stage
+    $preserve = @{}
+    foreach ($p in @("workshop.json", "preview.png")) {
+        $pp = Join-Path $stage $p
+        if (Test-Path $pp) { $preserve[$p] = [System.IO.File]::ReadAllBytes($pp) }
+    }
+    if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
+    New-Item -ItemType Directory -Force $stage | Out-Null
+    Copy-Item -Recurse "$dst\*" $stage
+
+    Rewrite-Manifest (Join-Path $stage "manifest.json") $cfg
+    foreach ($k in $preserve.Keys) { [System.IO.File]::WriteAllBytes((Join-Path $stage $k), $preserve[$k]) }
+    $workshopNote = if ($preserve.ContainsKey("workshop.json")) { "workshop.json preserved" } else { "no workshop.json yet (the game's first upload creates it)" }
+    Write-Host "zip:    $zip"
+    Write-Host "staged: $stage (manifest id $($cfg.IdTo), $workshopNote)"
 }
-if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
-New-Item -ItemType Directory -Force $stage | Out-Null
-Copy-Item -Recurse "$dst\*" $stage
-$manifestPath = Join-Path $stage "manifest.json"
-$manifestText = [System.IO.File]::ReadAllText($manifestPath) -replace '"id"\s*:\s*"Cleo_TerraFirma"', '"id": "Cleo_TerraFirmaBeta"'
-[System.IO.File]::WriteAllText($manifestPath, $manifestText, (New-Object System.Text.UTF8Encoding $false))
-if ((Get-Content $manifestPath -Raw) -notmatch '"Cleo_TerraFirmaBeta"') { throw "manifest id rewrite failed -- staging aborted" }
-foreach ($k in $preserve.Keys) { [System.IO.File]::WriteAllBytes((Join-Path $stage $k), $preserve[$k]) }
-$workshopNote = if ($preserve.ContainsKey("workshop.json")) { "workshop.json preserved" } else { "no workshop.json yet (the game's first upload creates it)" }
 
-Write-Host "publish OK: $csCount .cs stripped, $xmlCount .xml stripped + validated, compile check green"
-Write-Host "folder: $dst"
-Write-Host "zip:    $zip"
-Write-Host "staged: $stage (manifest id Cleo_TerraFirmaBeta, $workshopNote)"
+# staged id + dependency rewrites, failing closed
+function Rewrite-Manifest([string]$manifestPath, $cfg) {
+    $manifestText = [System.IO.File]::ReadAllText($manifestPath)
+    $manifestText = $manifestText -replace ('"id"\s*:\s*"' + [regex]::Escape($cfg.IdFrom) + '"'), ('"id": "' + $cfg.IdTo + '"')
+    foreach ($dep in $cfg.DepRewrites.Keys) {
+        # only a dependency KEY matches: the exact quoted id followed by a colon
+        $manifestText = $manifestText -replace ('"' + [regex]::Escape($dep) + '"(\s*:)'), ('"' + $cfg.DepRewrites[$dep] + '"$1')
+    }
+    [System.IO.File]::WriteAllText($manifestPath, $manifestText, (New-Object System.Text.UTF8Encoding $false))
+
+    # fail closed: the staged manifest must carry the staged id and every rewritten dependency
+    $check = Get-Content $manifestPath -Raw | ConvertFrom-Json
+    if ($check.id -ne $cfg.IdTo) { throw "manifest id rewrite failed for $($cfg.Src) -- staging aborted" }
+    foreach ($dep in $cfg.DepRewrites.Keys) {
+        $deps = $check.dependencies
+        if ($null -eq $deps -or $null -eq $deps.($cfg.DepRewrites[$dep]) -or $null -ne $deps.$dep) {
+            throw "dependency rewrite $dep -> $($cfg.DepRewrites[$dep]) failed for $($cfg.Src) -- staging aborted"
+        }
+    }
+    Write-Host "manifest ok: $($cfg.Src) -> id $($check.id)$(if ($check.dependencies) { ', deps ' + (($check.dependencies.PSObject.Properties | % { $_.Name }) -join ',') })"
+}
+
+# ---------------------------------------------------------------- run
+$wantTF1 = $Mod -ne "TF2"
+$wantTF2 = $Mod -ne "TF1"
+Strip-Mod $Mods.TF1                     # always: TF2 compile-checks against it
+if ($wantTF2) { Strip-Mod $Mods.TF2 }
+Compile-Check $wantTF2
+if ($CheckOnly) {
+    foreach ($k in @("TF1", "TF2")) {
+        if (($k -eq "TF1" -and -not $wantTF1) -or ($k -eq "TF2" -and -not $wantTF2)) { continue }
+        $tmp = Join-Path $pubRoot "_manifestcheck_$k.json"
+        Copy-Item (Join-Path $pubRoot "$($Mods[$k].Src)\manifest.json") $tmp -Force
+        Rewrite-Manifest $tmp $Mods[$k]
+        Remove-Item -Force $tmp
+    }
+    Write-Host "check OK ($Mod): nothing zipped, nothing staged"
+    return
+}
+if ($wantTF1) { Release-Mod $Mods.TF1 }
+if ($wantTF2) { Release-Mod $Mods.TF2 }
+Write-Host "publish OK ($Mod)"
