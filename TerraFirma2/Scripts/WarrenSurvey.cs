@@ -30,8 +30,11 @@ namespace Cleo.TerraFirma.Scripts
 		private static void Write(Dictionary<string, WarrenCarver.Result> records)
 			=> The.Game.SetStringGameState(StateKey, JsonConvert.SerializeObject(records));
 
+		// Bookkeeping only feeds tfwarrenstats, so it rides the VERIFY_WATCH switch: off, normal
+		// generation never touches the game-state JSON.
 		public static void Register(string zoneID)
 		{
+			if (!Helpers.VERIFY_WATCH) return;
 			var records = Read();
 			if (records.ContainsKey(zoneID)) return;
 			records.Add(zoneID, null);
@@ -40,6 +43,7 @@ namespace Cleo.TerraFirma.Scripts
 
 		public static void Record(string zoneID, WarrenCarver.Result result)
 		{
+			if (!Helpers.VERIFY_WATCH) return;
 			var records = Read();
 			records[zoneID] = result;
 			Write(records);

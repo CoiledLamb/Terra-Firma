@@ -247,14 +247,17 @@ namespace Cleo.TerraFirma.Scripts
 				}
 			// census, because the first live zone refused with "no face opens onto
 			// enough rock" (2026-08-23) and the numbers settle every host-read theory
-			int rock = 0, hard = 0, open = 0, water = 0, trees = 0;
-			for (int i = 0; i < g.W * g.H; i++)
+			if (Helpers.VERIFY_WATCH)
 			{
-				if (g.C[i] == FLOOR) { open++; if (g.Water[i] != 0) water++; if (g.Tree[i] != 0) trees++; }
-				else if (g.Host[i] != 0) hard++;
-				else rock++;
+				int rock = 0, hard = 0, open = 0, water = 0, trees = 0;
+				for (int i = 0; i < g.W * g.H; i++)
+				{
+					if (g.C[i] == FLOOR) { open++; if (g.Water[i] != 0) water++; if (g.Tree[i] != 0) trees++; }
+					else if (g.Host[i] != 0) hard++;
+					else rock++;
+				}
+				Helpers.VerifyLog("WARREN", $"host census: {rock} natural rock, {hard} hard walls, {open} open ({water} water, {trees} trees)");
 			}
-			Helpers.VerifyLog("WARREN", $"host census: {rock} natural rock, {hard} hard walls, {open} open ({water} water, {trees} trees)");
 			return g;
 		}
 
@@ -3527,7 +3530,7 @@ namespace Cleo.TerraFirma.Scripts
 			// then found sealed. Name the mouth's neighbors at apply time so a
 			// post-builder seal (biome mutation is the suspect - it runs after every
 			// builder) shows up as a diff between this line and what the player sees.
-			if (g.MouthIdx >= 0)
+			if (Helpers.VERIFY_WATCH && g.MouthIdx >= 0)
 			{
 				int mx = g.MouthIdx % g.W, my = g.MouthIdx / g.W;
 				var names = new List<string>();

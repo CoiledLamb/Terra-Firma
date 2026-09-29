@@ -41,7 +41,10 @@
 		<description>
 			<p>Carves an animate statue of the target creature from a target wall, inheriting its body plan and physique but not any mutations, skills, or equipment.</p>
 			<p>The statue guards you: nearby enemies must resist or direct their attacks at it.</p>
-			<p>After <stat Name="Duration" />, the statue returns to lifeless stone, entombing anything it wore or carried.</p>
+			<!-- level 10 permanence: CollectStats sends the text "until destroyed", which the bare
+			     sentence rendered as "After until destroyed round". Base switch idiom (the
+			     PowerSkate card); the permanent case reuses the approved level-text line. -->
+			<p><switch Name="Duration"><case Value="until destroyed">The statue lasts until destroyed. Carving another releases it.</case><default>After <stat Name="Duration" />, the statue returns to lifeless stone, entombing anything it wore or carried.</default></switch></p>
 			<statline Name="Cooldown" />
 		</description>
 		<UITile Tile="Abilities/abil_stoneshaper.png" Foreground="w" Detail="C" />
@@ -63,11 +66,14 @@
 	</ability>
 	<ability Command="Cleo_TerraFirma_CommandFissure">
 		<description>
-			<p>You crack open the earth and draw out its fruits.</p>
+			<!-- v1 card replaced 2026-09-29: the old Range/Area statlines had no stats behind them.
+			     Words are the signed-off v2 description and level-text lines; statlines follow
+			     CollectStats (RingRadius, WaveDamage, Cooldown). -->
+			<p>You send pulses through the earth, raising a ring of broken stone.</p>
 			<br />
-			<p>Results vary by mutation rank.</p>
-			<statline Name="Range" />
-			<statline Name="Area" />
+			<p>Creatures caught in its path are pushed outward and must make a Toughness save or be stunned.</p>
+			<statline Name="RingRadius" DisplayName="Ring radius" Unit="square" />
+			<statline Name="WaveDamage" DisplayName="Damage" />
 			<statline Name="Cooldown" />
 		</description>
 		<UITile Tile="Abilities/abil_fissure.png" Foreground="w" Detail="C" />

@@ -23,6 +23,11 @@ namespace Cleo.TerraFirma.Scripts
 		/// TEMPORARY verification instrumentation (2026-07-22): writes an "INFO - [TF-VERIFY] ..." line
 		/// to Player.log so the checklist watcher can confirm mechanical behavior from outside the game.
 		/// Invisible in-game. Strip the call sites (or flip VERIFY_WATCH off) before release.
+		/// The one switch for both mods (TF2 reads this const): every [TF-VERIFY] line, the
+		/// log-only work around them (warren census, mouth forensics), the warren survey
+		/// bookkeeping, and the _TestHarness/_SerializationHarness wishes. Left alone on purpose: the player-facing
+		/// Cleo_TerraFirma_DebugLog option (DebugLog above, default off) and MetricsManager
+		/// LogError/LogException calls, which report real misconfiguration and exceptions.
 		/// </summary>
 		public const bool VERIFY_WATCH = true;
 
