@@ -12,7 +12,7 @@
     <part Name="Armor" AV="0" DV="0" WornOn="Arm" />
     <part Name="Render" DisplayName="{{y|granitefur}} bracer" RenderString="]" Tile="baboonskin_bracers.png" ColorString="&amp;r" DetailColor="y" /> <!-- user sprite 2026-08-22; rust/brown per the cloak ruling, family palette -->
     <part Name="Commerce" Value="50" /> <!-- numbers sitting 2026-08-22 -->
-    <part Name="Description" Short="A forearm's length of dun monkey fur, stiff with grit that never quite shakes out. The arm it wraps learns the short arc: how a stone leaves the hand already knowing where it lands." /> <!-- DRAFT, signoff owed -->
+    <part Name="Description" Short="Grit-caked flesh was carved from a dead baboon and woven into a bracer." /> <!-- USER TEXT 2026-09-29, quartzfur echo -->
     <part Name="Physics" Weight="1" Organic="true" />
     <part Name="Fur" />
     <!-- MIGRATED to stock IntPropertyChanger 2026-08-29 (XML over C# ladder pass); the custom
@@ -34,7 +34,7 @@
     <part Name="Armor" AV="0" DV="1" WornOn="Hands" />
     <part Name="Render" DisplayName="{{y|granitefur}} gloves" RenderString="]" Tile="catching_gloves.png" ColorString="&amp;r" DetailColor="y" /> <!-- user sprite 2026-08-22 -->
     <part Name="Commerce" Value="75" /> <!-- numbers sitting 2026-08-22 -->
-    <part Name="Description" Short="Dun fur was shorn from a dead monkey and sewn into a pair of gloves. The palms remember catching." /> <!-- DRAFT, signoff owed -->
+    <part Name="Description" Short="Grit-caked flesh was carved from a dead baboon and sewn into a pair of gloves." /> <!-- USER TEXT 2026-09-29, quartzfur echo -->
     <part Name="Physics" Weight="5" Organic="true" />
     <part Name="Fur" />
     <part Name="Cleo_TerraFirma_CobblefurGloves" Chance="25" />
@@ -46,7 +46,7 @@
     <part Name="Armor" AV="1" DV="0" WornOn="Back" />
     <part Name="Render" DisplayName="{{y|granitefur}} cloak" RenderString="]" Tile="Items/sw_cloak_panther.bmp" ColorString="&amp;r" DetailColor="y" /> <!-- RULED 2026-08-22: recolored base panther cloak, primary rust red, detail brown -->
     <part Name="Commerce" Value="60" /> <!-- numbers sitting 2026-08-22 -->
-    <part Name="Description" Short="Hung from the shoulders, the pelt reads as one more heap of canyon scree. Among strewn stones its wearer is a shape the eye forgives." /> <!-- DRAFT, signoff owed -->
+    <part Name="Description" Short="Grit-caked flesh was carved from a dead baboon and sewn into a cloak." /> <!-- USER TEXT 2026-09-29, quartzfur echo -->
     <part Name="Physics" Weight="3" Organic="true" />
     <part Name="Fur" />
     <part Name="Cleo_TerraFirma_CobblefurCloak" Bonus="2" />

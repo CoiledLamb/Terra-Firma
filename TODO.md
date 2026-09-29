@@ -147,6 +147,8 @@ V17 follow-up: user reports shotgun gameplay verified. Approved name/readout now
 
 V17 text follow-up: explanatory RulesDescription removed and deployed; verify on a fresh shotgun. The earlier rules-text draft is retired.
 
+Granitefur descriptions 2026-09-29: user text replaces the three drafts, quartzfur echo ("Grit-caked flesh was carved from a dead baboon and" woven into a bracer / sewn into a pair of gloves / sewn into a cloak). XML/text-checked and deployed to TF2 with hash matched. In-game display verification remains.
+
 Failure-message conventions 2026-09-29: etching's reach/tool refusals now popup (base deliberate-action refusals); shufflers' unpowered peek uses base IActivePart "merely click"; mill, chalk box and animation table refusals name their object via ParentObject instead of hardcoded nouns. Both builds 0 errors, text rules passed, five files deployed with hashes matched. In-game display check remains.
 
 These are batches of remaining checks, not instructions to rebuild the feature. Record an observed verdict; static inspection and log messages alone do not close an eyes-on check. Use a disposable character for save/load harnesses that overwrite saves.
