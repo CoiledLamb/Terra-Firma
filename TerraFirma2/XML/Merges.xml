@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <objects>
+	<!-- Cave moss on base vine shale (2026-09-29): ShaleVines greens shale beside wading water;
+	     this part makes some of those walls ripe, harvestable moss. Replaces the warren-only
+	     placement. StartRipeChance 1:20 is Watervine's (Starapple Tree is 1:5). -->
+	<object Name="Shale" Load="Merge">
+		<part Name="Cleo_TerraFirma_ShaleMoss" StartRipeChance="1:20" />
+	</object>
 	<!-- Cobblefur cloak cover (RULED 2026-08-13, adjacent-scope sitting): base Rubble is a
 	     solid wall-layer heap outside the BaseStone tree, so the cloak's "amid rubble" check
 	     can't see it via IsAnyStone, and widening IsAnyStone is off the table (load-bearing;

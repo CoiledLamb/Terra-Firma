@@ -54,7 +54,6 @@ namespace Cleo.TerraFirma.Scripts
 		// the no-blueprint ruling same day). The one knob left in code is a LAW
 		// of the interpreter, not a content dial:
 		public const int OUTRIDER_POST_RADIUS = 8;    // how far from the mouth an outside post reaches
-		public const int MOSS_PCT = 35;           // mossPct (ported + dialed 2026-08-23)
 		public const int MOMENTUM = 55;           // momentum
 		public const int WANDER = 22;             // wander
 		public const int MOUTH_RUN = 6;           // mouthRun
@@ -1660,46 +1659,6 @@ namespace Cleo.TerraFirma.Scripts
 			string tstr = string.Join(" ", new[] { "commons", "blockyard", "face", "dwelling", "plain" }
 				.Select(role => role + ":" + (tally.TryGetValue(role, out int v) ? v : 0)));
 			return new RolesRec { Tally = tstr, YardDesc = yardDesc, YardRect = yardRect, YardState = yardState };
-		}
-
-		// ---------------------------------------------------------------- moss
-		// The 2026-08-23 sim port: candidacy at min distance, one roll per cell,
-		// v1 grading (full beside the water, x0.4 at the reach edge), guaranteed
-		// tell. Returns wall cells to recolor TileColor K / DetailColor g.
-		private static List<int> MossCells(Grid g)
-		{
-			var cand = new byte[g.W * g.H];
-			for (int i = 0; i < g.W * g.H; i++)
-			{
-				if (g.Aqua[i] == 0) continue;
-				int wx = i % g.W, wy = i / g.W;
-				for (int dy = -2; dy <= 2; dy++)
-					for (int dx = -2; dx <= 2; dx++)
-					{
-						int nx = wx + dx, ny = wy + dy;
-						if (!g.Inb(nx, ny) || g.C[g.Idx(nx, ny)] == FLOOR) continue;
-						bool faces = false;
-						foreach (var a in N8)
-						{
-							int fx = nx + a[0], fy = ny + a[1];
-							if (g.Inb(fx, fy) && g.C[g.Idx(fx, fy)] == FLOOR && g.Water[g.Idx(fx, fy)] == 0) { faces = true; break; }
-						}
-						if (!faces) continue;
-						int d = Math.Max(Math.Abs(dx), Math.Abs(dy)); if (d == 0) d = 1;
-						int j = g.Idx(nx, ny);
-						if (cand[j] == 0 || d < cand[j]) cand[j] = (byte)d;
-					}
-			}
-			var outCells = new List<int>();
-			int first = -1;
-			for (int i = 0; i < cand.Length; i++)
-			{
-				if (cand[i] == 0) continue;
-				if (first < 0) first = i;
-				if (Rng() < (MOSS_PCT / 100.0) * (cand[i] <= 1 ? 1 : 0.4)) outCells.Add(i);
-			}
-			if (outCells.Count == 0 && first >= 0) outCells.Add(first);
-			return outCells;
 		}
 
 		// ---------------------------------------------------------------- dress
@@ -3485,11 +3444,11 @@ namespace Cleo.TerraFirma.Scripts
 
 		// ---------------------------------------------------------------- apply
 		// Grid to zone: final FLOOR cells that are ours lose their walls; aquifer
-		// cells become deep brackish pools (the Redrock water idiom); moss walls
-		// recolor in place (TileColor K / DetailColor g, the v1 user picks).
+		// cells become deep brackish pools (the Redrock water idiom), which base
+		// ShaleVines and Cleo_TerraFirma_ShaleMoss later green with moss.
 		private static void ApplyToZone(Zone Z, Grid g)
 		{
-			int carved = 0, pools = 0, mossed = 0, padded = 0;
+			int carved = 0, pools = 0, padded = 0;
 			// AUGMENT MATERIALIZATION (blind-claim port): augmented cells that
 			// remain rock become real Shale - the same blueprint Hills paints, so
 			// added mass is indistinguishable from natural mass by construction.
@@ -3557,39 +3516,13 @@ namespace Cleo.TerraFirma.Scripts
 						}
 					}
 				}
-			// Etch the underlying face before moss captures its harvest-restoration palette.
+			// Etch the underlying face now; ShaleMoss captures its harvest palette at ZoneBuilt, after this.
 			ApplyCommonsEtchings(Z, g);
-			// MOSS AS A LIVING COAT (USER RULED 2026-08-23: "shale that has grown
-			// mossy should be prefixed green|mossy shale. the moss should be
-			// harvestable, reverting the wall to its basic form"). Stock
-			// Harvestable carries the whole loop - DestroyOnHarvest=false keeps
-			// the wall, Unripe* holds the wall's ORIGINAL palette captured here,
-			// harvest drops the moss clump and the render reverts natively; the
-			// MossyWall part adds the name adjective only while Ripe. Regen
-			// deliberately off (RegenTime unset) - regrowth is an unruled float.
-			foreach (int i in MossCells(g))
-			{
-				Cell c = Z.GetCell(i % g.W, i / g.W);
-				GameObject wall = c?.GetWalls().FirstOrDefault();
-				if (wall?.Render == null) continue;
-				var h = wall.RequirePart<XRL.World.Parts.Harvestable>();
-				h.Ripe = true;
-				h.DestroyOnHarvest = false;
-				h.OnSuccess = "Cleo_TerraFirma_MossClump";
-				h.OnSuccessAmount = "1";
-				h.RipeColor = "&K"; h.RipeTileColor = "&K"; h.RipeDetailColor = "g";
-				h.UnripeColor = wall.Render.ColorString ?? "";
-				h.UnripeTileColor = wall.Render.TileColor ?? "";
-				h.UnripeDetailColor = wall.Render.DetailColor ?? "";
-				wall.RequirePart<XRL.World.Parts.Cleo_TerraFirma_MossyWall>();
-				wall.Render.TileColor = "&K";
-				wall.Render.ColorString = "&K";
-				wall.Render.DetailColor = "g";
-				mossed++;
-			}
+			// Moss no longer lives here: Cleo_TerraFirma_ShaleMoss grows it on base vine shale
+			// at ZoneBuilt, warren pools included (2026-09-29).
 			int dressed = PlaceItems(Z, g);
 			ApplyPowerWires(Z, g);
-			Helpers.VerifyLog("WARREN", $"applied: {carved} cells carved ({padded} padded), {pools} pool cells, {mossed} mossy walls, {dressed} dress items");
+			Helpers.VerifyLog("WARREN", $"applied: {carved} cells carved ({padded} padded), {pools} pool cells, {dressed} dress items");
 			// mouth forensics (round 3): the first live warren carved green and was
 			// then found sealed. Name the mouth's neighbors at apply time so a
 			// post-builder seal (biome mutation is the suspect - it runs after every
