@@ -229,9 +229,11 @@ namespace XRL.World.Parts.Mutation
 				planCells.Add(cell);
 				planBps.Add(bp ?? "Cleo_TerraFirma_WallCalcify");
 			}
-			// nothing empty to fill: refuse before the turn and cooldown are spent (audit 2026-09-29)
+			// nothing empty to fill: refuse before the turn and cooldown are spent (audit 2026-09-29).
+			// Line DRAFT, shaped on PhotosyntheticSkin's "You need sunlight to bask in." and the
+			// card's "Only empty spaces will form walls."; Fail pops for the player, silent for NPCs.
 			if (planCells.Count == 0)
-				return false;
+				return ParentObject.Fail("You need empty spaces to calcify.");
 			UseEnergy(1000, $"Physical Mutation {Name}");
 			CooldownMyActivatedAbility(ActivatedAbilityID, GetCooldown(Level));
 			PlayWorldSound("Sounds/Throw/sfx_throwing_stone_large_impact", 1f, Combat: true); // the slam covers the rise

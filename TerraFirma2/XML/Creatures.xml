@@ -2,7 +2,9 @@
  <objects> 
   <!-- Jilted Lover chassis, with its wild grabber and spawn lanes removed.
        Merchant HP/AV copy BaseMerchant; intellect and ego copy Yurl (CLAUDE PROPOSAL
-       tuning). Own bank since 2026-09-29 (Conversations.xml). -->
+       tuning). Own bank since 2026-09-29 (Conversations.xml). Description: inherits Jilted
+       Lover's on purpose for now (user 2026-09-29); replace with the provisioner's own text
+       later (T04). -->
   <object Name="Cleo_TerraFirma_Vine Merchant" Inherits="Jilted Lover">
     <part Name="Render" DisplayName="quarry provisioner" />
     <part Name="Brain" Hostile="false" Wanders="false" Mobile="false" LivesOnWalls="true" Factions="Consortium-100,Cleo_TerraFirma_Quarriers-50" />
