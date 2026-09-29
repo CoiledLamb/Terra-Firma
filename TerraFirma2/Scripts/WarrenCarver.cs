@@ -1641,7 +1641,7 @@ namespace Cleo.TerraFirma.Scripts
 			if (yardDesc != "none")
 			{
 				if (occupancy == "abandoned") yardState = Chance(.3) ? "robbed" : "abandoned";
-				else if (occupancy == "reclaimed") yardState = "robbed";
+				else if (occupancy == "reclaimed") yardState = "cleared";   // D09 2026-09-29: the old crew took its stock
 				else
 				{
 					int[][] w3 = { new[]{30,60,10}, new[]{15,65,20}, new[]{5,55,40} };
@@ -2350,6 +2350,9 @@ namespace Cleo.TerraFirma.Scripts
 					{
 						if (x > x0 && x < x1 && y > y0 && y < y1) continue;
 						int i = g.Idx(x, y); if (i == gapI || !FreeI(i)) continue;
+						// CLEARED yards (D09): the boundary is worn, stepped through since the
+						// crew left. 35% CLAUDE dial; the lines re-tile around a gap like a smear.
+						if (state == "cleared" && Chance(.35)) continue;
 						string id = y == y0 ? (x == x0 ? "chalklineNW" : x == x1 ? "chalklineNE" : "chalklineN")
 								 : y == y1 ? (x == x0 ? "chalklineSW" : x == x1 ? "chalklineSE" : "chalklineS")
 								 : x == x0 ? "chalklineW" : "chalklineE";
@@ -2391,11 +2394,14 @@ namespace Cleo.TerraFirma.Scripts
 				if (ix1 < ix0 || iy1 < iy0) return;
 				int wx = Math.Abs(ix0 - art.Mouth.X) <= Math.Abs(ix1 - art.Mouth.X) ? ix0 : ix1;
 				bool working = state == "working" || state == "full";
-				if (state == "fresh" || working)
+				// CLEARED keeps its furniture (D09, user 2026-09-29): the departing crew took
+				// the stone, not the bench. No stone basket; its table is stock.
+				bool cleared = state == "cleared";
+				if (state == "fresh" || working || cleared)
 				{
 					int benchY = -1;
 					if (Chance(.75)) { Put(g.Idx(wx, iy0), "Workbench"); benchY = iy0; }
-					if (working && benchY >= 0 && iy0 + 1 <= iy1 && Chance(.7)) Put(g.Idx(wx, iy0 + 1), "Canvas Folding Chair");
+					if ((working || cleared) && benchY >= 0 && iy0 + 1 <= iy1 && Chance(.7)) Put(g.Idx(wx, iy0 + 1), "Canvas Folding Chair");
 					if (working && Chance(.75) && FreeI(g.Idx(wx, iy1))) Put(g.Idx(wx, iy1), "Cleo_TerraFirma_Stone Basket");
 				}
 				// THE YARD LEDGER (USER 2026-08-23: a chalkboard as a likely roll,
@@ -2461,13 +2467,15 @@ namespace Cleo.TerraFirma.Scripts
 					return;
 				}
 				int dir = wx == ix0 ? 1 : -1, avail = ix1 - ix0, ih = iy1 - iy0 + 1;
-				int nCols = state == "full" ? avail : R(1, Math.Min(3, Math.Max(1, avail)));
+				// CLEARED: 1-2 partial stacks of the smaller sizes left behind, no robbed gaps
+				int nCols = state == "full" ? avail : cleared ? R(1, Math.Min(2, Math.Max(1, avail))) : R(1, Math.Min(3, Math.Max(1, avail)));
 				bool gaps = state == "robbed";
 				for (int c2 = 0; c2 < nCols; c2++)
 				{
 					int x = wx + dir * (c2 + 1); if (x < ix0 || x > ix1) break;
-					int gi = state == "full" ? Math.Min(3, c2 + 2) : Math.Min(3, c2 + 1);
-					int len = state == "full" || gi == 3 ? ih
+					int gi = state == "full" ? Math.Min(3, c2 + 2) : Math.Min(cleared ? 2 : 3, c2 + 1);
+					int len = cleared ? R(1, Math.Max(1, ih - 1))   // partial by definition
+							: state == "full" || gi == 3 ? ih
 							: gi == 2 ? R(Math.Max(1, ih - 1), ih)
 							: R(1, Math.Max(1, ih - 1));
 					for (int k = 0; k < len; k++)
