@@ -91,10 +91,10 @@
 	<conversation ID="Cleo_TerraFirma_VineMerchant">
 		<node ID="Start">
 			<text>
-				come, wayfarer. my stonesup tools are yours to work.~
-				helmets, lights, picks... make certain of the stock you buy now, for a missing piece could prove fatal.~
-				the rocks here are loose. with my wares, you could be rid of them altogether.~
-				ah, to feel the sunlight on your skin, wayfarer. tell me, is it sweeter than the taste of fresh water?
+				Come, wayfarer. My stonesup tools are yours to work.~
+				Helmets, lights, picks... make certain of the stock you buy now, for a missing piece could prove fatal.~
+				The rocks here are loose. With my wares, you could be rid of them altogether.~
+				Ah, to feel the sunlight on your skin, wayfarer. Tell me, is it sweeter than the taste of fresh water?
 			</text>
 			<choice GotoID="End">Rust and earth.</choice>
 		</node>
