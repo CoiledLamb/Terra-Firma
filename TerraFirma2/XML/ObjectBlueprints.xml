@@ -69,7 +69,7 @@
        later per the user - only the lithovore cooking conversation is benched;
        this item's effect is planned work, not quarantined. -->
   <object Name="Cleo_TerraFirma_MossClump" Inherits="Snack">
-    <part Name="Render" DisplayName="clump of {{K|cave}}{{green|moss}}" ColorString="&amp;g" DetailColor="K" RenderString="%" Tile="Items/sw_grave_moss_clump.bmp" />
+    <part Name="Render" DisplayName="clump of {{K|cave}} {{green|moss}}" ColorString="&amp;g" DetailColor="K" RenderString="%" Tile="Items/sw_grave_moss_clump.bmp" />
     <part Name="Description" Short="A glistening carpet of moss holds the earth in its folds. Grit coats its tufts, promising the texture of salted pebbles." />
     <part Name="Physics" Weight="1" Organic="true" />
     <part Name="Commerce" Value="1" />
@@ -84,7 +84,7 @@
        grave-moss tile stands in until the sprite lands). World ingredient tables are the
        shale biomes, Hills and DesertCanyon (Hills.cs, Redrock.cs), like Starapple Preserves. -->
   <object Name="Cleo_TerraFirma_CrushedCaveMoss" Inherits="Preservable">
-    <part Name="Render" DisplayName="crushed {{K|cave}}{{green|moss}}" RenderString="%" ColorString="&amp;g" TileColor="&amp;g" DetailColor="K" RenderLayer="5" Tile="Items/sw_grave_moss_crushed.bmp" />
+    <part Name="Render" DisplayName="crushed {{K|cave}} {{green|moss}}" RenderString="%" ColorString="&amp;g" TileColor="&amp;g" DetailColor="K" RenderLayer="5" Tile="Items/sw_grave_moss_crushed.bmp" />
     <part Name="Commerce" Value="2" />
     <part Name="PreparedCookingIngredient" type="Cleo_TerraFirma_caveMoss" charges="1" />
     <tag Name="Plant" />
