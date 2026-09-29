@@ -17,19 +17,12 @@ namespace Cleo.TerraFirma.Scripts
 	/// instantiates a creature. Returns a creature blueprint name, or null on escape.
 	/// Wording copies base item naming (verb-first sentences with periods, "What would you like
 	/// to name?", "Enter a new name for..."). DRAFT until the user signs off.
-	/// The intro icon is the base [statue] / sultan shrine tile (Terrain/tile_tombstone1.png).
+	/// Popup settings match the Rename menu too: no title, no intro icon, Spacing 1.
 	/// </summary>
 	public static class Cleo_TerraFirma_CarvingPicker
 	{
 		public const string LAST_LOOKED_STATE = "Cleo_TerraFirma_CarvingLastLooked";
 		private const int SEARCH_MAX_RESULTS = 40;
-
-		/// <summary>Base Random Statue's own render (ObjectBlueprints: [statue], &amp;y / y),
-		/// the same tile the sultan shrines use.</summary>
-		private static IRenderable StatueIcon()
-		{
-			return new Renderable("Terrain/tile_tombstone1.png", "|", "&y", null, 'y');
-		}
 
 		/// <summary>Base's random-figurine pool (RandomFigurine: GetASampleCreature, minus
 		/// NoFigurine), which is EncountersAPI's creature pool: dynamic-encounter eligible and
@@ -73,8 +66,8 @@ namespace Cleo.TerraFirma.Scripts
 				icons.Add(null);
 				actions.Add("random");
 
-				int choice = Popup.PickOption(Title, "What would you like to carve?", "", "Sounds/UI/ui_notification_question",
-					labels.ToArray(), Hotkeys(labels.Count), icons.ToArray(), IntroIcon: StatueIcon(), AllowEscape: true);
+				int choice = Popup.PickOption(Title, "What would you like to carve?", "", "Sounds/UI/ui_notification",
+					labels.ToArray(), Hotkeys(labels.Count), icons.ToArray(), Spacing: 1, AllowEscape: true);
 				if (choice < 0)
 					return null;
 
@@ -161,7 +154,7 @@ namespace Cleo.TerraFirma.Scripts
 				labels[i] = Options[i].CachedDisplayNameStripped;
 				icons[i] = new Renderable(Options[i]);
 			}
-			int choice = Popup.PickOption(Title, Intro, "", "Sounds/UI/ui_notification", labels, Hotkeys(labels.Length), icons, IntroIcon: StatueIcon(), AllowEscape: true);
+			int choice = Popup.PickOption(Title, Intro, "", "Sounds/UI/ui_notification", labels, Hotkeys(labels.Length), icons, AllowEscape: true);
 			return choice < 0 ? null : Options[choice].Name;
 		}
 
