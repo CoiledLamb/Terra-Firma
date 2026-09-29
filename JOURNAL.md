@@ -2864,3 +2864,7 @@ Compile: 0 errors. Strict XML/text checks and lab syntax passed; all eleven stat
 Confirmed in play: V09 (fresh-world warrens), V12 (Stonecarver starting kit and held-feature gates), V13 (stocked chests and basket chalk), V14 (lantern regression), V15 (vine merchant), V16 (MiningGear), V18 (electrical network and mill palette), V19 (commons etchings and canyon statues), and V20 (hermits, spiders and webs). These verification groups leave the active checklist.
 
 V10 is confirmed except moss. This closes the B03 dressing port; automatic moss harvesting and restoration remain under V10. The separate B15 placement improvement remains open. Progress credit is now 10 completed tasks out of the tracked 47, including the previously checked B03.
+
+## Decisions — 2026-09-29
+
+D01 closed: Geomancy's scan scope stays as it is (plain rocks do not scan). No structural scanning on ordinary stones; the existing scanning path is unchanged. The real gemstone throw is still checked under V05.
