@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- QUARANTINED 2026-09-30 from TerraFirma/XML/Rocks.xml (user: move the quarantined stuff out
+     of the mod). Outside both builds and the player packages. Restore by pasting these objects
+     back into Rocks.xml and moving Part_TimedForm.cs back to TerraFirma/Scripts (then delete its
+     stub in SaveCompatStubs.cs). See quarantine/README.md. -->
+<objects>
+	<object Name="Cleo_TerraFirma_BaboonFigurineItem" Inherits="Trinket">
+		<part Name="Render" DisplayName="baboon figurine" Tile="Assets_Content_Textures_Creatures_sw_baboon.bmp" RenderString="]" ColorString="&amp;y" DetailColor="K" />
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A baboon no taller than a knee, carved by patient hands. It holds very still, the way stone remembers to." /> -->
+		<part Name="Physics" Weight="5" />
+		<part Name="Commerce" Value="30" />
+		<!-- WorksOnCarrier: without it AddsRep is equipper-only and a trinket is never equipped
+		     (harness quick.rep, delta 0). Examiner override: base Trinket demands identification;
+		     a carved baboon is self-evident (user flag 2026-07-24). -->
+		<part Name="AddsRep" Faction="Baboons" Value="200" WorksOnCarrier="true" />
+		<part Name="Examiner" Complexity="0" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
+
+	<object Name="Cleo_TerraFirma_Rock_ApeStatue" Inherits="BaseApe">
+		<part Name="Render" DisplayName="ape statue" RenderString="a" Tile="Creatures/albino-ape.png" ColorString="&amp;y" DetailColor="K" />
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="An ape rendered in stone by no sculptor anyone can name. It moves like it remembers being one or the other." /> -->
+		<part Name="Brain" Hostile="false" />
+		<stat Name="Level" Value="12" />
+		<!-- stone body (user ruling 2026-07-22): +2 AV over the flesh original, and acid eats stone.
+		     AcidResistance -50 is a Claude number (base-game fungi anchor: -10) -->
+		<stat Name="AV" Value="7" />
+		<stat Name="AcidResistance" Value="-50" />
+		<stat Name="Hitpoints" Value="29" />
+		<inventoryobject Blueprint="Cleo_TerraFirma_StoneApeFist" Number="2" /> <!-- stone mimicry of the natural weapon (user ruling 2026-07-22) -->
+		<skill Name="Cudgel" />
+		<skill Name="Cudgel_Bludgeon" />
+		<tag Name="Role" Value="Brute" />
+		<part Name="Corpse" CorpseChance="0" />
+		<part Name="MentalShield" />
+		<part Name="NoBleed" />
+		<!-- RULED 2026-07-24 (revises the PERMANENT ratify: "ape can have cooldown"): a lifespan,
+		     then it crumbles back to devourable rubble where it stands -->
+		<part Name="Cleo_TerraFirma_TimedForm" Duration="500-1000" ReplacementBlueprint="Cleo_TerraFirma_Rock_Rubble" ExpireVerb="crumble" ExpireRest="back to rubble." />
+		<tag Name="DeathSounds" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_die" />
+		<tag Name="TakeDamageSound" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_hurt" />
+		<tag Name="AmbientIdleSound" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_idle" />
+		<tag Name="PunchSound" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_attack" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+		<tag Name="Species" Value="statue" />
+	</object>
+
+	<!-- stone mimicry of natural weapons (user ruling 2026-07-22): form and dice of the flesh
+	     original, rendered in stone -->
+	<object Name="Cleo_TerraFirma_StoneApeFist" Inherits="Albino ape fist">
+		<part Name="Render" DisplayName="stone fist" ColorString="&amp;y" DetailColor="K" />
+	</object>
+	<object Name="Cleo_TerraFirma_StoneBaboonBite" Inherits="Baboon_Bite">
+		<part Name="Render" DisplayName="stone bite" ColorString="&amp;y" DetailColor="K" />
+	</object>
+
+	<!-- baboon figurine (#21) Ã¢â‚¬â€ CREATURE-FIRST redesign (user rulings 2026-07-22): a knee-high stone
+	     baboon that falls alive and allied (DropRock brain-branch), fights at RANGE with real fissure
+	     stones (standard baboon loadout + pocket line; AIThrowAndScoot inherited from BaseBaboon is
+	     the whole skirmish AI), and scavenges spent stones off the floor (StoneScavenger Ã¢â‚¬â€ it picks
+	     up your fissure fallout and throws it back for you). Baboon base stats per ruling (L5/HP5/AV2:
+	     small, weak, dies if cornered); the identity is the ARM Ã¢â‚¬â€ range/accuracy via actor properties,
+	     not Strength (weak arm, uncanny aim; both Claude numbers). PERMANENT (ruled). Pickup, carrying,
+	     inventory activation, and rep are the auxiliary pocket-form pass Ã¢â‚¬â€ deliberately NOT built yet. -->
+	<object Name="Cleo_TerraFirma_Rock_BaboonFigurine" Inherits="BaseBaboon">
+		<!-- "statuette" not "figurine" (user ruling 2026-07-22): base-game Figurines are inert trade
+		     goods and this is anything but. Internal blueprint name unchanged, house pattern. -->
+		<!-- StoneStep tag RETIRED 2026-07-25 (fragility ruling): seam-born creatures land allied to
+		     the caster, so the owner-party gate covers them ("no carveout just for baboons"). The
+		     deferred stone-creature roster conversation may resurrect the tag for WILD stone
+		     creatures (stonefrog etc.) if party status ever isn't enough. -->
+		<part Name="Render" DisplayName="baboon statuette" Tile="Assets_Content_Textures_Creatures_sw_baboon.bmp" RenderString="a" ColorString="&amp;y" DetailColor="K" />
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A baboon no taller than a knee, carved by patient hands and impatient to be moving. It sizes up everything as either a threat or a throw." /> -->
+		<part Name="Brain" Hostile="false" />
+		<stat Name="Level" Value="5" />
+		<!-- stone body (user ruling 2026-07-22): +2 AV over BaseBaboon's 2, and acid eats stone -->
+		<stat Name="AV" Value="4" />
+		<stat Name="AcidResistance" Value="-50" />
+		<inventoryobject Blueprint="Cleo_TerraFirma_StoneBaboonBite" Number="1" />
+		<inventoryobject Blueprint="Small Stone" Number="5" />
+		<inventoryobject Blueprint="@Cleo_TerraFirma_ThrowableRocks1" Number="1-2" />
+		<part Name="Cleo_TerraFirma_StoneScavenger" />
+		<!-- RULED 2026-07-24 ("same for baboon... when baboon expires, maybe make it into that rep
+		     granting figure"): lifespan, then it stiffens into the AddsRep figurine item (the
+		     catalog's original rep half, finally landing); pocket stones spill on expiry -->
+		<part Name="Cleo_TerraFirma_TimedForm" Duration="500-1000" ReplacementBlueprint="Cleo_TerraFirma_BaboonFigurineItem" ExpireVerb="stiffen" ExpireRest="back into a lifeless figurine." />
+		<intproperty Name="ThrowRangeBonus" Value="5" />
+		<intproperty Name="CloseThrowRangeAccuracyBonus" Value="50" />
+		<part Name="Corpse" CorpseChance="0" />
+		<part Name="MentalShield" />
+		<part Name="NoBleed" />
+		<removepart Name="BloodRingWeakness" />
+		<tag Name="Role" Value="Artillery" />
+		<tag Name="DynamicObjectsTable:Baboons" Value="{{{remove}}}" />
+		<tag Name="DeathSounds" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_die" />
+		<tag Name="TakeDamageSound" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_hurt" />
+		<tag Name="AmbientIdleSound" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_idle" />
+		<tag Name="PunchSound" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_attack" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+		<tag Name="Species" Value="statue" />
+	</object>
+
+	<!-- chasm: band-3 rare, the overt counterpart. A true open hole (native OpenShaft machinery:
+	     always-pull, everyone natively avoids it, and whatever occupies the cell it lands in falls
+	     straight through, loose loot included; that is its crush). Zero mod code. -->
+	<object Name="Cleo_TerraFirma_Rock_Chasm" Inherits="OpenShaft">
+		<part Name="Render" DisplayName="chasm" />
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="The collapse kept going. Below is only more below." /> -->
+		<part Name="StairsDown" PullMessage="You plunge through the broken floor!" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
+
+</objects>
