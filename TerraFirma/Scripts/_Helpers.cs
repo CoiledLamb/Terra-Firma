@@ -29,7 +29,7 @@ namespace Cleo.TerraFirma.Scripts
 		/// Cleo_TerraFirma_DebugLog option (DebugLog above, default off) and MetricsManager
 		/// LogError/LogException calls, which report real misconfiguration and exceptions.
 		/// </summary>
-		public const bool VERIFY_WATCH = true;
+		public const bool VERIFY_WATCH = false;
 
 		public static void VerifyLog(string Context, string Msg)
 		{
