@@ -565,8 +565,8 @@ namespace Cleo.TerraFirma.Scripts
 			standing?.SetIntProperty(SPAWN_MARK, 1);
 			int spent = energyBefore - (ply.Energy?.Value ?? 0);
 			bool restacked = standing != null && standing.Physics?.Owner == owner && !GameObject.Validate(scatter);
-			Report("cairn.restack", localPassed && toppled && ownerKept && blocked && restacked && spent == 1000,
-				$"owner's people {(localPassed ? "pass over it" : "TOPPLED IT")}; stranger {(toppled ? "topples it" : "DID NOT TOPPLE IT")}, scatter owner {(ownerKept ? "kept" : "LOST")}; restack with someone standing there {(blocked ? "refused" : "ALLOWED")}; restack when clear {(restacked ? "stands it back up, owner kept" : "FAILED")}, energy {spent} (want 1000)");
+			Report("cairn.restack", localPassed && toppled && ownerKept && blocked && restacked && spent >= 900 && spent <= 1100,
+				$"owner's people {(localPassed ? "pass over it" : "TOPPLED IT")}; stranger {(toppled ? "topples it" : "DID NOT TOPPLE IT")}, scatter owner {(ownerKept ? "kept" : "LOST")}; restack with someone standing there {(blocked ? "refused" : "ALLOWED")}; restack when clear {(restacked ? "stands it back up, owner kept" : "FAILED")}, energy {spent} (want one turn, 900-1100 with the engine's jitter)");
 		}
 	}
 }

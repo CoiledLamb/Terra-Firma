@@ -412,8 +412,8 @@ namespace Cleo.TerraFirma.Scripts
 			GameObject statueA = ShapeCarve(ply, shaper, BABOON_BP, open[0]);
 			int spent = energyBefore - (ply.Energy?.Value ?? 0);
 			bool carvedA = statueA != null && GameObject.Validate(statueA) && shaper.CurStatue == statueA;
-			Report("shape.carve", carvedA && spent == 1000,
-				$"carve #1 (Baboon muse): statue {(carvedA ? "stands and is tracked" : "FAILED")}, energy spent {spent} (want 1000, one turn)");
+			Report("shape.carve", carvedA && spent >= 900 && spent <= 1100,
+				$"carve #1 (Baboon muse): statue {(carvedA ? "stands and is tracked" : "FAILED")}, energy spent {spent} (want one turn: 1000 with the engine's 0.9-1.1 jitter, GameObject.UseEnergy)");
 
 			GameObject statueB = ShapeCarve(ply, shaper, ROBOT_BP, open[1]);
 			bool swapped = statueB != null && GameObject.Validate(statueB) && shaper.CurStatue == statueB && statueB != statueA;
@@ -653,7 +653,7 @@ namespace Cleo.TerraFirma.Scripts
 			SetupFis(The.Player, "");
 		}
 
-		/// <summary>fis-npc: the first NPC-caster scenario — a Hulking Baboon granted Fissure L5,
+		/// <summary>fis-npc: the first NPC-caster scenario — a melee Snapjaw granted Fissure L5,
 		/// hostile-locked, 20 turns to cast. PASS = the zone gained loose fissure stones (a cast
 		/// happened); living-fall allegiance is REPORTED (seam-dependent). A 0-cast result is
 		/// itself the fis-npc answer: no AI advertisement. SPAWN DISTANCE 4-6 -> 2-3 (first
@@ -668,12 +668,16 @@ namespace Cleo.TerraFirma.Scripts
 			List<Cell> ring = origin.GetLocalAdjacentCells(3);
 			ring.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat") || c.DistanceTo(origin) < 2);
 			if (ring.Count == 0) { Report("fis", false, "SETUP FAIL - no open cell at distance 2-3"); RunNext(queue, ply); return; }
-			GameObject caster = GameObject.Create("Hulking Baboon");
+			// a MELEE caster (2026-09-30): the old Hulking Baboon kites since the scavenger merge
+			// filled its pockets (topGoal Flee all run, never inside the wave), so it tested the
+			// baboon AI, not the cast. HP after placement: zone entry recalculates it.
+			GameObject caster = GameObject.Create("Snapjaw");
 			caster.SetIntProperty(SPAWN_MARK, 1);
-			caster.GetStat("Hitpoints").BaseValue = 150;
 			Mutations mutations = caster.RequirePart<Mutations>();
 			mutations.AddMutation(new XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure(), 5);
 			ring[0].AddObject(caster);
+			caster.GetStat("Hitpoints").BaseValue = 150;
+			caster.GetStat("Hitpoints").Penalty = 0;
 			// DIRECTED kill (root cause of the 0-cast boots, decomp Kill.cs:506): a plain
 			// Brain.Target assignment makes a NON-directed Kill goal, which pops itself
 			// every turn against a target the actor isn't hostile to -- and baboon REP on
