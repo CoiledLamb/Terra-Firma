@@ -2868,3 +2868,7 @@ V10 is confirmed except moss. This closes the B03 dressing port; automatic moss 
 ## Decisions — 2026-09-29
 
 D01 closed: Geomancy's scan scope stays as it is (plain rocks do not scan). No structural scanning on ordinary stones; the existing scanning path is unchanged. The real gemstone throw is still checked under V05.
+
+## Release audit — 2026-09-29/30
+
+Four parallel code reviews (TF1 mutations, TF2 items, warren generation, packaging) ahead of the patch. Both builds were clean and the live dev folders hash-matched the repo. Outcomes: logging consolidated under `VERIFY_WATCH`; Fissure and Stoneshaper ability cards fixed; cave moss throw trigger rolls 50% (the feared pebble loop is impossible: base dedupes ingredient types); seven bugs fixed (carving picker creature gate, pauldrons melee-only, petrify releases across zones, Calcify refuses before spending, petrify sound at the victim, Barrage stone lease on unmutate, reachable outrider post); eight rough drafts replaced with base-shaped lines; no dowser in the beta; TF1 0.2.0 with TF2 at `>=0.2.0`; player builds exclude dev wishes; fused testing build target added. The auditors' claims were spot-checked against the decompile; one was wrong (Stoneshaper's card already rendered "rounds" below level 10). Engine facts from this pass are in `design/ground-truth.md`; remaining work is the wrap-up section of `TODO.md`.
