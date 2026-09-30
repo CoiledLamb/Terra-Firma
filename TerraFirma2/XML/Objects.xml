@@ -118,8 +118,9 @@ Perishes when unequipped." />
 	     tier 3; the aquifer liquid-ping half SKIPPED; grant toggles silently. The conditional
 	     lives in Part_Seismophone.cs, a MutationOnEquip subclass riding the base part's own
 	     re-check events. Powered profile = night-vision goggles grammar (socket + switch,
-	     1 charge/turn). Acquisition: tinkering (ruled) or wish tfseismophone; dynamic loot and
-	     the stonecarver kit-spread lane stay unwired, that lane is its own docket. -->
+	     1 charge/turn). Acquisition: tinkering (ruled), the goggles' artifact ladder
+	     (Artifact 0R-4R merges in PopulationTables.xml, user 2026-09-30), or wish
+	     tfseismophone; the stonecarver kit-spread lane stays unwired. -->
 	<object Name="Cleo_TerraFirma_Seismophone" Inherits="BaseHelmet">
 		<part Name="Armor" AV="0" DV="1" WornOn="Head" />
 		<part Name="Render" DisplayName="seismophone" RenderString="]" ColorString="&amp;y" TileColor="&amp;y" DetailColor="c" Tile="seismophone.png" /> <!-- user sprite 2026-09-30, replacing the base teleprojector placeholder -->

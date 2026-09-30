@@ -449,21 +449,28 @@
 	</population>
 	<population Name="Artifact 0R" Load="Merge">
 		<group Name="Items" Style="pickone">
+			<!-- Seismophone (user 2026-09-30: "should go in a relevant table"): base
+			     Night-vision Goggles' exact artifact ladder, 5/5/5/10/20, the item it was built at
+			     parity with. Weights CLAUDE PROPOSAL. -->
+			<object Weight="5" Number="1" Blueprint="Cleo_TerraFirma_Seismophone" />
 			<object Weight="20" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
 		</group>
 	</population>
 	<population Name="Artifact 1R" Load="Merge">
 		<group Name="Items" Style="pickone">
+			<object Weight="5" Number="1" Blueprint="Cleo_TerraFirma_Seismophone" />
 			<object Weight="20" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
 		</group>
 	</population>
 	<population Name="Artifact 2R" Load="Merge">
 		<group Name="Items" Style="pickone">
+			<object Weight="5" Number="1" Blueprint="Cleo_TerraFirma_Seismophone" />
 			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
 		</group>
 	</population>
 	<population Name="Artifact 3R" Load="Merge">
 		<group Name="Items" Style="pickone">
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_Seismophone" />
 			<object Weight="5" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
 			<!-- Codex PROPOSAL weight for tier-3 surveying equipment. -->
 			<object Weight="5" Number="1" Blueprint="Cleo_TerraFirma_SeismicShufflers" />
@@ -471,6 +478,7 @@
 	</population>
 	<population Name="Artifact 4R" Load="Merge">
 		<group Name="Items" Style="pickone">
+			<object Weight="20" Number="1" Blueprint="Cleo_TerraFirma_Seismophone" />
 			<object Weight="1" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
 		</group>
 	</population>
