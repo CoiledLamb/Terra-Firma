@@ -180,9 +180,8 @@
        dressing places this in the socket, gallery-bay, and room-storage chest rolls.
        The room-storage chest cap counts this variant too. Vine merchant
        restock joins when that blueprint lands (intent recorded in TODO.md). Counts and
-       chances CLAUDE DRAFT; DisplayName draft, approved 2026-09-30. -->
+       chances CLAUDE DRAFT. Reads as a plain chest (own name dropped 2026-09-30, user). -->
   <object Name="Cleo_TerraFirma_Quarry Chest" Inherits="Chest">
-    <part Name="Render" DisplayName="quarry chest" />
     <part Name="Inventory" />
     <inventoryobject Blueprint="@Cleo_TerraFirma_MiningGear" Number="1-2" />
     <inventoryobject Blueprint="Pickaxe" Chance="35" />
