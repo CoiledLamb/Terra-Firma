@@ -1,5 +1,7 @@
 # TODO-quarantine.md — held content, out of design conversations
 
+**2026-09-30:** held files now live in `quarantine/` at the repo root, outside both builds; see `quarantine/README.md`. Older holds stay on the `quarantine-hold` branch.
+
 **Created at the 2026-08-11 trim pass, under the DESIGN QUARANTINE ruling (user, same day): "can we quarantine the first iteration of fissure, all the rocks it added, and lithovore, so they're not counted for conversations like these?"**
 
 Everything in this file is HELD, not done: the v1 fissure rock catalog, its beta-era records, cooking effects, and Lithovore. It returns only by explicit user reopen (the held-ring-content reconsideration item in TODO.md's jam section is the catalog's road back; "Lithovore's post-beta place" is Lithovore's). Records are verbatim moves from TODO.md — provenance intact; grep this file alongside TODO.md and TODO-archive.md. ~~In-game state: all of this is already spawn-layer gated (inert wish-door dev blueprints); nothing here is reachable in play.~~ **CODE PHYSICALLY PARKED 2026-08-22 on git branch `quarantine-hold` (user: "move it to its own branch so it doesn't come up until i'm ready to address it") — the scripts, blueprints, tables, merges and dev doors are OUT of the working tree entirely; full parking record (what left, what deliberately stayed) in TODO.md's DESIGN QUARANTINE section. This file remains the design ledger; the branch holds the code.**
