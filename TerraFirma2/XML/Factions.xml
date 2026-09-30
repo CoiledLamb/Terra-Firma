@@ -78,6 +78,10 @@
     EmblemDetailColor="K"
   >
     <feeling About="*" Value="0" />
+    <!-- 2026-09-30 (user): quarriers dislike snapjaws, so a canyon crew engages on sight
+         instead of only answering blows. Snapjaws already feel "*" -50 toward the guild.
+         Value copies the Fellowship of Wardens' own Snapjaws line (base Factions.xml). -->
+    <feeling About="Snapjaws" Value="-50" />
 
     <!-- Interests RULED 2026-08-15 (user: "buying ruins is good, selling desertcanyons and
          underground works"). These are the water ritual secrets trade, and the buy/sell split is
