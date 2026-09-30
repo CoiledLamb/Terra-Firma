@@ -7,7 +7,7 @@
        Tiles are recolored base PLACEHOLDERS, sprite debt filed for all three.
        Numbers all DRAFT (numbers sitting): gloves Chance 25, cloak conditional DV 2
        (Yurtmat parity), commerce/tier modest; bracer is +2 throw range, USER NUMBER
-       2026-08-22 (see the bracer's own comment below). Descriptions DRAFT. -->
+       2026-08-22 (see the bracer's own comment below). Descriptions are user text 2026-09-29. -->
     <object Name="Cleo_TerraFirma_Cobblefur Bracer" Inherits="BaseArmlet">
     <part Name="Armor" AV="0" DV="0" WornOn="Arm" />
     <part Name="Render" DisplayName="{{y|granitefur}} bracer" RenderString="]" Tile="baboonskin_bracers.png" ColorString="&amp;r" DetailColor="y" /> <!-- user sprite 2026-08-22; rust/brown per the cloak ruling, family palette -->
@@ -226,7 +226,7 @@
   <!-- C01 body pair (shaped 2026-08-22, built 2026-09-29). Tier 2 for both, user-approved
        2026-09-29. Tiles per the 08-22 sitting: girdle = base bark armor, pauldrons = base
        studded leather. Colors, weights and commerce are CLAUDE PROPOSAL. Descriptions are user text
-       2026-09-29; any other strings are the user's, owed; the rules lines come from the parts, DRAFT. -->
+       2026-09-29; the rules lines come from the parts, approved 2026-09-29. -->
   <object Name="Cleo_TerraFirma_MudskinGirdle" Inherits="BaseArmor">
     <part Name="Armor" AV="1" DV="1" WornOn="Body" />
     <part Name="Render" DisplayName="mudskin girdle" RenderString="]" Tile="Items/sw_armor1.bmp" ColorString="&amp;w" DetailColor="r" />

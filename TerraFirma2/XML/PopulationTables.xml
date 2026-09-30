@@ -212,8 +212,11 @@
 			<table Name="Cleo_TerraFirma_MiningGear" />
 			<!-- Fissure stones, role-texture pitch 2026-08-23; count RULED same day (user: "amount
 			     should be 2-3"). The sower precedent: grenades in plain inventory get thrown by
-			     stock AI. Whoever fells the hewer inherits the unspent ones, deliberately. -->
-			<object Blueprint="Cleo_TerraFirma_FissureStone" Number="2-3" />
+			     stock AI. Whoever fells the hewer inherits the unspent ones, deliberately.
+			     HELD 2026-09-30 (design/decisions/2026-09-30-no-dowser-beta.md): the stones left
+			     the beta with the dowser. The blueprint stays compiled as a wish-door; restore by
+			     uncommenting this row. -->
+			<!-- <object Blueprint="Cleo_TerraFirma_FissureStone" Number="2-3" /> -->
 			<table Name="Cleo_TerraFirma_Carver Knife" />
 			<table Name="Cleo_TerraFirma_Carver Hammer" />
 			<group Name="Armor" Style="pickone">

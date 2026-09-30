@@ -230,7 +230,7 @@ Perishes when unequipped." />
 	     (Items.xml ~12605). WaterContainer chassis brings LeakWhenBroken free: a cracked
 	     cistern weeps its cargo. Drops with the creature on death, sealed; that drop IS the
 	     loot. RATE and MaxVolume DRAFT and load-bearing (the money number), numbers sitting
-	     owed. Description DRAFT, signoff owed. Tile inherits the waterskin sprite, sprite debt
+	     owed. Description approved 2026-09-10. Tile inherits the waterskin sprite, sprite debt
 	     filed. -->
 	<object Name="Cleo_TerraFirma_GutCistern" Inherits="WaterContainer">
 		<part Name="Render" DisplayName="gut cistern" ColorString="&amp;w" DetailColor="B" />

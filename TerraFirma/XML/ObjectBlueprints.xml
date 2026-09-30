@@ -40,7 +40,7 @@
     <tag Name="Gender" Value="plural" />
   </object>
 
-  <!-- ===== Painter vertical-slice test objects (2026-07-25). All names/descriptions are DRAFT pending user sign-off. ===== -->
+  <!-- ===== Painter vertical-slice test objects (2026-07-25). Fire dish and quarried stone descriptions approved 2026-09-08/09-10 (TODO.md). ===== -->
   <!-- Fire dish: inherits Campfire wholesale so the flame VFX come free (AnimatedMaterialFire + PrefabImposter particle flames + LightSource). Tile expects Textures/firedish.png (not yet supplied). -->
   <object Name="Cleo_TerraFirma_FireDish" Inherits="Campfire">
     <!-- USER 2026-08-23: "firepits should be brown or grey (your pick) not red".
@@ -101,8 +101,8 @@
        A real blueprint in the Campfire/Campfire Remains idiom: no flame prefab, no
        light. Colors stay the ruled brown, USER RULED 2026-08-26 ("no need for the ash
        grey recolor"): cold reads through the dead flames and the name. The tense pass
-       and the extinguish path both land here now. DESCRIPTION IS CLAUDE DRAFT, user
-       voice owed (the lit dish's line is also still draft). -->
+       and the extinguish path both land here now. Both dish descriptions approved
+       2026-09-10. -->
   <object Name="Cleo_TerraFirma_FireDishCold" Inherits="Cleo_TerraFirma_FireDish">
     <part Name="Render" DisplayName="cold fire dish" />
     <part Name="Description" Short="A chunk of earth has been lathed into a finely smoothed bowl. Within it, charred dogthorn cradles the half-spoken echoes of idle chatter." />
