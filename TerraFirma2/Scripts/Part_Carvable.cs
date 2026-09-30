@@ -11,7 +11,7 @@ namespace XRL.World.Parts
 	/// from the shared carving picker; the statue is the Stoneshaper's
 	/// MakeStatueOfCreatureFromWall (the StatueMaker prototype's flow), inert, revealed with the
 	/// Stoneshaper's own carve VFX (PlayCarveReveal).
-	/// Refusal and success lines DRAFT.
+	/// Refusal and success lines draft, approved 2026-09-30.
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_Carvable : IPart

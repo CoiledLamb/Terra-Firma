@@ -103,7 +103,7 @@
 		<part Name="RulesDescription" Text="Sometimes pecks at enemies and scrapes at stone.
 Perishes when unequipped." />
 		<part Name="Springy" Factor="0.5" />
-		<part Name="DestroyOnUnequip" Message="Your symbiotic mole cricket perishes." /> <!-- DRAFT (user flag 2026-08-23: the part's default is "The mote of light is extinguished."; verb from the user-approved rules line) -->
+		<part Name="DestroyOnUnequip" Message="Your symbiotic mole cricket perishes." /> <!-- draft, approved 2026-09-30 (user flag 2026-08-23: the part's default is "The mote of light is extinguished."; verb from the user-approved rules line) -->
 		<part Name="Cleo_TerraFirma_MoleCricket" />
 		<part Name="AddsRep" Faction="Insects,Cleo_TerraFirma_Quarriers" Value="200" /> <!-- RULED 2026-08-22: +200 each, insects AND the guild - the symbiosis pays both ways -->
 		<tag Name="Tier" Value="2" />
@@ -126,7 +126,7 @@ Perishes when unequipped." />
 		<part Name="Physics" Weight="2" />
 		<part Name="Commerce" Value="150" />
 		<part Name="Description" Short="An aluminum sheath enclosing a glittering filament connects to a whispering ear. When pressed against the earth, it speaks." />
-		<part Name="RulesDescription" Text="Functions only while the wearer is beside a wall." /> <!-- DRAFT (Claude); the "Grants you Heightened Hearing at level 2." line is appended by the part itself -->
+		<part Name="RulesDescription" Text="Functions only while the wearer is beside a wall." /> <!-- draft, approved 2026-09-30; the "Grants you Heightened Hearing at level 2." line is appended by the part itself -->
 		<!-- the dials live here since the 2026-08-29 ladder pass; the ctor keeps the same values
 		     as fail-safe fallbacks for a bare mount (all XML-settable fields of base
 		     MutationOnEquip / IPoweredPart, verified against the shipped Items.xml idiom) -->

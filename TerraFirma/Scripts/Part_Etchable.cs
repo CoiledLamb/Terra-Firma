@@ -251,7 +251,7 @@ namespace XRL.World.Parts
 				return;
 			if (actor.DistanceTo(ParentObject) > 1)
 			{
-				actor.Fail("You cannot reach " + ParentObject.t() + "."); // DRAFT; popup per base deliberate-action refusals
+				actor.Fail("You cannot reach " + ParentObject.t() + "."); // draft, approved 2026-09-30; popup per base deliberate-action refusals
 				return;
 			}
 			int toolTier = GetEtchToolTier(actor);
@@ -271,7 +271,7 @@ namespace XRL.World.Parts
 				for (int i = 0; i < limbs.Count; i++)
 					limbNames[i] = limbs[i].GetCardinalName();
 				int pick = Popup.PickOption(
-					Intro: "Choose a part to etch.", // DRAFT (TattooGun's prompt shape)
+					Intro: "Choose a part to etch.", // draft, approved 2026-09-30 (TattooGun's prompt shape)
 					Options: limbNames,
 					AllowEscape: true);
 				if (pick < 0)
@@ -293,7 +293,7 @@ namespace XRL.World.Parts
 				// shape is instruction + quoted example ("Describe your tattoo. For example: \"a
 				// tiny snail\"."); the prose whitelist and 60-char cap stay ours (a carved message
 				// wants punctuation the tattoo charset lacks)
-				text = Popup.AskString("Etch your message. For example: \"live and drink\".", "", "Sounds/UI/ui_notification", TYPED_CHARS, null, TYPED_MAX); // DRAFT (example line is base-game idiom, not invented voice)
+				text = Popup.AskString("Etch your message. For example: \"live and drink\".", "", "Sounds/UI/ui_notification", TYPED_CHARS, null, TYPED_MAX); // draft, approved 2026-09-30 (example line is base-game idiom, not invented voice)
 				if (text.IsNullOrEmpty())
 					return;
 			}
@@ -325,9 +325,9 @@ namespace XRL.World.Parts
 			int garbled;
 			text = GarbleByTier(text, toolTier, out garbled);
 			if (garbled > 0)
-				IComponent<GameObject>.AddPlayerMessage("Your rough tools slip, and some of the carving is lost."); // DRAFT (reworded for the block-glyph garble)
+				IComponent<GameObject>.AddPlayerMessage("Your rough tools slip, and some of the carving is lost."); // draft, approved 2026-09-30 (reworded for the block-glyph garble)
 			if (reEtch)
-				IComponent<GameObject>.AddPlayerMessage("You strike the old face away in a thin sheet of stone."); // DRAFT (re-etch ruling: "breaking off a sheet")
+				IComponent<GameObject>.AddPlayerMessage("You strike the old face away in a thin sheet of stone."); // draft, approved 2026-09-30 (re-etch ruling: "breaking off a sheet")
 			bool firstEtch = Inscription.IsNullOrEmpty() && LimbInscriptions.Count == 0;
 			if (limb != null)
 				LimbInscriptions[limb.ID] = text;
@@ -358,9 +358,9 @@ namespace XRL.World.Parts
 			// wrote should be popped up after you finish typing" -- TattooGun's own idiom:
 			// Popup.Show("You tattoo " + text + " on ...") after the work lands)
 			if (limb != null)
-				Popup.Show("You etch \"" + text + "\" into " + Grammar.MakePossessive(ParentObject.t()) + " " + limb.GetOrdinalName() + "."); // DRAFT
+				Popup.Show("You etch \"" + text + "\" into " + Grammar.MakePossessive(ParentObject.t()) + " " + limb.GetOrdinalName() + "."); // draft, approved 2026-09-30
 			else
-				Popup.Show("You etch \"" + text + "\" into " + ParentObject.t() + "."); // DRAFT
+				Popup.Show("You etch \"" + text + "\" into " + ParentObject.t() + "."); // draft, approved 2026-09-30
 			actor.UseEnergy(1000, "Etching");
 			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("ETCH", $"{(reEtch ? "re-etched" : "etched")} {ParentObject.Blueprint}{(limb != null ? " [" + limb.GetOrdinalName() + "]" : "")} ({(choice == 0 ? "typed" : "markov")}, kit tier {toolTier}, {garbled} garbled): \"{text}\"");
 		}
@@ -500,7 +500,7 @@ namespace XRL.World.Parts
 		public override bool HandleEvent(GetDisplayNameEvent E)
 		{
 			if ((!Inscription.IsNullOrEmpty() || LimbInscriptions.Count > 0) && (!E.Understood() || !E.Object.HasProperName))
-				E.AddAdjective("etched"); // DRAFT
+				E.AddAdjective("etched"); // draft, approved 2026-09-30
 			return base.HandleEvent(E);
 		}
 
@@ -510,7 +510,7 @@ namespace XRL.World.Parts
 			{
 				if (E.Infix.Length > 0)
 					E.Infix.Append("\n");
-				// DRAFT frame (Graffitied's structure, its own voice)
+				// frame draft, approved 2026-09-30 (Graffitied's structure, its own voice)
 				E.Infix.Append("\nWords are chiseled into the surface. They read:\n\n\"").Append(Inscription).Append("\"\n");
 			}
 			if (LimbInscriptions.Count > 0 && ParentObject.Body is Body body)
@@ -522,7 +522,7 @@ namespace XRL.World.Parts
 						continue; // the limb is gone, and its words went with it (Tattoos' dangling-ID idiom, pruned lazily)
 					if (E.Infix.Length > 0)
 						E.Infix.Append("\n");
-					// DRAFT frame, one line per etched limb
+					// frame draft, approved 2026-09-30, one line per etched limb
 					E.Infix.Append("\nChiseled into ").Append(ParentObject.its).Append(" ").Append(part.GetOrdinalName())
 						.Append(": \"").Append(kv.Value).Append("\"\n");
 				}

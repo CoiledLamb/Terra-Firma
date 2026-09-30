@@ -118,7 +118,7 @@ namespace XRL.World.Parts
 				if (figurines.Count == 0)
 				{
 					if (E.Actor.IsPlayer())
-						Popup.ShowFail("You carry no figurine to animate."); // DRAFT
+						Popup.ShowFail("You carry no figurine to animate."); // draft, approved 2026-09-30
 					return false;
 				}
 				if (ParentObject.QueryCharge() < AnimationCost)
@@ -134,7 +134,7 @@ namespace XRL.World.Parts
 					foreach (GameObject fig in figurines)
 						options.Add(fig.DisplayName);
 					int choice = Popup.PickOption(
-						Intro: "Animate which figurine?", // DRAFT
+						Intro: "Animate which figurine?", // draft, approved 2026-09-30
 						Options: options.ToArray(),
 						AllowEscape: true);
 					if (choice < 0)
@@ -150,7 +150,7 @@ namespace XRL.World.Parts
 				if (spot == null)
 				{
 					if (E.Actor.IsPlayer())
-						Popup.ShowFail("There is no open ground beside " + ParentObject.t() + "."); // DRAFT
+						Popup.ShowFail("There is no open ground beside " + ParentObject.t() + "."); // draft, approved 2026-09-30
 					return false;
 				}
 				if (!ParentObject.UseCharge(AnimationCost))

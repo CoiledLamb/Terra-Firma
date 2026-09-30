@@ -192,7 +192,7 @@ namespace XRL.World.Parts.Mutation
 				if (victim.Brain == null)
 				{
 					if (E.Actor.IsPlayer())
-						Popup.ShowFail($"You cannot transfix {victim.t()}."); // DRAFT
+						Popup.ShowFail($"You cannot transfix {victim.t()}."); // draft, approved 2026-09-30
 					return false;
 				}
 			}
@@ -278,7 +278,7 @@ namespace XRL.World.Parts.Mutation
 			if (ParentObject.HasEffect<Stun>() || ParentObject.HasEffect<StunGasStun>() || ParentObject.HasEffect<Confused>() || ParentObject.HasEffect<Asleep>() || ParentObject.HasEffect<Paralyzed>())
 			{
 				Helpers.VerifyLog("GAZE", $"caster incapacitated (stun/confusion/sleep/paralysis) -> gaze breaks at {CurFailedSaves}F/{CurSuccessfulSaves}S");
-				CancelGaze($"You cannot hold your unblinking gaze!"); // DRAFT
+				CancelGaze($"You cannot hold your unblinking gaze!"); // draft, approved 2026-09-30
 				return;
 			}
 			// belt for the command gate: a brainless Target (gazed on a pre-fix build, or a

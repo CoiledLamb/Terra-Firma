@@ -16,7 +16,7 @@ namespace Cleo.TerraFirma.Scripts
 	/// Icons, built from the blueprint alone (Renderable(GameObjectBlueprint)), so listing never
 	/// instantiates a creature. Returns a creature blueprint name, or null on escape.
 	/// Wording copies base item naming (verb-first sentences with periods, "What would you like
-	/// to name?", "Enter a new name for..."). DRAFT until the user signs off.
+	/// to name?", "Enter a new name for..."). Draft, approved 2026-09-30.
 	/// Popup settings match the Rename menu too: no title, no intro icon, Spacing 1.
 	/// </summary>
 	public static class Cleo_TerraFirma_CarvingPicker

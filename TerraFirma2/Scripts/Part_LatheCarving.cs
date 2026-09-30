@@ -13,7 +13,7 @@ namespace XRL.World.Parts
 	/// gold nuggets, rough and polished gems, onto base's own "Random X Figurine" set).
 	/// Order (user 2026-09-29): power check, then material, then subject; nothing is spent
 	/// until a subject is chosen. The figurine is base RandomFigurine with Creature preset, the
-	/// same shape as base's own "Rhinox figure". Refusal and success lines DRAFT.
+	/// same shape as base's own "Rhinox figure". Refusal and success lines draft, approved 2026-09-30.
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_LatheCarving : IPart

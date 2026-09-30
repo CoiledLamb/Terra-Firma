@@ -15,7 +15,7 @@ namespace XRL.World.Effects
 
 		public Cleo_TerraFirma_Enamored()
 		{
-			DisplayName = "{{R|enamored}}"; // DRAFT name - awaiting user text pass
+			DisplayName = "{{R|enamored}}"; // name draft, approved 2026-09-30
 		}
 
 		public Cleo_TerraFirma_Enamored(int Duration, GameObject Beloved)

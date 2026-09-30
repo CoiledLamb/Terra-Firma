@@ -126,7 +126,7 @@ namespace XRL.World.Parts
 				{
 					if (E.Actor.IsPlayer())
 					{
-						Popup.ShowFail("You have no glowsphere fragment to load."); // DRAFT
+						Popup.ShowFail("You have no glowsphere fragment to load."); // draft, approved 2026-09-30
 					}
 					return false;
 				}
@@ -136,7 +136,7 @@ namespace XRL.World.Parts
 				SyncState();
 				if (E.Actor.IsPlayer())
 				{
-					IComponent<GameObject>.AddPlayerMessage("You seat " + pick.t() + " inside " + ParentObject.t() + "."); // DRAFT
+					IComponent<GameObject>.AddPlayerMessage("You seat " + pick.t() + " inside " + ParentObject.t() + "."); // draft, approved 2026-09-30
 				}
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("LANTERN", $"loaded shard fuel={GetFuel()}");
 				E.Actor.UseEnergy(1000, "Item LoadGlowstoneLantern");
@@ -150,7 +150,7 @@ namespace XRL.World.Parts
 				SyncState();
 				if (E.Actor.IsPlayer())
 				{
-					IComponent<GameObject>.AddPlayerMessage("You take " + outShard.t() + " out of " + ParentObject.t() + "."); // DRAFT
+					IComponent<GameObject>.AddPlayerMessage("You take " + outShard.t() + " out of " + ParentObject.t() + "."); // draft, approved 2026-09-30
 				}
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("LANTERN", "shard removed");
 				E.Actor.UseEnergy(1000, "Item UnloadGlowstoneLantern");
@@ -174,7 +174,7 @@ namespace XRL.World.Parts
 						{
 							if (ParentObject.Equipped != null && ParentObject.Equipped.IsPlayer())
 							{
-								IComponent<GameObject>.AddPlayerMessage("The fragment inside " + The.Player.Poss(ParentObject) + " goes dark."); // DRAFT
+								IComponent<GameObject>.AddPlayerMessage("The fragment inside " + The.Player.Poss(ParentObject) + " goes dark."); // draft, approved 2026-09-30
 							}
 							Cleo.TerraFirma.Scripts.Helpers.VerifyLog("LANTERN", "socketed shard burned out");
 							Shard.Obliterate();

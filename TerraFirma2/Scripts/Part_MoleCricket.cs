@@ -62,7 +62,7 @@ namespace XRL.World.Parts
 				{
 					int dmg = Math.Max(1, PeckDamage.RollCached());
 					prey.TakeDamage(dmg, "from " + ParentObject.t() + "!", "Physical",
-						null, null, Owner: wearer, Attacker: wearer, Source: ParentObject); // DRAFT death reason
+						null, null, Owner: wearer, Attacker: wearer, Source: ParentObject); // death reason draft, approved 2026-09-30
 					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CRICKET", $"pecked {prey.Blueprint} for {dmg}");
 				}
 				else if (prey == null && IsWearerIdle(wearer) && DigChance.in100())

@@ -76,7 +76,7 @@ namespace XRL.World.Parts
 				if (!string.IsNullOrEmpty(owner) && toppled.Physics != null)
 					toppled.Physics.Owner = owner;   // the scatter is still theirs
 				if (Visible())
-					XDidY(stepper, "topple", ParentObject.the + ParentObject.ShortDisplayName, "!", ColorAsBadFor: stepper);   // DRAFT line, voice pass owed
+					XDidY(stepper, "topple", ParentObject.the + ParentObject.ShortDisplayName, "!", ColorAsBadFor: stepper);   // draft, approved 2026-09-30
 				ParentObject.PlayWorldSound(ToppleSound, 1f);
 				if (!string.IsNullOrEmpty(owner))
 					ParentObject.Physics?.BroadcastForHelp(stepper);   // the hostile act, engine's own trespass channel
@@ -146,7 +146,7 @@ namespace XRL.World.Parts
 				if (!string.IsNullOrEmpty(owner) && standing.Physics != null)
 					standing.Physics.Owner = owner;
 				if (E.Actor.IsPlayer())
-					IComponent<GameObject>.AddPlayerMessage("You stack the stones back into a cairn."); // DRAFT
+					IComponent<GameObject>.AddPlayerMessage("You stack the stones back into a cairn."); // draft, approved 2026-09-30
 				Helpers.VerifyLog("CAIRN", $"restacked by {E.Actor.Blueprint}{(string.IsNullOrEmpty(owner) ? "" : $" (owner {owner} kept)")}");
 				here.AddObject(standing);
 				ParentObject.Destroy(null, Silent: true);

@@ -58,7 +58,7 @@
   <!-- Quarry stone stacks (warren dress port 2026-08-23): the yard's three
        grades, user sprites (quarrystones 1a/1b through 3a/3b). Grade 1 is the
        column being filled NOW, grade 3 is finished stock; the yard recipe reads
-       time through them (fill ordering RULED 2026-07-27). DisplayName DRAFT;
+       time through them (fill ordering RULED 2026-07-27). DisplayName draft, approved 2026-09-30;
        descriptions deliberately absent, ride the release text pass. -->
   <!-- Moss clump (USER RULED 2026-08-23: wall moss is harvestable, wall reverts).
        Mirrors base's own Clump of Grave Moss (a Snack): tile is that clump
@@ -156,8 +156,8 @@
   <!-- YARD LEDGER BOARD (setup USER-greenlit 2026-08-26: "that sounds fine, set that up").
        The dress yard's chalkboard as its own blueprint, so the ledger LINES live here as
        tags instead of C# strings; the =token= substitution style is the game's own
-       vernacular. THE LINES ARE STILL THE 2026-08-23 CLAUDE DRAFT and the user voice is
-       owed: editing these Values is now the whole voice sitting, no recompile. Tokens the
+       vernacular. The lines are the 2026-08-23 draft, approved 2026-09-30;
+       editing these Values needs no recompile. Tokens the
        carver fills: =day= and =month= (Calendar, at carve time), =blocks= (the site's true
        carved floor, so the board never lies about the dig it stands in). WarrenCarver
        keeps deciding WHICH lines appear (the occupancy law); the write-verb part arrives
@@ -180,7 +180,7 @@
        dressing places this in the socket, gallery-bay, and room-storage chest rolls.
        The room-storage chest cap counts this variant too. Vine merchant
        restock joins when that blueprint lands (intent recorded in TODO.md). Counts and
-       chances CLAUDE DRAFT; DisplayName DRAFT, signoff owed. -->
+       chances CLAUDE DRAFT; DisplayName draft, approved 2026-09-30. -->
   <object Name="Cleo_TerraFirma_Quarry Chest" Inherits="Chest">
     <part Name="Render" DisplayName="quarry chest" />
     <part Name="Inventory" />

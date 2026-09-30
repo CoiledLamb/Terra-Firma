@@ -167,7 +167,7 @@ namespace XRL.World.Parts
 					// Set per-instance so floor stones stay equipable by snapjaws; accepted wart:
 					// the mark rides spilled stones after death, so scavengers won't arm them.
 					item.SetIntProperty("NoAIEquip", 1);
-					// consume verb is a Claude DRAFT (one string to swap at text signoff)
+					// consume verb draft, approved 2026-09-30
 					DidXToY("crunch", item);
 					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("HOUND", $"{who.Blueprint} swallowed {item.Blueprint} (gut now {GutCount(who)})");
 				}

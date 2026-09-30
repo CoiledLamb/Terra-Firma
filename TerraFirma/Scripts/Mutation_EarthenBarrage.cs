@@ -156,8 +156,8 @@ namespace XRL.World.Parts.Mutation
 				"Sculpted stones occupy your thrown weapon slot.\n" +
 				"Stones not held as a thrown weapon crumble to dust after " + ROCK_LIFETIME_MIN + "-" + ROCK_LIFETIME_MAX + " rounds.\n" +
 				"Damage increment: {{rules|" + GetThrowDamage(Level) + "}}\n" +
-				// DRAFT (pen-cap rework 2026-08-09, awaiting text signoff): the bonus line
-				// became a cap line; phrasing is Claude's until the user rules
+				// draft, approved 2026-09-30 (pen-cap rework 2026-08-09): the bonus line
+				// became a cap line
 				"Stone penetration: your Strength modifier, up to {{rules|" + GetPenetrationCap(Level) + "}}\n" +
 				// AV/DV lines CUT with the whorl stat shifts (rebalance 2026-08-06)
 				"Stones in reserve whorl about you and deflect physical projectiles.\n" +

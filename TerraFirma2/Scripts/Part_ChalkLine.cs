@@ -81,11 +81,11 @@ namespace XRL.World.Parts
 					}
 					if (walker.IsPlayer())
 					{
-						IComponent<GameObject>.AddPlayerMessage("Your steps smear the chalk line."); // DRAFT
+						IComponent<GameObject>.AddPlayerMessage("Your steps smear the chalk line."); // draft, approved 2026-09-30
 					}
 					else if (ParentObject.IsVisible())
 					{
-						IComponent<GameObject>.AddPlayerMessage(walker.Does("smear") + " the chalk line underfoot."); // DRAFT
+						IComponent<GameObject>.AddPlayerMessage(walker.Does("smear") + " the chalk line underfoot."); // draft, approved 2026-09-30
 					}
 					Cell cell = ParentObject.CurrentCell;
 					Cleo.TerraFirma.Scripts.Cleo_TerraFirma_ChalkRevealFX.PlayScuff(cell);
@@ -119,7 +119,7 @@ namespace XRL.World.Parts
 				}
 				if (E.Actor.IsPlayer())
 				{
-					IComponent<GameObject>.AddPlayerMessage("You smear the chalk line away."); // DRAFT
+					IComponent<GameObject>.AddPlayerMessage("You smear the chalk line away."); // draft, approved 2026-09-30
 				}
 				Cell cell = ParentObject.CurrentCell;
 				E.Actor.UseEnergy(1000, "Item SmearChalkLine");

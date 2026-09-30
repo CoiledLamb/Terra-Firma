@@ -150,7 +150,7 @@ namespace XRL.World.Parts
 			if (crumble)
 			{
 				// distinct endings (RULED 2026-07-23, phrases from the user's own ruling): a fed stone
-				// goes out gorged; one latched to lifeless stone withers dry. Both DRAFT for the text pass.
+				// goes out gorged; one latched to lifeless stone withers dry. Both draft, approved 2026-09-30.
 				if (IComponent<GameObject>.Visible(ParentObject))
 					IComponent<GameObject>.AddPlayerMessage(Starved
 						? ParentObject.Does("wither") + " and crumble away, dry and unfed."

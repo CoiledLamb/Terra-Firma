@@ -23,8 +23,8 @@
 		     is found. RULED 2026-08-04 ("let's have the fallback stone wall be the same for both
 		     calcify and fissure"): dressed identically to Fissure's no-geology fallback, neutral
 		     gray &y^K (limestone scheme) over the inherited wall_rock paint family, never raw
-		     sandstone red. DisplayName = DRAFT under the beta-text ruling (a gray wall reading
-		     "sandstone" would be worse); release sitting signs off. -->
+		     sandstone red. DisplayName draft, approved 2026-09-30 (a gray wall reading
+		     "sandstone" would be worse). -->
 		<!-- DisplayName is the bare noun ON PURPOSE (bug 2026-08-05: "calcified calcified stone"):
 		     every spawn of this blueprint comes through Calcify's PlaceWall, which attaches
 		     Cleo_TerraFirma_CalcifyWallPart, and THAT part prepends "calcified" via GetDisplayName.

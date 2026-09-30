@@ -79,7 +79,7 @@ namespace XRL.World.Parts
 				}
 				if (E.Actor.IsPlayer())
 				{
-					Popup.Show("The glowsphere breaks into " + Grammar.Cardinal(count) + " glowing fragments."); // DRAFT
+					Popup.Show("The glowsphere breaks into " + Grammar.Cardinal(count) + " glowing fragments."); // draft, approved 2026-09-30
 				}
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHARD", $"glowsphere broken into {count} fragments by {E.Actor.Blueprint}");
 				E.Actor.UseEnergy(1000, "Item BreakGlowsphere");
@@ -119,7 +119,7 @@ namespace XRL.World.Parts
 				}
 				if (IComponent<GameObject>.Visible(ParentObject))
 				{
-					IComponent<GameObject>.AddPlayerMessage("The glowsphere shatters, scattering glowing fragments."); // DRAFT
+					IComponent<GameObject>.AddPlayerMessage("The glowsphere shatters, scattering glowing fragments."); // draft, approved 2026-09-30
 				}
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHARD", $"thrown glowsphere shattered into {count} fragments");
 				ParentObject.Destroy();

@@ -118,7 +118,7 @@
          bespoke, which is what keeps the byname load bearing instead of decorative, and it gives
          the "lode" material perk something to bite (richer gear populations, by name alone). -->
     <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Quarrier Kit" />
-    <part Name="Description" Short="Chalk dust has worked so far into the creases of =pronouns.possessive= hands that the lines read like a map of somewhere quarried." /> <!-- DRAFT, and deliberately identity-neutral: the professions carry who these people are, and they are not built yet -->
+    <part Name="Description" Short="Chalk dust has worked so far into the creases of =pronouns.possessive= hands that the lines read like a map of somewhere quarried." /> <!-- draft, approved 2026-09-30, and deliberately identity-neutral: the professions carry who these people are, and they are not built yet -->
     <stat Name="Level" Value="10" /> <!-- CLAUDE PLACEHOLDER, numbers sitting owed -->
     <!-- NOTE the missing "*noinherit" here, unlike every other creature in this file: that marker
          stops a tag reaching children, and the whole point on this blueprint is that every role
@@ -253,7 +253,7 @@
        stone grey per the roster color ruling; the corpse drop closes the loop, a killed one
        sometimes reverts to the inert stone figurine curio (chance CLAUDE DRAFT). MentalShield:
        there is no mind in there to reach. ALL STATS CLAUDE PLACEHOLDER, numbers sitting owed;
-       DisplayName and description DRAFT, signoff owed. -->
+       DisplayName and description draft, approved 2026-09-30. -->
   <object Name="Cleo_TerraFirma_AnimateFigurine" Inherits="BaseHumanoid">
     <part Name="Render" DisplayName="animate figurine" Tile="Items/figurine.png" RenderString="*" ColorString="&amp;y" DetailColor="K" />
     <part Name="Description" Short="" />

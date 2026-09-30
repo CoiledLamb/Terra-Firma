@@ -14,9 +14,9 @@
 			Characters who gain Earthen Barrage begin with Take Stones already enabled, sculpting and equipping stones automatically. Does not change the toggle on existing characters.
 		</helptext>
 	</option>
-	<!-- Per-mutation pool toggles (USER REQUEST 2026-08-05). DisplayText/helptext are DRAFT
-	     under the standing beta-text ruling (2026-07-31); vigilant signoff rides the release
-	     text pass. Gating is stamped by Scripts/_MutationPoolOptions.cs at new game and save
+	<!-- Per-mutation pool toggles (USER REQUEST 2026-08-05). DisplayText/helptext
+	     draft, approved 2026-09-30.
+	     Gating is stamped by Scripts/_MutationPoolOptions.cs at new game and save
 	     load; existing characters always keep mutations they already have. -->
 	<option ID="Cleo_TerraFirma_PoolGeomancy"
 		DisplayText="Geomancy in mutation pools"

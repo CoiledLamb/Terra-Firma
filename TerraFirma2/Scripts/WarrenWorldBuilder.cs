@@ -52,13 +52,12 @@ namespace XRL.World.WorldBuilders
 					}
 					The.ZoneManager.AddZoneBuilder(zoneID, 6000, "Cleo_TerraFirma_WarrenMaker", "Stage", stage);
 					WarrenSurvey.Register(zoneID);
-					// secret name is player-facing text: DRAFT, rides the release
-					// voice pass (user owns shipped strings)
+					// secret name is player-facing text: draft, approved 2026-09-30
 					string secretID = Builder.AddSecret(zoneID, "a quarry warren",
 						new string[3] { "stonecarver", "settlement", "humanoid" }, "Settlements");
 					Builder.AddLocationFinder(zoneID, secretID);
 					// PASS-OVER ENCOUNTER (user ask 2026-08-23, the village/lair
-					// idiom). LINE IS DRAFT, user voice owed. The first-visit dud is
+					// idiom). Line draft, approved 2026-09-30. The first-visit dud is
 					// structurally gone: the ladder guarantees the visited zone holds
 					// a warren, so the popup can no longer lie.
 					pTravel?.AddEncounter(new XRL.World.Parts.EncounterEntry(

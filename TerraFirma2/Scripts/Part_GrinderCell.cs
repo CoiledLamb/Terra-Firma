@@ -100,7 +100,7 @@ namespace XRL.World.Parts
 				ParentObject.FlushWeightCaches();
 				if (E.Actor.IsPlayer())
 				{
-					IComponent<GameObject>.AddPlayerMessage("The spiral stills and dumps its unground grist."); // DRAFT
+					IComponent<GameObject>.AddPlayerMessage("The spiral stills and dumps its unground grist."); // draft, approved 2026-09-30
 				}
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("GRINDER", $"grind stopped, {dumped} lb of grist dumped");
 				E.Actor.UseEnergy(1000, "Item StopGrinderCell");
@@ -167,7 +167,7 @@ namespace XRL.World.Parts
 				{
 					if (E.Actor.IsPlayer())
 					{
-						Popup.ShowFail("There is no stone in reach to feed it."); // DRAFT (was inventory-only wording)
+						Popup.ShowFail("There is no stone in reach to feed it."); // draft, approved 2026-09-30 (was inventory-only wording)
 					}
 					return false;
 				}
@@ -181,10 +181,10 @@ namespace XRL.World.Parts
 					{
 						int w = stones[i].GetPart<Physics>()?.Weight ?? 0;
 						options.Add(stones[i].DisplayName + " {{K|(" + w + "#)}}"
-							+ (i >= carried ? " {{K|(nearby)}}" : "")); // DRAFT marker
+							+ (i >= carried ? " {{K|(nearby)}}" : "")); // marker draft, approved 2026-09-30
 					}
 					int choice = Popup.PickOption(
-						Intro: "Feed which stone?", // DRAFT
+						Intro: "Feed which stone?", // draft, approved 2026-09-30
 						Options: options.ToArray(),
 						AllowEscape: true);
 					if (choice < 0)
@@ -212,7 +212,7 @@ namespace XRL.World.Parts
 				ParentObject.FlushWeightCaches(); // the stone's weight moves into the cell, not into thin air
 				if (E.Actor.IsPlayer())
 				{
-					IComponent<GameObject>.AddPlayerMessage("You feed " + pick.t() + " into " + ParentObject.t() + ", and the spiral begins to churn."); // DRAFT
+					IComponent<GameObject>.AddPlayerMessage("You feed " + pick.t() + " into " + ParentObject.t() + ", and the spiral begins to churn."); // draft, approved 2026-09-30
 				}
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("GRINDER", $"fed {pick.Blueprint} weight={weight} pool={StoneChargeLeft}");
 				pick.Destroy();
@@ -246,7 +246,7 @@ namespace XRL.World.Parts
 						GameObject holder = ParentObject.InInventory ?? ParentObject.Equipped;
 						if (holder != null && holder.IsPlayer())
 						{
-							IComponent<GameObject>.AddPlayerMessage("The spiral grinds its stone down to nothing and stills."); // DRAFT
+							IComponent<GameObject>.AddPlayerMessage("The spiral grinds its stone down to nothing and stills."); // draft, approved 2026-09-30
 						}
 						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("GRINDER", $"stone ground out, cell at {cell.Charge}/{cell.MaxCharge}");
 					}

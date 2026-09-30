@@ -149,7 +149,7 @@ namespace XRL.World.Parts
 				{
 					// icon = the box's own look; description per the base AddAbility idiom
 					AbilityID = who.ActivatedAbilities.AddAbility("Draw with Chalk", DRAW_COMMAND, "Items",
-						Description: "Draw a chalk line on an adjacent square.", // DRAFT (ability name + description)
+						Description: "Draw a chalk line on an adjacent square.", // draft, approved 2026-09-30 (ability name + description)
 						Silent: true,
 						UITileDefault: new ConsoleLib.Console.Renderable(ParentObject.Render));
 					// CommandEvent's cascade (17) NEVER reaches inventory (bugfix 2026-08-22, user:
@@ -206,7 +206,7 @@ namespace XRL.World.Parts
 			Uses = 0;
 			if (who.IsPlayer())
 			{
-				IComponent<GameObject>.AddPlayerMessage("You tip the new chalk into your box."); // DRAFT
+				IComponent<GameObject>.AddPlayerMessage("You tip the new chalk into your box."); // draft, approved 2026-09-30
 			}
 			// the crumble idiom for removing a box mid-event, belt included (spent boxes once
 			// lingered at zero; a merge husk carries the same risk)
@@ -257,7 +257,7 @@ namespace XRL.World.Parts
 					total += uses;
 				}
 			}
-			ent.DisplayName = "Draw with Chalk (" + total + ")"; // DRAFT format
+			ent.DisplayName = "Draw with Chalk (" + total + ")"; // format draft, approved 2026-09-30
 		}
 
 		public override bool HandleEvent(DroppedEvent E)
@@ -335,7 +335,7 @@ namespace XRL.World.Parts
 						}
 						else if (actor.IsPlayer())
 						{
-							Popup.ShowFail("You have no chalk."); // DRAFT
+							Popup.ShowFail("You have no chalk."); // draft, approved 2026-09-30
 						}
 					}
 				}
@@ -349,11 +349,11 @@ namespace XRL.World.Parts
 			{
 				if (actor.IsPlayer())
 				{
-					Popup.ShowFail(ParentObject.Does("are") + " empty."); // DRAFT
+					Popup.ShowFail(ParentObject.Does("are") + " empty."); // draft, approved 2026-09-30
 				}
 				return;
 			}
-			Cell target = PickDirection("Draw where?", actor); // DRAFT prompt (IComponent helper returns the cell)
+			Cell target = PickDirection("Draw where?", actor); // prompt draft, approved 2026-09-30 (IComponent helper returns the cell)
 			if (target == null || target == actor.CurrentCell)
 			{
 				return;
@@ -363,7 +363,7 @@ namespace XRL.World.Parts
 			{
 				if (actor.IsPlayer())
 				{
-					Popup.ShowFail("There is no clear floor there to chalk."); // DRAFT
+					Popup.ShowFail("There is no clear floor there to chalk."); // draft, approved 2026-09-30
 				}
 				return;
 			}
@@ -404,7 +404,7 @@ namespace XRL.World.Parts
 			{
 				if (actor != null && actor.IsPlayer())
 				{
-					IComponent<GameObject>.AddPlayerMessage("The last stick of chalk crumbles to dust."); // DRAFT
+					IComponent<GameObject>.AddPlayerMessage("The last stick of chalk crumbles to dust."); // draft, approved 2026-09-30
 				}
 				// instrumented (live-test 2026-08-22: spent boxes reported LINGERING at zero with
 				// no exception in the log) - record what Destroy actually does, and force the

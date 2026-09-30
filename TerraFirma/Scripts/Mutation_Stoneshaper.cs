@@ -614,7 +614,7 @@ namespace XRL.World.Parts.Mutation
 					st.BaseValue -= loss;
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", $"copy decay: gen {museGen + 1} statue loses {loss} {dingedStat} (muse was gen {museGen})");
 				if (Sculptor.IsPlayer())
-					XRL.Messages.MessageQueue.AddPlayerMessage("Some of the likeness is lost in the copying."); // DRAFT
+					XRL.Messages.MessageQueue.AddPlayerMessage("Some of the likeness is lost in the copying."); // draft, approved 2026-09-30
 			}
 
 			Statue.GetStat("Level").BaseValue = Sculptor.Level;

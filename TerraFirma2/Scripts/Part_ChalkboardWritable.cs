@@ -84,20 +84,20 @@ namespace XRL.World.Parts
 				Cleo_TerraFirma_ChalkBox box = Cleo_TerraFirma_ChalkBox.FindCarriedBox(actor);
 				if (box == null)
 				{
-					Popup.ShowFail("You have no chalk."); // DRAFT
+					Popup.ShowFail("You have no chalk."); // draft, approved 2026-09-30
 					return false;
 				}
-				// typed-or-markov pick, the etch menu's shape; these two OPTION LINES are DRAFT
+				// typed-or-markov pick, the etch menu's shape; these two OPTION LINES are draft, approved 2026-09-30
 				// (etching's own pair is USER VOICE and stays etching's)
 				int choice = Popup.PickOption(
 					Intro: "What would you like to write?", // approved 2026-09-30, base-shaped
-					Options: new string[] { "Write a message.", "Write from memory." }, // DRAFT
+					Options: new string[] { "Write a message.", "Write from memory." }, // draft, approved 2026-09-30
 					AllowEscape: true);
 				string text = null;
 				if (choice == 0)
 				{
 					text = Popup.AskString("Chalk your message. For example: \"live and drink\".", "", "Sounds/UI/ui_notification",
-						Cleo_TerraFirma_Etchable.TYPED_CHARS, null, Cleo_TerraFirma_Etchable.TYPED_MAX); // DRAFT
+						Cleo_TerraFirma_Etchable.TYPED_CHARS, null, Cleo_TerraFirma_Etchable.TYPED_MAX); // draft, approved 2026-09-30
 					if (text.IsNullOrEmpty())
 					{
 						return false;
@@ -129,7 +129,7 @@ namespace XRL.World.Parts
 				writing.Text = text;
 				// no write sfx by ruling 2026-08-22 (tattoo-gun placeholder removed; the sound
 				// pass picks a real one if any)
-				Popup.Show("You chalk \"" + text + "\" onto " + ParentObject.t() + "."); // DRAFT
+				Popup.Show("You chalk \"" + text + "\" onto " + ParentObject.t() + "."); // draft, approved 2026-09-30
 				// write beat AFTER the modal (bug catch 2026-08-23 "puffs are almost invisible":
 				// fired before Popup.Show, the whole 0.3s beat played out behind the popup);
 				// board profile throws full radius so the dust clears the board's own sprite.
@@ -164,8 +164,8 @@ namespace XRL.World.Parts
 			if (!Text.IsNullOrEmpty())
 			{
 				// Graffitied.AddGraffiti's frame verbatim (ruled 2026-08-22): infix prose, blank
-				// line, quote alone on its own line. One word swapped in the frame line (DRAFT,
-				// user's to reword); words fixed chalk-white where graffiti uses the spray color
+				// line, quote alone on its own line. One word swapped in the frame line (draft,
+				// approved 2026-09-30); words fixed chalk-white where graffiti uses the spray color
 				if (E.Infix.Length > 0)
 				{
 					E.Infix.Append("\n");
