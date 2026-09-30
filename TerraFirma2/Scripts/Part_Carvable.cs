@@ -69,9 +69,10 @@ namespace XRL.World.Parts
 			GameObject statue = muse == null ? null : Mutation.Cleo_TerraFirma_Stoneshaper.MakeStatueOfCreatureFromWall(muse, ParentObject, string.Empty, props);
 			if (statue == null || cell == null)
 			{
+				string subjectName = muse?.an() ?? "that";
 				muse?.Obliterate();
 				statue?.Obliterate();
-				return Actor.Fail("The stone will not take that shape.");
+				return Actor.Fail("You cannot carve a statue of " + subjectName + "."); // approved 2026-09-30, base-shaped (TattooGun "You cannot tattoo X.")
 			}
 			if (!worn.UseCharge(gauntlets.CarveCharge, LiveOnly: false, 0L))
 			{

@@ -124,7 +124,7 @@ namespace XRL.World.Parts
 				if (ParentObject.QueryCharge() < AnimationCost)
 				{
 					if (E.Actor.IsPlayer())
-						Popup.ShowFail(ParentObject.Does("lie") + " dormant; its cell wants for charge."); // DRAFT
+						Popup.ShowFail(ParentObject.Does("click", int.MaxValue, null, null, "merely") + "."); // approved 2026-09-30, base-shaped (IActivePart unpowered line)
 					return false;
 				}
 				GameObject pick;
@@ -160,7 +160,7 @@ namespace XRL.World.Parts
 				spot.AddObject(walker).MakeActive();
 				if (E.Actor.IsPlayer())
 				{
-					IComponent<GameObject>.AddPlayerMessage("You set " + pick.t() + " on the table. Stone hums against stone, and it steps down animate."); // DRAFT
+					IComponent<GameObject>.AddPlayerMessage("You imbue " + pick.t() + " with life."); // approved 2026-09-30, base-shaped (AnimateObject verbatim)
 				}
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("FIGTABLE",
 					$"animated {pick.Blueprint} -> {walker.DisplayNameOnlyStripped} (charge left {ParentObject.QueryCharge()})");

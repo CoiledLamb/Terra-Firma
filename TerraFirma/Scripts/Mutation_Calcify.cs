@@ -44,10 +44,10 @@ namespace XRL.World.Parts.Mutation
 			// REBALANCED 2026-08-06 (user: "calcify should fully copy the wall it's adjacent to if
 			// possible, including description and stats. it should no longer gain HP scaling per
 			// level"): the HP line and the 0 AV / -10 DV line retired with the stat overrides --
-			// walls now carry their blueprint's own numbers. Replacement line DRAFT, awaiting
-			// signoff. Cooldown lands last per the ~100%-of-base convention (2026-07-26 sitting).
+			// walls now carry their blueprint's own numbers. Replacement lines approved
+			// 2026-09-30. Cooldown lands last per the ~100%-of-base convention (2026-07-26 sitting).
 			// cooldown scales now (odd levels), so it earns the rules-wrap the flat 90 never had
-			return "Creates a contiguous line of walls in empty tiles starting adjacent to you\n" +
+			return "Creates a contiguous line of walls in empty tiles starting adjacent to you.\n" +
 				"Number created: {{rules|" + GetWallsCreated(Level) + "}}\n" +
 				"Cooldown: {{rules|" + GetCooldown(Level) + "}} rounds";
 		}
@@ -230,7 +230,7 @@ namespace XRL.World.Parts.Mutation
 				planBps.Add(bp ?? "Cleo_TerraFirma_WallCalcify");
 			}
 			// nothing empty to fill: refuse before the turn and cooldown are spent (audit 2026-09-29).
-			// Line DRAFT, shaped on PhotosyntheticSkin's "You need sunlight to bask in." and the
+			// Line approved 2026-09-30, shaped on PhotosyntheticSkin's "You need sunlight to bask in." and the
 			// card's "Only empty spaces will form walls."; Fail pops for the player, silent for NPCs.
 			if (planCells.Count == 0)
 				return ParentObject.Fail("You need empty spaces to calcify.");

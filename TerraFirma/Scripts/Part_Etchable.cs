@@ -257,7 +257,7 @@ namespace XRL.World.Parts
 			int toolTier = GetEtchToolTier(actor);
 			if (toolTier < 0)
 			{
-				actor.Fail("You want a hammer and a knife for that."); // DRAFT (safety branch; the verb is hidden without tools)
+				actor.Fail("You need a hammer and a knife to etch."); // approved 2026-09-30, base-shaped (PhotosyntheticSkin "You need sunlight to bask in."); safety branch, the verb is hidden without tools
 				return;
 			}
 			// bodied statues lead with the limb question, the tattoo gun's own idiom (user ruling
@@ -281,9 +281,9 @@ namespace XRL.World.Parts
 			bool reEtch = limb != null ? LimbInscriptions.ContainsKey(limb.ID) : !Inscription.IsNullOrEmpty();
 			// semi-flavored two-way pick per the ruling; the two OPTION LINES are the USER'S OWN
 			// VOICE (supplied + picked 2026-08-06, verbatim by standing rule -- do not polish);
-			// the intro lines remain DRAFT for the release text pass
+			// intro lines approved 2026-09-30 (base naming's "What would you like to name?" shape)
 			int choice = Popup.PickOption(
-				Intro: reEtch ? "Old words sit shallow in the stone." : "The face of the stone waits.", // DRAFT
+				Intro: reEtch ? "Something is already etched here. Etching again strikes it away." : "What would you like to etch?",
 				Options: new string[] { "Etch a message.", "Write from memory." },                      // USER VOICE, FINAL
 				AllowEscape: true);
 			string text = null;
@@ -302,7 +302,7 @@ namespace XRL.World.Parts
 				MarkovBook.EnsureCorpusLoaded(CORPUS);
 				if (!MarkovBook.CorpusData.TryGetValue(CORPUS, out MarkovChainData data))
 				{
-					IComponent<GameObject>.AddPlayerMessage("Nothing comes."); // DRAFT (corpus failed to load; logged by the engine)
+					IComponent<GameObject>.AddPlayerMessage("You can't think of anything to etch."); // approved 2026-09-30, base-shaped (corpus failed to load; logged by the engine)
 					return;
 				}
 				// reroll template leftovers (the "=name=" class of token) the way MarkovBook's

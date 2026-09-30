@@ -4,6 +4,6 @@
     "version": "0.1.0",
     "author": "Cleo, Ceres et al.",
     "dependencies": {
-        "Cleo_TerraFirma": "*"
+        "Cleo_TerraFirma": ">=0.2.0"
     }
 }

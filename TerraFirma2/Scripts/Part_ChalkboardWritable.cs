@@ -90,7 +90,7 @@ namespace XRL.World.Parts
 				// typed-or-markov pick, the etch menu's shape; these two OPTION LINES are DRAFT
 				// (etching's own pair is USER VOICE and stays etching's)
 				int choice = Popup.PickOption(
-					Intro: "The slate waits under a film of old dust.", // DRAFT
+					Intro: "What would you like to write?", // approved 2026-09-30, base-shaped
 					Options: new string[] { "Write a message.", "Write from memory." }, // DRAFT
 					AllowEscape: true);
 				string text = null;
@@ -108,7 +108,7 @@ namespace XRL.World.Parts
 					MarkovBook.EnsureCorpusLoaded(CORPUS);
 					if (!MarkovBook.CorpusData.TryGetValue(CORPUS, out MarkovChainData data))
 					{
-						IComponent<GameObject>.AddPlayerMessage("Nothing comes."); // DRAFT
+						IComponent<GameObject>.AddPlayerMessage("You can't think of anything to write."); // approved 2026-09-30, base-shaped
 						return false;
 					}
 					// reroll template leftovers, MarkovBook's own page-loop idiom
