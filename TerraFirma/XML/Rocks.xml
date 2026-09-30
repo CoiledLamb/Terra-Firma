@@ -41,4 +41,13 @@
 		<tag Name="PaintWith" Value="*" />
 		<tag Name="PaintPart" Value="Cleo_TerraFirma_StoneshaperWallProperties" />
 	</object>
+
+	<!-- SAVE-COMPAT ALIAS (2026-09-30). 0.1.2.5 Fissure dropped this "fallen rock" as its debris,
+	     but the blueprint was deleted 08-25 (base SmallBoulder took its place), so a 0.1.2.5
+	     save logged thousands of "Unknown Blueprint" errors, one per lookup of each old rock.
+	     Nothing spawns it; it exists so those rocks resolve. Their FallenRockPart stub copies
+	     this blueprint's description onto them at load. -->
+	<object Name="Cleo_TerraFirma_Rock_Generic" Inherits="SmallBoulder">
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
 </objects>
