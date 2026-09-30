@@ -1,0 +1,4 @@
+# Inserted by publish-beta.ps1 -Mod Release after the "it includes:" paragraph of TF2's
+# description, because the fused release carries part one's mutations too. Lines starting
+# with # are ignored. CLAUDE PROPOSAL 2026-09-30, awaiting the user's wording.
+mutations from part one: gorgon's gaze, earthen barrage, stoneshaper, geomancy, calcify, and fissure, plus the stonecarver calling.

@@ -3,7 +3,7 @@
 # obviously ai, and it's probably easier to just pull them out than find that voice").
 # The repo keeps every comment; this emits publish\TerraFirma + a dated zip.
 #
-#   powershell -NoProfile -ExecutionPolicy Bypass -File tools\publish-beta.ps1 [-Mod TF1|TF2|Both|Fused] [-CheckOnly]
+#   powershell -NoProfile -ExecutionPolicy Bypass -File tools\publish-beta.ps1 [-Mod TF1|TF2|Both|Fused|Release] [-CheckOnly]
 #
 # -CheckOnly: strip, validate and compile-check, then test the manifest rewrites on a temp
 # copy. No zip, and the staging folders (the upload sources) are left untouched.
@@ -28,6 +28,12 @@
 # file present in both aborts. It compile-checks as one assembly and never touches the
 # TF1/TF2 staging folders. Testers must not enable it alongside TF1 or TF2.
 #
+# -Mod Release (2026-09-30, user: the fused build ships as the update to the existing workshop
+# item): the same fused tree, staged into Mods\TerraFirmaBeta under Cleo_TerraFirmaBeta, so its
+# workshop.json and preview.png carry over. Front page is TF2's title and description, with the
+# line in design\workshop\release-mutations-line.txt inserted after "it includes:". It
+# overwrites the TF1 staging that -Mod TF1/Both writes; use one or the other.
+#
 # Steps: copy tree -> strip .cs (real lexer: strings, verbatim strings, interpolation
 # holes with nested strings all handled; line count preserved) -> scrub date tokens from
 # the surviving .cs text (RULED 2026-08-05: the 7 date-bearing runtime strings scrub in
@@ -40,7 +46,7 @@
 # before a zip is produced.
 
 param(
-    [ValidateSet("TF1", "TF2", "Both", "Fused")]
+    [ValidateSet("TF1", "TF2", "Both", "Fused", "Release")]
     [string]$Mod = "Both",
     [switch]$CheckOnly,
     [string]$RepoRoot = (Split-Path -Parent $PSScriptRoot),
@@ -65,6 +71,9 @@ $Mods = @{
     Fused = @{ Src = "TerraFirmaTest"; ZipName = "CoQ_TerraFirma_fusedtest"; Stage = "TerraFirmaTest";
              IdFrom = "Cleo_TerraFirmaTest"; IdTo = "Cleo_TerraFirmaTest"; DepRewrites = @{};
              Generated = $true; Title = "Terra Firma (fused test)" }
+    Release = @{ Src = "TerraFirmaRelease"; ZipName = "CoQ_TerraFirma_release"; Stage = "TerraFirmaBeta";
+             IdFrom = "Cleo_TerraFirmaBeta"; IdTo = "Cleo_TerraFirmaBeta"; DepRewrites = @{};
+             Generated = $true; FrontPage = "TF2" }
 }
 foreach ($k in $Mods.Keys) {
     if ($Mods[$k].Generated) { continue }
@@ -345,7 +354,17 @@ function Fuse-Mods($cfg) {
         $fused++
     }
     $m = Get-Content (Join-Path $tf1 "manifest.json") -Raw | ConvertFrom-Json
-    $manifest = [ordered]@{ id = $cfg.IdTo; title = $cfg.Title; description = $m.description; version = $m.version; author = $m.author }
+    $title = $cfg.Title
+    $description = $m.description
+    if ($cfg.FrontPage -eq "TF2") {
+        $front = Get-Content (Join-Path $tf2 "manifest.json") -Raw | ConvertFrom-Json
+        $title = $front.title
+        $insert = (Get-Content (Join-Path $RepoRoot "design\workshop\release-mutations-line.txt") | Where-Object { $_ -and -not $_.StartsWith("#") }) -join " "
+        $anchor = "it includes:`n`n"
+        if (-not $insert -or -not $front.description.Contains($anchor)) { throw "release front page: missing the mutations line or the 'it includes:' anchor -- fuse aborted" }
+        $description = $front.description.Replace($anchor, $anchor + $insert + "`n`n")
+    }
+    $manifest = [ordered]@{ id = $cfg.IdTo; title = $title; description = $description; version = $m.version; author = $m.author }
     [System.IO.File]::WriteAllText((Join-Path $dst "manifest.json"), ($manifest | ConvertTo-Json), (New-Object System.Text.UTF8Encoding $false))
     Write-Host "$($cfg.Src): fused $fused shared XML files TF1-first, added $added TF2 files"
 }
@@ -429,13 +448,15 @@ function Rewrite-Manifest([string]$manifestPath, $cfg) {
 $wantTF1 = $Mod -eq "TF1" -or $Mod -eq "Both"
 $wantTF2 = $Mod -eq "TF2" -or $Mod -eq "Both"
 $wantFused = $Mod -eq "Fused"
+$wantRelease = $Mod -eq "Release"
 Strip-Mod $Mods.TF1                     # always: TF2 and the fused build compile against it
-if ($wantTF2 -or $wantFused) { Strip-Mod $Mods.TF2 }
-Compile-Check ($wantTF2 -or $wantFused)
+if ($wantTF2 -or $wantFused -or $wantRelease) { Strip-Mod $Mods.TF2 }
+Compile-Check ($wantTF2 -or $wantFused -or $wantRelease)
 if ($wantFused) { Fuse-Mods $Mods.Fused; Compile-Fused $Mods.Fused }
+if ($wantRelease) { Fuse-Mods $Mods.Release; Compile-Fused $Mods.Release }
 if ($CheckOnly) {
-    foreach ($k in @("TF1", "TF2", "Fused")) {
-        if (($k -eq "TF1" -and -not $wantTF1) -or ($k -eq "TF2" -and -not $wantTF2) -or ($k -eq "Fused" -and -not $wantFused)) { continue }
+    foreach ($k in @("TF1", "TF2", "Fused", "Release")) {
+        if (($k -eq "TF1" -and -not $wantTF1) -or ($k -eq "TF2" -and -not $wantTF2) -or ($k -eq "Fused" -and -not $wantFused) -or ($k -eq "Release" -and -not $wantRelease)) { continue }
         $tmp = Join-Path $pubRoot "_manifestcheck_$k.json"
         Copy-Item (Join-Path $pubRoot "$($Mods[$k].Src)\manifest.json") $tmp -Force
         Rewrite-Manifest $tmp $Mods[$k]
@@ -447,4 +468,5 @@ if ($CheckOnly) {
 if ($wantTF1) { Release-Mod $Mods.TF1 }
 if ($wantTF2) { Release-Mod $Mods.TF2 }
 if ($wantFused) { Release-Mod $Mods.Fused }
+if ($wantRelease) { Release-Mod $Mods.Release }
 Write-Host "publish OK ($Mod)"
