@@ -1,9 +1,13 @@
-Paste into the Steam page at TF2's first upload (the game writes workshop.json then).
-Same text as TerraFirma2/manifest.json, with Qud markup swapped for Steam BBCode.
+The Steam page text for the fused release (item 3778701376). Already written into
+Mods\TerraFirmaBeta\workshop.json 2026-09-30, which the in-game uploader sends; kept here
+because that file lives outside the repo. Generated from publish-beta -Mod Release's
+manifest with Qud markup swapped for Steam BBCode.
 
 "...you hear the distant ring of hammers, the scuttling of a thousand legs. the salt winds of change blow, wayfarer. will you follow them?"
 
 this is the [b]beta[/b] version of terra firma's expansion, diaspora of the stone. it includes:
+
+mutations: gorgon's gaze, earthen barrage, stoneshaper, geomancy, calcify, and fissure, plus the stonecarver calling.
 
 new worldgen: warrens - the desert canyons are now home to 25 cavehomes each game. some will be flourishing, others will be abandoned. they are also home to...
 
