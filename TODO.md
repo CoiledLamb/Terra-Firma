@@ -104,6 +104,7 @@ Handoff from the release-audit session (2026-09-29/30). Newer than the 09-16 sna
   Watch item, 2026-09-29: a 50/50 mole:human mix across all roles is under consideration, held until mole tunneling (PathAsBurrower) is seen in play. If picked: one pickone row per role at 1:1 with the role's current count, so crew size holds; the outrider post goes 1:1 too.
 
 - [ ] **B18 — Wire the seismophone and grinder shotgun sprites.** User 2026-09-30 item pass: the seismophone shows base `Items/sw_teleprojector.bmp` instead of the user's own sprite, and the grinder shotgun (`Cleo_TerraFirma_Gravel Shotgun`, no Render override) shows the inherited Pump Shotgun art instead of billy checkers' sprite. Neither png is in the repo, the live mod folders or git history. Finish: both files in `TerraFirma2/Textures`, blueprints pointing at them, seen in game.
+  Built 2026-09-30: user added `seismophone.png` and `grindershotgun.png` (16x24 two-color); moved from TF1 to `TerraFirma2/Textures` since both are TF2 items. Seismophone `Tile` swapped (keeps &y/c); grinder shotgun gets its own `Tile`, colors still inherited from Pump Shotgun (&K/w). Both builds 0 errors, XML/text checks passed, deployed to TF2 with hashes matched. Awaiting a look in game.
 
 ## Content awaiting its own design/build sitting
 

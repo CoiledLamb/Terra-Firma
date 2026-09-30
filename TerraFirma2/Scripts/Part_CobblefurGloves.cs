@@ -18,9 +18,9 @@ namespace XRL.World.Parts
 	[Serializable]
 	public class Cleo_TerraFirma_CobblefurGloves : IPart
 	{
-		/// <summary>Flat catch chance per incoming thrown rock. DRAFT 25 (numbers sitting owed).
+		/// <summary>Flat catch chance per incoming thrown rock. 50, user 2026-09-30 (was DRAFT 25).
 		/// Uncontested by design (user: "0/1 statline, since it's completely uncontested").</summary>
-		public int Chance = 25;
+		public int Chance = 50;
 
 		public override bool SameAs(IPart p)
 		{

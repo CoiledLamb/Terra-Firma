@@ -4,7 +4,7 @@
 	     Description approved 2026-09-08; CLAUDE PROPOSAL: inherited art/value/tier.
 	     Acquisition: inherited Guns tag plus quarry provisioner stock. -->
 	<object Name="Cleo_TerraFirma_Gravel Shotgun" Inherits="Pump Shotgun">
-		<part Name="Render" DisplayName="grinder shotgun" />
+		<part Name="Render" DisplayName="grinder shotgun" Tile="grindershotgun.png" /> <!-- billy checkers sprite 2026-09-30; colors inherit Pump Shotgun (&amp;K, w) -->
 		<part Name="Description" Short="A stone grinder has been fitted onto the familiar shape of a pump shotgun. A percussive shriek accompanies the pull of its trigger as a hail of pebbles spews from its maw." />
 		<removepart Name="MagazineAmmoLoader" />
 		<part Name="Cleo_TerraFirma_GravelAmmoLoader" StoneBlueprints="Small Stone,Large Stone" ProjectileObject="Cleo_TerraFirma_GravelProjectile" WeightPerBurst="5" ReloadEnergy="1000" />
@@ -122,7 +122,7 @@ Perishes when unequipped." />
 	     the stonecarver kit-spread lane stay unwired, that lane is its own docket. -->
 	<object Name="Cleo_TerraFirma_Seismophone" Inherits="BaseHelmet">
 		<part Name="Armor" AV="0" DV="1" WornOn="Head" />
-		<part Name="Render" DisplayName="seismophone" RenderString="]" ColorString="&amp;y" TileColor="&amp;y" DetailColor="c" Tile="Items/sw_teleprojector.bmp" /> <!-- base teleprojector tile (coiled antennae read as listening wire); CLAUDE pick per the art-bar ruling, bespoke sprite lands if the user makes one -->
+		<part Name="Render" DisplayName="seismophone" RenderString="]" ColorString="&amp;y" TileColor="&amp;y" DetailColor="c" Tile="seismophone.png" /> <!-- user sprite 2026-09-30, replacing the base teleprojector placeholder -->
 		<part Name="Physics" Weight="2" />
 		<part Name="Commerce" Value="150" />
 		<part Name="Description" Short="An aluminum sheath enclosing a glittering filament connects to a whispering ear. When pressed against the earth, it speaks." />

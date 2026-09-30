@@ -5,7 +5,7 @@
        All three: Fur part + organic + AddsRep Baboons -100 per piece (quartzfur precedent;
        wearing dead monkey angers living monkeys, stacks per piece worn = self-balancing).
        Tiles are recolored base PLACEHOLDERS, sprite debt filed for all three.
-       Numbers all DRAFT (numbers sitting): gloves Chance 25, cloak conditional DV 2
+       Numbers DRAFT (numbers sitting) except gloves Chance 50 (user 2026-09-30, up from 25); cloak conditional DV 2
        (Yurtmat parity), commerce/tier modest; bracer is +2 throw range, USER NUMBER
        2026-08-22 (see the bracer's own comment below). Descriptions are user text 2026-09-29. -->
     <object Name="Cleo_TerraFirma_Cobblefur Bracer" Inherits="BaseArmlet">
@@ -37,7 +37,7 @@
     <part Name="Description" Short="Grit-caked flesh was carved from a dead baboon and sewn into a pair of gloves." /> <!-- USER TEXT 2026-09-29, quartzfur echo -->
     <part Name="Physics" Weight="5" Organic="true" />
     <part Name="Fur" />
-    <part Name="Cleo_TerraFirma_CobblefurGloves" Chance="25" />
+    <part Name="Cleo_TerraFirma_CobblefurGloves" Chance="50" />
     <part Name="AddsRep" Faction="Baboons" Value="-100" />
     <tag Name="EquipSound" Value="sfx_equip_armor_fur" />
     <tag Name="Tier" Value="2" />
