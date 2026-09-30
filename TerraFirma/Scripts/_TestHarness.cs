@@ -32,30 +32,22 @@ namespace Cleo.TerraFirma.Scripts
 	[HasWishCommand]
 	public class TestHarnessWishes
 	{
-		private const string SCAV_AMMO_BP = "Cleo_TerraFirma_Rock_Pebbles";   // was Rock_Generic (deleted 2026-08-25); scavenger tests need a FallenRockPart carrier
+		private const string SCAV_AMMO_BP = "Cleo_TerraFirma_Rock_Pebbles";
 		private const string BABOON_BP = "Baboon";
 		private const string SPAWN_MARK = "TFHarnessSpawn";
-		private const string STATUETTE_BP = "Cleo_TerraFirma_Rock_BaboonFigurine";
-		private const string FIGURINE_ITEM_BP = "Cleo_TerraFirma_BaboonFigurineItem";
-		private const string APE_BP = "Cleo_TerraFirma_Rock_ApeStatue";
 		private const string RUBBLE_BP = "Cleo_TerraFirma_Rock_Rubble";
 		private const string PEBBLES_BP = "Cleo_TerraFirma_Rock_Pebbles";
-		private const string DULLTEST_BP = "Cleo_TerraFirma_Rock_Pebbles";   // was GENERIC_BP = Rock_Generic (deleted 2026-08-25); the dull test needs a FallenRockPart carrier
 		private const string ROBOT_BP = "Scrapbot";
 		private const string MOTH_BP = "Glowmoth";
 
 		[WishCommand(Command = "tfverify")]
 		public static void Help()
 		{
-			MessageQueue.AddPlayerMessage("TF harness (BETA TRIM 2026-08-02; catalog dev doors PARKED on branch quarantine-hold 2026-08-22) -- instant: tfquick (pockets+rep), tffeedback (2026-08-07 batch: Husangeion name/bleed, statue popup tag, rough-vs-tier look-text, gaze-wall lockout belt), tfredoubt (8 scripted casts: ring census by band, push/stun, carve depth, water displacement -- chews nearby natural stone). Turn-driven: tfform (5t), tfshape (Stoneshaper, 3t; incl. shape.mourning swap-quiet stamp), tffis (NPC caster, 20t), tfscav (30t, you are the target). tfbatch = the surviving set, ~60 turns standing still, ends with ONE 'BATCH COMPLETE' verdict line for the quick boot-and-test loop. Stage-for-eyes: tfgazewall (plain + animated holo wall, you cast the gaze). Diagnostic: tfstatueai (12t, statue-AI inertness repro: control + animated-wall + miner muses, snapshot + tick telemetry). Peek: tfspore (pure read).", "W");
+			MessageQueue.AddPlayerMessage("TF harness (restructured 2026-09-30) -- instant: tfaudit (entomb, gaze release, barrage lease, calcify refusal, whorl swat of a pebble), tfredoubt (ring census by band, push/stun, water displacement, pebbles; chews nearby natural stone), tfshape (carve cost, swap, expiry, L10 permanence, limb re-arm, copy decay; swaps out your live statue). Turn-driven: tffis (NPC caster, 20t), tfscav (30t, you are the target). tfbatch = all of it, ~50 turns standing still, ends with ONE BATCH COMPLETE line. Diagnostic: tfstatueai (20t). Dev door: tfnpc. Round trip: tfserial (overwrites the quicksave).", "W");
 			if (!Helpers.VERIFY_WATCH)
 				MessageQueue.AddPlayerMessage("VERIFY_WATCH is OFF -- the harness is disabled.", "R");
 		}
 
-		/// <summary>Fungal-lottery state peek (user request 2026-07-25, for the save-quit-reload
-		/// experiment): a PURE READ of the stored permutation -- prints to chat and the watcher,
-		/// never rolls, never writes, so it cannot contaminate the experiment. EMPTY is itself an
-		/// answer: no fungal rock has been minted this boot (creation is what rolls the lottery).</summary>
 		/// <summary>NPC-caster spawner (2026-08-06, riding the advertisement pass: RandomMutations
 		/// rolls are random, so eyeballing NPC casts needs a deterministic door). "tfnpc gorgon 4"
 		/// spawns a hostile snapjaw beside the player carrying the named mutation at the given
@@ -100,11 +92,9 @@ namespace Cleo.TerraFirma.Scripts
 			Helpers.VerifyLog("NPC", $"tfnpc spawned Snapjaw + {mutation.GetType().Name} Lv{level} @({spot.X},{spot.Y})");
 		}
 
-		/// <summary>The full sweep, BETA TRIM shape (redoubt pivot, RULED 2026-08-02): three
-		/// synchronous scenarios, then the turn-driven four chained through the driver's queue.
-		/// Held-content scenarios (streak/strange/spill/puddle/mine/tar/devour/eat/hopper/carom)
-		/// PARKED on branch quarantine-hold 2026-08-22 with the catalog; restore from that branch.
-		/// Pre-trim chain at tag fissure-v2-grenade.</summary>
+		/// <summary>The full sweep (restructured 2026-09-30 around what is still owed): three
+		/// synchronous batteries (audit, redoubt, shape), then the turn-driven two (fis, scav)
+		/// chained through the driver's queue. Ends with ONE 'BATCH COMPLETE' verdict line.</summary>
 		[WishCommand(Command = "tfbatch")]
 		public static void Batch()
 		{
@@ -114,340 +104,426 @@ namespace Cleo.TerraFirma.Scripts
 			BatchFail = 0;
 			BatchFails.Clear();
 			BatchActive = true;
-			QuickSync();
-			FeedbackSync();
+			AuditSync();
 			RedoubtSync();
-			SetupShape(The.Player, "fis,scav"); // form held in quarantine/ 2026-09-30
+			ShapeSync();
+			SetupFis(The.Player, "scav");
 		}
 
-		// ---------------------------------------------------------------- round 3, synchronous
+		// ---------------------------------------------------------------- audit battery (synchronous)
 
-		/// <summary>The quick shelf, beta-trim shape: baboon pocket counts (inverted at the
-		/// pivot) + figurine rep-on-take. Two asserts, one wish, no turns. (heal/cage asserts
-		/// and the quickape chain are BETA-HELD with their rocks.)</summary>
-		[WishCommand(Command = "tfquick")]
-		public static void Quick()
+		/// <summary>The 2026-09-29 audit fixes plus the entomb regression and the 09-30 pebble
+		/// swat: gaze.entomb, gaze.release, barrage.lease, calcify.refusal, whorl.swat.</summary>
+		[WishCommand(Command = "tfaudit")]
+		public static void Audit()
 		{
 			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
-			QuickSync();
+			AuditSync();
 		}
 
-		internal static void QuickSync()
+		internal static void AuditSync()
 		{
 			GameObject ply = The.Player;
 			Cell origin = ply?.CurrentCell;
 			if (origin == null)
 				return;
-
-			// pockets, INVERTED at the redoubt pivot (RULED 2026-08-02: mod-rock pockets CUT,
-			// plain Small Stones kept -- "let them keep their stones"): the merge still reaches
-			// Hulking by inheritance but NOT Quartz; now it must deliver ZERO mod rocks and
-			// 2-3 base-game Small Stones.
-			GameObject hulk = GameObject.Create("Hulking Baboon");
-			GameObject quartz = GameObject.Create("Quartz Baboon");
-			int hulkRocks = CountModRocks(hulk);
-			int quartzRocks = CountModRocks(quartz);
-			int hulkPlain = 0;
-			if (hulk?.Inventory != null)
-				foreach (GameObject item in hulk.Inventory.GetObjects())
-					if (item.Blueprint == "Small Stone")
-						hulkPlain += item.Count;
-			Report("quick.pockets", hulkRocks == 0 && quartzRocks == 0 && hulkPlain >= 2,
-				$"Hulking Baboon spawns with {hulkRocks} mod rock(s) (want 0 post-pivot) and {hulkPlain} Small Stone(s) (want >=2), Quartz Baboon with {quartzRocks} mod rock(s) (want 0 -- outside the merge)");
-			hulk?.Obliterate();
-			quartz?.Obliterate();
-
-			// quick.rep (baboon figurine rep-on-take) held in quarantine/ 2026-09-30 with the figurine
-
-			// BETA-HELD quick.heal + quick.cage (healstone, aegischist) PARKED on branch
-			// quarantine-hold 2026-08-22 with the catalog; restore from that branch.
-		}
-
-		/// <summary>The 2026-08-07 Discord-feedback batch, synchronous: Husangeion rename (ASCII-only
-		/// after the H-root-sk-theta-vos glyph bug: the classic font draws by raw codepoint, so any
-		/// accented char renders as CP437 salad) + salt-trace bleed with the producer left pure ·
-		/// statue blueprint popup-eligible again (blanket NoFollowerDeathPopup deleted per the
-		/// popup-on-expiry ruling) · rough carves read "crudely depicts" while other tiers keep the
-		/// base "intricately" (tier-1-only ruling). The swap-quiet property stamp is asserted in
-		/// tfshape (shape.mourning), where a real swap-carve runs.</summary>
-		[WishCommand(Command = "tffeedback")]
-		public static void Feedback()
-		{
-			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			FeedbackSync();
-		}
-
-		internal static void FeedbackSync()
-		{
-			GameObject ply = The.Player;
-			Cell origin = ply?.CurrentCell;
-			if (origin == null)
-				return;
-
-			// Husangeion: rename landed, name stays renderable, bleed carries the salt trace
-			GameObject boar = GameObject.Create("Cleo_TerraFirma_BoarVessel");
-			if (boar == null)
-			{
-				Report("feedback.boar", false, "SETUP FAIL - boar vessel blueprint would not spawn");
-			}
-			else
-			{
-				string name = boar.Render?.DisplayName ?? "";
-				bool ascii = true;
-				foreach (char ch in name)
-					if (ch < ' ' || ch > '~') { ascii = false; break; }
-				Report("feedback.boarname", name == "Husangeion" && ascii,
-					$"display name '{name}' (want 'Husangeion', pure ASCII)");
-				string bleed = boar.GetPropertyOrTag("BleedLiquid", "");
-				LiquidProducer producer = boar.GetPart<LiquidProducer>();
-				bool saltTrace = bleed == "water-900,salt-100";
-				bool purePour = producer != null && producer.Liquid == "water";
-				Report("feedback.boarbleed", saltTrace && purePour,
-					$"BleedLiquid='{bleed}' (want water-900,salt-100, the ruled salt trace), producer liquid='{(producer == null ? "MISSING" : producer.Liquid)}' (want water -- the drinkable cargo stays pure)");
-				// mood-ring glaze (2026-08-07; empty rule settled third-round on NEGATIVE SPACE,
-				// "the channels fluid runs through"): part mounted, and a fresh boar's detail
-				// matches its rolled cargo -- B over water, k over an empty tank (StartVolume
-				// 1d33-1 CAN roll zero). Cider/wine tints are eyes-on -- pour and watch.
-				bool tintMounted = boar.HasPart<Cleo_TerraFirma_VesselTint>();
-				string detailNow = boar.Render?.DetailColor ?? "?";
-				bool hasCargo = (boar.LiquidVolume?.Volume ?? 0) > 0;
-				string wantDetail = hasCargo ? "B" : "k";
-				Report("feedback.boartint", tintMounted && detailNow == wantDetail,
-					$"VesselTint part {(tintMounted ? "mounted" : "MISSING")}, fresh-boar detail '{detailNow}' over {(hasCargo ? "water cargo (want B)" : "an empty tank (want k, the empty channels)")}");
-				// it/its ruling, same day: Gender tag rides the blueprint
-				string gender = boar.GetPropertyOrTag("Gender", "");
-				Report("feedback.boargender", gender == "neuterperson",
-					$"Gender='{gender}' (want neuterperson -- the base creature it/its idiom)");
-				boar.Obliterate();
-			}
-
-			// statue blueprint: the mourning popup is eligible again (blanket tag deleted)
-			GameObject inert = GameObject.Create("Cleo_TerraFirma_StoneshaperStatue");
-			bool loud = inert != null && !inert.HasTagOrProperty("NoFollowerDeathPopup");
-			Report("feedback.mourntag", loud, loud
-				? "statue blueprint carries NO blanket NoFollowerDeathPopup (combat + expiry popups restored)"
-				: "statue blueprint STILL blanket-tagged -- the popup ruling is not in effect");
-			if (inert != null) inert.Obliterate();
-
-			// tier look-text: rough diverges to "crudely", every other tier keeps the base sentence
-			List<Cell> open = origin.GetLocalAdjacentCells();
-			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
-			if (open.Count < 1)
-			{
-				Report("feedback.look", false, "SETUP FAIL - no open adjacent cell for the test wall");
-				return;
-			}
-			GameObject wall = GameObject.Create("Sandstone");
-			open[0].AddObject(wall);
-			GameObject muse = GameObject.Create(BABOON_BP);
-			muse.SetIntProperty(SPAWN_MARK, 1);
-			GameObject rough = XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper.MakeStatueOfCreatureFromWall(muse, wall, "rough");
-			string roughDesc = rough?.GetPart<Description>()?._Short ?? "";
-			bool crude = roughDesc.Contains("crudely depicts") && !roughDesc.Contains("intricately");
-			Report("feedback.roughlook", crude, crude
-				? "rough carve reads 'crudely depicts' with no 'intricately' residue"
-				: $"rough carve look-text WRONG: '{Snip(roughDesc)}'");
-			GameObject fine = XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper.MakeStatueOfCreatureFromWall(muse, wall, "fine");
-			string fineDesc = fine?.GetPart<Description>()?._Short ?? "";
-			bool untouched = fineDesc.Contains("intricately depicts") && !fineDesc.Contains("crudely");
-			Report("feedback.tierlook", untouched, untouched
-				? "fine carve keeps the base 'intricately depicts' (tier-1-only divergence holds)"
-				: $"fine carve look-text WRONG: '{Snip(fineDesc)}'");
-			if (rough != null && GameObject.Validate(rough)) rough.Obliterate();
-			if (fine != null && GameObject.Validate(fine)) fine.Obliterate();
-			if (GameObject.Validate(muse)) muse.Obliterate();
-			if (GameObject.Validate(wall)) wall.Obliterate();
-
-			// gaze-wall lockout regression (major bug 2026-08-07): a brainless gaze target must
-			// RELEASE on the first tick, never NRE the action loop into the endless pass cycle.
-			// BeginGaze bypasses the command gate ON PURPOSE -- this drives the TickGaze belt,
-			// the same path that self-heals a save made inside the lockout.
-			if (open.Count < 2)
-			{
-				Report("feedback.gazewall", false, "SETUP FAIL - need two open adjacent cells for the gaze rig");
-				return;
-			}
-			GameObject gorgon = GameObject.Create("Snapjaw");
-			gorgon.SetIntProperty(SPAWN_MARK, 1);
-			open[1].AddObject(gorgon);
-			var gaze = new XRL.World.Parts.Mutation.Cleo_TerraFirma_GorgonsGaze();
-			gorgon.RequirePart<Mutations>().AddMutation(gaze, 4);
-			GameObject holoWall = GameObject.Create("HolographicShaleWall");
-			holoWall.SetIntProperty(SPAWN_MARK, 1);
-			open[0].AddObject(holoWall);
-			bool released;
-			string gazeDetail;
+			bool suppressed = Popup.Suppress;
+			Popup.Suppress = true;
+			Cleo_TerraFirma_StoneRiseFX.HarnessMute = true;
 			try
 			{
-				gaze.BeginGaze(holoWall);
-				gaze.TickGaze();
-				released = gaze.Target == null;
-				gazeDetail = released
-					? "brainless HolographicShaleWall released on tick one (no NRE, no lockout)"
-					: $"gaze STILL HOLDS {gaze.Target?.Blueprint ?? "?"} after the tick -- the release belt did not fire";
+				AuditEntomb();
+				AuditGazeRelease(origin);
+				AuditBarrageLease();
+				AuditCalcifyRefusal(origin);
+				AuditWhorlSwat(ply, origin);
 			}
-			catch (Exception ex)
+			finally
 			{
-				released = false;
-				gazeDetail = $"tick THREW {ex.GetType().Name} -- the endless-pass lockout is live ({ex.Message})";
+				Cleo_TerraFirma_StoneRiseFX.HarnessMute = false;
+				Popup.Suppress = suppressed;
+				SweepSpawns(origin.ParentZone);
 			}
-			Report("feedback.gazewall", released, gazeDetail);
-			if (GameObject.Validate(holoWall)) holoWall.Obliterate();
-			if (GameObject.Validate(gorgon)) gorgon.Obliterate();
+		}
 
-			// entombment regression (user report 2026-08-15: "armor should be lootable"). The old
-			// code cleared the equip SLOT and handed the item to nobody, so worn gear was destroyed
-			// by petrification while the backpack survived. Worn item must end up inside the statue.
-			GameObject victim = GameObject.Create("Snapjaw");
-			victim.SetIntProperty(SPAWN_MARK, 1);
+		private static List<Cell> OpenAround(Cell origin, int radius)
+		{
+			List<Cell> open = new List<Cell>(origin.GetLocalAdjacentCells(radius));
+			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
+			return open;
+		}
+
+		private static GameObject Spawn(string blueprint, Cell c = null)
+		{
+			GameObject o = GameObject.Create(blueprint);
+			if (o == null)
+				return null;
+			o.SetIntProperty(SPAWN_MARK, 1);
+			c?.AddObject(o);
+			return o;
+		}
+
+		/// <summary>Entombment regression (user report 2026-08-15: "armor should be lootable"):
+		/// petrified gear, worn and carried, must end up inside the statue.</summary>
+		private static void AuditEntomb()
+		{
+			GameObject victim = Spawn("Snapjaw");
 			GameObject worn = GameObject.Create("Leather Armor");
 			GameObject carried = GameObject.Create("Leather Boots");
-			GameObject tomb = GameObject.Create("Cleo_TerraFirma_QuarriedBlock");
-			tomb.SetIntProperty(SPAWN_MARK, 1);
+			GameObject tomb = Spawn("Cleo_TerraFirma_QuarriedBlock");
 			victim.ReceiveObject(worn);
 			victim.ReceiveObject(carried);
 			bool equipped = victim.ForceEquipObject(worn, "Body", Silent: true);
 			StatueHelpers.EntombPossessions(victim, tomb);
 			bool wornInTomb = tomb.Inventory != null && tomb.Inventory.GetObjectsDirect().Contains(worn);
 			bool carriedInTomb = tomb.Inventory != null && tomb.Inventory.GetObjectsDirect().Contains(carried);
-			string entombDetail =
+			string detail =
 				!equipped ? "SETUP FAIL - could not equip the test armor on a Snapjaw body" :
-				(wornInTomb && carriedInTomb) ? "worn armor AND carried boots both entombed (the orphaning bug stays fixed)" :
-				!wornInTomb ? "WORN ARMOR LOST - it never reached the statue, the slot-clear orphan is back" :
+				(wornInTomb && carriedInTomb) ? "worn armor AND carried boots both entombed" :
+				!wornInTomb ? "WORN ARMOR LOST - it never reached the statue" :
 				"carried item lost - the inventory sweep broke";
-			Report("feedback.entomb", equipped && wornInTomb && carriedInTomb, entombDetail);
+			Report("gaze.entomb", equipped && wornInTomb && carriedInTomb, detail);
 			if (GameObject.Validate(tomb)) tomb.Obliterate();
 			if (GameObject.Validate(victim)) victim.Obliterate();
 		}
 
-		private static string Snip(string s) => s.IsNullOrEmpty() ? "(empty)" : (s.Length > 90 ? s.Substring(0, 90) + "..." : s);
-
-		/// <summary>Manual staging for the gaze-wall fix (user test design 2026-08-07): one PLAIN
-		/// HolographicShaleWall (gaze it -> expect "You cannot transfix..." with NO cooldown burn)
-		/// and one ANIMATED one (gaze it -> expect a normal petrify duel; animation grants Brain +
-		/// donor stats and strips HologramInvulnerability). Eyes-on wish -- you cast the gaze.</summary>
-		[WishCommand(Command = "tfgazewall")]
-		public static void GazeWallStage()
+		/// <summary>Audit fix 2026-09-29 (Effect_Petrifying EndTurn): a victim whose gazer is
+		/// still alive but no longer in its zone must release itself. Control first: with the
+		/// gazer present, the effect holds.</summary>
+		private static void AuditGazeRelease(Cell origin)
 		{
-			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			GameObject ply = The.Player;
-			Cell origin = ply?.CurrentCell;
-			if (origin == null)
-				return;
-			List<Cell> open = origin.GetLocalAdjacentCells();
-			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
-			if (open.Count < 2)
-			{
-				MessageQueue.AddPlayerMessage("tfgazewall: need two open adjacent cells.", "R");
-				return;
-			}
-			GameObject plain = GameObject.Create("HolographicShaleWall");
-			open[0].AddObject(plain);
-			GameObject animated = GameObject.Create("HolographicShaleWall");
-			open[1].AddObject(animated);
-			AnimateObject.Animate(animated);
-			Helpers.VerifyLog("GAZE", $"tfgazewall staged: plain wall @({open[0].X},{open[0].Y}), animated wall @({open[1].X},{open[1].Y})");
-			MessageQueue.AddPlayerMessage($"Staged: PLAIN holographic shale at ({open[0].X},{open[0].Y}) -- gaze must refuse, no cooldown; ANIMATED at ({open[1].X},{open[1].Y}) -- gaze must duel normally.", "W");
+			List<Cell> open = OpenAround(origin, 2);
+			if (open.Count < 2) { Report("gaze.release", false, "SETUP FAIL - need two open cells within 2"); return; }
+			GameObject gazer = Spawn("Snapjaw", open[0]);
+			GameObject victim = Spawn("Snapjaw", open[1]);
+			XRL.World.Effects.Cleo_TerraFirma_Petrifying effect = new XRL.World.Effects.Cleo_TerraFirma_Petrifying(gazer);
+			bool applied = victim.ApplyEffect(effect);
+			EndTurnEvent.Send(victim);
+			bool heldWhilePresent = applied && !effect.Receding;
+			gazer.CurrentCell.RemoveObject(gazer); // alive, but in no zone: the teleport-away shape
+			EndTurnEvent.Send(victim);
+			bool releasedWhenGone = effect.Receding;
+			Report("gaze.release", heldWhilePresent && releasedWhenGone,
+				!applied ? "SETUP FAIL - Petrifying would not apply to a Snapjaw"
+				: $"gazer present: {(heldWhilePresent ? "effect holds" : "RELEASED EARLY")}; gazer out of the zone: {(releasedWhenGone ? "effect recedes on its own" : "STILL HELD (the stuck-victim trap is back)")}");
+			if (GameObject.Validate(gazer)) gazer.Obliterate();
 		}
+
+		/// <summary>Audit fix 2026-09-29 (EarthenBarrage.Unmutate): stones still held when the
+		/// mutation goes get the promised 50-100 round lease, not the 9999 held-sustain lease.</summary>
+		private static void AuditBarrageLease()
+		{
+			GameObject holder = Spawn("Snapjaw");
+			Mutations mutations = holder.RequirePart<Mutations>();
+			XRL.World.Parts.Mutation.Cleo_TerraFirma_EarthenBarrage eb = new XRL.World.Parts.Mutation.Cleo_TerraFirma_EarthenBarrage();
+			mutations.AddMutation(eb, 4);
+			GameObject stone = GameObject.Create("Cleo_TerraFirma_EphemeralStone");
+			stone.RequirePart<XRL.World.Parts.Temporary>().Duration = 9999;
+			holder.ReceiveObject(stone);
+			mutations.RemoveMutation(eb);
+			XRL.World.Parts.Temporary lease = GameObject.Validate(stone) ? stone.GetPart<XRL.World.Parts.Temporary>() : null;
+			int d = lease?.Duration ?? -1;
+			Report("barrage.lease", d >= 50 && d <= 100,
+				lease == null ? "stone or its Temporary lease VANISHED on removal" : $"held stone lease after the mutation left: {d} (want 50-100, not 9999)");
+			if (GameObject.Validate(stone)) stone.Obliterate();
+			holder.Obliterate();
+		}
+
+		/// <summary>Audit fix 2026-09-29 (Calcify command): an NPC whose whole wall line is
+		/// occupied must refuse without spending its turn or cooldown. Positive control after:
+		/// clear the line and the same cast lands walls and takes the cooldown.</summary>
+		private static void AuditCalcifyRefusal(Cell origin)
+		{
+			Zone zone = origin.ParentZone;
+			Cell casterCell = null, anchor = null, targetCell = null;
+			foreach (Cell c in OpenAround(origin, 4))
+			{
+				Cell a = c.GetCellFromDirection("E");
+				Cell b = a?.GetCellFromDirection("E");
+				if (a == null || b == null || a.ParentZone != zone || b.ParentZone != zone)
+					continue;
+				if (a.IsSolid() || b.IsSolid() || a.HasObjectWithPart("Combat") || b.HasObjectWithPart("Combat") || b == origin || a == origin)
+					continue;
+				casterCell = c; anchor = a; targetCell = b;
+				break;
+			}
+			if (casterCell == null) { Report("calcify.refusal", false, "SETUP FAIL - no open three-cell east lane within 4"); return; }
+			GameObject caster = Spawn("Snapjaw", casterCell);
+			GameObject threat = Spawn("Snapjaw", targetCell);
+			XRL.World.Parts.Mutation.Cleo_TerraFirma_Calcify calc = new XRL.World.Parts.Mutation.Cleo_TerraFirma_Calcify();
+			caster.RequirePart<Mutations>().AddMutation(calc, 1);
+			ActivatedAbilityEntry entry = caster.ActivatedAbilities?.GetAbility(calc.ActivatedAbilityID);
+			// block the whole candidate line: the anchor and its north/south flanks
+			List<GameObject> blockers = new List<GameObject>();
+			List<Cell> line = new List<Cell> { anchor };
+			Cell up = anchor, down = anchor;
+			for (int i = 0; i < 5; i++)
+			{
+				up = up?.GetCellFromDirection("N");
+				down = down?.GetCellFromDirection("S");
+				if (up != null && up.ParentZone == zone) line.Add(up);
+				if (down != null && down.ParentZone == zone) line.Add(down);
+			}
+			foreach (Cell c in line)
+				if (c.IsEmpty() && c != origin)
+					blockers.Add(Spawn("Snapjaw", c));
+			int energyBefore = caster.Energy?.Value ?? 0;
+			int cdBefore = entry?.Cooldown ?? -1;
+			CommandEvent.Send(caster, "Cleo_TerraFirma_CommandCalcify", Target: threat);
+			int energyAfter = caster.Energy?.Value ?? 0;
+			int cdAfter = entry?.Cooldown ?? -1;
+			bool refusedClean = entry != null && cdAfter == cdBefore && energyAfter == energyBefore;
+			foreach (GameObject b in blockers)
+				if (GameObject.Validate(b)) b.Obliterate();
+			HashSet<GameObject> before = SnapshotZone(zone);
+			CommandEvent.Send(caster, "Cleo_TerraFirma_CommandCalcify", Target: threat);
+			int walls = 0;
+			foreach (GameObject o in NewSince(zone, before))
+				if (o.HasPart<Cleo_TerraFirma_CalcifyWallPart>())
+				{
+					walls++;
+					o.Obliterate();
+				}
+			bool controlCast = walls > 0 && (entry?.Cooldown ?? 0) > 0;
+			Report("calcify.refusal", refusedClean && controlCast,
+				entry == null ? "SETUP FAIL - Calcify ability entry missing on the NPC"
+				: $"blocked line: cooldown {cdBefore}->{cdAfter}, energy {energyBefore}->{energyAfter} ({(refusedClean ? "refused, nothing spent" : "SPENT on a refusal")}); cleared line: {walls} wall(s), cooldown {entry.Cooldown} ({(controlCast ? "the cast works" : "CONTROL FAILED, so the refusal proves nothing")})");
+		}
+
+		/// <summary>09-30 regression after FallenRockPart left: a whorl-guarded target swats a
+		/// thrown pebble into an adjacent cell, the pebble survives, and the deflection mark is
+		/// gone once the throw resolves (WhorlDeflected restores its own landing now).</summary>
+		private static void AuditWhorlSwat(GameObject ply, Cell origin)
+		{
+			Cell spot = null;
+			foreach (Cell c in OpenAround(origin, 3))
+				if (c.DistanceTo(origin) >= 2 && OpenAround(c, 1).Count >= 4)
+				{
+					spot = c;
+					break;
+				}
+			if (spot == null) { Report("whorl.swat", false, "SETUP FAIL - no roomy open cell at distance 2-3"); return; }
+			GameObject target = Spawn("Snapjaw", spot);
+			target.ApplyEffect(new XRL.World.Effects.Cleo_TerraFirma_GravelWhorl(100));
+			int hpBefore = target.GetStat("Hitpoints").Value;
+			bool savedForce = XRL.World.Effects.Cleo_TerraFirma_GravelWhorl.DebugForceDeflect;
+			int savedOutcome = XRL.World.Effects.Cleo_TerraFirma_GravelWhorl.DebugForcedOutcome;
+			XRL.World.Effects.Cleo_TerraFirma_GravelWhorl.DebugForceDeflect = true;
+			XRL.World.Effects.Cleo_TerraFirma_GravelWhorl.DebugForcedOutcome = 2;
+			GameObject pebble;
+			try { pebble = ThrowAt(ply, PEBBLES_BP, target); }
+			finally
+			{
+				XRL.World.Effects.Cleo_TerraFirma_GravelWhorl.DebugForceDeflect = savedForce;
+				XRL.World.Effects.Cleo_TerraFirma_GravelWhorl.DebugForcedOutcome = savedOutcome;
+			}
+			bool alive = pebble != null && GameObject.Validate(pebble) && pebble.CurrentCell != null;
+			int dist = alive ? RedoubtCheb(pebble.CurrentCell, target.CurrentCell) : -1;
+			bool unmarked = alive && !pebble.HasPart<Cleo_TerraFirma_WhorlDeflectedPart>();
+			bool unhurt = target.GetStat("Hitpoints").Value == hpBefore;
+			Report("whorl.swat", alive && dist == 1 && unmarked && unhurt,
+				pebble == null ? "SETUP FAIL - the throw never happened (no thrown slot?)"
+				: $"pebble {(alive ? $"swatted to distance {dist} (want 1)" : "LOST")}, deflection mark {(unmarked ? "cleared" : "LEFT BEHIND")}, target {(unhurt ? "unhurt" : "HIT despite the swat")}");
+			if (GameObject.Validate(pebble)) pebble.Obliterate();
+		}
+
+		// ---------------------------------------------------------------- shape battery (synchronous)
 
 		[WishCommand(Command = "tfshape")]
 		public static void Shape()
 		{
 			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
-			SetupShape(The.Player, "");
+			ShapeSync();
 		}
 
-		/// <summary>Stoneshaper core, driven through the extracted CarveFrom seam (the UI pickers
-		/// stay human): carve #1 asserts statue + CurStatue tracking; a Young Ivory attempt
-		/// asserts the clean no-body fail (no cooldown, wall intact); carve #2 asserts the
-		/// swap-down commit; then the statue is destroyed and a 3-turn watch asserts the
-		/// cooldown only TICKS -- no reset, no zero-out (the shape-cd retirement watch).</summary>
-		internal static void SetupShape(GameObject ply, string queue)
+		/// <summary>Stoneshaper through the extracted CarveFrom seam (the pickers stay human):
+		/// carve + one-turn cost, swap-down + mourning stamps, natural expiry into an inert statue
+		/// that keeps the gear, L10 permanence, limb re-arm on the statue's fists, and copy-of-a-
+		/// copy decay. Grants the mutation for the run if missing; a live statue of yours is
+		/// swapped out by the first carve.</summary>
+		internal static void ShapeSync()
 		{
+			GameObject ply = The.Player;
 			Cell origin = ply?.CurrentCell;
 			if (origin == null)
 				return;
+			List<Cell> open = OpenAround(origin, 2);
+			if (open.Count < 3) { Report("shape", false, "SETUP FAIL - need three open cells within 2 for walls"); return; }
+			Mutations mutations = ply.RequirePart<Mutations>();
 			XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper shaper = ply.GetPart<XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper>();
-			if (shaper == null) { Report("shape", false, "SETUP SKIP - needs a Stoneshaper (rockwineverytime character)"); RunNext(queue, ply); return; }
-			List<Cell> open = new List<Cell>(origin.GetLocalAdjacentCells(2));
-			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
-			if (open.Count < 5) { Report("shape", false, "SETUP FAIL - need five open cells within 2"); RunNext(queue, ply); return; }
-
-			// wall 1 + muse A -> carve #1
-			GameObject wall1 = GameObject.Create("Sandstone");
-			open[0].AddObject(wall1);
-			if (wall1.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>() == null)
+			bool granted = false;
+			int savedLevel = 0, savedCooldown = 0;
+			ActivatedAbilityEntry entry = null;
+			if (shaper == null)
 			{
-				Report("shape", false, "SETUP FAIL - spawned Sandstone lacks StoneshaperWallProperties (merge gap?)");
-				wall1.Obliterate();
-				RunNext(queue, ply);
-				return;
+				shaper = new XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper();
+				mutations.AddMutation(shaper, 1);
+				granted = true;
 			}
-			GameObject museA = GameObject.Create(BABOON_BP);
-			museA.SetIntProperty(SPAWN_MARK, 1);
-			open[1].AddObject(museA);
-			GameObject statueA;
+			else
+			{
+				savedLevel = shaper.BaseLevel;
+				entry = ply.ActivatedAbilities?.GetAbility(shaper.ActivatedAbilityID);
+				savedCooldown = entry?.Cooldown ?? 0;
+			}
+			int savedCap = shaper.CapOverride;
 			bool suppressed = Popup.Suppress;
 			Popup.Suppress = true;
-			try { statueA = shaper.CarveFrom(ply, museA, open[0]); }
-			finally { Popup.Suppress = suppressed; }
+			Cleo_TerraFirma_StoneRiseFX.HarnessMute = true;
+			try
+			{
+				shaper.CapOverride = 1;
+				shaper.Level = 1;
+				ShapeCarveSwapExpiry(ply, shaper, open);
+				ShapePermanentRearm(ply, shaper, open[2]);
+				ShapeCopyDecay(ply);
+			}
+			finally
+			{
+				Cleo_TerraFirma_StoneRiseFX.HarnessMute = false;
+				Popup.Suppress = suppressed;
+				shaper.StatueLifetimeRemaining = 0;
+				if (granted)
+					mutations.RemoveMutation(shaper);
+				else
+				{
+					shaper.CapOverride = savedCap;
+					shaper.Level = savedLevel;
+					if (entry != null)
+						entry.Cooldown = savedCooldown;
+				}
+				SweepSpawns(origin.ParentZone);
+			}
+		}
+
+		private static GameObject ShapeCarve(GameObject ply, XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper shaper, string museBp, Cell wallCell)
+		{
+			wallCell.AddObject(GameObject.Create("Sandstone"));
+			GameObject muse = Spawn(museBp);
+			GameObject statue = shaper.CarveFrom(ply, muse, wallCell);
+			statue?.SetIntProperty(SPAWN_MARK, 1);
+			muse.Obliterate();
+			return statue;
+		}
+
+		private static void ShapeCarveSwapExpiry(GameObject ply, XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper shaper, List<Cell> open)
+		{
+			int energyBefore = ply.Energy?.Value ?? 0;
+			GameObject statueA = ShapeCarve(ply, shaper, BABOON_BP, open[0]);
+			int spent = energyBefore - (ply.Energy?.Value ?? 0);
 			bool carvedA = statueA != null && GameObject.Validate(statueA) && shaper.CurStatue == statueA;
-			if (statueA != null) statueA.SetIntProperty(SPAWN_MARK, 1);
-			Report("shape.carve", carvedA, $"carve #1 (Baboon muse, spawned Sandstone wall): statue {(carvedA ? "stands and is tracked as CurStatue" : "FAILED")}");
-			ActivatedAbilityEntry entry = ply.ActivatedAbilities?.GetAbility(shaper.ActivatedAbilityID);
-			int cdAfterCarve = entry?.Cooldown ?? -1;
+			Report("shape.carve", carvedA && spent == 1000,
+				$"carve #1 (Baboon muse): statue {(carvedA ? "stands and is tracked" : "FAILED")}, energy spent {spent} (want 1000, one turn)");
 
-			// Young Ivory -> clean no-body fail: null statue, wall untouched, cooldown not re-taken
-			GameObject wall2 = GameObject.Create("Sandstone");
-			open[2].AddObject(wall2);
-			GameObject ivory = GameObject.Create("Young Ivory");
-			ivory.SetIntProperty(SPAWN_MARK, 1);
-			open[3].AddObject(ivory);
-			GameObject statueNull;
-			suppressed = Popup.Suppress;
-			Popup.Suppress = true;
-			try { statueNull = shaper.CarveFrom(ply, ivory, open[2]); }
-			finally { Popup.Suppress = suppressed; }
-			bool wallIntact = GameObject.Validate(wall2) && wall2.CurrentCell == open[2];
-			int cdAfterIvory = entry?.Cooldown ?? -1;
-			Report("shape.ivory", statueNull == null && wallIntact && shaper.CurStatue == statueA && cdAfterIvory <= cdAfterCarve,
-				$"Young Ivory attempt: statue={(statueNull == null ? "refused (no body plan)" : "CARVED?!")}, wall {(wallIntact ? "intact" : "SPENT")}, cooldown {cdAfterCarve}->{cdAfterIvory} (must not re-take)");
-
-			// muse B (robot anatomy) -> swap-down commit
-			GameObject museB = GameObject.Create(ROBOT_BP);
-			museB.SetIntProperty(SPAWN_MARK, 1);
-			open[4].AddObject(museB);
-			GameObject statueB;
-			suppressed = Popup.Suppress;
-			Popup.Suppress = true;
-			try { statueB = shaper.CarveFrom(ply, museB, open[2]); }
-			finally { Popup.Suppress = suppressed; }
+			GameObject statueB = ShapeCarve(ply, shaper, ROBOT_BP, open[1]);
 			bool swapped = statueB != null && GameObject.Validate(statueB) && shaper.CurStatue == statueB && statueB != statueA;
-			if (statueB != null) statueB.SetIntProperty(SPAWN_MARK, 1);
-			Report("shape.swap", swapped, $"carve #2 (Scrapbot muse): {(swapped ? "swap-down committed -- new statue tracked, prior returned to stone (gear entombed)" : "SWAP FAILED")}");
-
-			// popup ruling 2026-08-07: the swap branch alone stamps quiet-suppression on the
-			// OUTGOING statue (graveyard reference still readable post-obliterate); the incoming
-			// statue must stay popup-eligible so its combat death / natural expiry mourns loud
+			Report("shape.swap", swapped, $"carve #2 (Scrapbot muse): {(swapped ? "swap-down committed, new statue tracked" : "SWAP FAILED")}");
 			bool swapQuiet = statueA != null && statueA.GetStringProperty("NoFollowerDeathPopup") == "1";
 			bool freshLoud = statueB != null && !statueB.HasTagOrProperty("NoFollowerDeathPopup");
 			Report("shape.mourning", swapQuiet && freshLoud,
-				$"swap-carve suppression stamp on the outgoing statue: {(swapQuiet ? "present (swap stays a log line)" : "MISSING (swap would popup)")}; incoming statue popup-eligible: {(freshLoud ? "yes (combat/expiry mourn loud)" : "NO (something re-tagged it)")}");
-
-			if (!swapped || entry == null)
-			{
-				RunNext(queue, ply);
+				$"outgoing statue quiet stamp {(swapQuiet ? "present" : "MISSING")}; incoming statue popup-eligible {(freshLoud ? "yes" : "NO")}");
+			if (!swapped)
 				return;
+
+			// natural expiry: the statue de-animates into an inert statue that keeps its gear
+			GameObject boots = GameObject.Create("Leather Boots");
+			statueB.ReceiveObject(boots);
+			Cell statueCell = statueB.CurrentCell;
+			shaper.StatueLifetimeRemaining = 1;
+			EndTurnEvent.Send(ply);
+			GameObject inert = null;
+			if (statueCell != null)
+				foreach (GameObject o in statueCell.Objects)
+					if (o.Blueprint == "Cleo_TerraFirma_StoneshaperStatue")
+						inert = o;
+			bool gearKept = inert?.Inventory != null && inert.Inventory.GetObjectsDirect().Contains(boots);
+			Report("shape.expiry", shaper.CurStatue == null && inert != null && gearKept,
+				$"lifetime ran out: tracking {(shaper.CurStatue == null ? "released" : "STILL HELD")}, inert statue {(inert != null ? "left in place" : "MISSING")}, its gear {(gearKept ? "kept inside" : "LOST")}");
+			inert?.SetIntProperty(SPAWN_MARK, 1);
+		}
+
+		private static void ShapePermanentRearm(GameObject ply, XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper shaper, Cell wallCell)
+		{
+			shaper.CapOverride = 10;
+			shaper.Level = 10;
+			GameObject statue = ShapeCarve(ply, shaper, "Snapjaw", wallCell);
+			if (statue == null) { Report("shape.permanent", false, "SETUP FAIL - the L10 carve failed"); return; }
+			bool permanent = shaper.StatueLifetimeRemaining == XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper.GetDuration(10);
+			for (int i = 0; i < 5; i++)
+				EndTurnEvent.Send(ply);
+			bool stands = GameObject.Validate(statue) && shaper.CurStatue == statue;
+			Report("shape.permanent", permanent && stands,
+				$"L10 carve: lifetime {(permanent ? "permanent" : "FINITE (" + shaper.StatueLifetimeRemaining + ")")}, after 5 turns the statue {(stands ? "still stands and is tracked" : "EXPIRED")}");
+			if (!stands)
+				return;
+
+			// limb re-arm (audit fix 2026-08-29): regrowing a hand restores the stone fist
+			string fist = XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper.DEFAULT_BEHAVIOR_BP;
+			BodyPart hand = null;
+			foreach (BodyPart p in statue.Body.LoopParts())
+				if (p.DefaultBehaviorBlueprint == fist)
+				{
+					hand = p;
+					break;
+				}
+			if (hand == null) { Report("shape.rearm", false, "SETUP FAIL - the Snapjaw statue has no stone fist to cut"); return; }
+			string handType = hand.Type;
+			GameObject severed = hand.Dismember();
+			if (GameObject.Validate(severed)) severed.Obliterate();
+			bool regrew = statue.Body.RegenerateLimb(WholeLimb: true);
+			bool rearmed = false;
+			foreach (BodyPart p in statue.Body.LoopParts())
+				if (p.Type == handType && p.DefaultBehavior?.Blueprint == fist)
+					rearmed = true;
+			Report("shape.rearm", regrew && rearmed,
+				$"cut a {handType}, regrew: {(regrew ? "limb back" : "REGROWTH FAILED")}, stone fist {(rearmed ? "re-armed" : "MISSING (bare hand)")}");
+		}
+
+		/// <summary>Copy-of-a-copy decay (RULED 2026-08-12): gen 1 and 2 copy clean, gen 3 loses
+		/// 1-3 from one inherited stat. Measured as the drop in (statue - muse) Str+Agi+Tou
+		/// between the clean gen-2 copy and the gen-3 copy, so any wall stat rider cancels out.</summary>
+		private static void ShapeCopyDecay(GameObject ply)
+		{
+			GameObject wall = GameObject.Create("Sandstone");
+			Cleo_TerraFirma_StoneshaperWallProperties props = wall.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>();
+			if (props == null) { Report("shape.copygen", false, "SETUP FAIL - Sandstone lacks StoneshaperWallProperties"); wall.Obliterate(); return; }
+			string[] stats = { "Strength", "Agility", "Toughness" };
+			int Sum(GameObject o, bool baseValues)
+			{
+				int n = 0;
+				foreach (string s in stats)
+					n += baseValues ? o.GetStat(s).BaseValue : o.GetStatValue(s);
+				return n;
 			}
-			// the shape-cd watch: destroy the statue, then 3 turns -- the cooldown may only TICK
-			int cdBeforeKill = entry.Cooldown;
-			statueB.Destroy(null, Silent: true);
-			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "shape", TurnsRemaining = 3, TurnsTotal = 3, Queue = queue };
-			driver.InitShape(entry, cdBeforeKill);
-			ply.AddPart(driver);
-			MessageQueue.AddPlayerMessage("Harness: shape cooldown-watch running -- 3 turns after the statue's destruction.", "W");
+			GameObject Copy(GameObject muse)
+			{
+				GameObject s = XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper.MakeStatueOfCreatureFromWall(muse, wall, "fine", props);
+				if (s == null)
+					return null;
+				XRL.World.Parts.AnimateObject.Animate(s);
+				XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper.ApplyStatueBuffs(ply, muse, s, 5, props);
+				return s;
+			}
+			GameObject origin = GameObject.Create("Snapjaw");
+			GameObject g1 = Copy(origin);
+			GameObject g2 = g1 == null ? null : Copy(g1);
+			GameObject g3 = g2 == null ? null : Copy(g2);
+			if (g3 == null)
+				Report("shape.copygen", false, "SETUP FAIL - a statue copy returned null");
+			else
+			{
+				int gen1 = g1.GetIntProperty("Cleo_TerraFirma_StatueCopyGen");
+				int gen2 = g2.GetIntProperty("Cleo_TerraFirma_StatueCopyGen");
+				int gen3 = g3.GetIntProperty("Cleo_TerraFirma_StatueCopyGen");
+				int clean = Sum(g2, true) - Sum(g1, false);
+				int decayed = Sum(g3, true) - Sum(g2, false);
+				int loss = clean - decayed;
+				Report("shape.copygen", gen1 == 1 && gen2 == 2 && gen3 == 3 && loss >= 1 && loss <= 3,
+					$"generations {gen1}/{gen2}/{gen3} (want 1/2/3); gen 3 lost {loss} inherited Str+Agi+Tou relative to the clean gen 2 copy (want 1-3)");
+			}
+			foreach (GameObject o in new[] { g3, g2, g1, origin, wall })
+				if (o != null && GameObject.Validate(o))
+					o.Obliterate();
 		}
 
 		/// <summary>Statue-AI diagnostic (USER REPORT 2026-08-10: statues carved from an
@@ -610,25 +686,15 @@ namespace Cleo.TerraFirma.Scripts
 			MessageQueue.AddPlayerMessage("Harness: NPC redoubt caster running -- 20 turns; expect the earth to heave and a ring to rise.", "W");
 		}
 
-		internal static int CountLooseFissureRocks(Zone zone)
-		{
-			int n = 0;
-			if (zone != null)
-				foreach (GameObject obj in zone.GetObjects())
-					if (obj.Blueprint == PEBBLES_BP && obj.CurrentCell != null && obj.InInventory == null && obj.Equipped == null)
-						n += obj.Count;
-			return n;
-		}
-
-		/// <summary>Redoubt census: every mod rock-family object standing in the zone -- fabric
-		/// (rubble/crumbled/wall/crack), salvage keepers, debris, and the figure.</summary>
+		/// <summary>Redoubt census: every mod rock-family object standing in the zone -- ring
+		/// fabric (rubble/crumbled/wall) and pebbles.</summary>
 		internal static int CountRingPieces(Zone zone)
 		{
 			int n = 0;
 			if (zone != null)
 				foreach (GameObject obj in zone.GetObjects())
 					if (obj.CurrentCell != null && obj.InInventory == null && obj.Equipped == null
-						&& (obj.Blueprint.StartsWith("Cleo_TerraFirma_Rock_") || obj.Blueprint == "Cleo_TerraFirma_RedoubtFigure"))
+						&& (obj.Blueprint.StartsWith("Cleo_TerraFirma_Rock_")))
 						n += obj.Count;
 			return n;
 		}
@@ -638,9 +704,6 @@ namespace Cleo.TerraFirma.Scripts
 		private const string FIS_COMMAND = "Cleo_TerraFirma_CommandFissure";
 		private const string FABRIC_CRUMBLED_BP = "Cleo_TerraFirma_Rock_CrumbledWall";
 		private const string FABRIC_WALL_BP = "Cleo_TerraFirma_Rock_Wall";
-		private const string NATURAL_WALL_BP = "Sandstone";
-		private const string METAL_WALL_BP = "MetalWall";
-		private const string WOOD_WALL_BP = "WoodWall";
 		private const string PUDDLE_BP = "FreshWaterPuddle";
 
 		[WishCommand(Command = "tfredoubt")]
@@ -690,8 +753,8 @@ namespace Cleo.TerraFirma.Scripts
 			{
 				RedoubtRingCensus(ply, zone, origin, fis);
 				RedoubtPush(ply, zone, origin, fis);
-				RedoubtCarve(ply, zone, origin, fis);
 				RedoubtWater(ply, zone, origin, fis);
+				RedoubtPebbles(ply, zone, origin, fis);
 			}
 			finally
 			{
@@ -760,7 +823,7 @@ namespace Cleo.TerraFirma.Scripts
 				if (!GameObject.Validate(o))
 					continue;
 				string bp = o.Blueprint;
-				if (bp != null && (bp.StartsWith("Cleo_TerraFirma_Rock_") || bp == "Cleo_TerraFirma_RedoubtFigure" || bp == "MediumBoulder"))
+				if (bp != null && (bp.StartsWith("Cleo_TerraFirma_Rock_") || bp == "MediumBoulder"))
 					o.Obliterate();
 			}
 		}
@@ -969,114 +1032,62 @@ namespace Cleo.TerraFirma.Scripts
 			SweepSpawns(zone);
 		}
 
-		private static GameObject RedoubtRigWall(string bp, Cell c, int av = -1, int hp = -1)
+		/// <summary>09-30 regression after FallenRockPart left for quarantine/: L10 casts until the
+		/// wake scatter drops pebbles (3% per interior cell, so up to ten casts), then each pebble
+		/// must carry no FallenRockPart, show its approved description, and throw cleanly at a
+		/// baboon and land intact.</summary>
+		private static void RedoubtPebbles(GameObject ply, Zone zone, Cell origin, XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure fis)
 		{
-			GameObject w = GameObject.Create(bp);
-			if (av >= 0)
-				w.GetStat("AV").BaseValue = av;
-			if (hp >= 0)
-				w.GetStat("Hitpoints").BaseValue = hp;
-			c.AddObject(w);
-			return w;
-		}
-
-		/// <summary>Carve under the PULSE PASS (per-pulse bites RULED 2026-08-08: every wall in
-		/// a pulse's coverage takes one carve-as-attack bite; the depth ladder and per-ray
-		/// budget retired, repetition digs). Glass-jaw sandstones (AV 0, 1 HP: any penetration
-		/// fells them, and vs AV 0 the wave always penetrates) make the CHAIN asserts
-		/// deterministic: a two-file falls one wall per pulse at ANY level (pulse 1 fells ring
-		/// 1, pulse 2 surges the breach and fells ring 2), and at L4 a three-file falls
-		/// entirely by pulse 3 -- whose ring IS the rim since the radius-3 re-dial (RULED
-		/// 2026-08-10), so the three-file's last wall doubles as the rim-bite probe. The
-		/// ring-4 glass-jaw INVERTED same re-dial: it now sits BEYOND everything, and at 1 HP
-		/// any bite would fell it -- it must STAND, proving the front never bites past
-		/// coverage (the old front-bite window is empty at radius 3). The
-		/// armored survivor (AV 999, bitten up to 3 times, zero pens each) must STAND
-		/// untouched -- the leftover half of the ruling. CLAMP REMOVED (L20 pass, RULED
-		/// 2026-08-09 "potentially fine it destroys all wall types"): glass-jaw WOOD falls
-		/// (Soft), AV-0 METAL now FALLS too (armor, not class, is the boundary), native-AV
-		/// metal still holds untouched (PV 18 vs AV 30, the zero-pen path).</summary>
-		private static void RedoubtCarve(GameObject ply, Zone zone, Cell origin, XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure fis)
-		{
-			Cell e1 = origin.GetCellFromDirection("E");
-			Cell e2 = e1?.GetCellFromDirection("E");
-			Cell e3 = e2?.GetCellFromDirection("E");
-			Cell e4 = e3?.GetCellFromDirection("E");
-			Cell w1 = origin.GetCellFromDirection("W");
-			Cell n1 = origin.GetCellFromDirection("N");
-			Cell s1 = origin.GetCellFromDirection("S");
-			if (e1 == null || e2 == null || e3 == null || e4 == null || w1 == null || n1 == null || s1 == null
-				|| e1.IsSolid() || e2.IsSolid() || e3.IsSolid() || e4.IsSolid() || w1.IsSolid() || n1.IsSolid() || s1.IsSolid())
+			const string DESC = "Smooth spall from the world's slow grinding, come down at last.";
+			List<GameObject> pebbles = new List<GameObject>();
+			List<GameObject> spawnedByCasts = new List<GameObject>();
+			int casts = 0;
+			while (pebbles.Count == 0 && casts < 10)
 			{
-				Report("redoubt.carve", false, "SETUP FAIL - need open E1/E2/E3/E4/W1/N1/S1 cells");
+				HashSet<GameObject> before = SnapshotZone(zone);
+				RedoubtCast(ply, fis, 10);
+				casts++;
+				foreach (GameObject o in NewSince(zone, before))
+				{
+					spawnedByCasts.Add(o);
+					if (o.Blueprint == PEBBLES_BP && o.CurrentCell != null)
+						pebbles.Add(o);
+				}
+			}
+			if (pebbles.Count == 0)
+			{
+				Report("redoubt.pebbles", false, $"no pebbles in {casts} L10 casts (odds of that are about 1 in 150; rerun before believing it)");
+				RedoubtCleanup(spawnedByCasts);
 				return;
 			}
-			List<string> fails = new List<string>();
-
-			// cast A -- L1: the pulse chain replaces the depth budget, so BOTH glass-jaws of
-			// the two-file fall (one per pulse) even at band 1
-			GameObject sand1 = RedoubtRigWall(NATURAL_WALL_BP, e1, 0, 1);
-			Cleo_TerraFirma_StoneshaperWallProperties props = sand1.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>();
-			if (props == null || props.MaterialType != "stone" || !props.Natural)
+			int legacy = 0, badDesc = 0;
+			foreach (GameObject p in pebbles)
 			{
-				Report("redoubt.carve", false, $"SETUP FAIL - spawned {NATURAL_WALL_BP} is not classified natural stone (Merges Natural flag missing or unmapped)");
-				sand1.Obliterate();
-				return;
+				if (p.GetPart<Cleo_TerraFirma_FallenRockPart>() != null) legacy++;
+				if (p.GetPart<Description>()?._Short != DESC) badDesc++;
 			}
-			GameObject sand2 = RedoubtRigWall(NATURAL_WALL_BP, e2, 0, 1);
-			GameObject survivor = RedoubtRigWall(NATURAL_WALL_BP, s1, 999);
-			int survivorHP = survivor.GetStat("Hitpoints").Value;
-			GameObject metal = RedoubtRigWall(METAL_WALL_BP, w1, 0); // AV 0: pens guaranteed -- clamp REMOVED (L20 pass), so it must FALL now
-			GameObject wood = RedoubtRigWall(WOOD_WALL_BP, n1, 0, 1); // glass-jaw Soft: must fall to the wave
-			HashSet<GameObject> before = SnapshotZone(zone);
-			RedoubtCast(ply, fis, 1);
-			if (GameObject.Validate(sand1) && sand1.CurrentCell != null) fails.Add("L1: first glass-jaw sandstone NOT felled");
-			if (GameObject.Validate(sand2) && sand2.CurrentCell != null) fails.Add("L1: second glass-jaw sandstone NOT felled (pulse 2 must surge the breach and bite ring 2)");
-			if (!GameObject.Validate(survivor) || survivor.CurrentCell != s1) fails.Add("L1: AV-999 survivor FELL (armor must hold)");
-			else if (survivor.GetStat("Hitpoints").Value != survivorHP) fails.Add("L1: AV-999 survivor took damage on zero penetrations");
-			if (GameObject.Validate(metal) && metal.CurrentCell != null) fails.Add("L1: AV-0 METAL wall STANDING (clamp removed 2026-08-09 -- all wall types fall by AV+HP, and AV 0 guarantees felling pens)");
-			if (GameObject.Validate(wood) && wood.CurrentCell != null) fails.Add("L1: glass-jaw WOOD wall NOT felled (Soft class takes the full attack)");
-			RedoubtCleanup(NewSince(zone, before));
-			if (GameObject.Validate(sand2)) sand2.Obliterate();
-			if (GameObject.Validate(wood)) wood.Obliterate();
-			if (GameObject.Validate(metal)) metal.Obliterate(); // cast B wants the native-AV holds probe, not the clamp probe
-
-			// cast B -- L4: the three-file falls entirely (one wall per pulse; ring 3 IS the
-			// rim now), the ring-4 glass-jaw sits beyond the radius-3 rim and must STAND
-			// untouched (no front overreach), the survivor stands for the at-all-levels claim,
-			// and a NATIVE-AV metal wall (AV 30 vs PV 18: zero pens ever) probes the
-			// attacked-but-untouched path of the Hard class
-			GameObject b1 = RedoubtRigWall(NATURAL_WALL_BP, e1, 0, 1);
-			GameObject b2 = RedoubtRigWall(NATURAL_WALL_BP, e2, 0, 1);
-			GameObject b3 = RedoubtRigWall(NATURAL_WALL_BP, e3, 0, 1);
-			GameObject b4 = RedoubtRigWall(NATURAL_WALL_BP, e4, 0, 1); // ring 4: BEYOND the radius-3 rim -- the no-overreach probe (1 HP: any bite fells it)
-			metal = RedoubtRigWall(METAL_WALL_BP, w1);
-			int metalHP = metal.GetStat("Hitpoints").Value;
-			if (!GameObject.Validate(survivor) || survivor.CurrentCell != s1)
+			string throwNote = "no open cell for the throw target";
+			bool thrown = false;
+			Cell spot = null;
+			foreach (Cell c in origin.GetLocalAdjacentCells(2))
+				if (!c.IsSolid() && !c.HasObjectWithPart("Combat") && c.DistanceTo(origin) == 2)
+				{
+					spot = c;
+					break;
+				}
+			if (spot != null)
 			{
-				survivor = RedoubtRigWall(NATURAL_WALL_BP, s1, 999);
-				survivorHP = survivor.GetStat("Hitpoints").Value;
+				GameObject target = GameObject.Create(BABOON_BP);
+				target.SetIntProperty(SPAWN_MARK, 1);
+				spot.AddObject(target);
+				GameObject stone = ThrowAt(ply, PEBBLES_BP, target);
+				thrown = stone != null && GameObject.Validate(stone) && stone.CurrentCell != null;
+				throwNote = stone == null ? "the throw never happened (no thrown slot?)" : thrown ? "a thrown pebble landed intact" : "the thrown pebble VANISHED";
+				if (GameObject.Validate(stone)) stone.Obliterate();
 			}
-			before = SnapshotZone(zone);
-			RedoubtCast(ply, fis, 4);
-			if (GameObject.Validate(b1) && b1.CurrentCell != null) fails.Add("L4: first glass-jaw sandstone NOT felled");
-			if (GameObject.Validate(b2) && b2.CurrentCell != null) fails.Add("L4: second glass-jaw sandstone NOT felled (pulse chain broken at ring 2)");
-			if (GameObject.Validate(b3) && b3.CurrentCell != null) fails.Add("L4: third glass-jaw sandstone NOT felled (pulse chain broken at ring 3)");
-			if (!GameObject.Validate(b4) || b4.CurrentCell == null) fails.Add("L4: ring-4 glass-jaw sandstone TOUCHED (it sits beyond the radius-3 rim -- the front must not bite past coverage)");
-			if (!GameObject.Validate(survivor) || survivor.CurrentCell != s1 || survivor.GetStat("Hitpoints").Value != survivorHP) fails.Add("L4: AV-999 survivor fell or took damage");
-			// "untouched" retired with the clamp (first pulse boot 2026-08-09): exploding pen
-			// dice give PV 18 a ~12% chip per bite vs AV 30, and three bites a cast make chips
-			// ROUTINE -- the wall must STAND (felling needs ~3 pens in one cast, <1%), but
-			// damage is legal now. Chip-vs-clean is reported, not asserted.
-			if (!GameObject.Validate(metal) || metal.CurrentCell != w1) fails.Add("L4: native-AV METAL wall FELL (AV 30 vs PV 18 must stand; felling odds are sub-1%)");
-			RedoubtCleanup(NewSince(zone, before));
-			if (GameObject.Validate(metal)) metal.Obliterate();
-			if (GameObject.Validate(survivor)) survivor.Obliterate();
-			if (GameObject.Validate(b4)) b4.Obliterate(); // expected to STAND now (radius-3 re-dial) -- clear it
-			Report("redoubt.carve", fails.Count == 0,
-				fails.Count == 0
-					? "per-pulse bites hold: the L1 two-file fell one wall per pulse, the L4 three-file fell entirely (ring 3 = the rim since the radius-3 re-dial), the ring-4 wall stood untouched beyond the rim (no front overreach); the AV-999 survivor stood untouched at both bands (armor is the boundary); clamp-removed rules verified -- glass-jaw wood AND AV-0 metal both FELL, native-AV metal untouched on zero pens"
-					: string.Join("; ", fails.ToArray()));
+			Report("redoubt.pebbles", legacy == 0 && badDesc == 0 && thrown,
+				$"{pebbles.Count} pebble(s) in {casts} cast(s): {legacy} still carrying FallenRockPart (want 0), {badDesc} with the wrong description (want 0); {throwNote}");
+			RedoubtCleanup(spawnedByCasts);
 		}
 
 		/// <summary>Walls over water at L7 (band 3, wall share 55±12): every open rim cell is
@@ -1140,25 +1151,6 @@ namespace Cleo.TerraFirma.Scripts
 
 		// ---------------------------------------------------------------- round 3, turn-driven setups
 
-		internal static void SetupQuickApe(GameObject ply, string queue)
-		{
-			// held 2026-09-30: the creature and its TimedForm moved to quarantine/ (original in
-			// quarantine/TerraFirma/Scripts/_TestHarness-held.cs)
-			Report("quick.ape", false, "HELD - moved to quarantine/ 2026-09-30");
-			RunNext(queue, ply);
-		}
-
-		[WishCommand(Command = "tfdull")]
-		public static void Dull()
-		{
-			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			// RETIRED 2026-07-25 (fragility ruling: the dull clock is CUT -- "a stone keeps until
-			// it goes off"). The scenario's PASS stands in the ledger as history; the code path it
-			// proved is dormant (DullAfter 0 mod-wide). SetupDull kept below in case the clock ever
-			// returns as a longer fuse.
-			MessageQueue.AddPlayerMessage("tfdull RETIRED: the dull clock was cut 2026-07-25 (a stone keeps until it goes off). Ledger entry stands as history.", "W");
-		}
-
 		/// <summary>Slot-normalized player-path throw: force-equip a fresh stone and PerformThrow
 		/// it at the victim. Returns the stone (often spent/broken afterwards). Logs a diagnostic
 		/// line either way -- the round-3 drain anomalies (guard fail on a live robot; a batch
@@ -1210,86 +1202,6 @@ namespace Cleo.TerraFirma.Scripts
 			return stone;
 		}
 
-		/// <summary>A straight clear lane whose END cell also has at least minOpenNeighbors open
-		/// sides. Harness bug #6 (2026-07-24, caught by the throwat diagnostic): the cage throw
-		/// connected with a TinkerTurret INTERPOSED on the flight path -- the target's
-		/// surroundings were open but the line to it wasn't. Throw targets need both.</summary>
-		internal static Cell FindLaneOpenEnd(Cell origin, int length, int minOpenNeighbors)
-		{
-			string[] dirs = { "E", "W", "N", "S", "NE", "NW", "SE", "SW" };
-			foreach (string dir in dirs)
-			{
-				Cell walk = origin;
-				bool clear = true;
-				for (int step = 0; step < length; step++)
-				{
-					walk = walk.GetCellFromDirection(dir);
-					if (walk == null || walk.IsSolid() || walk.HasObjectWithPart("Combat"))
-					{
-						clear = false;
-						break;
-					}
-				}
-				if (!clear)
-					continue;
-				int openSides = 0;
-				foreach (Cell adj in walk.GetLocalAdjacentCells())
-					if (!adj.IsSolid() && !adj.HasObjectWithPart("Combat"))
-						openSides++;
-				if (openSides >= minOpenNeighbors)
-					return walk;
-			}
-			return null;
-		}
-
-		/// <summary>Force a creature back and forth across a cell (DirectMoveTo, forced) --
-		/// ObjectEnteredCellEvent fires synchronously per entry, so step-proc statistics need no
-		/// turn pump. Stops early when stop() returns true. Returns entries performed.</summary>
-		internal static int ForceEntries(GameObject victim, Cell offCell, Cell onCell, int max, Func<bool> stop)
-		{
-			int n = 0;
-			for (; n < max && GameObject.Validate(victim); n++)
-			{
-				victim.DirectMoveTo(onCell, 0, Forced: true, IgnoreCombat: true);
-				if (stop())
-					return n + 1;
-				victim.DirectMoveTo(offCell, 0, Forced: true, IgnoreCombat: true);
-			}
-			return n;
-		}
-
-		internal static int CountModRocks(GameObject who)
-		{
-			int n = 0;
-			List<GameObject> pack = who?.Inventory?.GetObjectsDirect();
-			if (pack != null)
-				foreach (GameObject item in pack)
-					if (item.Blueprint != null && item.Blueprint.StartsWith("Cleo_TerraFirma_Rock_"))
-						n += item.Count;
-			return n;
-		}
-
-		/// <summary>Statuette expiry mechanics (batch item 5's assertable half): a spawned
-		/// statuette with its TimedForm clock wound to 2 must, within 5 turns, be GONE and
-		/// replaced by a rep-granting figurine item with its pocket stones spilled beside it.
-		/// The popup ABSENCE stays the user's eyeball -- the property stamp is pre-obliteration
-		/// and unobservable after the fact.</summary>
-		[WishCommand(Command = "tfform")]
-		public static void Form()
-		{
-			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			if (The.Player?.HasPart<Cleo_TerraFirma_TestDriver>() == true) { MessageQueue.AddPlayerMessage("A harness scenario is already running.", "R"); return; }
-			SetupForm(The.Player, "");
-		}
-
-		internal static void SetupForm(GameObject ply, string queue)
-		{
-			// held 2026-09-30: the creature and its TimedForm moved to quarantine/ (original in
-			// quarantine/TerraFirma/Scripts/_TestHarness-held.cs)
-			Report("form", false, "HELD - moved to quarantine/ 2026-09-30");
-			RunNext(queue, ply);
-		}
-
 		internal static void RunNext(string queue, GameObject ply)
 		{
 			if (queue.IsNullOrEmpty() || ply == null)
@@ -1302,10 +1214,7 @@ namespace Cleo.TerraFirma.Scripts
 			string rest = comma < 0 ? "" : queue.Substring(comma + 1);
 			switch (next)
 			{
-				case "form": SetupForm(ply, rest); break;
 				case "scav": SetupScav(ply, rest); break;
-				case "quickape": SetupQuickApe(ply, rest); break;
-				case "shape": SetupShape(ply, rest); break;
 				case "fis": SetupFis(ply, rest); break;
 			}
 		}
@@ -1363,49 +1272,6 @@ namespace Cleo.TerraFirma.Scripts
 		}
 
 		// ---------------------------------------------------------------- shared
-
-		internal static Cell FindLane(Cell origin, int length)
-		{
-			string[] dirs = { "E", "W", "N", "S", "NE", "NW", "SE", "SW" };
-			foreach (string dir in dirs)
-			{
-				Cell walk = origin;
-				bool clear = true;
-				for (int step = 0; step < length; step++)
-				{
-					walk = walk.GetCellFromDirection(dir);
-					if (walk == null || walk.IsSolid() || (step < length - 1 && walk.HasObjectWithPart("Combat")))
-					{
-						clear = false;
-						break;
-					}
-				}
-				if (clear && !walk.HasObjectWithPart("Combat"))
-					return walk;
-			}
-			return null;
-		}
-
-		internal static int CountInZone(Zone zone, string blueprint)
-		{
-			int n = 0;
-			if (zone != null)
-				foreach (GameObject obj in zone.GetObjects())
-					if (obj.Blueprint == blueprint)
-						n += obj.Count;
-			return n;
-		}
-
-		internal static int CountInBag(GameObject who, string blueprint)
-		{
-			int n = 0;
-			List<GameObject> bag = who.Inventory?.GetObjectsDirect();
-			if (bag != null)
-				foreach (GameObject item in bag)
-					if (item.Blueprint == blueprint)
-						n += item.Count;
-			return n;
-		}
 
 		// quick-loop tally (2026-08-07 sprucing): tfbatch counts its Reports and closes with ONE
 		// grep-able verdict line, so a boot-and-test pass is launch -> tfbatch -> read the verdict
@@ -1468,14 +1334,6 @@ namespace XRL.World.Parts
 		public string Queue = "";
 
 		[NonSerialized] private bool LiveSetup;
-		[NonSerialized] private GameObject FormCreature;
-		[NonSerialized] private int FigurineBaseline;
-		[NonSerialized] private GameObject ApeCreature;
-		[NonSerialized] private int RubbleBaseline;
-		[NonSerialized] private GameObject DullRock;
-		[NonSerialized] private int PebblesBaseline;
-		[NonSerialized] private ActivatedAbilityEntry ShapeEntry;
-		[NonSerialized] private int ShapeCdBeforeKill;
 		[NonSerialized] private GameObject FisCaster;
 		[NonSerialized] private int FisRocksBaseline;
 		[NonSerialized] private GameObject[] AiStatues;
@@ -1490,34 +1348,6 @@ namespace XRL.World.Parts
 
 		public void InitScav()
 		{
-			LiveSetup = true;
-		}
-
-		public void InitForm(GameObject creature, int figurineBaseline)
-		{
-			FormCreature = creature;
-			FigurineBaseline = figurineBaseline;
-			LiveSetup = true;
-		}
-
-		public void InitQuickApe(GameObject ape, int rubbleBaseline)
-		{
-			ApeCreature = ape;
-			RubbleBaseline = rubbleBaseline;
-			LiveSetup = true;
-		}
-
-		public void InitDull(GameObject rock, int pebblesBaseline)
-		{
-			DullRock = rock;
-			PebblesBaseline = pebblesBaseline;
-			LiveSetup = true;
-		}
-
-		public void InitShape(ActivatedAbilityEntry entry, int cdBeforeKill)
-		{
-			ShapeEntry = entry;
-			ShapeCdBeforeKill = cdBeforeKill;
 			LiveSetup = true;
 		}
 
@@ -1677,14 +1507,6 @@ namespace XRL.World.Parts
 		{
 			if (Scenario == "scav")
 				FinishScav(owner);
-			else if (Scenario == "form")
-				FinishForm(owner);
-			else if (Scenario == "quickape")
-				FinishQuickApe(owner);
-			else if (Scenario == "dull")
-				FinishDull(owner);
-			else if (Scenario == "shape")
-				FinishShape();
 			else if (Scenario == "fis")
 				FinishFis(owner);
 			else if (Scenario == "statueai")
@@ -1715,89 +1537,14 @@ namespace XRL.World.Parts
 
 		private void FinishFis(GameObject owner)
 		{
-			// REDOUBT shape (pivot 2026-08-02): a cast now deposits ring fabric (rubble/crumbled/
-			// wall/crack/salvage), not a shower of loose stones -- count ring pieces by prefix.
+			// REDOUBT shape (pivot 2026-08-02): a cast deposits ring fabric (rubble/crumbled/wall)
+			// and wake pebbles -- count ring pieces by prefix.
 			bool casterAlive = GameObject.Validate(FisCaster);
 			int piecesNow = Cleo.TerraFirma.Scripts.TestHarnessWishes.CountRingPieces(owner.CurrentZone);
 			int delta = piecesNow - FisRocksBaseline;
 			bool pass = casterAlive && delta >= 5;
 			Cleo.TerraFirma.Scripts.TestHarnessWishes.Report("fis", pass,
 				$"NPC redoubt caster over {TurnsTotal} turns: ring pieces {FisRocksBaseline}->{piecesNow} (+{delta}, want >=5 = a wave happened and deposited a rim). A zero here answers fis-npc: no AI advertisement on the mutation.");
-		}
-
-		private void FinishShape()
-		{
-			int cdNow = ShapeEntry?.Cooldown ?? -1;
-			// the retirement watch: after the statue's death the cooldown may only TICK DOWN --
-			// a jump UP is a reset to BASE (the retired display logic resurfacing), a plunge
-			// far below the tick rate is a zero-out. Band: 3 turns of ticking, generous margin.
-			bool pass = ShapeEntry != null && cdNow <= ShapeCdBeforeKill && cdNow >= ShapeCdBeforeKill - 40;
-			Cleo.TerraFirma.Scripts.TestHarnessWishes.Report("shape.cd", pass,
-				$"cooldown {ShapeCdBeforeKill}->{cdNow} across {TurnsTotal} turns after the statue's destruction (must only tick: no reset upward, no zero-out; shape-cd retirement watch)");
-		}
-
-		private void FinishQuickApe(GameObject owner)
-		{
-			bool gone = !GameObject.Validate(ApeCreature);
-			int rubbleNow = Cleo.TerraFirma.Scripts.TestHarnessWishes.CountInZone(owner.CurrentZone, "Cleo_TerraFirma_Rock_Rubble");
-			int delta = rubbleNow - RubbleBaseline;
-			Cleo.TerraFirma.Scripts.TestHarnessWishes.Report("quick.ape", gone && delta >= 1,
-				$"ape statue {(gone ? "crumbled and gone" : "STILL STANDING")} after {TurnsTotal} turns; rubble {RubbleBaseline}->{rubbleNow} (want +1, devourable per the ruling)");
-		}
-
-		private void FinishDull(GameObject owner)
-		{
-			bool goneFromBag = !GameObject.Validate(DullRock) || DullRock.InInventory != owner;
-			int pebblesNow = Cleo.TerraFirma.Scripts.TestHarnessWishes.CountInBag(owner, "Cleo_TerraFirma_Rock_Pebbles");
-			int delta = pebblesNow - PebblesBaseline;
-			Cleo.TerraFirma.Scripts.TestHarnessWishes.Report("dull", goneFromBag && delta >= 1,
-				$"carried rock (clock wound to 2) {(goneFromBag ? "went dull and gone" : "STILL IN THE BAG")} after {TurnsTotal} turns; pebbles {PebblesBaseline}->{pebblesNow} (want >=+1, payload lost with the dull)");
-		}
-
-		private void FinishForm(GameObject owner)
-		{
-			bool gone = !GameObject.Validate(FormCreature);
-			Zone zone = owner.CurrentZone;
-			int figurinesNow = Cleo.TerraFirma.Scripts.TestHarnessWishes.CountInZone(zone, "Cleo_TerraFirma_BaboonFigurineItem");
-			int delta = figurinesNow - FigurineBaseline;
-			// find the freshest figurine to report the spill beside it, then clean up the delta
-			int spilled = 0;
-			GameObject cleanupTarget = null;
-			if (zone != null && delta > 0)
-			{
-				foreach (GameObject obj in zone.GetObjects())
-				{
-					if (obj.Blueprint == "Cleo_TerraFirma_BaboonFigurineItem")
-						cleanupTarget = obj; // the last one found; with delta 1 (the normal case) it IS ours
-				}
-				if (cleanupTarget?.CurrentCell != null)
-				{
-					foreach (GameObject obj in cleanupTarget.CurrentCell.Objects)
-						if (obj.HasTag("Cleo_TerraFirma_IsAnyStone") && obj.InInventory == null && obj.Equipped == null)
-							spilled += obj.Count;
-				}
-			}
-			bool pass = gone && delta > 0;
-			Cleo.TerraFirma.Scripts.TestHarnessWishes.Report("form", pass,
-				$"statuette {(gone ? "expired and gone" : "STILL ALIVE")} after {TurnsTotal} turns; figurine items {FigurineBaseline}->{figurinesNow} (want +1); {spilled} loose pocket stone(s) beside the figurine");
-			if (pass && cleanupTarget != null && GameObject.Validate(cleanupTarget))
-				cleanupTarget.Obliterate(); // spilled pebbles stay as litter -- acceptable
-		}
-
-		private static void CountMill(GameObject mill, out int stones, out int powders)
-		{
-			stones = 0;
-			powders = 0;
-			List<GameObject> held = mill?.Inventory?.GetObjectsDirect();
-			if (held == null)
-				return;
-			foreach (GameObject item in held)
-			{
-				if (item.HasTag("Cleo_TerraFirma_IsAnyStone"))
-					stones += item.Count;
-				else if (item.Blueprint != null && item.Blueprint.StartsWith("Cleo_TerraFirma_Ground"))
-					powders += item.Count;
-			}
 		}
 
 		private void FinishScav(GameObject owner)

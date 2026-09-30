@@ -31,8 +31,8 @@ namespace Cleo.TerraFirma.Scripts
 	///     StatueLifetimeRemaining countdown
 	///   - Earthen Barrage reserve charge count
 	///   - Gorgon's Gaze partial-petrify stone mark on a spawned probe (effect + duration)
-	///   - One of each redoubt ring deposit: fabric wall, crumbled wall, rubble, crack,
-	///     calcified wall (with its live part), redoubt figure
+	///   - One of each redoubt ring deposit: fabric wall, crumbled wall, rubble, and a
+	///     calcified wall (with its live part)
 	///
 	/// WARNING: overwrites the character's quicksave AND (by the engine's own QuickLoad
 	/// contract) copies it over the Primary save -- run on test characters. In-session reload
@@ -187,7 +187,7 @@ namespace Cleo.TerraFirma.Scripts
 				bool wired = false;
 				if (sh.CurStatue == null && cellIdx < open.Count)
 				{
-					GameObject ape = GameObject.Create("Cleo_TerraFirma_Rock_ApeStatue");
+					GameObject ape = GameObject.Create("Cleo_TerraFirma_StoneshaperStatue"); // the ape statue until it left for quarantine/ 2026-09-30
 					if (ape != null)
 					{
 						ape.SetIntProperty(SPAWN_MARK, 1);
