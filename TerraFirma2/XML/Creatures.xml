@@ -209,6 +209,10 @@
     <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Outrider" /> <!-- mole outrider inherits this -->
     <tag Name="Role" Value="Artillery" /> <!-- DRAFT -->
     <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Outrider Kit" />
+    <!-- Trail watch, 2026-09-30: beat around the mouth, shift handover, break when alone.
+         Inert unless WarrenCarver stamps a beat. Dials are CLAUDE PROPOSAL; the mole
+         outrider inherits this. -->
+    <part Name="Cleo_TerraFirma_OutriderPatrol" BeatRadius="12" BeatInner="3" BeatPoints="6" PauseTurns="3-8" ShiftTurns="400-600" BreakTurns="100-200" />
   </object>
 
   <!-- MOLE HALF of the two-body shape. The mole-folk species axis had sat as an unratified user

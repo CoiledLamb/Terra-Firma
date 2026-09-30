@@ -3614,10 +3614,10 @@ namespace Cleo.TerraFirma.Scripts
 				}
 				return false;
 			}
-			bool SeatOutsidePost(GameObject who2)
+			bool[] mouthReach = null;
+			bool[] MouthReach()
 			{
-				if (g.MouthIdx < 0) return false;
-				int mx = g.MouthIdx % g.W, my = g.MouthIdx / g.W;
+				if (mouthReach != null) return mouthReach;
 				// reachable from the mouth over dry, tree-free floor (audit 2026-09-29: a post could
 				// land in an unbreached garden or across water); 8-way, as creatures walk
 				var reach = new bool[g.W * g.H];
@@ -3635,6 +3635,14 @@ namespace Cleo.TerraFirma.Scripts
 						reach[ni] = true; fq.Enqueue(ni);
 					}
 				}
+				return mouthReach = reach;
+			}
+			GameObject posted = null;
+			bool SeatOutsidePost(GameObject who2)
+			{
+				if (g.MouthIdx < 0) return false;
+				int mx = g.MouthIdx % g.W, my = g.MouthIdx / g.W;
+				var reach = MouthReach();
 				var posts = new List<int>();
 				for (int y = Math.Max(0, my - OUTRIDER_POST_RADIUS); y <= Math.Min(g.H - 1, my + OUTRIDER_POST_RADIUS); y++)
 					for (int x = Math.Max(0, mx - OUTRIDER_POST_RADIUS); x <= Math.Min(g.W - 1, mx + OUTRIDER_POST_RADIUS); x++)
@@ -3648,7 +3656,68 @@ namespace Cleo.TerraFirma.Scripts
 				if (posts.Count == 0) return false;
 				int pick = posts[R(0, posts.Count - 1)];
 				Z.GetCell(pick % g.W, pick / g.W).AddObject(who2);
+				posted = who2;
 				return true;
+			}
+			// TRAIL WATCH BEAT (2026-09-30, user: a beat around the mouth, and a lone outrider
+			// takes a break with the post empty). One ring of waypoints per warren, one per
+			// angular sector around the mouth, on the same reachable outside floor the post
+			// uses; walked in sector order so the beat loops. Every outrider gets the same
+			// beat plus its own inside rest cell; the posted one starts on duty. Dials ride
+			// the part (Part_OutriderPatrol.cs); fewer than two waypoints means no beat.
+			void StampPatrols()
+			{
+				var outriders = Z.GetObjectsWithPart("Cleo_TerraFirma_OutriderPatrol");
+				if (outriders.Count == 0 || g.MouthIdx < 0) return;
+				var dials = outriders[0].GetPart<XRL.World.Parts.Cleo_TerraFirma_OutriderPatrol>();
+				int mx = g.MouthIdx % g.W, my = g.MouthIdx / g.W;
+				int sectors = Math.Max(2, dials.BeatPoints);
+				var bySector = new List<int>[sectors];
+				var reach = MouthReach();
+				for (int y = Math.Max(0, my - dials.BeatRadius); y <= Math.Min(g.H - 1, my + dials.BeatRadius); y++)
+					for (int x = Math.Max(0, mx - dials.BeatRadius); x <= Math.Min(g.W - 1, mx + dials.BeatRadius); x++)
+					{
+						int i = g.Idx(x, y);
+						if (Math.Max(Math.Abs(x - mx), Math.Abs(y - my)) < dials.BeatInner) continue;
+						if (!reach[i] || g.C[i] != FLOOR || g.Host[i] == 0 || g.Water[i] != 0) continue;
+						Cell c = Z.GetCell(x, y);
+						if (c == null || c.IsSolid()) continue;
+						double a = Math.Atan2(y - my, x - mx) + Math.PI;
+						int s = Math.Min(sectors - 1, (int)(a / (2 * Math.PI) * sectors));
+						(bySector[s] ??= new List<int>()).Add(i);
+					}
+				var beat = new List<string>();
+				foreach (var cands in bySector)
+					if (cands != null)
+					{
+						int i = cands[R(0, cands.Count - 1)];
+						beat.Add((i % g.W) + "," + (i / g.W));
+					}
+				if (beat.Count < 2)
+				{
+					Helpers.VerifyLog("PATROL", $"no beat: {beat.Count} waypoint(s) around the mouth");
+					return;
+				}
+				var inside = new List<int>();
+				for (int i = 0; i < g.W * g.H; i++)
+					if (g.C[i] == FLOOR && g.Host[i] == 0 && g.Water[i] == 0)
+					{
+						Cell c = Z.GetCell(i % g.W, i / g.W);
+						if (c != null && !c.IsSolid()) inside.Add(i);
+					}
+				string beatStr = string.Join(";", beat);
+				foreach (var o in outriders)
+				{
+					var p = o.GetPart<XRL.World.Parts.Cleo_TerraFirma_OutriderPatrol>();
+					p.Beat = beatStr;
+					if (inside.Count > 0)
+					{
+						int ri = inside[R(0, inside.Count - 1)];
+						p.Rest = (ri % g.W) + "," + (ri / g.W);
+					}
+				}
+				posted?.GetPart<XRL.World.Parts.Cleo_TerraFirma_OutriderPatrol>()?.TakeDuty(XRL.The.Game?.TimeTicks ?? 0);
+				Helpers.VerifyLog("PATROL", $"beat of {beat.Count} around mouth ({mx},{my}): {beatStr}; {outriders.Count} outrider(s), posted {(posted != null ? "yes" : "no")}");
 			}
 			// HINT INTERPRETER (placement migrated to the tables 2026-08-26, the
 			// dress-migration architecture applied to creatures): a row's Hint
@@ -3788,6 +3857,7 @@ namespace Cleo.TerraFirma.Scripts
 			var census = new Dictionary<string, int>();
 			string[] crewTables = { "Cleo_TerraFirma_WarrenCrew Working", "Cleo_TerraFirma_WarrenCrew Camp", "Cleo_TerraFirma_WarrenCrew Flourishing" };
 			int carvers = PlaceTable(crewTables[Math.Max(0, Math.Min(crewTables.Length - 1, r.StageIdx))], census);
+			StampPatrols();
 			Helpers.VerifyLog("WARREN", $"population: in use, stage {r.Stage}, overseer {overseerNote}, " +
 				$"{carvers} crew, {outposts} posted outside ({string.Join(", ", census.Select(kv => kv.Value + " " + kv.Key.Replace("Cleo_TerraFirma_", "")))})");
 		}
