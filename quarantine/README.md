@@ -28,14 +28,15 @@ those parts means restoring those two spots too (see the file's history at 2026-
 
 ## Saves
 
-Every moved class shipped in 0.1.2.5, so `TerraFirma/Scripts/SaveCompatStubs.cs` keeps an inert
-stub under each name that skips its saved data without a load error. The drainstone stub also
-lifts the base `Cursed` part a latched stone carries, so it can come off. Objects whose blueprint
-moved still load from their saved parts; the engine logs "Unknown Blueprint" when something looks
-the blueprint up, and falls back to `Object`.
+No save-compat stubs. Every moved class shipped in 0.1.2.5, but none had a spawn path in normal
+play there: Fissure dropped only the spine (generic, pebbles, rubble, crack, walls), and the
+catalog tables were reachable only through Lithovore (not in that build's `Mutations.xml`), the
+statuette's own inventory, or wishes. A save that does hold one loads anyway: `IPart.Load` skips
+the part's block and the game shows its load-error popup once. Objects whose blueprint moved load
+from their saved parts; the engine logs "Unknown Blueprint" on lookup and falls back to `Object`.
 
 ## Restoring
 
 Move the files back to the same paths under the mod, paste the XML objects back into
-`TerraFirma/XML/Rocks.xml`, paste the harness methods back into `TestHarnessWishes`, and delete the
-matching stubs from `SaveCompatStubs.cs`. Both builds must stay 0 errors.
+`TerraFirma/XML/Rocks.xml`, and paste the harness methods back into `TestHarnessWishes`. Both
+builds must stay 0 errors.

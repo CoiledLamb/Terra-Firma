@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- QUARANTINED 2026-09-30 from TerraFirma/XML/Rocks.xml (user: move the quarantined stuff out
      of the mod). Outside both builds and the player packages. Restore by pasting these objects
-     back into Rocks.xml and moving Part_TimedForm.cs back to TerraFirma/Scripts (then delete its
-     stub in SaveCompatStubs.cs). See quarantine/README.md. -->
+     back into Rocks.xml and moving Part_TimedForm.cs back to TerraFirma/Scripts. See
+     quarantine/README.md. -->
 <objects>
 	<object Name="Cleo_TerraFirma_BaboonFigurineItem" Inherits="Trinket">
 		<part Name="Render" DisplayName="baboon figurine" Tile="Assets_Content_Textures_Creatures_sw_baboon.bmp" RenderString="]" ColorString="&amp;y" DetailColor="K" />
