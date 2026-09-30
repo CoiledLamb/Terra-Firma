@@ -8,7 +8,6 @@ namespace XRL.World.Parts
     // EnteredCell registration follows Yurtmat/CobblefurCloak. Lower-zone access uses
     // Cell.GetCellFromDirectionGlobal; Temporary owns projection expiry and zone thaw.
     [Serializable]
-    [HasWishCommand]
     public class Cleo_TerraFirma_SeismicShufflers : IPoweredPart
     {
         public int PreviewDuration = 2;
@@ -181,12 +180,6 @@ namespace XRL.World.Parts
                 if (GameObject.Validate(projection))
                     projection.Obliterate(Silent: true);
             Projections.Clear();
-        }
-
-        [WishCommand(Command = "tfshufflers")]
-        public static void WishShufflers()
-        {
-            The.Player.ReceiveObject("Cleo_TerraFirma_SeismicShufflers");
         }
     }
 }

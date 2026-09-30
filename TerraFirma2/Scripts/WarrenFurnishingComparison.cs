@@ -10,7 +10,6 @@ using XRL.World;
 
 namespace Cleo.TerraFirma.Scripts
 {
-	[HasWishCommand]
 	public static partial class WarrenCarver
 	{
 		// Codex PROPOSAL: capture only during the wish. A and B share the real
@@ -81,8 +80,8 @@ namespace Cleo.TerraFirma.Scripts
 			}
 		}
 
-		[WishCommand(Command = "tfwarrendress")]
-		public static void CompareWorldFurnishing()
+		// entry point for the tfwarrendress wish (_Wishes2.cs, left out of player builds)
+		internal static void CompareWorldFurnishing()
 		{
 			if (The.Game == null || _furnishingPairs != null) return;
 			_furnishingPairs = new Dictionary<string, FurnishingPair>();

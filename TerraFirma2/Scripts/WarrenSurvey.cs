@@ -14,7 +14,6 @@ namespace Cleo.TerraFirma.Scripts
 	/// generation. Null means registered but unmeasured. Failed claims remain here
 	/// after their journal notes disappear; repeat surveys never carve a built zone.
 	/// Uses XRLGame.Get/SetStringGameState, serialized by XRLGame.SaveGame.</summary>
-	[HasWishCommand]
 	public static class WarrenSurvey
 	{
 		private const string StateKey = "Cleo_TerraFirma_WarrenSurvey_Staged_v1";
@@ -88,10 +87,6 @@ namespace Cleo.TerraFirma.Scripts
 			text.Append("Use a fresh world for a complete sample. Generation counts do not verify playability.");
 			return text.ToString();
 		}
-
-		[WishCommand(Command = "tfwarrenstats")]
-		public static void Survey()
-			=> RunSurvey(true);
 
 		internal static void RunSurvey(bool showReport)
 		{

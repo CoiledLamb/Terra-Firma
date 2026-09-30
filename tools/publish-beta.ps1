@@ -3,7 +3,7 @@
 # obviously ai, and it's probably easier to just pull them out than find that voice").
 # The repo keeps every comment; this emits publish\TerraFirma + a dated zip.
 #
-#   powershell -NoProfile -ExecutionPolicy Bypass -File tools\publish-beta.ps1 [-Mod TF1|TF2|Both] [-CheckOnly]
+#   powershell -NoProfile -ExecutionPolicy Bypass -File tools\publish-beta.ps1 [-Mod TF1|TF2|Both|Fused] [-CheckOnly]
 #
 # -CheckOnly: strip, validate and compile-check, then test the manifest rewrites on a temp
 # copy. No zip, and the staging folders (the upload sources) are left untouched.
@@ -17,6 +17,17 @@
 # SteamWorkshopUploaderView), so the dev/staging distinction lives on the dev side: dev
 # manifests are titled "... (dev)" and staging strips the suffix (2026-09-29).
 #
+# Player builds leave the dev tooling out (2026-09-30): each mod's Exclude list is deleted from
+# the stripped copy, a missing listed file aborts (a rename must not ship a harness), and any
+# WishCommand surviving the strip aborts. The repo and dev deploys keep every file.
+#
+# -Mod Fused (2026-09-30): a single-folder testing build, Cleo_TerraFirmaTest, staged to
+# Mods\TerraFirmaTest. It unions the two stripped trees. Same-named XML files are fused
+# TF1-nodes-first, because the engine discards a merge whose target has not loaded yet
+# (ObjectBlueprintLoader.ReadObjectsNode, "unknown blueprint, node discarded"); any other
+# file present in both aborts. It compile-checks as one assembly and never touches the
+# TF1/TF2 staging folders. Testers must not enable it alongside TF1 or TF2.
+#
 # Steps: copy tree -> strip .cs (real lexer: strings, verbatim strings, interpolation
 # holes with nested strings all handled; line count preserved) -> scrub date tokens from
 # the surviving .cs text (RULED 2026-08-05: the 7 date-bearing runtime strings scrub in
@@ -29,7 +40,7 @@
 # before a zip is produced.
 
 param(
-    [ValidateSet("TF1", "TF2", "Both")]
+    [ValidateSet("TF1", "TF2", "Both", "Fused")]
     [string]$Mod = "Both",
     [switch]$CheckOnly,
     [string]$RepoRoot = (Split-Path -Parent $PSScriptRoot),
@@ -40,15 +51,23 @@ $ErrorActionPreference = "Stop"
 $pubRoot = Join-Path $RepoRoot "publish"
 $modsRoot = Join-Path $env:USERPROFILE "AppData\LocalLow\Freehold Games\CavesOfQud\Mods"
 
-# per-mod settings; DepRewrites maps a dev dependency id to the id its staged copy carries
+# per-mod settings; DepRewrites maps a dev dependency id to the id its staged copy carries;
+# Exclude lists dev-only files (relative to the mod folder) left out of the player build
 $Mods = @{
     TF1 = @{ Src = "TerraFirma";  ZipName = "CoQ_TerraFirma_beta";  Stage = "TerraFirmaBeta";
-             IdFrom = "Cleo_TerraFirma";  IdTo = "Cleo_TerraFirmaBeta";  DepRewrites = @{} }
+             IdFrom = "Cleo_TerraFirma";  IdTo = "Cleo_TerraFirmaBeta";  DepRewrites = @{};
+             Exclude = @("Scripts\_TestHarness.cs", "Scripts\_SerializationHarness.cs", "Scripts\_Wishes.cs", "Scripts\ZonePainter.cs") }
     TF2 = @{ Src = "TerraFirma2"; ZipName = "CoQ_TerraFirma2_beta"; Stage = "TerraFirma2Beta";
              IdFrom = "Cleo_TerraFirma2"; IdTo = "Cleo_TerraFirma2Beta";
-             DepRewrites = @{ "Cleo_TerraFirma" = "Cleo_TerraFirmaBeta" } }
+             DepRewrites = @{ "Cleo_TerraFirma" = "Cleo_TerraFirmaBeta" };
+             Exclude = @("Scripts\_Wishes2.cs") }
+    # generated from the two stripped trees, no repo source of its own
+    Fused = @{ Src = "TerraFirmaTest"; ZipName = "CoQ_TerraFirma_fusedtest"; Stage = "TerraFirmaTest";
+             IdFrom = "Cleo_TerraFirmaTest"; IdTo = "Cleo_TerraFirmaTest"; DepRewrites = @{};
+             Generated = $true; Title = "Terra Firma (fused test)" }
 }
 foreach ($k in $Mods.Keys) {
+    if ($Mods[$k].Generated) { continue }
     $p = Join-Path $RepoRoot $Mods[$k].Src
     if (-not (Test-Path $p)) { throw "source folder not found: $p" }
 }
@@ -205,6 +224,13 @@ function Strip-Mod($cfg) {
     New-Item -ItemType Directory -Force $dst | Out-Null
     Copy-Item -Recurse "$src\*" $dst
 
+    # dev tooling stays out of player builds; a listed file that is gone means the list is stale
+    foreach ($rel in $cfg.Exclude) {
+        $ex = Join-Path $dst $rel
+        if (-not (Test-Path $ex)) { throw "exclude list names $rel but $($cfg.Src) has no such file -- publish aborted" }
+        Remove-Item -Force $ex
+    }
+
     $csCount = 0; $xmlCount = 0
     $dateToken = ' ?\b20\d{2}-\d{2}-\d{2}\b'  # optional leading space so "cut 2026-07-25)" tidies to "cut)"
     foreach ($f in Get-ChildItem $dst -Recurse -Filter *.cs) {
@@ -225,6 +251,13 @@ function Strip-Mod($cfg) {
             $leak | ForEach-Object { Write-Host $_ }
             throw "date token survived the scrub in $($f.Name) -- publish aborted"
         }
+    }
+
+    # wish guard: a dev wish outside the excluded files would ship to players
+    $wish = Get-ChildItem $dst -Recurse -Filter *.cs | Select-String -Pattern 'WishCommand'
+    if ($wish) {
+        $wish | ForEach-Object { Write-Host $_ }
+        throw "a wish survived the exclude list in $($cfg.Src) -- move it into the wish file or exclude its file; publish aborted"
     }
 
     foreach ($f in Get-ChildItem $dst -Recurse -Filter *.xml) {
@@ -272,6 +305,67 @@ function Compile-Check([bool]$withTF2) {
             }
             Write-Host "compile check green: $proj"
         }
+    }
+    finally { Pop-Location }
+    Remove-Item -Recurse -Force $buildDir
+}
+
+# ---------------------------------------------------------------- fused testing build
+# Union of the stripped TF1 and TF2 trees into publish\<Fused.Src>. Same-named XML fuses
+# TF1-first (TF2 merges onto TF1 blueprints and the Stonecarver calling need their targets
+# loaded); any other shared file aborts. Manifest: TF1's version, author and description under
+# the fused id and title, no dependencies.
+function Fuse-Mods($cfg) {
+    $tf1 = Join-Path $pubRoot $Mods.TF1.Src
+    $tf2 = Join-Path $pubRoot $Mods.TF2.Src
+    $dst = Join-Path $pubRoot $cfg.Src
+    if (Test-Path $dst) { Remove-Item -Recurse -Force $dst }
+    New-Item -ItemType Directory -Force $dst | Out-Null
+    Copy-Item -Recurse "$tf1\*" $dst
+    $fused = 0; $added = 0
+    foreach ($f in Get-ChildItem $tf2 -Recurse -File) {
+        $rel = $f.FullName.Substring($tf2.Length).TrimStart('\')
+        if ($rel -eq "manifest.json") { continue }
+        $target = Join-Path $dst $rel
+        if (-not (Test-Path $target)) {
+            New-Item -ItemType Directory -Force (Split-Path $target) | Out-Null
+            Copy-Item $f.FullName $target
+            $added++
+            continue
+        }
+        if ($f.Extension -ne ".xml") { throw "fused build: $rel exists in both mods and is not XML -- fuse aborted" }
+        $a = New-Object System.Xml.XmlDocument; $a.Load($target)
+        $b = New-Object System.Xml.XmlDocument; $b.Load($f.FullName)
+        if ($a.DocumentElement.Name -ne $b.DocumentElement.Name) {
+            throw "fused build: $rel roots differ ($($a.DocumentElement.Name) vs $($b.DocumentElement.Name)) -- fuse aborted"
+        }
+        foreach ($n in @($b.DocumentElement.ChildNodes)) { [void]$a.DocumentElement.AppendChild($a.ImportNode($n, $true)) }
+        $a.Save($target)
+        $check = New-Object System.Xml.XmlDocument; $check.Load($target)   # strict-validate or abort
+        $fused++
+    }
+    $m = Get-Content (Join-Path $tf1 "manifest.json") -Raw | ConvertFrom-Json
+    $manifest = [ordered]@{ id = $cfg.IdTo; title = $cfg.Title; description = $m.description; version = $m.version; author = $m.author }
+    [System.IO.File]::WriteAllText((Join-Path $dst "manifest.json"), ($manifest | ConvertTo-Json), (New-Object System.Text.UTF8Encoding $false))
+    Write-Host "$($cfg.Src): fused $fused shared XML files TF1-first, added $added TF2 files"
+}
+
+# one assembly, as the game compiles a single mod: the repo csproj globs the fused tree
+function Compile-Fused($cfg) {
+    $buildDir = Join-Path $pubRoot "_compilecheck_fused"
+    if (Test-Path $buildDir) { Remove-Item -Recurse -Force $buildDir }
+    New-Item -ItemType Directory -Force $buildDir | Out-Null
+    Copy-Item (Join-Path $RepoRoot "TerraFirma.csproj") $buildDir
+    Copy-Item -Recurse (Join-Path $pubRoot $cfg.Src) (Join-Path $buildDir "TerraFirma")
+    Push-Location $buildDir
+    try {
+        $build = & dotnet build "TerraFirma.csproj" -p:QudLibPath="$QudLib" 2>&1
+        $errors = $build | Select-String -Pattern "error CS\d|error MSB\d"
+        if ($LASTEXITCODE -ne 0 -or $errors) {
+            $errors | ForEach-Object { Write-Host $_ }
+            throw "fused build FAILED to compile as one assembly -- nothing zipped"
+        }
+        Write-Host "compile check green: fused $($cfg.Src)"
     }
     finally { Pop-Location }
     Remove-Item -Recurse -Force $buildDir
@@ -332,14 +426,16 @@ function Rewrite-Manifest([string]$manifestPath, $cfg) {
 }
 
 # ---------------------------------------------------------------- run
-$wantTF1 = $Mod -ne "TF2"
-$wantTF2 = $Mod -ne "TF1"
-Strip-Mod $Mods.TF1                     # always: TF2 compile-checks against it
-if ($wantTF2) { Strip-Mod $Mods.TF2 }
-Compile-Check $wantTF2
+$wantTF1 = $Mod -eq "TF1" -or $Mod -eq "Both"
+$wantTF2 = $Mod -eq "TF2" -or $Mod -eq "Both"
+$wantFused = $Mod -eq "Fused"
+Strip-Mod $Mods.TF1                     # always: TF2 and the fused build compile against it
+if ($wantTF2 -or $wantFused) { Strip-Mod $Mods.TF2 }
+Compile-Check ($wantTF2 -or $wantFused)
+if ($wantFused) { Fuse-Mods $Mods.Fused; Compile-Fused $Mods.Fused }
 if ($CheckOnly) {
-    foreach ($k in @("TF1", "TF2")) {
-        if (($k -eq "TF1" -and -not $wantTF1) -or ($k -eq "TF2" -and -not $wantTF2)) { continue }
+    foreach ($k in @("TF1", "TF2", "Fused")) {
+        if (($k -eq "TF1" -and -not $wantTF1) -or ($k -eq "TF2" -and -not $wantTF2) -or ($k -eq "Fused" -and -not $wantFused)) { continue }
         $tmp = Join-Path $pubRoot "_manifestcheck_$k.json"
         Copy-Item (Join-Path $pubRoot "$($Mods[$k].Src)\manifest.json") $tmp -Force
         Rewrite-Manifest $tmp $Mods[$k]
@@ -350,4 +446,5 @@ if ($CheckOnly) {
 }
 if ($wantTF1) { Release-Mod $Mods.TF1 }
 if ($wantTF2) { Release-Mod $Mods.TF2 }
+if ($wantFused) { Release-Mod $Mods.Fused }
 Write-Host "publish OK ($Mod)"
