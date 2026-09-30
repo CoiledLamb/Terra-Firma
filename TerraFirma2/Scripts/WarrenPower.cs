@@ -12,9 +12,25 @@ namespace Cleo.TerraFirma.Scripts
 		// Codex PROPOSAL: B02 port of warren-lab-v2.html layPowerGrid.
 		// Native PowerGrid.BuildZone has no haul-road mask. Keep the lab's seeded
 		// routes, then install native ModWired / PowerLine for runtime transmission.
-		private static Row[] _wiringRows, _wireDamageRows;
+		private static Row[] _wiringRows, _wireDamageRows, _machineCountRows, _machineRows;
 		private const string MillBlueprint = "Cleo_TerraFirma_PiezoelectricMill";
 		private const string TableBlueprint = "Cleo_TerraFirma_AnimationTable";
+
+		/// <summary>Powered machines a wired warren draws from; a missing table
+		/// fails loud to the original tumbler.</summary>
+		private static Row[] MachineRows()
+		{
+			if (_machineRows != null) return _machineRows;
+			var rows = new List<Row>();
+			foreach (var po in ReadPopRows("Cleo_TerraFirma_WarrenMachines"))
+				if (!IsNothingRow(po.Blueprint)) rows.Add(new Row((int)Math.Min(po.Weight, int.MaxValue), po.Blueprint));
+			if (rows.Count == 0)
+			{
+				MetricsManager.LogError("TerraFirma: machine table 'Cleo_TerraFirma_WarrenMachines' missing or empty; tumbler only");
+				rows.Add(new Row(1, "Rock Tumbler"));
+			}
+			return _machineRows = rows.ToArray();
+		}
 
 		private static void LayPowerGrid(Grid g, List<PocketRec> pockets, RolesRec roles, int si, string occupancy)
 		{
@@ -98,11 +114,28 @@ namespace Cleo.TerraFirma.Scripts
 				Helpers.VerifyLog("WARREN", $"power: {(wired ? "unplaced mill" : "unwired")}, table={tableI}");
 				return;
 			}
-			int tumblerI = SeatRoles(new[] { "face", "plain", "dwelling" });
-			if (tumblerI >= 0) g.Item[tumblerI] = "Rock Tumbler";
 			var consumers = new List<int>();
 			if (tableI >= 0) consumers.Add(tableI);
-			if (tumblerI >= 0) consumers.Add(tumblerI);
+			// Machine roster (user 2026-09-30: add the lathe; a wired site picks one
+			// or two machines rather than all). Count and roster are XML tables,
+			// drawn without replacement on the carve seed.
+			var pool = MachineRows().ToList();
+			int count = Math.Min(pool.Count, int.Parse(RollLabelTable(ref _machineCountRows, "Cleo_TerraFirma_WarrenMachineCount", new[] { "1", "2" })));
+			var machines = new List<string>();
+			for (int k = 0; k < count; k++)
+			{
+				int t = pool.Sum(r => r.Wt);
+				double x = Rng() * t;
+				int j = pool.Count - 1;
+				for (int q = 0; q < pool.Count; q++) { x -= pool[q].Wt; if (x < 0) { j = q; break; } }
+				string machine = pool[j].Id;
+				pool.RemoveAt(j);
+				int seat = SeatRoles(new[] { "face", "plain", "dwelling" });
+				if (seat < 0) continue;
+				g.Item[seat] = machine;
+				consumers.Add(seat);
+				machines.Add(machine);
+			}
 			for (int i = 0; i < g.Item.Length; i++) if (g.Item[i] == "Kiln") consumers.Add(i);
 			var endpoints = new HashSet<int>(consumers) { millI };
 			g.PowerWires = new Dictionary<int, bool>();
@@ -161,7 +194,7 @@ namespace Cleo.TerraFirma.Scripts
 					g.PowerWires.Add(i, broken);
 				}
 			}
-			Helpers.VerifyLog("WARREN", $"power: {(live ? "live" : "dormant")}, mill={millI}, table={tableI}, tumbler={tumblerI}, routed={routed}/{consumers.Count}, wires={g.PowerWires.Count}, broken={g.PowerWires.Count(p => p.Value)}");
+			Helpers.VerifyLog("WARREN", $"power: {(live ? "live" : "dormant")}, mill={millI}, table={tableI}, machines=[{string.Join(", ", machines)}], routed={routed}/{consumers.Count}, wires={g.PowerWires.Count}, broken={g.PowerWires.Count(p => p.Value)}");
 		}
 
 		private static void ApplyPowerWires(Zone zone, Grid g)

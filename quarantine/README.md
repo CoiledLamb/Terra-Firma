@@ -21,6 +21,7 @@ record for all of it is `TODO-quarantine.md`.
 | `TerraFirma/Scripts/Part_FallenRock.cs` | 2026-09-30 | The v1 stone engine: step payloads, the payload switch, pathfinding asymmetry, fragility, throw sting, ricochet, dull clock. Pebbles were the last live carrier and used none of it |
 | `TerraFirma/Scripts/_LiveFileFragments-held.cs` | 2026-09-30 | Code cut from live files: Fissure's keeper salvage, crack gates and ring figure (held since 2026-08-03) with their constants and band tables; FallenRock's `FallThrough`, `Latch` and surge-owner lines |
 | `TerraFirma/XML/Rocks.xml` | 2026-09-30 | Baboon figurine item, ape statue, stone fist/bite, baboon statuette, chasm, redoubt figure, crack |
+| `design/warren-lab-v2.html` | 2026-09-30 | The warren carve sim. Retired because warrens now generate in the base game; `WarrenCarver.cs` no longer ports from it |
 
 Left in the mod on purpose, because live code still uses them: the Fissure spine in `Rocks.xml`
 (base fallen rock, pebbles, rubble, crumbled wall, wall). The code cut from live files is in

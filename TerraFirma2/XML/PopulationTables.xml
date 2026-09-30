@@ -859,6 +859,22 @@
 			<object Blueprint="broken" Weight="12" />
 		</group>
 	</population>
+	<!-- CLAUDE PROPOSAL: a wired warren seats one or two powered machines, drawn
+	     without replacement from the roster below (user 2026-09-30: add the lathe,
+	     pick one or two rather than all). Count entries are seeded labels; roster
+	     entries are real blueprints. Weights are dials. -->
+	<population Name="Cleo_TerraFirma_WarrenMachineCount">
+		<group Name="Count" Style="pickone">
+			<object Blueprint="1" Weight="1" />
+			<object Blueprint="2" Weight="1" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_WarrenMachines">
+		<group Name="Machines" Style="pickone">
+			<object Blueprint="Rock Tumbler" Weight="1" />
+			<object Blueprint="Lathe" Weight="1" />
+		</group>
+	</population>
 	<!-- Codex PROPOSAL: B07 counts and equal-weight canyon animal likenesses.
 	     EtchCount entries are seeded labels, never spawned blueprints. -->
 	<population Name="Cleo_TerraFirma_WarrenEtchCount">
