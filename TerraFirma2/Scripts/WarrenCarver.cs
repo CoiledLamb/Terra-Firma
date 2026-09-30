@@ -6,12 +6,9 @@ using XRL.World;
 namespace Cleo.TerraFirma.Scripts
 {
 	/// <summary>
-	/// Warren v2 carve engine - FIRST PORT PASS 2026-08-23, ported line-faithful from
-	/// design/warren-lab-v2.html (the sim leads by ruling 2026-08-07; this file catches
-	/// up, never the reverse). Box layout only in this pass: blockMode is the sim's
-	/// non-default A/B lane and rides a later port pass, as do the dress tables
-	/// (registration is in; dressSite is not - roles are stamped and logged so the
-	/// dress pass lands on the contract later with zero re-derivation).
+	/// Warren v2 carve engine, first ported 2026-08-23 from the warren sim (retired to
+	/// quarantine/design/ on 2026-09-30). This file is the source of truth now; remarks
+	/// below that name the sim or its JS ids are provenance only.
 	/// The REAL zone replaces genCanyon: host/water/tree masks are read from the
 	/// built zone, so the carve answers actual canyon geometry, rivers included.
 	/// All decisions log as [TF-VERIFY] [WARREN].
@@ -1690,9 +1687,6 @@ namespace Cleo.TerraFirma.Scripts
 		// (the old BP indirection died with the migration); the few ids that are
 		// not blueprints are placement directives PlaceItems resolves itself
 		// (chalkline*, yardboard). Placement laws all stay here.
-		// SIM MIRROR: design/warren-lab-v2.html keeps its own JS copies (DRESS,
-		// ROOMPOOLS, NATURAL, PLAINTRACE, HALLTABLE + the ITEMS art layer, in sim
-		// ids). THE SIM LEADS: dress content changes hit the sim first, then port.
 		private const string HINT_FACE = "Cleo_TerraFirma_Face";
 		private static Row[] _tSocket, _tGalleryBay, _tGalleryPillar, _tGalleryFloor, _tNatural, _tPlainTrace, _tHallTable;
 		private static Row[] T_SOCKET => _tSocket ?? (_tSocket = LoadDressTable("Socket"));
