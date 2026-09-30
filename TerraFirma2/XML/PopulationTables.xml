@@ -422,14 +422,17 @@
 		</group>
 	</population>
 	<!-- Quarrier work parties in the surface canyon (user 2026-09-30); warrens only generate
-	     in DesertCanyon terrain, so a crew out here is near home. Same shape as base
-	     SnapjawParty1 in this table. Cave levels untouched. Weight 10 CLAUDE PROPOSAL (base
-	     rows are all 10, so about 1 in 16 creature rolls). The chassis keeps its
-	     ExcludeFromDynamicEncounters gate; a table row ignores it. Outriders here have no
-	     beat, so their patrol part stays inert. -->
-	<population Name="DesertCanyonCreatures" Load="Merge">
-		<group Name="Creatures" Style="pickone">
-			<table Weight="10" Name="Cleo_TerraFirma_Stonecarver Pack" />
+	     in DesertCanyon terrain, so a crew out here is near home. The surface template
+	     (ZoneTemplates.xml "DesertCanyon") rolls only the ZoneGlobals, ZoneGlobals-Reachable
+	     and PerSector tables; DesertCanyonCreatures is cave-only (DesertCanyonCavePopulation),
+	     which is where the first wiring wrongly went. A new named group is appended by
+	     PopulationList.MergeFrom, the same shape as base ManySnapjaws (Chance 4) beside it.
+	     Chance 10 per zone CLAUDE PROPOSAL. The chassis keeps its ExcludeFromDynamicEncounters
+	     gate; a table row ignores it. Outriders here have no beat, so their patrol part stays
+	     inert. -->
+	<population Name="DesertCanyonZoneGlobals-Reachable" Load="Merge">
+		<group Chance="10" Name="Cleo_TerraFirma_QuarrierParty">
+			<table Name="Cleo_TerraFirma_Stonecarver Pack" />
 		</group>
 	</population>
 	<!-- Item spawn wiring 2026-08-22 (user rulings, one lane each; all weights DRAFT):
