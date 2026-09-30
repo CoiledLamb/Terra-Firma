@@ -22,7 +22,8 @@ record for all of it is `TODO-quarantine.md`.
 
 Left in the mod on purpose, because live code still uses them: `Part_FallenRock.cs` (Fissure,
 Earthen Barrage's whorl, the TF2 cairn) and the Fissure spine in `Rocks.xml` (base fallen rock,
-pebbles, rubble, crumbled wall, wall, redoubt figure, crack). Its `"Latch"` payload case and the
+pebbles, rubble, crumbled wall, wall, redoubt figure). The crack also stayed, but nothing places it:
+its spawn sits in a commented-out BETA-HELD block in `Mutation_Fissure.cs` since 2026-08-03. Its `"Latch"` payload case and the
 surge-owner line in `"SpawnObject"` were cut when the latch and surge parts moved; restoring
 those parts means restoring those two spots too (see the file's history at 2026-09-30).
 

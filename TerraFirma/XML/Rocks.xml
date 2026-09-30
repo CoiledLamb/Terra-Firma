@@ -18,7 +18,7 @@
 	<!-- V1 ROCK CATALOG + KITCHEN PARKED on branch quarantine-hold (2026-08-22, user ruling:
 	     "move it to its own branch so it doesn't come up until i'm ready to address it").
 	     This file keeps the live fissure spine (base fallen rock, pebbles, rubble,
-	     crumbled wall, fabric wall) and the ring pieces Fissure still places (crack, figure).
+	     crumbled wall, fabric wall) the redoubt figure, and the crack (its spawn is commented out in Mutation_Fissure.cs since 2026-08-03).
 	     The chasm, ape statue and baboon figurine + fists moved to quarantine/ 2026-09-30. Generic debris left the spine 2026-08-25 (user: base rocks). The payload stones, puddles, tar patch, ground/kitchen forms,
 	     StoneMeal, cooking ingredient mappings, surge field and force shards live on that branch;
 	     design record in TODO-quarantine.md. -->
