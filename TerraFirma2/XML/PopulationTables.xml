@@ -535,6 +535,22 @@
 			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_SeismicShufflers" />
 		</group>
 	</population>
+	<!-- World loot for the outrider body pieces and the gauntlets (user 2026-09-30: "broadened";
+	     they keep their quarrier kit rows). Tier-matched rare tables: girdle and pauldrons are
+	     tier 2 beside base Spiked Gauntlets (w20, the pauldrons' spiked cousin); the gauntlets
+	     are tier 4 powered gear beside Strength Exo and Grease Boots (w10). Weights CLAUDE
+	     PROPOSAL. -->
+	<population Name="Armor 2R" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="20" Number="1" Blueprint="Cleo_TerraFirma_MudskinGirdle" />
+			<object Weight="20" Number="1" Blueprint="Cleo_TerraFirma_FlintSpikePauldrons" />
+		</group>
+	</population>
+	<population Name="Armor 4R" Load="Merge">
+		<group Name="Items" Style="pickone">
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_GaslightGauntlets" />
+		</group>
+	</population>
 
 	<!-- ================= WARREN DRESS TABLES (migrated from WarrenCarver.cs 2026-08-26;
 	     migration itself USER-GREENLIT 2026-08-25, dials CLAUDE unless struck) =================
