@@ -52,3 +52,10 @@ wearing a ruling tag when the trackers were triaged on 2026-09-02.
 - `IComponent.ReadError(Exception, Reader, Start, Length)` runs before `SkipBlock`; returning true after `Reader.Stream.Position = Start + Length` skips the part without counting an error (the stub pattern in `SaveCompatStubs.cs`).
 - The level cap is applied after food and gear bonuses (`BaseMutation.CalcLevel`), so a cooked mutation boost does nothing at the cap.
 - consequence for the mod: once a class has shipped, its saved public fields are frozen. New per-object data goes in `[NonSerialized]` fields backed by object string properties, or the class ships a stub. Compare every shipped class's field list against the staged build before a release.
+
+## Saves record each active mod's version
+
+- checked: 2026-09-30, decompile of `SerializationWriter.WriteModVersions` and `SerializationReader.ReadModVersions`.
+- The save header, written before any object, holds every active mod's `ModInfo.ID` and `Manifest.Version` (`Version.Zero` when the manifest has none). On load they land in `SerializationReader.ModVersions` (`Dictionary<string, Version>`), readable from a part's `Read`.
+- Keyed by mod ID, so dev saves (`Cleo_TerraFirma`) and release saves (`Cleo_TerraFirmaBeta`) record under different keys. Two builds sharing a manifest version look identical.
+- Not checked: that `ReadModVersions` runs for every save the game still loads (no `FileVersion` gate appears in it).
