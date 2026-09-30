@@ -1,111 +1,44 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- Fissure's fallen rocks (Spec v2, 2026-07-22). The v1 fifteen from design/fissure-rock-list.md.
-     Thrown channels ride native parts (grenades, BleedingOnHit, DischargeOnHit); step channels and
-     pathfinding asymmetry rode Cleo_TerraFirma_FallenRockPart, in quarantine/ since 2026-09-30. Crush-on-landing is read from the
-     Cleo_TerraFirma_CrushDamage / Cleo_TerraFirma_CrushInstakill tags by the mutation.
-
-     GRIND-FIRST (RULED 2026-07-22): rocks are NOT direct cooking ingredients; the pantry opens
-     only through the mill (pestle anywhere, campfire menu, or a millstone). All rock-side
-     PreparedCookingIngredient lines were removed that day; the cooking domains live on the
-     Ground_* forms at the bottom of this file. The per-rock "Lithovore pass" comments below
-     describe each rock's DOMAIN ASSIGNMENT, which its ground form carries. Eaten-effect tags and
-     parts (the raw channel) remain rock-side and are unaffected. -->
+<!-- What Fissure places: loose pebbles in the wave's wake, and the ring's fabric (rubble,
+     crumbled wall, fallen wall). Mutation_Fissure.cs reads Cleo_TerraFirma_CrushDamage and
+     Cleo_TerraFirma_CrushInstakill from these blueprints when a piece lands on someone.
+     The v1 rock catalog, its kitchen and Lithovore are held on the quarantine-hold branch and
+     in quarantine/ (2026-09-30); design record in TODO-quarantine.md. -->
 <objects>
-	<!-- BETA HOLD (user ruling 2026-07-27): every spawnable's Description below is commented out
-	     (BETA-HELD markers) so unapproved draft text does not ship in the friends beta; rocks fall
-	     back to their inherited base-game description. Restore at the real text pass. -->
-	<!-- shared base: a throwable stone that fell from the ceiling -->
-	<!-- V1 ROCK CATALOG + KITCHEN PARKED on branch quarantine-hold (2026-08-22, user ruling:
-	     "move it to its own branch so it doesn't come up until i'm ready to address it").
-	     This file keeps the live fissure spine (base fallen rock, pebbles, rubble,
-	     crumbled wall, fabric wall) The redoubt figure and crack joined them 2026-09-30.
-	     The chasm, ape statue and baboon figurine + fists moved to quarantine/ 2026-09-30. Generic debris left the spine 2026-08-25 (user: base rocks). The payload stones, puddles, tar patch, ground/kitchen forms,
-	     StoneMeal, cooking ingredient mappings, surge field and force shards live on that branch;
-	     design record in TODO-quarantine.md. -->
-	<object Name="Cleo_TerraFirma_BaseFallenRock" Inherits="BaseStone">
-		<!-- Weight 5 -> 1 (user ruling 2026-07-22 verification session): fissure stones are light;
-		     a pocketful of ammo shouldn't be half a carry budget. Stalactite overrides back to 5
-		     (ruled); pebbles override to 0. KNOWN KNOCK-ON, flagged for veto: the Lithovore's
-		     size-scaled satiety keys off weight <= 1, so all fissure rocks now eat as HALF snacks
-		     (was: full). Stalactite/boulders/statues unchanged. -->
-		<part Name="Physics" Weight="1" Category="Thrown Weapons" />
-		<part Name="Commerce" Value="1" />
-		<!-- Cleo_TerraFirma_FallenRockPart (step payloads, pathfinding asymmetry, the discharge law)
-		     moved to quarantine/ 2026-09-30: no live stone used any of it. -->
-		<tag Name="BaseObject" Value="*noinherit" />
-		<tag Name="ExcludeFromDynamicEncounters" />
-		<tag Name="Tier" Value="1" />
-	</object>
-
-	<!-- ============ Band 1 (mutation Lv 1-3) ============ -->
-
-
-	<object Name="Cleo_TerraFirma_Rock_Pebbles" Inherits="Cleo_TerraFirma_BaseFallenRock">
+	<object Name="Cleo_TerraFirma_Rock_Pebbles" Inherits="BaseStone">
 		<part Name="Render" DisplayName="pebbles" Tile="Items/sw_smallstone.bmp" ColorString="&amp;w" DetailColor="Y" />
 		<part Name="Description" Short="Smooth spall from the world's slow grinding, come down at last." /> <!-- draft, approved 2026-09-30 -->
-		<part Name="Physics" Weight="0" /> <!-- user asked 0.1; engine Weight is an int, so 0 is the nearest (powder precedent) -->
+		<part Name="Physics" Weight="0" Category="Thrown Weapons" /> <!-- user asked 0.1; engine Weight is an int, so 0 is the nearest (powder precedent) -->
+		<part Name="Commerce" Value="1" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+		<tag Name="Tier" Value="1" />
 		<tag Name="Gender" Value="plural" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="1" />
 	</object>
-	<!-- (russet/blue pebble variants CUT, user ruling 2026-07-22) -->
-
-	<!-- (russet/blue pebble variants CUT, user ruling 2026-07-22) -->
-
-	<!-- (Rock_Generic "fallen rock" DELETED, user ruling 2026-08-25 "remove em":
-	     base rocks serve everywhere it spawned. Dress: Small Stone/SmallBoulder;
-	     fissure debris: SmallBoulder. Its 2d6 CrushDamage left with it.) -->
-
-	<!-- THE HOLOGRAPHIC ROCK (user concept 2026-07-24, designed + ruled 2026-07-25): the rock
-	     that isn't there. Belief gates both ends (Part_Holographic: Int DC 12, sticky forever,
-	     machines auto-pass); a believed hit does EXACTLY a generic rock's dice (the mundanity is
-	     the punchline) and collapses the lie. Generics of tiers 2-3 at weight 5 ("it's just a
-	     joke rock, so it's pretty weak... it should also not get picked for seams"); NoSeam tag
-	     enforced at the Fissure seam roll. No CrushDamage tag: a fall that isn't there crushes
-	     no one. Excluded from the strange pool (purity invariant: a belief gate can no-op).
-	     Neither mill nor pestle yields anything (machines don't believe; believers grind at
-	     nothing). Render shimmer = HologramMaterial, the tell for the observant. Name WIP,
-	     queued behind the tanglelith slate; description DRAFT (user's surface). -->
 
 	<object Name="Cleo_TerraFirma_Rock_Rubble" Inherits="Rubble">
 		<part Name="Render" DisplayName="rubble" ColorString="&amp;y" DetailColor="w" />
-		<!-- BETA-HELD: <part Name="Description" Short="A volume of the ceiling lies where it landed, broken past any use but blocking the way all the same." /> -->
 		<stat Name="Hitpoints" Value="250" />
 		<tag Name="ExcludeFromDynamicEncounters" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="3d6" />
 	</object>
 
-	<!-- ============ Rock-scale puddles (pool-volume ruling 2026-07-24; revised same day from
-	     2d8 to 4d8, so 4-32 drams) ============
-	     The base puddles spawn at a flat 500 drams and render as "pool of X" (a water source
-	     from a pebble); base OilPuddle's own StartVolume idiom is the fix pattern. These children
-	     override spawn volume only; everything else inherits. The pour-into-container park item
-	     draws from the same 2d8 budget. -->
-
 	<object Name="Cleo_TerraFirma_Rock_CrumbledWall" Inherits="Rubble">
 		<part Name="Render" DisplayName="crumbled wall" ColorString="&amp;Y" DetailColor="y" />
-		<!-- BETA-HELD: <part Name="Description" Short="A slab too broken to stand and too stubborn to lie flat." /> -->
 		<stat Name="Hitpoints" Value="400" />
 		<tag Name="ExcludeFromDynamicEncounters" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="5d6" />
 	</object>
 
-
 	<object Name="Cleo_TerraFirma_Rock_Wall" Inherits="Sandstone">
 		<part Name="Render" DisplayName="fallen wall" />
-		<!-- BETA-HELD: <part Name="Description" Short="A shelf of the deep ceiling, standing now where it fell, load-bearing for nothing." /> -->
 		<tag Name="ExcludeFromDynamicEncounters" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="8d8" />
 		<tag Name="Cleo_TerraFirma_CrushInstakill" Value="15" />
-		<!-- seam fix (user 2026-08-05: "fissure walls don't seem to paint with calcify walls"):
-		     the painter only fuses same-blueprint / matching-PaintWith / neighbor-wildcard /
-		     PaintPart-hit neighbors, and this blueprint matched calcify's zone-borrowed stone on
-		     none of them. PaintPart makes THIS wall draw fused toward anything carrying the mod's
-		     stone part (calcify walls, zone geology; Merges.xml puts it on all natural rock);
-		     PaintWith "*" is the engine wildcard making neighbors draw fused toward THIS wall.
-		     Both directions covered = no broken faces at the joint. -->
+		<!-- Fuses with calcify walls and zone geology (user 2026-08-05): PaintPart makes this wall
+		     draw toward anything carrying the mod's stone part (Merges.xml puts it on all natural
+		     rock), and PaintWith "*" makes neighbors draw toward this wall. -->
 		<tag Name="PaintWith" Value="*" />
 		<tag Name="PaintPart" Value="Cleo_TerraFirma_StoneshaperWallProperties" />
 	</object>
-
-
 </objects>

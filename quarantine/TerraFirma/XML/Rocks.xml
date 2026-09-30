@@ -4,6 +4,23 @@
      back into Rocks.xml and moving Part_TimedForm.cs back to TerraFirma/Scripts. See
      quarantine/README.md. -->
 <objects>
+	<!-- The shared base the v1 rocks inherit, folded into pebbles in the live file 2026-09-30.
+	     Restore it first if any held rock that inherits it comes back. -->
+	<object Name="Cleo_TerraFirma_BaseFallenRock" Inherits="BaseStone">
+		<!-- Weight 5 -> 1 (user ruling 2026-07-22 verification session): fissure stones are light;
+		     a pocketful of ammo shouldn't be half a carry budget. Stalactite overrides back to 5
+		     (ruled); pebbles override to 0. KNOWN KNOCK-ON, flagged for veto: the Lithovore's
+		     size-scaled satiety keys off weight <= 1, so all fissure rocks now eat as HALF snacks
+		     (was: full). Stalactite/boulders/statues unchanged. -->
+		<part Name="Physics" Weight="1" Category="Thrown Weapons" />
+		<part Name="Commerce" Value="1" />
+		<!-- Cleo_TerraFirma_FallenRockPart (step payloads, pathfinding asymmetry, the discharge law)
+		     moved to quarantine/ 2026-09-30: no live stone used any of it. -->
+		<tag Name="BaseObject" Value="*noinherit" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+		<tag Name="Tier" Value="1" />
+	</object>
+
 	<object Name="Cleo_TerraFirma_BaboonFigurineItem" Inherits="Trinket">
 		<part Name="Render" DisplayName="baboon figurine" Tile="Assets_Content_Textures_Creatures_sw_baboon.bmp" RenderString="]" ColorString="&amp;y" DetailColor="K" />
 		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A baboon no taller than a knee, carved by patient hands. It holds very still, the way stone remembers to." /> -->

@@ -615,7 +615,7 @@ namespace Cleo.TerraFirma.Scripts
 			int n = 0;
 			if (zone != null)
 				foreach (GameObject obj in zone.GetObjects())
-					if (obj.GetBlueprint().InheritsFrom("Cleo_TerraFirma_BaseFallenRock") && obj.CurrentCell != null && obj.InInventory == null && obj.Equipped == null)
+					if (obj.Blueprint == PEBBLES_BP && obj.CurrentCell != null && obj.InInventory == null && obj.Equipped == null)
 						n += obj.Count;
 			return n;
 		}
