@@ -101,4 +101,19 @@
     </factionworshipattitudes>
   </faction>
 
+  <!-- Canyon neighbours (user 2026-09-30: quarriers should not fight stray glowcrows).
+       Birds and Unshelled Reptiles have no catch-all of their own; Faction.InheritParent
+       copies Beasts' "*" -50, which is past Brain.FEELING_HOSTILE_THRESHOLD (-10), so both
+       attacked quarriers on sight and the quarriers (0 toward everyone) fought back.
+       A merge node with only a Name keeps every base attribute (LoadFactionNode sets only
+       what is present). Same idiom as Beasts' own neutral list (Snapjaws, Robots, Cats).
+       Equimaxes need nothing: Prey and its child Equines sit at "*" 0 already. -->
+  <faction Name="Birds">
+    <feeling About="Cleo_TerraFirma_Quarriers" Value="0" />
+  </faction>
+
+  <faction Name="Unshelled Reptiles">
+    <feeling About="Cleo_TerraFirma_Quarriers" Value="0" />
+  </faction>
+
 </factions>
