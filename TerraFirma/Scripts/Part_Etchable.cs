@@ -271,7 +271,7 @@ namespace XRL.World.Parts
 				for (int i = 0; i < limbs.Count; i++)
 					limbNames[i] = limbs[i].GetCardinalName();
 				int pick = Popup.PickOption(
-					Intro: "Choose a part to etch.", // draft, approved 2026-09-30 (TattooGun's prompt shape)
+					Intro: "Choose a body part to etch.", // draft, approved 2026-09-30 (Engraver and TattooGun: "Choose a body part to engrave.")
 					Options: limbNames,
 					AllowEscape: true);
 				if (pick < 0)
