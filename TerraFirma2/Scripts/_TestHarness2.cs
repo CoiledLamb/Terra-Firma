@@ -246,7 +246,10 @@ namespace Cleo.TerraFirma.Scripts
 					fists++;
 					fist = hand.DefaultBehavior;
 				}
-			bool chargedName = gauntlets.DisplayName.Contains("{{gaslight|gaslight}}");
+			// read as identified: the gauntlets carry Examiner Complexity 4, so a fresh spawn shows
+			// its unknown-gloves name to the player and the gaslight swap never sees its base name
+			string Named() => gauntlets.GetDisplayName(AsIfKnown: true);
+			bool chargedName = Named().Contains("{{gaslight|gaslight}}");
 			int Pen(out int spent)
 			{
 				int before = gauntlets.QueryCharge(LiveOnly: false, 0L);
@@ -259,7 +262,7 @@ namespace Cleo.TerraFirma.Scripts
 			int pvFull = fist == null ? -1 : Pen(out spentFull);
 			EnergyCell ec = gauntlets.GetPart<EnergyCellSocket>()?.Cell?.GetPart<EnergyCell>();
 			if (ec != null) ec.Charge = 0;
-			bool plainName = !gauntlets.DisplayName.Contains("{{gaslight|gaslight}}");
+			bool plainName = !Named().Contains("{{gaslight|gaslight}}");
 			int pvEmpty = fist == null ? -1 : Pen(out int _);
 			gauntlets.ForceUnequip(Silent: true);
 			int fistsLeft = 0;
@@ -337,6 +340,7 @@ namespace Cleo.TerraFirma.Scripts
 			// grant: an eater without Earthen Barrage gains it, and loses it when the meal wears off
 			GameObject eater = Spawn("Snapjaw");
 			ProceduralCookingEffect meal = ProceduralCookingEffect.CreateJustUnits(new List<string> { "Cleo_TerraFirma_caveMoss" });
+			meal.Init(eater);   // base cooking inits before applying (ProceduralCookingEffect.cs:114 throws otherwise)
 			bool applied = eater.ApplyEffect(meal);
 			bool granted = eater.HasPart<Cleo_TerraFirma_EarthenBarrage>();
 			eater.RemoveEffect(meal);
@@ -347,6 +351,7 @@ namespace Cleo.TerraFirma.Scripts
 			barrager.RequirePart<Mutations>().AddMutation(eb, 3);
 			int baseLevel = eb.Level;
 			ProceduralCookingEffect meal2 = ProceduralCookingEffect.CreateJustUnits(new List<string> { "Cleo_TerraFirma_caveMoss" });
+			meal2.Init(barrager);
 			barrager.ApplyEffect(meal2);
 			int boosted = barrager.GetPart<Cleo_TerraFirma_EarthenBarrage>()?.Level ?? -1;
 			barrager.RemoveEffect(meal2);
@@ -373,6 +378,7 @@ namespace Cleo.TerraFirma.Scripts
 			if (slot?.Equipped != null)
 				slot.ForceUnequip(Silent: true);
 			ProceduralCookingEffectWithTrigger meal = ProceduralCookingEffect.CreateTriggeredAction("Cleo_TerraFirma_caveMoss", "Cleo_TerraFirma_caveMoss");
+			meal.Init(eater);
 			eater.ApplyEffect(meal);
 			const int TRIES = 40;
 			for (int i = 0; i < TRIES; i++)
