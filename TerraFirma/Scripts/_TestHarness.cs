@@ -40,7 +40,6 @@ namespace Cleo.TerraFirma.Scripts
 		private const string APE_BP = "Cleo_TerraFirma_Rock_ApeStatue";
 		private const string RUBBLE_BP = "Cleo_TerraFirma_Rock_Rubble";
 		private const string PEBBLES_BP = "Cleo_TerraFirma_Rock_Pebbles";
-		private const string CRACK_BP = "Cleo_TerraFirma_Rock_Crack";
 		private const string DULLTEST_BP = "Cleo_TerraFirma_Rock_Pebbles";   // was GENERIC_BP = Rock_Generic (deleted 2026-08-25); the dull test needs a FallenRockPart carrier
 		private const string ROBOT_BP = "Scrapbot";
 		private const string MOTH_BP = "Glowmoth";
@@ -48,7 +47,7 @@ namespace Cleo.TerraFirma.Scripts
 		[WishCommand(Command = "tfverify")]
 		public static void Help()
 		{
-			MessageQueue.AddPlayerMessage("TF harness (BETA TRIM 2026-08-02; catalog dev doors PARKED on branch quarantine-hold 2026-08-22) -- instant: tfquick (pockets+rep), tffeedback (2026-08-07 batch: Husangeion name/bleed, statue popup tag, rough-vs-tier look-text, gaze-wall lockout belt), tfcrack, tfredoubt (8 scripted casts: ring census by band, push/stun, carve depth, water displacement -- chews nearby natural stone). Turn-driven: tfform (5t), tfshape (Stoneshaper, 3t; incl. shape.mourning swap-quiet stamp), tffis (NPC caster, 20t), tfscav (30t, you are the target). tfbatch = the surviving set, ~60 turns standing still, ends with ONE 'BATCH COMPLETE' verdict line for the quick boot-and-test loop. Stage-for-eyes: tfgazewall (plain + animated holo wall, you cast the gaze). Diagnostic: tfstatueai (12t, statue-AI inertness repro: control + animated-wall + miner muses, snapshot + tick telemetry). Peek: tfspore (pure read).", "W");
+			MessageQueue.AddPlayerMessage("TF harness (BETA TRIM 2026-08-02; catalog dev doors PARKED on branch quarantine-hold 2026-08-22) -- instant: tfquick (pockets+rep), tffeedback (2026-08-07 batch: Husangeion name/bleed, statue popup tag, rough-vs-tier look-text, gaze-wall lockout belt), tfredoubt (8 scripted casts: ring census by band, push/stun, carve depth, water displacement -- chews nearby natural stone). Turn-driven: tfform (5t), tfshape (Stoneshaper, 3t; incl. shape.mourning swap-quiet stamp), tffis (NPC caster, 20t), tfscav (30t, you are the target). tfbatch = the surviving set, ~60 turns standing still, ends with ONE 'BATCH COMPLETE' verdict line for the quick boot-and-test loop. Stage-for-eyes: tfgazewall (plain + animated holo wall, you cast the gaze). Diagnostic: tfstatueai (12t, statue-AI inertness repro: control + animated-wall + miner muses, snapshot + tick telemetry). Peek: tfspore (pure read).", "W");
 			if (!Helpers.VERIFY_WATCH)
 				MessageQueue.AddPlayerMessage("VERIFY_WATCH is OFF -- the harness is disabled.", "R");
 		}
@@ -117,9 +116,8 @@ namespace Cleo.TerraFirma.Scripts
 			BatchActive = true;
 			QuickSync();
 			FeedbackSync();
-			CrackSync();
 			RedoubtSync();
-			SetupForm(The.Player, "shape,fis,scav");
+			SetupShape(The.Player, "fis,scav"); // form held in quarantine/ 2026-09-30
 		}
 
 		// ---------------------------------------------------------------- round 3, synchronous
@@ -160,19 +158,7 @@ namespace Cleo.TerraFirma.Scripts
 			hulk?.Obliterate();
 			quartz?.Obliterate();
 
-			// figurine rep: INTENT is +200 while carried (AddsRep). Suspicion from recon: the part
-			// defaults to equipper-only (WorksOnCarrier unset in our XML) -- delta 0 confirms it.
-			int repBefore = The.Game.PlayerReputation.Get("Baboons");
-			GameObject fig = GameObject.Create(FIGURINE_ITEM_BP);
-			origin.AddObject(fig);
-			ply.TakeObject(fig, NoStack: false, Silent: true, EnergyCost: 0);
-			int repAfter = The.Game.PlayerReputation.Get("Baboons");
-			fig.Obliterate();
-			int repFinal = The.Game.PlayerReputation.Get("Baboons");
-			int delta = repAfter - repBefore;
-			Report("quick.rep", delta == 200,
-				$"figurine take: Baboons rep {repBefore}->{repAfter} (delta {delta}, INTENT +200 carried), after removal {repFinal}" +
-				(delta == 0 ? " -- AddsRep never applied: the WorksOnCarrier suspicion is CONFIRMED (part is equipper-only without it)" : ""));
+			// quick.rep (baboon figurine rep-on-take) held in quarantine/ 2026-09-30 with the figurine
 
 			// BETA-HELD quick.heal + quick.cage (healstone, aegischist) PARKED on branch
 			// quarantine-hold 2026-08-22 with the catalog; restore from that branch.
@@ -363,42 +349,6 @@ namespace Cleo.TerraFirma.Scripts
 			AnimateObject.Animate(animated);
 			Helpers.VerifyLog("GAZE", $"tfgazewall staged: plain wall @({open[0].X},{open[0].Y}), animated wall @({open[1].X},{open[1].Y})");
 			MessageQueue.AddPlayerMessage($"Staged: PLAIN holographic shale at ({open[0].X},{open[0].Y}) -- gaze must refuse, no cooldown; ANIMATED at ({open[1].X},{open[1].Y}) -- gaze must duel normally.", "W");
-		}
-
-		/// <summary>Crack pull-down: force a victim over the cracked floor until the 15% proc
-		/// drops it to the zone below (60 crossings: miss odds ~0.006%).</summary>
-		[WishCommand(Command = "tfcrack")]
-		public static void CrackSync()
-		{
-			if (!Helpers.VERIFY_WATCH) { Help(); return; }
-			GameObject ply = The.Player;
-			Cell origin = ply?.CurrentCell;
-			if (origin == null)
-				return;
-			List<Cell> open = origin.GetLocalAdjacentCells();
-			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
-			if (open.Count < 2) { Report("crack", false, "SETUP FAIL - need two open adjacent cells"); return; }
-			GameObject crack = GameObject.Create(CRACK_BP);
-			crack.SetIntProperty(SPAWN_MARK, 1);
-			open[0].AddObject(crack);
-			GameObject victim = GameObject.Create(BABOON_BP);
-			victim.SetIntProperty(SPAWN_MARK, 1);
-			victim.GetStat("Hitpoints").BaseValue = 100; // survives the landing
-			open[1].AddObject(victim);
-			Zone startZone = victim.CurrentZone;
-			int n = 0;
-			bool fell = false;
-			for (; n < 60 && GameObject.Validate(victim); n++)
-			{
-				victim.DirectMoveTo(open[0], 0, Forced: true, IgnoreCombat: true);
-				if (victim.CurrentZone != startZone) { fell = true; break; }
-				victim.DirectMoveTo(open[1], 0, Forced: true, IgnoreCombat: true);
-			}
-			Report("crack", fell, fell
-				? $"victim fell through to {victim.CurrentZone?.ZoneID ?? "the zone below"} after {n + 1} crossing(s) (StepChance 15)"
-				: $"victim NEVER fell in 60 crossings (miss odds ~0.006% -- the FallThrough payload looks dead)");
-			if (GameObject.Validate(victim)) victim.Obliterate();
-			if (GameObject.Validate(crack)) crack.Obliterate();
 		}
 
 		[WishCommand(Command = "tfshape")]

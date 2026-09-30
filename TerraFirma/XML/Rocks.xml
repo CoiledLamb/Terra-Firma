@@ -18,7 +18,7 @@
 	<!-- V1 ROCK CATALOG + KITCHEN PARKED on branch quarantine-hold (2026-08-22, user ruling:
 	     "move it to its own branch so it doesn't come up until i'm ready to address it").
 	     This file keeps the live fissure spine (base fallen rock, pebbles, rubble,
-	     crumbled wall, fabric wall) the redoubt figure, and the crack (its spawn is commented out in Mutation_Fissure.cs since 2026-08-03).
+	     crumbled wall, fabric wall) The redoubt figure and crack joined them 2026-09-30.
 	     The chasm, ape statue and baboon figurine + fists moved to quarantine/ 2026-09-30. Generic debris left the spine 2026-08-25 (user: base rocks). The payload stones, puddles, tar patch, ground/kitchen forms,
 	     StoneMeal, cooking ingredient mappings, surge field and force shards live on that branch;
 	     design record in TODO-quarantine.md. -->
@@ -96,12 +96,6 @@
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="5d6" />
 	</object>
 
-	<object Name="Cleo_TerraFirma_RedoubtFigure" Inherits="Statue">
-		<part Name="Render" DisplayName="stone figure" RenderString="|" ColorString="&amp;y" DetailColor="K" Occluding="true" Tile="Terrain/tile_tombstone1.png" RenderLayer="6" />
-		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="The wave left this behind: a shape half-risen from the earth, worked by no hand you could name." /> -->
-		<tag Name="ExcludeFromDynamicEncounters" />
-	</object>
-
 
 	<object Name="Cleo_TerraFirma_Rock_Wall" Inherits="Sandstone">
 		<part Name="Render" DisplayName="fallen wall" />
@@ -120,18 +114,5 @@
 		<tag Name="PaintPart" Value="Cleo_TerraFirma_StoneshaperWallProperties" />
 	</object>
 
-
-	<object Name="Cleo_TerraFirma_Rock_Crack" Inherits="StairsDown">
-		<part Name="Render" DisplayName="cracked floor" Tile="Terrain/sw_crack.bmp" ColorString="&amp;K" TileColor="&amp;y" DetailColor="K" RenderString="." />
-		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A hairline parting in the floor, wide enough to have opinions about weight." /> -->
-		<part Name="StairsDown" Connected="false" PullDown="false" PullMessage="The floor gives way!" />
-		<part Name="StairHighlight" bEnabled="false" />
-		<removepart Name="Interesting" />
-		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="15" Payload="FallThrough" HoldChance="100" />
-		<tag Name="NoAutowalk" />
-		<tag Name="IgnoreForStairConnections" />
-		<tag Name="ExcludeFromDynamicEncounters" />
-		<tag Name="Gender" Value="neuter" />
-	</object>
 
 </objects>

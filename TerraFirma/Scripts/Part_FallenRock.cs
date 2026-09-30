@@ -928,17 +928,7 @@ namespace XRL.World.Parts
 						entry.Cooldown = Math.Max(entry.Cooldown, segments);
 					break;
 				}
-				case "FallThrough": // crack: the floor gives way beneath them. Flip the dormant StairsDown live,
-				                    // let the native pull handle everything (zone below, fall damage, fliers
-				                    // exempt), close it again. Dormant at rest = no native avoid-weight
-				                    // broadcast, preserving the mine asymmetry.
-					if (GameObject.Validate(ref victim) && ParentObject.GetPart<StairsDown>() is StairsDown stairs)
-					{
-						stairs.PullDown = true;
-						try { stairs.CheckPullDown(victim); }
-						finally { stairs.PullDown = false; }
-					}
-					break;
+				// case "FallThrough" (crack) moved to quarantine/ 2026-09-30
 				case "MagnetPulse": // lodestone: the engine's own pulse (MagneticPulse mutation, decompiled) --
 				                    // drags loose metal and robots to the stone, rips non-chest worn metal off
 				                    // bodies in radius. amount = radius, step = half via Reduced.

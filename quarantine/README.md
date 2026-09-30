@@ -18,14 +18,13 @@ record for all of it is `TODO-quarantine.md`.
 | `TerraFirma/Scripts/Part_DrainLatch.cs` | 2026-09-30 | The drainstone's cursed latch that drinks life (blueprint on `quarantine-hold`) |
 | `TerraFirma/Scripts/Part_SurgeField.cs` | 2026-09-30 | The deep galvena's arcing field (blueprint on `quarantine-hold`); class `Cleo_TerraFirma_SurgePart` |
 | `TerraFirma/Scripts/_TestHarness-held.cs` | 2026-09-30 | `tfspore`, `SetupQuickApe`, `SetupForm` from the dev harness |
-| `TerraFirma/XML/Rocks.xml` | 2026-09-30 | Baboon figurine item, ape statue, stone fist/bite, baboon statuette, chasm |
+| `TerraFirma/Scripts/_LiveFileFragments-held.cs` | 2026-09-30 | Code cut from live files: Fissure's keeper salvage, crack gates and ring figure (held since 2026-08-03) with their constants and band tables; FallenRock's `FallThrough`, `Latch` and surge-owner lines |
+| `TerraFirma/XML/Rocks.xml` | 2026-09-30 | Baboon figurine item, ape statue, stone fist/bite, baboon statuette, chasm, redoubt figure, crack |
 
 Left in the mod on purpose, because live code still uses them: `Part_FallenRock.cs` (Fissure,
 Earthen Barrage's whorl, the TF2 cairn) and the Fissure spine in `Rocks.xml` (base fallen rock,
-pebbles, rubble, crumbled wall, wall, redoubt figure). The crack also stayed, but nothing places it:
-its spawn sits in a commented-out BETA-HELD block in `Mutation_Fissure.cs` since 2026-08-03. Its `"Latch"` payload case and the
-surge-owner line in `"SpawnObject"` were cut when the latch and surge parts moved; restoring
-those parts means restoring those two spots too (see the file's history at 2026-09-30).
+pebbles, rubble, crumbled wall, wall). The code cut from live files is in
+`_LiveFileFragments-held.cs`, each fragment labeled with where it goes back.
 
 ## Saves
 

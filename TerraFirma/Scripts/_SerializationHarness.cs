@@ -55,9 +55,7 @@ namespace Cleo.TerraFirma.Scripts
 			"Cleo_TerraFirma_Rock_Wall",
 			"Cleo_TerraFirma_Rock_CrumbledWall",
 			"Cleo_TerraFirma_Rock_Rubble",
-			"Cleo_TerraFirma_Rock_Crack",
 			"Cleo_TerraFirma_WallCalcify",
-			"Cleo_TerraFirma_RedoubtFigure",
 		};
 
 		[WishCommand(Command = "tfserial")]

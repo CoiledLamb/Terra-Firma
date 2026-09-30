@@ -110,4 +110,23 @@
 		<tag Name="ExcludeFromDynamicEncounters" />
 	</object>
 
+	<object Name="Cleo_TerraFirma_RedoubtFigure" Inherits="Statue">
+		<part Name="Render" DisplayName="stone figure" RenderString="|" ColorString="&amp;y" DetailColor="K" Occluding="true" Tile="Terrain/tile_tombstone1.png" RenderLayer="6" />
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="The wave left this behind: a shape half-risen from the earth, worked by no hand you could name." /> -->
+		<tag Name="ExcludeFromDynamicEncounters" />
+	</object>
+
+	<object Name="Cleo_TerraFirma_Rock_Crack" Inherits="StairsDown">
+		<part Name="Render" DisplayName="cracked floor" Tile="Terrain/sw_crack.bmp" ColorString="&amp;K" TileColor="&amp;y" DetailColor="K" RenderString="." />
+		<!-- BETA-HELD (DRAFT): <part Name="Description" Short="A hairline parting in the floor, wide enough to have opinions about weight." /> -->
+		<part Name="StairsDown" Connected="false" PullDown="false" PullMessage="The floor gives way!" />
+		<part Name="StairHighlight" bEnabled="false" />
+		<removepart Name="Interesting" />
+		<part Name="Cleo_TerraFirma_FallenRockPart" StepChance="15" Payload="FallThrough" HoldChance="100" />
+		<tag Name="NoAutowalk" />
+		<tag Name="IgnoreForStairConnections" />
+		<tag Name="ExcludeFromDynamicEncounters" />
+		<tag Name="Gender" Value="neuter" />
+	</object>
+
 </objects>

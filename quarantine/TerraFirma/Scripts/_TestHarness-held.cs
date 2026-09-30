@@ -73,3 +73,59 @@
 			ply.AddPart(driver);
 			MessageQueue.AddPlayerMessage("Harness: form scenario running -- 5 turns while the statuette's clock runs out.", "W");
 		}
+
+// tfcrack and its constant, held 2026-09-30 with the crack
+		private const string CRACK_BP = "Cleo_TerraFirma_Rock_Crack";
+
+		/// <summary>Crack pull-down: force a victim over the cracked floor until the 15% proc
+		/// drops it to the zone below (60 crossings: miss odds ~0.006%).</summary>
+		[WishCommand(Command = "tfcrack")]
+		public static void CrackSync()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			GameObject ply = The.Player;
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+			List<Cell> open = origin.GetLocalAdjacentCells();
+			open.RemoveAll(c => c.IsSolid() || c.HasObjectWithPart("Combat"));
+			if (open.Count < 2) { Report("crack", false, "SETUP FAIL - need two open adjacent cells"); return; }
+			GameObject crack = GameObject.Create(CRACK_BP);
+			crack.SetIntProperty(SPAWN_MARK, 1);
+			open[0].AddObject(crack);
+			GameObject victim = GameObject.Create(BABOON_BP);
+			victim.SetIntProperty(SPAWN_MARK, 1);
+			victim.GetStat("Hitpoints").BaseValue = 100; // survives the landing
+			open[1].AddObject(victim);
+			Zone startZone = victim.CurrentZone;
+			int n = 0;
+			bool fell = false;
+			for (; n < 60 && GameObject.Validate(victim); n++)
+			{
+				victim.DirectMoveTo(open[0], 0, Forced: true, IgnoreCombat: true);
+				if (victim.CurrentZone != startZone) { fell = true; break; }
+				victim.DirectMoveTo(open[1], 0, Forced: true, IgnoreCombat: true);
+			}
+			Report("crack", fell, fell
+				? $"victim fell through to {victim.CurrentZone?.ZoneID ?? "the zone below"} after {n + 1} crossing(s) (StepChance 15)"
+				: $"victim NEVER fell in 60 crossings (miss odds ~0.006% -- the FallThrough payload looks dead)");
+			if (GameObject.Validate(victim)) victim.Obliterate();
+			if (GameObject.Validate(crack)) crack.Obliterate();
+		}
+
+
+// quick.rep, cut from QuickSync 2026-09-30 with the baboon figurine item
+			// figurine rep: INTENT is +200 while carried (AddsRep). Suspicion from recon: the part
+			// defaults to equipper-only (WorksOnCarrier unset in our XML) -- delta 0 confirms it.
+			int repBefore = The.Game.PlayerReputation.Get("Baboons");
+			GameObject fig = GameObject.Create(FIGURINE_ITEM_BP);
+			origin.AddObject(fig);
+			ply.TakeObject(fig, NoStack: false, Silent: true, EnergyCost: 0);
+			int repAfter = The.Game.PlayerReputation.Get("Baboons");
+			fig.Obliterate();
+			int repFinal = The.Game.PlayerReputation.Get("Baboons");
+			int delta = repAfter - repBefore;
+			Report("quick.rep", delta == 200,
+				$"figurine take: Baboons rep {repBefore}->{repAfter} (delta {delta}, INTENT +200 carried), after removal {repFinal}" +
+				(delta == 0 ? " -- AddsRep never applied: the WorksOnCarrier suspicion is CONFIRMED (part is equipper-only without it)" : ""));
+

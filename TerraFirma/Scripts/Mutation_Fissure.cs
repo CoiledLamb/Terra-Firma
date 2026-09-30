@@ -43,8 +43,7 @@ namespace XRL.World.Parts.Mutation
 		// double-bites and the one-bite rim grammar holds.
 		private const int RING_RADIUS = 3;
 		// FEEL ROUND 1 (user, 2026-08-02): "walls feel too solid at lower levels - need more gaps"
-		// -- fixed 3 became a falling ladder; see GetGapCount. Crack-gates commented out same round.
-		// private const int CRACK_GATE_CHANCE = 50; // % per gap: the doors made of dice (BETA-HELD, feel round 1)
+		// -- fixed 3 became a falling ladder; see GetGapCount. Crack-gates held the same round; moved to quarantine/ 2026-09-30.
 		// ANIMATION PASS v2 (user spec 2026-08-03): sprite-slide emergence on the CombatJuice
 		// layer -- see Fx_StoneRise.cs, where all tempo/geometry dials now live. The v1
 		// buffer-stamp approach (color-block pulse) was rejected at feel review: "transitioning
@@ -59,9 +58,6 @@ namespace XRL.World.Parts.Mutation
 		private const string RUBBLE_BLUEPRINT = "Cleo_TerraFirma_Rock_Rubble";
 		private const string CRUMBLED_BLUEPRINT = "Cleo_TerraFirma_Rock_CrumbledWall";
 		private const string WALL_BLUEPRINT = "Cleo_TerraFirma_Rock_Wall";
-		private const string CRACK_BLUEPRINT = "Cleo_TerraFirma_Rock_Crack";
-		private const string FIGURE_BLUEPRINT = "Cleo_TerraFirma_RedoubtFigure";
-		private const string SALVAGE_TABLE = "Cleo_TerraFirma_RedoubtSalvage";
 		private static readonly string[] SMOKE_COLORS = { "&K", "&y", "&w" };
 		#endregion
 
@@ -222,21 +218,6 @@ namespace XRL.World.Parts.Mutation
 		// The product never expires, so level must not also buy frequency (no double-dip).
 		public static int GetCooldown(int Lv) => 100;
 
-		/// <summary>Keeper-salvage rolls per cast ("additional small spawns", ruled): 1 roll at bands 1-2, 2 at bands 3-4, each 50%.</summary>
-		public static int GetSalvageRolls(int Lv) => GetBand(Lv) >= 3 ? 2 : 1;
-
-/// <summary>% chance the rim raises a stone figure (USER RULED into v1: "figurine can come
-		/// in first pass"): 0/2/4/6 by band, at most one per cast. A figure is an event, not a fixture.</summary>
-		public static int GetFigureChance(int Lv)
-		{
-			switch (GetBand(Lv))
-			{
-				case 1: return 0;
-				case 2: return 2;
-				case 3: return 4;
-				default: return 6;
-			}
-		}
 		#endregion
 
 		#region Events
@@ -372,51 +353,7 @@ namespace XRL.World.Parts.Mutation
 				deposits.Add((c, fabric, 0f));
 				deposited++;
 			}
-			/* BETA-HELD (feel round 2, user 2026-08-03: "all salvage + baboon and geyser, for
-			   now" -- reconsider once the mutation is functioning). The keeper-salvage rolls;
-			   the figure survives (lore-bearing, not loot). Feel round 1's crack-gate hold rides
-			   inside. Restore alongside GetSalvageRolls/SALVAGE_TABLE. (The geyser-in-gap that
-			   was held here died for good at the 2026-08-13 geyser cut -- its code and helpers
-			   are scrubbed, not held; pre-cut shape at git tag fissure-v2-grenade.)
-			foreach (Cell gap in gaps)
-			{
-				if (CRACK_GATE_CHANCE.in100())
-					deposits.Add((gap, CRACK_BLUEPRINT, 0f));
-			}
-			for (int s = 0; s < GetSalvageRolls(Level); s++)
-			{
-				if (rim.Count > 0 && 50.in100())
-				{
-					Cell c = rim[Stat.Random(0, rim.Count - 1)];
-					string bp = PopulationManager.RollOneFrom(SALVAGE_TABLE)?.Blueprint;
-					if (bp != null)
-						deposits.Add((c, bp, 0f));
-				}
-			}
-			*/
-			/* BETA-HELD (feel round 2 correction, user 2026-08-03: "i think you're confused
-			   about the figurine - that's what i meant by the baboon") -- the stone figure
-			   rides the same cut as salvage and geyser after all. Blueprint stays defined;
-			   restore alongside GetFigureChance.
-			// the figure: at most one, rare, an event -- it REPLACES its cell's fabric rather
-			// than stacking a second solid on it
-			if (rim.Count > 0 && GetFigureChance(Level).in100())
-			{
-				Cell c = rim[Stat.Random(0, rim.Count - 1)];
-				if (!StillHoldsCombatant(c))
-				{
-					for (int i = 0; i < deposits.Count; i++)
-					{
-						if (deposits[i].cell == c)
-						{
-							deposits[i] = (c, FIGURE_BLUEPRINT, deposits[i].time);
-							Helpers.VerifyLog("FIS", $"RING FIGURE raised @({c.X},{c.Y})");
-							break;
-						}
-					}
-				}
-			}
-			*/
+			// keeper salvage, crack gates and the ring figure (BETA-HELD 2026-08-03) moved to quarantine/ 2026-09-30
 			// interior wake scatter (FEEL ROUND 2, user: "spawn some stones or boulders in
 			// addition to the ring. breaking up the inside will also make it feel more
 			// uniform") -- loose stone in the wave's wake, timed to each shell's passing
@@ -498,7 +435,7 @@ namespace XRL.World.Parts.Mutation
 						}
 					}
 				}
-				if (bp == WALL_BLUEPRINT || bp == FIGURE_BLUEPRINT)
+				if (bp == WALL_BLUEPRINT)
 					SweepLooseItemsAside(plan.cell); // a wall owns its whole tile: loot spills out the side, never vanishes
 				GameObject piece = GameObject.Create(bp);
 				if (bp == WALL_BLUEPRINT)
