@@ -44,3 +44,11 @@ wearing a ruling tag when the trackers were triaged on 2026-09-02.
 - `GameObject.Fail(msg)` shows `Popup.ShowFail` only for the player and returns false.
 - Melee hits pass their weapon into the damage events (`Combat`, the "TakeDamage" event's Weapon parameter; `TookDamageEvent.Weapon`). Not individually checked: that breath, blast and quill-retaliation damage leave Weapon null.
 - Base `Creature` carries `<tag Name="Creature" />`, inherited by every creature; animated items get `IsCreature` from a property on a non-creature blueprint.
+
+## Saved parts are read field by field, in order, with no end check
+
+- checked: 2026-09-30, decompile of `IComponent<T>.Read`/`Write` (default path walks `GetCachedFields()`: public instance fields, declaration order, skipping `[NonSerialized]`), `IPart.Load` and `Effect.Load` (each part is a length-prefixed block, but a successful `LoadData` never seeks to the block's end), `SerializationReader.SkipBlock` and `XRLGame` (`Popup.DisplayLoadError` when `Reader.Errors > 0`).
+- A class missing at load: `ReadTokenizedType` throws, `SkipBlock` skips the part and counts an error, and the load-error popup shows. A class with **more** saved fields than the save holds reads past its block into the next part and corrupts it (seen 2026-09-30: a 0.1.2.5 statue's added `StoneshaperStatueStatsPart` fields broke the next part, Wings, and the statue was lost). Fewer fields leave the stream mid-block.
+- `IComponent.ReadError(Exception, Reader, Start, Length)` runs before `SkipBlock`; returning true after `Reader.Stream.Position = Start + Length` skips the part without counting an error (the stub pattern in `SaveCompatStubs.cs`).
+- The level cap is applied after food and gear bonuses (`BaseMutation.CalcLevel`), so a cooked mutation boost does nothing at the cap.
+- consequence for the mod: once a class has shipped, its saved public fields are frozen. New per-object data goes in `[NonSerialized]` fields backed by object string properties, or the class ships a stub. Compare every shipped class's field list against the staged build before a release.

@@ -28,7 +28,7 @@ namespace XRL.World.Parts
 		public int MaxWeight = 100;
 
 		/// <summary>How far afield the hound smells a loose stone (Chebyshev; scavenger default).</summary>
-		public int SeekRadius = 8;
+		[NonSerialized] public int SeekRadius = 8;   // out of the save (2026-09-30): 0.1.2.5 saved only MaxWeight, and fields load by position
 
 		[NonSerialized]
 		private Cell LastSeekTarget;
