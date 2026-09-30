@@ -444,6 +444,56 @@ function Rewrite-Manifest([string]$manifestPath, $cfg) {
     Write-Host "manifest ok: $($cfg.Src) -> '$($check.title)', id $($check.id)$(if ($check.dependencies) { ', deps ' + (($check.dependencies.PSObject.Properties | % { $_.Name }) -join ',') })"
 }
 
+# ---------------------------------------------------------------- save-layout guard
+# (2026-09-30, after a 0.1.2.5 save lost its statues): the engine loads a part's public fields
+# by position with no end check (IComponent.Read; design/ground-truth.md), so a shipped class
+# whose saved fields change corrupts every old save that holds it. Before a stage folder is
+# overwritten, every class in the build already staged there is compared with the new tree:
+# public instance fields, in order, skipping [NonSerialized]. Any drift aborts. Classes in
+# SaveCompatStubs.cs are exempt (they skip their saved data by design). Classes that are gone
+# are listed, not fatal: their parts load with the engine's load-error popup unless stubbed.
+function Get-SavedLayouts([string]$scriptsDir) {
+    $layouts = @{}
+    $stubs = @{}
+    if (-not (Test-Path $scriptsDir)) { return @{ Layouts = $layouts; Stubs = $stubs } }
+    foreach ($file in Get-ChildItem $scriptsDir -Recurse -Filter *.cs) {
+        $cls = $null
+        $pendingNonSerialized = $false
+        foreach ($line in [System.IO.File]::ReadAllLines($file.FullName)) {
+            if ($line -match '^\s*public (?:sealed |abstract |partial )*class (\w+)') {
+                $cls = $Matches[1]
+                $layouts[$cls] = New-Object System.Collections.Generic.List[string]
+                if ($file.Name -eq "SaveCompatStubs.cs") { $stubs[$cls] = $true }
+                $pendingNonSerialized = $false
+                continue
+            }
+            if ($line -match '^\s*\[NonSerialized\]\s*$') { $pendingNonSerialized = $true; continue }
+            if ($cls -and $line -match '^\t\t(\[NonSerialized\] )?public (?!override |static |const |class |abstract |virtual |event |readonly )([\w<>\[\],\.\?]+) (\w+)( =[^;]*)?;') {
+                if (-not $Matches[1] -and -not $pendingNonSerialized) { $layouts[$cls].Add("$($Matches[2]) $($Matches[3])") }
+            }
+            if ($line.Trim()) { $pendingNonSerialized = $false }
+        }
+    }
+    return @{ Layouts = $layouts; Stubs = $stubs }
+}
+
+function Check-SaveLayout([string]$newTree, [string]$stageName) {
+    $staged = Join-Path (Join-Path $modsRoot $stageName) "Scripts"
+    if (-not (Test-Path $staged)) { Write-Host "save layout: nothing staged in $stageName yet, no shipped layouts to hold"; return }
+    $old = Get-SavedLayouts $staged
+    $new = Get-SavedLayouts (Join-Path $newTree "Scripts")
+    $drift = @(); $gone = @(); $held = 0
+    foreach ($cls in $old.Layouts.Keys) {
+        if (-not $new.Layouts.ContainsKey($cls)) { $gone += $cls; continue }
+        if ($new.Stubs.ContainsKey($cls)) { continue }
+        $a = $old.Layouts[$cls] -join ", "; $b = $new.Layouts[$cls] -join ", "
+        if ($a -ne $b) { $drift += "  $cls`n    staged: [$a]`n    new:    [$b]" } else { $held++ }
+    }
+    if ($gone.Count) { Write-Host "save layout note: $($gone.Count) staged class(es) gone (their parts load with an error unless stubbed): $(($gone | Sort-Object) -join ', ')" }
+    if ($drift.Count) { throw "save layout DRIFT against the build staged in ${stageName}: old saves would misread these parts. Move new data to [NonSerialized] fields or object properties, or stub the class.`n$($drift -join "`n")" }
+    Write-Host "save layout ok: $held class(es) keep the layout staged in $stageName"
+}
+
 # ---------------------------------------------------------------- run
 $wantTF1 = $Mod -eq "TF1" -or $Mod -eq "Both"
 $wantTF2 = $Mod -eq "TF2" -or $Mod -eq "Both"
@@ -454,6 +504,11 @@ if ($wantTF2 -or $wantFused -or $wantRelease) { Strip-Mod $Mods.TF2 }
 Compile-Check ($wantTF2 -or $wantFused -or $wantRelease)
 if ($wantFused) { Fuse-Mods $Mods.Fused; Compile-Fused $Mods.Fused }
 if ($wantRelease) { Fuse-Mods $Mods.Release; Compile-Fused $Mods.Release }
+# no stage folder may be overwritten by a build that would misread its saves
+if ($wantTF1) { Check-SaveLayout (Join-Path $pubRoot $Mods.TF1.Src) $Mods.TF1.Stage }
+if ($wantTF2) { Check-SaveLayout (Join-Path $pubRoot $Mods.TF2.Src) $Mods.TF2.Stage }
+if ($wantFused) { Check-SaveLayout (Join-Path $pubRoot $Mods.Fused.Src) $Mods.Fused.Stage }
+if ($wantRelease) { Check-SaveLayout (Join-Path $pubRoot $Mods.Release.Src) $Mods.Release.Stage }
 if ($CheckOnly) {
     foreach ($k in @("TF1", "TF2", "Fused", "Release")) {
         if (($k -eq "TF1" -and -not $wantTF1) -or ($k -eq "TF2" -and -not $wantTF2) -or ($k -eq "Fused" -and -not $wantFused) -or ($k -eq "Release" -and -not $wantRelease)) { continue }

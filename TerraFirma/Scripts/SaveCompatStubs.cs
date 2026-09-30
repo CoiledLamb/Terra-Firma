@@ -12,6 +12,10 @@ namespace XRL.World.Parts
 	// fields and seeks past the block in ReadError, which IPart.Load consults before SkipBlock and
 	// which counts no error. It then sits inert on the stone; the next save writes it empty.
 	//
+	// Every stone carrying it is from an old save, so it also refreshes the stone's description
+	// from the current blueprint at load (2026-09-30): descriptions are saved per object, and
+	// 0.1.2.5 pebbles were made while theirs was held, so they read "A hideous specimen."
+	//
 	// Restoring the class means deleting this stub.
 	public class Cleo_TerraFirma_FallenRockPart : IPart
 	{
@@ -24,6 +28,17 @@ namespace XRL.World.Parts
 		{
 			Reader.Stream.Position = Start + Length;
 			return true;
+		}
+
+		public override void FinalizeRead(SerializationReader Reader)
+		{
+			base.FinalizeRead(Reader);
+			if (ParentObject?.Blueprint == null)
+				return;
+			string current = GameObjectFactory.Factory.GetBlueprintIfExists(ParentObject.Blueprint)?.GetPartParameter<string>("Description", "Short");
+			Description description = ParentObject.GetPart<Description>();
+			if (!string.IsNullOrEmpty(current) && description != null)
+				description._Short = current;
 		}
 	}
 }
