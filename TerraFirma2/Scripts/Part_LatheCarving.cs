@@ -25,7 +25,9 @@ namespace XRL.World.Parts
 		{
 			return base.WantEvent(ID, cascade)
 				|| ID == GetInventoryActionsEvent.ID
-				|| ID == InventoryActionEvent.ID;
+				|| ID == InventoryActionEvent.ID
+				|| ID == CanSmartUseEvent.ID
+				|| ID == CommandSmartUseEvent.ID;
 		}
 
 		private static List<GameObject> GetInputs(GameObject Actor)
@@ -33,10 +35,33 @@ namespace XRL.World.Parts
 			return Actor.GetInventory(item => item.HasTag(INPUT_TAG));
 		}
 
+		// space on the lathe = Carve while an input is carried (user 2026-09-30); the
+		// SmartUse pair with the chalkboard's gates, Chair's Sit being the base precedent
+		private bool CanCarve(GameObject actor)
+		{
+			return actor != null && actor.IsPlayer() && actor != ParentObject && ParentObject.Understood()
+				&& actor.PhaseMatches(ParentObject) && actor.FlightCanReach(ParentObject)
+				&& GetInputs(actor).Count > 0;
+		}
+
+		public override bool HandleEvent(CanSmartUseEvent E)
+		{
+			if (CanCarve(E.Actor))
+				return false;
+			return base.HandleEvent(E);
+		}
+
+		public override bool HandleEvent(CommandSmartUseEvent E)
+		{
+			if (CanCarve(E.Actor))
+				AttemptCarve(E.Actor);
+			return base.HandleEvent(E);
+		}
+
 		public override bool HandleEvent(GetInventoryActionsEvent E)
 		{
 			if (E.Actor != null && E.Actor.IsPlayer() && GetInputs(E.Actor).Count > 0)
-				E.AddAction("Carve", "carve", COMMAND, null, 'v', FireOnActor: false);
+				E.AddAction("Carve", "carve", COMMAND, null, 'v', FireOnActor: false, Default: 5);
 			return base.HandleEvent(E);
 		}
 
