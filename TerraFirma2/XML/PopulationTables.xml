@@ -427,11 +427,11 @@
 	     and PerSector tables; DesertCanyonCreatures is cave-only (DesertCanyonCavePopulation),
 	     which is where the first wiring wrongly went. A new named group is appended by
 	     PopulationList.MergeFrom, the same shape as base ManySnapjaws (Chance 4) beside it.
-	     Chance 10 per zone CLAUDE PROPOSAL. The chassis keeps its ExcludeFromDynamicEncounters
-	     gate; a table row ignores it. Outriders here have no beat, so their patrol part stays
-	     inert. -->
+	     Chance 20 per zone (user 2026-09-30, up from 10 after seeing them). The chassis
+	     keeps its ExcludeFromDynamicEncounters gate; a table row ignores it. Outriders here
+	     have no beat, so their patrol part stays inert. -->
 	<population Name="DesertCanyonZoneGlobals-Reachable" Load="Merge">
-		<group Chance="10" Name="Cleo_TerraFirma_QuarrierParty">
+		<group Chance="20" Name="Cleo_TerraFirma_QuarrierParty">
 			<table Name="Cleo_TerraFirma_Stonecarver Pack" />
 		</group>
 	</population>
