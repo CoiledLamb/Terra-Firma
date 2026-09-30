@@ -263,7 +263,6 @@ namespace XRL.World.Parts.Mutation
 					" to lifeless stone. Anything worn or carried will be entombed within, recoverable by hand. Proceed?") == DialogResult.No)
 					return false;
 			}
-		//MessageQueue.AddPlayerMessage("choosing target");
 		targetSelection:
 			Cell targetCreatureCell = PickDestinationCell(Snap: true, Label: "Choose a cell with a creature to copy.");
 			if (targetCreatureCell == null)
@@ -282,9 +281,7 @@ namespace XRL.World.Parts.Mutation
 				E.Actor.Fail(creature.T() + creature.GetVerb("have") + " no body plan for you to carve.");
 				goto targetSelection;
 			}
-			//MessageQueue.AddPlayerMessage($"target chosen: {creature.DisplayName}");
 
-			//MessageQueue.AddPlayerMessage($"choosing wall: {creature.DisplayName}");
 			Cell targetWallCell = targetCreatureCell;
 			WallType validWalls = GetValidWallsAtLevel(Level);
 
@@ -297,17 +294,14 @@ namespace XRL.World.Parts.Mutation
 			targetWallCell = PickTarget.ShowPicker(PickTarget.PickStyle.EmptyCell, 1, 9999, wallSeed.X, wallSeed.Y, Label: "Choose a wall to carve the statue from.", UseTarget: false);
 			if (targetWallCell == null)
 			{ // cancelled
-			  //MessageQueue.AddPlayerMessage($"cancelled");
 				return false;
 			}
 			else if (!targetWallCell.HasWall())
 			{
 				E.Actor.Fail("You must select a tile containing a solid wall.");
-				//MessageQueue.AddPlayerMessage($"tile has no wall");
 				goto wallSelection;
 			}
 
-			//MessageQueue.AddPlayerMessage($"getting walls...");
 			List<GameObject> walls = targetWallCell.GetWalls();
 			GameObject refWall = walls.First();
 			if (refWall.HasPart<HologramMaterial>() || refWall.HasPart<Walltrap>() || refWall.HasPart<Forcefield>())
@@ -567,10 +561,8 @@ namespace XRL.World.Parts.Mutation
 
 			if (partsToReplace.IsNullOrEmpty())
 			{
-				//MessageQueue.AddPlayerMessage("looped parts is null. selecting body.");
 				partsToReplace.Add(Statue.Body.GetPart("Body", true).First());
 			}
-			//MessageQueue.AddPlayerMessage($"adding natural weapon, part 2. replacing {partsToReplace.Count} parts...");
 			List<string> museMapLines = new();
 			foreach (var item in partsToReplace)
 			{
@@ -637,9 +629,7 @@ namespace XRL.World.Parts.Mutation
 					Statue.RequirePart<Mutations>().AddMutation(WallProps.MutationName, WallProps.MutationLevel);
 			}
 
-			//MessageQueue.AddPlayerMessage($"caching stuff...");
 			bool isVain = Creature == Sculptor || Creature.Blueprint == "Asphodel" || Sculptor.HasEffect<Lovesick>();
-			//MessageQueue.AddPlayerMessage($"is vain: {isVain}, {The.Game.GetBooleanGameState("Cleo_TerraFirma_StateIsVain")}");
 			if (isVain)
 			{
 				Statue.SetIntProperty("Cleo_TerraFirma_IsVain", 1);
@@ -657,7 +647,6 @@ namespace XRL.World.Parts.Mutation
 			// temporary and permanent statues were always identical companions. Pass nothing rather
 			// than encode a distinction the engine does not have.
 			Statue.Brain.BecomeCompanionOf(Sculptor);
-			//MessageQueue.AddPlayerMessage($"assigning convo script...");
 			Statue.RequirePart<ConversationScript>().ConversationID = "Cleo_TerraFirma_ConversationStoneshaperStatue";
 			// the statue fights AND draws aggro: nearby enemies must save vs Willpower or attack it instead of the sculptor.
 			// a successful save grants long DistractionImmunity, so strong-willed enemies opt out once and stay out.
