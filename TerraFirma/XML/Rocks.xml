@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- Fissure's fallen rocks (Spec v2, 2026-07-22). The v1 fifteen from design/fissure-rock-list.md.
      Thrown channels ride native parts (grenades, BleedingOnHit, DischargeOnHit); step channels and
-     pathfinding asymmetry ride Cleo_TerraFirma_FallenRockPart. Crush-on-landing is read from the
+     pathfinding asymmetry rode Cleo_TerraFirma_FallenRockPart, in quarantine/ since 2026-09-30. Crush-on-landing is read from the
      Cleo_TerraFirma_CrushDamage / Cleo_TerraFirma_CrushInstakill tags by the mutation.
 
      GRIND-FIRST (RULED 2026-07-22): rocks are NOT direct cooking ingredients; the pantry opens
@@ -30,15 +30,8 @@
 		     (was: full). Stalactite/boulders/statues unchanged. -->
 		<part Name="Physics" Weight="1" Category="Thrown Weapons" />
 		<part Name="Commerce" Value="1" />
-		<!-- THE DISCHARGE LAW (fragility system RULED 2026-07-25, supersedes HoldChance-25 and the
-		     dull clock): a stone keeps until it goes off; it always goes off underfoot (spenders
-		     carry StepChance 100) unless the stepper is its owner or the owner's party; when it
-		     goes off (step or throw) it is gone (HoldChance 0). Payloadless ammo never spends.
-		     Zoners (caromcobble 50, crack 15) keep per-crossing RATES and HoldChance 100;
-		     permanence is their identity. Dull clock CUT same ruling (weight is the carry cap,
-		     Burgeoning the precedent; DullAfter 0 = never, the code path stays for a future longer
-		     fuse). Children's part lines merge over this one. -->
-		<part Name="Cleo_TerraFirma_FallenRockPart" HoldChance="0" DullAfter="0" />
+		<!-- Cleo_TerraFirma_FallenRockPart (step payloads, pathfinding asymmetry, the discharge law)
+		     moved to quarantine/ 2026-09-30: no live stone used any of it. -->
 		<tag Name="BaseObject" Value="*noinherit" />
 		<tag Name="ExcludeFromDynamicEncounters" />
 		<tag Name="Tier" Value="1" />
@@ -49,7 +42,7 @@
 
 	<object Name="Cleo_TerraFirma_Rock_Pebbles" Inherits="Cleo_TerraFirma_BaseFallenRock">
 		<part Name="Render" DisplayName="pebbles" Tile="Items/sw_smallstone.bmp" ColorString="&amp;w" DetailColor="Y" />
-		<!-- BETA-HELD: <part Name="Description" Short="Smooth spall from the world's slow grinding, come down at last." /> -->
+		<part Name="Description" Short="Smooth spall from the world's slow grinding, come down at last." /> <!-- draft, approved 2026-09-30 -->
 		<part Name="Physics" Weight="0" /> <!-- user asked 0.1; engine Weight is an int, so 0 is the nearest (powder precedent) -->
 		<tag Name="Gender" Value="plural" />
 		<tag Name="Cleo_TerraFirma_CrushDamage" Value="1" />

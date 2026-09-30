@@ -129,3 +129,23 @@
 				$"figurine take: Baboons rep {repBefore}->{repAfter} (delta {delta}, INTENT +200 carried), after removal {repFinal}" +
 				(delta == 0 ? " -- AddsRep never applied: the WorksOnCarrier suspicion is CONFIRMED (part is equipper-only without it)" : ""));
 
+
+// SetupDull (and its "dull" case in RunNext), held 2026-09-30 with FallenRockPart
+		/// <summary>The anti-hoarding clock, never before verified end-to-end (nobody carries a
+		/// rock 1000 turns on purpose): wind DullAfter to 2, carry it, assert crumble-to-pebbles.</summary>
+		internal static void SetupDull(GameObject ply, string queue)
+		{
+			if (ply?.CurrentCell == null)
+				return;
+			GameObject rock = GameObject.Create(DULLTEST_BP);
+			Cleo_TerraFirma_FallenRockPart frp = rock?.GetPart<Cleo_TerraFirma_FallenRockPart>();
+			if (frp == null) { Report("dull", false, "SETUP FAIL - generic rock or FallenRockPart missing"); RunNext(queue, ply); return; }
+			frp.DullAfter = 2;
+			frp.DullAfterMax = 2; // the expiry roll (first carried turn) collapses to exactly 2
+			ply.ReceiveObject(rock);
+			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "dull", TurnsRemaining = 5, TurnsTotal = 5, Queue = queue };
+			driver.InitDull(rock, CountInBag(ply, PEBBLES_BP));
+			ply.AddPart(driver);
+			MessageQueue.AddPlayerMessage("Harness: dull-clock scenario running -- 5 turns carrying a doomed rock.", "W");
+		}
+

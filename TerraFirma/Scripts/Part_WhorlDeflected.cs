@@ -11,9 +11,8 @@ namespace XRL.World.Parts
 	/// placement) and lets FallenRockPart roll throw-fragility (both live-fire finds,
 	/// 2026-07-22 verification session). RULED 2026-07-23: a deflected throw is the whorl's
 	/// to place and not the thrower's use to break -- restore the outcome's placement and skip
-	/// the fragility roll. This part restores placement at AfterThrownEvent and removes itself;
-	/// FallenRockPart calls <see cref="Restore"/> first (so its landing-cell logic -- miss
-	/// payloads, deferred pulses -- runs from the right cell) and skips fragility while marked.
+	/// the fragility roll. This part restores placement at AfterThrownEvent and removes itself.
+	/// (FallenRockPart, which also called <see cref="Restore"/>, moved to quarantine/ 2026-09-30.)
 	/// Added at runtime, so it always sits last in the part list -- self-removal mid-dispatch
 	/// can't skip another part's handler.
 	/// </summary>

@@ -615,7 +615,7 @@ namespace Cleo.TerraFirma.Scripts
 			int n = 0;
 			if (zone != null)
 				foreach (GameObject obj in zone.GetObjects())
-					if (obj.GetPart<Cleo_TerraFirma_FallenRockPart>() != null && obj.CurrentCell != null && obj.InInventory == null && obj.Equipped == null)
+					if (obj.GetBlueprint().InheritsFrom("Cleo_TerraFirma_BaseFallenRock") && obj.CurrentCell != null && obj.InInventory == null && obj.Equipped == null)
 						n += obj.Count;
 			return n;
 		}
@@ -1159,24 +1159,6 @@ namespace Cleo.TerraFirma.Scripts
 			MessageQueue.AddPlayerMessage("tfdull RETIRED: the dull clock was cut 2026-07-25 (a stone keeps until it goes off). Ledger entry stands as history.", "W");
 		}
 
-		/// <summary>The anti-hoarding clock, never before verified end-to-end (nobody carries a
-		/// rock 1000 turns on purpose): wind DullAfter to 2, carry it, assert crumble-to-pebbles.</summary>
-		internal static void SetupDull(GameObject ply, string queue)
-		{
-			if (ply?.CurrentCell == null)
-				return;
-			GameObject rock = GameObject.Create(DULLTEST_BP);
-			Cleo_TerraFirma_FallenRockPart frp = rock?.GetPart<Cleo_TerraFirma_FallenRockPart>();
-			if (frp == null) { Report("dull", false, "SETUP FAIL - generic rock or FallenRockPart missing"); RunNext(queue, ply); return; }
-			frp.DullAfter = 2;
-			frp.DullAfterMax = 2; // the expiry roll (first carried turn) collapses to exactly 2
-			ply.ReceiveObject(rock);
-			Cleo_TerraFirma_TestDriver driver = new Cleo_TerraFirma_TestDriver { Scenario = "dull", TurnsRemaining = 5, TurnsTotal = 5, Queue = queue };
-			driver.InitDull(rock, CountInBag(ply, PEBBLES_BP));
-			ply.AddPart(driver);
-			MessageQueue.AddPlayerMessage("Harness: dull-clock scenario running -- 5 turns carrying a doomed rock.", "W");
-		}
-
 		/// <summary>Slot-normalized player-path throw: force-equip a fresh stone and PerformThrow
 		/// it at the victim. Returns the stone (often spent/broken afterwards). Logs a diagnostic
 		/// line either way -- the round-3 drain anomalies (guard fail on a live robot; a batch
@@ -1323,7 +1305,6 @@ namespace Cleo.TerraFirma.Scripts
 				case "form": SetupForm(ply, rest); break;
 				case "scav": SetupScav(ply, rest); break;
 				case "quickape": SetupQuickApe(ply, rest); break;
-				case "dull": SetupDull(ply, rest); break;
 				case "shape": SetupShape(ply, rest); break;
 				case "fis": SetupFis(ply, rest); break;
 			}

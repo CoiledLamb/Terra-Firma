@@ -420,7 +420,7 @@ namespace XRL.World.Effects
 		/// to break. The engine's PerformThrow finishes the throw after this outcome has acted --
 		/// re-placing the weapon at its own landing cell and rolling throw-fragility -- so real
 		/// deflected thrown weapons get marked: the mark restores the outcome's placement at
-		/// AfterThrownEvent, and FallenRockPart skips its fragility roll while marked.
+		/// AfterThrownEvent. (FallenRockPart's fragility skip left for quarantine/ 2026-09-30.)
 		/// </summary>
 		private void MarkDeflected(GameObject projectile, Cell landing, bool ricochet = false)
 		{

@@ -988,8 +988,6 @@ namespace XRL.World.Parts.Mutation
 		private void StampOwner(GameObject rock)
 		{
 			rock.SetStringProperty(RING_MAKER_PROP, ParentObject.ID); // recast-refresh: the deposit knows its maker
-			if (rock.GetPart<Cleo_TerraFirma_FallenRockPart>() is Cleo_TerraFirma_FallenRockPart part)
-				part.Owner = ParentObject;
 			if (ParentObject.HasStringProperty("FugueCopy"))
 			{
 				rock.SetIntProperty(FUGUE_DEPOSIT_PROP, 1);

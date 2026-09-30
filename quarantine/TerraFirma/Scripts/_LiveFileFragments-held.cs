@@ -117,3 +117,18 @@
 							sp.Owner = source;
 						return o;
 					}
+
+// ==== Rocks.xml, Cleo_TerraFirma_BaseFallenRock (after Commerce)
+		<!-- THE DISCHARGE LAW (fragility system RULED 2026-07-25, supersedes HoldChance-25 and the
+		     dull clock): a stone keeps until it goes off; it always goes off underfoot (spenders
+		     carry StepChance 100) unless the stepper is its owner or the owner's party; when it
+		     goes off (step or throw) it is gone (HoldChance 0). Payloadless ammo never spends.
+		     Zoners (caromcobble 50, crack 15) keep per-crossing RATES and HoldChance 100;
+		     permanence is their identity. Dull clock CUT same ruling (weight is the carry cap,
+		     Burgeoning the precedent; DullAfter 0 = never, the code path stays for a future longer
+		     fuse). Children's part lines merge over this one. -->
+		<part Name="Cleo_TerraFirma_FallenRockPart" HoldChance="0" DullAfter="0" />
+
+// ==== Mutation_Fissure.cs, StampOwner (after the RING_MAKER_PROP stamp)
+			if (rock.GetPart<Cleo_TerraFirma_FallenRockPart>() is Cleo_TerraFirma_FallenRockPart part)
+				part.Owner = ParentObject;
