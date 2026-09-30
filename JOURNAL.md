@@ -2876,3 +2876,7 @@ Four parallel code reviews (TF1 mutations, TF2 items, warren generation, packagi
 ## Cave moss verified — 2026-09-30
 
 V10 closed: the user confirmed automatic moss harvesting in play. The cave moss cooking domain is verified end to end the same day: harvest, preserve at a campfire, cook, moss as the stone-throw trigger (50%), moss as the sculpted-pebble action, and the Earthen Barrage grant/boost with its removal on expiry. Moss spawn frequency review and description display remain on the moss heading in `TODO.md`.
+
+## Outrider patrol, canyon crews and lathe verified — 2026-09-30
+
+B16 closed: the user watched the posted outrider walk its beat around the mouth and rotate at shift end (`Cleo_TerraFirma_OutriderPatrol`, stamped by `WarrenCarver.StampPatrols`; dials still CLAUDE PROPOSAL). B17 closed: quarrier packs spawn in surface canyon zones (`DesertCanyonZoneGlobals-Reachable`, Chance 20 per zone at the user's call; the first wiring went to the cave-only `DesertCanyonCreatures` and was moved), and relations with canyon birds and unshelled reptiles were observed calm; the guild also feels -50 toward snapjaws. Lathe carving verified end to end the same day. Progress credit is now 18 of 54.
