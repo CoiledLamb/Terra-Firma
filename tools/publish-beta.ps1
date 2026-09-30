@@ -18,8 +18,10 @@
 # manifests are titled "... (dev)" and staging strips the suffix (2026-09-29).
 #
 # Player builds leave the dev tooling out (2026-09-30): each mod's Exclude list is deleted from
-# the stripped copy, a missing listed file aborts (a rename must not ship a harness), and any
-# WishCommand surviving the strip aborts. The repo and dev deploys keep every file.
+# the stripped copy, a missing listed path aborts (a rename must not ship a harness), and any
+# WishCommand surviving the strip aborts. The repo and dev deploys keep every file. Since the
+# scripts were sorted into folders, the list is each mod's whole Scripts\Dev folder, so a new
+# wish or harness file is excluded by living there.
 #
 # -Mod Fused (2026-09-30): a single-folder testing build, Cleo_TerraFirmaTest, staged to
 # Mods\TerraFirmaTest. It unions the two stripped trees. Same-named XML files are fused
@@ -59,15 +61,15 @@ $pubRoot = Join-Path $RepoRoot "publish"
 $modsRoot = Join-Path $env:USERPROFILE "AppData\LocalLow\Freehold Games\CavesOfQud\Mods"
 
 # per-mod settings; DepRewrites maps a dev dependency id to the id its staged copy carries;
-# Exclude lists dev-only files (relative to the mod folder) left out of the player build
+# Exclude lists dev-only paths (relative to the mod folder) left out of the player build
 $Mods = @{
     TF1 = @{ Src = "TerraFirma";  ZipName = "CoQ_TerraFirma_beta";  Stage = "TerraFirmaBeta";
              IdFrom = "Cleo_TerraFirma";  IdTo = "Cleo_TerraFirmaBeta";  DepRewrites = @{};
-             Exclude = @("Scripts\_TestHarness.cs", "Scripts\_SerializationHarness.cs", "Scripts\_Wishes.cs", "Scripts\ZonePainter.cs") }
+             Exclude = @("Scripts\Dev") }
     TF2 = @{ Src = "TerraFirma2"; ZipName = "CoQ_TerraFirma2_beta"; Stage = "TerraFirma2Beta";
              IdFrom = "Cleo_TerraFirma2"; IdTo = "Cleo_TerraFirma2Beta";
              DepRewrites = @{ "Cleo_TerraFirma" = "Cleo_TerraFirmaBeta" };
-             Exclude = @("Scripts\_Wishes2.cs", "Scripts\_TestHarness2.cs") }
+             Exclude = @("Scripts\Dev") }
     # generated from the two stripped trees, no repo source of its own
     Fused = @{ Src = "TerraFirmaTest"; ZipName = "CoQ_TerraFirma_fusedtest"; Stage = "TerraFirmaTest";
              IdFrom = "Cleo_TerraFirmaTest"; IdTo = "Cleo_TerraFirmaTest"; DepRewrites = @{};
@@ -237,8 +239,8 @@ function Strip-Mod($cfg) {
     # dev tooling stays out of player builds; a listed file that is gone means the list is stale
     foreach ($rel in $cfg.Exclude) {
         $ex = Join-Path $dst $rel
-        if (-not (Test-Path $ex)) { throw "exclude list names $rel but $($cfg.Src) has no such file -- publish aborted" }
-        Remove-Item -Force $ex
+        if (-not (Test-Path $ex)) { throw "exclude list names $rel but $($cfg.Src) has no such path -- publish aborted" }
+        Remove-Item -Recurse -Force $ex
     }
 
     $csCount = 0; $xmlCount = 0
