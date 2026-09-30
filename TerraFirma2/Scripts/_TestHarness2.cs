@@ -349,6 +349,7 @@ namespace Cleo.TerraFirma.Scripts
 			GameObject barrager = Spawn("Snapjaw");
 			var eb = new Cleo_TerraFirma_EarthenBarrage();
 			barrager.RequirePart<Mutations>().AddMutation(eb, 3);
+			eb.CapOverride = 20;   // CalcLevel caps AFTER food and gear bonuses; a snapjaw's cap is 1, which leaves the boost no room
 			int baseLevel = eb.Level;
 			ProceduralCookingEffect meal2 = ProceduralCookingEffect.CreateJustUnits(new List<string> { "Cleo_TerraFirma_caveMoss" });
 			meal2.Init(barrager);
@@ -433,6 +434,8 @@ namespace Cleo.TerraFirma.Scripts
 			Report("moss.signal", performed && ear.Heard == 1,
 				!performed ? "SETUP FAIL - the Snapjaw would not throw" : $"one thrown Small Stone told its thrower {ear.Heard} time(s) (want 1)");
 			if (GameObject.Validate(stone)) stone.Obliterate();
+			thrower.Obliterate();   // hostiles in view block automatic harvest, which runs next
+			target.Obliterate();
 		}
 
 		private static void MossHarvest(Cell origin)
