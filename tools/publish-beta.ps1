@@ -60,7 +60,7 @@ $Mods = @{
     TF2 = @{ Src = "TerraFirma2"; ZipName = "CoQ_TerraFirma2_beta"; Stage = "TerraFirma2Beta";
              IdFrom = "Cleo_TerraFirma2"; IdTo = "Cleo_TerraFirma2Beta";
              DepRewrites = @{ "Cleo_TerraFirma" = "Cleo_TerraFirmaBeta" };
-             Exclude = @("Scripts\_Wishes2.cs") }
+             Exclude = @("Scripts\_Wishes2.cs", "Scripts\_TestHarness2.cs") }
     # generated from the two stripped trees, no repo source of its own
     Fused = @{ Src = "TerraFirmaTest"; ZipName = "CoQ_TerraFirma_fusedtest"; Stage = "TerraFirmaTest";
              IdFrom = "Cleo_TerraFirmaTest"; IdTo = "Cleo_TerraFirmaTest"; DepRewrites = @{};
