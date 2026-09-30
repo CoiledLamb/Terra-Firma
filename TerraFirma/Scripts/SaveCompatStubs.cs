@@ -42,4 +42,45 @@ namespace XRL.World.Parts
 			return true;
 		}
 	}
+
+	// The drainstone. A latched one is force-equipped on its victim and carries base Cursed, which
+	// only the real part's unlatch removed; without this the stone would stay stuck on that limb for
+	// good. The curse is lifted at load (PartRack.FinalizeRead re-syncs when a part is removed
+	// mid-loop). The victim's LifeDrain effect has its own duration and runs out on its own.
+	public class Cleo_TerraFirma_DrainLatch : IPart
+	{
+		public override void Read(GameObject Basis, SerializationReader Reader)
+		{
+			throw new NotSupportedException("quarantined part; saved data skipped");
+		}
+
+		public override bool ReadError(Exception Exception, SerializationReader Reader, long Start, int Length)
+		{
+			Reader.Stream.Position = Start + Length;
+			return true;
+		}
+
+		public override void FinalizeRead(SerializationReader Reader)
+		{
+			base.FinalizeRead(Reader);
+			if (ParentObject != null && ParentObject.HasPart<Cursed>())
+				ParentObject.RemovePart<Cursed>();
+		}
+	}
+
+	// The deep galvena's surge field. Its blueprint carries base Temporary, so an old field still
+	// expires on schedule; only the arcing stops.
+	public class Cleo_TerraFirma_SurgePart : IPart
+	{
+		public override void Read(GameObject Basis, SerializationReader Reader)
+		{
+			throw new NotSupportedException("quarantined part; saved data skipped");
+		}
+
+		public override bool ReadError(Exception Exception, SerializationReader Reader, long Start, int Length)
+		{
+			Reader.Stream.Position = Start + Length;
+			return true;
+		}
+	}
 }

@@ -774,14 +774,8 @@ namespace XRL.World.Parts
 				{
 					if (detail.IsNullOrEmpty())
 						break;
-					// surge fields (deep galvena) get the thrower threaded in for kill attribution
-					GameObject Make()
-					{
-						GameObject o = GameObject.Create(detail);
-						if (o.GetPart<Cleo_TerraFirma_SurgePart>() is Cleo_TerraFirma_SurgePart sp)
-							sp.Owner = source;
-						return o;
-					}
+					// the deep galvena's surge-owner threading left with Part_SurgeField.cs for quarantine/ (2026-09-30)
+					GameObject Make() => GameObject.Create(detail);
 					int count = Math.Max(1, amount);
 					C.AddObject(Make());
 					List<Cell> open = C.GetLocalAdjacentCells();
@@ -983,25 +977,7 @@ namespace XRL.World.Parts
 					}
 					break;
 				}
-				case "Latch": // drainstone: fastens onto the victim and drinks; amount = rounds (step = half via Reduced)
-				{
-					// victim identity captured pre-Validate (harness find 2026-07-24: the guard failed
-					// on a throw at a live Scrapbot and the old line could not say WHO the payload
-					// thought it was aimed at -- NULL = the victimless at-rest/landing path, a
-					// blueprint = a real target whose ref went stale)
-					string latchVictimDesc = victim == null ? "NULL" : victim.Blueprint;
-					if (GameObject.Validate(ref victim) && ParentObject.GetPart<Cleo_TerraFirma_DrainLatch>() is Cleo_TerraFirma_DrainLatch latch)
-					{
-						Helpers.VerifyLog("DRAIN", $"latch dispatch: victim={latchVictimDesc}, reduced={Reduced}, stoneCell={(ParentObject.CurrentCell == null ? "null" : "set")} -> {(Reduced || ParentObject.CurrentCell != null ? "IMMEDIATE" : "DEFERRED")}");
-						if (Reduced || ParentObject.CurrentCell != null)
-							latch.Latch(victim, Math.Max(1, amount), source); // at rest (stepped, or a PLACED strange surrogate): latch now
-						else
-							latch.RequestLatch(victim, Math.Max(1, amount), source); // mid-flight (no cell yet): defer until the engine finishes the throw
-					}
-					else
-						Helpers.VerifyLog("DRAIN", $"latch dispatch FAILED guard: victim={latchVictimDesc}, victimValid={GameObject.Validate(ref victim)}, partPresent={ParentObject.GetPart<Cleo_TerraFirma_DrainLatch>() != null}");
-					break;
-				}
+				// case "Latch" (drainstone) left with Part_DrainLatch.cs for quarantine/ (2026-09-30)
 				case "TempAlly": // lovestone thrown: a hostile act of sudden devotion; amount = rounds
 					if (GameObject.Validate(ref victim) && GameObject.Validate(ref source) && victim.Brain != null)
 						victim.ApplyEffect(new Cleo_TerraFirma_Enamored(Math.Max(1, amount), source), source);
