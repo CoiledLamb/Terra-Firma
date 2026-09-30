@@ -30,8 +30,9 @@
 #
 # -Mod Release (2026-09-30, user: the fused build ships as the update to the existing workshop
 # item): the same fused tree, staged into Mods\TerraFirmaBeta under Cleo_TerraFirmaBeta, so its
-# workshop.json and preview.png carry over. Front page is TF2's title and description, with the
-# line in design\workshop\release-mutations-line.txt inserted after "it includes:". It
+# workshop.json and preview.png carry over. Front page is TF2's title and short in-game
+# description; the full text lives in design\workshop\release-steam-description.txt and the
+# staged workshop.json (Steam) and design\workshop\release-discord-announcement.md. It
 # overwrites the TF1 staging that -Mod TF1/Both writes; use one or the other.
 #
 # Steps: copy tree -> strip .cs (real lexer: strings, verbatim strings, interpolation
@@ -359,10 +360,7 @@ function Fuse-Mods($cfg) {
     if ($cfg.FrontPage -eq "TF2") {
         $front = Get-Content (Join-Path $tf2 "manifest.json") -Raw | ConvertFrom-Json
         $title = $front.title
-        $insert = (Get-Content (Join-Path $RepoRoot "design\workshop\release-mutations-line.txt") | Where-Object { $_ -and -not $_.StartsWith("#") }) -join " "
-        $anchor = "it includes:`n`n"
-        if (-not $insert -or -not $front.description.Contains($anchor)) { throw "release front page: missing the mutations line or the 'it includes:' anchor -- fuse aborted" }
-        $description = $front.description.Replace($anchor, $anchor + $insert + "`n`n")
+        $description = $front.description
     }
     $manifest = [ordered]@{ id = $cfg.IdTo; title = $title; description = $description; version = $m.version; author = $m.author }
     [System.IO.File]::WriteAllText((Join-Path $dst "manifest.json"), ($manifest | ConvertTo-Json), (New-Object System.Text.UTF8Encoding $false))

@@ -1,7 +1,7 @@
-The Steam page text for the fused release (item 3778701376). Already written into
-Mods\TerraFirmaBeta\workshop.json 2026-09-30, which the in-game uploader sends; kept here
-because that file lives outside the repo. Generated from publish-beta -Mod Release's
-manifest with Qud markup swapped for Steam BBCode.
+The full release text for the Steam page (item 3778701376), already written into
+Mods\TerraFirmaBeta\workshop.json 2026-09-30, which the in-game uploader sends. Kept here
+because that file lives outside the repo. The in-game mod page shows only the opening
+(TerraFirma2/manifest.json, ending at "...diaspora of the stone.").
 
 "...you hear the distant ring of hammers, the scuttling of a thousand legs. the salt winds of change blow, wayfarer. will you follow them?"
 

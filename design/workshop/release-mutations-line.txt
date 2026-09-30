@@ -1,4 +1,0 @@
-# Inserted by publish-beta.ps1 -Mod Release after the "it includes:" paragraph of TF2's
-# description, because the fused release carries part one's mutations too. Lines starting
-# with # are ignored. Wording approved by the user 2026-09-30.
-mutations: gorgon's gaze, earthen barrage, stoneshaper, geomancy, calcify, and fissure, plus the stonecarver calling.
