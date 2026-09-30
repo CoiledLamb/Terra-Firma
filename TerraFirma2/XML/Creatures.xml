@@ -302,7 +302,7 @@
        for a gut cistern"): the vessel's own palette on the base splat, butchery gates the organ
        behind the kill (an inventory cistern was a trade surface, user catch). Base Corpse ships
        Food (Gross/IllOnEat) + a Meat tag; both stripped, fired clay is not a meal. Description
-       is the user's (pictograph line, TODO.md); DisplayName still DRAFT, signoff owed. -->
+       is the user's (pictograph line, TODO.md); DisplayName approved 2026-09-30. -->
   <object Name="Cleo_TerraFirma_Boar Vessel Corpse" Inherits="Corpse">
     <part Name="Render" DisplayName="boar vessel corpse" TileColor="&amp;w" ColorString="&amp;w" DetailColor="B" />
     <part Name="Description" Short="Shards of a shattered pictograph lie inert on the ground, where once they trotted under the salt sun." />
