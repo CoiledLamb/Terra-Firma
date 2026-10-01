@@ -368,7 +368,7 @@ Perishes when unequipped." />
        commerce 15, weight 2. Tile is base sandals until a sprite lands; &y is CLAUDE PROPOSAL.
        Description inherits base Sandals as a placeholder; user text owed. -->
   <object Name="Cleo_TerraFirma_SpallSandals" Inherits="Sandals">
-    <part Name="Render" DisplayName="spall sandals" ColorString="&amp;y" />
+    <part Name="Render" DisplayName="spallstrider's sandals" ColorString="&amp;y" />
     <part Name="Commerce" Value="15" />
     <part Name="Physics" Weight="2" />
     <part Name="Cleo_TerraFirma_SpallSandals" MS="25" NaturalStoneOnly="true" />
