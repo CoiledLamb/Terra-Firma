@@ -3,10 +3,10 @@ using System;
 namespace XRL.World.Effects
 {
 	/// <summary>
-	/// What the warren banner bestows (user 2026-10-01: +1 Willpower to quarriers who can see
+	/// What the warren banner bestows (user 2026-10-01: +2 Willpower to quarriers who can see
 	/// it). Base Banner applies it by type name with Duration 7 and refreshes it every 5 turns,
 	/// so it never stacks. Shape copied from base WarTrance with one stat shift.
-	/// DisplayName is a DRAFT stand-in until the user names it ("the opposite of homesick").
+	/// Name "rooted" picked by the user 2026-10-01 ("the opposite of homesick").
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_StonehandsBannerEffect : Effect
@@ -31,12 +31,12 @@ namespace XRL.World.Effects
 
 		public override string GetDetails()
 		{
-			return "+1 Willpower";
+			return "+2 Willpower";
 		}
 
 		public override bool Apply(GameObject Object)
 		{
-			StatShifter.SetStatShift("Willpower", 1);
+			StatShifter.SetStatShift("Willpower", 2);
 			return true;
 		}
 
