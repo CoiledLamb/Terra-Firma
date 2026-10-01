@@ -59,7 +59,7 @@ namespace XRL.World.Parts
 			return base.HandleEvent(E);
 		}
 
-		// DRAFT rules line, base MovespeedInLiquid's phrasing.
+		// Rules line on base MovespeedInLiquid's shape, "while adjacent to" from ModSprayFire.
 		public override bool HandleEvent(GetShortDescriptionEvent E)
 		{
 			if (ShowInShortDescription && MS != 0)
@@ -67,7 +67,7 @@ namespace XRL.World.Parts
 				E.Postfix.Append("\n&C");
 				if (MS > 0)
 					E.Postfix.Append('+');
-				E.Postfix.Append(MS).Append(" move speed while next to ")
+				E.Postfix.Append(MS).Append(" move speed while adjacent to ")
 					.Append(NaturalStoneOnly ? "natural stone" : "a wall");
 			}
 			return base.HandleEvent(E);
