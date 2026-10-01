@@ -1,6 +1,6 @@
 # Terra Firma — work remaining
 
-**Checklist progress:** `██████░░░░░░░░░░░░░░` **32%** · 18 of 55 complete · 37 remaining
+**Checklist progress:** `██████░░░░░░░░░░░░░░` **32%** · 18 of 56 complete · 38 remaining
 
 *Completed tasks retain credit after leaving this list. Counts start with the 47-item checklist used to introduce this bar; earlier completed work is excluded.*
 <!-- Codex PROPOSAL: progress accounting. Completed credit: B03, V09, V12, V13, V14, V15, V16, V18, V19, V20, D01, C03, T02, R01, V21, V10, B16, B17. Total = completed credit plus active checkboxes; refresh when tasks change. -->
@@ -105,6 +105,7 @@ Handoff from the release-audit session (2026-09-29/30). Newer than the 09-16 sna
 
 - [ ] **B18 — Wire the seismophone and grinder shotgun sprites.** User 2026-09-30 item pass: the seismophone shows base `Items/sw_teleprojector.bmp` instead of the user's own sprite, and the grinder shotgun (`Cleo_TerraFirma_Gravel Shotgun`, no Render override) shows the inherited Pump Shotgun art instead of billy checkers' sprite. Neither png is in the repo, the live mod folders or git history. Finish: both files in `TerraFirma2/Textures`, blueprints pointing at them, seen in game.
   Built 2026-09-30: user added `seismophone.png` and `grindershotgun.png` (16x24 two-color); moved from TF1 to `TerraFirma2/Textures` since both are TF2 items. Seismophone `Tile` swapped (keeps &y/c); grinder shotgun gets its own `Tile`, colors still inherited from Pump Shotgun (&K/w). Both builds 0 errors, XML/text checks passed, deployed to TF2 with hashes matched. Awaiting a look in game.
+- [ ] **B19 — Let the repair skill undesecrate statues.** User 2026-10-01. Base desecration is the `ModDesecrated` part (adjective, rules line, &K/r render), added by `Shrine.PerformDesecration` from the Desecrate action or when a shrine drops below 75% HP. Nothing in base removes it. Finish: repairing a desecrated statue strips the mod, seen in game.
 
 ## Content awaiting its own design/build sitting
 
