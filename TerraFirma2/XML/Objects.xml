@@ -368,7 +368,7 @@ Perishes when unequipped." />
        commerce 15, weight 2. Tile is base sandals until a sprite lands; brown with grey detail (user 2026-10-01).
        Description user text 2026-10-01. -->
   <object Name="Cleo_TerraFirma_SpallSandals" Inherits="Sandals">
-    <part Name="Render" DisplayName="spallstrider's sandals" ColorString="&amp;w" DetailColor="y" />
+    <part Name="Render" DisplayName="spallskirter's sandals" ColorString="&amp;w" DetailColor="y" />
     <part Name="Commerce" Value="15" />
     <part Name="Physics" Weight="2" />
     <part Name="Description" Short="Brinestalk is woven along tectonic lines to find the geodesic path." />
