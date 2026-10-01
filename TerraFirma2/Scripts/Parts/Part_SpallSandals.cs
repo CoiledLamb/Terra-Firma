@@ -3,7 +3,7 @@ using System;
 namespace XRL.World.Parts
 {
 	/// <summary>
-	/// Spall sandals (C04, user 2026-10-01: wall-adjacent move speed, 25 over base's 50).
+	/// Spall sandals (C04, user 2026-10-01: wall-adjacent move speed, +10 at tier 2).
 	/// A copy of base MovespeedInLiquid with the liquid check swapped for a wall check: the
 	/// wearer's cell is rechecked on EnteredCell/EndTurn, and while any of the eight neighbors
 	/// holds a qualifying wall the wearer gets MoveSpeed -MS (lower is faster) through the
@@ -13,7 +13,7 @@ namespace XRL.World.Parts
 	[Serializable]
 	public class Cleo_TerraFirma_SpallSandals : IPart
 	{
-		public int MS = 25;
+		public int MS = 10;
 
 		public bool StoneOnly = true;
 

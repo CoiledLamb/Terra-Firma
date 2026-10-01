@@ -363,7 +363,7 @@ Perishes when unequipped." />
     <tag Name="Tier" Value="3" />
     <tag Name="ExcludeFromDynamicEncounters" />
   </object>
-  <!-- SPALL SANDALS (C04, user 2026-10-01: wall-adjacent move speed at 25). Numbers copy base
+  <!-- SPALL SANDALS (C04, user 2026-10-01: wall-adjacent move speed, +10 at tier 2; base always-on feet run +5 at T2, +10 at T3, +20 at T4). Numbers copy base
        Sandals of the River-Wives, the tier-2 movement sandals (Items.xml:6368): AV/DV 0,
        commerce 15, weight 2. Tile is base sandals until a sprite lands; brown with grey detail (user 2026-10-01).
        Description user text 2026-10-01. -->
@@ -372,7 +372,7 @@ Perishes when unequipped." />
     <part Name="Commerce" Value="15" />
     <part Name="Physics" Weight="2" />
     <part Name="Description" Short="Brinestalk is woven along tectonic lines to find the geodesic path." />
-    <part Name="Cleo_TerraFirma_SpallSandals" MS="25" StoneOnly="true" />
+    <part Name="Cleo_TerraFirma_SpallSandals" MS="10" StoneOnly="true" />
     <tag Name="Tier" Value="2" />
     <stag Name="Movement" />
     <tag Name="ExcludeFromDynamicEncounters" />
