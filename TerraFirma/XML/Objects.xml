@@ -56,6 +56,8 @@
 		<tag Name="AmbientIdleSound" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_idle" />
 		<tag Name="PunchSound" Value="Sounds/Creatures/VO/sfx_creature_animal_rockCreature_vo_attack" />
 		<part Name="RandomStatue" StatueType="sculpture" />
+		<!-- B19: Repair lifts desecration (base Shrine, inherited from Random Statue). -->
+		<part Name="Cleo_TerraFirma_UndesecratePart" />
 	</object>
 	<object Name="Cleo_TerraFirma_StoneshaperStatueNaturalWeapon" Inherits="NaturalWeapon">
 		<part Name="Render" DisplayName="{{y|gravelly haymaker}}" Tile="Creatures/natural-weapon-fist.bmp" ColorString="&amp;K" />
