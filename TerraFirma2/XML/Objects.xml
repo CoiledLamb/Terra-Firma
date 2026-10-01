@@ -387,6 +387,7 @@ Perishes when unequipped." />
   <object Name="Cleo_TerraFirma_StonehandsBanner" Inherits="Furniture">
     <part Name="Render" DisplayName="banner of the {{w|sundered mountain}}" Tile="stonehandsbanner.png" RenderString="]" ColorString="&amp;w" DetailColor="y" />
     <part Name="Physics" Weight="40" Takeable="false" Solid="false" Organic="true" />
+    <part Name="Description" Short="Earth-brown textiles evoke an image of a great mountain, split in two." />
     <part Name="Banner" Faction="Cleo_TerraFirma_Quarriers" Effect="Cleo_TerraFirma_StonehandsBannerEffect" Description="Bestows the {{w|rooted}} effect to members of the Quarriers' Guild who can see this item." />
     <tag Name="ExcludeFromDynamicEncounters" />
   </object>
