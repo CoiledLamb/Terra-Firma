@@ -406,6 +406,8 @@
 			<object Weight="100" Blueprint="Cleo_TerraFirma_SeismicShufflers" Number="1" />
 			<!-- CLAUDE PROPOSAL weight: the carving tool rides the same mining pool as the shufflers. -->
 			<object Weight="100" Blueprint="Cleo_TerraFirma_GaslightGauntlets" Number="1" />
+			<!-- CLAUDE PROPOSAL weight: spall sandals ride the mining pool beside the shufflers. -->
+			<object Weight="100" Blueprint="Cleo_TerraFirma_SpallSandals" Number="1" />
 		</group>
 	</population>
 	<!-- Granite baboon troop wiring (user ruling 2026-08-22: "it should spawn in all 3" - the
@@ -544,6 +546,8 @@
 		<group Name="Items" Style="pickone">
 			<object Weight="20" Number="1" Blueprint="Cleo_TerraFirma_MudskinGirdle" />
 			<object Weight="20" Number="1" Blueprint="Cleo_TerraFirma_FlintSpikePauldrons" />
+			<!-- spall sandals beside base Sandals of the River-Wives (w20), CLAUDE PROPOSAL -->
+			<object Weight="20" Number="1" Blueprint="Cleo_TerraFirma_SpallSandals" />
 		</group>
 	</population>
 	<population Name="Armor 4R" Load="Merge">

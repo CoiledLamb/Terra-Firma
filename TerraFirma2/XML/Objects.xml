@@ -363,6 +363,19 @@ Perishes when unequipped." />
     <tag Name="Tier" Value="3" />
     <tag Name="ExcludeFromDynamicEncounters" />
   </object>
+  <!-- SPALL SANDALS (C04, user 2026-10-01: wall-adjacent move speed at 25). Numbers copy base
+       Sandals of the River-Wives, the tier-2 movement sandals (Items.xml:6368): AV/DV 0,
+       commerce 15, weight 2. Tile is base sandals until a sprite lands; &y is CLAUDE PROPOSAL.
+       Description inherits base Sandals as a placeholder; user text owed. -->
+  <object Name="Cleo_TerraFirma_SpallSandals" Inherits="Sandals">
+    <part Name="Render" DisplayName="spall sandals" ColorString="&amp;y" />
+    <part Name="Commerce" Value="15" />
+    <part Name="Physics" Weight="2" />
+    <part Name="Cleo_TerraFirma_SpallSandals" MS="25" NaturalStoneOnly="true" />
+    <tag Name="Tier" Value="2" />
+    <stag Name="Movement" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
   <!-- Eater Hologram precedent: layer 6, non-solid/non-occluding, native material and
        invulnerability. Wall sprites only: no wall tags, painting, or gameplay parts. -->
   <object Name="Cleo_TerraFirma_SeismicProjection" Inherits="Item">
