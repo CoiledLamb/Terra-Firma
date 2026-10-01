@@ -23,11 +23,14 @@
 	     three carver roles (words the user's, capitalization editorial). The snapjaw miner
 	     keeps his "...live and drink." below on purpose; a hired snapjaw awkwardly aping the
 	     standard courtesy is its own beat, and one edit flips it if the user wants him guild-voiced. -->
+	<!-- Last two lines user WIP 2026-09-30, staged as dropped (sentence starts capitalized). -->
 	<conversation ID="Cleo_TerraFirma_Outrider">
 		<node ID="Start">
 			<text>
 				Mind the cairns, wayfarer, lest you knock one over.~
-				Seen a few baboons today. Not one made it further than a stone's throw.
+				Seen a few baboons today. Not one made it further than a stone's throw.~
+				The nonsense birds? Don't talk to them, they won't talk to you.~
+				Can hear your coming from a mile away, wayfarer. I'll be hearing you go, too.
 			</text>
 			<choice GotoID="End">Rust and earth.</choice>
 		</node>
@@ -61,11 +64,14 @@
 	     Bark out of Cleo_StartingGear_Stonecarver. Stock HaveItem and TakeItem conversation parts
 	     could turn that into a real handover with no C#. DECLINED 2026-08-29 (user: "hewer's
 	     witchwood is a claude proposal i'm not taking"); the line stays flavor, not a fetch hook. -->
+	<!-- Last two lines user WIP 2026-09-30, staged as dropped (sentence starts capitalized). -->
 	<conversation ID="Cleo_TerraFirma_Hewer">
 		<node ID="Start">
 			<text>
 				Smashed through a wall last week, soaked my clothes. Damn aquifers.~
-				Overseer said we needed to square away more rock, but my back's been killing me... got any witchwood?
+				Overseer said we needed to square away more rock, but my back's been killing me... got any witchwood?~
+				Grounds' not so steady here, wayfarer. I'd watch my step, if're you.~
+				Ever scraped the moss of one of these here walls? Tastes like grit, but sure fills ya' up.
 			</text>
 			<choice GotoID="End">Rust and earth.</choice>
 		</node>
