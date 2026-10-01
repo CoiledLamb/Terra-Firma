@@ -2880,3 +2880,7 @@ V10 closed: the user confirmed automatic moss harvesting in play. The cave moss 
 ## Outrider patrol, canyon crews and lathe verified — 2026-09-30
 
 B16 closed: the user watched the posted outrider walk its beat around the mouth and rotate at shift end (`Cleo_TerraFirma_OutriderPatrol`, stamped by `WarrenCarver.StampPatrols`; dials still CLAUDE PROPOSAL). B17 closed: quarrier packs spawn in surface canyon zones (`DesertCanyonZoneGlobals-Reachable`, Chance 20 per zone at the user's call; the first wiring went to the cave-only `DesertCanyonCreatures` and was moved), and relations with canyon birds and unshelled reptiles were observed calm; the guild also feels -50 toward snapjaws. Lathe carving verified end to end the same day. Progress credit is now 18 of 54.
+
+## Statue repair verified — 2026-10-01
+
+B19 closed: the user verified that the Repair skill lifts desecration from carved statues and restores them to full HP in play. `Cleo_TerraFirma_UndesecratePart` on `Cleo_TerraFirma_StoneshaperStatue` copies base `Broken`'s repair idiom (repairable while `ModDesecrated` is present, removed on `RepairedEvent`); carved statues are desecratable because they inherit base `Random Statue`, which carries `Shrine`. Statues carved before 0.2.4 lack the part and stay unrepairable. Progress credit is now 19 of 57.
