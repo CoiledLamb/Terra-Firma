@@ -714,6 +714,8 @@
 			<object Weight="4" Blueprint="Hammered Dulcimer" />
 			<object Weight="2" Blueprint="Random Stone Statue" />
 			<object Weight="2" Blueprint="Cleo_TerraFirma_FireDish" />
+			<!-- the sundered-mountain banner, "sometimes" (user 2026-10-01); weight CLAUDE PROPOSAL -->
+			<object Weight="2" Blueprint="Cleo_TerraFirma_StonehandsBanner" />
 		</group>
 	</population>
 	<!-- WORK-FACE SCATTER (USER 2026-08-29: "having them be sparser makes sense, but they

@@ -377,6 +377,19 @@ Perishes when unequipped." />
     <stag Name="Movement" />
     <tag Name="ExcludeFromDynamicEncounters" />
   </object>
+  <!-- STONEHANDS BANNER (internal title; user 2026-10-01): a quiet Sunderlies nod, Sotur
+       Stonehands in Across Moghra'yi Vol. I. Furniture, not base's cloak banners. Base Banner
+       does the work standing in a cell: every 5 turns, quarriers with line of sight get the
+       effect for 7 (no stacking); the [raised] tag stays (user). The player calling is a native
+       mutant who learned the trade, not a guild member, so it gets nothing (user). Description
+       overrides base's auto line, which would read "to the Quarriers' Guild who can see".
+       Brown cloth (user); y detail on the rod and tassel, non-solid, weight are CLAUDE PROPOSAL. -->
+  <object Name="Cleo_TerraFirma_StonehandsBanner" Inherits="Furniture">
+    <part Name="Render" DisplayName="banner of the {{w|sundered mountain}}" Tile="stonehandsbanner.png" RenderString="]" ColorString="&amp;w" DetailColor="y" />
+    <part Name="Physics" Weight="40" Takeable="false" Solid="false" Organic="true" />
+    <part Name="Banner" Faction="Cleo_TerraFirma_Quarriers" Effect="Cleo_TerraFirma_StonehandsBannerEffect" Description="Bestows the {{w|rooted}} effect to members of the Quarriers' Guild who can see this item." />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
   <!-- Eater Hologram precedent: layer 6, non-solid/non-occluding, native material and
        invulnerability. Wall sprites only: no wall tags, painting, or gameplay parts. -->
   <object Name="Cleo_TerraFirma_SeismicProjection" Inherits="Item">
