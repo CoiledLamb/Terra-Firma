@@ -7,15 +7,15 @@ namespace XRL.World.Parts
 	/// A copy of base MovespeedInLiquid with the liquid check swapped for a wall check: the
 	/// wearer's cell is rechecked on EnteredCell/EndTurn, and while any of the eight neighbors
 	/// holds a qualifying wall the wearer gets MoveSpeed -MS (lower is faster) through the
-	/// part's StatShifter. NaturalStoneOnly routes through IsNaturalStone, the gate Fissure and
-	/// Calcify share, so built and metal walls give nothing (CLAUDE PROPOSAL, XML-settable).
+	/// part's StatShifter. StoneOnly counts any wall whose MaterialType is "stone" (Merges.xml),
+	/// natural or built, so concrete and crypt walls count and metal or wood do not (user 2026-10-01).
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_SpallSandals : IPart
 	{
 		public int MS = 25;
 
-		public bool NaturalStoneOnly = true;
+		public bool StoneOnly = true;
 
 		public bool ShowInShortDescription = true;
 
@@ -24,7 +24,7 @@ namespace XRL.World.Parts
 		public override bool SameAs(IPart p)
 		{
 			Cleo_TerraFirma_SpallSandals other = p as Cleo_TerraFirma_SpallSandals;
-			if (other.MS != MS || other.NaturalStoneOnly != NaturalStoneOnly || other.ShowInShortDescription != ShowInShortDescription)
+			if (other.MS != MS || other.StoneOnly != StoneOnly || other.ShowInShortDescription != ShowInShortDescription)
 				return false;
 			return base.SameAs(p);
 		}
@@ -68,7 +68,7 @@ namespace XRL.World.Parts
 				if (MS > 0)
 					E.Postfix.Append('+');
 				E.Postfix.Append(MS).Append(" move speed while adjacent to ")
-					.Append(NaturalStoneOnly ? "natural stone" : "a wall");
+					.Append(StoneOnly ? "a stone wall" : "a wall");
 			}
 			return base.HandleEvent(E);
 		}
@@ -82,7 +82,7 @@ namespace XRL.World.Parts
 					GameObject obj = adjacent.Objects[i];
 					if (!obj.IsWall())
 						continue;
-					if (!NaturalStoneOnly || Cleo_TerraFirma_StoneshaperWallProperties.IsNaturalStone(obj.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>()))
+					if (!StoneOnly || obj.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>()?.MaterialType == "stone")
 						return true;
 				}
 			}
