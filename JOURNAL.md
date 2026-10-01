@@ -2884,3 +2884,7 @@ B16 closed: the user watched the posted outrider walk its beat around the mouth 
 ## Statue repair verified — 2026-10-01
 
 B19 closed: the user verified that the Repair skill lifts desecration from carved statues and restores them to full HP in play. `Cleo_TerraFirma_UndesecratePart` on `Cleo_TerraFirma_StoneshaperStatue` copies base `Broken`'s repair idiom (repairable while `ModDesecrated` is present, removed on `RepairedEvent`); carved statues are desecratable because they inherit base `Random Statue`, which carries `Shrine`. Statues carved before 0.2.4 lack the part and stay unrepairable. Progress credit is now 19 of 57.
+
+## Sundered-mountain banner verified — 2026-10-01
+
+B20 closed: the user verified the banner in play. `Cleo_TerraFirma_StonehandsBanner` ("banner of the sundered mountain", internal title Stonehands banner: a quiet Sunderlies nod after Sotur Stonehands in *Across Moghra'yi* Vol. I) is TF2 furniture on base `Banner`: quarriers with line of sight get rooted (+2 Willpower, 7 turns, refreshed every 5, no stacking). The stonecarver calling gets nothing by design, since the player is a native mutant who learned the trade. Spawns from the warren plaza dress table at weight 2 (CLAUDE PROPOSAL). Progress credit is now 20 of 57.

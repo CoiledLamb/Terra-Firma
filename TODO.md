@@ -1,9 +1,9 @@
 # Terra Firma — work remaining
 
-**Checklist progress:** `██████░░░░░░░░░░░░░░` **33%** · 19 of 57 complete · 38 remaining
+**Checklist progress:** `███████░░░░░░░░░░░░░` **35%** · 20 of 57 complete · 37 remaining
 
 *Completed tasks retain credit after leaving this list. Counts start with the 47-item checklist used to introduce this bar; earlier completed work is excluded.*
-<!-- Codex PROPOSAL: progress accounting. Completed credit: B03, V09, V12, V13, V14, V15, V16, V18, V19, V20, D01, C03, T02, R01, V21, V10, B16, B17, B19. Total = completed credit plus active checkboxes; refresh when tasks change. -->
+<!-- Codex PROPOSAL: progress accounting. Completed credit: B03, V09, V12, V13, V14, V15, V16, V18, V19, V20, D01, C03, T02, R01, V21, V10, B16, B17, B19, B20. Total = completed credit plus active checkboxes; refresh when tasks change. -->
 
 Current task list, reconciled 2026-09-05 against the `items` working tree and later records. This is a documentation cleanup, not a new release commitment. Build work, verification, and undecided scope are separate below; order within a section is not a priority ruling.
 
@@ -105,8 +105,6 @@ Handoff from the release-audit session (2026-09-29/30). Newer than the 09-16 sna
 
 - [ ] **B18 — Wire the seismophone and grinder shotgun sprites.** User 2026-09-30 item pass: the seismophone shows base `Items/sw_teleprojector.bmp` instead of the user's own sprite, and the grinder shotgun (`Cleo_TerraFirma_Gravel Shotgun`, no Render override) shows the inherited Pump Shotgun art instead of billy checkers' sprite. Neither png is in the repo, the live mod folders or git history. Finish: both files in `TerraFirma2/Textures`, blueprints pointing at them, seen in game.
   Built 2026-09-30: user added `seismophone.png` and `grindershotgun.png` (16x24 two-color); moved from TF1 to `TerraFirma2/Textures` since both are TF2 items. Seismophone `Tile` swapped (keeps &y/c); grinder shotgun gets its own `Tile`, colors still inherited from Pump Shotgun (&K/w). Both builds 0 errors, XML/text checks passed, deployed to TF2 with hashes matched. Awaiting a look in game.
-- [ ] **B20 — Sundered-mountain banner in warrens.** User 2026-10-01: warren decoration with a quiet Sunderlies nod (internal title Stonehands banner, after Sotur Stonehands in *Across Moghra'yi* Vol. I; "sundered mountain" in brown). Finish: seen in a warren, effect seen on a quarrier.
-  Built 2026-10-01: `Cleo_TerraFirma_StonehandsBanner` (TF2 furniture, user tile `stonehandsbanner.png`, brown cloth, `y` detail CLAUDE PROPOSAL) carries base `Banner` for `Cleo_TerraFirma_Quarriers`: quarriers with line of sight get `Cleo_TerraFirma_StonehandsBannerEffect` (+2 Willpower, 7 turns, refreshed every 5, no stacking). The player calling gets nothing by design (native mutant who learned the trade, user). Rules line overrides base's auto text ("members of the Quarriers' Guild"). Plaza dress row w2 beside the stone statue (CLAUDE PROPOSAL). Effect name "rooted" and +2 Willpower picked by the user 2026-10-01. Description user text 2026-10-01 ("Earth-brown textiles evoke an image of a great mountain, split in two."); the emblem is the split mountain. Both builds 0 errors, XML/text checks passed, deployed to TF2 with hashes matched.
 
 ## Content awaiting its own design/build sitting
 
