@@ -9,6 +9,7 @@ Every v2 warren decision argues from the goal statement; the bars below are how 
 - user: "the quarry warrens are a sort of halfway point between procgen villages and goatfolk villages. they are part settlement, part camp, part work area. they sometimes might contain a recipe you haven't had before, that you can only eat in this one camp. or a legendary stonecarver and their entourage, that you can encourage to join you. or a few fragments of history or gossip from faraway lands and those close to their home. sometimes, they've cultivated a provisioner in the walls - a jilted lover and consortium representative that will trade with you and restock periodically. they don't assign quests, nor are they immediately hostile to the player. learning the location of a quarry warren should be an 'oh neat!' moment earlygame, while goatfolk villages turn to groans extremely quickly."
 - source: `JOURNAL.md:633`
 - shape: a contrast bar, so the named failure mode is part of the spec. Goatfolk villages groan because every instance is the same instance. "Halfway between the two" needs an identity layer above the carve.
+- bend, closed 2026-10-02: the "don't assign quests" line gives way to overseer-given quests that lead to other warrens, once those are built (D10 in `TODO.md`).
 
 ### Stage axis, same sitting
 

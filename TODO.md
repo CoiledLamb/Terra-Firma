@@ -1,6 +1,6 @@
 # Terra Firma — work remaining
 
-**Checklist progress:** `███████░░░░░░░░░░░░░` **35%** · 20 of 57 complete · 37 remaining
+**Checklist progress:** `███████░░░░░░░░░░░░░` **34%** · 20 of 58 complete · 38 remaining
 
 *Completed tasks retain credit after leaving this list. Counts start with the 47-item checklist used to introduce this bar; earlier completed work is excluded.*
 <!-- Codex PROPOSAL: progress accounting. Completed credit: B03, V09, V12, V13, V14, V15, V16, V18, V19, V20, D01, C03, T02, R01, V21, V10, B16, B17, B19, B20. Total = completed credit plus active checkboxes; refresh when tasks change. -->
@@ -245,6 +245,7 @@ These are separate planning tasks; implementation follows review of each item.
   Audit edge folded in 2026-09-29: when the mouth's shore has no route to the zone edge, the mouth-access law logs "NO defile route found" and the warren still ships (`WarrenCarver.cs`, mouth-access block). User: extra entrances could solve it. They help only if a second entrance lands on a shore that does reach the edge.
 - [ ] **D09 — Plan cleared stockyards for reclaimed warrens.** Review removing quarried-stone stockpiles from reclaimed chalkyards to suggest the departing crew took its stock. Keep the change scoped to reclaimed yards; settle remaining rubble and yard dressing before implementation.
   Built 2026-09-29: reclaimed yards now roll a `cleared` state (abandoned-robbed unchanged). 1-2 partial stacks of the smaller sizes, no boulder gaps; the chalk boundary is worn, 35% of ring cells skipped (CLAUDE dial); the board keeps its usual 70% roll with the departed line; workbench and chair now roll there too, stone basket excluded. Sim not updated, by choice. Both builds 0 errors, deployed with hash matched. Awaiting a fresh-world look at a reclaimed yard.
+- [ ] **D10 — Overseer quests that lead to other warrens.** **CLAUDE PROPOSAL wording:** an overseer gives the player a goal at another warren, so quests double as a way to find warrens. Start by reading base's dynamic quest kit (`VillageDynamicQuestContext`, the `*DynamicQuestTemplate` family) and describing it back before design. The warren guideline's "don't assign quests" line bends for this once built (closed 2026-10-02).
 
 Codex PROPOSAL verification entry, 2026-09-17: animation table palette trial uses gray y foreground and brown w details in Objects.xml; dormant variant inherits the same palette. Sprite unchanged. Build (0 errors), text rules, 17 XML parses and live dev XML hash passed. Restart and visually check the figurines against the table; color acceptance remains pending.
 
