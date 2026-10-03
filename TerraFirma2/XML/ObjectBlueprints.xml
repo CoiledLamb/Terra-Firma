@@ -11,7 +11,7 @@
     <object Name="Cleo_TerraFirma_Cobblefur Bracer" Inherits="BaseArmlet">
     <part Name="Armor" AV="0" DV="0" WornOn="Arm" />
     <part Name="Render" DisplayName="{{y|granitefur}} bracer" RenderString="]" Tile="baboonskin_bracers.png" ColorString="&amp;r" DetailColor="y" /> <!-- user sprite 2026-08-22; rust/brown per the cloak ruling, family palette -->
-    <part Name="Commerce" Value="50" /> <!-- numbers sitting 2026-08-22 -->
+    <part Name="Commerce" Value="40" /> <!-- user 2026-10-03, rough -->
     <part Name="Description" Short="Grit-caked flesh was carved from a dead baboon and woven into a bracer." /> <!-- USER TEXT 2026-09-29, quartzfur echo -->
     <part Name="Physics" Weight="1" Organic="true" />
     <part Name="Fur" />
@@ -33,7 +33,7 @@
     <object Name="Cleo_TerraFirma_Cobblefur Gloves" Inherits="BaseGlove">
     <part Name="Armor" AV="0" DV="1" WornOn="Hands" />
     <part Name="Render" DisplayName="{{y|granitefur}} gloves" RenderString="]" Tile="catching_gloves.png" ColorString="&amp;r" DetailColor="y" /> <!-- user sprite 2026-08-22 -->
-    <part Name="Commerce" Value="75" /> <!-- numbers sitting 2026-08-22 -->
+    <part Name="Commerce" Value="50" /> <!-- user 2026-10-03, rough -->
     <part Name="Description" Short="Grit-caked flesh was carved from a dead baboon and sewn into a pair of gloves." /> <!-- USER TEXT 2026-09-29, quartzfur echo -->
     <part Name="Physics" Weight="5" Organic="true" />
     <part Name="Fur" />
@@ -45,7 +45,7 @@
     <object Name="Cleo_TerraFirma_Cobblefur Cloak" Inherits="BaseCloak">
     <part Name="Armor" AV="1" DV="0" WornOn="Back" />
     <part Name="Render" DisplayName="{{y|granitefur}} cloak" RenderString="]" Tile="Items/sw_cloak_panther.bmp" ColorString="&amp;r" DetailColor="y" /> <!-- RULED 2026-08-22: recolored base panther cloak, primary rust red, detail brown -->
-    <part Name="Commerce" Value="60" /> <!-- numbers sitting 2026-08-22 -->
+    <part Name="Commerce" Value="45" /> <!-- user 2026-10-03, rough -->
     <part Name="Description" Short="Grit-caked flesh was carved from a dead baboon and sewn into a cloak." /> <!-- USER TEXT 2026-09-29, quartzfur echo -->
     <part Name="Physics" Weight="3" Organic="true" />
     <part Name="Fur" />
