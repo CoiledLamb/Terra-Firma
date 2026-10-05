@@ -756,6 +756,7 @@ namespace XRL.World.Parts.Mutation
 			RandomStatue randomStatuePart = statue.RequirePart<RandomStatue>();
 			randomStatuePart.Material = WallProperties?.MaterialDisplayName ?? WallProperties?.MaterialType ?? "stone";
 			randomStatuePart.SetCreature(Muse);
+			ApplyDisguiseLooks(statue, Muse);
 			statue.DisplayName = $"{(NamePrefix != string.Empty ? $"{NamePrefix} " : "")}{statue.DisplayName}";
 
 			// a rough statue can't "intricately depict" anything (friend's catch via the feedback
@@ -781,6 +782,46 @@ namespace XRL.World.Parts.Mutation
 			statue.Render.TileColor = Wall.Render.TileColor;
 
 			return statue;
+		}
+
+		/// <summary>
+		/// A disguised muse is carved as it appears (user 2026-10-05, looks only). Base
+		/// RandomStatue.SetCreature reads the real Render.Tile, the BaseOnly name and the real
+		/// Description, so the statue unmasked the disguise. This swaps tile, glyph, name and
+		/// description to the Disguised effect's blueprint; body plan and physique stay the
+		/// real creature's, a disguise being only skin deep.
+		/// </summary>
+		private static void ApplyDisguiseLooks(GameObject Statue, GameObject Muse)
+		{
+			Disguised disguise = Muse.GetEffect<Disguised>();
+			if (disguise == null || disguise.BlueprintName.IsNullOrEmpty())
+				return;
+			GameObjectBlueprint bp = GameObjectFactory.Factory.GetBlueprintIfExists(disguise.BlueprintName);
+			if (bp == null)
+				return;
+
+			// same call SetCreature uses, so the string it wrote is exactly what gets replaced
+			string realName = Muse.an(int.MaxValue, null, null, AsIfKnown: false, Single: false, NoConfusion: false, NoColor: false, Stripped: true, WithoutTitles: false, Short: true, BaseOnly: true);
+			string looks = disguise.Appearance;
+			if (looks.IsNullOrEmpty())
+				looks = XRL.Language.Grammar.A(bp.GetPartParameter("Render", "DisplayName", "creature of some kind"));
+			looks = ConsoleLib.Console.ColorUtility.StripFormatting(looks);
+
+			Statue.Render.DisplayName = Statue.Render.DisplayName.Replace(realName, looks);
+			if (!disguise.Tile.IsNullOrEmpty())
+				Statue.Render.Tile = disguise.Tile;
+			if (!disguise.RenderString.IsNullOrEmpty())
+				Statue.Render.RenderString = disguise.RenderString;
+
+			Description desc = Statue.GetPart<Description>();
+			if (desc != null)
+			{
+				int cut = desc._Short.IndexOf(":\n\n");
+				string head = (cut >= 0 ? desc._Short.Substring(0, cut) : desc._Short).Replace(realName, looks);
+				string body = bp.GetPartParameter<string>("Description", "Short");
+				desc._Short = body.IsNullOrEmpty() ? head + "." : head + ":\n\n" + GameText.VariableReplace(body, Muse);
+			}
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", $"disguise: muse {Muse.Blueprint} carved as its disguise {disguise.BlueprintName} ('{looks}', tile {Statue.Render.Tile})");
 		}
 
 		public static int GetDuration(int Lv) => Lv >= 10 ? INFINITE_DURATION_PLACEHOLDER : BASE_DURATION + (Lv * TURNS_PER_LEVEL);
