@@ -326,7 +326,8 @@ namespace XRL.World.Parts.Mutation
 			if (CurFailedSaves >= NUM_OF_SAVES)
 			{
 				Helpers.VerifyLog("GAZE", $"10th fail: {Target.Blueprint} PETRIFIED (statue + entombed possessions)");
-				Petrify(ParentObject, Target);
+				if (!Petrify(ParentObject, Target))
+					AssocEffect = null; // Petrify removed it; keep CancelGaze from touching a detached effect
 				// the statue IS the outcome -- zero the tally so CancelGaze's stone-mark branch
 				// (escapees only) can't fire on the freshly petrified victim (log-caught
 				// 2026-08-06: a spurious 500-round mark + "remains partially petrified" stinger
@@ -393,7 +394,8 @@ namespace XRL.World.Parts.Mutation
 			AssocEffect = null;
 		}
 
-		public static void Petrify(GameObject Medusa, GameObject Victim)
+		/// <returns>False when the death was prevented (e.g. NPC Precognition) and the victim lives.</returns>
+		public static bool Petrify(GameObject Medusa, GameObject Victim)
 		{
 			// feel round 1: the completion shower -- a hard burst of rock debris under the statue swap
 			Cleo_TerraFirma_GorgonPetrifyFX.RockPops(Victim, 10, Burst: true);
@@ -409,14 +411,20 @@ namespace XRL.World.Parts.Mutation
 				$"{Victim.It + Victim.GetVerb("were", true, true)} @@turned to stone by the unblinking gaze of {Medusa.an()}."))
 			{
 				curCell.AddObject(statue);
+				return true;
 			}
 			else
 			{
+				// player report 2026-10-11: an NPC saved by Precognition (OnBeforeDie restores
+				// only hitpoints and temperature) walked off still carrying ten fails of
+				// petrifying. The death was undone, so the stone goes with it.
+				Victim.RemoveEffect<Cleo_TerraFirma_Petrifying>();
 				Cleo.TerraFirma.Scripts.StatueHelpers.ReturnPossessions(statue, Victim); // death was prevented -- give it all back
 				// the flag is persistent and gates ALL drop paths on every future death; unwind it
 				// the way the engine's Consumer part does (Consumer.cs:128)
 				Victim.ModIntProperty("SuppressCorpseDrops", -1, RemoveIfZero: true);
 				statue.Obliterate();
+				return false;
 			}
 		}
 		#endregion

@@ -95,6 +95,10 @@ namespace XRL.World.Parts.Mutation
 			// IsGeomancyStone = the Geomancy-only pass for trade goods (nuggets/figurines, user
 			// ruling 2026-08-06) -- deliberately NOT IsAnyStone, which would also feed the
 			// lithovore/auto-sculpt gates
+			// the reveal is the player's sight (SetExplored, lit cells); an NPC geomancer's
+			// throws unveiled the map for the player (player report 2026-10-11). NPCs keep +2 range.
+			if (!ParentObject.IsPlayer())
+				return;
 			if (Weapon == null || (!Weapon.HasTag("Cleo_TerraFirma_IsAnyStone") && !Weapon.HasTag("Cleo_TerraFirma_IsGeomancyStone")))
 				return;
 			Cell landingCell = Weapon.CurrentCell;
