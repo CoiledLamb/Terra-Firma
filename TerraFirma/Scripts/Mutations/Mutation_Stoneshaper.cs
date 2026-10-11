@@ -680,6 +680,7 @@ namespace XRL.World.Parts.Mutation
 			Description inertDesc = inert.GetPart<Description>();
 			if (statueDesc != null && inertDesc != null)
 				inertDesc._Short = statueDesc._Short;
+			CarrySurfaceWriting(Statue, inert);
 			StatueHelpers.EntombPossessions(Statue, inert);
 			Statue.SetStringProperty("CustomDeathVerb", "expired");
 			Statue.Obliterate(Silent: true);
@@ -780,8 +781,30 @@ namespace XRL.World.Parts.Mutation
 			statue.Render.ColorString = Wall.Render.ColorString;
 			statue.Render.DetailColor = Wall.Render.DetailColor;
 			statue.Render.TileColor = Wall.Render.TileColor;
+			CarrySurfaceWriting(Wall, statue);
 
 			return statue;
+		}
+
+		/// <summary>
+		/// Words on the stone ride into the carving (user 2026-10-11): base Graffitied text and our
+		/// own etched Inscription. The spray color already rides in on ColorString above, since
+		/// Graffitied.Graffiti only recolors through Render.SetForegroundColor. Adding Graffitied
+		/// after creation skips its ObjectCreatedEvent reroll, so the text is the wall's, and its
+		/// "graffitied" name adjective comes along (kept, user 2026-10-11). Also used by
+		/// DeanimateStatue so the inert copy keeps them.
+		/// </summary>
+		public static void CarrySurfaceWriting(GameObject From, GameObject To)
+		{
+			string graffiti = From.GetPart<Graffitied>()?.Text;
+			if (!graffiti.IsNullOrEmpty())
+			{
+				To.RequirePart<Graffitied>().Text = graffiti;
+				To.SetIntProperty("HasGraffiti", 1);
+			}
+			string inscription = From.GetPart<Cleo_TerraFirma_Etchable>()?.Inscription;
+			if (!inscription.IsNullOrEmpty())
+				To.RequirePart<Cleo_TerraFirma_Etchable>().Inscription = inscription;
 		}
 
 		/// <summary>
