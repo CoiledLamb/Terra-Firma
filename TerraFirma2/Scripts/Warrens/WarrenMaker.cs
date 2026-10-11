@@ -43,7 +43,12 @@ namespace XRL.World.ZoneBuilders
 					Reason = "exception: " + x.GetType().Name,
 					Seed = WarrenCarver.SeedFor(Z.ZoneID)
 				});
-				SettleRumor(Z);
+				// a throw after ApplyToZone leaves a carved warren standing; erasing its note
+				// then lost players the marker (reported 2026-10-11). Only an untouched zone settles.
+				if (Z.HasZoneProperty(WarrenCarver.APPLIED_PROPERTY))
+					Helpers.VerifyLog("WARREN", $"note kept: {Z.ZoneID} threw after the carve was applied");
+				else
+					SettleRumor(Z);
 			}
 			return true;
 		}

@@ -3443,8 +3443,13 @@ namespace Cleo.TerraFirma.Scripts
 		// Grid to zone: final FLOOR cells that are ours lose their walls; aquifer
 		// cells become deep brackish pools (the Redrock water idiom), which base
 		// ShaleVines and Cleo_TerraFirma_ShaleMoss later green with moss.
+		/// <summary>Set on the zone before the first cell changes. From here the warren
+		/// stands, so WarrenMaker keeps its map note even if a later step throws.</summary>
+		public const string APPLIED_PROPERTY = "Cleo_TerraFirma_WarrenApplied";
+
 		private static void ApplyToZone(Zone Z, Grid g)
 		{
+			Z.SetZoneProperty(APPLIED_PROPERTY, "1");
 			int carved = 0, pools = 0, padded = 0;
 			// AUGMENT MATERIALIZATION (blind-claim port): augmented cells that
 			// remain rock become real Shale - the same blueprint Hills paints, so
