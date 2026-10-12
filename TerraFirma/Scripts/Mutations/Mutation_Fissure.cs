@@ -236,6 +236,7 @@ namespace XRL.World.Parts.Mutation
 			// (CLAUDE PICK at port time, spec's AI note; the flip is a feel dial)
 			bool usable = IsMyActivatedAbilityAIUsable(ActivatedAbilityID);
 			bool added = false;
+			string hold = null;
 			if (usable)
 			{
 				if (E.Distance <= 1)
@@ -243,14 +244,68 @@ namespace XRL.World.Parts.Mutation
 				else if (E.Distance <= PULSE_COUNT && Stat.Random(1, 100) <= 50)
 					added = true;
 				if (added)
+				{
+					hold = WhyHoldFire(E.Actor);
+					if (hold != null)
+						added = false;
+				}
+				if (added)
 					E.Add(COMMAND_ID);
 			}
 			// gate telemetry (first pulse boot 2026-08-09: fis-npc 0 casts in 20 turns even
 			// from inside coverage -- this line answers whether advertisement fires and the
 			// failure is downstream, or never fires at all). NPC-only; rides the TF-VERIFY strip.
 			if (!ParentObject.IsPlayer())
-				Helpers.VerifyLog("FIS", $"AI gate: {ParentObject.Blueprint} dist {E.Distance}, usable={usable} -> {(added ? "ADVERTISED" : "held")}");
+				Helpers.VerifyLog("FIS", $"AI gate: {ParentObject.Blueprint} dist {E.Distance}, usable={usable} -> {(added ? "ADVERTISED" : "held")}{(hold != null ? " (" + hold + ")" : "")}");
 			return base.HandleEvent(E);
+		}
+
+		/// <summary>D11 (user 2026-10-12, shape agreed 2026-10-02): the pulses hit every Combat
+		/// object but the caster, so an AI caster holds fire unless the blast is all enemies.
+		/// Ally gate copied from base Disintegration's AIGetOffensiveAbilityListEvent handler
+		/// (decompiled 2026-10-12): every visible Combat object in a radius-4 square
+		/// (FastSquareVisibility) must be one the caster feels hostile toward (GetFeeling below 0),
+		/// and at least one must exist. Radius 4 is the ring plus the outward push. The
+		/// important-object hold has no base precedent: anything IsImportant (quest items,
+		/// Storied, the Important tag) inside the ring radius that is not a hostile creature
+		/// keeps the caster from casting. Returns null when the cast is safe.</summary>
+		private string WhyHoldFire(GameObject Actor)
+		{
+			if (Actor == null)
+				Actor = ParentObject;
+			Cell origin = Actor.CurrentCell;
+			Zone zone = origin?.ParentZone;
+			if (zone == null || Actor.Brain == null)
+				return "no cell or brain";
+			bool anyHostile = false;
+			foreach (GameObject o in zone.FastSquareVisibility(origin.X, origin.Y, RING_RADIUS + 1, "Combat", Actor, VisibleToPlayerOnly: false, IncludeWalls: false, skip: null))
+			{
+				if (o == Actor)
+					continue;
+				if (Actor.Brain.GetFeeling(o) >= 0)
+					return "non-hostile " + o.Blueprint + " in range";
+				anyHostile = true;
+			}
+			if (!anyHostile)
+				return "no hostile in range";
+			for (int x = origin.X - RING_RADIUS; x <= origin.X + RING_RADIUS; x++)
+			{
+				for (int y = origin.Y - RING_RADIUS; y <= origin.Y + RING_RADIUS; y++)
+				{
+					Cell c = zone.GetCell(x, y);
+					if (c == null)
+						continue;
+					foreach (GameObject o in c.Objects)
+					{
+						if (o == Actor || !o.IsImportant())
+							continue;
+						if (o.Brain != null && Actor.Brain.GetFeeling(o) < 0)
+							continue; // a hostile important creature is a fair target
+						return "important " + o.Blueprint + " in the ring";
+					}
+				}
+			}
+			return null;
 		}
 
 		public override bool HandleEvent(CommandEvent E)
