@@ -123,7 +123,7 @@ namespace XRL.World.Parts
 				{
 					PauseEnds = now + PauseTurns.RollCached();
 					// home is where they stand, so stock Bored idles instead of nudging onto an occupied waypoint
-					brain.StartingCell.SetCell(ParentObject.CurrentCell);
+					SetHome(brain, ParentObject.CurrentCell);
 				}
 				if (now < PauseEnds)
 					return;
@@ -132,7 +132,7 @@ namespace XRL.World.Parts
 			else if (now - LegStarted > LegTimeout)
 				NextLeg(brain, beat, now);
 			else
-				brain.StartingCell.SetCell(target);
+				SetHome(brain, target);
 		}
 
 		private void NextLeg(Brain brain, List<Cell> beat, long now)
@@ -140,7 +140,7 @@ namespace XRL.World.Parts
 			Leg = (Leg + 1) % beat.Count;
 			PauseEnds = 0;
 			LegStarted = now;
-			brain.StartingCell.SetCell(beat[Leg]);
+			SetHome(brain, beat[Leg]);
 		}
 
 		private void EndShift(Brain brain, Zone zone, long now)
@@ -166,7 +166,7 @@ namespace XRL.World.Parts
 				HeadingIn = true;
 				LegStarted = now;
 				brain.Wanders = false;
-				brain.StartingCell.SetCell(rest);
+				SetHome(brain, rest);
 			}
 			else
 				brain.Wanders = true;
@@ -179,7 +179,7 @@ namespace XRL.World.Parts
 				Cell rest = RestCell(zone);
 				if (rest != null && ParentObject.DistanceTo(rest) > 1 && now - LegStarted <= LegTimeout)
 				{
-					brain.StartingCell.SetCell(rest);
+					SetHome(brain, rest);
 					return;
 				}
 				HeadingIn = false;
@@ -218,7 +218,7 @@ namespace XRL.World.Parts
 					best = i;
 			Leg = best;
 			brain.Wanders = false;
-			brain.StartingCell.SetCell(beat[Leg]);
+			SetHome(brain, beat[Leg]);
 		}
 
 		private GameObject FindColleague(Zone zone, bool onDuty, bool idleOnly)
@@ -251,6 +251,16 @@ namespace XRL.World.Parts
 		}
 
 		private Cell RestCell(Zone zone) => ParseCell(zone, Rest);
+
+		/// <summary>Moves the stock home point. Brain.StartingCell can be null (base null-checks it
+		/// in Brain.Stay and in the Wanders-off setup, Brain.cs:2159/2612), so this copies that
+		/// guard: make one before setting it. Player log 2026-10-13: the unguarded write threw in TakeDuty during
+		/// the warren build and in WalkBeat every bored turn.</summary>
+		private static void SetHome(Brain brain, Cell c)
+		{
+			brain.StartingCell ??= new GlobalLocation();
+			brain.StartingCell.SetCell(c);
+		}
 
 		private static Cell ParseCell(Zone zone, string pt)
 		{
