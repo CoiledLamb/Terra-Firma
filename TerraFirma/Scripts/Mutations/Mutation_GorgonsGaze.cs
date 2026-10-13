@@ -255,6 +255,8 @@ namespace XRL.World.Parts.Mutation
 			}
 			AssocEffect = new Cleo_TerraFirma_Petrifying(ParentObject);
 			Target.ApplyEffect(AssocEffect, ParentObject);
+			if (Victim.HasEffect<Asleep>())
+				Victim.FireEvent("WakeUp"); // the gaze lands now; see TickGaze for why this is needed
 			ParentObject.PlayWorldSound("Sounds/Abilities/sfx_ability_sunderMind_attack");
 			Target.PlayWorldSound("Sounds/Abilities/sfx_ability_sunderMind_attack");
 		}
@@ -292,6 +294,11 @@ namespace XRL.World.Parts.Mutation
 			}
 			AssocEffect ??= Target.GetEffect<Cleo_TerraFirma_Petrifying>(); // re-link after save/load
 			Target.Brain.Attacked(ParentObject);
+			// player report 2026-10-12: a gazed sleeper slept on. Base Asleep wakes only on
+			// "TakeDamage" or "WakeUp" (Asleep.FireEvent, decompiled 2026-10-12) and the gaze deals
+			// no damage, so each tick wakes the target the way a hit would (Bed.cs fires the same event)
+			if (Target.HasEffect<Asleep>())
+				Target.FireEvent("WakeUp");
 			// caster's Willpower (the discipline to hold the gaze unblinking) raises the save DC, same mechanism as the lithofex's Ego;
 			// each accrued failure raises it further -- the stiffer they get, the harder it is to look away
 			bool targetResists = Target.MakeSave("Toughness", GetSaveDifficulty(Level) + CurFailedSaves, ParentObject, "Willpower", Vs: Name, IgnoreNatural20: !Target.IsPlayer(), Source: ParentObject);
