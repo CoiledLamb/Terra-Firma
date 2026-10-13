@@ -136,6 +136,8 @@ Handoff from the release-audit session (2026-09-29/30). Newer than the 09-16 sna
 
 ## Verification still owed
 
+Autoexplore ate an animation table, 2026-10-13 (player report, for 0.2.6): `Player.log` shows "Attempting to add untakeable object 'Cleo_TerraFirma_AnimationTable'". Base `EnergyCell` sets autoexplore's "Autoget" on the object pass, after base's takeable check has run on the actor pass; `TakeObject` pulls the table out of its cell and inventory refuses it, so it ends up nowhere. The mill carries the same part. New `FurnitureCellGuard` (TF2 `Scripts/Core`) is wired into the table and mill parts: it clears that Autoget and stops the dispatch, so it works on saved objects too. Both builds 0 errors, TF2 deployed with hashes matched. Possible follow-up for the user: base furniture stores charge in `Capacitor`, not `EnergyCell`; swapping the blueprints would remove the trap at the source, but the mill code reads `EnergyCell` directly, and saved objects would still need the guard. In game: with "autoget ammo" on, autoexplore past a warren animation table and a mill; both stay put and nothing is logged.
+
 Chalk line description: approved partition/divide wording complete, built, XML/text-checked, and deployed. In-game description display verification remains.
 
 Boar vessel remains description: user draft installed with capitalization and lie correction; pictograph selected from the offered alternatives. Built, XML/text-checked, and deployed; in-game display verification remains.

@@ -58,7 +58,13 @@ namespace XRL.World.Parts
 				|| ID == GetInventoryActionsEvent.ID
 				|| ID == CanSmartUseEvent.ID
 				|| ID == CommandSmartUseEvent.ID
-				|| ID == InventoryActionEvent.ID;
+				|| ID == InventoryActionEvent.ID
+				|| ID == AutoexploreObjectEvent.ID;
+		}
+
+		public override bool HandleEvent(AutoexploreObjectEvent E)
+		{
+			return Cleo.TerraFirma.Scripts.FurnitureCellGuard.Block(E, ParentObject);
 		}
 
 		public override bool HandleEvent(EnteredCellEvent E)

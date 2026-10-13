@@ -29,7 +29,10 @@ namespace XRL.World.Parts
 		}
 
 		public override bool WantEvent(int ID, int cascade) => base.WantEvent(ID, cascade)
-			|| ID == GetInventoryActionsEvent.ID || ID == InventoryActionEvent.ID;
+			|| ID == GetInventoryActionsEvent.ID || ID == InventoryActionEvent.ID
+			|| ID == AutoexploreObjectEvent.ID;
+
+		public override bool HandleEvent(AutoexploreObjectEvent E) => Cleo.TerraFirma.Scripts.FurnitureCellGuard.Block(E, ParentObject);
 
 		public override bool HandleEvent(GetInventoryActionsEvent E)
 		{
