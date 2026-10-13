@@ -293,7 +293,11 @@ namespace XRL.World.Parts.Mutation
 				return;
 			}
 			AssocEffect ??= Target.GetEffect<Cleo_TerraFirma_Petrifying>(); // re-link after save/load
-			Target.Brain.Attacked(ParentObject);
+			// party members hold no grudge, matching base's damage route (Brain.HandleEvent(TookDamageEvent)
+			// skips InSamePartyAs); the gaze deals no damage, so it would otherwise take Shield Slam's
+			// unfiltered Brain.Attacked route and turn a gazed companion against its leader
+			if (!Target.InSamePartyAs(ParentObject))
+				Target.Brain.Attacked(ParentObject);
 			// player report 2026-10-12: a gazed sleeper slept on. Base Asleep wakes only on
 			// "TakeDamage" or "WakeUp" (Asleep.FireEvent, decompiled 2026-10-12) and the gaze deals
 			// no damage, so each tick wakes the target the way a hit would (Bed.cs fires the same event)
