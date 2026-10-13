@@ -9,7 +9,7 @@ namespace XRL.World.Parts
 	/// The figurine animation table (design sitting 2026-08-24, all forks user-ruled; see the
 	/// journal entry). Exchange verb on the TABLE per the mod-wide target-side ergonomics
 	/// ruling: offer "Animate" when the interactor carries any-material figurine, pick one,
-	/// pay a flat charge from the table's INTERNAL EnergyCell (ruled: internal cell, no
+	/// pay a flat charge from the table's INTERNAL cell, a base Capacitor since 2026-10-13 (ruled: internal cell, no
 	/// socket - chargeable via tinker recharge, unstealable because no removal verb exists),
 	/// destroy the figurine, wake a bonded walker beside the table.
 	///

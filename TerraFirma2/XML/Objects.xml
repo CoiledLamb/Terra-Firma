@@ -146,7 +146,7 @@ Perishes when unequipped." />
 		<tag Name="ExcludeFromDynamicEncounters" />
 	</object>
 	<!-- Figurine animation table (design sitting 2026-08-24, all forks user-ruled; build
-	     docket opened same day, "lets build it"). Internal EnergyCell BY RULING - no socket,
+	     docket opened same day, "lets build it"). Internal cell BY RULING (a Capacitor since 2026-10-13) - no socket,
 	     so the cell is tinker-rechargeable but unstealable. Exchange verb lives in
 	     Part_AnimationTable.cs (target-side per the ergonomics ruling). Cell numbers +
 	     animation cost are CLAUDE DIALS. Spawn layer: wish tffigtable + the warren painter's
@@ -158,7 +158,11 @@ Perishes when unequipped." />
 		<part Name="Cleo_TerraFirma_AnimationTablePart" />
 		<!-- Codex PROPOSAL: grid supply is used before the table's existing internal cell. -->
 		<part Name="ElectricalPowerTransmission" ChargeRate="1000" IsConsumer="true" />
-		<part Name="EnergyCell" Charge="0" MaxCharge="5000" StartCharge="1000-3000" />
+		<!-- internal store is a base Capacitor (base furniture idiom), not an EnergyCell: autoexplore
+		     autogets anything with an EnergyCell and deleted a table (player log 2026-10-13).
+		     ChargeRate 0 keeps the grid out, as the old cell did; tinker recharge still works
+		     (AddCharge). MinimumChargeToExplode 0 keeps it from exploding when destroyed. -->
+		<part Name="Capacitor" Charge="0" MaxCharge="5000" StartCharge="1000-3000" ChargeRate="0" MinimumChargeToExplode="0" />
 		<part Name="Examiner" Complexity="3" />
 		<part Name="MissileCover" Percentage="10" />
 		<tag Name="Tier" Value="3" />
@@ -166,7 +170,7 @@ Perishes when unequipped." />
 	</object>
 	<!-- Codex PROPOSAL: B02 mill. Provisional rates use the cell's 50 charge/lb and
 	     25000 capacity; native FusionReactor supplies 100/turn without explosions.
-	     Circuitry holds transient passive output; EnergyCell holds fed bursts.
+	     Circuitry holds transient passive output; a Capacitor holds fed bursts.
 	     Natural-stone gating has no native XML condition and is omitted. Static base art. -->
 	<object Name="Cleo_TerraFirma_PiezoelectricMill" Inherits="MountedFurniture">
 		<part Name="Render" DisplayName="piezoelectric mill" ColorString="&amp;y" TileColor="&amp;y" DetailColor="W" RenderString="15" Tile="Items/sw_millstone_1.bmp" />
@@ -174,7 +178,8 @@ Perishes when unequipped." />
 		<part Name="Physics" Weight="300" Takeable="false" Solid="false" />
 		<part Name="FusionReactor" ChargeRate="100" ExplodeChance="0" CatastrophicDisable="false" Description="piezoelectric mill" NameForStatus="Earth grinding" />
 		<part Name="Circuitry" StartCharge="100" MaxCharge="100" />
-		<part Name="EnergyCell" MaxCharge="25000" StartCharge="2500-10000" IsRechargeable="false" />
+		<!-- Capacitor, not EnergyCell (see the animation table, 2026-10-13); ChargeRate 0 so only feeding fills it. -->
+		<part Name="Capacitor" Charge="0" MaxCharge="25000" StartCharge="2500-10000" IsRechargeable="false" ChargeRate="0" MinimumChargeToExplode="0" />
 		<part Name="ElectricalPowerTransmission" ChargeRate="1000" IsProducer="true" />
 		<part Name="PowerSwitch" SecurityClearance="0" />
 		<part Name="Cleo_TerraFirma_PiezoelectricMill" ChargePerPound="50" FeedEnergy="1000" />
@@ -188,10 +193,10 @@ Perishes when unequipped." />
 	<object Name="Cleo_TerraFirma_PiezoelectricMillDormant" Inherits="Cleo_TerraFirma_PiezoelectricMill">
 		<part Name="PowerSwitch" Active="false" />
 		<part Name="Circuitry" StartCharge="0" />
-		<part Name="EnergyCell" Charge="0" StartCharge="0" />
+		<part Name="Capacitor" Charge="0" StartCharge="0" />
 	</object>
 	<object Name="Cleo_TerraFirma_AnimationTableDormant" Inherits="Cleo_TerraFirma_AnimationTable">
-		<part Name="EnergyCell" Charge="0" StartCharge="0" />
+		<part Name="Capacitor" Charge="0" StartCharge="0" />
 	</object>
 	<!-- Box of chalk + chalk line (design sitting 2026-08-22, all four forks user-ruled:
 	     auto-orient strokes, draw adjacent, chalkboard writing typed AND markov, 8-12 uses).

@@ -6,7 +6,9 @@ namespace XRL.World.Parts
 {
 	// Codex PROPOSAL: burst feeding; passive supply and storage are native XML parts.
 	// Base FusionReactor.ProduceCharge / IPowerTransmission supply the grid.
-	// EnergyCell.AddCharge stores the burst; the existing grinder supplies the diet idiom.
+	// Capacitor.AddCharge stores the burst (base furniture's store, 2026-10-13; a mill saved
+	// before then still carries an EnergyCell and is read the same way); the existing grinder
+	// supplies the diet idiom.
 	[Serializable]
 	public class Cleo_TerraFirma_PiezoelectricMill : IPoweredPart
 	{
@@ -52,13 +54,16 @@ namespace XRL.World.Parts
 			var millCell = ParentObject.CurrentCell;
 			if (actorCell == null || millCell == null || actorCell.ParentZone != millCell.ParentZone
 				|| Math.Abs(actorCell.X - millCell.X) > 1 || Math.Abs(actorCell.Y - millCell.Y) > 1) return false;
-			var cell = ParentObject.GetPart<EnergyCell>();
-			if (cell == null || !IsReady(UseCharge: false, IgnoreCharge: true))
+			var cap = ParentObject.GetPart<Capacitor>();
+			var oldCell = cap == null ? ParentObject.GetPart<EnergyCell>() : null;
+			int Charge() => cap?.Charge ?? oldCell.Charge;
+			int MaxCharge() => cap?.MaxCharge ?? oldCell.MaxCharge;
+			if ((cap == null && oldCell == null) || !IsReady(UseCharge: false, IgnoreCharge: true))
 			{
 				if (E.Actor.IsPlayer()) Popup.ShowFail(ParentObject.Does("are") + " not running."); // Codex PROPOSAL
 				return false;
 			}
-			if (cell.Charge >= cell.MaxCharge || ChargePerPound <= 0)
+			if (Charge() >= MaxCharge() || ChargePerPound <= 0)
 			{
 				if (E.Actor.IsPlayer()) Popup.ShowFail(ParentObject.T() + " cannot store any more charge."); // Codex PROPOSAL
 				return false;
@@ -91,16 +96,16 @@ namespace XRL.World.Parts
 			}
 			var pick = stones[choice];
 			int burst = (int)Math.Min(int.MaxValue, (long)Math.Max(1, pick.Physics?.Weight ?? 0) * ChargePerPound);
-			int accepted = Math.Min(burst, cell.MaxCharge - cell.Charge);
+			int accepted = Math.Min(burst, MaxCharge() - Charge());
 			// A burst has no queue: make overflow explicit before consuming a whole stone.
 			if (accepted < burst && E.Actor.IsPlayer()
 				&& Popup.ShowYesNo("Only " + accepted + " of " + burst + " charge will fit. Feed the stone anyway?") != DialogResult.Yes) return false; // Codex PROPOSAL
 			pick = pick.SplitFromStack() ?? pick;
 			string name = pick.t();
 			if (!pick.Destroy()) return false;
-			cell.AddCharge(accepted);
+			if (cap != null) cap.AddCharge(accepted); else oldCell.AddCharge(accepted);
 			if (E.Actor.IsPlayer()) IComponent<GameObject>.AddPlayerMessage("You feed " + name + " into " + ParentObject.t() + "."); // Codex PROPOSAL
-			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("MILL", $"burst={burst}, stored={accepted}, charge={cell.Charge}/{cell.MaxCharge}");
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("MILL", $"burst={burst}, stored={accepted}, charge={Charge()}/{MaxCharge()}");
 			E.Actor.UseEnergy(FeedEnergy, "Item FeedPiezoelectricMill");
 			E.RequestInterfaceExit();
 			return base.HandleEvent(E);
