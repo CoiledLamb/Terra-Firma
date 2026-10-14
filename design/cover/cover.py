@@ -63,6 +63,7 @@ LETTER_STEPS=None          # separate band list for the title outlines; None = s
 FIELD_TEXTURE=None         # None, "sky" (the plate's own sky hatching tiled over the field), "hatch" (synthetic engraver's hatch)
 FIELD_TEX_STRENGTH=0.5     # how far the texture lines lift from the field colour toward the mid tone
 FIELD_TEX_IN_LETTERS=True  # texture shows through the hollow letters too
+FIELD_TEX_WEAR=0.0         # plate wear: the field hatch thins and breaks toward the frame edge (0 = off, 1 = heavy)
 SHADOW_MID=None            # shadow pass on the halftone: None, "all" (every hatched midtone goes to SHADOW_MID_COLOUR), "split" (only on the shadow side of the light), "blend" (fades in toward the shadow side)
 SHADOW_MID_COLOUR="c"
 SHADOW_MID_SPLIT=0.52       # where the split happens along the light-to-shadow parameter
@@ -189,6 +190,11 @@ def build():
                 y+=max(gap,1.6*SS)
         gaps=np.array(Image.fromarray((rng.random((N//6,N//6))*255).astype(np.uint8)).resize((N,N),Image.BILINEAR),dtype=float)/255
         tex=line.astype(float)*(gaps>0.22)
+        if FIELD_TEX_WEAR>0:
+            ey=np.minimum(np.arange(N),N-1-np.arange(N))[:,None]/(N/2); ex=np.minimum(np.arange(N),N-1-np.arange(N))[None,:]/(N/2)
+            edge=1-np.clip(np.minimum(ey,ex)/0.45,0,1)                      # 1 at the frame, 0 from ~45% in
+            worn=np.array(Image.fromarray((rng.random((N//3,N//3))*255).astype(np.uint8)).resize((N,N),Image.BILINEAR),dtype=float)/255
+            tex=tex*(worn>edge*FIELD_TEX_WEAR*0.9)
     if tex is not None:
         tex_col=hx(Q[FIELD])+(MID-hx(Q[FIELD]))*FIELD_TEX_STRENGTH
         cv=cv*(1-tex[:,:,None])+tex_col*tex[:,:,None]
