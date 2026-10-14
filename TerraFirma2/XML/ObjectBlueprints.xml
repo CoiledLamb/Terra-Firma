@@ -277,4 +277,36 @@
     <part Name="MeleeWeapon" MaxStrengthBonus="1000" BaseDamage="1d4" Skill="Cudgel" Stat="Strength" />
     <part Name="Cleo_TerraFirma_GaslightFist" PenetrationBonus="5" />
   </object>
+  <!-- C12 refractive buckler and shield (user concept 2026-10-13; built 2026-10-14, wish-only).
+       Refraction built in, the rainboweave cloak idiom: a RefractLight part on the item, which
+       also makes base ModRefractive.ModificationApplicable refuse a second roll. RetroVariance
+       1d181-91 copies ModRefractive's own bounce (Angle + 180, plus or minus 90). Positive DV
+       checked 2026-10-14: base Shield.HandleEvent(EquippedEvent) is a plain StatShifter shift.
+       Codex PROPOSAL: Chance 20/30 as briefed (note: base ModRefractive gives an ARM shield 10,
+       a hand shield 30); tier 4 = ModRefractive NativeTier; weight and Metal copy the steel
+       buckler (8) and steel shield (12); commerce 65 = their 50 x the refractive mod's 1.3.
+       DisplayName, Description and tiles are placeholders owed by the user. No loot rows, and
+       ExcludeFromDynamicEncounters keeps both out of DynamicInheritsTable:BaseShield. -->
+  <object Name="Cleo_TerraFirma_RefractiveBuckler" Inherits="BaseShield">
+    <part Name="Render" DisplayName="PLACEHOLDER refractive buckler" Tile="items/sw_buckler3.bmp" ColorString="&amp;Y" DetailColor="y" />
+    <part Name="Shield" AV="1" DV="1" WornOn="Arm" />
+    <part Name="RefractLight" Chance="20" RetroVariance="1d181-91" ShowInShortDescription="true" />
+    <part Name="Description" Short="PLACEHOLDER description." />
+    <part Name="Commerce" Value="65" />
+    <part Name="Physics" Weight="8" />
+    <part Name="Metal" />
+    <tag Name="Tier" Value="4" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
+  <object Name="Cleo_TerraFirma_RefractiveShield" Inherits="BaseShield">
+    <part Name="Render" DisplayName="PLACEHOLDER refractive shield" Tile="Items/sw_shield5.bmp" ColorString="&amp;Y" DetailColor="y" />
+    <part Name="Shield" AV="2" DV="0" WornOn="Hand" />
+    <part Name="RefractLight" Chance="30" RetroVariance="1d181-91" ShowInShortDescription="true" />
+    <part Name="Description" Short="PLACEHOLDER description." />
+    <part Name="Commerce" Value="65" />
+    <part Name="Physics" Weight="12" />
+    <part Name="Metal" />
+    <tag Name="Tier" Value="4" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
 </objects>
