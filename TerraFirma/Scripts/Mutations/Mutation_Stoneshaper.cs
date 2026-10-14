@@ -488,7 +488,7 @@ namespace XRL.World.Parts.Mutation
 			if (lovesick != null && actor.IsPlayer())
 				Popup.Show($"You attempt to picture {target.t()} in your mind, but all you can think about is {lovesick.Beauty.t()}…!");
 			if (confusedMuse != null && actor.IsPlayer())
-				Popup.Show("[PLACEHOLDER C11 reveal]"); // the reveal line is the user's, still unwritten
+				Popup.Show($"You attempt to picture {target.t()}, but your scattered mind conjures images of {confusedMuse.t()} instead…!"); // USER TEXT 2026-10-14, final
 			XDidYToZ(actor, $"create a sculpture of", creature, EndMark: "!", ColorAsGoodFor: actor, Source: actor);
 			confusedMuse?.Obliterate(); // the statue copied values only (ApplyStatueBuffs, SetCreature), nothing points back
 
