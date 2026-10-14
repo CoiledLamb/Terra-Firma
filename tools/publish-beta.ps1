@@ -97,6 +97,18 @@ $checkCode = $LASTEXITCODE
 $checkOutput | ForEach-Object { Write-Host $_ }
 if ($checkCode -ne 0) { throw "text-rule check FAILED -- publish aborted, nothing zipped" }
 
+# ---------------------------------------------------------------- verification switch
+# Helpers.VERIFY_WATCH is the one switch for [TF-VERIFY] logging in both mods; dev keeps it
+# true, player builds must not. A real run aborts on true, -CheckOnly warns and carries on so
+# a dev tree can still be checked. An unreadable switch fails closed either way.
+$helpersPath = Join-Path $RepoRoot "TerraFirma\Scripts\Core\_Helpers.cs"
+$watchLine = if (Test-Path $helpersPath) { Select-String -Path $helpersPath -Pattern 'const bool VERIFY_WATCH\s*=\s*(true|false)\s*;' | Select-Object -First 1 }
+if (-not $watchLine) { throw "could not read Helpers.VERIFY_WATCH in $helpersPath -- publish aborted" }
+if ($watchLine.Matches[0].Groups[1].Value -eq "true") {
+    if ($CheckOnly) { Write-Warning "VERIFY_WATCH is true in _Helpers.cs:$($watchLine.LineNumber) -- a real run would abort; set it false before staging" }
+    else { throw "VERIFY_WATCH is true in _Helpers.cs:$($watchLine.LineNumber) -- set it false before staging; publish aborted, nothing zipped" }
+}
+
 # ---------------------------------------------------------------- C# comment lexer
 Add-Type -TypeDefinition @'
 using System.Text;
