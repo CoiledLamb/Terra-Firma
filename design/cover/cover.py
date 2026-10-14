@@ -63,6 +63,7 @@ LETTER_STEPS=None          # separate band list for the title outlines; None = s
 FIELD_TEXTURE=None         # None, "sky" (the plate's own sky hatching tiled over the field), "hatch" (synthetic engraver's hatch)
 FIELD_TEX_STRENGTH=0.5     # how far the texture lines lift from the field colour toward the mid tone
 FIELD_TEX_IN_LETTERS=True  # texture shows through the hollow letters too
+CATALOGUE=None             # catalogue line on the left edge, e.g. "TF {version}"; {version} is read from TerraFirma/manifest.json at render time
 FIELD_TEX_WEAR=0.0         # plate wear: the field hatch thins and breaks toward the frame edge (0 = off, 1 = heavy)
 SHADOW_MID=None            # shadow pass on the halftone: None, "all" (every hatched midtone goes to SHADOW_MID_COLOUR), "split" (only on the shadow side of the light), "blend" (fades in toward the shadow side)
 SHADOW_MID_COLOUR="c"
@@ -204,6 +205,7 @@ def build():
     o=(N-D*SS)//2; reg=cv[o:o+D*SS,o:o+D*SS]; cv[o:o+D*SS,o:o+D*SS]=reg*(1-sa)+srgb*sa
     A=np.zeros((N,N))
     for w,deg,bi in WORDS: A=np.maximum(A,warp(w,np.radians(deg),np.radians(spans[w]),D*SS/2,bi))
+    global LAST_LETTERS; LAST_LETTERS=Image.fromarray((A*255).astype(np.uint8)).resize((512,512),Image.LANCZOS)
     kk=2*int(round(EDGE_PX*SS))+1
     dil=np.array(Image.fromarray((A*255).astype(np.uint8)).filter(ImageFilter.MaxFilter(kk)),dtype=float)/255; ea=np.clip(dil-A,0,1)
     if EDGE_BREAKS>0:
@@ -235,9 +237,9 @@ PRESETS={
  # FINAL 2026-10-14 (user: "that's the one i want"): continuous ink drift from white at the upper left through grey to
  # shadow cyan at the lower right, running through the seal, the title and the field alike; hand-ruled hatch over the
  # black field; solid black letters with a grey outline; posterised to the base tones plus eight samples of the drift.
- "final":dict(_COMMON,TINT_STEPS=None,FIELD_TEXTURE="hatch_jitter"),
+ "final":dict(_COMMON,TINT_STEPS=None,FIELD_TEXTURE="hatch_jitter",FIELD_TEX_WEAR=0.5,CATALOGUE="CL - {version}"),
  # earlier bookmark: four stepped inks (Y y C c at half strength, shadow ink full), seams stippled, flat black field, hollow letters.
- "bookmark_A1_stipple":dict(_COMMON,TINT_STEPS=[(0.30,"Y",0.5),(0.52,"y",0.5),(0.80,"C",0.5),(1.0,"c",1.0)],SEAM_SOFT=0.12,LETTER_FILL="k",FIELD_TEX_IN_LETTERS=True),
+ "bookmark_A1_stipple":dict(_COMMON,CATALOGUE=None,TINT_STEPS=[(0.30,"Y",0.5),(0.52,"y",0.5),(0.80,"C",0.5),(1.0,"c",1.0)],SEAM_SOFT=0.12,LETTER_FILL="k",FIELD_TEX_IN_LETTERS=True),
 }
 def apply(preset):
     for k,v in PRESETS[preset].items(): globals()[k]=v
@@ -245,9 +247,31 @@ def palette_for(preset):
     y_=hx(Q["y"])
     if TINT_STEPS: return ["k","K",MID]+[y_+(hx(Q[c])-y_)*k for _,c,k in TINT_STEPS]
     return ["k","K",MID,"Y"]+[tint_top(np.array([t]))[0] for t in np.linspace(0,1,8)]
+def mod_version():
+    import json
+    try: return json.load(open(os.path.join(HERE,"..","..","TerraFirma","manifest.json")))["version"]
+    except Exception: return "?"
+def stamp_catalogue(im):
+    """vertical line in the left-edge gap between TERRA and DIASPORA, reading upward, centred in the spandrel between ring and frame"""
+    if not CATALOGUE: return im
+    text=CATALOGUE.format(version=mod_version()); f=ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",11)
+    d=ImageDraw.Draw(Image.new("L",(1,1))); bb=d.textbbox((0,0),text,font=f); w,h=bb[2]-bb[0],bb[3]-bb[1]
+    col=tuple(int(v) for v in tint_top(np.array([0.5]))[0])            # the drift's grey, same as the letters' outline at mid-plate
+    t=Image.new("RGBA",(w+2,h+2),(0,0,0,0)); ImageDraw.Draw(t).text((1-bb[0],1-bb[1]),text,font=f,fill=col+(255,)); t=t.rotate(90,expand=True)
+    gap_x=(512-D)//2; x=max(2,gap_x//2-t.size[0]//2)
+    # find the clear run of rows along that strip (no title letters, with 3px of breathing room) nearest the horizontal, and centre in it
+    L=np.array(LAST_LETTERS)[:,max(0,x-3):x+t.size[0]+3]>40; busy=L.any(1); free=~busy
+    runs=[]; start=None
+    for yy_,fr in enumerate(list(free)+[False]):
+        if fr and start is None: start=yy_
+        if not fr and start is not None: runs.append((start,yy_-1)); start=None
+    runs=[r for r in runs if r[1]-r[0]>=t.size[1]] or runs
+    a,b=min(runs,key=lambda r:abs((r[0]+r[1])/2-256)); y=(a+b)//2-t.size[1]//2
+    im=im.copy(); im.paste(t,(x,y),t); return im
 def render_preset(preset, pixel=True):
     apply(preset); m=build(); sm=m.resize((512,512),Image.LANCZOS)
-    return (pix(sm,512,Image.NONE,palette_for(preset)) if pixel else sm), m
+    out=pix(sm,512,Image.NONE,palette_for(preset)) if pixel else sm
+    return stamp_catalogue(out), m
 if __name__=="__main__":
     import sys
     for n in (sys.argv[1:] or list(PRESETS)):
