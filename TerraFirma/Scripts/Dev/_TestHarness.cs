@@ -528,9 +528,11 @@ namespace Cleo.TerraFirma.Scripts
 
 		/// <summary>C11 confused carve (2026-10-14), through the CarveFrom seam: a Confused shaper
 		/// carves a random bodied likeness, not the muse it picked; Lovesick still wins over
-		/// Confused. The muse is Mehmet, a unique the dynamic-encounter pool cannot draw, so
-		/// "not the muse" can't pass or fail by luck. Run by hand (not in tfbatch); grants the
+		/// Confused. The muse is a farm goat, which base excludes from dynamic encounters (so the
+		/// confused pool cannot draw it), so "not the muse" can't pass or fail by luck. Run by hand (not in tfbatch); grants the
 		/// mutation for the run if missing, and a live statue of yours is swapped out.</summary>
+		private const string CONFUSED_MUSE_BP = "Farm Goat";
+
 		[WishCommand(Command = "tfconfused")]
 		public static void ConfusedShape()
 		{
@@ -542,6 +544,12 @@ namespace Cleo.TerraFirma.Scripts
 			if (ply.HasEffect<XRL.World.Effects.Confused>() || ply.HasEffect<XRL.World.Effects.Lovesick>())
 			{
 				Report("shape.confused", false, "SETUP FAIL - you are already Confused or Lovesick; wait it out and rerun");
+				return;
+			}
+			GameObjectBlueprint museModel = GameObjectFactory.Factory.GetBlueprintIfExists(CONFUSED_MUSE_BP);
+			if (museModel == null || Qud.API.EncountersAPI.IsEligibleForDynamicEncounters(museModel))
+			{
+				Report("shape.confused", false, $"SETUP FAIL - {CONFUSED_MUSE_BP} is missing or drawable by the confused pool");
 				return;
 			}
 			List<Cell> open = OpenAround(origin, 2);
@@ -577,19 +585,20 @@ namespace Cleo.TerraFirma.Scripts
 				ply.ApplyEffect(confused);
 				if (!ply.HasEffect<XRL.World.Effects.Confused>()) { Report("shape.confused", false, "SETUP FAIL - Confused would not apply"); return; }
 
-				GameObject statue = ShapeCarve(ply, shaper, "Mehmet", open[0]);
+				GameObject statue = ShapeCarve(ply, shaper, CONFUSED_MUSE_BP, open[0]);
 				string carved = statue?.GetPart<RandomStatue>()?.BaseBlueprint;
 				GameObject likeness = carved == null ? null : GameObject.CreateSample(carved);
 				bool bodied = likeness?.Body != null;
 				likeness?.Obliterate();
-				Report("shape.confused", statue != null && carved != null && carved != "Mehmet" && bodied,
+				Report("shape.confused", statue != null && carved != null && carved != CONFUSED_MUSE_BP && bodied,
 					statue == null ? "the confused carve FAILED (no statue)"
-					: $"confused shaper picked Mehmet and carved {carved ?? "NOTHING RECORDED"} ({(carved == "Mehmet" ? "THE PICKED MUSE" : "a random likeness")}, {(bodied ? "bodied" : "NO BODY")}); the reveal popup is still the placeholder");
+					: $"confused shaper picked a {CONFUSED_MUSE_BP} and carved {carved ?? "NOTHING RECORDED"} ({(carved == CONFUSED_MUSE_BP ? "THE PICKED MUSE" : "a random likeness")}, {(bodied ? "bodied" : "NO BODY")}); the reveal popup is still the placeholder");
 
 				beauty = Spawn(BABOON_BP);
 				lovesick = new XRL.World.Effects.Lovesick(30, beauty);
 				ply.ApplyEffect(lovesick);
-				GameObject smitten = ShapeCarve(ply, shaper, "Mehmet", open[1]);
+				if (!ply.HasEffect<XRL.World.Effects.Lovesick>()) { Report("shape.confused.lovesick", false, "SETUP FAIL - Lovesick would not apply (base refuses inorganic bodies)"); return; }
+				GameObject smitten = ShapeCarve(ply, shaper, CONFUSED_MUSE_BP, open[1]);
 				string carvedLove = smitten?.GetPart<RandomStatue>()?.BaseBlueprint;
 				Report("shape.confused.lovesick", ply.HasEffect<XRL.World.Effects.Confused>() && carvedLove == BABOON_BP,
 					$"Confused and Lovesick for a {BABOON_BP}: carved {carvedLove ?? "NOTHING"} (want {BABOON_BP}, Lovesick wins)");
