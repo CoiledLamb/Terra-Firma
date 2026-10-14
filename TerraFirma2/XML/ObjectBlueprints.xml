@@ -44,7 +44,7 @@
   </object>
     <object Name="Cleo_TerraFirma_Cobblefur Cloak" Inherits="BaseCloak">
     <part Name="Armor" AV="1" DV="0" WornOn="Back" />
-    <part Name="Render" DisplayName="{{y|granitefur}} cloak" RenderString="]" Tile="Items/sw_cloak_panther.bmp" ColorString="&amp;r" DetailColor="y" /> <!-- RULED 2026-08-22: recolored base panther cloak, primary rust red, detail brown -->
+    <part Name="Render" DisplayName="{{y|granitefur}} cloak" RenderString="]" Tile="Items/sw_cloak_panther.bmp" ColorString="&amp;y" DetailColor="r" /> <!-- recolored base panther cloak; colors reversed 2026-10-14 (user), now grey with rust red detail. Bracer and gloves keep rust with grey detail. -->
     <part Name="Commerce" Value="45" /> <!-- user 2026-10-14, flat set price -->
     <part Name="Description" Short="Grit-caked flesh was carved from a dead baboon and sewn into a cloak." /> <!-- USER TEXT 2026-09-29, quartzfur echo -->
     <part Name="Physics" Weight="3" Organic="true" />

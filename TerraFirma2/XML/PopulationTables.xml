@@ -209,7 +209,7 @@
 	<population Name="Cleo_TerraFirma_Hewer Kit">
 		<group Name="Equipment" Style="pickeach">
 			<table Name="Cleo_TerraFirma_Quarrier Kit" />
-			<table Name="Cleo_TerraFirma_MiningGear" />
+			<table Name="Cleo_TerraFirma_MiningGear" Chance="60" />
 			<!-- Fissure stones, role-texture pitch 2026-08-23; count RULED same day (user: "amount
 			     should be 2-3"). The sower precedent: grenades in plain inventory get thrown by
 			     stock AI. Whoever fells the hewer inherits the unspent ones, deliberately.
@@ -237,9 +237,9 @@
 		<group Name="Equipment" Style="pickeach">
 			<table Name="Cleo_TerraFirma_Quarrier Kit" />
 			<table Name="Cleo_Stonecarver_Maquette" />
-			<!-- Headgear at a chance rather than the hewer's guarantee: the quiet one is
-			     sometimes bare-headed. Chance CLAUDE DRAFT (gear sitting 2026-08-23). -->
-			<table Name="Cleo_TerraFirma_MiningGear" Chance="65" />
+			<!-- Mining gear at a chance: the quiet one is sometimes bare-headed. 40 here and
+			     60 on the hewer (user 2026-10-14, C13; was 65 and a guarantee). -->
+			<table Name="Cleo_TerraFirma_MiningGear" Chance="40" />
 			<!-- Carver ladders replace EtchTools here too (etch-tool ruling of 2026-08-22
 			     landing as sequenced at the 08-23 gear sitting). -->
 			<table Name="Cleo_TerraFirma_Carver Knife" />
@@ -338,14 +338,14 @@
 		<group Name="Knife" Style="pickone">
 			<object Weight="15" Blueprint="Cleo_TerraFirma_Blunted Chisel" Number="1" />
 			<object Weight="75" Blueprint="Steel Utility Knife" Number="1" />
-			<object Weight="10" Blueprint="Dagger3" Number="1" />
+			<object Weight="5" Blueprint="Dagger3" Number="1" />
 		</group>
 	</population>
 	<population Name="Cleo_TerraFirma_Carver Hammer">
 		<group Name="Hammer" Style="pickone">
 			<object Weight="15" Blueprint="Cleo_TerraFirma_Splintered Mallet" Number="1" />
 			<object Weight="75" Blueprint="Steel Hammer" Number="1" />
-			<object Weight="10" Blueprint="Cudgel3" Number="1" />
+			<object Weight="5" Blueprint="Cudgel3" Number="1" />
 		</group>
 	</population>
 
