@@ -187,7 +187,7 @@ V17 text follow-up: explanatory RulesDescription removed and deployed; verify on
 
 Granitefur descriptions 2026-09-29: user text replaces the three drafts, quartzfur echo ("Grit-caked flesh was carved from a dead baboon and" woven into a bracer / sewn into a pair of gloves / sewn into a cloak). XML/text-checked and deployed to TF2 with hash matched. In-game display verification remains.
 
-Granitefur trade values 2026-10-03: user rough numbers, bracer 40, gloves 50, cloak 45 (were 50/75/60). Both builds 0 errors, text rules passed, deployed to TF2 with hash matched. In-game price check remains.
+Granitefur trade values 2026-10-14: flat 45 for all three (user; base prices every piece of a fur set alike), were 40/50/45 since 2026-10-03 and 50/75/60 before that. Comparison in [design/granitefur-value-comparison-2026-10-14.md](design/granitefur-value-comparison-2026-10-14.md). In-game price check remains.
 
 Stoneshaper disguise 2026-10-05: a disguised muse is now carved as its disguise, looks only (tile, glyph, name, description from the Disguised effect's blueprint; body plan and physique stay the real creature's). Natural weapon names still come from the real body. Both builds 0 errors, deployed with hash matched. VERIFY_WATCH line "SHAPE disguise:". In-game check remains.
 

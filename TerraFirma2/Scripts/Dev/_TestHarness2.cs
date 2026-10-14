@@ -703,8 +703,8 @@ namespace Cleo.TerraFirma.Scripts
 		{
 			(string bp, int want)[] set =
 			{
-				("Cleo_TerraFirma_Cobblefur Bracer", 40),
-				("Cleo_TerraFirma_Cobblefur Gloves", 50),
+				("Cleo_TerraFirma_Cobblefur Bracer", 45),
+				("Cleo_TerraFirma_Cobblefur Gloves", 45),
 				("Cleo_TerraFirma_Cobblefur Cloak", 45),
 			};
 			List<string> got = new List<string>();
