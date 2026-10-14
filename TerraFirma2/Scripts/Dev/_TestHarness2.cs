@@ -712,10 +712,10 @@ namespace Cleo.TerraFirma.Scripts
 			foreach (var (bp, want) in set)
 			{
 				GameObjectBlueprint model = GameObjectFactory.Factory.GetBlueprintIfExists(bp);
-				string value = model?.GetPartParameter<string>("Commerce", "Value");
-				bool ok = value == want.ToString();
+				int value = model?.GetPartParameter<int>("Commerce", "Value", -1) ?? -1;   // stored typed; a string read throws
+				bool ok = value == want;
 				pass &= ok;
-				got.Add($"{bp.Replace("Cleo_TerraFirma_", "")} {value ?? "MISSING"}{(ok ? "" : " (want " + want + ")")}");
+				got.Add($"{bp.Replace("Cleo_TerraFirma_", "")} {(value < 0 ? "MISSING" : value.ToString())}{(ok ? "" : " (want " + want + ")")}");
 			}
 			Report("patch.granitefur", pass, "Commerce values: " + string.Join(", ", got));
 		}

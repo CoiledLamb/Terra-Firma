@@ -695,7 +695,7 @@ namespace Cleo.TerraFirma.Scripts
 		private static void PatchGazeSleeper()
 		{
 			List<Cell> open = OpenAround(The.Player.CurrentCell, 2);
-			if (open.Count < 2) { Report("patch.gaze.sleeper", false, "SETUP FAIL - need two open cells within 2"); return; }
+			if (open.Count < 3) { Report("patch.gaze.sleeper", false, "SETUP FAIL - need three open cells within 2"); return; }
 			GameObject gazer = Spawn("Snapjaw", open[0]);
 			GameObject victim = Spawn("Snapjaw", open[1]);
 			var gaze = GiveGaze(gazer);
@@ -704,18 +704,21 @@ namespace Cleo.TerraFirma.Scripts
 			bool asleep = first.Duration > 0 && victim.HasEffect<XRL.World.Effects.Asleep>();
 			gaze.BeginGaze(victim);
 			bool wokeOnBegin = first.Duration <= 0;
-			if (victim.HasEffect<XRL.World.Effects.Asleep>())
-				victim.RemoveEffect<XRL.World.Effects.Asleep>();
-			var second = PutToSleep(victim);
+			gaze.CancelGaze(Silent: true);
+			// the tick half on a second sleeper (base Asleep.Apply refuses a creature that still
+			// carries the spent effect this turn); Target set straight, so BeginGaze's wake can't stand in
+			GameObject victim2 = Spawn("Snapjaw", open[2]);
+			var second = PutToSleep(victim2);
 			bool wokeOnTick = false;
 			if (second != null)
 			{
+				gaze.Target = victim2;
 				gaze.TickGaze();
 				wokeOnTick = second.Duration <= 0;
 			}
 			gaze.CancelGaze(Silent: true);
 			Report("patch.gaze.sleeper", asleep && wokeOnBegin && second != null && wokeOnTick,
-				$"sleeper {(asleep ? "asleep before the gaze" : "NOT ASLEEP (setup)")}; gaze lands: {(wokeOnBegin ? "wakes it" : "SLEEPS ON")}; put back to sleep, one gaze tick: {(second == null ? "SETUP FAIL (would not sleep again)" : wokeOnTick ? "wakes it" : "SLEEPS ON")}");
+				$"sleeper {(asleep ? "asleep before the gaze" : "NOT ASLEEP (setup)")}; gaze lands: {(wokeOnBegin ? "wakes it" : "SLEEPS ON")}; a second sleeper, one gaze tick: {(second == null ? "SETUP FAIL (would not sleep again)" : wokeOnTick ? "wakes it" : "SLEEPS ON")}");
 		}
 
 		private static bool HoldsGrudge(GameObject who, GameObject against)
