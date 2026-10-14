@@ -76,6 +76,8 @@ namespace XRL.World.Parts
 		{
 			if (Actor.DistanceTo(ParentObject) > 1)
 				return Actor.Fail("You cannot reach " + ParentObject.t() + ".");
+			if (!Actor.CanMoveExtremities(null, ShowMessage: true, Involuntary: false, AllowTelekinetic: true)) // frozen: base Engraver/Tinker gate
+				return false;
 			ChargeSink sink = ParentObject.GetPart<ChargeSink>();
 			if (sink != null && !sink.IsReady())
 				return Actor.Fail(ParentObject.Does("click", int.MaxValue, null, null, "merely") + "."); // base IActivePart unpowered line

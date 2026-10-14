@@ -120,6 +120,8 @@ namespace XRL.World.Parts
 		{
 			if (E.Command == ANIMATE_COMMAND)
 			{
+				if (E.Actor != null && !E.Actor.CheckFrozen(Telepathic: false, Telekinetic: true)) // frozen: base AnimatorSpray gate
+					return false;
 				List<GameObject> figurines = FindCarriedFigurines(E.Actor);
 				if (figurines.Count == 0)
 				{

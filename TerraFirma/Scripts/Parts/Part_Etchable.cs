@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using ConsoleLib.Console;
 using XRL.Language;
@@ -248,6 +248,8 @@ namespace XRL.World.Parts
 		private void AttemptEtch(GameObject actor)
 		{
 			if (!IsEtchableSurface())
+				return;
+			if (!actor.CanMoveExtremities(null, ShowMessage: true, Involuntary: false, AllowTelekinetic: true)) // frozen: base Engraver's gate
 				return;
 			if (actor.DistanceTo(ParentObject) > 1)
 			{

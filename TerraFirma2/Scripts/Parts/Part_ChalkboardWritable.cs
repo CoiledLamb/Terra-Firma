@@ -69,6 +69,8 @@ namespace XRL.World.Parts
 		{
 			if (E.Command == WRITE_COMMAND && E.Actor != null)
 			{
+				if (!E.Actor.CanMoveExtremities(null, ShowMessage: true, Involuntary: false, AllowTelekinetic: true)) // frozen: base Engraver gate
+					return false;
 				if (AttemptWrite(E.Actor))
 				{
 					E.RequestInterfaceExit();

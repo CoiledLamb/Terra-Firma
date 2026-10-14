@@ -54,6 +54,7 @@ namespace XRL.World.Parts
 			var millCell = ParentObject.CurrentCell;
 			if (actorCell == null || millCell == null || actorCell.ParentZone != millCell.ParentZone
 				|| Math.Abs(actorCell.X - millCell.X) > 1 || Math.Abs(actorCell.Y - millCell.Y) > 1) return false;
+			if (!E.Actor.CanMoveExtremities(null, ShowMessage: true, Involuntary: false, AllowTelekinetic: true)) return false; // frozen: base hand-action gate
 			var cap = ParentObject.GetPart<Capacitor>();
 			var oldCell = cap == null ? ParentObject.GetPart<EnergyCell>() : null;
 			int Charge() => cap?.Charge ?? oldCell.Charge;

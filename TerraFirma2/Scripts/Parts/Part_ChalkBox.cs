@@ -345,6 +345,8 @@ namespace XRL.World.Parts
 
 		private void AttemptDraw(GameObject actor)
 		{
+			if (!actor.CanMoveExtremities(null, ShowMessage: true, Involuntary: false, AllowTelekinetic: true)) // frozen: base Engraver gate
+				return;
 			if (Uses <= 0)
 			{
 				if (actor.IsPlayer())

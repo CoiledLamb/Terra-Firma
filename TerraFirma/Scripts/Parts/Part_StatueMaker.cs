@@ -1,4 +1,4 @@
-﻿using Cleo.TerraFirma.Scripts;
+using Cleo.TerraFirma.Scripts;
 using System;
 using System.Collections.Generic;
 
@@ -36,6 +36,8 @@ namespace XRL.World.Parts
 				Helpers.DebugLog($"-> invalid ({E.Command != COMMAND_ID} || {E.Actor == null} || {!E.Actor.IsPlayer()})", DEBUG_CONTEXT);
 				return base.HandleEvent(E);
 			}
+			if (!E.Actor.CanMoveExtremities("Activate", ShowMessage: true, Involuntary: false, AllowTelekinetic: true)) // frozen: base Activate gate
+				return base.HandleEvent(E);
 			if (E.Actor.OnWorldMap())
 			{
 				Helpers.DebugLog($"-> on world map", DEBUG_CONTEXT);

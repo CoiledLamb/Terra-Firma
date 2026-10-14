@@ -133,6 +133,8 @@ namespace XRL.World.Parts
 		{
 			if (E.Command == COMMAND)
 			{
+				if (E.Actor != null && !E.Actor.CanMoveExtremities(null, ShowMessage: true, Involuntary: false, AllowTelekinetic: true)) // frozen: base hand-action gate
+					return false;
 				Cell here = ParentObject.CurrentCell;
 				if (here == null)
 					return false;

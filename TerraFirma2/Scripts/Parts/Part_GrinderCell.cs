@@ -93,6 +93,8 @@ namespace XRL.World.Parts
 		{
 			if (E.Command == STOP_COMMAND && E.Actor != null && StoneChargeLeft > 0)
 			{
+				if (!E.Actor.CheckFrozen(Telepathic: false, Telekinetic: true)) // frozen: base PowerSwitch gate
+					return false;
 				int dumped = RemainingStoneWeight();
 				StoneChargeLeft = 0;
 				StoneName = null;
@@ -109,6 +111,8 @@ namespace XRL.World.Parts
 			}
 			if (E.Command == FEED_COMMAND && E.Actor != null)
 			{
+				if (!E.Actor.CanMoveExtremities(null, ShowMessage: true, Involuntary: false, AllowTelekinetic: true)) // frozen: base hand-action gate
+					return false;
 				// LOOSE INVENTORY ONLY (bugfix 2026-08-22, user repro: feeding the equipped
 				// sculpted pebble destroyed it in the thrown slot, leaving a stale reference
 				// that made EarthenBarrage's pickup re-arm bail forever at its

@@ -50,6 +50,8 @@ namespace XRL.World.Parts
 		{
 			if (!IsCarvableStone())
 				return false;
+			if (!Actor.CanMoveExtremities(null, ShowMessage: true, Involuntary: false, AllowTelekinetic: true)) // frozen: base Engraver gate
+				return false;
 			if (Actor.DistanceTo(ParentObject) > 1)
 				return Actor.Fail("You cannot reach " + ParentObject.t() + ".");
 			GameObject worn = Cleo_TerraFirma_GaslightGauntlets.FindWorn(Actor);

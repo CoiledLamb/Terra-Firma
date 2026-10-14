@@ -106,6 +106,8 @@ namespace XRL.World.Parts
 		{
 			if (E.Command == SMEAR_COMMAND && E.Actor != null)
 			{
+				if (!E.Actor.CanMoveExtremities(null, ShowMessage: true, Involuntary: false, AllowTelekinetic: true)) // frozen: base hand-action gate
+					return false;
 				string owner = ParentObject.Physics?.Owner;
 				if (!owner.IsNullOrEmpty())
 				{

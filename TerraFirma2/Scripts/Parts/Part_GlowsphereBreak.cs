@@ -65,6 +65,8 @@ namespace XRL.World.Parts
 		{
 			if (E.Command == COMMAND && E.Actor != null)
 			{
+				if (!E.Actor.CanMoveExtremities(null, ShowMessage: true, Involuntary: false, AllowTelekinetic: true)) // frozen: base hand-action gate
+					return false;
 				// destructive and irreversible; a permanent light becomes depleting fragments
 				if (E.Actor.IsPlayer()
 					&& Popup.ShowYesNo("Really break your glowsphere?") != DialogResult.Yes) // USER TEXT 2026-08-22 (capitalization normalized)
