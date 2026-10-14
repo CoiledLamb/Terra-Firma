@@ -526,6 +526,95 @@ namespace Cleo.TerraFirma.Scripts
 					o.Obliterate();
 		}
 
+		/// <summary>C11 confused carve (2026-10-14), through the CarveFrom seam: a Confused shaper
+		/// carves a random bodied likeness, not the muse it picked; Lovesick still wins over
+		/// Confused. The muse is Mehmet, a unique the dynamic-encounter pool cannot draw, so
+		/// "not the muse" can't pass or fail by luck. Run by hand (not in tfbatch); grants the
+		/// mutation for the run if missing, and a live statue of yours is swapped out.</summary>
+		[WishCommand(Command = "tfconfused")]
+		public static void ConfusedShape()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			GameObject ply = The.Player;
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+			if (ply.HasEffect<XRL.World.Effects.Confused>() || ply.HasEffect<XRL.World.Effects.Lovesick>())
+			{
+				Report("shape.confused", false, "SETUP FAIL - you are already Confused or Lovesick; wait it out and rerun");
+				return;
+			}
+			List<Cell> open = OpenAround(origin, 2);
+			if (open.Count < 2) { Report("shape.confused", false, "SETUP FAIL - need two open cells within 2 for walls"); return; }
+			Mutations mutations = ply.RequirePart<Mutations>();
+			XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper shaper = ply.GetPart<XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper>();
+			bool granted = false;
+			int savedLevel = 0, savedCooldown = 0;
+			ActivatedAbilityEntry entry = null;
+			if (shaper == null)
+			{
+				shaper = new XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper();
+				mutations.AddMutation(shaper, 1);
+				granted = true;
+			}
+			else
+			{
+				savedLevel = shaper.BaseLevel;
+				entry = ply.ActivatedAbilities?.GetAbility(shaper.ActivatedAbilityID);
+				savedCooldown = entry?.Cooldown ?? 0;
+			}
+			int savedCap = shaper.CapOverride;
+			bool suppressed = Popup.Suppress;
+			Popup.Suppress = true;
+			Cleo_TerraFirma_StoneRiseFX.HarnessMute = true;
+			XRL.World.Effects.Confused confused = new XRL.World.Effects.Confused(30, 1);
+			XRL.World.Effects.Lovesick lovesick = null;
+			GameObject beauty = null;
+			try
+			{
+				shaper.CapOverride = 1;
+				shaper.Level = 1;
+				ply.ApplyEffect(confused);
+				if (!ply.HasEffect<XRL.World.Effects.Confused>()) { Report("shape.confused", false, "SETUP FAIL - Confused would not apply"); return; }
+
+				GameObject statue = ShapeCarve(ply, shaper, "Mehmet", open[0]);
+				string carved = statue?.GetPart<RandomStatue>()?.BaseBlueprint;
+				GameObject likeness = carved == null ? null : GameObject.CreateSample(carved);
+				bool bodied = likeness?.Body != null;
+				likeness?.Obliterate();
+				Report("shape.confused", statue != null && carved != null && carved != "Mehmet" && bodied,
+					statue == null ? "the confused carve FAILED (no statue)"
+					: $"confused shaper picked Mehmet and carved {carved ?? "NOTHING RECORDED"} ({(carved == "Mehmet" ? "THE PICKED MUSE" : "a random likeness")}, {(bodied ? "bodied" : "NO BODY")}); the reveal popup is still the placeholder");
+
+				beauty = Spawn(BABOON_BP);
+				lovesick = new XRL.World.Effects.Lovesick(30, beauty);
+				ply.ApplyEffect(lovesick);
+				GameObject smitten = ShapeCarve(ply, shaper, "Mehmet", open[1]);
+				string carvedLove = smitten?.GetPart<RandomStatue>()?.BaseBlueprint;
+				Report("shape.confused.lovesick", ply.HasEffect<XRL.World.Effects.Confused>() && carvedLove == BABOON_BP,
+					$"Confused and Lovesick for a {BABOON_BP}: carved {carvedLove ?? "NOTHING"} (want {BABOON_BP}, Lovesick wins)");
+			}
+			finally
+			{
+				if (lovesick != null) ply.RemoveEffect(lovesick);
+				ply.RemoveEffect(confused);
+				if (beauty != null && GameObject.Validate(beauty)) beauty.Obliterate();
+				Cleo_TerraFirma_StoneRiseFX.HarnessMute = false;
+				Popup.Suppress = suppressed;
+				shaper.StatueLifetimeRemaining = 0;
+				if (granted)
+					mutations.RemoveMutation(shaper);
+				else
+				{
+					shaper.CapOverride = savedCap;
+					shaper.Level = savedLevel;
+					if (entry != null)
+						entry.Cooldown = savedCooldown;
+				}
+				SweepSpawns(origin.ParentZone);
+			}
+		}
+
 		/// <summary>Statue-AI diagnostic (USER REPORT 2026-08-10: statues carved from an
 		/// animated wall and from a miner stood FULLY INERT -- no move, no attack, no follow).
 		/// Static analysis cleared every suspected channel: the statue is a fresh object (no

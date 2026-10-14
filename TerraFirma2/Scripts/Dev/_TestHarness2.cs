@@ -5,6 +5,7 @@ using XRL.Messages;
 using XRL.UI;
 using XRL.Wish;
 using XRL.World;
+using XRL.World.AI.GoalHandlers;
 using XRL.World.Anatomy;
 using XRL.World.Effects;
 using XRL.World.Parts;
@@ -26,6 +27,9 @@ namespace Cleo.TerraFirma.Scripts
 	///               adjacent auto-harvest (lends you Harvestry for the run if you lack it)
 	///   tfcairn  -- topple, owner kept, the owner's people pass, restack blocked, restack
 	///   tfbatch2 -- all three, ending with one verdict line
+	///   tffrozen -- the 2026-10-14 frozen gates (TF1 and TF2 actions both; run by hand, not in
+	///               tfbatch2): each gated action refuses frozen and spends nothing, the ungated
+	///               mutations still answer frozen; ends with its own verdict line
 	/// </summary>
 	[HasWishCommand]
 	public class TestHarness2Wishes
@@ -131,6 +135,17 @@ namespace Cleo.TerraFirma.Scripts
 
 		[WishCommand(Command = "tfcairn")]
 		public static void Cairn() { if (Begin()) Run(CairnChecks); }
+
+		[WishCommand(Command = "tffrozen")]
+		public static void Frozen()
+		{
+			if (!Begin()) return;
+			Pass = 0; Fail = 0; Fails.Clear();
+			Run(FrozenChecks);
+			string verdict = Fail == 0 ? "ALL GREEN" : "FAILS: " + string.Join(", ", Fails);
+			Helpers.VerifyLog("AUTO", $"FROZEN COMPLETE: {Pass} pass / {Fail} fail -- {verdict}");
+			MessageQueue.AddPlayerMessage($"Harness frozen complete: {Pass} pass / {Fail} fail -- {verdict}", Fail == 0 ? "G" : "R");
+		}
 
 		// ---------------------------------------------------------------- gear
 
@@ -576,6 +591,390 @@ namespace Cleo.TerraFirma.Scripts
 			bool restacked = standing != null && standing.Physics?.Owner == owner && !GameObject.Validate(scatter);
 			Report("cairn.restack", localPassed && toppled && ownerKept && blocked && restacked && spent >= 900 && spent <= 1100,
 				$"owner's people {(localPassed ? "pass over it" : "TOPPLED IT")}; stranger {(toppled ? "topples it" : "DID NOT TOPPLE IT")}, scatter owner {(ownerKept ? "kept" : "LOST")}; restack with someone standing there {(blocked ? "refused" : "ALLOWED")}; restack when clear {(restacked ? "stands it back up, owner kept" : "FAILED")}, energy {spent} (want one turn, 900-1100 with the engine's jitter)");
+		}
+
+		// ---------------------------------------------------------------- frozen gates
+
+		private const string FIS_COMMAND = "Cleo_TerraFirma_CommandFissure";
+		private const string GAZE_COMMAND = "Cleo_TerraFirma_CommandGorgonsGaze";
+		private const string SHAPER_COMMAND = "Cleo_TerraFirma_CommandStoneshaper";
+		private const string CALCIFY_COMMAND = "Cleo_TerraFirma_CommandCalcify";
+		private const string BARRAGE_COMMAND = "Cleo_TerraFirma_CommandEarthenBarrage";
+		private const string STATUE_MAKER_COMMAND = "Cleo_TerraFirma_CommandActivateStatueMaker";
+		private const string MILL_FEED_COMMAND = "Cleo_TerraFirma_FeedPiezoelectricMill";
+
+		/// <summary>The frozen gates (2026-10-14, base parity). Frozen is Physics.IsFrozen
+		/// (Temperature at or below BrittleTemperature), the one thing base CheckFrozen and
+		/// CanMoveExtremities read (GameObject decompile 2026-10-14), so the rig sets the
+		/// temperature straight and puts it back. NPC-capable actions run on a frozen snapjaw
+		/// (refuses, spends nothing), then thawed on the same setup (acts), so a pass proves the
+		/// frozen gate did the refusing. Player-only actions prompt right after their gate, so
+		/// they only run frozen: a leaked gate shows as a picker opening mid-run.</summary>
+		private static void FrozenChecks()
+		{
+			Zone zone = The.Player.CurrentZone;
+			HashSet<GameObject> before = new HashSet<GameObject>(zone.GetObjects());
+			void Tidy()
+			{
+				Sweep(zone);
+				List<GameObject> fresh = new List<GameObject>();
+				foreach (GameObject o in zone.GetObjects())
+					if (!before.Contains(o) && !o.IsPlayer())
+						fresh.Add(o);
+				foreach (GameObject o in fresh)
+					o.Obliterate();   // what the thawed controls made: a cairn, a walker
+			}
+			Action[] checks = { FrozenFissure, FrozenUngated, FrozenRestack, FrozenSmear, FrozenBreak, FrozenGrinderFeed, FrozenGrinderStop, FrozenMillFeed, FrozenAnimate, FrozenPlayerActions };
+			foreach (Action check in checks)
+			{
+				try { check(); }
+				catch (Exception ex)
+				{
+					Report("frozen." + check.Method.Name, false, $"THREW {ex.GetType().Name}: {ex.Message}");
+					Helpers.VerifyLog("AUTO", ex.ToString());
+				}
+				finally { Tidy(); }
+			}
+		}
+
+		/// <summary>Freezes by temperature alone and returns the old reading for the thaw.</summary>
+		private static int Freeze(GameObject o)
+		{
+			int saved = o.Physics._Temperature;
+			o.Physics._Temperature = o.Physics.BrittleTemperature - 50;
+			return saved;
+		}
+
+		private static int EnergyOf(GameObject o) => o.Energy?.Value ?? 0;
+
+		private static bool Has(Cell c, string blueprint)
+		{
+			foreach (GameObject o in c.Objects)
+				if (o.Blueprint == blueprint)
+					return true;
+			return false;
+		}
+
+		/// <summary>A snapjaw within 2 of you, plus an open cell beside it that itself has open
+		/// neighbors (the animation table wants somewhere to put its walker).</summary>
+		private static bool NpcRig(string scenario, out GameObject npc, out Cell beside)
+		{
+			npc = null;
+			beside = null;
+			foreach (Cell c in OpenAround(The.Player.CurrentCell, 2))
+				foreach (Cell b in OpenAround(c, 1))
+					if (b != c && OpenAround(b, 1).Count >= 3)
+					{
+						npc = SturdySnapjaw(c);
+						beside = b;
+						if (npc != null)
+							return true;
+					}
+			Report("frozen." + scenario, false, "SETUP FAIL - need an open cell within 2 with open ground around it");
+			return false;
+		}
+
+		/// <summary>One NPC-capable gate. State fingerprints whatever the action would change.</summary>
+		private static void GatedByNpc(string scenario, GameObject actor, Func<string> State, Action Act)
+		{
+			int e0 = EnergyOf(actor);
+			string s0 = State();
+			int saved = Freeze(actor);
+			bool frozen = actor.IsFrozen();
+			try { Act(); }
+			finally { actor.Physics._Temperature = saved; }
+			int e1 = EnergyOf(actor);
+			string s1 = State();
+			bool refused = e1 == e0 && s1 == s0;
+			Act();
+			int e2 = EnergyOf(actor);
+			string s2 = State();
+			bool acted = e2 < e1 && s2 != s1;
+			Report("frozen." + scenario, frozen && refused && acted,
+				$"{(frozen ? "frozen" : "SETUP FAIL - would not freeze")}: {(refused ? "refused, nothing spent (" + s1 + ")" : $"ACTED (energy {e0}->{e1}; {s0} -> {s1})")}; thawed control: {(acted ? $"acts (energy -{e1 - e2}; {s2})" : $"DID NOT ACT (energy {e1}->{e2}; {s2}), so the frozen refusal proves nothing")}");
+		}
+
+		private static void FrozenRestack()
+		{
+			if (!NpcRig("restack", out GameObject npc, out Cell spot)) return;
+			GameObject scatter = Spawn("Cleo_TerraFirma_CairnToppled", spot);
+			GatedByNpc("restack", npc,
+				() => $"scatter {(GameObject.Validate(scatter) ? "down" : "gone")}, cairn {(Has(spot, "Cleo_TerraFirma_Cairn") ? "standing" : "absent")}",
+				() => InventoryActionEvent.Check(scatter, npc, scatter, Cleo_TerraFirma_CairnRestack.COMMAND));
+		}
+
+		private static void FrozenSmear()
+		{
+			if (!NpcRig("smear", out GameObject npc, out Cell spot)) return;
+			GameObject line = Spawn(Cleo_TerraFirma_ChalkBox.LINE_BLUEPRINT, spot);
+			GatedByNpc("smear", npc,
+				() => $"chalk line {(GameObject.Validate(line) ? "drawn" : "gone")}",
+				() => InventoryActionEvent.Check(line, npc, line, Cleo_TerraFirma_ChalkLine.SMEAR_COMMAND));
+		}
+
+		private static void FrozenBreak()
+		{
+			if (!NpcRig("glowsphere", out GameObject npc, out Cell _)) return;
+			GameObject sphere = GameObject.Create("Glowsphere");
+			npc.ReceiveObject(sphere);
+			GatedByNpc("glowsphere", npc,
+				() => $"glowsphere {(GameObject.Validate(sphere) ? "whole" : "broken")}, {CountCarried(npc, "Cleo_TerraFirma_GlowstoneShard")} shard(s)",
+				() => InventoryActionEvent.Check(sphere, npc, sphere, Cleo_TerraFirma_GlowsphereBreak.COMMAND));
+		}
+
+		/// <summary>A heavy stone in the snapjaw's pack: NPC feeders take the heaviest stone in
+		/// reach, so this keeps the thawed control off any boulder lying nearby.</summary>
+		private static GameObject HeavyStone(GameObject npc)
+		{
+			GameObject stone = GameObject.Create("Small Stone");
+			stone.Physics.Weight = 99;
+			npc.ReceiveObject(stone);
+			return stone;
+		}
+
+		private static void FrozenGrinderFeed()
+		{
+			if (!NpcRig("grinder.feed", out GameObject npc, out Cell _)) return;
+			GameObject cell = GameObject.Create("Cleo_TerraFirma_GrinderCell");
+			npc.ReceiveObject(cell);
+			var grinder = cell.GetPart<Cleo_TerraFirma_GrinderCell>();
+			grinder.StoneChargeLeft = 0;
+			GameObject stone = HeavyStone(npc);
+			GatedByNpc("grinder.feed", npc,
+				() => $"grind pool {grinder.StoneChargeLeft}, stone {(GameObject.Validate(stone) ? "carried" : "eaten")}",
+				() => InventoryActionEvent.Check(cell, npc, cell, Cleo_TerraFirma_GrinderCell.FEED_COMMAND));
+		}
+
+		private static void FrozenGrinderStop()
+		{
+			if (!NpcRig("grinder.stop", out GameObject npc, out Cell _)) return;
+			GameObject cell = GameObject.Create("Cleo_TerraFirma_GrinderCell");
+			npc.ReceiveObject(cell);
+			var grinder = cell.GetPart<Cleo_TerraFirma_GrinderCell>();
+			grinder.StoneChargeLeft = 500;
+			grinder.StoneName = "harness stone";
+			GatedByNpc("grinder.stop", npc,
+				() => $"grind pool {grinder.StoneChargeLeft}",
+				() => InventoryActionEvent.Check(cell, npc, cell, Cleo_TerraFirma_GrinderCell.STOP_COMMAND));
+		}
+
+		private static void FrozenMillFeed()
+		{
+			if (!NpcRig("mill.feed", out GameObject npc, out Cell spot)) return;
+			GameObject mill = Spawn("Cleo_TerraFirma_PiezoelectricMill", spot);
+			Capacitor cap = mill.GetPart<Capacitor>();
+			if (cap == null) { Report("frozen.mill.feed", false, "SETUP FAIL - the mill has no Capacitor"); return; }
+			cap.Charge = 0;
+			GameObject stone = HeavyStone(npc);
+			GatedByNpc("mill.feed", npc,
+				() => $"mill stores {cap.Charge}, stone {(GameObject.Validate(stone) ? "carried" : "eaten")}",
+				() => InventoryActionEvent.Check(mill, npc, mill, MILL_FEED_COMMAND));
+		}
+
+		private static void FrozenAnimate()
+		{
+			if (!NpcRig("animate", out GameObject npc, out Cell spot)) return;
+			GameObject table = Spawn("Cleo_TerraFirma_AnimationTable", spot);
+			Capacitor cap = table.GetPart<Capacitor>();
+			if (cap == null) { Report("frozen.animate", false, "SETUP FAIL - the table has no Capacitor"); return; }
+			cap.Charge = cap.MaxCharge;
+			GameObject figurine = GameObject.Create("Random Copper Figurine");
+			npc.ReceiveObject(figurine);
+			GatedByNpc("animate", npc,
+				() => $"table charge {cap.Charge}, figurine {(GameObject.Validate(figurine) ? "carried" : "animated")}",
+				() => InventoryActionEvent.Check(table, npc, table, Cleo_TerraFirma_AnimationTablePart.ANIMATE_COMMAND));
+		}
+
+		/// <summary>Fissure: both halves of base Stinger's gate. The cast's thawed control is
+		/// skipped on purpose (a live pulse beside you would hit you and chew the walls); the
+		/// thawed advertisement is reported for context only, since the ally hold can keep it
+		/// quiet for its own reasons.</summary>
+		private static void FrozenFissure()
+		{
+			Cell c = null;
+			foreach (Cell x in OpenAround(The.Player.CurrentCell, 1))
+			{
+				c = x;
+				break;
+			}
+			if (c == null) { Report("frozen.fissure", false, "SETUP FAIL - need an open cell beside you"); return; }
+			GameObject npc = SturdySnapjaw(c);   // adjacent: distance 1 skips the fringe coin flip
+			var fissure = new Cleo_TerraFirma_Fissure();
+			npc.RequirePart<Mutations>().AddMutation(fissure, 1);
+			ActivatedAbilityEntry entry = npc.ActivatedAbilities?.GetAbility(fissure.ActivatedAbilityID);
+			bool ready = entry != null && entry.Cooldown <= 0 && npc.IsActivatedAbilityAIUsable(fissure.ActivatedAbilityID);
+			bool Advertised()
+			{
+				foreach (AICommandList a in AIGetOffensiveAbilityListEvent.GetFor(npc, The.Player, 1))
+					if (a.Command == FIS_COMMAND)
+						return true;
+				return false;
+			}
+			int e0 = EnergyOf(npc);
+			int saved = Freeze(npc);
+			bool frozen = npc.IsFrozen();
+			bool adFrozen, cooled;
+			try
+			{
+				adFrozen = Advertised();
+				CommandEvent.Send(npc, FIS_COMMAND);
+				cooled = entry != null && entry.Cooldown > 0;
+			}
+			finally { npc.Physics._Temperature = saved; }
+			int e1 = EnergyOf(npc);
+			bool adThawed = Advertised();
+			Report("frozen.fissure", ready && frozen && !adFrozen && e1 == e0 && !cooled,
+				$"{(ready ? "ability ready" : "SETUP FAIL - ability not ready")}, {(frozen ? "frozen" : "WOULD NOT FREEZE")}: advertisement {(adFrozen ? "OFFERED" : "withheld")}; cast {(e1 == e0 && !cooled ? "refused, no energy or cooldown" : $"SPENT (energy {e0}->{e1}, cooldown {entry?.Cooldown})")}; thawed it {(adThawed ? "advertises again" : "still holds (ally/importance hold, see the FIS log line)")}; thawed cast not run (the pulse would hit you)");
+		}
+
+		/// <summary>Base parity for the ungated mutations: a frozen caster still answers the way
+		/// a thawed one does (Gaze and Stoneshaper offensive, Calcify defensive, Barrage's toggle).
+		/// Geomancy has no command or advertisement to gate, so it is logged, not asserted.</summary>
+		private static void FrozenUngated()
+		{
+			List<Cell> open = OpenAround(The.Player.CurrentCell, 1);
+			if (open.Count < 2) { Report("frozen.ungated", false, "SETUP FAIL - need two open cells beside you"); return; }
+			GameObject npc = SturdySnapjaw(open[0]);
+			Spawn("Sandstone", open[1]);   // natural stone in reach for the shaper's wall finder
+			Mutations m = npc.RequirePart<Mutations>();
+			var gaze = new Cleo_TerraFirma_GorgonsGaze();
+			var shaper = new Cleo_TerraFirma_Stoneshaper();
+			var calcify = new Cleo_TerraFirma_Calcify();
+			var barrage = new Cleo_TerraFirma_EarthenBarrage();
+			m.AddMutation(gaze, 1);
+			m.AddMutation(shaper, 1);
+			m.AddMutation(calcify, 1);
+			m.AddMutation(barrage, 1);
+			GameObject target = The.Player;
+			int dist = npc.DistanceTo(target);
+			bool Lists(List<AICommandList> list, string command)
+			{
+				foreach (AICommandList a in list)
+					if (a.Command == command)
+						return true;
+				return false;
+			}
+			bool[] Answers() => new[]
+			{
+				Lists(AIGetOffensiveAbilityListEvent.GetFor(npc, target, dist), GAZE_COMMAND),
+				Lists(AIGetOffensiveAbilityListEvent.GetFor(npc, target, dist), SHAPER_COMMAND),
+				Lists(AIGetDefensiveAbilityListEvent.GetFor(npc, target, dist), CALCIFY_COMMAND),
+			};
+			bool[] warm = Answers();
+			ActivatedAbilityEntry toggle = npc.ActivatedAbilities?.GetAbility(barrage.ActivatedAbilityID);
+			bool toggleBefore = toggle?.ToggleState ?? false;
+			int saved = Freeze(npc);
+			bool frozen = npc.IsFrozen();
+			bool[] cold;
+			bool toggleAfter;
+			try
+			{
+				cold = Answers();
+				CommandEvent.Send(npc, BARRAGE_COMMAND);
+				toggleAfter = toggle?.ToggleState ?? toggleBefore;
+			}
+			finally { npc.Physics._Temperature = saved; }
+			string[] names = { "gaze", "stoneshaper", "calcify" };
+			for (int i = 0; i < names.Length; i++)
+				Report("frozen.ungated." + names[i], frozen && warm[i] && cold[i],
+					!warm[i] ? "SETUP FAIL - no advertisement even thawed, so parity is unproven here"
+					: $"thawed advertises; frozen {(cold[i] ? "still advertises (base parity)" : "WITHHELD (a gate crept in)")}");
+			Report("frozen.ungated.barrage", frozen && toggle != null && toggleAfter != toggleBefore,
+				toggle == null ? "SETUP FAIL - no Earthen Barrage toggle" : $"frozen toggle {(toggleAfter != toggleBefore ? "flips (base parity)" : "DID NOT FLIP")}");
+			Helpers.VerifyLog("AUTO", "SCENARIO frozen.ungated.geomancy: INFO - passive, no command or advertisement to gate; nothing asserted");
+		}
+
+		/// <summary>The player-only verbs, all frozen at once: Etch, statue-maker Activate, lathe
+		/// Carve, gauntlet Carve, chalkboard Write, chalk Draw. Each prompts right after its gate,
+		/// so there is no thawed control; a picker opening during the run means a gate leaked.
+		/// The kit is lent and taken back; your hands are borrowed for the gauntlets.</summary>
+		private static void FrozenPlayerActions()
+		{
+			GameObject ply = The.Player;
+			if (ply.HasPart<Telekinesis>())
+			{
+				Helpers.VerifyLog("AUTO", "SCENARIO frozen.player: SKIP - you have Telekinesis, which base lets through every one of these gates (AllowTelekinetic)");
+				MessageQueue.AddPlayerMessage("Harness frozen.player: SKIP - Telekinesis passes these gates in base too.", "W");
+				return;
+			}
+			List<Cell> open = OpenAround(ply.CurrentCell, 1);
+			if (open.Count < 3) { Report("frozen.player", false, "SETUP FAIL - need three open cells beside you"); return; }
+			BodyPart hands = ply.Body?.GetFirstPart("Hands");
+			if (hands == null) { Report("frozen.player", false, "SETUP FAIL - you have no Hands slot"); return; }
+			GameObject wall = Spawn("Sandstone", open[0]);
+			GameObject lathe = Spawn("Lathe", open[1]);
+			GameObject board = Spawn("Chalkboard", open[2]);
+			var etchable = wall.GetPart<Cleo_TerraFirma_Etchable>();
+			List<GameObject> kit = new List<GameObject>();
+			GameObject Lend(string blueprint)
+			{
+				GameObject o = GameObject.Create(blueprint);
+				o.SetIntProperty(SPAWN_MARK, 1);   // also keeps it from stacking into your own
+				kit.Add(o);
+				ply.ReceiveObject(o);
+				return o;
+			}
+			Lend("Cleo_TerraFirma_Blunted Chisel");
+			Lend("Cleo_TerraFirma_Splintered Mallet");
+			GameObject loop = Lend("Cleo_TerraFirma_StatueMaker");
+			GameObject nugget = Lend("Copper Nugget");
+			GameObject chalk = Lend("Cleo_TerraFirma_BoxOfChalk");
+			var box = chalk.GetPart<Cleo_TerraFirma_ChalkBox>();
+			GameObject previous = hands.Equipped;
+			if (previous != null)
+				hands.ForceUnequip(Silent: true);
+			GameObject gauntlets = ChargedGauntlets(10000);
+			gauntlets.SetIntProperty(SPAWN_MARK, 1);
+			kit.Add(gauntlets);
+			ply.ReceiveObject(gauntlets);
+			ply.ForceEquipObject(gauntlets, hands, Silent: true);
+			int ChalkLines()
+			{
+				int n = 0;
+				foreach (Cell c in ply.CurrentCell.GetLocalAdjacentCells())
+					if (Has(c, Cleo_TerraFirma_ChalkBox.LINE_BLUEPRINT))
+						n++;
+				return n;
+			}
+			void Gate(string scenario, Func<string> State, Action Act)
+			{
+				int e0 = EnergyOf(ply);
+				string s0 = State();
+				Act();
+				int e1 = EnergyOf(ply);
+				string s1 = State();
+				bool refused = e1 == e0 && s1 == s0;
+				Report("frozen." + scenario, refused,
+					refused ? $"frozen: refused, nothing spent ({s1})" : $"frozen: ACTED (energy {e0}->{e1}; {s0} -> {s1})");
+			}
+			int saved = Freeze(ply);
+			try
+			{
+				if (!ply.IsFrozen()) { Report("frozen.player", false, "SETUP FAIL - you would not freeze"); return; }
+				Gate("etch", () => $"wall inscription \"{etchable?.Inscription}\"",
+					() => InventoryActionEvent.Check(wall, ply, wall, Cleo_TerraFirma_Etchable.COMMAND));
+				Gate("statuemaker", () => $"loop {(GameObject.Validate(loop) ? "kept" : "used up")}, wall {(GameObject.Validate(wall) ? "standing" : "sculpted")}",
+					() => InventoryActionEvent.Check(loop, ply, loop, STATUE_MAKER_COMMAND));
+				Gate("lathe", () => $"nugget {(GameObject.Validate(nugget) ? "x" + nugget.Count : "gone")}",
+					() => InventoryActionEvent.Check(lathe, ply, lathe, Cleo_TerraFirma_LatheCarving.COMMAND));
+				Gate("gauntletcarve", () => $"gauntlet charge {gauntlets.QueryCharge(LiveOnly: false, 0L)}, wall {(GameObject.Validate(wall) ? "standing" : "carved")}",
+					() => InventoryActionEvent.Check(wall, ply, wall, Cleo_TerraFirma_Carvable.COMMAND));
+				Gate("chalkboard", () => $"chalk {box.Uses} use(s), board {(board.HasPart<Cleo_TerraFirma_ChalkWriting>() ? "written" : "blank")}",
+					() => InventoryActionEvent.Check(board, ply, board, Cleo_TerraFirma_ChalkboardWritable.WRITE_COMMAND));
+				Gate("chalkdraw", () => $"chalk {box.Uses} use(s), {ChalkLines()} chalk line(s) around you",
+					() => chalk.FireEvent(Event.New(Cleo_TerraFirma_ChalkBox.DRAW_COMMAND, "Actor", ply)));
+			}
+			finally
+			{
+				ply.Physics._Temperature = saved;
+				if (gauntlets.Equipped != null)
+					gauntlets.ForceUnequip(Silent: true);
+				foreach (GameObject o in kit)
+					if (GameObject.Validate(o))
+						o.Obliterate();
+				if (previous != null && GameObject.Validate(previous))
+					ply.ForceEquipObject(previous, hands, Silent: true);
+			}
 		}
 	}
 }
