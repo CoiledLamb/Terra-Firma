@@ -486,7 +486,7 @@ namespace XRL.World.Parts.Mutation
 			PlayCarveReveal(targetWallCell, refWall, statue, PlaceStatue);
 
 			if (lovesick != null && actor.IsPlayer())
-				Popup.Show($"You attempt to picture {target.the} {target.DisplayName} in your mind, but all you can think about is {lovesick.Beauty.the} {lovesick.Beauty.DisplayName}…!");
+				Popup.Show($"You attempt to picture {target.t()} in your mind, but all you can think about is {lovesick.Beauty.t()}…!");
 			if (confusedMuse != null && actor.IsPlayer())
 				Popup.Show("[PLACEHOLDER C11 reveal]"); // the reveal line is the user's, still unwritten
 			XDidYToZ(actor, $"create a sculpture of", creature, EndMark: "!", ColorAsGoodFor: actor, Source: actor);
