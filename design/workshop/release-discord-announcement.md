@@ -14,4 +14,4 @@ new behaviors: etching, carving, writing with chalk, breaking glowspheres.
 
 and more! your feedback is always appreciated, and welcomed, @ coiledlamb on discord. thanks so much for trying out my mod, and thanks to the many collaborators and beta testers for part one!
 
-credits: cleo (concept), ceres (code), ontoclasm (mutation sprites), billy checkers (other sprites), and underdoug (warren procgen assistance). also thanks to our beta testers: birdy, euclid, wrbrgrgl, lyra sieradzka, wyvy willow, bucklerparry, and umbral!
+credits: cleo (concept), ceres (code), ontoclasm (mutation sprites), billy checkers (other sprites), and underdoug (warren procgen assistance). also thanks to our beta testers: birdy, bucklerparry, euclid, lyra sieradzka, reverie, umbral, wrbrgrgl, and wyvy willow!
