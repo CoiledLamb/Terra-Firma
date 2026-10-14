@@ -176,7 +176,7 @@ namespace XRL.World.Parts.Mutation
 				if (victim.HasEffect<Cleo_TerraFirma_Petrifying>())
 				{
 					if (E.Actor.IsPlayer())
-						Popup.ShowFail($"{victim.T()} is already being petrified! Wait your turn!");
+						Popup.ShowFail($"{victim.T()}{victim.Is} already being petrified! Wait your turn!");
 					return false;
 				}
 				// THE HOLOGRAPHIC-SHALE LOCKOUT (user major-bug report 2026-08-07): the picker's
@@ -270,7 +270,7 @@ namespace XRL.World.Parts.Mutation
 			}
 			if (ParentObject.CurrentZone != Target.CurrentZone)
 			{
-				CancelGaze($"{Target.T()} exits the reach of your unblinking gaze, breaking its hold.");
+				CancelGaze($"{Target.T()}{Target.GetVerb("exit")} the reach of your unblinking gaze, breaking its hold.");
 				return;
 			}
 			// stunned/confused/asleep/paralyzed caster breaks the channel -- the 2026-07-24
@@ -313,7 +313,7 @@ namespace XRL.World.Parts.Mutation
 				if (CurSuccessfulSaves >= SUCCESSES_TO_BREAK)
 				{
 					Helpers.VerifyLog("GAZE", $"3rd success: gaze BROKEN by {Target.Blueprint}{(CurFailedSaves >= STONE_MARK_MIN_FAILS ? " (stone-mark eligible at " + CurFailedSaves + " fails)" : "")}");
-					CancelGaze($"{Target.T()} shakes off your unblinking gaze entirely, breaking its hold!");
+					CancelGaze($"{Target.T()}{Target.GetVerb("shake")} off your unblinking gaze entirely, breaking its hold!");
 					return;
 				}
 				Target.PlayWorldSound("Sounds/Damage/sfx_damage_stone", 1f, Combat: true);

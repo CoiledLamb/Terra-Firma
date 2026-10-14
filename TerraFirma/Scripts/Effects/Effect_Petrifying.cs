@@ -159,7 +159,7 @@ namespace XRL.World.Effects
 				{
 					if (!E.HasFlag("Forced") && E.GetStringParameter("Type") != "Teleporting" && !Object.IsTryingToJoinPartyLeader())
 					{
-						AddPlayerMessage(STUCK_MESSAGE);
+						if (Object.IsPlayer()) AddPlayerMessage(STUCK_MESSAGE);
 						Object.UseEnergy(1000);
 						return false;
 					}

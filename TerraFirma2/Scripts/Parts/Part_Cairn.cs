@@ -76,7 +76,7 @@ namespace XRL.World.Parts
 				if (!string.IsNullOrEmpty(owner) && toppled.Physics != null)
 					toppled.Physics.Owner = owner;   // the scatter is still theirs
 				if (Visible())
-					XDidY(stepper, "topple", ParentObject.the + ParentObject.ShortDisplayName, "!", ColorAsBadFor: stepper);   // draft, approved 2026-09-30
+					XDidY(stepper, "topple", ParentObject.t(), "!", ColorAsBadFor: stepper);   // draft, approved 2026-09-30
 				ParentObject.PlayWorldSound(ToppleSound, 1f);
 				if (!string.IsNullOrEmpty(owner))
 					ParentObject.Physics?.BroadcastForHelp(stepper);   // the hostile act, engine's own trespass channel

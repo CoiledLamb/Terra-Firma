@@ -357,13 +357,13 @@ namespace XRL.World.Parts.Mutation
 			}
 			if (refWall.HasTag("Cleo_TerraFirma_NoStoneshape"))
 			{
-				E.Actor.Fail($"No matter how hard you try, {refWall.DisplayName} refuses to be sculpted.");
+				E.Actor.Fail($"No matter how hard you try, {refWall.t()} refuses to be sculpted.");
 				goto wallSelection;
 			}
 			Cleo_TerraFirma_StoneshaperWallProperties wallProps = refWall.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>();
 			if (wallProps == null)
 			{
-				E.Actor.Fail($"No matter how hard you try, {refWall.DisplayName} refuses to be sculpted.");
+				E.Actor.Fail($"No matter how hard you try, {refWall.t()} refuses to be sculpted.");
 				goto wallSelection;
 			}
 			bool isStoneWall = wallProps.MaterialType == "stone";
