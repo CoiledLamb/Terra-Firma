@@ -624,6 +624,331 @@ namespace Cleo.TerraFirma.Scripts
 			}
 		}
 
+		// ---------------------------------------------------------------- patch battery (0.2.5/0.2.6, synchronous)
+
+		/// <summary>The shipped-but-unseen 0.2.5 fixes that live in TF1 (2026-10-14): gaze wakes a
+		/// sleeper, no party grudge, Precognition undoes the statue, NPC geomancer reveals nothing,
+		/// D11 Fissure hold-fire, Stoneshaper carries surface writing and carves a disguise. Each
+		/// check has a control where one exists. Ends with one PATCH COMPLETE line. TF2's half is
+		/// tfpatch2.</summary>
+		[WishCommand(Command = "tfpatch")]
+		public static void Patch()
+		{
+			if (!Helpers.VERIFY_WATCH) { Help(); return; }
+			GameObject ply = The.Player;
+			Cell origin = ply?.CurrentCell;
+			if (origin == null)
+				return;
+			BatchPass = 0;
+			BatchFail = 0;
+			BatchFails.Clear();
+			BatchActive = true;
+			bool suppressed = Popup.Suppress;
+			Popup.Suppress = true;
+			Cleo_TerraFirma_StoneRiseFX.HarnessMute = true;
+			Action[] checks = { PatchGazeSleeper, PatchGazeParty, PatchGazePrecognition, PatchGeomancerGate, PatchFissureHold, PatchShapeWriting, PatchShapeDisguise };
+			try
+			{
+				foreach (Action check in checks)
+				{
+					try { check(); }
+					catch (Exception ex)
+					{
+						Report("patch." + check.Method.Name, false, $"THREW {ex.GetType().Name}: {ex.Message}");
+						Helpers.VerifyLog("AUTO", ex.ToString());
+					}
+					finally { SweepSpawns(origin.ParentZone); }
+				}
+			}
+			finally
+			{
+				Cleo_TerraFirma_StoneRiseFX.HarnessMute = false;
+				Popup.Suppress = suppressed;
+				BatchActive = false;
+			}
+			string verdict = BatchFail == 0 ? "ALL GREEN" : "FAILS: " + string.Join(", ", BatchFails);
+			Helpers.VerifyLog("AUTO", $"PATCH COMPLETE: {BatchPass} pass / {BatchFail} fail -- {verdict}");
+			MessageQueue.AddPlayerMessage($"Harness patch complete: {BatchPass} pass / {BatchFail} fail -- {verdict}", BatchFail == 0 ? "G" : "R");
+		}
+
+		private static XRL.World.Parts.Mutation.Cleo_TerraFirma_GorgonsGaze GiveGaze(GameObject who)
+		{
+			var gaze = new XRL.World.Parts.Mutation.Cleo_TerraFirma_GorgonsGaze();
+			who.RequirePart<Mutations>().AddMutation(gaze, 1);
+			return gaze;
+		}
+
+		/// <summary>Base Asleep ignores WakeUp on the turn it began (TurnWentToSleep, private), and
+		/// a harness runs inside one turn, so the rig backdates it a turn.</summary>
+		private static XRL.World.Effects.Asleep PutToSleep(GameObject who)
+		{
+			var sleep = new XRL.World.Effects.Asleep(100);
+			if (!who.ApplyEffect(sleep))
+				return null;
+			var turn = typeof(XRL.World.Effects.Asleep).GetField("TurnWentToSleep", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+			if (turn == null)
+				return null;
+			turn.SetValue(sleep, The.Game.Turns - 1);
+			return sleep;
+		}
+
+		private static void PatchGazeSleeper()
+		{
+			List<Cell> open = OpenAround(The.Player.CurrentCell, 2);
+			if (open.Count < 2) { Report("patch.gaze.sleeper", false, "SETUP FAIL - need two open cells within 2"); return; }
+			GameObject gazer = Spawn("Snapjaw", open[0]);
+			GameObject victim = Spawn("Snapjaw", open[1]);
+			var gaze = GiveGaze(gazer);
+			var first = PutToSleep(victim);
+			if (first == null) { Report("patch.gaze.sleeper", false, "SETUP FAIL - could not put the Snapjaw to sleep (or Asleep.TurnWentToSleep moved)"); return; }
+			bool asleep = first.Duration > 0 && victim.HasEffect<XRL.World.Effects.Asleep>();
+			gaze.BeginGaze(victim);
+			bool wokeOnBegin = first.Duration <= 0;
+			if (victim.HasEffect<XRL.World.Effects.Asleep>())
+				victim.RemoveEffect<XRL.World.Effects.Asleep>();
+			var second = PutToSleep(victim);
+			bool wokeOnTick = false;
+			if (second != null)
+			{
+				gaze.TickGaze();
+				wokeOnTick = second.Duration <= 0;
+			}
+			gaze.CancelGaze(Silent: true);
+			Report("patch.gaze.sleeper", asleep && wokeOnBegin && second != null && wokeOnTick,
+				$"sleeper {(asleep ? "asleep before the gaze" : "NOT ASLEEP (setup)")}; gaze lands: {(wokeOnBegin ? "wakes it" : "SLEEPS ON")}; put back to sleep, one gaze tick: {(second == null ? "SETUP FAIL (would not sleep again)" : wokeOnTick ? "wakes it" : "SLEEPS ON")}");
+		}
+
+		private static bool HoldsGrudge(GameObject who, GameObject against)
+		{
+			if (who.Brain == null || !who.Brain.TryGetOpinions(against, out var opinions) || opinions == null)
+				return false;
+			foreach (var o in opinions)
+				if (o is XRL.World.AI.OpinionAttack)
+					return true;
+			return false;
+		}
+
+		private static void PatchGazeParty()
+		{
+			List<Cell> open = OpenAround(The.Player.CurrentCell, 2);
+			if (open.Count < 3) { Report("patch.gaze.party", false, "SETUP FAIL - need three open cells within 2"); return; }
+			GameObject gazer = Spawn("Snapjaw", open[0]);
+			GameObject member = Spawn("Snapjaw", open[1]);
+			GameObject stranger = Spawn("Snapjaw", open[2]);
+			var gaze = GiveGaze(gazer);
+			member.Brain.PartyLeader = gazer;
+			bool inParty = member.InSamePartyAs(gazer) && !stranger.InSamePartyAs(gazer);
+			gaze.BeginGaze(member);
+			gaze.TickGaze();
+			bool memberGrudge = HoldsGrudge(member, gazer);
+			gaze.CancelGaze(Silent: true);
+			gaze.BeginGaze(stranger);
+			gaze.TickGaze();
+			bool strangerGrudge = HoldsGrudge(stranger, gazer);
+			gaze.CancelGaze(Silent: true);
+			Report("patch.gaze.party", inParty && !memberGrudge && strangerGrudge,
+				!inParty ? "SETUP FAIL - the party link did not take"
+				: $"gazed party member: {(memberGrudge ? "HOLDS A GRUDGE" : "no grudge")}; gazed stranger (control): {(strangerGrudge ? "holds a grudge" : "NO GRUDGE, so the party pass proves nothing")}");
+		}
+
+		private static void PatchGazePrecognition()
+		{
+			List<Cell> open = OpenAround(The.Player.CurrentCell, 2);
+			if (open.Count < 3) { Report("patch.gaze.precognition", false, "SETUP FAIL - need three open cells within 2"); return; }
+			Zone zone = The.Player.CurrentZone;
+			GameObject gazer = Spawn("Snapjaw", open[0]);
+			GameObject seer = Spawn("Snapjaw", open[1]);
+			GameObject plain = Spawn("Snapjaw", open[2]);
+			var precog = new XRL.World.Parts.Mutation.Precognition();
+			seer.RequirePart<Mutations>().AddMutation(precog, 1);
+			// a vision in progress: base OnBeforeDie only saves an NPC with turns left on it
+			precog.TurnsLeft = 10;
+			precog.HitpointsAtSave = seer.hitpoints;
+			precog.RealityDistortionBased = false;
+			int Statues(Cell c)
+			{
+				int n = 0;
+				foreach (GameObject o in c.Objects)
+					if (o.HasPart<RandomStatue>() || o.Blueprint.Contains("Statue"))
+						n++;
+				return n;
+			}
+			Cell seerCell = seer.CurrentCell, plainCell = plain.CurrentCell;
+			seer.ApplyEffect(new XRL.World.Effects.Cleo_TerraFirma_Petrifying(gazer));
+			bool seerPetrified = XRL.World.Parts.Mutation.Cleo_TerraFirma_GorgonsGaze.Petrify(gazer, seer);
+			bool seerLives = GameObject.Validate(seer) && !seer.IsInGraveyard() && seer.CurrentCell == seerCell;
+			bool seerClear = !seer.HasEffect<XRL.World.Effects.Cleo_TerraFirma_Petrifying>();
+			int seerStatues = Statues(seerCell);
+			plain.ApplyEffect(new XRL.World.Effects.Cleo_TerraFirma_Petrifying(gazer));
+			bool plainPetrified = XRL.World.Parts.Mutation.Cleo_TerraFirma_GorgonsGaze.Petrify(gazer, plain);
+			int plainStatues = Statues(plainCell);
+			foreach (GameObject o in plainCell.Objects)
+				o.SetIntProperty(SPAWN_MARK, 1);
+			Report("patch.gaze.precognition", !seerPetrified && seerLives && seerClear && seerStatues == 0 && plainPetrified && plainStatues == 1,
+				$"Precognition NPC at the 10th fail: {(seerPetrified ? "PETRIFIED (death not prevented)" : "death prevented")}, {(seerLives ? "still standing" : "GONE")}, petrifying {(seerClear ? "removed" : "STILL ON IT")}, {seerStatues} statue(s) left (want 0); plain Snapjaw control: {(plainPetrified ? "petrified" : "NOT PETRIFIED")}, {plainStatues} statue(s) (want 1)");
+		}
+
+		private static void PatchGeomancerGate()
+		{
+			GameObject ply = The.Player;
+			List<Cell> open = OpenAround(ply.CurrentCell, 2);
+			if (open.Count < 2) { Report("patch.geomancy.npc", false, "SETUP FAIL - need two open cells within 2"); return; }
+			GameObject npc = Spawn("Snapjaw", open[0]);
+			var npcGeo = new XRL.World.Parts.Mutation.Cleo_TerraFirma_Geomancy();
+			npc.RequirePart<Mutations>().AddMutation(npcGeo, 1);
+			GameObject stone = Spawn("Small Stone", open[1]);
+			npcGeo.OnStoneThrown(stone);
+			int npcCells = npcGeo.Cells.Count;
+			// control: the same landed stone, credited to you, does reveal
+			var plyGeo = ply.GetPart<XRL.World.Parts.Mutation.Cleo_TerraFirma_Geomancy>();
+			bool lent = false;
+			if (plyGeo == null)
+			{
+				plyGeo = new XRL.World.Parts.Mutation.Cleo_TerraFirma_Geomancy();
+				ply.RequirePart<Mutations>().AddMutation(plyGeo, 1);
+				lent = true;
+			}
+			int before = plyGeo.Cells.Count;
+			int plyCells = 0;
+			try
+			{
+				plyGeo.OnStoneThrown(stone);
+				plyCells = plyGeo.Cells.Count - before;
+			}
+			finally
+			{
+				if (plyGeo.Cells.Count > before)
+					plyGeo.Cells.RemoveRange(before, plyGeo.Cells.Count - before);   // no stray reveal from the control
+				if (lent)
+					ply.GetPart<Mutations>().RemoveMutation(plyGeo);
+			}
+			Report("patch.geomancy.npc", npcCells == 0 && plyCells > 0,
+				$"NPC geomancer's landed stone: {npcCells} cell(s) revealed (want 0); the same stone as yours (control): {plyCells} cell(s) (want some)");
+		}
+
+		/// <summary>D11 through the real advertisement plus the private WhyHoldFire (reflection,
+		/// dev only), so each case logs its hold reason. The caster stands at least 5 from you with
+		/// no Combat object in its radius-4 square, so only what the rig places is in play.</summary>
+		private static void PatchFissureHold()
+		{
+			Cell origin = The.Player.CurrentCell;
+			Zone zone = origin.ParentZone;
+			Cell spot = null;
+			foreach (Cell c in OpenAround(origin, 10))
+			{
+				if (RedoubtCheb(c, origin) < 5 || OpenAround(c, 1).Count < 4)
+					continue;
+				bool clear = true;
+				foreach (Cell s in c.GetLocalAdjacentCells(4))
+					if (s.HasObjectWithPart("Combat") || s.HasObject(o => o.IsImportant()))
+					{
+						clear = false;
+						break;
+					}
+				if (clear)
+				{
+					spot = c;
+					break;
+				}
+			}
+			if (spot == null) { Report("patch.fissure.hold", false, "SETUP FAIL - no open cell 5-10 from you with an empty radius-4 square"); return; }
+			List<Cell> around = OpenAround(spot, 1);
+			GameObject caster = Spawn("Snapjaw", spot);
+			var fissure = new XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure();
+			caster.RequirePart<Mutations>().AddMutation(fissure, 1);
+			GameObject foe = Spawn("Snapjaw", around[0]);
+			caster.Brain.AddOpinion<XRL.World.AI.OpinionAttack>(foe, null, 5f);
+			caster.Brain.AddOpinion<XRL.World.AI.OpinionAttack>(foe, null, 5f);
+			var why = typeof(XRL.World.Parts.Mutation.Cleo_TerraFirma_Fissure).GetMethod("WhyHoldFire", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+			if (why == null) { Report("patch.fissure.hold", false, "SETUP FAIL - WhyHoldFire not found (renamed?)"); return; }
+			string Why() => (string)why.Invoke(fissure, new object[] { caster });
+			bool Ad()
+			{
+				foreach (var a in AIGetOffensiveAbilityListEvent.GetFor(caster, foe, 1))
+					if (a.Command == "Cleo_TerraFirma_CommandFissure")
+						return true;
+				return false;
+			}
+			bool hostile = caster.Brain.GetFeeling(foe) < 0;
+			string whyOpen = Why();
+			bool adOpen = Ad();
+			GameObject ally = Spawn("Snapjaw", around[1]);
+			bool friendly = caster.Brain.GetFeeling(ally) >= 0;
+			string whyAlly = Why();
+			bool adAlly = Ad();
+			ally.Obliterate();
+			GameObject relic = Spawn("Statue", around[2]);
+			relic.SetIntProperty("Important", 1);
+			string whyImportant = Why();
+			bool adImportant = Ad();
+			relic.Obliterate();
+			bool adAfter = Ad();
+			bool pass = hostile && friendly && whyOpen == null && adOpen
+				&& whyAlly != null && whyAlly.StartsWith("non-hostile") && !adAlly
+				&& whyImportant != null && whyImportant.StartsWith("important") && !adImportant && adAfter;
+			Report("patch.fissure.hold", pass,
+				!hostile || !friendly ? $"SETUP FAIL - feelings: foe {caster.Brain.GetFeeling(foe)} (want < 0), ally {(friendly ? "friendly" : "hostile")}"
+				: $"open, one foe adjacent: {(adOpen ? "advertises" : "HOLDS (" + (whyOpen ?? "coin or gate") + ")")}; a friendly Snapjaw within 4: {(adAlly ? "STILL ADVERTISES" : "holds (" + whyAlly + ")")}; an Important statue in the ring: {(adImportant ? "STILL ADVERTISES" : "holds (" + whyImportant + ")")}; cleared again: {(adAfter ? "advertises" : "STILL HOLDS")}");
+		}
+
+		private static void PatchShapeWriting()
+		{
+			Cell open = null;
+			foreach (Cell c in OpenAround(The.Player.CurrentCell, 2))
+			{
+				open = c;
+				break;
+			}
+			if (open == null) { Report("patch.shape.writing", false, "SETUP FAIL - need an open cell within 2"); return; }
+			GameObject wall = GameObject.Create("Sandstone");
+			var props = wall.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>();
+			wall.RequirePart<Graffitied>().Text = "HARNESS SPRAY";
+			wall.RequirePart<Cleo_TerraFirma_Etchable>().Inscription = "harness etch";
+			GameObject plainWall = GameObject.Create("Sandstone");
+			GameObject muse = GameObject.Create("Snapjaw");
+			GameObject statue = XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper.MakeStatueOfCreatureFromWall(muse, wall, "fine", props);
+			GameObject plain = XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper.MakeStatueOfCreatureFromWall(muse, plainWall, "fine", props);
+			if (statue == null || plain == null) { Report("patch.shape.writing", false, "SETUP FAIL - a statue came back null"); return; }
+			string Spray(GameObject o) => o.GetPart<Graffitied>()?.Text;
+			string Etch(GameObject o) => o.GetPart<Cleo_TerraFirma_Etchable>()?.Inscription;
+			bool carved = Spray(statue) == "HARNESS SPRAY" && Etch(statue) == "harness etch";
+			bool plainClean = plain.GetPart<Graffitied>() == null && string.IsNullOrEmpty(Etch(plain));
+			// the inert copy on expiry
+			statue.SetIntProperty(SPAWN_MARK, 1);
+			open.AddObject(statue);
+			XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper.DeanimateStatue(statue);
+			GameObject inert = null;
+			foreach (GameObject o in open.Objects)
+				if (o.Blueprint == "Cleo_TerraFirma_StoneshaperStatue")
+					inert = o;
+			inert?.SetIntProperty(SPAWN_MARK, 1);
+			bool inertKept = inert != null && Spray(inert) == "HARNESS SPRAY" && Etch(inert) == "harness etch";
+			Report("patch.shape.writing", carved && plainClean && inertKept,
+				$"statue from a sprayed and etched wall: graffiti \"{Spray(statue)}\", inscription \"{Etch(statue)}\" ({(carved ? "both kept" : "LOST")}); plain wall control: {(plainClean ? "no writing" : "WRITING FROM NOWHERE")}; inert copy on expiry: {(inert == null ? "MISSING" : inertKept ? "both kept" : "LOST")}");
+			foreach (GameObject o in new[] { plain, muse, wall, plainWall })
+				if (GameObject.Validate(o)) o.Obliterate();
+		}
+
+		private static void PatchShapeDisguise()
+		{
+			GameObject wall = GameObject.Create("Sandstone");
+			var props = wall.GetPart<Cleo_TerraFirma_StoneshaperWallProperties>();
+			GameObject masked = GameObject.Create("Snapjaw");
+			GameObject bare = GameObject.Create("Snapjaw");
+			bool disguised = masked.ApplyEffect(new XRL.World.Effects.Disguised("Baboon")) && masked.HasEffect<XRL.World.Effects.Disguised>();
+			GameObject maskedStatue = XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper.MakeStatueOfCreatureFromWall(masked, wall, "fine", props);
+			GameObject bareStatue = XRL.World.Parts.Mutation.Cleo_TerraFirma_Stoneshaper.MakeStatueOfCreatureFromWall(bare, wall, "fine", props);
+			string maskedName = maskedStatue?.Render.DisplayName ?? "";
+			string bareName = bareStatue?.Render.DisplayName ?? "";
+			bool showsDisguise = maskedName.Contains("baboon") && !maskedName.Contains("snapjaw");
+			bool bareShowsSelf = bareName.Contains("snapjaw");
+			Report("patch.shape.disguise", disguised && showsDisguise && bareShowsSelf,
+				!disguised ? "SETUP FAIL - Disguised (as a Baboon) would not apply to a Snapjaw"
+				: $"disguised Snapjaw carves as \"{maskedName}\" ({(showsDisguise ? "the disguise" : "NOT THE DISGUISE")}); undisguised control \"{bareName}\" ({(bareShowsSelf ? "itself" : "WRONG")})");
+			foreach (GameObject o in new[] { maskedStatue, bareStatue, masked, bare, wall })
+				if (o != null && GameObject.Validate(o)) o.Obliterate();
+		}
+
 		/// <summary>Statue-AI diagnostic (USER REPORT 2026-08-10: statues carved from an
 		/// animated wall and from a miner stood FULLY INERT -- no move, no attack, no follow).
 		/// Static analysis cleared every suspected channel: the statue is a fresh object (no

@@ -593,6 +593,133 @@ namespace Cleo.TerraFirma.Scripts
 				$"owner's people {(localPassed ? "pass over it" : "TOPPLED IT")}; stranger {(toppled ? "topples it" : "DID NOT TOPPLE IT")}, scatter owner {(ownerKept ? "kept" : "LOST")}; restack with someone standing there {(blocked ? "refused" : "ALLOWED")}; restack when clear {(restacked ? "stands it back up, owner kept" : "FAILED")}, energy {spent} (want one turn, 900-1100 with the engine's jitter)");
 		}
 
+		// ---------------------------------------------------------------- patch battery (0.2.5/0.2.6)
+
+		[WishCommand(Command = "tfpatch2")]
+		public static void Patch2()
+		{
+			if (!Begin()) return;
+			Pass = 0; Fail = 0; Fails.Clear();
+			Run(PatchOutriderHome);
+			Run(PatchAutoexploreGuard);
+			Run(PatchOldMillFeed);
+			Run(PatchGranitefurPrices);
+			Helpers.VerifyLog("AUTO", "SCENARIO patch.outrider.note: SKIP - the map note is stamped during a warren build (WarrenCarver.StampPatrols), which a harness cannot rerun; check a fresh warren in play");
+			string verdict = Fail == 0 ? "ALL GREEN" : "FAILS: " + string.Join(", ", Fails);
+			Helpers.VerifyLog("AUTO", $"PATCH2 COMPLETE: {Pass} pass / {Fail} fail -- {verdict}");
+			MessageQueue.AddPlayerMessage($"Harness patch2 complete: {Pass} pass / {Fail} fail -- {verdict}", Fail == 0 ? "G" : "R");
+		}
+
+		/// <summary>0.2.5's outrider guard: with Brain.StartingCell null (the reporter's state),
+		/// taking the post and walking the beat must not throw, and both leave a home point.</summary>
+		private static void PatchOutriderHome()
+		{
+			Cell origin = The.Player.CurrentCell;
+			List<Cell> open = OpenAround(origin, 3);
+			if (open.Count < 3) { Report("patch.outrider.home", false, "SETUP FAIL - need three open cells within 3"); return; }
+			GameObject outrider = Spawn("Cleo_TerraFirma_Outrider", open[0]);
+			var patrol = outrider?.GetPart<Cleo_TerraFirma_OutriderPatrol>();
+			if (patrol == null || outrider.Brain == null) { Report("patch.outrider.home", false, "SETUP FAIL - no outrider patrol part or brain"); return; }
+			patrol.Beat = $"{open[1].X},{open[1].Y};{open[2].X},{open[2].Y}";
+			patrol.Rest = $"{open[0].X},{open[0].Y}";
+			long now = The.Game.TimeTicks;
+			bool OnBeat(Cell c) => c == open[1] || c == open[2] || c == outrider.CurrentCell;
+			string takeThrew = null, walkThrew = null;
+			outrider.Brain.StartingCell = null;
+			try { patrol.TakeDuty(now); }
+			catch (Exception ex) { takeThrew = ex.GetType().Name; }
+			Cell afterTake = outrider.Brain.StartingCell?.ResolveCell();
+			outrider.Brain.StartingCell = null;
+			patrol.OnDuty = true;
+			patrol.PauseEnds = 0;
+			patrol.LegStarted = now;
+			try { patrol.HandleEvent(PooledEvent<AIBoredEvent>.FromPool()); }
+			catch (Exception ex) { walkThrew = ex.GetType().Name; }
+			Cell afterWalk = outrider.Brain.StartingCell?.ResolveCell();
+			bool pass = takeThrew == null && walkThrew == null && afterTake != null && OnBeat(afterTake) && afterWalk != null && OnBeat(afterWalk);
+			Report("patch.outrider.home", pass,
+				$"null home, take the post: {(takeThrew != null ? "THREW " + takeThrew : afterTake == null ? "no home set" : OnBeat(afterTake) ? "home on a waypoint" : "home OFF the beat")}; null home, a bored turn on the beat: {(walkThrew != null ? "THREW " + walkThrew : afterWalk == null ? "no home set" : OnBeat(afterWalk) ? "home on the beat" : "home OFF the beat")}");
+		}
+
+		/// <summary>0.2.6's autoexplore guard, asked the way autoexplore asks
+		/// (AutoexploreObjectEvent.GetAdjacentAction) with "autoget ammo" on. Control: an
+		/// untakeable energy cell with no guard is the bug's shape and does come back "Autoget".
+		/// Also an old-save mill (EnergyCell, no Capacitor) and an old-save table.</summary>
+		private static void PatchAutoexploreGuard()
+		{
+			GameObject ply = The.Player;
+			List<Cell> open = OpenAround(ply.CurrentCell, 3);
+			if (open.Count < 5) { Report("patch.autoexplore", false, "SETUP FAIL - need five open cells within 3"); return; }
+			GameObject OldSave(GameObject o)
+			{
+				o.RemovePart<Capacitor>();
+				EnergyCell cell = new EnergyCell();
+				cell.MaxCharge = 25000;
+				cell.Charge = 0;
+				o.AddPart(cell);
+				return o;
+			}
+			GameObject table = Spawn("Cleo_TerraFirma_AnimationTable", open[0]);
+			GameObject mill = Spawn("Cleo_TerraFirma_PiezoelectricMill", open[1]);
+			GameObject oldTable = OldSave(Spawn("Cleo_TerraFirma_AnimationTable", open[2]));
+			GameObject oldMill = OldSave(Spawn("Cleo_TerraFirma_PiezoelectricMill", open[3]));
+			GameObject bare = Spawn("Chem Cell", open[4]);
+			bare.Physics.Takeable = false;
+			bool saved = Options.AutogetAmmo;
+			Options.AutogetAmmo = true;
+			try
+			{
+				string Ask(GameObject o) => AutoexploreObjectEvent.GetAdjacentAction(ply, o, "?", null) ?? "nothing";
+				string t = Ask(table), m = Ask(mill), ot = Ask(oldTable), om = Ask(oldMill), b = Ask(bare);
+				bool guarded = t != "Autoget" && m != "Autoget" && ot != "Autoget" && om != "Autoget";
+				bool still = GameObject.Validate(table) && table.CurrentCell == open[0] && GameObject.Validate(mill) && mill.CurrentCell == open[1];
+				Report("patch.autoexplore", guarded && b == "Autoget" && still,
+					$"autoget ammo on; autoexplore's answer: table {t}, mill {m}, old-save table {ot}, old-save mill {om} (want no Autoget on any); unguarded untakeable energy cell (control): {b} (want Autoget)");
+			}
+			finally { Options.AutogetAmmo = saved; }
+		}
+
+		/// <summary>An old-save mill (EnergyCell, no Capacitor) still takes a fed stone: the feed
+		/// code's fallback read, driven by a snapjaw so no picker opens.</summary>
+		private static void PatchOldMillFeed()
+		{
+			if (!NpcRig("patch.oldmill", out GameObject npc, out Cell spot)) return;
+			GameObject mill = Spawn("Cleo_TerraFirma_PiezoelectricMill", spot);
+			mill.RemovePart<Capacitor>();
+			EnergyCell cell = new EnergyCell();
+			cell.MaxCharge = 25000;
+			cell.Charge = 0;
+			mill.AddPart(cell);
+			GameObject stone = HeavyStone(npc);
+			int e0 = EnergyOf(npc);
+			InventoryActionEvent.Check(mill, npc, mill, MILL_FEED_COMMAND);
+			int stored = mill.GetPart<EnergyCell>()?.Charge ?? -1;
+			bool eaten = !GameObject.Validate(stone);
+			Report("patch.oldmill", stored > 0 && eaten && EnergyOf(npc) < e0,
+				$"old-save mill fed by a snapjaw: stores {stored} in its EnergyCell, stone {(eaten ? "eaten" : "STILL CARRIED")}, energy {(EnergyOf(npc) < e0 ? "spent" : "NOT SPENT")}");
+		}
+
+		private static void PatchGranitefurPrices()
+		{
+			(string bp, int want)[] set =
+			{
+				("Cleo_TerraFirma_Cobblefur Bracer", 40),
+				("Cleo_TerraFirma_Cobblefur Gloves", 50),
+				("Cleo_TerraFirma_Cobblefur Cloak", 45),
+			};
+			List<string> got = new List<string>();
+			bool pass = true;
+			foreach (var (bp, want) in set)
+			{
+				GameObjectBlueprint model = GameObjectFactory.Factory.GetBlueprintIfExists(bp);
+				string value = model?.GetPartParameter<string>("Commerce", "Value");
+				bool ok = value == want.ToString();
+				pass &= ok;
+				got.Add($"{bp.Replace("Cleo_TerraFirma_", "")} {value ?? "MISSING"}{(ok ? "" : " (want " + want + ")")}");
+			}
+			Report("patch.granitefur", pass, "Commerce values: " + string.Join(", ", got));
+		}
+
 		// ---------------------------------------------------------------- frozen gates
 
 		private const string FIS_COMMAND = "Cleo_TerraFirma_CommandFissure";
