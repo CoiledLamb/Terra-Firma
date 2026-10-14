@@ -514,6 +514,18 @@ $wantRelease = $Mod -eq "Release"
 Strip-Mod $Mods.TF1                     # always: TF2 and the fused build compile against it
 if ($wantTF2 -or $wantFused -or $wantRelease) { Strip-Mod $Mods.TF2 }
 Compile-Check ($wantTF2 -or $wantFused -or $wantRelease)
+# placeholder guard: scans the STRIPPED trees, so only text that would ship counts (comments are
+# gone); the fused and release builds are unions of these. A real run aborts, -CheckOnly warns.
+$placeholderTrees = @(Join-Path $pubRoot $Mods.TF1.Src)
+if ($wantTF2 -or $wantFused -or $wantRelease) { $placeholderTrees += Join-Path $pubRoot $Mods.TF2.Src }
+$placeholders = foreach ($t in $placeholderTrees) {
+    Get-ChildItem $t -Recurse -File -Include *.cs, *.xml, *.json, *.txt | Select-String -SimpleMatch -CaseSensitive -Pattern '[PLACEHOLDER'
+}
+if ($placeholders) {
+    $where = $placeholders | ForEach-Object { "$($_.Path.Substring($pubRoot.Length + 1)):$($_.LineNumber): $($_.Line.Trim())" }
+    if ($CheckOnly) { $where | ForEach-Object { Write-Warning "placeholder text would ship -- $_" } }
+    else { throw "placeholder text would ship -- replace it before staging; publish aborted, nothing zipped`n$($where -join "`n")" }
+}
 if ($wantFused) { Fuse-Mods $Mods.Fused; Compile-Fused $Mods.Fused }
 if ($wantRelease) { Fuse-Mods $Mods.Release; Compile-Fused $Mods.Release }
 # no stage folder may be overwritten by a build that would misread its saves
