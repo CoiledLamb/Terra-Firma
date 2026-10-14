@@ -53,7 +53,7 @@
        (armor/reflect, L22 subterrane); gravel = stone THROWN (barrage/whorl, early canyon).
        STATS + EB LEVEL DRAFT (Hulking-grade body, EB 4 for a visible whorl), numbers
        sitting owed. Tile = recolored base baboon PLACEHOLDER, sprite debt filed.
-       Corpse: custom, CorpseChance 15 DRAFT (down from the inherited 40; he will be a
+       Corpse: custom, CorpseChance 10 (user 2026-10-14, base fur parity with the apes; was 15, from the inherited 40; he will be a
        common canyon spawn and 40% would carpet the canyon in pelts; quartz ships at 6).
        Butchery = the cobblefur family (bracer/gloves/cloak, quartzfur three-piece idiom),
        table in PopulationTables.xml. ExcludeFromDynamicEncounters = controlled debut,
@@ -67,7 +67,7 @@
     <!-- mutation nodes resolve by CLASS name, not display name (caught 2026-08-14: the display
          name loaded as a MODERROR + unnamed-node warn and the baboon spawned barrage-less) -->
     <mutation Name="Cleo_TerraFirma_EarthenBarrage" Level="2" /> <!-- RULED 2026-08-22 down from 4: 1d6+3 with per-pen rolls two-shots fresh characters and baboons troop; EB2 = 1d6+1, whorl still banks 4 stones -->
-    <part Name="Corpse" CorpseChance="15" CorpseBlueprint="Cleo_TerraFirma_Cobble Baboon Corpse" />
+    <part Name="Corpse" CorpseChance="10" CorpseBlueprint="Cleo_TerraFirma_Cobble Baboon Corpse" />
     <!-- NO ConversationScript, RULED 2026-08-16. Not an oversight and not a debt: BaseBaboon,
          Baboon and Quartz Baboon all ship without one, so baboons are unclickable in base and
          this one matches. Base does give conversations to some beasts (Reptiles, Frogs, Worms,
