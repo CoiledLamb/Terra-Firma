@@ -889,6 +889,40 @@ namespace Cleo.TerraFirma.Scripts
 			bool pass = hostile && friendly && whyOpen == null && adOpen
 				&& whyAlly != null && whyAlly.StartsWith("non-hostile") && !adAlly
 				&& whyImportant != null && whyImportant.StartsWith("important") && !adImportant && adAfter;
+			// the gate must see you (fix 2026-10-14): base weighs the player at 100 (never
+			// position-swapped), which the old IncludeWalls:false scan dropped as a wall
+			string whyYou = null;
+			bool youChecked = false;
+			Cell besideYou = null;
+			foreach (Cell c in OpenAround(origin, 1))
+			{
+				bool alone = true;
+				foreach (Cell s in c.GetLocalAdjacentCells(4))
+					if (s != origin && (s.HasObjectWithPart("Combat") || s.HasObject(o => o.IsImportant() && !o.IsPlayer())))
+					{
+						alone = false;
+						break;
+					}
+				if (alone)
+				{
+					besideYou = c;
+					break;
+				}
+			}
+			if (besideYou != null)
+			{
+				caster.DirectMoveTo(besideYou, 0, Forced: true, IgnoreCombat: true);
+				foe.Obliterate();
+				whyYou = Why();
+				youChecked = caster.CurrentCell == besideYou;
+			}
+			bool seesYou = youChecked && whyYou != "no hostile in range"
+				&& (whyYou == null ? caster.Brain.GetFeeling(The.Player) < 0 : whyYou.Contains(The.Player.Blueprint));
+			if (youChecked)
+				Report("patch.fissure.player", seesYou,
+					$"caster beside you, nothing else within 4: gate says {(whyYou == null ? "cast (you are its hostile)" : "\"" + whyYou + "\"")} ({(seesYou ? "it sees you" : "BLIND TO YOU")})");
+			else
+				Helpers.VerifyLog("AUTO", "SCENARIO patch.fissure.player: SKIP - no cell beside you with an empty radius-4 square; rerun somewhere quieter");
 			Report("patch.fissure.hold", pass,
 				!hostile || !friendly ? $"SETUP FAIL - feelings: foe {caster.Brain.GetFeeling(foe)} (want < 0), ally {(friendly ? "friendly" : "hostile")}"
 				: $"open, one foe adjacent: {(adOpen ? "advertises" : "HOLDS (" + (whyOpen ?? "coin or gate") + ")")}; a friendly Snapjaw within 4: {(adAlly ? "STILL ADVERTISES" : "holds (" + whyAlly + ")")}; an Important statue in the ring: {(adImportant ? "STILL ADVERTISES" : "holds (" + whyImportant + ")")}; cleared again: {(adAfter ? "advertises" : "STILL HOLDS")}");

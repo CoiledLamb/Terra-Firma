@@ -269,7 +269,13 @@ namespace XRL.World.Parts.Mutation
 		/// and at least one must exist. Radius 4 is the ring plus the outward push. The
 		/// important-object hold has no base precedent: anything IsImportant (quest items,
 		/// Storied, the Important tag) inside the ring radius that is not a hostile creature
-		/// keeps the caster from casting. Returns null when the cast is safe.</summary>
+		/// keeps the caster from casting. Returns null when the cast is safe.
+		/// IncludeWalls is ON (fix 2026-10-14, user: "the hewer doesn't seem to want to cast
+		/// fissure at all now"): with it off, the scan drops every cell weighing 100+ to the
+		/// caster, and base Combat.HandleEvent(GetNavigationWeightEvent) weighs any creature
+		/// that cannot be position-swapped at 100 -- always the player (GameObject.CanBePositionSwapped).
+		/// The gate never saw the player and logged "no hostile in range" point-blank. Walls are
+		/// skipped by hand instead.</summary>
 		private string WhyHoldFire(GameObject Actor)
 		{
 			if (Actor == null)
@@ -279,9 +285,9 @@ namespace XRL.World.Parts.Mutation
 			if (zone == null || Actor.Brain == null)
 				return "no cell or brain";
 			bool anyHostile = false;
-			foreach (GameObject o in zone.FastSquareVisibility(origin.X, origin.Y, RING_RADIUS + 1, "Combat", Actor, VisibleToPlayerOnly: false, IncludeWalls: false, skip: null))
+			foreach (GameObject o in zone.FastSquareVisibility(origin.X, origin.Y, RING_RADIUS + 1, "Combat", Actor, VisibleToPlayerOnly: false, IncludeWalls: true, skip: null))
 			{
-				if (o == Actor)
+				if (o == Actor || o.IsWall())
 					continue;
 				if (Actor.Brain.GetFeeling(o) >= 0)
 					return "non-hostile " + o.Blueprint + " in range";

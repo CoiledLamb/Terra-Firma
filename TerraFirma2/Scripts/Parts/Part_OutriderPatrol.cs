@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Cleo.TerraFirma.Scripts;
+using XRL.World.AI.GoalHandlers;
 
 namespace XRL.World.Parts
 {
@@ -18,6 +19,14 @@ namespace XRL.World.Parts
 	///
 	/// WarrenCarver stamps Beat, Rest and the first OnDuty at build; a blueprint spawned any
 	/// other way has an empty Beat and behaves exactly as before.
+	///
+	/// Walks are pushed here, not left to Bored (fix 2026-10-14, user: "the outrider's patrol
+	/// seems to get blocked by friendly creatures standing in the way"). Bored walks home with
+	/// MoveTo(careful: true), and a careful Step refuses any cell weighing 10 or more
+	/// (Step.TakeAction). Base Combat weighs a non-hostile creature by its goal count, or 95
+	/// once it has a target, so a colleague mid-walk or mid-fight reads as too dangerous and the
+	/// outrider stood still until LegTimeout. A non-careful MoveTo (the RockSweeper idiom) reaches
+	/// the ally position swap instead; a leg with no progress for STALL_TURNS is skipped.
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_OutriderPatrol : IPart
@@ -58,6 +67,13 @@ namespace XRL.World.Parts
 		public long LegStarted;
 		public long NextLook;
 
+		/// <summary>Bored ticks without moving before a leg is skipped. Const, not a field:
+		/// public fields serialize by position and a new one would break saved outriders.</summary>
+		private const int STALL_TURNS = 5;
+
+		private Cell StallCell;
+		private int StallTicks;
+
 		public override bool WantEvent(int ID, int cascade)
 		{
 			if (!base.WantEvent(ID, cascade))
@@ -67,17 +83,20 @@ namespace XRL.World.Parts
 
 		public override bool HandleEvent(AIBoredEvent E)
 		{
-			Tend();
+			// a pushed walk takes this tick; Bored would otherwise stack its careful MoveTo on top
+			if (Tend())
+				return false;
 			return base.HandleEvent(E);
 		}
 
-		private void Tend()
+		/// <summary>Returns true when it pushed a walk of its own.</summary>
+		private bool Tend()
 		{
 			Brain brain = ParentObject.Brain;
 			Cell here = ParentObject.CurrentCell;
 			Zone zone = here?.ParentZone;
 			if (brain == null || zone == null || string.IsNullOrEmpty(Beat) || The.Game == null)
-				return;
+				return false;
 			if (ParentObject.IsPlayerControlled() || brain.PartyLeader != null)
 			{
 				// recruited: the watch is no longer theirs to keep
@@ -87,30 +106,29 @@ namespace XRL.World.Parts
 					HeadingIn = false;
 					brain.Wanders = true;
 				}
-				return;
+				return false;
 			}
 			long now = The.Game.TimeTicks;
 			if (OnDuty)
-				WalkBeat(brain, zone, now);
-			else
-				OffShift(brain, zone, now);
+				return WalkBeat(brain, zone, now);
+			return OffShift(brain, zone, now);
 		}
 
-		private void WalkBeat(Brain brain, Zone zone, long now)
+		private bool WalkBeat(Brain brain, Zone zone, long now)
 		{
 			if (ShiftEnds == 0)
 				ShiftEnds = now + ShiftTurns.RollCached();
 			if (now >= ShiftEnds)
 			{
 				EndShift(brain, zone, now);
-				return;
+				return false;
 			}
 			List<Cell> beat = Waypoints(zone);
 			if (beat.Count == 0)
 			{
 				OnDuty = false;
 				brain.Wanders = true;
-				return;
+				return false;
 			}
 			brain.Wanders = false;
 			Leg %= beat.Count;
@@ -126,13 +144,41 @@ namespace XRL.World.Parts
 					SetHome(brain, ParentObject.CurrentCell);
 				}
 				if (now < PauseEnds)
-					return;
+					return false;
 				NextLeg(brain, beat, now);
+				return WalkTo(brain, beat[Leg]);
 			}
-			else if (now - LegStarted > LegTimeout)
+			if (now - LegStarted > LegTimeout || Stalled())
+			{
 				NextLeg(brain, beat, now);
-			else
-				SetHome(brain, target);
+				target = beat[Leg];
+			}
+			return WalkTo(brain, target);
+		}
+
+		/// <summary>Counts bored ticks spent on the same cell; true once a leg has made no
+		/// progress for STALL_TURNS of them.</summary>
+		private bool Stalled()
+		{
+			Cell here = ParentObject.CurrentCell;
+			if (here != StallCell)
+			{
+				StallCell = here;
+				StallTicks = 0;
+				return false;
+			}
+			return ++StallTicks >= STALL_TURNS;
+		}
+
+		/// <summary>Sets the home point and walks there without Bored's careful flag.
+		/// overridesCombat stays off, so a target still pulls the outrider into a fight.</summary>
+		private bool WalkTo(Brain brain, Cell target)
+		{
+			SetHome(brain, target);
+			if (target == null || ParentObject.CurrentCell == target || brain.HasGoal("MoveTo"))
+				return false;
+			brain.PushGoal(new MoveTo(target, careful: false));
+			return true;
 		}
 
 		private void NextLeg(Brain brain, List<Cell> beat, long now)
@@ -140,6 +186,8 @@ namespace XRL.World.Parts
 			Leg = (Leg + 1) % beat.Count;
 			PauseEnds = 0;
 			LegStarted = now;
+			StallCell = null;
+			StallTicks = 0;
 			SetHome(brain, beat[Leg]);
 		}
 
@@ -172,21 +220,20 @@ namespace XRL.World.Parts
 				brain.Wanders = true;
 		}
 
-		private void OffShift(Brain brain, Zone zone, long now)
+		private bool OffShift(Brain brain, Zone zone, long now)
 		{
 			if (HeadingIn)
 			{
 				Cell rest = RestCell(zone);
-				if (rest != null && ParentObject.DistanceTo(rest) > 1 && now - LegStarted <= LegTimeout)
-				{
-					SetHome(brain, rest);
-					return;
-				}
+				if (rest != null && ParentObject.DistanceTo(rest) > 1 && now - LegStarted <= LegTimeout && !Stalled())
+					return WalkTo(brain, rest);
 				HeadingIn = false;
+				StallCell = null;
+				StallTicks = 0;
 				brain.Wanders = true;
 			}
 			if (now < BreakEnds || now < NextLook)
-				return;
+				return false;
 			NextLook = now + 10;
 			// an empty post gets filled: after a break, or when the watch died or joined someone
 			if (FindColleague(zone, onDuty: true, idleOnly: false) == null)
@@ -194,6 +241,7 @@ namespace XRL.World.Parts
 				TakeDuty(now);
 				Helpers.VerifyLog("PATROL", $"{ParentObject.Blueprint} ({ParentObject.ID}) takes the empty post");
 			}
+			return false;
 		}
 
 		public void TakeDuty(long now)
@@ -203,6 +251,8 @@ namespace XRL.World.Parts
 			BreakEnds = 0;
 			PauseEnds = 0;
 			LegStarted = now;
+			StallCell = null;
+			StallTicks = 0;
 			ShiftEnds = now + ShiftTurns.RollCached();
 			Brain brain = ParentObject.Brain;
 			Zone zone = ParentObject.CurrentZone;
