@@ -206,7 +206,7 @@
 
   <object Name="Cleo_TerraFirma_Outrider" Inherits="Cleo_TerraFirma_Stonecarver">
     <part Name="Render" DisplayName="quarry {{B|outrider}}" ColorString="&amp;B" />
-    <part Name="Description" Short="=pronouns.Possessive= eyes move uncertainly from your gait to your arms. What did you come to =pronouns.possessive= quarry for, traveler? A nearby stone rises from the earth in anticipation of your answer." />
+    <part Name="Description" Short="=pronouns.Possessive= eyes move uncertainly from your gait to your arms. For what did you come to =pronouns.possessive= quarry, traveler? A nearby stone rises from the earth in anticipation of your answer." />
     <mutation Name="Cleo_TerraFirma_EarthenBarrage" Level="4" /> <!-- level DRAFT -->
     <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Outrider" /> <!-- mole outrider inherits this -->
     <tag Name="Role" Value="Artillery" /> <!-- DRAFT -->
