@@ -234,7 +234,8 @@ namespace XRL.World.Parts.Mutation
 			// ring itself), and adjacency is the damage mode (3 hits): the worth-casting gate
 			// rides the coverage radius, with fringe casts coin-flipped so the AI leans point-blank
 			// (CLAUDE PICK at port time, spec's AI note; the flip is a feel dial)
-			bool usable = IsMyActivatedAbilityAIUsable(ActivatedAbilityID);
+			// frozen: no advertising, base Stinger's AI gate (user 2026-10-14, block fissure)
+			bool usable = IsMyActivatedAbilityAIUsable(ActivatedAbilityID) && E.Actor.CanMoveExtremities("Fissure");
 			bool added = false;
 			string hold = null;
 			if (usable)
@@ -317,6 +318,9 @@ namespace XRL.World.Parts.Mutation
 				E.Actor?.Fail("You cannot do that on the world map.");
 				return false;
 			}
+			// frozen: base Stinger's gate (user 2026-10-14, block fissure); refuses before any energy or cooldown
+			if (!ParentObject.CanMoveExtremities("Fissure", ShowMessage: true))
+				return false;
 			Cell origin = ParentObject.CurrentCell;
 			Zone zone = origin?.ParentZone;
 			if (zone == null)
