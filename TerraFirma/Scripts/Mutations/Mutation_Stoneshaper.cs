@@ -191,6 +191,52 @@ namespace XRL.World.Parts.Mutation
 			return best;
 		}
 
+		// C11 dials (closed 2026-10-14): full odds within 5 levels of the shaper, halving per 5 beyond
+		private const int CONFUSED_FULL_ODDS_LEVELS = 5;
+		private const int CONFUSED_HALVING_STEP = 5;
+		private const int CONFUSED_MAX_DRAWS = 100; // Claude dial: past this, the last bodied draw is kept
+
+		/// <summary>C11: the likeness a confused shaper carves instead of its muse. Draws from the
+		/// base pool the way RandomStatue does (EncountersAPI.GetACreatureBlueprintModel, a uniform
+		/// pick over dynamic-encounter creatures; decompile 2026-10-14) and keeps a draw by level
+		/// distance to the shaper. Bodiless creatures are filtered out of every draw, which is the
+		/// reroll the spec asks for. Returns a sample object the caller must Obliterate, or null.</summary>
+		internal static GameObject PickConfusedMuse(GameObject actor)
+		{
+			int shaperLevel = actor.Stat("Level");
+			GameObjectBlueprint kept = null;
+			for (int draw = 1; draw <= CONFUSED_MAX_DRAWS; draw++)
+			{
+				GameObjectBlueprint bp = Qud.API.EncountersAPI.GetACreatureBlueprintModel(b => b.HasPart("Body"));
+				if (bp == null)
+					return null;
+				kept = bp;
+				int distance = Math.Abs(bp.BaseStat("Level", 1) - shaperLevel);
+				if (Stat.Rnd.NextDouble() < ConfusedKeepChance(distance))
+				{
+					Helpers.VerifyLog("SHAPE", $"confused carve: kept {bp.Name} (Lv{bp.BaseStat("Level", 1)} vs shaper Lv{shaperLevel}, odds {ConfusedKeepChance(distance):0.###}) on draw {draw}");
+					break;
+				}
+				if (draw == CONFUSED_MAX_DRAWS)
+					Helpers.VerifyLog("SHAPE", $"confused carve: {CONFUSED_MAX_DRAWS} draws spent, keeping the last ({bp.Name})");
+			}
+			GameObject muse = GameObject.CreateSample(kept.Name);
+			if (muse?.Body == null)
+			{
+				muse?.Obliterate();
+				return null; // the caller carves the picked muse instead
+			}
+			return muse;
+		}
+
+		internal static double ConfusedKeepChance(int LevelDistance)
+		{
+			if (LevelDistance <= CONFUSED_FULL_ODDS_LEVELS)
+				return 1.0;
+			int halvings = (LevelDistance - CONFUSED_FULL_ODDS_LEVELS + CONFUSED_HALVING_STEP - 1) / CONFUSED_HALVING_STEP;
+			return Math.Pow(0.5, halvings);
+		}
+
 		/// <summary>Nearest wall cell legally carveable from origin: the player picker's
 		/// validity checks (solid wall, no hologram/walltrap/forcefield, no refusal tag, audited
 		/// properties present, type within the level's reach), nearest-first. RequireVisible
@@ -366,14 +412,25 @@ namespace XRL.World.Parts.Mutation
 
 			Lovesick lovesick = actor.GetEffect<Lovesick>();
 			GameObject target = creature;
+			GameObject confusedMuse = null; // C11: a throwaway sample, disposed once the statue has copied it
 			if (lovesick != null)
 			{
 				creature = lovesick.Beauty; // >:)
 				if (creature == null || creature.Body == null)
 					creature = target; // the beloved can't be rendered in stone; carve what was actually asked for
 			}
-			else if (target.HasPart<Lovely>())
-				actor.ApplyEffect(new Lovesick(Stat.Random(3000, 3600), target));
+			else
+			{
+				if (target.HasPart<Lovely>())
+					actor.ApplyEffect(new Lovesick(Stat.Random(3000, 3600), target));
+				// C11 (2026-10-14): a confused shaper carves a random likeness; Lovesick wins above
+				if (actor.HasEffect<Confused>())
+				{
+					confusedMuse = PickConfusedMuse(actor);
+					if (confusedMuse != null)
+						creature = confusedMuse;
+				}
+			}
 
 			string descriptor = "rough";
 			if (Level >= 3)
@@ -392,6 +449,7 @@ namespace XRL.World.Parts.Mutation
 			{
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHAPE", $"statue creation FAILED (null) for muse {creature?.Blueprint ?? "?"}");
 				actor.Fail("The stone refuses to take shape.");
+				confusedMuse?.Obliterate();
 				return null;
 			}
 			AnimateObject.Animate(statue);
@@ -429,7 +487,10 @@ namespace XRL.World.Parts.Mutation
 
 			if (lovesick != null && actor.IsPlayer())
 				Popup.Show($"You attempt to picture {target.the} {target.DisplayName} in your mind, but all you can think about is {lovesick.Beauty.the} {lovesick.Beauty.DisplayName}…!");
+			if (confusedMuse != null && actor.IsPlayer())
+				Popup.Show("[PLACEHOLDER C11 reveal]"); // the reveal line is the user's, still unwritten
 			XDidYToZ(actor, $"create a sculpture of", creature, EndMark: "!", ColorAsGoodFor: actor, Source: actor);
+			confusedMuse?.Obliterate(); // the statue copied values only (ApplyStatueBuffs, SetCreature), nothing points back
 
 			// every carve takes the same cooldown; recasting after it swaps the living statue out
 			// (lifetime-as-cooldown display retired with the swap-down ruling, 2026-07-23)

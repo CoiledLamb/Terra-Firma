@@ -349,5 +349,30 @@ namespace Cleo.TerraFirma.Scripts
 			Helpers.VerifyLog("GEOSCAN", $"wall={wall.Blueprint} compiled={compiled} reflected={reflected}({reflectNote}) wound=\"{wound}\" -> {verdict}");
 			MessageQueue.AddPlayerMessage($"tfgeoscan [{wall.Blueprint}]: compiled={compiled}, reflected={reflected}, WoundLevel {(woundNumeric ? "NUMERIC" : "bare")}. {verdict} Scan part left on the wall (50 turns) -- look at it now: exact HP visible?", Capitalize: false);
 		}
+
+		/// <summary>C11 test door (2026-10-14): logs 30 confused-muse draws for the player's level
+		/// as [TF-VERIFY][SHAPE] lines (each sample disposed), then confuses the player for 30
+		/// turns so the next Stoneshaper carve takes the confused path. Base's effect:Confused
+		/// wish uses the zero-duration constructor, so it cannot stand in.</summary>
+		[WishCommand(Command = "tfconfusedcarve")]
+		public static void ConfusedCarve()
+		{
+			GameObject Ply = The.Player;
+			int lv = Ply.Stat("Level");
+			int near = 0;
+			for (int i = 0; i < 30; i++)
+			{
+				GameObject muse = Cleo_TerraFirma_Stoneshaper.PickConfusedMuse(Ply);
+				if (muse == null)
+					continue;
+				int d = System.Math.Abs(muse.Stat("Level") - lv);
+				if (d <= 5)
+					near++;
+				Helpers.VerifyLog("SHAPE", $"tfconfusedcarve sample {i + 1}: {muse.Blueprint} Lv{muse.Stat("Level")} (distance {d})");
+				muse.Obliterate();
+			}
+			Ply.ApplyEffect(new XRL.World.Effects.Confused(30, 1));
+			MessageQueue.AddPlayerMessage($"tfconfusedcarve: {near}/30 sampled muses within 5 levels of Lv{lv} (log has the list). Confused for 30 turns: carve now.", Capitalize: false);
+		}
 	}
 }
