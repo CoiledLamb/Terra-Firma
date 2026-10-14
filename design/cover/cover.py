@@ -60,8 +60,26 @@ def stepped(t, steps):
             else: out[zone]=cols[i][None,:]*(1-f[zone][:,None])+cols[i+1][None,:]*f[zone][:,None]
     return out
 LETTER_STEPS=None          # separate band list for the title outlines; None = same as TINT_STEPS
+FIELD_TEXTURE=None         # None, "sky" (the plate's own sky hatching tiled over the field), "hatch" (synthetic engraver's hatch)
+FIELD_TEX_STRENGTH=0.5     # how far the texture lines lift from the field colour toward the mid tone
+FIELD_TEX_IN_LETTERS=True  # texture shows through the hollow letters too
+SHADOW_MID=None            # shadow pass on the halftone: None, "all" (every hatched midtone goes to SHADOW_MID_COLOUR), "split" (only on the shadow side of the light), "blend" (fades in toward the shadow side)
+SHADOW_MID_COLOUR="c"
+SHADOW_MID_SPLIT=0.52       # where the split happens along the light-to-shadow parameter
+SHADOW_BLEND=(0.25,0.85)    # where the blended shadow pass starts and reaches full, along the light-to-shadow parameter (0 = lit corner, 1 = shadow corner)
+SHADOW_LINES_BLEND=None    # separate (start,end) for the seal's heavy lines; None = same as SHADOW_BLEND
+SHADOW_RAMP=(0.60,1.0)      # in the shadow pass: ink density where the halftone colour peaks, and where the line tone is reached (lower = more of the plate counts as line)
+SHADOW_ON_LETTERS=0.0      # how far the title outlines follow the shadow pass toward SHADOW_MID_COLOUR (0..1)
+SHADOW_ON_LINES=0.0        # how far the seal's heavy lines (ring letters, contours) follow it too (0..1)
+TINT_GEOM="diagonal"       # band geometry: "diagonal", or ("shadow", cx, cy) = arcs concentric about a point (0..1 canvas coords) with white farthest from it, or ("light", cx, cy) = arcs concentric about the light
 SEAM_SOFT=0.0              # width (in t, 0..1 along the diagonal) of the transition at each band seam; 0 = hard
 SEAM_DITHER=True           # stipple the transition with an ordered pattern at final-pixel scale instead of blending
+def tparam(xc, yc):
+    """band parameter 0..1 from canvas-normalised coords: 0 = lit (white), 1 = shadow"""
+    if TINT_GEOM=="diagonal": return (xc+yc)/2
+    kind,cx,cy=TINT_GEOM; d=np.hypot(xc-cx,yc-cy)
+    far=max(np.hypot(cx-a,cy-b) for a in (0,1) for b in (0,1))
+    return d/far if kind=="light" else 1-d/far
 def tint_top(t):
     """t: 0 at upper-left .. 1 at lower-right. white -> grey -> shadow cyan, centred on grey at t=0.5"""
     Y,y,c=hx(Q["Y"]),hx(Q["y"]),hx(Q["c"]); t=np.asarray(t)[...,None]
@@ -75,6 +93,17 @@ def seal(size):
     w=np.clip(1-np.hypot((xx-cx*sc)/(rx*sc),(yy-cy*sc)/(ry*sc))**1.8,0,1)
     b=hx(Q[SEAL_BASE]); grey=ramp(g,[(0,b),(0.60,MID),(1,hx(Q["y"]))]); hot=ramp(g,[(0,b),(0.60,MID),(0.88,hx(Q["y"])),(1,hx(Q["Y"]))])
     rgb=grey*(1-w[:,:,None])+hot*w[:,:,None]
+    if SHADOW_MID:
+        sc_=hx(Q[SHADOW_MID_COLOUR]); m0,m1=SHADOW_RAMP; gg=np.clip(g/m1,0,1) if m1<1 else g
+        grey2=ramp(gg,[(0,b),(m0,sc_),(1,hx(Q["y"]))]); hot2=ramp(gg,[(0,b),(m0,sc_),(0.88,hx(Q["y"])),(1,hx(Q["Y"]))])
+        rgb2=grey2*(1-w[:,:,None])+hot2*w[:,:,None]
+        xc=(xx/size*D+(512-D)/2)/512; yc=(yy/size*D+(512-D)/2)/512; t=tparam(xc,yc)
+        wm={"all":np.ones_like(t),"split":(t>SHADOW_MID_SPLIT).astype(float),"blend":np.clip((t-SHADOW_BLEND[0])/(SHADOW_BLEND[1]-SHADOW_BLEND[0]),0,1)}[SHADOW_MID]
+        rgb=rgb*(1-wm[:,:,None])+rgb2*wm[:,:,None]
+        if SHADOW_ON_LINES>0:
+            lb=SHADOW_LINES_BLEND or SHADOW_BLEND; wl_=np.clip((t-lb[0])/(lb[1]-lb[0]),0,1) if SHADOW_MID=="blend" else wm
+            lines=np.clip((g-0.60)/0.40,0,1)*wl_*SHADOW_ON_LINES
+            rgb=rgb*(1-lines[:,:,None])+(rgb*0.5+sc_*0.5)*lines[:,:,None]
     if SHADOW:
         dx,dy,st=SHADOW; sc=size/512
         sil=((g>0.45)&(w>0.35)).astype(np.uint8)*255                        # spade + orb, from ink inside the spotlight
@@ -85,7 +114,7 @@ def seal(size):
         ink=np.clip((g-0.60)/0.40,0,1)
         rgb=rgb+(hx(Q[SHADOW_COLOUR])-hx(Q["y"]))*(ink*sh*st)[:,:,None]
     if TINT>0:
-        t=(xx+yy)/(2*size); top=tint_top(t)                      # per-pixel colour the ink drifts toward
+        xc=(xx/size*D+(512-D)/2)/512; yc=(yy/size*D+(512-D)/2)/512; t=tparam(xc,yc); top=tint_top(t)                      # per-pixel colour the ink drifts toward
         ink=np.clip((g-0.60)/0.40,0,1)[:,:,None]                 # how much of each pixel is 'top ink' rather than base/mid
         rgb=rgb+(top-hx(Q["y"]))*ink*TINT
     if LIGHT>0:
@@ -136,6 +165,33 @@ WORDS=[(w,centres[w],bi) for w,_,bi in WORDS]
 # ---------- compose ----------
 def build():
     cv=np.full((N,N,3),hx(Q[FIELD]))
+    tex=None
+    if FIELD_TEXTURE=="sky":
+        sky=np.array(prepared_src(),dtype=float)/255; h0=sky.shape[0]
+        patch=1-sky[int(h0*0.12):int(h0*0.30), int(h0*0.30):int(h0*0.70)]     # sky hatching above the trees, inside the ring
+        patch=np.clip((patch-0.15)/0.5,0,1)
+        ph,pw=patch.shape; tile=np.block([[patch,patch[:,::-1]],[patch[::-1,:],patch[::-1,::-1]]])
+        reps=(N//tile.shape[0]+2, N//tile.shape[1]+2); big=np.tile(tile,reps)[:N,:N]
+        tex=np.array(Image.fromarray((big*255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.6*SS)),dtype=float)/255
+    elif FIELD_TEXTURE in ("hatch","hatch_jitter"):
+        rng=np.random.default_rng(3); yy_=np.arange(N)[:,None]; xx_=np.arange(N)[None,:]
+        if FIELD_TEXTURE=="hatch":
+            wob=np.sin(xx_/(37.0*SS))*1.2*SS+np.sin(xx_/(9.0*SS)+yy_/(53.0*SS))*0.6*SS
+            period=3.0*SS; line=((yy_+wob)%period)<(1.1*SS)
+        else:
+            # hand-ruled: each line has its own spacing, weight and wobble; lines are laid down one at a time
+            line=np.zeros((N,N),bool); y=rng.uniform(0,3*SS)
+            while y<N:
+                gap=rng.normal(3.0,0.55)*SS; wgt=rng.uniform(0.7,1.5)*SS
+                wob=(np.sin(xx_/(rng.uniform(25,60)*SS)+rng.uniform(0,6.28))*rng.uniform(0.6,1.6)*SS
+                     +np.sin(xx_/(rng.uniform(6,14)*SS)+rng.uniform(0,6.28))*rng.uniform(0.2,0.6)*SS)
+                line|=np.abs(yy_-(y+wob))<wgt/2
+                y+=max(gap,1.6*SS)
+        gaps=np.array(Image.fromarray((rng.random((N//6,N//6))*255).astype(np.uint8)).resize((N,N),Image.BILINEAR),dtype=float)/255
+        tex=line.astype(float)*(gaps>0.22)
+    if tex is not None:
+        tex_col=hx(Q[FIELD])+(MID-hx(Q[FIELD]))*FIELD_TEX_STRENGTH
+        cv=cv*(1-tex[:,:,None])+tex_col*tex[:,:,None]
     if LIGHT>0 and LIGHT_FIELD:
         t=(XX+YY)/(2*N); cv=cv*(1+0.6*LIGHT*(1-2*t))[:,:,None]
     sim,smask=seal(D*SS); sa=np.array(smask,dtype=float)[:,:,None]/255; srgb=np.array(sim,dtype=float)
@@ -149,10 +205,13 @@ def build():
         ea=ea*((nz>EDGE_BREAKS).astype(float)*(1-BREAK_FLOOR)+BREAK_FLOOR)
     edge_col=hx(Q[EDGE])[None,None,:]
     if TINT>0 and TINT_LETTERS:
-        tt=(XX+YY)/(2*N); top=stepped(tt[...,None],LETTER_STEPS) if LETTER_STEPS else tint_top(tt)
+        tt=tparam(XX/N,YY/N); top=stepped(tt[...,None],LETTER_STEPS) if LETTER_STEPS else tint_top(tt)
         edge_col=hx(Q[EDGE])+(top-hx(Q["y"]))*TINT
+        if SHADOW_MID and SHADOW_ON_LETTERS>0:
+            wl={"all":np.ones_like(tt),"split":(tt>SHADOW_MID_SPLIT).astype(float),"blend":np.clip((tt-SHADOW_BLEND[0])/(SHADOW_BLEND[1]-SHADOW_BLEND[0]),0,1)}[SHADOW_MID]*SHADOW_ON_LETTERS
+            edge_col=edge_col*(1-wl[:,:,None])+hx(Q[SHADOW_MID_COLOUR])*wl[:,:,None]
     cv=cv*(1-ea[:,:,None])+edge_col*ea[:,:,None]
-    cv=cv*(1-A[:,:,None])+hx(Q[LETTER_FILL])*A[:,:,None]
+    if not (FIELD_TEXTURE and FIELD_TEX_IN_LETTERS and LETTER_FILL==FIELD): cv=cv*(1-A[:,:,None])+hx(Q[LETTER_FILL])*A[:,:,None]
     return Image.fromarray(cv.clip(0,255).astype(np.uint8))
 pal=Image.new("P",(1,1)); cols=[hx(Q["k"]),hx(Q["K"]),MID,hx(Q["y"]),hx(Q["Y"]),hx(Q["c"]),hx(Q["C"]),(hx(Q["y"])+hx(Q["Y"]))/2,(hx(Q["y"])+hx(Q["c"]))/2]; pal.putpalette([int(c) for col in cols for c in col]+[0]*(768-27))
 def pix(im,n,dither,palette=None):
@@ -160,29 +219,32 @@ def pix(im,n,dither,palette=None):
     if palette:
         pl=Image.new("P",(1,1)); cc=[hx(Q[c]) if isinstance(c,str) else c for c in palette]; pl.putpalette([int(v) for col in cc for v in col]+[0]*(768-3*len(cc)))
     return im.resize((n,n),Image.LANCZOS).quantize(palette=pl,dither=dither).convert("RGB").resize((512,512),Image.NEAREST)
+
 # ---------- presets ----------
+# every knob above has a default; a preset is the set of values that produce one agreed cover.
+_COMMON=dict(FIELD="k",SEAL_BASE="k",LETTER_FILL="k",EDGE_PX=1.25,EDGE_BREAKS=0.0,LIGHT=0.0,FLATTEN=True,D=430,
+             TINT=1.0,TINT_LETTERS=True,LETTER_STEPS=None,SHADOW=None,SHADOW_MID=None,SHADOW_ON_LETTERS=0.0,SHADOW_ON_LINES=0.0,
+             FIELD_TEXTURE=None,FIELD_TEX_STRENGTH=0.4,FIELD_TEX_IN_LETTERS=False,TINT_GEOM="diagonal",SEAM_SOFT=0.0,SEAM_DITHER=True)
 PRESETS={
- # bookmarked 2026-10-14: black field, hollow Siegfried, four stepped inks lit from the upper left, shadow ink full strength,
- # all seams stippled wide, posterised hard at 512. open idea: raise the cyan band so it starts at the base of the orb and wings.
- "bookmark_A1_stipple":dict(FIELD="k",SEAL_BASE="k",LETTER_FILL="k",EDGE_PX=1.25,EDGE_BREAKS=0.0,LIGHT=0.0,FLATTEN=True,D=430,
-    TINT=1.0,TINT_LETTERS=True,LETTER_STEPS=None,SHADOW=None,SEAM_SOFT=0.12,SEAM_DITHER=True,
-    TINT_STEPS=[(0.30,"Y",0.5),(0.52,"y",0.5),(0.80,"C",0.5),(1.0,"c",1.0)]),
- "bookmark_A1_stipple_band_higher":dict(FIELD="k",SEAL_BASE="k",LETTER_FILL="k",EDGE_PX=1.25,EDGE_BREAKS=0.0,LIGHT=0.0,FLATTEN=True,D=430,
-    TINT=1.0,TINT_LETTERS=True,LETTER_STEPS=None,SHADOW=None,SEAM_SOFT=0.12,SEAM_DITHER=True,
-    TINT_STEPS=[(0.30,"Y",0.5),(0.50,"y",0.5),(0.70,"C",0.5),(1.0,"c",1.0)]),
+ # FINAL 2026-10-14 (user: "that's the one i want"): continuous ink drift from white at the upper left through grey to
+ # shadow cyan at the lower right, running through the seal, the title and the field alike; hand-ruled hatch over the
+ # black field; solid black letters with a grey outline; posterised to the base tones plus eight samples of the drift.
+ "final":dict(_COMMON,TINT_STEPS=None,FIELD_TEXTURE="hatch_jitter"),
+ # earlier bookmark: four stepped inks (Y y C c at half strength, shadow ink full), seams stippled, flat black field, hollow letters.
+ "bookmark_A1_stipple":dict(_COMMON,TINT_STEPS=[(0.30,"Y",0.5),(0.52,"y",0.5),(0.80,"C",0.5),(1.0,"c",1.0)],SEAM_SOFT=0.12,LETTER_FILL="k",FIELD_TEX_IN_LETTERS=True),
 }
 def apply(preset):
     for k,v in PRESETS[preset].items(): globals()[k]=v
+def palette_for(preset):
+    y_=hx(Q["y"])
+    if TINT_STEPS: return ["k","K",MID]+[y_+(hx(Q[c])-y_)*k for _,c,k in TINT_STEPS]
+    return ["k","K",MID,"Y"]+[tint_top(np.array([t]))[0] for t in np.linspace(0,1,8)]
 def render_preset(preset, pixel=True):
     apply(preset); m=build(); sm=m.resize((512,512),Image.LANCZOS)
-    if not pixel: return sm
-    y=hx(Q["y"]); p=["k","K",MID]+[y+(hx(Q[c])-y)*k for _,c,k in TINT_STEPS]
-    return pix(sm,512,Image.NONE,p)
-
+    return (pix(sm,512,Image.NONE,palette_for(preset)) if pixel else sm), m
 if __name__=="__main__":
     import sys
-    names=sys.argv[1:] or list(PRESETS)
-    for n in names:
-        render_preset(n).save(os.path.join(OUT,f"{n}_512.png"))
-        apply(n); build().resize((1024,1024),Image.LANCZOS).save(os.path.join(OUT,f"{n}_smooth_1024.png"))
-        print("rendered",n)
+    for n in (sys.argv[1:] or list(PRESETS)):
+        out,master=render_preset(n)
+        out.save(os.path.join(OUT,f"{n}_512.png")); render_preset(n,pixel=False)[0].save(os.path.join(OUT,f"{n}_smooth_512.png"))
+        master.resize((1024,1024),Image.LANCZOS).save(os.path.join(OUT,f"{n}_smooth_1024.png")); print("rendered",n)
