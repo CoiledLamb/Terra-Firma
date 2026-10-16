@@ -180,7 +180,7 @@ namespace XRL.World.Parts.Mutation
 				"Power equals the stone's sell value or weight, whichever is higher.\n" +
 				"Vision radius: 1 tile per " + (int)POWER_PER_TILE + " power (minimum " + (int)MIN_RADIUS_TILES + ")\n" +
 				"Vision duration: 1 round per " + (int)POWER_PER_TURN + " power (minimum " + (int)MIN_DURATION_TURNS + ")\n" +
-				"Gemstones also apply full scanning to creatures and walls in the revealed area.\n" +
+				"Gemstones also reveal the stats of creatures and walls in the revealed area.\n" +
 				"+2 thrown weapon range";
 		}
 

@@ -81,10 +81,10 @@ namespace XRL.World.Parts.Mutation
 			// description. Precedent for the bare block: Phasing/Burgeoning/Temporal Fugue.
 			// Ruled silences stay silent: flyer exemption, loot, gap ladder, engulf catch,
 			// moved-only stun nuance, pinning, eviction, walls (repetition digs, undocumented).
-			return "Ring radius: " + GetRingRadius(Level) + " squares\n" +
+			return "Ring radius: {{rules|" + GetRingRadius(Level) + "}} squares\n" +
 				"Damage: {{rules|" + GetPulseDice(Level, 1) + "/" + GetPulseDice(Level, 2) + "/" + GetPulseDice(Level, 3) + "}} in three spreading pulses\n" +
 				"Creatures caught in its path are pushed outward and must make a Toughness save or be stunned for {{rules|" + GetStunRounds(Level) + "}} " + (GetStunRounds(Level) == 1 ? "round" : "rounds") + ".\n" +
-				"Cooldown: " + GetCooldown(Level) + " rounds";
+				"Cooldown: {{rules|" + GetCooldown(Level) + "}} rounds";
 		}
 
 		public override bool Mutate(GameObject GO, int Level = 1)

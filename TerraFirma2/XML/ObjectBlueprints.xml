@@ -200,12 +200,12 @@
        verified slam. Tile is the fallen-rock family's, kin to what the detonation scatters.
        FLAVOR NOTE 2026-08-24: a "lump of primordial clay" pass landed here for a few hours by
        misread; the user meant it for the FIGURINE grenade (unbuilt, see TODO roster flags).
-       Name and description here are CLAUDE GUT by the user's license ("go with your gut and
-       i'll edit it later however i desire"), so both are freely editable, no signoff gate.
+       Name is CLAUDE GUT by the user's license ("go with your gut and i'll edit it
+       later however i desire"), freely editable. Description left empty for the user to write.
        Commerce and Weight CLAUDE DRAFT. -->
   <object Name="Cleo_TerraFirma_FissureStone" Inherits="BaseThrownWeapon">
     <part Name="Render" DisplayName="fissure stone" Tile="Items/sw_smallboulder.bmp" RenderString="*" ColorString="&amp;y" DetailColor="K" />
-    <part Name="Description" Short="A fist of quarried stone, scored to a lattice of fault lines. It is waiting for one hard landing." /> <!-- CLAUDE GUT, user edits at will -->
+    <part Name="Description" Short="" />
     <part Name="Stacker" />
     <part Name="Physics" Category="Grenades" Weight="10" />
     <part Name="Commerce" Value="20" />

@@ -61,12 +61,12 @@ namespace XRL.World.Parts
 			int MaxCharge() => cap?.MaxCharge ?? oldCell.MaxCharge;
 			if ((cap == null && oldCell == null) || !IsReady(UseCharge: false, IgnoreCharge: true))
 			{
-				if (E.Actor.IsPlayer()) Popup.ShowFail(ParentObject.Does("are") + " not running."); // Codex PROPOSAL
+				if (E.Actor.IsPlayer()) Popup.ShowFail(ParentObject.Does("are") + " not running.");
 				return false;
 			}
 			if (Charge() >= MaxCharge() || ChargePerPound <= 0)
 			{
-				if (E.Actor.IsPlayer()) Popup.ShowFail(ParentObject.T() + " cannot store any more charge."); // Codex PROPOSAL
+				if (E.Actor.IsPlayer()) Popup.ShowFail(ParentObject.T() + " cannot store any more charge.");
 				return false;
 			}
 			var stones = E.Actor.GetInventoryDirect(IsFood);
@@ -83,7 +83,7 @@ namespace XRL.World.Parts
 			}
 			if (stones.Count == 0)
 			{
-				if (E.Actor.IsPlayer()) Popup.ShowFail("There is no stone in reach to feed it."); // Codex PROPOSAL
+				if (E.Actor.IsPlayer()) Popup.ShowFail("There is no stone in reach to feed it.");
 				return false;
 			}
 			int choice = 0;
@@ -91,8 +91,9 @@ namespace XRL.World.Parts
 			{
 				var options = new List<string>();
 				for (int i = 0; i < stones.Count; i++)
-					options.Add(stones[i].DisplayName + (i >= carried ? " {{K|(nearby)}}" : ""));
-				choice = Popup.PickOption(Intro: "Feed which stone?", Options: options.ToArray(), AllowEscape: true); // Codex PROPOSAL
+					options.Add(stones[i].DisplayName + " {{K|(" + (stones[i].Physics?.Weight ?? 0) + "#)}}"
+						+ (i >= carried ? " {{K|(nearby)}}" : ""));
+				choice = Popup.PickOption(Intro: "Feed which stone?", Options: options.ToArray(), AllowEscape: true);
 				if (choice < 0) return false;
 			}
 			var pick = stones[choice];
@@ -100,12 +101,12 @@ namespace XRL.World.Parts
 			int accepted = Math.Min(burst, MaxCharge() - Charge());
 			// A burst has no queue: make overflow explicit before consuming a whole stone.
 			if (accepted < burst && E.Actor.IsPlayer()
-				&& Popup.ShowYesNo("Only " + accepted + " of " + burst + " charge will fit. Feed the stone anyway?") != DialogResult.Yes) return false; // Codex PROPOSAL
+				&& Popup.ShowYesNo("Only " + accepted + " of " + burst + " charge will fit. Feed the stone anyway?") != DialogResult.Yes) return false;
 			pick = pick.SplitFromStack() ?? pick;
 			string name = pick.t();
 			if (!pick.Destroy()) return false;
 			if (cap != null) cap.AddCharge(accepted); else oldCell.AddCharge(accepted);
-			if (E.Actor.IsPlayer()) IComponent<GameObject>.AddPlayerMessage("You feed " + name + " into " + ParentObject.t() + "."); // Codex PROPOSAL
+			if (E.Actor.IsPlayer()) IComponent<GameObject>.AddPlayerMessage("You feed " + name + " into " + ParentObject.t() + ".");
 			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("MILL", $"burst={burst}, stored={accepted}, charge={Charge()}/{MaxCharge()}");
 			E.Actor.UseEnergy(FeedEnergy, "Item FeedPiezoelectricMill");
 			E.RequestInterfaceExit();

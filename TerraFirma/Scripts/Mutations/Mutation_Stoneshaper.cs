@@ -306,17 +306,17 @@ namespace XRL.World.Parts.Mutation
 				// "cooldown gates it most of the time anyways") -- but never by accident; permanent
 				// ones especially can carry levels and gear
 				if (E.Actor.IsPlayer() && Popup.ShowYesNo("Carving a new statue will return " + CurStatue.t() +
-					" to lifeless stone. Anything worn or carried will be entombed within, recoverable by hand. Proceed?") == DialogResult.No)
+					" to lifeless stone. Anything worn or carried will be entombed within. Proceed?") == DialogResult.No)
 					return false;
 			}
 		targetSelection:
-			Cell targetCreatureCell = PickDestinationCell(Snap: true, Label: "Choose a cell with a creature to copy.");
+			Cell targetCreatureCell = PickDestinationCell(Snap: true, Label: "Choose a square with a creature to copy.");
 			if (targetCreatureCell == null)
 				return false;
 			GameObject creature = targetCreatureCell.GetCombatTarget(E.Actor, true);
 			if (creature == null || !creature.IsCreature)
 			{
-				E.Actor.Fail("You must target a cell containing a creature.");
+				E.Actor.Fail("You must target a square containing a creature.");
 				goto targetSelection;
 			}
 			if (creature.Body == null)
@@ -344,7 +344,7 @@ namespace XRL.World.Parts.Mutation
 			}
 			else if (!targetWallCell.HasWall())
 			{
-				E.Actor.Fail("You must select a tile containing a solid wall.");
+				E.Actor.Fail("You must select a square containing a solid wall.");
 				goto wallSelection;
 			}
 
@@ -352,7 +352,7 @@ namespace XRL.World.Parts.Mutation
 			GameObject refWall = walls.First();
 			if (refWall.HasPart<HologramMaterial>() || refWall.HasPart<Walltrap>() || refWall.HasPart<Forcefield>())
 			{
-				E.Actor.Fail("You must select a tile containing a solid wall.");
+				E.Actor.Fail("You must select a square containing a solid wall.");
 				goto wallSelection;
 			}
 			if (refWall.HasTag("Cleo_TerraFirma_NoStoneshape"))

@@ -4,7 +4,7 @@
 		<description>
 			<p>You calcify sturdy walls to form obstacles.</p>
 			<br />
-			<p>Walls are placed in a contiguous shape, beginning adjacent to you. Only empty spaces will form walls.</p>
+			<p>Walls are placed in a contiguous shape, beginning adjacent to you.</p>
 			<!-- rebalance 2026-08-06: walls are true copies of the source stone, so the per-level
 			     HP stat is gone; replacement sentence approved 2026-09-30 -->
 			<p>Creates <stat Name="WallNum" /> walls.</p>
@@ -18,9 +18,9 @@
 			<br />
 			<!-- daze rider cut 2026-08-06 (rebalance pass); pen line reworked 2026-08-09
 			     (flat bonus retired for a Strength-filled cap) wording draft, approved 2026-09-30 -->
-			<p>Stones deal <stat Name="Damage" /> damage; penetration follows your Strength, up to <stat Name="PenetrationCap" /> PV</p>
-			<p>A new stone is sculpted every <stat Name="TurnsPerCharge" /> rounds, up to a reserve of <stat Name="MaxCharges" /></p>
-			<p>Thrown stones disappear after <stat Name="Lifetime" /> consecutive turns of not being held as a thrown weapon</p>
+			<p>Stones deal <stat Name="Damage" /> damage; penetration follows your Strength, up to <stat Name="PenetrationCap" />.</p>
+			<p>A new stone is sculpted every <stat Name="TurnsPerCharge" /> rounds, up to a reserve of <stat Name="MaxCharges" />.</p>
+			<p>Stones not held as a thrown weapon crumble to dust after <stat Name="Lifetime" /> rounds.</p>
 			<br />
 			<p>While you have stones in reserve, they whorl about you and deflect physical projectiles (up to <stat Name="DeflectFull" />% at full reserve). Lasers and other energy attacks pass through.</p>
 		</description>
@@ -31,7 +31,7 @@
 		<description>
 			<p>Attune your sculpted stones to a keening resonance, or still them again.</p>
 			<br />
-			<p>Resonant stones penetrate as vibro weapons.</p>
+			<p>Resonant stones' penetration value is equal to the defender's armor value.</p>
 			<!-- AV/DV clause cut with the whorl stat shifts (rebalance 2026-08-06) -->
 			<p>While attuned, your gravel whorl deflects light-based projectiles instead of physical ones.</p>
 		</description>

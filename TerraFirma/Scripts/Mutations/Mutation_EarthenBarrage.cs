@@ -164,7 +164,7 @@ namespace XRL.World.Parts.Mutation
 				"Lasers and other energy attacks pass through the whorl.\n" +
 				"Deflect chance: 3% per stone in reserve, +1% per mutation level" +
 				(Level >= RESONANT_UNLOCK_LEVEL
-					? "\nYou may attune your stones to {{C|resonance}}.\nResonant stones' penetration value is equal to the defender's armor value.\nWhile attuned, your whorl deflects light instead of matter."
+					? "\nYou may attune your stones to {{C|resonance}}.\nResonant stones' penetration value is equal to the defender's armor value.\nWhile attuned, your whorl deflects light-based projectiles instead of physical ones."
 					: "\nAt level " + RESONANT_UNLOCK_LEVEL + ", you learn to attune your stones to {{C|resonance}}.");
 		}
 

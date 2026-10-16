@@ -115,7 +115,7 @@ namespace XRL.World.Parts
             // Temporary expiry invalidates/removes projections; stale references must not block a new peek.
             foreach (GameObject projection in Projections)
                 if (GameObject.Validate(projection) && projection.CurrentCell != null)
-                    return wearer.Fail("Wait for the current projection to disappear.");
+                    return wearer.Fail("You can't make another projection yet.");
             Cell origin = wearer.CurrentCell;
             Cell below = Below(origin);
             if (below == null)
@@ -169,7 +169,7 @@ namespace XRL.World.Parts
             Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHUFFLERS",
                 $"peek {below.ParentZone.ZoneID}: {walls} projected walls, {PreviewDuration} turns");
             if (walls == 0)
-                wearer.ShowFailure("The scan finds no walls immediately below.");
+                wearer.ShowFailure("You find no walls beneath you.");
             wearer.UseEnergy(1000, "Item Seismic Peek");
             return false;
         }

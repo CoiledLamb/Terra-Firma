@@ -47,8 +47,7 @@ namespace XRL.World.Parts.Mutation
 			// walls now carry their blueprint's own numbers. Replacement lines approved
 			// 2026-09-30. Cooldown lands last per the ~100%-of-base convention (2026-07-26 sitting).
 			// cooldown scales now (odd levels), so it earns the rules-wrap the flat 90 never had
-			return "Creates a contiguous line of walls in empty tiles starting adjacent to you.\n" +
-				"Number created: {{rules|" + GetWallsCreated(Level) + "}}\n" +
+			return "Creates {{rules|" + GetWallsCreated(Level) + "}} contiguous walls in empty tiles starting adjacent to you.\n" +
 				"Cooldown: {{rules|" + GetCooldown(Level) + "}} rounds";
 		}
 
