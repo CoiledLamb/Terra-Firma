@@ -76,6 +76,8 @@
 		<part Name="Cleo_TerraFirma_StatueMakerPart" />
 		<part Name="Examiner" Unknown="UnknownOddTrinket" Complexity="3" />
 		<tag Name="Tier" Value="3" />
+		<!-- Held out of dynamic encounters until the loop is finished (user, 2026-10-15). The Tool parent leaves it eligible otherwise. -->
+		<tag Name="ExcludeFromDynamicEncounters" />
 		<!-- BETA-HELD (RULED 2026-08-05: "we should just bench the statue making item with the rest
 		     of the gear we're adding in phase 2"): all three acquisition surfaces gated below; the
 		     blueprint + part stay compiled as an inert dev door (wish-reachable only), per the
