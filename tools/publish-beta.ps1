@@ -402,6 +402,32 @@ function Compile-Fused($cfg) {
     Remove-Item -Recurse -Force $buildDir
 }
 
+# ---------------------------------------------------------------- workshop cover
+# (2026-10-14): Mods\TerraFirmaBeta's preview.png is rendered fresh from design\cover\cover.py on every run
+# that stages there (TF1, Both, Release), so the cover's "CL - {version}" catalogue line follows
+# TerraFirma\manifest.json instead of going stale. It renders before anything is zipped or staged; a
+# missing Python, Pillow or numpy, or an unreadable manifest (cover.py --to fails closed), aborts the publish.
+$coverStage = "TerraFirmaBeta"
+function Render-Cover {
+    $script = Join-Path $RepoRoot "design\cover\cover.py"
+    if (-not (Test-Path $script)) { throw "cover script missing at $script -- publish aborted, nothing zipped" }
+    $py = Get-Command python -ErrorAction SilentlyContinue; $pyArgs = @()
+    if (-not $py) { $py = Get-Command py -ErrorAction SilentlyContinue; $pyArgs = @("-3") }
+    if (-not $py) { throw "python not found (the workshop cover render needs it, with Pillow and numpy) -- publish aborted, nothing zipped" }
+    $out = Join-Path $pubRoot "_cover_preview.png"
+    if (Test-Path $out) { Remove-Item -Force $out }
+    # python warnings arrive on stderr; under "Stop" Windows PowerShell would turn the first one into a terminating error
+    $prev = $ErrorActionPreference; $ErrorActionPreference = "Continue"
+    try { $log = & $py.Source @pyArgs $script --to $out final 2>&1; $code = $LASTEXITCODE }
+    finally { $ErrorActionPreference = $prev }
+    if ($code -ne 0 -or -not (Test-Path $out)) {
+        $log | ForEach-Object { Write-Host $_ }
+        throw "workshop cover render FAILED -- publish aborted, nothing zipped"
+    }
+    Write-Host "cover:  $(($log | Select-Object -Last 1))"
+    return $out
+}
+
 # ---------------------------------------------------------------- zip + stage one mod
 # (2026-08-06, workshop plan): the stripped tree also lands as a STANDING second mod with
 # its manifest id rewritten -- two local mods cannot share an id (ModManager.RegisterMod
@@ -427,6 +453,7 @@ function Release-Mod($cfg) {
 
     Rewrite-Manifest (Join-Path $stage "manifest.json") $cfg
     foreach ($k in $preserve.Keys) { [System.IO.File]::WriteAllBytes((Join-Path $stage $k), $preserve[$k]) }
+    if ($cfg.Stage -eq $coverStage) { Copy-Item -Force $coverPng (Join-Path $stage "preview.png"); Write-Host "cover:  $stage\preview.png re-rendered" }
     $workshopNote = if ($preserve.ContainsKey("workshop.json")) { "workshop.json preserved" } else { "no workshop.json yet (the game's first upload creates it)" }
     Write-Host "zip:    $zip"
     Write-Host "staged: $stage (manifest id $($cfg.IdTo), $workshopNote)"
@@ -533,6 +560,8 @@ if ($wantTF1) { Check-SaveLayout (Join-Path $pubRoot $Mods.TF1.Src) $Mods.TF1.St
 if ($wantTF2) { Check-SaveLayout (Join-Path $pubRoot $Mods.TF2.Src) $Mods.TF2.Stage }
 if ($wantFused) { Check-SaveLayout (Join-Path $pubRoot $Mods.Fused.Src) $Mods.Fused.Stage }
 if ($wantRelease) { Check-SaveLayout (Join-Path $pubRoot $Mods.Release.Src) $Mods.Release.Stage }
+# the workshop cover, rendered once for whichever run stages TerraFirmaBeta (also under -CheckOnly, to prove it renders)
+if ($wantTF1 -or $wantRelease) { $coverPng = Render-Cover }
 if ($CheckOnly) {
     foreach ($k in @("TF1", "TF2", "Fused", "Release")) {
         if (($k -eq "TF1" -and -not $wantTF1) -or ($k -eq "TF2" -and -not $wantTF2) -or ($k -eq "Fused" -and -not $wantFused) -or ($k -eq "Release" -and -not $wantRelease)) { continue }
