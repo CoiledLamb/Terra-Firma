@@ -54,8 +54,9 @@ namespace Cleo.TerraFirma.Scripts
 	}
 
 	/// <summary>An OWNED copy of a creature's look for the band sprite. RenderForUI returns a
-	/// REUSED per-object buffer (GameObject._contextRender, Reset each call) -- its fields are
-	/// copied here at snapshot time and the buffer ref is never kept. Colors are the stone
+	/// REUSED per-object buffer on stable (GameObject._contextRender, Reset each call) and a
+	/// Visual struct on lang-experimental; either way its tile and flips are copied here at
+	/// snapshot time and nothing of it is kept. Colors are the stone
 	/// dressing, not the creature's: the band is the petrified part.</summary>
 	public class Cleo_TerraFirma_CreatureSnapshotRenderable : IRenderable
 	{
@@ -664,26 +665,49 @@ namespace Cleo.TerraFirma.Scripts
 				return state;
 			}
 			Release(state, ShrinkOut: false); // a dying holdover never comes back -- replace it
+			// VERSION_1_1 is defined by the game's mod compiler on the lang-experimental build
+			// (2.0.212), where RenderForUI returns Visual; stable defines VERSION_1_0.
+#if VERSION_1_1
+			Visual v = target.RenderForUI();
+			if (!v.Valid || v.Text || v.Tile.IsNullOrEmpty()) // Text: a glyph-only Visual, the old empty-Tile case
+				return null;
+#else
 			RenderEvent re = target.RenderForUI(); // REUSED buffer -- copy fields now, never keep the ref
 			if (re == null || re.Tile.IsNullOrEmpty())
 				return null;
+#endif
 			Cleo_TerraFirma_PetrifyBandState fresh = new Cleo_TerraFirma_PetrifyBandState
 			{
 				PackedCell = cell.X + cell.Y * 1000,
 				TargetFrac = frac,
 				Gen = GlobalGen,
 			};
+#if VERSION_1_1
+			WaterlineColors(target, v, out Color mixer, out Color creatureDetail);
+			CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuicePetrifyBand(
+				new Cleo_TerraFirma_CreatureSnapshotRenderable(v.Tile, STONE_FG, BAND_POROUS ? 'k' : STONE_DETAIL, 'k', v.HFlip, v.VFlip),
+				fresh, mixer, creatureDetail), async: true);
+#else
 			WaterlineColors(re, out Color mixer, out Color creatureDetail);
 			CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuicePetrifyBand(
 				new Cleo_TerraFirma_CreatureSnapshotRenderable(re.Tile, STONE_FG, BAND_POROUS ? 'k' : STONE_DETAIL, 'k', re.HFlip, re.VFlip),
 				fresh, mixer, creatureDetail), async: true);
+#endif
 			return fresh;
 		}
 
 		/// <summary>The waterline's palette for this target: the mixer shade (its main and
 		/// detail render channels mixed together -- the game's own third-color idiom, no
 		/// pigment of ours) plus the raw detail color for the line's dither channel. Computed
-		/// once at snapshot time from the same reused RenderForUI buffer the tile came from.</summary>
+		/// once at snapshot time from the same RenderForUI result the tile came from. On lang the
+		/// Visual reads Detail 'w' when nothing set a detail color; with an empty Render.DetailColor
+		/// that 'w' is the fallback, and no detail means the main color, as on stable.</summary>
+#if VERSION_1_1
+		private static void WaterlineColors(XRL.World.GameObject target, Visual v, out Color mixer, out Color creatureDetail)
+		{
+			char fg = v.Foreground == '\0' ? 'y' : v.Foreground;
+			char dt = v.Detail == 'w' && (target.Render?.DetailColor.IsNullOrEmpty() ?? true) ? fg : v.Detail;
+#else
 		private static void WaterlineColors(RenderEvent re, out Color mixer, out Color creatureDetail)
 		{
 			char fg = 'y';
@@ -695,6 +719,7 @@ namespace Cleo.TerraFirma.Scripts
 					fg = cs[amp + 1];
 			}
 			char dt = re.DetailColor.IsNullOrEmpty() ? fg : re.DetailColor[0];
+#endif
 			Color main = ConsoleLib.Console.ColorUtility.ColorMap.GetValue(fg);
 			creatureDetail = ConsoleLib.Console.ColorUtility.ColorMap.GetValue(dt);
 			mixer = Color.Lerp(main, creatureDetail, LINE_MIX);
