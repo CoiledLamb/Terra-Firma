@@ -973,4 +973,16 @@
 			<object Weight="5" Number="1-2" Blueprint="Cleo_TerraFirma_Inkling" />
 		</group>
 	</population>
+	<!-- Inkling in the Tomb of the Eaters (user 2026-10-17: small weight). TombCreatures feeds the
+	     catacombs and crematory, CryptCreatures the crypts; 5 against each table's 50 is about one pick in eleven. -->
+	<population Name="TombCreatures" Load="Merge">
+		<group Name="Creatures" Style="pickone">
+			<object Weight="5" Number="1-2" Blueprint="Cleo_TerraFirma_Inkling" />
+		</group>
+	</population>
+	<population Name="CryptCreatures" Load="Merge">
+		<group Name="Creatures" Style="pickone">
+			<object Weight="5" Number="1-2" Blueprint="Cleo_TerraFirma_Inkling" />
+		</group>
+	</population>
 </populations>
