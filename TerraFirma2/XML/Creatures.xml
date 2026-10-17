@@ -328,7 +328,8 @@
        Temper lives in Cleo_TerraFirma_StoneKissedRecluse: keeps his distance, turns on you up
        close, calms when you back off unless you hurt him, ignores you at loved Hermits rep,
        rings himself with statues on placement. Gaze level 3 (DC 14 + WIL) and Role are Codex
-       PROPOSAL dials. Spawn: base Mountains_Creatures pool by tag. -->
+       PROPOSAL dials. Spawn: PopulationTables.xml merge into MountainsZoneGlobals-Reachable;
+       no region _Creatures tag, which only the village builders read (user 2026-10-17). -->
   <object Name="Cleo_TerraFirma_StoneKissedHermit" Inherits="BaseHumanoid">
     <part Name="Render" DisplayName="stone-kissed hermit" Tile="stonekissed_hermit.png" RenderString="h" ColorString="&amp;y" DetailColor="Y" />
     <part Name="Corpse" CorpseChance="0" />
@@ -344,7 +345,6 @@
     <part Name="Cleo_TerraFirma_StoneKissedRecluse" />
     <inventoryobject Blueprint="Knollworm Skull" Number="1" />
     <tag Name="Role" Value="Controller" />
-    <tag Name="DynamicObjectsTable:Mountains_Creatures" />
   </object>
 
   <!-- Inkling (designed with the user 2026-10-17; sprite, colors, factions and description

@@ -973,6 +973,14 @@
 			<object Weight="5" Number="1-2" Blueprint="Cleo_TerraFirma_Inkling" />
 		</group>
 	</population>
+	<!-- Stone-kissed hermit in the wild mountains (user 2026-10-17: chance 10, alone). Base wild
+	     mountain creatures roll from this pickeach group, the way Hide-Sheathed Hermit sits in
+	     HillsZoneGlobals-Reachable; the group's own Chance 95 still applies. -->
+	<population Name="MountainsZoneGlobals-Reachable" Load="Merge">
+		<group Name="Creatures" Style="pickeach">
+			<object Chance="10" Number="1" Blueprint="Cleo_TerraFirma_StoneKissedHermit" />
+		</group>
+	</population>
 	<!-- Inkling in the Tomb of the Eaters (user 2026-10-17: small weight). TombCreatures feeds the
 	     catacombs and crematory, CryptCreatures the crypts; 5 against each table's 50 is about one pick in eleven. -->
 	<population Name="TombCreatures" Load="Merge">
