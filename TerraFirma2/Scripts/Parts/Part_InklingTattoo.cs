@@ -15,7 +15,7 @@ namespace XRL.World.Parts
 	///
 	/// Its tattoo is one entry in the host's base Tattoos part; only that entry is ever removed,
 	/// never the whole body part's list. It hops off when the host is hurt or dies, or when its
-	/// tattoo is gone. While riding it gets hungry and eats or garbles the host's other tattoos
+	/// tattoo is gone, or on its own after RideFor turns or when there is nothing left to eat. While riding it gets hungry and eats or garbles the host's other tattoos
 	/// (the Mark of Death included, user 2026-10-17: "no need for a guard there").
 	///
 	/// Hunger timing is a Codex PROPOSAL dial. Message lines are DRAFTS for the user.
@@ -34,6 +34,11 @@ namespace XRL.World.Parts
 		public int EatChance = 50;
 
 		public int TurnsToMeal = -1;
+
+		/// <summary>Turns it rides before wandering off on its own (user 2026-10-17: it never left). DIAL.</summary>
+		public string RideFor = "200-500";
+
+		public int TurnsToLeave = -1;
 
 		public override bool SameAs(IPart p) => false;
 
@@ -78,12 +83,22 @@ namespace XRL.World.Parts
 				HopOff(Frightened: true, Silent: false);
 				return base.HandleEvent(E);
 			}
+			if (TurnsToLeave < 0)
+				TurnsToLeave = RideFor.RollCached();
+			if (--TurnsToLeave <= 0)
+			{
+				if (!HopOff(Frightened: false, Silent: false))
+					TurnsToLeave = 1; // boxed in: try again next turn
+				return base.HandleEvent(E);
+			}
 			if (TurnsToMeal < 0)
 				TurnsToMeal = MealEvery.RollCached();
 			if (--TurnsToMeal <= 0)
 			{
 				TurnsToMeal = -1;
-				Feed();
+				// nothing left to eat on this host: it goes looking elsewhere
+				if (!Feed())
+					HopOff(Frightened: false, Silent: false);
 			}
 			return base.HandleEvent(E);
 		}
@@ -113,16 +128,23 @@ namespace XRL.World.Parts
 		/// <summary>Eat or garble one of the host's other tattoos. True if it found one.</summary>
 		public bool Feed()
 		{
-			Tattoos tattoos = ParentObject.GetPart<Tattoos>();
+			return GameObject.Validate(ref Inkling) && EatOne(Inkling, ParentObject, BodyPartID, TattooText, EatChance);
+		}
+
+		/// <summary>Eater eats or garbles one of Host's tattoos, skipping one entry (a rider's own
+		/// tattoo; pass null to skip none). Shared by riding and wild inklings. True if it ate.</summary>
+		public static bool EatOne(GameObject Eater, GameObject Host, int SkipPart, string SkipText, int EatChance)
+		{
+			Tattoos tattoos = Host.GetPart<Tattoos>();
 			if (tattoos == null)
 				return false;
 			List<(int Part, int Index)> meals = new List<(int, int)>();
 			foreach (KeyValuePair<int, List<string>> entry in tattoos.Descriptions)
 			{
-				bool skippedSelf = false;
+				bool skippedSelf = SkipText == null;
 				for (int i = 0; i < entry.Value.Count; i++)
 				{
-					if (!skippedSelf && entry.Key == BodyPartID && entry.Value[i] == TattooText)
+					if (!skippedSelf && entry.Key == SkipPart && entry.Value[i] == SkipText)
 					{
 						skippedSelf = true;
 						continue;
@@ -132,31 +154,31 @@ namespace XRL.World.Parts
 			}
 			if (meals.Count == 0)
 			{
-				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", "hungry, but no other tattoos to eat");
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"hungry, but no other tattoos on {Host.Blueprint}");
 				return false;
 			}
 			(int part, int index) = meals.GetRandomElement();
 			List<string> list = tattoos.Descriptions[part];
 			string old = list[index];
-			string partName = ParentObject.Body?.GetPartByID(part)?.Name ?? "skin";
+			string partName = Host.Body?.GetPartByID(part)?.Name ?? "skin";
 			if (Stat.Random(1, 100) <= EatChance)
 			{
 				list.RemoveAt(index);
 				if (list.Count == 0)
 					tattoos.RemoveTattoo(part);
 				else
-					ParentObject.CheckMarkOfDeath();
-				if (ParentObject.IsPlayer())
-					MessageQueue.AddPlayerMessage($"{Inkling.Does("eat")} the tattoo of {old} on your {partName}."); // DRAFT line
-				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"ate tattoo '{old}' on {partName}");
+					Host.CheckMarkOfDeath();
+				if (Host.IsPlayer())
+					MessageQueue.AddPlayerMessage($"{Eater.Does("eat")} the tattoo of {old} on your {partName}."); // DRAFT line
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"ate tattoo '{old}' on {Host.Blueprint}'s {partName}");
 			}
 			else
 			{
 				list[index] = Grammar.Obfuscate(old, 10);
-				ParentObject.CheckMarkOfDeath();
-				if (ParentObject.IsPlayer())
-					MessageQueue.AddPlayerMessage($"{Inkling.Does("nibble")} at the tattoo of {old} on your {partName}, smearing it."); // DRAFT line
-				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"garbled tattoo '{old}' -> '{list[index]}' on {partName}");
+				Host.CheckMarkOfDeath();
+				if (Host.IsPlayer())
+					MessageQueue.AddPlayerMessage($"{Eater.Does("nibble")} at the tattoo of {old} on your {partName}, smearing it."); // DRAFT line
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"garbled tattoo '{old}' -> '{list[index]}' on {Host.Blueprint}'s {partName}");
 			}
 			return true;
 		}

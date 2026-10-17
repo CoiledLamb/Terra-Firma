@@ -48,5 +48,18 @@ namespace Cleo.TerraFirma.Scripts
 			if (rider == null || !rider.HopOff(Frightened: false, Silent: false))
 				MessageQueue.AddPlayerMessage("tfinkoff: no inkling riding, or no open cell beside you.", Capitalize: false);
 		}
+
+		/// <summary>Every inkling in the zone gets hungry right now, skipping the meal timer.</summary>
+		[WishCommand(Command = "tfinkhungry")]
+		public static void Hungry()
+		{
+			int n = 0;
+			foreach (GameObject obj in The.Player.CurrentZone.GetObjectsWithPart("Cleo_TerraFirma_Inkling"))
+			{
+				obj.GetPart<Cleo_TerraFirma_Inkling>().TurnsToMeal = 0;
+				n++;
+			}
+			MessageQueue.AddPlayerMessage($"tfinkhungry: {n} inkling(s) hungry now.", Capitalize: false);
+		}
 	}
 }

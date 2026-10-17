@@ -16,12 +16,16 @@ namespace XRL.World.Parts
 	/// adjacent wall and passes for graffiti. Entry is the engine's own wall rule, Brain.WallWalker
 	/// (Physics.HandleEvent(ObjectEnteringCellEvent)), so nothing phases; the disguise is base
 	/// Mimic's render idiom aimed at the wall in its own cell, and the look text is base
-	/// Graffitied's line followed by the inkling's own description (user 2026-10-17). It comes
+	/// Graffitied's line, reading like any graffitied wall (user 2026-10-17). It comes
 	/// back out after CalmTurns with nothing scary near.
 	///
 	/// Petted (base Pettable, so only when it likes you): it rides on you as a tattoo. The whole
 	/// creature leaves the map and is held by Cleo_TerraFirma_InklingTattoo on the host, so its
 	/// inventory, skills and the rest come back intact when it hops off.
+	///
+	/// Hungry (every MealEvery turns, hiding or not, and hunger beats fear): it walks to the
+	/// nearest tattooed creature within HungerRadius and jumps on as a tattoo, no petting needed,
+	/// then eats from riding (user 2026-10-17). A wild inkling never eats directly.
 	///
 	/// Radii and turn counts are Codex PROPOSAL dials. Message lines are DRAFTS for the user.
 	/// </summary>
@@ -36,6 +40,17 @@ namespace XRL.World.Parts
 
 		/// <summary>Quiet turns in the wall before it comes out. DIAL.</summary>
 		public int CalmTurns = 5;
+
+		/// <summary>Turns between a wild inkling's meals, rolled fresh after each. DIAL.</summary>
+		public string MealEvery = "100-200";
+
+		/// <summary>How far a hungry inkling will go for a tattooed creature. DIAL.</summary>
+		public int HungerRadius = 8;
+
+		/// <summary>Chance in 100 a meal eats the tattoo outright; otherwise it smears it. DIAL.</summary>
+		public int EatChance = 50;
+
+		public int TurnsToMeal = -1;
 
 		public bool Hidden;
 		public bool Scared;
@@ -77,6 +92,22 @@ namespace XRL.World.Parts
 				return base.HandleEvent(E);
 
 			GameObject threat = FindThreat();
+
+			// hunger ticks whether or not it is hiding, and beats fear (user 2026-10-17: it should
+			// care about your tattoos before it rides you; in-game, a hiding inkling never got hungry)
+			if (TurnsToMeal < 0)
+				TurnsToMeal = MealEvery.RollCached();
+			if (TurnsToMeal > 0)
+				TurnsToMeal--;
+			GameObject meal = TurnsToMeal == 0 ? FindTattooed() : null;
+			// adjacent: it jumps on, straight out of the wall if need be, and eats from riding
+			// (user 2026-10-17: "it should have to jump on to you to eat the tattoo")
+			if (meal != null && ParentObject.DistanceTo(meal) <= 1 && RideOn(meal, Hungry: true))
+			{
+				TurnsToMeal = -1;
+				return false;
+			}
+
 			if (Hidden)
 			{
 				if (!ParentObject.CurrentCell.HasWall())
@@ -85,12 +116,45 @@ namespace XRL.World.Parts
 					Unhide();
 					return base.HandleEvent(E);
 				}
-				if (threat != null)
+				if (meal != null)
+				{
+					// hunger draws it out of the wall
+					if (Emerge())
+						return false;
+				}
+				else if (threat != null)
 					QuietTurns = 0;
 				else if (++QuietTurns >= CalmTurns && Emerge())
 					return false;
 				ParentObject.UseEnergy(1000, "Pass");
 				return false;
+			}
+
+			if (meal != null)
+			{
+				// only when not already walking: MoveTo spends its first turn pathfinding and pushes
+				// Step goals (MoveTo.TakeAction), so re-pushing it every turn never takes a step
+				if (!brain.HasGoal<MoveTo>() && !brain.HasGoal<Step>())
+				{
+					// head for an open cell beside the meal; FindPath won't end on an occupied cell
+					Cell goal = null;
+					int best = int.MaxValue;
+					foreach (Cell c in meal.CurrentCell.GetLocalAdjacentCells())
+					{
+						if (!c.IsEmpty() || c.HasWall())
+							continue;
+						int d = ParentObject.CurrentCell.PathDistanceTo(c);
+						if (d < best)
+						{
+							best = d;
+							goal = c;
+						}
+					}
+					brain.Goals.Clear();
+					brain.PushGoal(goal != null ? new MoveTo(goal) : new MoveTo(meal, shortBy: 1));
+					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"hungry: heading for {meal.Blueprint}");
+				}
+				return base.HandleEvent(E);
 			}
 
 			if (threat != null || Scared)
@@ -140,6 +204,40 @@ namespace XRL.World.Parts
 			return best;
 		}
 
+		GameObject FindTattooed()
+		{
+			Cell here = ParentObject.CurrentCell;
+			Zone zone = here?.ParentZone;
+			if (zone == null)
+				return null;
+			GameObject best = null;
+			int bestDist = int.MaxValue;
+			for (int dx = -HungerRadius; dx <= HungerRadius; dx++)
+			{
+				for (int dy = -HungerRadius; dy <= HungerRadius; dy++)
+				{
+					Cell cell = zone.GetCell(here.X + dx, here.Y + dy);
+					if (cell == null)
+						continue;
+					foreach (GameObject obj in cell.Objects)
+					{
+						if (obj == ParentObject || !obj.IsCreature)
+							continue;
+						Tattoos tattoos = obj.GetPart<Tattoos>();
+						if (tattoos == null || tattoos.Descriptions.Count == 0)
+							continue;
+						int d = Math.Max(Math.Abs(dx), Math.Abs(dy));
+						if (d < bestDist)
+						{
+							best = obj;
+							bestDist = d;
+						}
+					}
+				}
+			}
+			return best;
+		}
+
 		bool Hide()
 		{
 			Cell here = ParentObject.CurrentCell;
@@ -161,6 +259,9 @@ namespace XRL.World.Parts
 			}
 			Hidden = true;
 			Scared = false;
+			// the base wall-dweller flag: look (base LookSorter) then ranks it with the wall and picks
+			// the creature, and the zone wall sanity check leaves it be (caught in game 2026-10-17)
+			ParentObject.Brain.LivesOnWalls = true;
 			QuietTurns = 0;
 			GraffitiText = RollGraffiti();
 			ParentObject.Brain.Goals.Clear();
@@ -193,7 +294,10 @@ namespace XRL.World.Parts
 			QuietTurns = 0;
 			GraffitiText = null;
 			if (ParentObject.Brain != null)
+			{
 				ParentObject.Brain.WallWalker = false;
+				ParentObject.Brain.LivesOnWalls = false;
+			}
 		}
 
 		static string RollGraffiti()
@@ -236,13 +340,12 @@ namespace XRL.World.Parts
 			GameObject wall = HiddenIn;
 			if (wall != null && !string.IsNullOrEmpty(GraffitiText))
 			{
-				string own = E.Base.ToString();
 				E.Base.Clear().Append(wall.GetPart<Description>()?.Short ?? "");
 				if (E.Infix.Length > 0)
 					E.Infix.Append("\n");
-				// base Graffitied's line, then the inkling's own description (user 2026-10-17)
+				// base Graffitied's line alone: it reads like any graffitied wall (user 2026-10-17)
 				E.Infix.Append("\nGraffiti is scrawled across the surface. It reads: \n\n\"{{K|")
-					.Append(GraffitiText).Append("}}\"\n\n").Append(own);
+					.Append(GraffitiText).Append("}}\"\n");
 			}
 			return base.HandleEvent(E);
 		}
@@ -255,7 +358,7 @@ namespace XRL.World.Parts
 		}
 
 		/// <summary>Leave the map and ride on Host as a tattoo. False if Host has no room for one.</summary>
-		public bool RideOn(GameObject Host)
+		public bool RideOn(GameObject Host, bool Hungry = false)
 		{
 			if (Host?.Body == null || Host.HasPart<Cleo_TerraFirma_InklingTattoo>() || ParentObject.CurrentCell == null)
 				return false;
@@ -284,6 +387,7 @@ namespace XRL.World.Parts
 				Inkling = ParentObject,
 				BodyPartID = spot.ID,
 				TattooText = text,
+				TurnsToMeal = Hungry ? 1 : -1, // hungry: eats at the end of this turn
 			});
 			if (Host.IsPlayer())
 				MessageQueue.AddPlayerMessage($"{ParentObject.Does("seep")} into your skin and settles on your {spot.Name}."); // DRAFT line
