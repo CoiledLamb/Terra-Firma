@@ -5,6 +5,7 @@ using XRL.Messages;
 using XRL.Rules;
 using XRL.World.AI.GoalHandlers;
 using XRL.World.Anatomy;
+using XRL.World.Capabilities;
 
 namespace XRL.World.Parts
 {
@@ -347,6 +348,23 @@ namespace XRL.World.Parts
 				E.Infix.Append("\nGraffiti is scrawled across the surface. It reads: \n\n\"{{K|")
 					.Append(GraffitiText).Append("}}\"\n");
 			}
+			return base.HandleEvent(E);
+		}
+
+		public override void Register(GameObject Object, IEventRegistrar Registrar)
+		{
+			// object side, LATE: runs after PerceptionEvent's base line-of-sight check, which counts
+			// solid cells, so a hunter looking at the wall would otherwise see it
+			Registrar.Register(PerceptionEvent.ObjectID, EventOrder.LATE);
+			base.Register(Object, Registrar);
+		}
+
+		public override bool HandleEvent(PerceptionEvent E)
+		{
+			// hidden, it can't be seen by NPCs unless they're adjacent (user 2026-10-17); base
+			// smell, hearing and clairvoyance run earlier on the looker's side and still find it
+			if (Hidden && E.Object == ParentObject && !E.PlayerPerspective && E.Actor.DistanceTo(ParentObject) > 1)
+				E.Senses.Remove(Perception.Visual);
 			return base.HandleEvent(E);
 		}
 
