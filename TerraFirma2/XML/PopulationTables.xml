@@ -888,6 +888,13 @@
 			<group Name="Pigs" Style="pickeach">
 				<object Blueprint="Cleo_TerraFirma_Farm Boar Vessel" Number="1" Chance="15" />
 			</group>
+			<!-- A whole pen of them (user 2026-10-17: weight 1, stilt pig farmer). A new group name
+			     is added to Types beside the base herds (PopulationList.MergeFrom); the existing
+			     weights sum to 15, so this is 1 pen in 16. -->
+			<group Name="Cleo_TerraFirma_BoarVessels" Style="pickeach" Weight="1">
+				<object Blueprint="Cleo_TerraFirma_Farm Boar Vessel" Number="2-6" />
+				<object Blueprint="StiltPigFarmer" Number="1" />
+			</group>
 		</group>
 	</population>
 	<!-- Codex PROPOSAL: B02 lab defaults, interpreted as seeded labels, not blueprints. -->
