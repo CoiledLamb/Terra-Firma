@@ -1,0 +1,189 @@
+using System;
+using System.Collections.Generic;
+using XRL.Language;
+using XRL.Messages;
+using XRL.Rules;
+using XRL.World.Anatomy;
+
+namespace XRL.World.Parts
+{
+	/// <summary>
+	/// An inkling riding on its host as a tattoo (see Cleo_TerraFirma_Inkling). The creature itself
+	/// is held here, off the map: the plain GameObject field rides IComponent.Write's token
+	/// serialization, the same WriteGameObject call base LocalCache uses to keep whole objects
+	/// out of the zone, so it saves and loads with everything it had.
+	///
+	/// Its tattoo is one entry in the host's base Tattoos part; only that entry is ever removed,
+	/// never the whole body part's list. It hops off when the host is hurt or dies, or when its
+	/// tattoo is gone. While riding it gets hungry and eats or garbles the host's other tattoos
+	/// (the Mark of Death included, user 2026-10-17: "no need for a guard there").
+	///
+	/// Hunger timing is a Codex PROPOSAL dial. Message lines are DRAFTS for the user.
+	/// </summary>
+	[Serializable]
+	public class Cleo_TerraFirma_InklingTattoo : IPart
+	{
+		public GameObject Inkling;
+		public int BodyPartID;
+		public string TattooText;
+
+		/// <summary>Turns between meals, rolled fresh after each. DIAL.</summary>
+		public string MealEvery = "300-600";
+
+		/// <summary>Chance in 100 a meal eats the tattoo outright; otherwise it garbles it. DIAL.</summary>
+		public int EatChance = 50;
+
+		public int TurnsToMeal = -1;
+
+		public override bool SameAs(IPart p) => false;
+
+		public override bool WantEvent(int ID, int cascade)
+		{
+			return base.WantEvent(ID, cascade)
+				|| ID == SingletonEvent<EndTurnEvent>.ID
+				|| ID == TookDamageEvent.ID;
+		}
+
+		public override void Register(GameObject Object, IEventRegistrar Registrar)
+		{
+			Registrar.Register("BeforeDeathRemoval");
+			base.Register(Object, Registrar);
+		}
+
+		public override bool FireEvent(Event E)
+		{
+			if (E.ID == "BeforeDeathRemoval")
+				HopOff(Frightened: true, Silent: false);
+			return base.FireEvent(E);
+		}
+
+		public override bool HandleEvent(TookDamageEvent E)
+		{
+			if (E.Damage == null || E.Damage.Amount > 0)
+				HopOff(Frightened: true, Silent: false);
+			return base.HandleEvent(E);
+		}
+
+		public override bool HandleEvent(EndTurnEvent E)
+		{
+			if (!GameObject.Validate(ref Inkling))
+			{
+				RemoveOwnTattoo();
+				ParentObject.RemovePart(this);
+				return base.HandleEvent(E);
+			}
+			if (!HasOwnTattoo())
+			{
+				// someone took the tattoo off (another inkling's meal, a tattoo gun): it falls off too
+				HopOff(Frightened: true, Silent: false);
+				return base.HandleEvent(E);
+			}
+			if (TurnsToMeal < 0)
+				TurnsToMeal = MealEvery.RollCached();
+			if (--TurnsToMeal <= 0)
+			{
+				TurnsToMeal = -1;
+				Feed();
+			}
+			return base.HandleEvent(E);
+		}
+
+		List<string> OwnList()
+		{
+			Tattoos tattoos = ParentObject.GetPart<Tattoos>();
+			if (tattoos != null && tattoos.Descriptions.TryGetValue(BodyPartID, out List<string> list))
+				return list;
+			return null;
+		}
+
+		bool HasOwnTattoo() => OwnList()?.Contains(TattooText) ?? false;
+
+		void RemoveOwnTattoo()
+		{
+			Tattoos tattoos = ParentObject.GetPart<Tattoos>();
+			List<string> list = OwnList();
+			if (list == null || !list.Remove(TattooText))
+				return;
+			if (list.Count == 0)
+				tattoos.RemoveTattoo(BodyPartID); // also clears colors and rechecks the Mark of Death
+			else
+				ParentObject.CheckMarkOfDeath();
+		}
+
+		/// <summary>Eat or garble one of the host's other tattoos. True if it found one.</summary>
+		public bool Feed()
+		{
+			Tattoos tattoos = ParentObject.GetPart<Tattoos>();
+			if (tattoos == null)
+				return false;
+			List<(int Part, int Index)> meals = new List<(int, int)>();
+			foreach (KeyValuePair<int, List<string>> entry in tattoos.Descriptions)
+			{
+				bool skippedSelf = false;
+				for (int i = 0; i < entry.Value.Count; i++)
+				{
+					if (!skippedSelf && entry.Key == BodyPartID && entry.Value[i] == TattooText)
+					{
+						skippedSelf = true;
+						continue;
+					}
+					meals.Add((entry.Key, i));
+				}
+			}
+			if (meals.Count == 0)
+			{
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", "hungry, but no other tattoos to eat");
+				return false;
+			}
+			(int part, int index) = meals.GetRandomElement();
+			List<string> list = tattoos.Descriptions[part];
+			string old = list[index];
+			string partName = ParentObject.Body?.GetPartByID(part)?.Name ?? "skin";
+			if (Stat.Random(1, 100) <= EatChance)
+			{
+				list.RemoveAt(index);
+				if (list.Count == 0)
+					tattoos.RemoveTattoo(part);
+				else
+					ParentObject.CheckMarkOfDeath();
+				if (ParentObject.IsPlayer())
+					MessageQueue.AddPlayerMessage($"{Inkling.Does("eat")} the tattoo of {old} on your {partName}."); // DRAFT line
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"ate tattoo '{old}' on {partName}");
+			}
+			else
+			{
+				list[index] = Grammar.Obfuscate(old, 10);
+				ParentObject.CheckMarkOfDeath();
+				if (ParentObject.IsPlayer())
+					MessageQueue.AddPlayerMessage($"{Inkling.Does("nibble")} at the tattoo of {old} on your {partName}, smearing it."); // DRAFT line
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"garbled tattoo '{old}' -> '{list[index]}' on {partName}");
+			}
+			return true;
+		}
+
+		/// <summary>Put the inkling back on the map beside the host and drop its tattoo.</summary>
+		public bool HopOff(bool Frightened, bool Silent)
+		{
+			Cell here = ParentObject.CurrentCell;
+			if (here == null || !GameObject.Validate(ref Inkling))
+				return false;
+			List<Cell> open = new List<Cell>();
+			foreach (Cell cell in here.GetLocalAdjacentCells())
+			{
+				if (cell.IsEmpty() && !cell.HasWall())
+					open.Add(cell);
+			}
+			if (open.Count == 0)
+				return false;
+			RemoveOwnTattoo();
+			GameObject inkling = Inkling;
+			Inkling = null;
+			ParentObject.RemovePart(this);
+			inkling.GetPart<Cleo_TerraFirma_Inkling>()?.HopOff(open.GetRandomElement(), Frightened);
+			if (!Silent && ParentObject.IsPlayer())
+				MessageQueue.AddPlayerMessage($"{inkling.Does("peel")} off your skin."); // DRAFT line
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"hopped off {ParentObject.Blueprint} (frightened={Frightened})");
+			return true;
+		}
+	}
+}

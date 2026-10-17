@@ -321,4 +321,51 @@
     <intproperty Name="Bleeds" Value="0" />
     <tag Name="Tier" Value="1" />
   </object>
+
+  <!-- Stone-kissed hermit (design 2026-10-13, description, sprite and colors user 2026-10-17).
+       Hide-Sheathed Hermit's chassis (BaseHumanoid, Hermits-100, AV 6, L8, HP 25, resists 10)
+       with the TF1 gaze as his whole weapon, so no cudgel skills and no equipment builder.
+       Temper lives in Cleo_TerraFirma_StoneKissedRecluse: keeps his distance, turns on you up
+       close, calms when you back off unless you hurt him, ignores you at loved Hermits rep,
+       rings himself with statues on placement. Gaze level 3 (DC 14 + WIL) and Role are Codex
+       PROPOSAL dials. Spawn: base Mountains_Creatures pool by tag. -->
+  <object Name="Cleo_TerraFirma_StoneKissedHermit" Inherits="BaseHumanoid">
+    <part Name="Render" DisplayName="stone-kissed hermit" Tile="stonekissed_hermit.png" RenderString="h" ColorString="&amp;y" DetailColor="Y" />
+    <part Name="Corpse" CorpseChance="0" />
+    <stat Name="AV" Value="6" />
+    <stat Name="Level" Value="8" />
+    <stat Name="Hitpoints" Value="25" />
+    <stat Name="ColdResistance" Value="10" />
+    <stat Name="HeatResistance" Value="10" />
+    <stat Name="ElectricResistance" Value="10" />
+    <part Name="Brain" Hostile="false" Factions="Hermits-100" />
+    <part Name="Description" Short="A dusting of stone clings to =pronouns.objective= like winter frost. =pronouns.Possessive= movements are stiff and halting, but =pronouns.subjective= =verb:avert:afterpronoun= =pronouns.possessive= face from yours, unwilling, or perhaps unable, to meet your gaze." />
+    <mutation Name="Cleo_TerraFirma_GorgonsGaze" Level="3" />
+    <part Name="Cleo_TerraFirma_StoneKissedRecluse" />
+    <inventoryobject Blueprint="Knollworm Skull" Number="1" />
+    <tag Name="Role" Value="Controller" />
+    <tag Name="DynamicObjectsTable:Mountains_Creatures" />
+  </object>
+
+  <!-- Inkling (designed with the user 2026-10-17; sprite, colors, factions and description
+       theirs). Weak cave prey: hides in walls as graffiti when scared, rides on you as a tattoo
+       when petted (base Pettable, so only once it likes you), eats or garbles your other
+       tattoos while riding. All of that is Cleo_TerraFirma_Inkling + _InklingTattoo. Bleeds
+       ink like the base urchins and leaves a base InkDrop puddle on death (SpawnOnDeath, no
+       puff). Stats are Codex PROPOSAL dials. PetResponse and the conversation emote are still
+       BaseAnimal's soft growl; owed to the user if they want the inkling's own. Spawn: merged
+       into Tier2CaveCreatures in PopulationTables.xml. -->
+  <object Name="Cleo_TerraFirma_Inkling" Inherits="BaseAnimal">
+    <part Name="Render" DisplayName="inkling" Tile="inkling.png" RenderString="i" ColorString="&amp;K" DetailColor="Y" />
+    <part Name="Corpse" CorpseChance="0" />
+    <stat Name="Level" Value="2" />
+    <stat Name="Hitpoints" Value="6" />
+    <stat Name="AV" Value="0" />
+    <part Name="Brain" Hostile="false" Factions="Prey-100,Newly Sentient Beings-50" />
+    <part Name="Description" Short="Pitch spilled forth from the primordial brush, and congealed into a skittish, trembling creature." />
+    <part Name="Pettable" />
+    <part Name="SpawnOnDeath" Blueprint="InkDrop" DoPuff="false" />
+    <part Name="Cleo_TerraFirma_Inkling" />
+    <tag Name="BleedLiquid" Value="ink-1000" />
+  </object>
 </objects>
