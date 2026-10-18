@@ -1070,9 +1070,9 @@
 	     FlowerFieldsPopulation's Creatures group (surface zones) and FlowerfieldCreatures (the
 	     biome's creature pick). One variant per roll, a small cluster of it. No Chance (base's
 	     pick-one weighs first, then rolls Chance; Chance 10 at weight 1 was about one cluster per
-	     100+ screens). Raised 2026-10-18 (user: "a good bit more common"): surface Weight 15,
-	     about 11% per region, roughly half of fresh flower-field screens; caves Weight 25,
-	     about 14% of FlowerfieldCreatures picks. Number is a Codex PROPOSAL dial. -->
+	     100+ screens). 2026-10-18 (user: "a good bit more common", then "less so in the caves, more on
+	     the surface"): surface Weight 30, about 18% per region, most fresh flower-field screens;
+	     caves Weight 5, about 0.7% per region, one subterranean screen in ten or so. Number is a Codex PROPOSAL dial. -->
 	<population Name="Cleo_TerraFirma_Burrowbees">
 		<group Name="Variant" Style="pickone">
 			<object Weight="1" Number="2-4" Blueprint="Cleo_TerraFirma_DogthornBurrowbee" />
@@ -1082,12 +1082,12 @@
 	</population>
 	<population Name="FlowerFieldsPopulation" Load="Merge">
 		<group Name="Creatures" Style="pickone">
-			<table Weight="15" Name="Cleo_TerraFirma_Burrowbees" />
+			<table Weight="30" Name="Cleo_TerraFirma_Burrowbees" />
 		</group>
 	</population>
 	<population Name="FlowerfieldCreatures" Load="Merge">
 		<group Name="Creatures" Style="pickone">
-			<table Weight="25" Name="Cleo_TerraFirma_Burrowbees" />
+			<table Weight="5" Name="Cleo_TerraFirma_Burrowbees" />
 		</group>
 	</population>
 </populations>
