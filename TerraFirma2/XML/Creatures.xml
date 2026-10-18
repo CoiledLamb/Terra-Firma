@@ -341,7 +341,7 @@
     <stat Name="HeatResistance" Value="10" />
     <stat Name="ElectricResistance" Value="10" />
     <part Name="Brain" Hostile="false" Factions="Hermits-100" />
-    <part Name="Description" Short="A dusting of stone clings to =pronouns.objective= like winter frost. =pronouns.Possessive= movements are stiff and halting, but =pronouns.subjective= =verb:avert:afterpronoun= =pronouns.possessive= face from yours, unwilling, or perhaps unable, to meet your gaze." />
+    <part Name="Description" Short="A dusting of stone clings to =pronouns.objective= like winter frost. =pronouns.Possessive= movements are stiff and halting; =pronouns.subjective= =verb:avert:afterpronoun= =pronouns.possessive= face from yours, unwilling, or perhaps unable, to meet your gaze." />
     <mutation Name="Cleo_TerraFirma_GorgonsGaze" Level="3" />
     <part Name="Cleo_TerraFirma_StoneKissedRecluse" />
     <inventoryobject Blueprint="Knollworm Skull" Number="1" />
