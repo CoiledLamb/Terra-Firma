@@ -3749,29 +3749,43 @@ namespace Cleo.TerraFirma.Scripts
 			bool SeatMerchant(GameObject who)
 			{
 				if (merchantPlaced) return false;
-				var walls = new List<Cell>();
-				var seen = new HashSet<int>();
+				// Potted since 2026-10-18 (user): a floor cell set against a wall, like a pot by
+				// the wall (base Sixshrew stands on the floor). It is immobile, so it must never
+				// block a passage: its open neighbors, walked around the ring, form one unbroken
+				// run, so anything that could pass beside it still can.
+				int[][] ring = { new[]{1,0}, new[]{1,1}, new[]{0,1}, new[]{-1,1}, new[]{-1,0}, new[]{-1,-1}, new[]{0,-1}, new[]{1,-1} };
+				bool Open(int x, int y)
+				{
+					if (!g.Inb(x, y)) return false;
+					int i = g.Idx(x, y);
+					Cell c = Z.GetCell(x, y);
+					return g.C[i] == FLOOR && c != null && !c.IsSolid();
+				}
+				var spots = new List<Cell>();
 				for (int i = 0; i < g.W * g.H; i++)
 				{
 					if (g.C[i] != FLOOR || g.Host[i] != 0 || g.Water[i] != 0) continue;
 					int x = i % g.W, y = i / g.W;
-					Cell approach = Z.GetCell(x, y);
-					if (approach == null || approach.IsSolid()) continue;
-					foreach (var d in N4)
+					Cell spot = Z.GetCell(x, y);
+					if (spot == null || !spot.IsEmpty()) continue;
+					bool againstWall = N4.Any(d => g.Inb(x + d[0], y + d[1]) && (Z.GetCell(x + d[0], y + d[1])?.HasWall() ?? false));
+					if (!againstWall) continue;
+					int open = 0, runs = 0;
+					for (int k = 0; k < ring.Length; k++)
 					{
-						int wx = x + d[0], wy = y + d[1];
-						if (!g.Inb(wx, wy)) continue;
-						Cell wall = Z.GetCell(wx, wy);
-						if (wall == null || !wall.HasWall() || wall.HasObjectWithPart("Combat")) continue;
-						if (seen.Add(g.Idx(wx, wy))) walls.Add(wall);
+						bool here = Open(x + ring[k][0], y + ring[k][1]);
+						bool prev = Open(x + ring[(k + 7) % 8][0], y + ring[(k + 7) % 8][1]);
+						if (here) open++;
+						if (here && !prev) runs++;
 					}
+					if (open > 0 && runs == 1)
+						spots.Add(spot);
 				}
-				// A wall-bound shop must never fall back to a floor cell or block a passage.
-				if (walls.Count == 0) return false;
-				Cell selected = walls[R(0, walls.Count - 1)];
+				if (spots.Count == 0) return false;
+				Cell selected = spots[R(0, spots.Count - 1)];
 				selected.AddObject(who);
 				merchantPlaced = true;
-				Helpers.VerifyLog("WARREN", $"vine merchant seated on wall ({selected.X},{selected.Y})");
+				Helpers.VerifyLog("WARREN", $"provisioner potted against a wall at ({selected.X},{selected.Y})");
 				return true;
 			}
 			bool SeatByHint(GameObject who, string hint)

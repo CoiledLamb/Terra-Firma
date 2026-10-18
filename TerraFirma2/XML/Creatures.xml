@@ -6,8 +6,11 @@
        Lover's on purpose for now (user 2026-09-29); replace with the provisioner's own text
        later (T04). -->
   <object Name="Cleo_TerraFirma_Vine Merchant" Inherits="Jilted Lover">
-    <part Name="Render" DisplayName="quarry provisioner" />
-    <part Name="Brain" Hostile="false" Wanders="false" Mobile="false" LivesOnWalls="true" Factions="Consortium-100,Cleo_TerraFirma_Quarriers-50" />
+    <!-- potted, on the floor beside a wall (user 2026-10-18; base Sixshrew is the potted plant
+         merchant precedent): sprite and colors the user's, brown main, light green detail -->
+    <part Name="Render" DisplayName="quarry provisioner" Tile="quarry_provisioner.png" ColorString="&amp;w" TileColor="&amp;w" DetailColor="G" />
+    <part Name="Brain" Hostile="false" Wanders="false" Mobile="false" LivesOnWalls="false" Factions="Consortium-100,Cleo_TerraFirma_Quarriers-50" />
+    <removepart Name="WallColor" />
     <removepart Name="JiltedLoverProperties" />
     <removeinventoryobject Blueprint="Lovers_Thorns" />
     <part Name="Corpse" CorpseChance="0" />
