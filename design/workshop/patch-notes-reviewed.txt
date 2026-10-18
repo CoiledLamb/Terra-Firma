@@ -21,3 +21,8 @@ ca621ad noted Inkling: hidden in a wall, NPCs only see it from adjacent (object-
 2e4aebe noted Inkling: a meal takes the host's tattoo ink as its main color and clears the host's tint
 0e1f320 noted Inkling: host keeps its tattoo tint; hidden graffiti drawn and written in the inkling's ink color
 3774fc5 noted Close C14 inkling (journal); wild boar vessel spawns at half Boar's chance in its four biomes; dev wish tfpoproll
+ffeded2 noted Creatures: stone-kissed hermit + inkling (build, spawns, test wishes; sprites, recon notes)
+1ffcb35 noted Stone-kissed hermit: spawn in wild mountains (MountainsZoneGlobals-Reachable, chance 10), drop village-only tag
+de8e521 noted Stone-kissed hermit: statue ring flood-fills his own clearing instead of random cells
+47ae757 noted Stone-kissed hermit: Chance 10 in mountains and hills (diagnostic 100 retired)
+4fb22a0 noted Stone-kissed hermit: kit of staff (20% amber-tipped), robe or tunic, sandals

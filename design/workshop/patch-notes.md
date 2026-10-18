@@ -21,6 +21,7 @@ The ledger is design/workshop/patch-notes-reviewed.txt.
 
 new creatures:
 - inkling: hides in cave walls as graffiti, and rides along as a tattoo if you pet it. it gets hungry, eats tattoo ink, and takes on the color of what it ate. found in caves and in the tomb of the eaters, and sometimes kept as a village pet.
+- stone-kissed hermit: lives alone in the mountains and hills, ringed by statues of the local creatures. it backs away if you come close and turns on you with gorgon's gaze if you get too close. back off and it calms down and goes home, unless you've hurt it. hermits who love you leave you alone.
 
 changes:
 - boar vessels now turn up in the wild, in the same four places boars live, at half a boar's odds.
@@ -30,7 +31,6 @@ fixes:
 - fixed an error with petrification on the game's lang-experimental beta branch.
 
 ### not landed yet (not in the notes until it's done)
-- stone-kissed hermit: built, spawning in mountains and hills; its back-off, aggro and calm-down still need seeing in game.
 - refractive buckler and refractive shield: built but held (commented out); still owe names, descriptions, sprites and where you find them.
 - refractive gear reflecting gorgon's gaze: decided, not built.
 
