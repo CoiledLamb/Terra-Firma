@@ -10,7 +10,7 @@
     <!-- potted, on the floor beside a wall (user 2026-10-18; base Sixshrew is the potted plant
          merchant precedent): sprite and colors the user's, brown main, light green detail -->
     <part Name="Render" DisplayName="Pandogrove" Tile="quarry_provisioner.png" ColorString="&amp;w" TileColor="&amp;w" DetailColor="G" />
-    <part Name="Brain" Hostile="false" Wanders="false" Mobile="false" LivesOnWalls="false" Factions="Consortium-100,Cleo_TerraFirma_Quarriers-50" />
+    <part Name="Brain" Hostile="false" Wanders="false" Mobile="false" LivesOnWalls="false" Factions="Consortium-100,Cleo_TerraFirma_Quarriers-10" /> <!-- guild share 10 (user 2026-10-18): at 50 the guild's -200 starting rep made it hostile to every non-stonecarver -->
     <removepart Name="WallColor" />
     <part Name="Description" Short="A writhing coil of mottled vines wreathes a faded amphora. Chips line its rim like jagged teeth, and a single ragged leaf rises from its shaded belly to meet you." />
     <xtagGrammar Proper="true" />
