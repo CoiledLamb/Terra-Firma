@@ -39,6 +39,9 @@ namespace XRL.World.Parts
 		/// <summary>Feeling at or above which a creature doesn't scare it (Pettable's "liked" line).</summary>
 		public int LikedFeeling = 50;
 
+		/// <summary>Intelligence save an adjacent NPC makes to spot it hiding (user 2026-10-18). DIAL.</summary>
+		public int SpotSave = 10;
+
 		/// <summary>Quiet turns in the wall before it comes out. DIAL.</summary>
 		public int CalmTurns = 5;
 
@@ -361,9 +364,11 @@ namespace XRL.World.Parts
 
 		public override bool HandleEvent(PerceptionEvent E)
 		{
-			// hidden, it can't be seen by NPCs unless they're adjacent (user 2026-10-17); base
-			// smell, hearing and clairvoyance run earlier on the looker's side and still find it
-			if (Hidden && E.Object == ParentObject && !E.PlayerPerspective && E.Actor.DistanceTo(ParentObject) > 1)
+			// hidden, NPCs only see it from adjacent, and then only on an Intelligence save (user
+			// 2026-10-18: "a 10 int save"), rolled per look, the way Hidden's search rolls per move;
+			// base smell, hearing and clairvoyance run earlier on the looker's side and still find it
+			if (Hidden && E.Object == ParentObject && !E.PlayerPerspective && E.Senses.Contains(Perception.Visual)
+				&& (E.Actor.DistanceTo(ParentObject) > 1 || !E.Actor.MakeSave("Intelligence", SpotSave, Vs: "Inkling Spot", Source: ParentObject)))
 				E.Senses.Remove(Perception.Visual);
 			return base.HandleEvent(E);
 		}
