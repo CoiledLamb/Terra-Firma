@@ -379,4 +379,34 @@
     <part Name="Cleo_TerraFirma_Inkling" />
     <tag Name="BleedLiquid" Value="ink-1000" />
   </object>
+
+  <!-- Burrowbee (C15, designed with the user 2026-10-17/18; sprite, names, colors, factions and
+       description theirs). A flower-field bee that forages underground: base Burrowing does the
+       burrow, base Burrowed the hiding (invisible, can't attack, forced up when hit), and
+       Cleo_TerraFirma_BurrowbeeForager picks the next flower and surfaces beside it. Neutral,
+       fights when provoked with base Stinger; the three children differ only in Stinger variant
+       and detail color. Level, HP, AV and mutation levels are Codex PROPOSAL dials. -->
+  <object Name="Cleo_TerraFirma_Burrowbee" Inherits="BaseInsect">
+    <part Name="Render" DisplayName="burrowbee" Tile="burrowbee.png" RenderString="b" ColorString="&amp;W" TileColor="&amp;W" DetailColor="g" />
+    <part Name="Brain" Hostile="false" Factions="Insects-100,Prey-25" />
+    <part Name="Description" Short="Like a dancer mid-pirouette, =pronouns.subjective= =verb:twirl:afterpronoun= through the earth. Unhindered by the quickened loam, =pronouns.subjective= =verb:sup:afterpronoun= life's sweetest nectars against the painted backdrop of inflorescences." />
+    <stat Name="Level" Value="4" />
+    <stat Name="Hitpoints" Value="12" />
+    <stat Name="AV" Value="2" />
+    <mutation Name="Burrowing" Level="3" />
+    <part Name="Cleo_TerraFirma_BurrowbeeForager" />
+    <tag Name="BaseObject" Value="*noinherit" />
+  </object>
+  <object Name="Cleo_TerraFirma_DogthornBurrowbee" Inherits="Cleo_TerraFirma_Burrowbee">
+    <part Name="Render" DisplayName="dogthorn burrowbee" DetailColor="g" />
+    <mutation Name="Stinger" Variant="Stinger Poison" Level="2" />
+  </object>
+  <object Name="Cleo_TerraFirma_WitchwoodBurrowbee" Inherits="Cleo_TerraFirma_Burrowbee">
+    <part Name="Render" DisplayName="witchwood burrowbee" DetailColor="w" />
+    <mutation Name="Stinger" Variant="Stinger Confusion" Level="2" />
+  </object>
+  <object Name="Cleo_TerraFirma_StillvineBurrowbee" Inherits="Cleo_TerraFirma_Burrowbee">
+    <part Name="Render" DisplayName="stillvine burrowbee" DetailColor="C" />
+    <mutation Name="Stinger" Variant="Stinger Paralysis" Level="2" />
+  </object>
 </objects>
