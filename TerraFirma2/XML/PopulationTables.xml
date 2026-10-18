@@ -980,14 +980,18 @@
 			<object Weight="5" Number="1-2" Blueprint="Cleo_TerraFirma_Inkling" />
 		</group>
 	</population>
-	<!-- Stone-kissed hermit in the wild mountains (user 2026-10-17: chance 10, alone). Base wild
-	     mountain creatures roll from this pickeach group, the way Hide-Sheathed Hermit sits in
-	     HillsZoneGlobals-Reachable; the group's own Chance 95 still applies. -->
+	<!-- Stone-kissed hermit in the wild mountains and hills (user 2026-10-17: chance 10, alone;
+	     2026-10-18: hills too, same chance). Base wild creatures of both roll from these pickeach
+	     groups, where Hide-Sheathed Hermit already sits in the hills; each group's own Chance 95
+	     still applies, so about one fresh screen in eleven. -->
 	<population Name="MountainsZoneGlobals-Reachable" Load="Merge">
 		<group Name="Creatures" Style="pickeach">
-			<!-- DIAGNOSTIC 2026-10-18: Chance 100 (user: "bump the chance way up - something isn't
-			     right"), so every fresh mountain screen should hold one; dial back once seen. -->
-			<object Chance="100" Number="1" Blueprint="Cleo_TerraFirma_StoneKissedHermit" />
+			<object Chance="10" Number="1" Blueprint="Cleo_TerraFirma_StoneKissedHermit" />
+		</group>
+	</population>
+	<population Name="HillsZoneGlobals-Reachable" Load="Merge">
+		<group Name="Creatures" Style="pickeach">
+			<object Chance="10" Number="1" Blueprint="Cleo_TerraFirma_StoneKissedHermit" />
 		</group>
 	</population>
 	<!-- Inkling in the Tomb of the Eaters (user 2026-10-17: small weight). TombCreatures feeds the
