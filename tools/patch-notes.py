@@ -73,12 +73,11 @@ def mark(status, hashes, rows):
 
 
 def release_text():
-    text = NOTES.read_text(encoding="utf-8")
-    text = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
-    m = re.search(r"^## (.+?)\n(.*?)(?=^## |\Z)", text, flags=re.DOTALL | re.MULTILINE)
-    version, body = m.group(1), m.group(2)
-    body = re.split(r"^### not landed yet", body, flags=re.MULTILINE)[0].strip()
-    bad = [l for l in body.splitlines() if "—" in l or any(ord(c) > 126 for c in l)]
+    text = re.sub(r"<!--.*?-->", "", NOTES.read_text(encoding="utf-8"), flags=re.DOTALL)
+    m = re.search(r"^(\d+(?:\.\d+)+)\s*\n(.*?)(?=^\d+(?:\.\d+)+\s*$|\Z)", text,
+                  flags=re.DOTALL | re.MULTILINE)
+    version, body = m.group(1), m.group(2).strip()
+    bad = [l for l in body.splitlines() if any(ord(c) > 126 for c in l)]
     return version, body, bad
 
 
@@ -101,7 +100,7 @@ def main(argv):
         mark("noted" if cmd == "note" else "skip", argv[1:], rows)
     elif cmd == "release":
         version, body, bad = release_text()
-        print(f"terra firma {version.split(' (')[0]}\n\n{body}")
+        print(f"{version}\n\n{body}")
         for l in bad:
             print(f"\n!! non-ASCII or em dash, fix before shipping: {l}", file=sys.stderr)
     elif cmd == "since":
