@@ -2896,3 +2896,7 @@ C14 closed (user: "close the inkling"). Seen in game 2026-10-17/18: hiding in a 
 ## Stone-kissed hermit verified — 2026-10-18
 
 C10 closed: the user saw every finish-line behavior in play: he backs off at distance 4, turns hostile at 2, calms and heads home when the player backs off, gazes (Gorgon's Gaze level 6, save difficulty 17, user 2026-10-18), rings himself with statues, and ignores a player at loved Hermits reputation. The statue ring flood-fills his own clearing (random cells had landed behind walls). Spawns: Chance 10 in base `MountainsZoneGlobals-Reachable` and `HillsZoneGlobals-Reachable`; the `DynamicObjectsTable:Mountains_Creatures` tag was dropped because only village builders read it. Kit: staff (20% amber-tipped), cloth robe or woven tunic, sandals, knollworm skull. Code: `Part_StoneKissedRecluse.cs`; dev wishes `tfhermitroll`, `tfhermitzone`, `tfpoproll` in `Scripts\Dev\_WishesHermit.cs`.
+
+## Wild boar vessel seen — 2026-10-18
+
+The user saw a wild boar vessel in play after its spawn merge (commit `3774fc5`): `Cleo_TerraFirma_BaseBoarVessel` beside base Boar in its four biomes at half Boar's chance or weight (Chance 5/12.5/2.5/5 in the four zone-globals tables, Weight 5/3/5/3 in the biome creature tables, weights rounded up). The region `_Creatures` tags stay for village populations. Not yet seen: a farm pen of vessels (`Cleo_TerraFirma_BoarVessels` herd in `StiltAnimalPen`, weight 1, commit `94788cc`).
