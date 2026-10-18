@@ -1,0 +1,23 @@
+# patch-notes ledger: commits already reviewed for patch-notes.md
+# since <hash> = the last release commit; only commits after it are listed
+# lines: <short hash> <noted|skip> <subject>
+since 2c0d405
+853747a skip TODO: inkling + burrowbee entries, hermit description/sprite
+436f809 skip TODO: C14 inkling seen in game, save/load while riding confirmed
+e92bfcb skip TODO: C14 inkling perception and ink color verified in game
+e15f094 skip Dev wish tfhermitroll: roll the mountain table 1000 times and count stone-kissed hermits
+dd7b8d2 skip Stone-kissed hermit: diagnostic Chance 100 in MountainsZoneGlobals-Reachable
+3773128 skip Dev wish tfhermitzone: report this screen's terrain and mountain-table spawns
+6c7e5fc skip Stone-kissed hermit: spawn trace (created, zone built and where he stands)
+a5502e9 skip TODO: C15 burrowbee variant names and paralysis detail color
+e8d3c41 skip TODO: C15 names no longer owed
+d9d76fe skip TODO: C15 paralysis variant is the jilted burrowbee
+9d16812 noted Build on both stable and lang-experimental: RenderForUI Visual port behind #if VERSION_1_1
+809dc3f noted Inkling: hunger, riding departure, graffiti look text
+03cd19d noted Inkling: weight 5 in Tomb of the Eaters TombCreatures and CryptCreatures
+94788cc noted Boar vessel: a whole-pen herd type in StiltAnimalPen (weight 1, stilt pig farmer)
+ca621ad noted Inkling: hidden in a wall, NPCs only see it from adjacent (object-side PerceptionEvent, LATE)
+3c835d7 noted Inkling: adjacent NPCs spot it hiding only on an Intelligence save, difficulty 10
+2e4aebe noted Inkling: a meal takes the host's tattoo ink as its main color and clears the host's tint
+0e1f320 noted Inkling: host keeps its tattoo tint; hidden graffiti drawn and written in the inkling's ink color
+3774fc5 noted Close C14 inkling (journal); wild boar vessel spawns at half Boar's chance in its four biomes; dev wish tfpoproll
