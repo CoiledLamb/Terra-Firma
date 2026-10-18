@@ -24,7 +24,7 @@ BRANCHES = ["items", "creatures"]
 
 # Commits a player never sees: tracker edits, dev wishes, diagnostics, release bookkeeping.
 NOISE = re.compile(
-    r"^(TODO|R0\d|Design|Merge branch)\b|^Dev wish|^Dev:|diagnostic Chance|spawn trace|"
+    r"^(TODO|R0\d|Design|Merge branch|Patch notes)\b|^Dev wish|^Dev:|diagnostic Chance|spawn trace|"
     r"harness|^tfpatch",
     re.IGNORECASE,
 )

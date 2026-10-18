@@ -26,3 +26,8 @@ ffeded2 noted Creatures: stone-kissed hermit + inkling (build, spawns, test wish
 de8e521 noted Stone-kissed hermit: statue ring flood-fills his own clearing instead of random cells
 47ae757 noted Stone-kissed hermit: Chance 10 in mountains and hills (diagnostic 100 retired)
 4fb22a0 noted Stone-kissed hermit: kit of staff (20% amber-tipped), robe or tunic, sandals
+a5e873e noted Stone-kissed hermit: Gorgon's Gaze level 6 (save difficulty 17)
+b2755a1 noted Stone-kissed hermit description: semicolon for 'but' (user)
+96a2d75 skip Patch notes: running design/workshop/patch-notes.md (0.2.8 seeded, 0.2.7/0.2.7.1 backfilled) + tools/patch-notes.py commit ledger
+29a6165 skip TODO: C15 paralysis variant is the stillvine burrowbee, cyan detail
+1737a1b skip Patch notes: stone-kissed hermit verified, into 0.2.8
