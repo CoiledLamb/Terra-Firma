@@ -2888,3 +2888,7 @@ B19 closed: the user verified that the Repair skill lifts desecration from carve
 ## Sundered-mountain banner verified — 2026-10-01
 
 B20 closed: the user verified the banner in play. `Cleo_TerraFirma_StonehandsBanner` ("banner of the sundered mountain", internal title Stonehands banner: a quiet Sunderlies nod after Sotur Stonehands in *Across Moghra'yi* Vol. I) is TF2 furniture on base `Banner`: quarriers with line of sight get rooted (+2 Willpower, 7 turns, refreshed every 5, no stacking). The stonecarver calling gets nothing by design, since the player is a native mutant who learned the trade. Spawns from the warren plaza dress table at weight 2 (CLAUDE PROPOSAL). Progress credit is now 20 of 57.
+
+## Inkling verified — 2026-10-18
+
+C14 closed (user: "close the inkling"). Seen in game 2026-10-17/18: hiding in a wall as graffiti, riding as a tattoo when petted, the hunger walk and jump-on, eating and smearing tattoos, save and load while riding, hidden from NPCs except an adjacent Intelligence save (difficulty 10, object-side `PerceptionEvent`), and eaten ink becoming its main and graffiti color while the host keeps its tint. Spawns: `Tier2CaveCreatures` weight 5 plus `TombCreatures` and `CryptCreatures` weight 5; village pets come free from base `PopulationInflux`. A natural spawn was not seen before closing. Code: `Part_Inkling.cs`, `Part_InklingTattoo.cs`; dev wishes in `Scripts\Dev\_WishesInkling.cs`. Dials (meal timers, radii, spot save) stay CLAUDE PROPOSAL; message lines stay DRAFT.

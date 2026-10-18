@@ -36,6 +36,36 @@ namespace Cleo.TerraFirma.Scripts
 			Helpers.VerifyLog("HERMIT", line);
 		}
 
+		/// <summary>"tfpoproll Table|Blueprint": roll any population table 1000 times and count
+		/// rolls holding that blueprint (wild boar vessel check, 2026-10-18).</summary>
+		[WishCommand(Command = "tfpoproll")]
+		public static bool PopRoll(string rest)
+		{
+			string[] args = (rest ?? "").Split('|');
+			if (args.Length != 2)
+			{
+				MessageQueue.AddPlayerMessage("tfpoproll: use tfpoproll Table|Blueprint", Capitalize: false);
+				return true;
+			}
+			string table = args[0].Trim(), blueprint = args[1].Trim();
+			int hits = 0;
+			for (int i = 0; i < 1000; i++)
+			{
+				foreach (PopulationResult result in PopulationManager.Generate(table))
+				{
+					if (result.Blueprint == blueprint)
+					{
+						hits++;
+						break;
+					}
+				}
+			}
+			string line = $"tfpoproll: {blueprint} in {hits}/1000 rolls of {table}.";
+			MessageQueue.AddPlayerMessage(line, Capitalize: false);
+			Helpers.VerifyLog("SPAWN", line);
+			return true;
+		}
+
 		/// <summary>What this screen is and what the mountain table put in it: terrain, and counts
 		/// of stone-kissed hermits, goats, cannibals and dogs (the table's own roster).</summary>
 		[WishCommand(Command = "tfhermitzone")]

@@ -897,6 +897,51 @@
 			</group>
 		</group>
 	</population>
+	<!-- WILD BOAR VESSEL SPAWNS (user 2026-10-18: "add the vessel wild spawns at half"). The
+	     region _Creatures tags only feed village builders, so the wild vessel joins base Boar's
+	     own entries in its four biomes at half Boar's chance or weight, same Number. Chance
+	     takes decimals (PopulationItem.RollChance parses a double); weights are whole numbers,
+	     so Boar's weight 5 halves to 3, rounded up. Merges find nested groups by name. -->
+	<population Name="DesertCanyonZoneGlobals-Reachable" Load="Merge">
+		<group Name="Creatures" Style="pickeach">
+			<object Chance="5" Number="1d2" Blueprint="Cleo_TerraFirma_BaseBoarVessel" />
+		</group>
+	</population>
+	<population Name="HillsZoneGlobals-Reachable" Load="Merge">
+		<group Name="Creatures" Style="pickeach">
+			<object Chance="12.5" Number="1d4" Blueprint="Cleo_TerraFirma_BaseBoarVessel" />
+		</group>
+	</population>
+	<population Name="JungleZoneGlobals" Load="Merge">
+		<group Name="Creatures" Style="pickeach">
+			<object Chance="2.5" Number="1-2" Blueprint="Cleo_TerraFirma_BaseBoarVessel" />
+		</group>
+	</population>
+	<population Name="FlowerFieldsPopulation" Load="Merge">
+		<group Name="Creatures" Style="pickone">
+			<object Chance="5" Number="1d2" Blueprint="Cleo_TerraFirma_BaseBoarVessel" />
+		</group>
+	</population>
+	<population Name="DesertCanyonCreatures" Load="Merge">
+		<group Name="Creatures" Style="pickone">
+			<object Weight="5" Number="1" Blueprint="Cleo_TerraFirma_BaseBoarVessel" />
+		</group>
+	</population>
+	<population Name="HillCreatures" Load="Merge">
+		<group Name="Creatures" Style="pickone">
+			<object Weight="3" Number="1" Blueprint="Cleo_TerraFirma_BaseBoarVessel" />
+		</group>
+	</population>
+	<population Name="FlowerfieldCreatures" Load="Merge">
+		<group Name="Creatures" Style="pickone">
+			<object Weight="5" Number="1" Blueprint="Cleo_TerraFirma_BaseBoarVessel" />
+		</group>
+	</population>
+	<population Name="JungleCreatures" Load="Merge">
+		<group Name="Creatures" Style="pickone">
+			<object Weight="3" Number="1" Blueprint="Cleo_TerraFirma_BaseBoarVessel" />
+		</group>
+	</population>
 	<!-- Codex PROPOSAL: B02 lab defaults, interpreted as seeded labels, not blueprints. -->
 	<population Name="Cleo_TerraFirma_WarrenWiring">
 		<group Style="pickone">
