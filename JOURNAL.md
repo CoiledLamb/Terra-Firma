@@ -2900,3 +2900,7 @@ C10 closed: the user saw every finish-line behavior in play: he backs off at dis
 ## Wild boar vessel seen — 2026-10-18
 
 The user saw a wild boar vessel in play after its spawn merge (commit `3774fc5`): `Cleo_TerraFirma_BaseBoarVessel` beside base Boar in its four biomes at half Boar's chance or weight (Chance 5/12.5/2.5/5 in the four zone-globals tables, Weight 5/2/5/2 in the biome creature tables, the halved 5s set to 2 by the user). The region `_Creatures` tags stay for village populations. Not yet seen: a farm pen of vessels (`Cleo_TerraFirma_BoarVessels` herd in `StiltAnimalPen`, weight 1, commit `94788cc`).
+
+## Pandogrove verified — 2026-10-18
+
+T04 closed: the quarry provisioner is now Pandogrove, one supercolony vine (after Pando) surfacing at every amphora, proper-named like base Sixshrew. The user verified it neutral to a fresh non-stonecarver, its dialogue chain (Kind, Here, Home, shaped like base Yurl's), and its placement in a fresh warren, potted on the floor beside a wall (WarrenCarver.SeatMerchant, never blocking a passage). Factions `Consortium-100,Cleo_TerraFirma_Quarriers-10`: at guild weight 50 the guild's -200 starting rep pushed its feeling past base's -10 hostility line for every non-stonecarver. Sprite, colors, description and dialogue are the user's.
