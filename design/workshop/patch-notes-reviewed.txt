@@ -31,3 +31,5 @@ b2755a1 noted Stone-kissed hermit description: semicolon for 'but' (user)
 96a2d75 skip Patch notes: running design/workshop/patch-notes.md (0.2.8 seeded, 0.2.7/0.2.7.1 backfilled) + tools/patch-notes.py commit ledger
 29a6165 skip TODO: C15 paralysis variant is the stillvine burrowbee, cyan detail
 1737a1b skip Patch notes: stone-kissed hermit verified, into 0.2.8
+73c2cfa skip Patch notes: ledger catches up on hermit gaze level; own commits count as noise
+6a074ac skip Patch notes: short plain bullet blocks (user)
