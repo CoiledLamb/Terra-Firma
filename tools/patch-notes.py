@@ -76,7 +76,8 @@ def release_text():
     text = re.sub(r"<!--.*?-->", "", NOTES.read_text(encoding="utf-8"), flags=re.DOTALL)
     m = re.search(r"^(\d+(?:\.\d+)+)\s*\n(.*?)(?=^\d+(?:\.\d+)+\s*$|\Z)", text,
                   flags=re.DOTALL | re.MULTILINE)
-    version, body = m.group(1), m.group(2).strip()
+    version, body = m.group(1), m.group(2)
+    body = re.split(r"^WORKING\s*$", body, flags=re.MULTILINE)[0].strip()
     bad = [l for l in body.splitlines() if any(ord(c) > 126 for c in l)]
     return version, body, bad
 

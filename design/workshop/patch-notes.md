@@ -1,19 +1,20 @@
 <!--
 running patch notes, newest on top. one short bullet per change, cleo edits.
-held/unfinished work goes in a comment under its version so it never ships.
+in-progress work goes under WORKING in its version; release stops there.
 python tools/patch-notes.py           commits not yet covered here
 python tools/patch-notes.py release   the top block, ready to paste
 -->
 
 0.2.8
-
-* new creature: inkling
-* new creature: stone-kissed hermit
-* boar vessels spawn in the wild
-* stilt pig farmers can keep boar vessel pens
-* fixed a petrification error on the lang-experimental branch
-
-<!-- held: refractive buckler + shield (commented out), refractive gear reflecting gorgon's gaze (not built) -->
+- now working on  lang experimental! feel free to try it out.
+- new creature: inkling
+- new creature: stone-kissed hermit
+- boar vessels spawn in the wild instead of only in villages
+- stilt pig farmers can keep boar vessel pens
+WORKING
+- new creature: burrowbees
+- new items: refractive targe, refractive lune
+- gorgon's gaze now bounces off of refractive gear, and can petrify its caster
 
 0.2.7.1
 
