@@ -324,11 +324,12 @@
 
   <!-- Stone-kissed hermit (design 2026-10-13, description, sprite and colors user 2026-10-17).
        Hide-Sheathed Hermit's chassis (BaseHumanoid, Hermits-100, AV 6, L8, HP 25, resists 10)
-       with the TF1 gaze as his whole weapon, so no cudgel skills and no equipment builder.
+       with the TF1 gaze as his main weapon, so no cudgel skills and no equipment builder; he
+       carries a plain staff he swings unskilled (user 2026-10-18: fine), robe and sandals.
        Temper lives in Cleo_TerraFirma_StoneKissedRecluse: keeps his distance, turns on you up
        close, calms when you back off unless you hurt him, ignores you at loved Hermits rep,
        rings himself with statues on placement. Gaze level 3 (DC 14 + WIL) and Role are Codex
-       PROPOSAL dials. Spawn: PopulationTables.xml merge into MountainsZoneGlobals-Reachable;
+       PROPOSAL dials. Spawn: PopulationTables.xml merges into Mountains/HillsZoneGlobals-Reachable;
        no region _Creatures tag, which only the village builders read (user 2026-10-17). -->
   <object Name="Cleo_TerraFirma_StoneKissedHermit" Inherits="BaseHumanoid">
     <part Name="Render" DisplayName="stone-kissed hermit" Tile="stonekissed_hermit.png" RenderString="h" ColorString="&amp;y" DetailColor="Y" />
@@ -344,6 +345,10 @@
     <mutation Name="Cleo_TerraFirma_GorgonsGaze" Level="3" />
     <part Name="Cleo_TerraFirma_StoneKissedRecluse" />
     <inventoryobject Blueprint="Knollworm Skull" Number="1" />
+    <!-- kit (user 2026-10-18): base @table idiom, Creatures.xml:1554; tables in PopulationTables.xml -->
+    <inventoryobject Blueprint="@Cleo_TerraFirma_StoneKissedHermitStaff" Number="1" />
+    <inventoryobject Blueprint="@Cleo_TerraFirma_StoneKissedHermitClothes" Number="1" />
+    <inventoryobject Blueprint="Sandals" Number="1" />
     <tag Name="Role" Value="Controller" />
   </object>
 

@@ -994,6 +994,20 @@
 			<object Chance="10" Number="1" Blueprint="Cleo_TerraFirma_StoneKissedHermit" />
 		</group>
 	</population>
+	<!-- Stone-kissed hermit's kit (user 2026-10-18: staffs with a chance of amber-tipped, some
+	     clothes and sandals; swinging the staff is fine). Weights are Codex PROPOSAL dials. -->
+	<population Name="Cleo_TerraFirma_StoneKissedHermitStaff">
+		<group Name="Staff" Style="pickone">
+			<object Weight="80" Blueprint="Staff" />
+			<object Weight="20" Blueprint="Amber-Tipped Staff" />
+		</group>
+	</population>
+	<population Name="Cleo_TerraFirma_StoneKissedHermitClothes">
+		<group Name="Clothes" Style="pickone">
+			<object Weight="1" Blueprint="Cloth Robe" />
+			<object Weight="1" Blueprint="Woven Tunic" />
+		</group>
+	</population>
 	<!-- Inkling in the Tomb of the Eaters (user 2026-10-17: small weight). TombCreatures feeds the
 	     catacombs and crematory, CryptCreatures the crypts; 5 against each table's 50 is about one pick in eleven. -->
 	<population Name="TombCreatures" Load="Merge">
