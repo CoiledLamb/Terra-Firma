@@ -394,6 +394,7 @@
     <stat Name="Hitpoints" Value="12" />
     <stat Name="AV" Value="2" />
     <mutation Name="Burrowing" Level="3" />
+    <mutation Name="Wings" Level="5" /> <!-- user 2026-10-18; level a Codex PROPOSAL dial (base dragonfly 10, glowmoth 1) -->
     <part Name="Cleo_TerraFirma_BurrowbeeForager" />
     <tag Name="BaseObject" Value="*noinherit" />
   </object>

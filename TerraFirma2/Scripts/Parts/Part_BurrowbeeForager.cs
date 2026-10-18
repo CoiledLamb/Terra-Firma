@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using XRL.Rules;
 using XRL.World.AI.GoalHandlers;
+using XRL.World.Capabilities;
 using XRL.World.Effects;
 
 namespace XRL.World.Parts
@@ -97,6 +98,9 @@ namespace XRL.World.Parts
 
 			if (burrowed == null)
 			{
+				// winged (user 2026-10-18): base Wings keeps it aloft whenever idle, so land first
+				if (Flight.IsFlying(ParentObject))
+					Flight.StopFlying(ParentObject, ParentObject);
 				CommandEvent.Send(ParentObject, "CommandBurrow");
 				if (!ParentObject.HasEffect<Burrowed>())
 				{
