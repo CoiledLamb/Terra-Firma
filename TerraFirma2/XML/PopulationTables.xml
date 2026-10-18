@@ -1068,8 +1068,10 @@
 	<!-- Burrowbees, flower fields only (C15; user 2026-10-18). The region _Creatures tag only
 	     feeds village builders, so they join base's two flower-field rolls by name instead:
 	     FlowerFieldsPopulation's Creatures group (surface zones) and FlowerfieldCreatures (the
-	     biome's creature pick). One variant per roll, a small cluster of it. Chance, weight and
-	     Number are Codex PROPOSAL dials, set at base's common flower-field values. -->
+	     biome's creature pick). One variant per roll, a small cluster of it. Surface Weight 5 and
+	     no Chance (user 2026-10-18): base's pick-one weighs first, then rolls Chance, so Chance 10
+	     at weight 1 was about one cluster per 100+ screens; now one per 3 or so. Caves keep
+	     Weight 10 (about one per 6 cave screens). Number is a Codex PROPOSAL dial. -->
 	<population Name="Cleo_TerraFirma_Burrowbees">
 		<group Name="Variant" Style="pickone">
 			<object Weight="1" Number="2-4" Blueprint="Cleo_TerraFirma_DogthornBurrowbee" />
@@ -1079,7 +1081,7 @@
 	</population>
 	<population Name="FlowerFieldsPopulation" Load="Merge">
 		<group Name="Creatures" Style="pickone">
-			<table Chance="10" Name="Cleo_TerraFirma_Burrowbees" />
+			<table Weight="5" Name="Cleo_TerraFirma_Burrowbees" />
 		</group>
 	</population>
 	<population Name="FlowerfieldCreatures" Load="Merge">
