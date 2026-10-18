@@ -985,7 +985,9 @@
 	     HillsZoneGlobals-Reachable; the group's own Chance 95 still applies. -->
 	<population Name="MountainsZoneGlobals-Reachable" Load="Merge">
 		<group Name="Creatures" Style="pickeach">
-			<object Chance="10" Number="1" Blueprint="Cleo_TerraFirma_StoneKissedHermit" />
+			<!-- DIAGNOSTIC 2026-10-18: Chance 100 (user: "bump the chance way up - something isn't
+			     right"), so every fresh mountain screen should hold one; dial back once seen. -->
+			<object Chance="100" Number="1" Blueprint="Cleo_TerraFirma_StoneKissedHermit" />
 		</group>
 	</population>
 	<!-- Inkling in the Tomb of the Eaters (user 2026-10-17: small weight). TombCreatures feeds the
