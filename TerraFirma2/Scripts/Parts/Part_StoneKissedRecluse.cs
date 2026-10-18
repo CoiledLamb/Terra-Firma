@@ -62,15 +62,7 @@ namespace XRL.World.Parts
 				|| ID == SingletonEvent<BeginTakeActionEvent>.ID
 				|| ID == TookDamageEvent.ID
 				|| ID == EnteredCellEvent.ID
-				|| ID == ZoneBuiltEvent.ID
-				|| ID == ObjectCreatedEvent.ID;
-		}
-
-		public override bool HandleEvent(ObjectCreatedEvent E)
-		{
-			// spawn trace (2026-10-18: none seen in fresh mountain screens at Chance 100)
-			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("HERMIT", $"created (context '{E.Context}')");
-			return base.HandleEvent(E);
+				|| ID == ZoneBuiltEvent.ID;
 		}
 
 		public override void Register(GameObject Object, IEventRegistrar Registrar)
@@ -174,8 +166,6 @@ namespace XRL.World.Parts
 
 		public override bool HandleEvent(ZoneBuiltEvent E)
 		{
-			Cell at = ParentObject.CurrentCell;
-			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("HERMIT", $"zone built {E.Zone?.ZoneID}, standing at {(at == null ? "nowhere" : at.X + "," + at.Y)}");
 			PlaceStatues();
 			return base.HandleEvent(E);
 		}
