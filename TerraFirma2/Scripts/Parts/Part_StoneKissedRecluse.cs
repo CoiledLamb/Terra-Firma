@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using XRL.Rules;
 using XRL.World.AI.GoalHandlers;
 
@@ -41,7 +42,7 @@ namespace XRL.World.Parts
 		/// <summary>How many statues ring him. DIAL.</summary>
 		public string StatueCount = "2-4";
 
-		/// <summary>Statues land between these distances from him. DIAL.</summary>
+		/// <summary>Statues land between these many steps from him, walking through open ground. DIAL.</summary>
 		public int StatueMinDistance = 2;
 		public int StatueMaxDistance = 5;
 
@@ -196,17 +197,37 @@ namespace XRL.World.Parts
 				return;
 			StatuesPlaced = true;
 
+			// candidates come from a flood fill through open ground from where he stands, so the
+			// ring sits in his own clearing; random cells in mountain rock were mostly solid, or
+			// open pockets cut off from him (seen in game 2026-10-18: 1/4 placed, one behind a wall)
+			List<Cell> spots = new List<Cell>();
+			Dictionary<Cell, int> steps = new Dictionary<Cell, int> { [home] = 0 };
+			Queue<Cell> frontier = new Queue<Cell>();
+			frontier.Enqueue(home);
+			while (frontier.Count > 0)
+			{
+				Cell at = frontier.Dequeue();
+				int d = steps[at];
+				if (d >= StatueMinDistance && at.IsEmpty())
+					spots.Add(at);
+				if (d >= StatueMaxDistance)
+					continue;
+				foreach (Cell next in at.GetLocalAdjacentCells())
+				{
+					if (steps.ContainsKey(next) || next.IsSolid())
+						continue;
+					steps[next] = d + 1;
+					frontier.Enqueue(next);
+				}
+			}
+
 			int want = StatueCount.RollCached();
 			int placed = 0;
-			for (int tries = 0; placed < want && tries < want * 12; tries++)
+			while (placed < want && spots.Count > 0)
 			{
-				int dx = Stat.Random(-StatueMaxDistance, StatueMaxDistance);
-				int dy = Stat.Random(-StatueMaxDistance, StatueMaxDistance);
-				int d = Math.Max(Math.Abs(dx), Math.Abs(dy));
-				if (d < StatueMinDistance)
-					continue;
-				Cell cell = home.ParentZone.GetCell(home.X + dx, home.Y + dy);
-				if (cell == null || !cell.IsEmpty())
+				Cell cell = spots.GetRandomElement();
+				spots.Remove(cell);
+				if (!cell.IsEmpty())
 					continue;
 				string bp = RollStatueCreature();
 				if (bp == null)
