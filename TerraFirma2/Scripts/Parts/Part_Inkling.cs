@@ -28,7 +28,7 @@ namespace XRL.World.Parts
 	/// nearest tattooed creature within HungerRadius and jumps on as a tattoo, no petting needed,
 	/// then eats from riding (user 2026-10-17). A wild inkling never eats directly.
 	///
-	/// Radii and turn counts are Codex PROPOSAL dials. Message lines are DRAFTS for the user.
+	/// Radii and turn counts are Codex PROPOSAL dials. Message lines approved by the user 2026-10-18.
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_Inkling : IPart
@@ -269,7 +269,7 @@ namespace XRL.World.Parts
 			QuietTurns = 0;
 			GraffitiText = RollGraffiti();
 			ParentObject.Brain.Goals.Clear();
-			DidX("seep", "into the wall"); // DRAFT line
+			DidX("seep", "into the wall");
 			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"hid in {target.GetFirstWall()?.Blueprint} at {target.X},{target.Y}");
 			return true;
 		}
@@ -287,7 +287,7 @@ namespace XRL.World.Parts
 			if (!ParentObject.DirectMoveTo(open.GetRandomElement(), 1000))
 				return false;
 			Unhide();
-			DidX("peel", "away from the wall"); // DRAFT line
+			DidX("peel", "away from the wall");
 			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", "emerged from the wall");
 			return true;
 		}
@@ -425,7 +425,7 @@ namespace XRL.World.Parts
 				TurnsToMeal = Hungry ? 1 : -1, // hungry: eats at the end of this turn
 			});
 			if (Host.IsPlayer())
-				MessageQueue.AddPlayerMessage($"{ParentObject.Does("seep")} into your skin and settles on your {spot.Name}."); // DRAFT line
+				MessageQueue.AddPlayerMessage($"{ParentObject.Does("seep")} into your skin and settles on your {spot.GetOrdinalName()}.");
 			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"riding {Host.Blueprint} on {spot.Name} as '{text}'");
 			return true;
 		}

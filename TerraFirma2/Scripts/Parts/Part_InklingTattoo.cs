@@ -18,7 +18,7 @@ namespace XRL.World.Parts
 	/// tattoo is gone, or on its own after RideFor turns or when there is nothing left to eat. While riding it gets hungry and eats or garbles the host's other tattoos
 	/// (the Mark of Death included, user 2026-10-17: "no need for a guard there").
 	///
-	/// Hunger timing is a Codex PROPOSAL dial. Message lines are DRAFTS for the user.
+	/// Hunger timing is a Codex PROPOSAL dial. Message lines approved by the user 2026-10-18.
 	/// </summary>
 	[Serializable]
 	public class Cleo_TerraFirma_InklingTattoo : IPart
@@ -164,7 +164,7 @@ namespace XRL.World.Parts
 			(int part, int index) = meals.GetRandomElement();
 			List<string> list = tattoos.Descriptions[part];
 			string old = list[index];
-			string partName = Host.Body?.GetPartByID(part)?.Name ?? "skin";
+			string partName = Host.Body?.GetPartByID(part)?.GetOrdinalName() ?? "skin";
 			if (Stat.Random(1, 100) <= EatChance)
 			{
 				list.RemoveAt(index);
@@ -173,7 +173,7 @@ namespace XRL.World.Parts
 				else
 					Host.CheckMarkOfDeath();
 				if (Host.IsPlayer())
-					MessageQueue.AddPlayerMessage($"{Eater.Does("eat")} the tattoo of {old} on your {partName}."); // DRAFT line
+					MessageQueue.AddPlayerMessage($"{Eater.Does("eat")} the tattoo of {old} on your {partName}.");
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"ate tattoo '{old}' on {Host.Blueprint}'s {partName}");
 			}
 			else
@@ -181,7 +181,7 @@ namespace XRL.World.Parts
 				list[index] = Grammar.Obfuscate(old, 10);
 				Host.CheckMarkOfDeath();
 				if (Host.IsPlayer())
-					MessageQueue.AddPlayerMessage($"{Eater.Does("nibble")} at the tattoo of {old} on your {partName}, smearing it."); // DRAFT line
+					MessageQueue.AddPlayerMessage($"{Eater.Does("nibble")} at the tattoo of {old} on your {partName}, smearing it.");
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"garbled tattoo '{old}' -> '{list[index]}' on {Host.Blueprint}'s {partName}");
 			}
 			return true;
@@ -220,7 +220,7 @@ namespace XRL.World.Parts
 			ParentObject.RemovePart(this);
 			inkling.GetPart<Cleo_TerraFirma_Inkling>()?.HopOff(open.GetRandomElement(), Frightened);
 			if (!Silent && ParentObject.IsPlayer())
-				MessageQueue.AddPlayerMessage($"{inkling.Does("peel")} off your skin."); // DRAFT line
+				MessageQueue.AddPlayerMessage($"{inkling.Does("peel")} off your skin.");
 			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"hopped off {ParentObject.Blueprint} (frightened={Frightened})");
 			return true;
 		}
