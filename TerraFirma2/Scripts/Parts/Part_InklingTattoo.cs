@@ -158,7 +158,8 @@ namespace XRL.World.Parts
 				return false;
 			}
 			// base Tattoos keeps one ink color per creature, not per tattoo: the inkling takes its
-			// main color and the host's tint goes with it (user 2026-10-18: sticks, main only)
+			// main color (user 2026-10-18: sticks, main only); the host keeps its tint until its
+			// last tattoo goes, which base RemoveTattoo already handles
 			TakeInk(Eater, tattoos);
 			(int part, int index) = meals.GetRandomElement();
 			List<string> list = tattoos.Descriptions[part];
@@ -196,8 +197,6 @@ namespace XRL.World.Parts
 			Eater.Render.ColorString = main;
 			if (!Eater.Render.TileColor.IsNullOrEmpty())
 				Eater.Render.TileColor = main;
-			HostTattoos.ColorString = null;
-			HostTattoos.DetailColor = null;
 			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"took ink {main} from {HostTattoos.ParentObject?.Blueprint}");
 		}
 

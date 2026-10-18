@@ -313,7 +313,19 @@ namespace XRL.World.Parts
 			return Grammar.Obfuscate(text.TrimEnd(' '), 10);
 		}
 
-		GameObject HiddenIn => Hidden ? ParentObject.CurrentCell?.GetFirstWall() : null;
+		/// <summary>Its own main color, the ink it last ate (dark grey K until then); the graffiti is
+		/// drawn and written in it (user 2026-10-18).</summary>
+		char InkColor
+		{
+			get
+			{
+				string cs = ParentObject.Render?.ColorString;
+				int amp = cs?.IndexOf('&') ?? -1;
+				return amp >= 0 && amp + 1 < cs.Length ? cs[amp + 1] : 'K';
+			}
+		}
+
+		GameObject HiddenIn =>Hidden ? ParentObject.CurrentCell?.GetFirstWall() : null;
 
 		public override bool Render(RenderEvent E)
 		{
@@ -323,7 +335,7 @@ namespace XRL.World.Parts
 				// Mimic's idiom, aimed at the wall it sits in; the ink shows as the wall's foreground
 				E.Tile = wall.Render.Tile;
 				E.RenderString = wall.Render.RenderString;
-				E.ApplyColors("&K", wall.Render.DetailColor, Mimic.ICON_COLOR_PRIORITY, Mimic.ICON_COLOR_PRIORITY);
+				E.ApplyColors("&" + InkColor, wall.Render.DetailColor, Mimic.ICON_COLOR_PRIORITY, Mimic.ICON_COLOR_PRIORITY);
 			}
 			return base.Render(E);
 		}
@@ -348,7 +360,7 @@ namespace XRL.World.Parts
 				if (E.Infix.Length > 0)
 					E.Infix.Append("\n");
 				// base Graffitied's line alone: it reads like any graffitied wall (user 2026-10-17)
-				E.Infix.Append("\nGraffiti is scrawled across the surface. It reads: \n\n\"{{K|")
+				E.Infix.Append("\nGraffiti is scrawled across the surface. It reads: \n\n\"{{").Append(InkColor).Append("|")
 					.Append(GraffitiText).Append("}}\"\n");
 			}
 			return base.HandleEvent(E);
