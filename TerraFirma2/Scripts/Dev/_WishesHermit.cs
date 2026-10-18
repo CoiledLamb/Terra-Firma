@@ -35,5 +35,27 @@ namespace Cleo.TerraFirma.Scripts
 			MessageQueue.AddPlayerMessage(line, Capitalize: false);
 			Helpers.VerifyLog("HERMIT", line);
 		}
+
+		/// <summary>What this screen is and what the mountain table put in it: terrain, and counts
+		/// of stone-kissed hermits, goats, cannibals and dogs (the table's own roster).</summary>
+		[WishCommand(Command = "tfhermitzone")]
+		public static void Zone()
+		{
+			XRL.World.Zone zone = The.Player.CurrentZone;
+			int hermits = 0, goats = 0, cannibals = 0, dogs = 0;
+			foreach (XRL.World.GameObject obj in zone.GetObjects())
+			{
+				switch (obj.Blueprint)
+				{
+					case "Cleo_TerraFirma_StoneKissedHermit": hermits++; break;
+					case "Goat": goats++; break;
+					case "Cannibal": cannibals++; break;
+					case "Dog": dogs++; break;
+				}
+			}
+			string line = $"tfhermitzone: {zone.ZoneID} terrain '{zone.GetTerrainDisplayName()}' region '{zone.GetTerrainRegion()}': hermits {hermits}, goats {goats}, cannibals {cannibals}, dogs {dogs}.";
+			MessageQueue.AddPlayerMessage(line, Capitalize: false);
+			Helpers.VerifyLog("HERMIT", line);
+		}
 	}
 }
