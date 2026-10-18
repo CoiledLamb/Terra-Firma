@@ -2891,7 +2891,7 @@ B20 closed: the user verified the banner in play. `Cleo_TerraFirma_StonehandsBan
 
 ## Inkling verified — 2026-10-18
 
-C14 closed (user: "close the inkling"). Seen in game 2026-10-17/18: hiding in a wall as graffiti, riding as a tattoo when petted, the hunger walk and jump-on, eating and smearing tattoos, save and load while riding, hidden from NPCs except an adjacent Intelligence save (difficulty 10, object-side `PerceptionEvent`), and eaten ink becoming its main and graffiti color while the host keeps its tint. Spawns: `Tier2CaveCreatures` weight 5 plus `TombCreatures` and `CryptCreatures` weight 5; village pets come free from base `PopulationInflux`. A natural spawn was not seen before closing. Code: `Part_Inkling.cs`, `Part_InklingTattoo.cs`; dev wishes in `Scripts\Dev\_WishesInkling.cs`. Dials (meal timers, radii, spot save) stay CLAUDE PROPOSAL; message lines stay DRAFT.
+C14 closed (user: "close the inkling"). Seen in game 2026-10-17/18: hiding in a wall as graffiti, riding as a tattoo when petted, the hunger walk and jump-on, eating and smearing tattoos, save and load while riding, hidden from NPCs except an adjacent Intelligence save (difficulty 10, object-side `PerceptionEvent`), and eaten ink becoming its main and graffiti color while the host keeps its tint. Spawns: `Tier2CaveCreatures` weight 5 plus `TombCreatures` and `CryptCreatures` weight 5; village pets come free from base `PopulationInflux`. Also seen spawning naturally in caves (user 2026-10-18). Code: `Part_Inkling.cs`, `Part_InklingTattoo.cs`; dev wishes in `Scripts\Dev\_WishesInkling.cs`. Dials (meal timers, radii, spot save) stay CLAUDE PROPOSAL; message lines stay DRAFT.
 
 ## Stone-kissed hermit verified — 2026-10-18
 
@@ -2899,4 +2899,4 @@ C10 closed: the user saw every finish-line behavior in play: he backs off at dis
 
 ## Wild boar vessel seen — 2026-10-18
 
-The user saw a wild boar vessel in play after its spawn merge (commit `3774fc5`): `Cleo_TerraFirma_BaseBoarVessel` beside base Boar in its four biomes at half Boar's chance or weight (Chance 5/12.5/2.5/5 in the four zone-globals tables, Weight 5/3/5/3 in the biome creature tables, weights rounded up). The region `_Creatures` tags stay for village populations. Not yet seen: a farm pen of vessels (`Cleo_TerraFirma_BoarVessels` herd in `StiltAnimalPen`, weight 1, commit `94788cc`).
+The user saw a wild boar vessel in play after its spawn merge (commit `3774fc5`): `Cleo_TerraFirma_BaseBoarVessel` beside base Boar in its four biomes at half Boar's chance or weight (Chance 5/12.5/2.5/5 in the four zone-globals tables, Weight 5/2/5/2 in the biome creature tables, the halved 5s set to 2 by the user). The region `_Creatures` tags stay for village populations. Not yet seen: a farm pen of vessels (`Cleo_TerraFirma_BoarVessels` herd in `StiltAnimalPen`, weight 1, commit `94788cc`).

@@ -901,7 +901,7 @@
 	     region _Creatures tags only feed village builders, so the wild vessel joins base Boar's
 	     own entries in its four biomes at half Boar's chance or weight, same Number. Chance
 	     takes decimals (PopulationItem.RollChance parses a double); weights are whole numbers,
-	     so Boar's weight 5 halves to 3, rounded up. Merges find nested groups by name. -->
+	     so Boar's weight 5 halves to 2 (user 2026-10-18). Merges find nested groups by name. -->
 	<population Name="DesertCanyonZoneGlobals-Reachable" Load="Merge">
 		<group Name="Creatures" Style="pickeach">
 			<object Chance="5" Number="1d2" Blueprint="Cleo_TerraFirma_BaseBoarVessel" />
@@ -929,7 +929,7 @@
 	</population>
 	<population Name="HillCreatures" Load="Merge">
 		<group Name="Creatures" Style="pickone">
-			<object Weight="3" Number="1" Blueprint="Cleo_TerraFirma_BaseBoarVessel" />
+			<object Weight="2" Number="1" Blueprint="Cleo_TerraFirma_BaseBoarVessel" />
 		</group>
 	</population>
 	<population Name="FlowerfieldCreatures" Load="Merge">
@@ -939,7 +939,7 @@
 	</population>
 	<population Name="JungleCreatures" Load="Merge">
 		<group Name="Creatures" Style="pickone">
-			<object Weight="3" Number="1" Blueprint="Cleo_TerraFirma_BaseBoarVessel" />
+			<object Weight="2" Number="1" Blueprint="Cleo_TerraFirma_BaseBoarVessel" />
 		</group>
 	</population>
 	<!-- Codex PROPOSAL: B02 lab defaults, interpreted as seeded labels, not blueprints. -->
