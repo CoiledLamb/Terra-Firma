@@ -2,15 +2,18 @@
  <objects> 
   <!-- Jilted Lover chassis, with its wild grabber and spawn lanes removed.
        Merchant HP/AV copy BaseMerchant; intellect and ego copy Yurl (CLAUDE PROPOSAL
-       tuning). Own bank since 2026-09-29 (Conversations.xml). Description: inherits Jilted
-       Lover's on purpose for now (user 2026-09-29); replace with the provisioner's own text
-       later (T04). -->
+       tuning). Own bank since 2026-09-29 (Conversations.xml). Named Pandogrove with its own
+       description and dialogue 2026-10-18 (user): one supercolony vine (after Pando) surfacing
+       at every amphora, so every provisioner is the same proper-named individual (base
+       Sixshrew idiom). -->
   <object Name="Cleo_TerraFirma_Vine Merchant" Inherits="Jilted Lover">
     <!-- potted, on the floor beside a wall (user 2026-10-18; base Sixshrew is the potted plant
          merchant precedent): sprite and colors the user's, brown main, light green detail -->
-    <part Name="Render" DisplayName="quarry provisioner" Tile="quarry_provisioner.png" ColorString="&amp;w" TileColor="&amp;w" DetailColor="G" />
+    <part Name="Render" DisplayName="Pandogrove" Tile="quarry_provisioner.png" ColorString="&amp;w" TileColor="&amp;w" DetailColor="G" />
     <part Name="Brain" Hostile="false" Wanders="false" Mobile="false" LivesOnWalls="false" Factions="Consortium-100,Cleo_TerraFirma_Quarriers-50" />
     <removepart Name="WallColor" />
+    <part Name="Description" Short="A writhing coil of mottled vines wreathes a faded amphora. Chips line its rim like jagged teeth, and a single ragged leaf rises from its shaded belly to meet you." />
+    <xtagGrammar Proper="true" />
     <removepart Name="JiltedLoverProperties" />
     <removeinventoryobject Blueprint="Lovers_Thorns" />
     <part Name="Corpse" CorpseChance="0" />
