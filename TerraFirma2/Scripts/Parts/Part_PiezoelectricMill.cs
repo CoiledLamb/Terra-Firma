@@ -49,7 +49,11 @@ namespace XRL.World.Parts
 		private bool IsFood(GameObject stone) => stone != null && stone != ParentObject
 			&& stone.HasTagOrProperty(Cleo_TerraFirma_GrinderCell.STONE_TAG)
 			&& !stone.HasPart<Temporary>() && !stone.IsCreature
-			&& string.IsNullOrEmpty(stone.Physics?.Owner);
+			&& (string.IsNullOrEmpty(stone.Physics?.Owner) || stone.Physics.Owner == GUILD_OWNER);
+
+		/// <summary>Warren dress stamps loose stone, boulders included, as the guild's
+		/// (WarrenCarver), but not the mill; guild rock is fair feed, no theft (2026-10-19).</summary>
+		private const string GUILD_OWNER = "Cleo_TerraFirma_Quarriers";
 
 		public override bool HandleEvent(InventoryActionEvent E)
 		{
