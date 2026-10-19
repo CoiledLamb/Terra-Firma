@@ -1,10 +1,3 @@
-<!--
-running patch notes, newest on top. one short bullet per change, cleo edits.
-in-progress work goes under WORKING in its version; release stops there.
-python tools/patch-notes.py           commits not yet covered here
-python tools/patch-notes.py release   the top block, ready to paste
--->
-
 0.2.8
 - now working on  lang experimental! feel free to try it out.
 - new creature: inkling
