@@ -374,5 +374,55 @@ namespace Cleo.TerraFirma.Scripts
 			Ply.ApplyEffect(new XRL.World.Effects.Confused(30, 1));
 			MessageQueue.AddPlayerMessage($"tfconfusedcarve: {near}/30 sampled muses within 5 levels of Lv{lv} (log has the list). Confused for 30 turns: carve now.", Capitalize: false);
 		}
+
+		/// <summary>C09 gaze bounce dev door (2026-10-19): a snapjaw gazer starts gazing at a
+		/// snapjaw wearing a refractive targe (TF2) set to always refract, with the bounce pre-roll
+		/// forced, so every tick bounces and the gazer walks its own ten-fail ladder to stone.
+		/// Wait a few turns and watch the gazer. tfgazebounceoff clears the forced pre-roll.</summary>
+		[WishCommand(Command = "tfgazebounce")]
+		public static void GazeBounce()
+		{
+			GameObject Ply = The.Player;
+			Cell here = Ply?.CurrentCell;
+			if (here == null)
+				return;
+			if (!GameObjectFactory.Factory.Blueprints.ContainsKey("Cleo_TerraFirma_RefractiveBuckler"))
+			{
+				MessageQueue.AddPlayerMessage("tfgazebounce: the refractive targe is a TF2 blueprint; load Terra Firma 2.", Capitalize: false);
+				return;
+			}
+			List<Cell> open = new List<Cell>();
+			foreach (Cell c in here.ParentZone.GetCells())
+				if (c != here && c.IsEmpty() && c.PathDistanceTo(here) <= 6)
+					open.Add(c);
+			open.Sort((a, b) => a.PathDistanceTo(here).CompareTo(b.PathDistanceTo(here)));
+			Cell gazerCell = open.Find(c => c.PathDistanceTo(here) >= 3);
+			Cell targetCell = gazerCell == null ? null : open.Find(c => c != gazerCell && c.PathDistanceTo(gazerCell) >= 3 && c.PathDistanceTo(here) >= 2);
+			if (gazerCell == null || targetCell == null)
+			{
+				MessageQueue.AddPlayerMessage("tfgazebounce: need open floor within 6 cells.", Capitalize: false);
+				return;
+			}
+			GameObject gazer = gazerCell.AddObject("Snapjaw");
+			GameObject target = targetCell.AddObject("Snapjaw");
+			GameObject targe = GameObject.Create("Cleo_TerraFirma_RefractiveBuckler");
+			RefractLight refract = targe.GetPart<RefractLight>();
+			if (refract != null)
+				refract.Chance = 100;
+			target.ReceiveObject(targe);
+			target.AutoEquip(targe, Silent: true);
+			gazer.RequirePart<Mutations>().AddMutation(new Cleo_TerraFirma_GorgonsGaze(), 1);
+			The.Game.SetBooleanGameState(Cleo_TerraFirma_GorgonsGaze.FORCE_BOUNCE_STATE, true);
+			gazer.GetPart<Cleo_TerraFirma_GorgonsGaze>()?.BeginGaze(target);
+			Helpers.VerifyLog("GAZE", $"tfgazebounce: gazer at {gazerCell.X},{gazerCell.Y}, targe-wearer at {targetCell.X},{targetCell.Y} (targe equipped: {targe.Equipped == target}), pre-roll forced");
+			MessageQueue.AddPlayerMessage("tfgazebounce: gazer and targe-wearer spawned, every tick bounces. Pass turns and watch the gazer. tfgazebounceoff clears the force.", Capitalize: false);
+		}
+
+		[WishCommand(Command = "tfgazebounceoff")]
+		public static void GazeBounceOff()
+		{
+			The.Game.SetBooleanGameState(Cleo_TerraFirma_GorgonsGaze.FORCE_BOUNCE_STATE, false);
+			MessageQueue.AddPlayerMessage("tfgazebounceoff: bounce pre-roll back to 50%.", Capitalize: false);
+		}
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Cleo.TerraFirma.Scripts;
 using XRL.UI;
 using XRL.World.Capabilities;
@@ -17,6 +18,9 @@ namespace XRL.World.Parts.Mutation
 		private const int QUICKNESS_LOSS_PER_SAVE = 10;
 
 		private const int BASE_COOLDOWN = 80; // matches Sunder Mind, this mutation's mental-side mirror
+
+		/// <summary>Game-state flag the dev wish tfgazebounce sets: every tick passes the bounce pre-roll.</summary>
+		public const string FORCE_BOUNCE_STATE = "Cleo_TerraFirma_ForceGazeBounce";
 
 		/// <summary>
 		/// The <see cref="GameObject"/> currently being targeted by this mutation.
@@ -88,6 +92,7 @@ namespace XRL.World.Parts.Mutation
 			RemoveMyActivatedAbility(ref ActivatedAbilityID);
 			if (AssocEffect != null)
 				AssocEffect.Receding = true;
+			GO?.GetEffect<Cleo_TerraFirma_PetrifyingReflected>()?.UpdateData(null, true); // C09: a held backfire lets go with the mutation
 			Cleo_TerraFirma_GorgonPetrifyFX.Release(BandFx, ShrinkOut: true);
 			BandFx = null;
 			return base.Unmutate(GO);
@@ -303,6 +308,10 @@ namespace XRL.World.Parts.Mutation
 			// no damage, so each tick wakes the target the way a hit would (Bed.cs fires the same event)
 			if (Target.HasEffect<Asleep>())
 				Target.FireEvent("WakeUp");
+			// C09: a refractor on the line can bounce this tick back at the gazer, in place of
+			// the target's save
+			if (TryBounce())
+				return;
 			// caster's Willpower (the discipline to hold the gaze unblinking) raises the save DC, same mechanism as the lithofex's Ego;
 			// each accrued failure raises it further -- the stiffer they get, the harder it is to look away
 			bool targetResists = Target.MakeSave("Toughness", GetSaveDifficulty(Level) + CurFailedSaves, ParentObject, "Willpower", Vs: Name, IgnoreNatural20: !Target.IsPlayer(), Source: ParentObject);
@@ -360,6 +369,118 @@ namespace XRL.World.Parts.Mutation
 		}
 
 		/// <summary>
+		/// C09 gaze bounce (closed with the user 2026-10-13/15, built 2026-10-19). A 50% pre-roll
+		/// halves every refractor's chance for gaze; on a pass the engine's own <c>RefractLight</c>
+		/// event walks the line the way base <c>IDelayedLineMutation.Refract</c> does (gazer's cell
+		/// skipped, target's cell included), so refractive gear, Light Manipulation, the refractor
+		/// implant, glitter gas and a resonant whorl all answer it. The first refractor that
+		/// answers bounces the tick: the target takes nothing, and the gazer saves against its own
+		/// gaze on its own tally (<see cref="Cleo_TerraFirma_PetrifyingReflected"/>).
+		/// </summary>
+		/// <returns>True when the tick bounced and the target's save is skipped.</returns>
+		private bool TryBounce()
+		{
+			bool forced = The.Game?.GetBooleanGameState(FORCE_BOUNCE_STATE) == true; // dev wish tfgazebounce
+			if (!forced && XRL.Rules.Stat.Random(0, 1) != 0)
+				return false;
+			Cell from = ParentObject.CurrentCell;
+			Cell to = Target.CurrentCell;
+			if (from == null || to == null || from.ParentZone != to.ParentZone)
+				return false;
+			List<Cell> path = new List<Cell>();
+			foreach (var p in Zone.Line(from.X, from.Y, to.X, to.Y))
+			{
+				Cell c = from.ParentZone.GetCell(p.X, p.Y);
+				if (c != null && c != from && !path.Contains(c))
+					path.Add(c);
+			}
+			if (!path.Contains(to))
+				path.Add(to);
+			// handlers cast Angle straight to float, so it must be set; Direction is pre-seeded
+			// back at the gazer (the whorl draws its scatter track along it)
+			float angle = (float)(Math.Atan2(to.X - from.X, to.Y - from.Y) * 180.0 / Math.PI);
+			Event e = null;
+			foreach (Cell cell in path)
+			{
+				if (!cell.HasObjectWithRegisteredEvent("RefractLight"))
+					continue;
+				if (e == null)
+				{
+					e = Event.New("RefractLight");
+					e.SetParameter("Attacker", ParentObject);
+					e.SetParameter("Angle", angle);
+					e.SetParameter("Sound", "sfx_light_refract");
+				}
+				e.SetParameter("Cell", cell);
+				e.SetParameter("Direction", (int)angle + 180);
+				e.SetParameter("Verb", null);
+				e.SetParameter("By", (object)null);
+				if (cell.FireEvent(e))
+					continue;
+				GameObject by = e.GetGameObjectParameter("By");
+				if (!GameObject.Validate(ref by))
+					continue;
+				string sound = e.GetStringParameter("Sound");
+				if (!sound.IsNullOrEmpty())
+					by.PlayWorldSound(sound, 0.5f, Combat: true);
+				XDidY(by, e.GetStringParameter("Verb") ?? "refract", "the unblinking gaze", "!", ColorAsGoodFor: Target, ColorAsBadFor: ParentObject);
+				Helpers.VerifyLog("GAZE", $"BOUNCE: {by.Blueprint} on {Target.Blueprint} {(e.GetStringParameter("Verb") ?? "refract")}s the gaze back at {ParentObject.Blueprint}{(forced ? " (forced pre-roll)" : "")}");
+				GazerSave();
+				return true;
+			}
+			return false;
+		}
+
+		/// <summary>
+		/// The gazer's save against its own bounced gaze: same Toughness save and DC formula as a
+		/// target's, +1 per gazer fail. A pass does nothing; a fail pins and slows the gazer one
+		/// stage, and ten fails turn it to stone.
+		/// </summary>
+		private void GazerSave()
+		{
+			// CLAUDE PROPOSAL (rule 3, 2026-10-19): a gazer already petrifying under someone
+			// else's gaze still has its tick bounced, but takes no save of its own; one ladder
+			// per creature, so two gazes never stack stages on one body
+			if (ParentObject.HasEffect<Cleo_TerraFirma_Petrifying>())
+			{
+				Helpers.VerifyLog("GAZE", "bounce: gazer already petrifying under another gaze, no gazer save");
+				return;
+			}
+			Cleo_TerraFirma_PetrifyingReflected self = ParentObject.GetEffect<Cleo_TerraFirma_PetrifyingReflected>();
+			if (self != null && self.Receding)
+			{
+				ParentObject.RemoveEffect(self); // a fading earlier backfire; this gaze starts its own tally
+				self = null;
+			}
+			int fails = self?.GazerFails ?? 0;
+			bool resists = ParentObject.MakeSave("Toughness", GetSaveDifficulty(Level) + fails, ParentObject, "Willpower", Vs: Name, IgnoreNatural20: !ParentObject.IsPlayer(), Source: ParentObject);
+			Helpers.VerifyLog("GAZE", $"gazer save vs DC {GetSaveDifficulty(Level) + fails}+WIL -> {(resists ? "RESIST" : "FAIL")} (gazer tally {fails + (resists ? 0 : 1)}F)");
+			if (resists)
+				return;
+			if (self == null)
+			{
+				self = new Cleo_TerraFirma_PetrifyingReflected(ParentObject);
+				if (!ParentObject.ApplyEffect(self))
+				{
+					Helpers.VerifyLog("GAZE", "gazer fail: petrifying refused (cannot be held in place), no stage");
+					return;
+				}
+			}
+			self.ApplyFailure();
+			self.GazerFails++;
+			Helpers.VerifyLog("GAZE", $"GAZER FAIL {self.GazerFails}/{NUM_OF_SAVES}: {ParentObject.Blueprint}");
+			if (self.GazerFails < NUM_OF_SAVES)
+			{
+				Cleo_TerraFirma_GorgonPetrifyFX.RockPops(ParentObject, 2 + self.GazerFails / 4);
+				return;
+			}
+			Helpers.VerifyLog("GAZE", $"GAZER STONED: {ParentObject.Blueprint} petrified by its own reflected gaze");
+			if (!Petrify(ParentObject, ParentObject))
+				ParentObject.RemoveEffect(self); // death prevented; the stone goes with it
+			CancelGaze(Silent: true);
+		}
+
+		/// <summary>
 		/// Drive the rising-stone-band overlay off the channel's NET state (fails minus successes) --
 		/// the tug-of-war read the user ruled 2026-08-06 ("both the animation and the breaking out").
 		/// The STATUE still counts cumulative fails; the divergence is deliberate and recorded in TODO.
@@ -395,6 +516,22 @@ namespace XRL.World.Parts.Mutation
 			}
 			else
 				AssocEffect?.UpdateData(null, true);
+			// C09: a gazer its own bounced gaze got 4+ fails into keeps a partial petrification,
+			// the same rule as a target; under that it just recedes
+			Cleo_TerraFirma_PetrifyingReflected self = ParentObject?.GetEffect<Cleo_TerraFirma_PetrifyingReflected>();
+			if (self != null && !self.Receding && GameObject.Validate(ParentObject) && !ParentObject.IsInGraveyard())
+			{
+				if (self.GazerFails >= STONE_MARK_MIN_FAILS)
+				{
+					Helpers.VerifyLog("GAZE", $"GAZER PARTIAL: gaze ended at {self.GazerFails} gazer fails, {ParentObject.Blueprint} partially petrified (500 rds)");
+					ParentObject.RemoveEffect(self);
+					ParentObject.ApplyEffect(new Cleo_TerraFirma_PartiallyPetrified(), ParentObject);
+					ParentObject.PlayWorldSound("Sounds/Damage/sfx_damage_stone", 1f, Combat: true);
+					XDidY(ParentObject, "remain", "partially petrified", "!", ColorAsBadFor: ParentObject, Source: ParentObject);
+				}
+				else
+					self.UpdateData(null, true);
+			}
 			CurFailedSaves = 0;
 			CurSuccessfulSaves = 0;
 			if (ParentObject.IsPlayer() && !Silent && Reason != string.Empty)
@@ -417,9 +554,19 @@ namespace XRL.World.Parts.Mutation
 			Cell curCell = Victim.CurrentCell;
 			GameObject statue = StoneGaze.CreateStatueOf(Victim); // no reason to reinvent the weel
 			Cleo.TerraFirma.Scripts.StatueHelpers.EntombPossessions(Victim, statue); // possessions petrify with them -- the statue is lootable
-			XDidYToZ(Medusa, "turn", Victim, $"to stone with {Medusa.poss("unblinking gaze")}", "!", ColorAsGoodFor: Medusa, ColorAsBadFor: Victim, Source: Medusa);
-			if (Victim.Die(Medusa, null, $"You were turned to stone by the unblinking gaze of {Medusa.an()}.",
-				$"{Victim.It + Victim.GetVerb("were", true, true)} @@turned to stone by the unblinking gaze of {Medusa.an()}."))
+			// pronoun, not poss(): poss repeated an NPC gazer's name ("the X turns the Y to stone
+			// with the X's unblinking gaze"); C09 adds the reflexive form for a bounced gaze
+			bool self = Medusa == Victim;
+			if (self)
+				XDidY(Medusa, "turn", $"{Medusa.itself} to stone with {Medusa.its} unblinking gaze", "!", ColorAsBadFor: Medusa, Source: Medusa);
+			else
+				XDidYToZ(Medusa, "turn", Victim, $"to stone with {Medusa.its} unblinking gaze", "!", ColorAsGoodFor: Medusa, ColorAsBadFor: Victim, Source: Medusa);
+			bool died = self
+				? Victim.Die(Medusa, null, "You turned yourself to stone with your unblinking gaze.",
+					$"{Victim.It} @@turned {Victim.itself} to stone with {Victim.its} unblinking gaze.")
+				: Victim.Die(Medusa, null, $"You were turned to stone by the unblinking gaze of {Medusa.an()}.",
+					$"{Victim.It + Victim.GetVerb("were", true, true)} @@turned to stone by the unblinking gaze of {Medusa.an()}.");
+			if (died)
 			{
 				curCell.AddObject(statue);
 				return true;
