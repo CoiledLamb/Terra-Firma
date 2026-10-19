@@ -27,6 +27,10 @@
 		<!-- thrown glowspheres also break (user 2026-08-22): damage on hit rides this part;
 		     the shatter/scatter/phosphorescent lives in Part_GlowsphereBreak. 1d4 = DIAL. -->
 		<part Name="ThrownWeapon" Damage="1d4" />
+		<!-- auto-equip prefers a hand over the thrown slot (user 2026-10-19): base dagger idiom,
+		     GameObject.AutoEquip skips its thrown-slot branch for this tag and falls to the
+		     off-hand pick; base GlowsphereProperties only lights it in a Hand. -->
+		<tag Name="NoAIEquipAsThrownWeapon" />
 	</object>
 	<!-- Chalkboard write action (ergonomics ruling 2026-08-22: target-side verbs) - the write
 	     verb lives on the board, shown only when the actor carries chalk. -->
