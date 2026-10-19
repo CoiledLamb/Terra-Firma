@@ -545,7 +545,9 @@ function Get-SavedLayouts([string]$scriptsDir) {
                 continue
             }
             if ($line -match '^\s*\[NonSerialized\]\s*$') { $pendingNonSerialized = $true; continue }
-            if ($cls -and $line -match '^\t\t(\[NonSerialized\] )?public (?!override |static |const |class |abstract |virtual |event |readonly )([\w<>\[\],\.\?]+) (\w+)( =[^;]*)?;') {
+            # class-member depth is two tabs or eight spaces (Part_SeismicShufflers.cs is space-indented and
+            # went unread until 2026-10-19); nested classes sit deeper and are not read
+            if ($cls -and $line -match '^(?:\t\t| {8})(\[NonSerialized\] )?public (?!override |static |const |class |abstract |virtual |event |readonly )([\w<>\[\],\.\?]+) (\w+)( =[^;]*)?;') {
                 if (-not $Matches[1] -and -not $pendingNonSerialized) { $layouts[$cls].Add("$($Matches[2]) $($Matches[3])") }
             }
             if ($line.Trim()) { $pendingNonSerialized = $false }
