@@ -26,17 +26,23 @@
   <object Name="Cleo_TerraFirma_Rockhound" Inherits="BaseDog">
     <part Name="Render" DisplayName="gneisshund" Tile="rockhound.png" RenderString="d" ColorString="&amp;w" DetailColor="y" />
     <part Name="Corpse" CorpseChance="100" CorpseBlueprint="Dog Corpse" />
-    <stat Name="Level" Value="8" />
-    <stat Name="Hitpoints" Value="18" />
+    <!-- midpoint between base Dog (L1, 8 HP, 1d3) and Guard Dog (L8, 22 HP, 1d8): user 2026-10-19 -->
+    <stat Name="Level" Value="4" />
+    <stat Name="Hitpoints" Value="12" />
     <stat Name="AV" Value="2" />
     <part Name="Cleo_TerraFirma_RockSweeper" />
     <!-- NO ConversationScript, RULED 2026-08-16 alongside the cobble baboon (user: "if basedog is
          mute, then we are good on rockhounds also"). BaseDog carries none, so the rockhound is
          mute by inheritance and by intent. Contrast the Husangeion, which opted out the other
          way: it takes PetResponse lines rather than a conversation. -->
-    <inventoryobject Blueprint="BigDog_Bite" Number="1" />
+    <inventoryobject Blueprint="Cleo_TerraFirma_Gneisshund_Bite" Number="1" />
     <part Name="Description" Short="Nose to the ground, =pronouns.subjective= =verb:hunt:afterpronoun= for bits of spall amongst the desert scrub. As =pronouns.subjective= =verb:trot:afterpronoun=, the stones in =pronouns.possessive= stomach click and settle against each other." />
     <tag Name="Role" Value="Brute" />
+  </object>
+
+  <!-- base has no 1d5 bite; same shape as base Dog_Bite / BigDog_Bite (Creatures.xml) -->
+  <object Name="Cleo_TerraFirma_Gneisshund_Bite" Inherits="Bite">
+    <part Name="MeleeWeapon" BaseDamage="1d5" />
   </object>
 
   <object Name="Cleo_TerraFirma_Snapjaw Miner" Inherits="Snapjaw">
