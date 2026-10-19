@@ -455,21 +455,22 @@
 		<group Name="Items" Style="pickone">
 			<!-- Seismophone (user 2026-09-30: "should go in a relevant table"): base
 			     Night-vision Goggles' exact artifact ladder, 5/5/5/10/20, the item it was built at
-			     parity with. Weights CLAUDE PROPOSAL. -->
+			     parity with. Weights CLAUDE PROPOSAL. Mole cricket halved at tiers 0-2 (user
+			     2026-10-19, population audit: "a touch rarer"), 20/20/10 to 10/10/5. -->
 			<object Weight="5" Number="1" Blueprint="Cleo_TerraFirma_Seismophone" />
-			<object Weight="20" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
 		</group>
 	</population>
 	<population Name="Artifact 1R" Load="Merge">
 		<group Name="Items" Style="pickone">
 			<object Weight="5" Number="1" Blueprint="Cleo_TerraFirma_Seismophone" />
-			<object Weight="20" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
 		</group>
 	</population>
 	<population Name="Artifact 2R" Load="Merge">
 		<group Name="Items" Style="pickone">
 			<object Weight="5" Number="1" Blueprint="Cleo_TerraFirma_Seismophone" />
-			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
+			<object Weight="5" Number="1" Blueprint="Cleo_TerraFirma_MoleCricket" />
 		</group>
 	</population>
 	<population Name="Artifact 3R" Load="Merge">
@@ -543,13 +544,14 @@
 	     they keep their quarrier kit rows). Tier-matched rare tables: girdle and pauldrons are
 	     tier 2 beside base Spiked Gauntlets (w20, the pauldrons' spiked cousin); the gauntlets
 	     are tier 4 powered gear beside Strength Exo and Grease Boots (w10). Weights CLAUDE
-	     PROPOSAL. -->
+	     PROPOSAL. Armor 2R trio halved 20 to 10 (user 2026-10-19, population audit): at 20 they
+	     doubled the table and pushed base's three rows from about 31% to 16% each. -->
 	<population Name="Armor 2R" Load="Merge">
 		<group Name="Items" Style="pickone">
-			<object Weight="20" Number="1" Blueprint="Cleo_TerraFirma_MudskinGirdle" />
-			<object Weight="20" Number="1" Blueprint="Cleo_TerraFirma_FlintSpikePauldrons" />
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_MudskinGirdle" />
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_FlintSpikePauldrons" />
 			<!-- spall sandals beside base Sandals of the River-Wives (w20), CLAUDE PROPOSAL -->
-			<object Weight="20" Number="1" Blueprint="Cleo_TerraFirma_SpallSandals" />
+			<object Weight="10" Number="1" Blueprint="Cleo_TerraFirma_SpallSandals" />
 		</group>
 	</population>
 	<population Name="Armor 4R" Load="Merge">
