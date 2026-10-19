@@ -417,11 +417,11 @@ Perishes when unequipped." />
        are Codex PROPOSAL dials; the description is the user's (final 2026-10-19). -->
   <object Name="Cleo_TerraFirma_BurrowbeeStinger" Inherits="BaseLongBlade">
     <part Name="Render" DisplayName="burrowbee stinger" Tile="burrowbee_stinger.png" ColorString="&amp;W" TileColor="&amp;W" DetailColor="g" />
-    <part Name="MeleeWeapon" MaxStrengthBonus="4" BaseDamage="1d8" Skill="LongBlades" /> <!-- user 2026-10-19: near base SalthopperMandible (Items.xml:8544, LongBlades 1d10, MaxStrengthBonus 4, tier 3), a die less for the venom -->
+    <part Name="MeleeWeapon" MaxStrengthBonus="3" BaseDamage="1d6" Skill="LongBlades" /> <!-- user 2026-10-19: a solid step under base SalthopperMandible (Items.xml:8544, 1d10, MaxStrengthBonus 4, tier 3), loses on dice and PV, paid back by the venom; easier to get (10% per bee vs about 1.2%) -->
     <part Name="Physics" Weight="1" />
-    <part Name="Commerce" Value="30" />
+    <part Name="Commerce" Value="25" />
     <part Name="Description" Short="A wicked curve of chitin, still wet with nascent venom, drips menacingly." />
-    <tag Name="Tier" Value="3" />
+    <tag Name="Tier" Value="2" />
     <tag Name="BaseObject" Value="*noinherit" />
     <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
   </object>

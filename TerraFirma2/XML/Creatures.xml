@@ -401,17 +401,17 @@
   <object Name="Cleo_TerraFirma_DogthornBurrowbee" Inherits="Cleo_TerraFirma_Burrowbee">
     <part Name="Render" DisplayName="dogthorn burrowbee" DetailColor="g" />
     <mutation Name="Stinger" Variant="Stinger Poison" Level="2" />
-      <part Name="Corpse" CorpseChance="50" CorpseBlueprint="Cleo_TerraFirma_DogthornBurrowbeeCorpse" /> <!-- CHANCE Codex PROPOSAL -->
+      <part Name="Corpse" CorpseChance="10" CorpseBlueprint="Cleo_TerraFirma_DogthornBurrowbeeCorpse" /> <!-- user 2026-10-19: 10%, and every corpse butchers (base Salthopper is 8% then a 15% roll) -->
   </object>
   <object Name="Cleo_TerraFirma_WitchwoodBurrowbee" Inherits="Cleo_TerraFirma_Burrowbee">
     <part Name="Render" DisplayName="witchwood burrowbee" DetailColor="w" />
     <mutation Name="Stinger" Variant="Stinger Confusion" Level="2" />
-      <part Name="Corpse" CorpseChance="50" CorpseBlueprint="Cleo_TerraFirma_WitchwoodBurrowbeeCorpse" /> <!-- CHANCE Codex PROPOSAL -->
+      <part Name="Corpse" CorpseChance="10" CorpseBlueprint="Cleo_TerraFirma_WitchwoodBurrowbeeCorpse" /> <!-- user 2026-10-19: 10%, and every corpse butchers (base Salthopper is 8% then a 15% roll) -->
   </object>
   <object Name="Cleo_TerraFirma_StillvineBurrowbee" Inherits="Cleo_TerraFirma_Burrowbee">
     <part Name="Render" DisplayName="stillvine burrowbee" DetailColor="C" />
     <mutation Name="Stinger" Variant="Stinger Paralysis" Level="2" />
-      <part Name="Corpse" CorpseChance="50" CorpseBlueprint="Cleo_TerraFirma_StillvineBurrowbeeCorpse" /> <!-- CHANCE Codex PROPOSAL -->
+      <part Name="Corpse" CorpseChance="10" CorpseBlueprint="Cleo_TerraFirma_StillvineBurrowbeeCorpse" /> <!-- user 2026-10-19: 10%, and every corpse butchers (base Salthopper is 8% then a 15% roll) -->
   </object>
 
   <!-- Burrowbee corpses (user 2026-10-18/19): butchering yields the bee's stinger as a
