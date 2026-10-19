@@ -31,7 +31,7 @@
     <tag Name="Tier" Value="2" />
   </object>
     <object Name="Cleo_TerraFirma_Cobblefur Gloves" Inherits="BaseGlove">
-    <part Name="Armor" AV="1" DV="1" WornOn="Hands" /> <!-- AV 1 user 2026-10-19 -->
+    <part Name="Armor" AV="1" DV="0" WornOn="Hands" /> <!-- AV 1, DV 0 user 2026-10-19 -->
     <part Name="Render" DisplayName="{{y|granitefur}} gloves" RenderString="]" Tile="catching_gloves.png" ColorString="&amp;r" DetailColor="y" /> <!-- user sprite 2026-08-22 -->
     <part Name="Commerce" Value="45" /> <!-- user 2026-10-14, flat set price -->
     <part Name="Description" Short="Grit-caked flesh was carved from a dead baboon and sewn into a pair of gloves." /> <!-- USER TEXT 2026-09-29, quartzfur echo -->
