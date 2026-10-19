@@ -169,8 +169,12 @@ namespace XRL.World.Parts
             if (wearer == null || !wearer.IsPlayer())
                 return false;
             // Temporary expiry invalidates/removes projections; stale references must not block a new peek.
+            // Only live projections on the wearer's own level block (2026-10-19, peek stuck on
+            // "can't make another" after leaving a zone): a left zone stops ticking its Temporary,
+            // and a frozen zone pools its objects, so the old reference can come back as another object.
+            Projections.RemoveAll(p => !IsOurProjection(p));
             foreach (GameObject projection in Projections)
-                if (GameObject.Validate(projection) && projection.CurrentCell != null)
+                if (projection.CurrentCell?.ParentZone == wearer.CurrentZone)
                     return wearer.Fail("You can't make another projection yet.");
             Cell origin = wearer.CurrentCell;
             Cell below = Below(origin);
@@ -194,7 +198,7 @@ namespace XRL.World.Parts
                 GameObject wall = below.ParentZone.GetCell(x, y).GetFirstWall();
                 if (wall?.Render == null)
                     continue;
-                GameObject projection = GameObject.Create("Cleo_TerraFirma_SeismicProjection");
+                GameObject projection = GameObject.Create(PROJECTION_BLUEPRINT);
                 projection.Render.Tile = wall.Render.Tile;
                 projection.Render.RenderString = wall.Render.RenderString;
                 projection.Render.HFlip = wall.Render.HFlip;
@@ -230,10 +234,18 @@ namespace XRL.World.Parts
             return false;
         }
 
+        public const string PROJECTION_BLUEPRINT = "Cleo_TerraFirma_SeismicProjection";
+
+        private static bool IsOurProjection(GameObject projection)
+        {
+            return GameObject.Validate(projection) && projection.Blueprint == PROJECTION_BLUEPRINT
+                && projection.CurrentCell != null;
+        }
+
         private void ClearProjections()
         {
             foreach (GameObject projection in Projections)
-                if (GameObject.Validate(projection))
+                if (IsOurProjection(projection))
                     projection.Obliterate(Silent: true);
             Projections.Clear();
         }
