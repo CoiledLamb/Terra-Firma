@@ -312,6 +312,17 @@
     <tag Name="Grazer" />
     <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
   </object>
+  <!-- BOAR VESSEL FARMER (user 2026-10-19: a vessel pen's farmer sells gut cisterns and salt,
+       not boar jerky and pig meat). Base StiltPigFarmer with its own restock table (base
+       GenericInventoryRestocker idiom, same 71 chance as PigFarmer). Only the pen places it, so
+       the inherited village tags are deleted and it stays out of dynamic encounters.
+       DisplayName still the inherited "pig farmer". -->
+  <object Name="Cleo_TerraFirma_StiltBoarVesselFarmer" Inherits="StiltPigFarmer">
+    <part Name="GenericInventoryRestocker" Table="Cleo_TerraFirma_BoarVesselFarmerInventory" Chance="71" />
+    <tag Name="DynamicObjectsTable:DesertCanyon_Creatures" Value="*delete" />
+    <tag Name="DynamicObjectsTable:Hills_Creatures" Value="*delete" />
+    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+  </object>
   <!-- BOAR VESSEL CORPSE (USER RULED 2026-08-27: "corpse recolored brown and azure, butcherable
        for a gut cistern"): the vessel's own palette on the base splat, butchery gates the organ
        behind the kill (an inventory cistern was a trade surface, user catch). Base Corpse ships

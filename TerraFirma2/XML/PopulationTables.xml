@@ -893,8 +893,16 @@
 			     weights sum to 15, so this is 1 pen in 16. -->
 			<group Name="Cleo_TerraFirma_BoarVessels" Style="pickeach" Weight="1">
 				<object Blueprint="Cleo_TerraFirma_Farm Boar Vessel" Number="2-6" />
-				<object Blueprint="StiltPigFarmer" Number="1" />
+				<object Blueprint="Cleo_TerraFirma_StiltBoarVesselFarmer" Number="1" />
 			</group>
+		</group>
+	</population>
+	<!-- Boar vessel farmer stock (user 2026-10-19: gut cisterns and salt). Salt is base's own
+	     salt waterskin (SaltWaterskin_Ingredient, 2d16 drams). Codex PROPOSAL: counts 1-2 each. -->
+	<population Name="Cleo_TerraFirma_BoarVesselFarmerInventory">
+		<group Name="Items" Style="pickeach">
+			<object Blueprint="Cleo_TerraFirma_GutCistern" Number="1-2" />
+			<object Blueprint="SaltWaterskin_Ingredient" Number="1-2" />
 		</group>
 	</population>
 	<!-- WILD BOAR VESSEL SPAWNS (user 2026-10-18: "add the vessel wild spawns at half"). The
