@@ -410,19 +410,18 @@ Perishes when unequipped." />
     <tag Name="ExcludeFromDynamicEncounters" />
   </object>
   <!-- Burrowbee stingers (user 2026-10-18/19): butchered from burrowbee corpses, wielded as
-       LongBlades like base's Stinger item (Items.xml:3870: LongBlades, MaxPenetration 1),
+       LongBlades like base's Stinger item (Items.xml:3870: LongBlades),
        which is natural gear and never drops; sprite the user's (2026-10-19). Venom on hit at the base
        Stinger's 20%: base PoisonOnHit and ConfuseOnHit, and Cleo_TerraFirma_ParalyzeOnHit for
        stillvine (base has no paralysis twin for weapons). Damage, saves, durations and value
        are Codex PROPOSAL dials; the description is the user's (final 2026-10-19). -->
   <object Name="Cleo_TerraFirma_BurrowbeeStinger" Inherits="BaseLongBlade">
     <part Name="Render" DisplayName="burrowbee stinger" Tile="burrowbee_stinger.png" ColorString="&amp;W" TileColor="&amp;W" DetailColor="g" />
-    <part Name="MeleeWeapon" MaxStrengthBonus="1" BaseDamage="1d3" Skill="LongBlades" />
-    <part Name="MaxPenetration" Max="1" />
+    <part Name="MeleeWeapon" MaxStrengthBonus="4" BaseDamage="1d8" Skill="LongBlades" /> <!-- user 2026-10-19: near base SalthopperMandible (Items.xml:8544, LongBlades 1d10, MaxStrengthBonus 4, tier 3), a die less for the venom -->
     <part Name="Physics" Weight="1" />
-    <part Name="Commerce" Value="20" />
+    <part Name="Commerce" Value="30" />
     <part Name="Description" Short="A wicked curve of chitin, still wet with nascent venom, drips menacingly." />
-    <tag Name="Tier" Value="1" />
+    <tag Name="Tier" Value="3" />
     <tag Name="BaseObject" Value="*noinherit" />
     <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
   </object>
