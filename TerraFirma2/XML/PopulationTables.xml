@@ -412,15 +412,16 @@
 	</population>
 	<!-- Granite baboon troop wiring (user ruling 2026-08-22: "it should spawn in all 3" - the
 	     dynamic pools arrive via inherited parent tags in Creatures.xml; these merges put him in
-	     baboon SOCIETY, the weird cousin who learned to juggle. Chances/numbers DRAFT. -->
+	     baboon SOCIETY, the weird cousin who learned to juggle. Chances/numbers DRAFT; lowered
+	     2026-10-19 (user: "a bit less common"), small party 33 to 20, big party 90 to 50. -->
 	<population Name="BaboonParty" Load="Merge">
 		<group Name="Baboons" Style="pickeach">
-			<object Chance="33" Number="0-1" Blueprint="Cleo_TerraFirma_Cobble Baboon" />
+			<object Chance="20" Number="0-1" Blueprint="Cleo_TerraFirma_Cobble Baboon" />
 		</group>
 	</population>
 	<population Name="BigBaboonParty" Load="Merge">
 		<group Name="Baboons" Style="pickeach">
-			<object Chance="90" Number="1-2" Blueprint="Cleo_TerraFirma_Cobble Baboon" />
+			<object Chance="50" Number="1-2" Blueprint="Cleo_TerraFirma_Cobble Baboon" />
 		</group>
 	</population>
 	<!-- Quarrier work parties in the surface canyon (user 2026-09-30); warrens only generate
@@ -1061,16 +1062,17 @@
 			<object Weight="1" Blueprint="Woven Tunic" />
 		</group>
 	</population>
-	<!-- Inkling in the Tomb of the Eaters (user 2026-10-17: small weight). TombCreatures feeds the
-	     catacombs and crematory, CryptCreatures the crypts; 5 against each table's 50 is about one pick in eleven. -->
+	<!-- Inkling in the Tomb of the Eaters (user 2026-10-17: small weight; 2026-10-19: a rare roll).
+	     TombCreatures feeds the catacombs and crematory, CryptCreatures the crypts; 1 against each
+	     table's 50 is about one pick in fifty. -->
 	<population Name="TombCreatures" Load="Merge">
 		<group Name="Creatures" Style="pickone">
-			<object Weight="5" Number="1-2" Blueprint="Cleo_TerraFirma_Inkling" />
+			<object Weight="1" Number="1-2" Blueprint="Cleo_TerraFirma_Inkling" />
 		</group>
 	</population>
 	<population Name="CryptCreatures" Load="Merge">
 		<group Name="Creatures" Style="pickone">
-			<object Weight="5" Number="1-2" Blueprint="Cleo_TerraFirma_Inkling" />
+			<object Weight="1" Number="1-2" Blueprint="Cleo_TerraFirma_Inkling" />
 		</group>
 	</population>
 	<!-- Burrowbees, flower fields only (C15; user 2026-10-18). The region _Creatures tag only

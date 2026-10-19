@@ -9,6 +9,9 @@
     <stat Name="Level" Value="12" />
     <mutation Name="Burrowing" Level="5" />
     <inventoryobject Blueprint="Cleo_TerraFirma_Aculei" Number="1" />
+    <!-- Held out of every spawn (user 2026-10-19). It sits in no table, so this tag closes the
+         dynamic pools it was leaking from; the blueprint stays live for saves and wishes. -->
+    <tag Name="ExcludeFromDynamicEncounters" />
   </object>
 
   <!-- Rockhound (user sprite 2026-08-12; build green-lit 2026-08-13: "we can start building
