@@ -93,6 +93,8 @@
     <part Name="Render" DisplayName="{{y|stone}} {{|*creature*}} figurine" DetailColor="K" RenderString="*" ColorString="&amp;y" RenderLayer="5" />
     <part Name="Commerce" Value="3" />
     <part Name="RandomFigurine" Material="stone" />
+    <!-- lang 2.0.212 only replaces =creature.name=, stable only *creature*: this part fills the name in after RandomFigurine on lang (2026-10-19) -->
+    <part Name="Cleo_TerraFirma_FigurineCreatureName" />
     <tag Name="Tier" Value="1" />
   </object>
   <!-- The cold dish (same docket + the user's in-game find 2026-08-26: cold-flipped
