@@ -12,13 +12,14 @@ namespace XRL.World.Parts.Mutation
 	{
 		#region Fields
 		private const string DEBUG_CONTEXT = "GMC";
-		/// <summary>Played once per reveal at the landing stone: the base shrine prayer clip. Clip and
+		/// <summary>Played once per reveal at the landing stone. Off since 2026-10-19 (user: "we should
+		/// probably just cut it"); set the dial to bring one back (it was the shrine prayer clip). Clip and
 		/// volume are dials in TerraFirma/GlobalConfig.json (base XRL.GlobalConfig, which merges every
 		/// mod's file), so a retune needs no recompile; these are the fallbacks. Not fields: Geomancy
 		/// shipped, and a new public field would shift its saved layout.</summary>
 		private const string REVEAL_SOUND_KEY = "Cleo_TerraFirma_GeomancyRevealSound";
 		private const string REVEAL_VOLUME_KEY = "Cleo_TerraFirma_GeomancyRevealSoundVolume";
-		private const string REVEAL_SOUND = "Sounds/Interact/sfx_interact_shrine_pray";
+		private const string REVEAL_SOUND = null;
 		private const float REVEAL_VOLUME = 0.5f;
 
 		private const float POWER_PER_TILE = 90f;
@@ -130,7 +131,9 @@ namespace XRL.World.Parts.Mutation
 			).ToList(); // materialized once: the distortion check fires events, and the verify log below also counts the result
 			if (ParentObject.IsPlayer())
 				DidX("listen", "for vibrations", ColorAsGoodFor: ParentObject);
-			Weapon.PlayWorldSound(XRL.GlobalConfig.GetStringSetting(REVEAL_SOUND_KEY, REVEAL_SOUND), XRL.GlobalConfig.GetFloatSetting(REVEAL_VOLUME_KEY, REVEAL_VOLUME));
+			string revealSound = XRL.GlobalConfig.GetStringSetting(REVEAL_SOUND_KEY, REVEAL_SOUND);
+			if (!string.IsNullOrEmpty(revealSound))
+				Weapon.PlayWorldSound(revealSound, XRL.GlobalConfig.GetFloatSetting(REVEAL_VOLUME_KEY, REVEAL_VOLUME));
 			Helpers.DebugLog($"---> radius, duration, do scan: {radiusRevealed}, {durationTurns}, {doScan}", DEBUG_CONTEXT);
 			Helpers.VerifyLog("GEO", $"reveal: {Weapon.Blueprint} landed, radius {radiusRevealed}, {durationTurns} turns, scan={doScan}, {pickedRadius.Count} cells pass the distortion mask");
 			// pulse/unveiling gate: NO IsVisible() third condition (Fissure's idiom) -- the
