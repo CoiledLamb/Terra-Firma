@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cleo.TerraFirma.Scripts;
 using XRL.UI;
 
@@ -96,7 +97,8 @@ namespace XRL.World.Parts
 			if (subject == null)
 				return false;
 
-			GameObject figurine = GameObject.Create(figurineBlueprint, BeforeObjectCreated: o =>
+			// unmodified: the figurine wears only the material's mods, no roll of its own (user 2026-10-19)
+			GameObject figurine = GameObject.CreateUnmodified(figurineBlueprint, BeforeObjectCreated: o =>
 			{
 				RandomFigurine rf = o.GetPart<RandomFigurine>();
 				if (rf != null)
@@ -104,6 +106,14 @@ namespace XRL.World.Parts
 			});
 			if (figurine == null)
 				return Actor.Fail("You cannot carve " + material.t() + ".");
+			// the material's mods carry over (playtest 2026-10-19: a gigantic nugget turned a plain
+			// figurine). By name and tier through ItemModding, not ModificationApplicable: a
+			// figurine has no mod key, so that gate refuses everything.
+			foreach (IPart part in material.PartsList.ToArray())
+			{
+				if (part is IModification mod && !figurine.HasPart(mod.Name))
+					XRL.World.Tinkering.ItemModding.ApplyModification(figurine, mod.Name, mod.Tier);
+			}
 
 			material.RemoveOne().Obliterate();
 			Actor.ReceiveObject(figurine);
