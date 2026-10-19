@@ -359,10 +359,14 @@ namespace XRL.World.Parts
 			}
 			if (open.Count == 0)
 				return false;
+			Cell wall = ParentObject.CurrentCell;
 			if (!ParentObject.DirectMoveTo(open.GetRandomElement(), 1000))
 				return false;
 			Unhide();
 			DidX("peel", "away from the wall");
+			// leaving mirrors entering: the graffiti sound again, at the wall it peels off (user 2026-10-19)
+			if (!GraffitiSound.IsNullOrEmpty())
+				wall.PlayWorldSound(GraffitiSound, GraffitiSoundVolume);
 			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", "emerged from the wall");
 			return true;
 		}
@@ -530,6 +534,9 @@ namespace XRL.World.Parts
 		public void HopOff(Cell Landing, bool Frightened, GameObject From = null)
 		{
 			Landing.AddObject(ParentObject);
+			// leaving mirrors entering: the attach sound again, at the host it peels off (user 2026-10-19)
+			if (!AttachSound.IsNullOrEmpty())
+				(From?.CurrentCell ?? Landing).PlayWorldSound(AttachSound, AttachSoundVolume);
 			Scared = Frightened;
 			if (Frightened && From != null)
 			{
