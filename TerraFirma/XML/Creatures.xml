@@ -17,11 +17,11 @@
        waits on the post-NPCs faction debt; probably wants base's Grazer tag then too).
        Chassis: BaseDog (Pettable and Dogs-100 arrive free). Gut: Cleo_TerraFirma_RockSweeper,
        swallow-and-spill (see the part for provenance). STATS ARE DRAFT, numbers sitting owed.
-       Name lock owed ("rockhound" working; candidate list in TODO). Render colors PLACEHOLDER,
+       Named "gneisshund" 2026-10-19 (user); ID and tile keep rockhound. Render colors PLACEHOLDER,
        user's sprite palette to rule. ExcludeFromDynamicEncounters dropped 2026-10-19 (user),
        so it rolls in the dynamic BaseDog pool; no table rows yet. -->
   <object Name="Cleo_TerraFirma_Rockhound" Inherits="BaseDog">
-    <part Name="Render" DisplayName="rockhound" Tile="rockhound.png" RenderString="d" ColorString="&amp;w" DetailColor="y" />
+    <part Name="Render" DisplayName="gneisshund" Tile="rockhound.png" RenderString="d" ColorString="&amp;w" DetailColor="y" />
     <part Name="Corpse" CorpseChance="100" CorpseBlueprint="Dog Corpse" />
     <stat Name="Level" Value="8" />
     <stat Name="Hitpoints" Value="18" />
