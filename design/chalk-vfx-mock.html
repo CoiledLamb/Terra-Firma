@@ -1,0 +1,261 @@
+<title>Chalk VFX Mock — Terra Firma</title>
+<style>
+  :root { color-scheme: dark; }
+  html { background: #10150f; }
+  body {
+    margin: 0; padding: 0;
+    background: #10150f;
+    color: #d8d2c2;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+  .mono { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: #27a457; margin: 0 0 10px;
+  }
+  h1 {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: clamp(28px, 4.6vw, 44px); font-weight: 700;
+    margin: 0 0 8px; letter-spacing: -.01em; color: #ece7d8;
+  }
+  .lede { max-width: 72ch; color: #98a08e; margin: 0 0 6px; font-size: 15px; }
+  .lede b { color: #d8d2c2; font-weight: 600; }
+  .provenance {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 11.5px; color: #6b7565; margin: 10px 0 0; max-width: 104ch;
+  }
+  .provenance b { color: #98a08e; font-weight: 600; }
+
+  .frames { display: flex; flex-wrap: wrap; gap: 24px; margin: 34px 0 0; }
+  .frame {
+    background: #161d18; border: 1px solid #263029; border-radius: 6px;
+    padding: 18px 20px 16px; flex: 1 1 300px; min-width: 300px;
+  }
+  .frame h2 {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 13px; letter-spacing: .18em; text-transform: uppercase;
+    color: #ece7d8; margin: 0 0 4px;
+  }
+  .frame .t {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 12px; color: #27a457; margin: 0 0 14px;
+  }
+  .frame p.note { font-size: 13px; color: #98a08e; margin: 12px 0 0; max-width: 42ch; }
+  .frame p.note b { color: #d8d2c2; font-weight: 600; }
+
+  .stage {
+    position: relative; width: 192px; height: 288px; margin: 0 auto;
+    background: #131713;
+    outline: 1px solid #202a22;
+    image-rendering: pixelated;
+    overflow: hidden;
+  }
+  .cell {
+    position: absolute; width: 64px; height: 96px;
+    box-shadow: inset 0 0 0 1px rgba(38,48,41,.35);
+  }
+  .cell .grain {
+    position: absolute; color: #1d231d; font-size: 30px;
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+  .sprite { position: absolute; width: 64px; height: 96px; image-rendering: pixelated; }
+  .at {
+    position: absolute;
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 44px; line-height: 1; transform: translate(-50%, -50%);
+    color: #b1c9c3;
+  }
+  .maskfrag {
+    position: absolute; background: #131713;
+    box-shadow: inset 0 0 0 1px rgba(70,84,72,.55);
+  }
+  .maskfrag .grain {
+    position: absolute; color: #1d231d; font-size: 22px;
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+  .mote {
+    position: absolute; background: #ffffff; border-radius: 2px;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 8px rgba(255,255,255,.5);
+  }
+  .mote.dim { opacity: .55; box-shadow: 0 0 5px rgba(255,255,255,.3); }
+  .anno {
+    position: absolute; font-size: 10.5px; color: #6b7565;
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    white-space: nowrap;
+  }
+
+  .later { display: flex; flex-wrap: wrap; gap: 24px; margin: 40px 0 0; }
+  .laterbox {
+    background: #141a15; border: 1px dashed #263029; border-radius: 6px;
+    padding: 16px 20px; flex: 1 1 300px;
+  }
+  .laterbox h2 {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+    color: #98a08e; margin: 0 0 6px;
+  }
+  .laterbox p { font-size: 13px; color: #6b7565; margin: 0; max-width: 52ch; }
+  .laterbox p b { color: #98a08e; font-weight: 600; }
+
+  table.dials {
+    border-collapse: collapse; margin: 40px 0 0; font-size: 13.5px; width: 100%;
+  }
+  table.dials caption {
+    text-align: left; font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 13px; letter-spacing: .18em; text-transform: uppercase;
+    color: #ece7d8; margin-bottom: 10px;
+  }
+  table.dials th, table.dials td {
+    border: 1px solid #263029; padding: 8px 12px; text-align: left; vertical-align: top;
+  }
+  table.dials th {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 12px; letter-spacing: .1em; color: #98a08e; font-weight: 600;
+    background: #161d18;
+  }
+  table.dials td .mono { color: #27a457; font-size: 12.5px; }
+  table.dials td { color: #b8b2a2; }
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">Terra Firma · VFX mock v2 · draw-on-ground reveal · static frames for approval</p>
+  <h1>Chalk reveal</h1>
+  <p class="lede">User shape 2026-08-23: an <b>opaque background mask over the tile</b>, a
+    <b>small puff of white particles</b> in the fire-puff style, and the puff
+    <b>reveals/dispels the mask in a dynamic motion</b>. Mechanism below is all house machinery:
+    the mask is a pooled sprite wearing the <b>floor's own tile</b> (the cell just looks like
+    bare floor until the dust clears), it dissolves as 4 sub-rect fragments staggered
+    ~60ms apart, and the motes are white-tinted sprite flecks. The real line object is placed
+    at t=0 and never moves; everything else is cover.</p>
+  <p class="provenance">ground truth: mask chassis = <b>Cleo_TerraFirma_JuiceCarveBlock</b>
+    (Fx_StoneRise.cs: pooled sprite wearing any tile, CloneSubRect fragments at natural size,
+    park-behind-map exit, pool-state restore) · motes = <b>Cleo_TerraFirma_JuiceWhorlFleck</b>
+    chassis (Fx_GravelWhorlFX.cs: Transparent pooled sprite, small scale, free color) ·
+    stock fire burst <b>Impacts/ImpactVFXFlameburst</b> (Cell.cs:8937) RULED OUT technically:
+    the ParticleVFX config family is Animated/Transmuted/Throw/Decapitated/ThrowFast/Slam/Consumed
+    only, so the flameburst prefab has no color channel and cannot be made white.</p>
+
+  <div class="frames">
+    <div class="frame">
+      <h2>Frame A · masked</h2>
+      <p class="t">t = 0, stroke placed, mask on</p>
+      <div class="stage">
+        <div class="cell" style="left:0;top:0"></div>
+        <div class="cell" style="left:64px;top:0"><span class="grain" style="left:40px;top:50px">.</span></div>
+        <div class="cell" style="left:128px;top:0"></div>
+        <div class="cell" style="left:0;top:96px"><span class="at" style="left:32px;top:48px">@</span></div>
+        <div class="cell" style="left:64px;top:96px"><span class="grain" style="left:34px;top:40px">.</span></div>
+        <div class="cell" style="left:128px;top:96px"><span class="grain" style="left:14px;top:20px">.</span></div>
+        <div class="cell" style="left:0;top:192px"></div>
+        <div class="cell" style="left:64px;top:192px"></div>
+        <div class="cell" style="left:128px;top:192px"><span class="grain" style="left:30px;top:44px">.</span></div>
+        <span class="anno" style="left:40px;top:70px">mask = floor's own tile: cell reads as bare floor</span>
+      </div>
+      <p class="note">the line object already exists under there. the mask is enqueued the
+        same frame it lands, so the stroke is <b>never seen popping in</b>.</p>
+    </div>
+
+    <div class="frame">
+      <h2>Frame B · dispelling</h2>
+      <p class="t">t ≈ 0.18s, 2 of 4 fragments gone</p>
+      <div class="stage">
+        <div class="cell" style="left:0;top:0"></div>
+        <div class="cell" style="left:64px;top:0"><span class="grain" style="left:40px;top:50px">.</span></div>
+        <div class="cell" style="left:128px;top:0"></div>
+        <div class="cell" style="left:0;top:96px"><span class="at" style="left:32px;top:48px">@</span></div>
+        <div class="cell" style="left:64px;top:96px">
+          <img class="sprite" style="clip-path: polygon(0 0, 50% 0, 50% 50%, 100% 50%, 100% 100%, 0 100%)" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAAXNSR0IArs4c6QAAACdJREFUOI1jYBgFo2AUMDAwMDBC6f9Q9n80uf849PxH0z8KRsFQBwDJnQQCYi0/4QAAAABJRU5ErkJggg==" alt="chalklineN half revealed">
+        </div>
+        <div class="cell" style="left:128px;top:96px"><span class="grain" style="left:14px;top:20px">.</span></div>
+        <div class="cell" style="left:0;top:192px"></div>
+        <div class="cell" style="left:64px;top:192px"></div>
+        <div class="cell" style="left:128px;top:192px"><span class="grain" style="left:30px;top:44px">.</span></div>
+        <div class="maskfrag" style="left:96px;top:96px;width:32px;height:48px"><span class="grain" style="left:8px;top:14px">.</span></div>
+        <div class="maskfrag" style="left:64px;top:144px;width:32px;height:48px"></div>
+        <div class="maskfrag" style="left:134px;top:88px;width:26px;height:38px;opacity:.7;transform:rotate(6deg)"></div>
+        <span class="mote" style="left:104px;top:112px;width:10px;height:10px"></span>
+        <span class="mote" style="left:76px;top:128px;width:8px;height:8px"></span>
+        <span class="mote dim" style="left:140px;top:150px;width:8px;height:8px"></span>
+        <span class="mote" style="left:92px;top:170px;width:10px;height:10px"></span>
+        <span class="mote dim" style="left:120px;top:196px;width:7px;height:7px"></span>
+        <span class="mote dim" style="left:88px;top:92px;width:7px;height:7px"></span>
+        <span class="anno" style="left:32px;top:250px">fragment edges drawn here for legibility; in game they wear floor pixels</span>
+      </div>
+      <p class="note">fragments pop off in random order, drifting 2 to 4 px as they park;
+        <b>white motes burst outward ease-out</b>, thickest where stroke was just exposed.
+        messy transitions blessed by the shape.</p>
+    </div>
+
+    <div class="frame">
+      <h2>Frame C · settled</h2>
+      <p class="t">t ≈ 0.4s, mask parked, last motes fading</p>
+      <div class="stage">
+        <div class="cell" style="left:0;top:0"></div>
+        <div class="cell" style="left:64px;top:0"><span class="grain" style="left:40px;top:50px">.</span></div>
+        <div class="cell" style="left:128px;top:0"></div>
+        <div class="cell" style="left:0;top:96px"><span class="at" style="left:32px;top:48px">@</span></div>
+        <div class="cell" style="left:64px;top:96px">
+          <img class="sprite" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAYAAADzoH0MAAAAAXNSR0IArs4c6QAAACdJREFUOI1jYBgFo2AUMDAwMDBC6f9Q9n80uf849PxH0z8KRsFQBwDJnQQCYi0/4QAAAABJRU5ErkJggg==" alt="chalklineN">
+        </div>
+        <div class="cell" style="left:128px;top:96px"><span class="grain" style="left:14px;top:20px">.</span></div>
+        <div class="cell" style="left:0;top:192px"></div>
+        <div class="cell" style="left:64px;top:192px"></div>
+        <div class="cell" style="left:128px;top:192px"><span class="grain" style="left:30px;top:44px">.</span></div>
+        <span class="mote dim" style="left:132px;top:120px;width:6px;height:6px"></span>
+        <span class="mote dim" style="left:84px;top:186px;width:6px;height:6px"></span>
+      </div>
+      <p class="note">the real stroke stands; nothing was ever swapped or re-rendered.
+        total beat <b>~0.4s</b>, shorter than a StoneRise emergence so drawing eleven
+        strokes in a row stays snappy.</p>
+    </div>
+  </div>
+
+  <div class="later">
+    <div class="laterbox">
+      <h2>Smear · unshaped, ground lane</h2>
+      <p>Claude offer, unruled: <b>run the reveal backwards</b>. Fragments of floor-tile
+        mask fly IN and assemble over the line, motes burst, and when the cover parks the
+        line object is already gone. Same machinery, negative direction. Waits behind draw.</p>
+    </div>
+    <div class="laterbox">
+      <h2>Chalkboard write · deferred by the shape</h2>
+      <p>User: <b>"reuse the puff effects in a slightly different way for the chalkboard,
+        but let's build ground first."</b> Motes without a mask, probably hugging the board
+        face. Nothing designed yet.</p>
+    </div>
+  </div>
+
+  <table class="dials">
+    <caption>Dials, all CLAUDE DRAFT, eyeball decides</caption>
+    <tr><th>dial</th><th>draft</th><th>range that still reads</th></tr>
+    <tr>
+      <td>mask fragments</td>
+      <td><span class="mono">4 quads (2x2 sub-rects)</span></td>
+      <td>3 horizontal bands (CarveBlock's own split) up to 6 smaller quads; more = messier</td>
+    </tr>
+    <tr>
+      <td>fragment stagger</td>
+      <td><span class="mono">~60ms, random order</span></td>
+      <td>40 to 90ms; slower starts reading as rubble</td>
+    </tr>
+    <tr>
+      <td>motes</td>
+      <td><span class="mono">5 to 6, white, 2 to 3px, ease-out burst</span></td>
+      <td>4 whisper to 10 gusty; glow optional</td>
+    </tr>
+    <tr>
+      <td>total beat</td>
+      <td><span class="mono">~0.4s</span></td>
+      <td>0.3 to 0.5s; must stay under the ability's turn cadence feel</td>
+    </tr>
+    <tr>
+      <td>retile of neighbors</td>
+      <td><span class="mono">instant swap, no beat</span></td>
+      <td>per the shape: transitions between states stay messy and that is fine</td>
+    </tr>
+  </table>
+</div>

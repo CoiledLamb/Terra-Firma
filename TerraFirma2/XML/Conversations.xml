@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<conversations>
+
+	<!-- OUTRIDER (user-written 2026-08-16). First quarrier to get a voice. Unlike the miner
+	     there was nothing to override: BaseHumanoid carries no ConversationScript, so before
+	     this the whole guild was mute.
+	     Wired on the OUTRIDER, not on the stonecarver chassis, per the profession-first ruling
+	     of 2026-08-15: the profession is the face, so the bank belongs to it. The chassis needs
+	     no conversation of its own as long as every carver in play has a profession, which the
+	     roster currently guarantees.
+	     Cleo_TerraFirma_Mole Outrider inherits this by descent, i.e. both bodies speak with one
+	     voice. That is what profession-first predicts; it is not a separate ruling, and a mole
+	     specific bank is one ConversationID away if the user wants the split.
+	     Water ritual, trade and join-party choices arrive FREE: base Conversations.xml opens
+	     with BaseConversation, "inherited by all conversations by default," which carries the
+	     WaterRitualChoice and its whole subtree. Relevant here because the Quarriers ship with
+	     WaterRitualJoin defaulting true, so a written bank is all recruitability needed.
+	     ADDRESS TERM: "wayfarer" is the user's, written inline. That is also the only way it
+	     can work; faction DefaultAddress has no conversation token, so Issachari hardcode
+	     "lack-salt" in their node text exactly like this. -->
+	<!-- FAREWELL RULED 2026-08-29 (user: "for the farewell, it could be rust and earth, or
+	     just the default live and drink"): the guild farewell is "Rust and earth." on the
+	     three carver roles (words the user's, capitalization editorial). The snapjaw miner
+	     keeps his "...live and drink." below on purpose; a hired snapjaw awkwardly aping the
+	     standard courtesy is its own beat, and one edit flips it if the user wants him guild-voiced. -->
+	<!-- Last two lines user WIP 2026-09-30, staged as dropped (sentence starts capitalized). -->
+	<conversation ID="Cleo_TerraFirma_Outrider">
+		<node ID="Start">
+			<text>
+				Mind the cairns, wayfarer, lest you knock one over.~
+				Seen a few baboons today. Not one made it further than a stone's throw.~
+				The nonsense birds? Don't talk to them, they won't talk to you.~
+				Can hear you coming from a mile away, wayfarer. I'll be hearing you go, too.
+			</text>
+			<choice GotoID="End">Rust and earth.</choice>
+		</node>
+	</conversation>
+
+	<!-- MASON (user-written 2026-08-16). Same wiring shape as the outrider: on the role, so
+	     Cleo_TerraFirma_Mole Mason inherits it by descent and both bodies speak as one mason.
+	     Precedent for a trade having its own bank rather than sharing a guild one is the Stilt
+	     itself: BaseMerchant points at GenericMerchant, and then every named trade on the
+	     Stiltgrounds overrides it with a bank of its own. The vintner talks about wine. -->
+	<conversation ID="Cleo_TerraFirma_Mason">
+		<node ID="Start">
+			<text>
+				Stones talk sometimes. Just gotta listen real close, and you can hear 'em singing.~
+				Need something sculpted? Man, boar, fish?~
+				I sometimes wonder if the stones feel like we do. Carving must hurt then, eh?~
+				Don't know the name of the rocks around here, but they carve just the same.
+			</text>
+			<choice GotoID="End">Rust and earth.</choice>
+		</node>
+	</conversation>
+
+	<!-- HEWER (user-written 2026-08-16). Third role wired, same shape: on the role, so
+	     Cleo_TerraFirma_Mole Hewer inherits it.
+	     Two hooks in these lines that other systems already own, recorded so nobody "fixes" them:
+	     the AQUIFER line is the exception to a rule the warren generator encodes (warren-lab.html
+	     wetChance seals one brine pocket per warren, and wetAvoid exists so tunnels visibly bend
+	     around it, hover text "diggers don't breach aquifers"). This hewer is the digger who did.
+	     Brine, so the soaking is salt water.
+	     The WITCHWOOD ask names an item the player stonecarver starts holding, 2 to 4 Witchwood
+	     Bark out of Cleo_StartingGear_Stonecarver. Stock HaveItem and TakeItem conversation parts
+	     could turn that into a real handover with no C#. DECLINED 2026-08-29 (user: "hewer's
+	     witchwood is a claude proposal i'm not taking"); the line stays flavor, not a fetch hook. -->
+	<!-- Last two lines user WIP 2026-09-30, staged as dropped (sentence starts capitalized). -->
+	<conversation ID="Cleo_TerraFirma_Hewer">
+		<node ID="Start">
+			<text>
+				Smashed through a wall last week, soaked my clothes. Damn aquifers.~
+				Overseer said we needed to square away more rock, but my back's been killing me... got any witchwood?~
+				Ground's not so steady here, wayfarer. I'd watch my step, if're you.~
+				Ever scraped the moss off one of these here walls? Tastes like grit, but sure fills ya' up.
+			</text>
+			<choice GotoID="End">Rust and earth.</choice>
+		</node>
+	</conversation>
+
+	<!-- OVERSEER (user-written WIP 2026-09-29, bank still growing toward 7-9). Wired on the
+	     Cleo_TerraFirma_Overseer blueprint alongside GivesRep, which is what unlocks the
+	     BaseConversation WaterRitualChoice (IfSpeakerHavePart="GivesRep"). -->
+	<conversation ID="Cleo_TerraFirma_Overseer">
+		<node ID="Start">
+			<text>
+				Ain't easy work overseein' a warren like this, wayfarer.~
+				Make sure not to find yourself on the wrong side of the outrider, and you'll do fine.
+			</text>
+			<choice GotoID="End">Rust and earth.</choice>
+		</node>
+	</conversation>
+
+	<!-- QUARRY PROVISIONER (user-written WIP 2026-09-29). Replaces GenericMerchant; the Trade
+	     choice arrives free from BaseConversation (base Conversations.xml:92). "wayfarer" on
+	     purpose: the vine counts itself part of the crew. "stonesup" is the user's coinage, to
+	     sup on stone: a tool that eats rock. Farewell follows the crew. -->
+	<conversation ID="Cleo_TerraFirma_VineMerchant">
+		<node ID="Start">
+			<text>
+				Come, wayfarer. My stonesup tools are yours to work.~
+				Helmets, lights, picks... make certain of the stock you buy now, for a missing piece could prove fatal.~
+				The rocks here are loose. With my wares, you could be rid of them altogether.~
+				Ah, to feel the sunlight on your skin, wayfarer. Tell me, is it sweeter than the taste of fresh water?
+			</text>
+			<choice Target="Kind">You're a plant, right? What kind?</choice>
+			<choice GotoID="End">Rust and earth.</choice>
+		</node>
+		<!-- Pandogrove's chain (user-written 2026-10-18), shaped like base Yurl's Story chain:
+		     each answer inherits Start's choices, the next question sorts first (Priority 1).
+		     The "me" to "we" slip in Here is the supercolony speaking; keep it. -->
+		<node ID="Kind" Inherits="Start">
+			<text>One of many. A spiral in multitude, radiating through the earth.</text>
+			<choice Target="Here" Priority="1">How did you wind up here?</choice>
+		</node>
+		<node ID="Here" Inherits="Start">
+			<text>The vase called me. It sang of home, of basking in the sun's fading glow, of hearing the howling caves on the horizon. To return, we provide for them.</text>
+			<choice Target="Home" Priority="1">Home? Aren't you just a potted plant?</choice>
+		</node>
+		<node ID="Home" Inherits="Start">
+			<text>And what of home, wayfarer? Do you know of such a thing?</text>
+		</node>
+	</conversation>
+</conversations>

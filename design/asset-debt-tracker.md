@@ -1,8 +1,9 @@
 # Asset-debt tracker — quarriers / camps / side content
 
 Created 2026-07-24 at user request: **inventory every planned blueprint and the sprite + text
-debt it incurs, BEFORE building anything.** TODO.md stays the ruling record; this file is the
-design/planning ledger (leanings, ideas, reuse notes — the forward-looking half).
+debt it incurs, BEFORE building anything.** [TODO.md](../TODO.md) holds current work;
+[JOURNAL.md](../JOURNAL.md) preserves the old tracker. This file is a historical
+design/planning inventory (leanings, ideas, reuse notes), not a second task list.
 
 **As of 2026-07-25, `asset-debt-tracker.html` is GENERATED GROUND TRUTH, not hand-maintained**
 (user: the tool must be "accurate and informative rather than having its head in the clouds").

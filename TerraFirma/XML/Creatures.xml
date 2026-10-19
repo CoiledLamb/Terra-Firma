@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
- <objects> 
+ <objects>
+
   <object Name="Cleo_TerraFirma_Burrowing Urchin" Inherits="BaseUrchin">
     <part Name="Render" DisplayName="burrowing urchin" ColorString="&amp;w" DetailColor="g" />
     <part Name="Description" Short="A moss covered ball of spines tumbles across the earth, prying open crevices and bits of scrap to nest in the dank spaces within." />
@@ -8,6 +9,9 @@
     <stat Name="Level" Value="12" />
     <mutation Name="Burrowing" Level="5" />
     <inventoryobject Blueprint="Cleo_TerraFirma_Aculei" Number="1" />
+    <!-- Held out of every spawn (user 2026-10-19). It sits in no table, so this tag closes the
+         dynamic pools it was leaking from; the blueprint stays live for saves and wishes. -->
+    <tag Name="ExcludeFromDynamicEncounters" />
   </object>
 
   <!-- Rockhound (user sprite 2026-08-12; build green-lit 2026-08-13: "we can start building
@@ -16,76 +20,76 @@
        waits on the post-NPCs faction debt; probably wants base's Grazer tag then too).
        Chassis: BaseDog (Pettable and Dogs-100 arrive free). Gut: Cleo_TerraFirma_RockSweeper,
        swallow-and-spill (see the part for provenance). STATS ARE DRAFT, numbers sitting owed.
-       Name lock owed ("rockhound" working; candidate list in TODO). Render colors PLACEHOLDER,
-       user's sprite palette to rule. ExcludeFromDynamicEncounters = controlled debut; remove
-       or replace with real table tags at the spawn-wiring pass. -->
+       Named "gneisshund" 2026-10-19 (user); ID and tile keep rockhound. Render colors PLACEHOLDER,
+       user's sprite palette to rule. ExcludeFromDynamicEncounters dropped 2026-10-19 (user),
+       so it rolls in the dynamic BaseDog pool; no table rows yet. -->
   <object Name="Cleo_TerraFirma_Rockhound" Inherits="BaseDog">
-    <part Name="Render" DisplayName="rockhound" Tile="rockhound.png" RenderString="d" ColorString="&amp;w" DetailColor="y" />
+    <part Name="Render" DisplayName="gneisshund" Tile="rockhound.png" RenderString="d" ColorString="&amp;w" DetailColor="y" />
     <part Name="Corpse" CorpseChance="100" CorpseBlueprint="Dog Corpse" />
-    <stat Name="Level" Value="8" />
-    <stat Name="Hitpoints" Value="18" />
+    <!-- between base Dog (L1, 8 HP, 1d3) and Guard Dog (L8, 22 HP, 1d8): user 2026-10-19 -->
+    <stat Name="Level" Value="4" />
+    <stat Name="Hitpoints" Value="12" />
     <stat Name="AV" Value="2" />
     <part Name="Cleo_TerraFirma_RockSweeper" />
-    <inventoryobject Blueprint="BigDog_Bite" Number="1" />
-    <part Name="Description" Short="Dust grays =pronouns.possessive= coat and =pronouns.possessive= muzzle is worn smooth as riverstone. When =pronouns.subjective= =verb:trot:afterpronoun=, something in =pronouns.possessive= belly clicks and settles, stone against swallowed stone." /> <!-- DRAFT, signoff owed -->
+    <!-- NO ConversationScript, RULED 2026-08-16 alongside the cobble baboon (user: "if basedog is
+         mute, then we are good on rockhounds also"). BaseDog carries none, so the rockhound is
+         mute by inheritance and by intent. Contrast the Husangeion, which opted out the other
+         way: it takes PetResponse lines rather than a conversation. -->
+    <inventoryobject Blueprint="Cleo_TerraFirma_Gneisshund_Bite" Number="1" />
+    <part Name="Description" Short="Nose to the ground, =pronouns.subjective= =verb:hunt:afterpronoun= for bits of spall amongst the desert scrub. As =pronouns.subjective= =verb:trot:afterpronoun=, the stones in =pronouns.possessive= stomach click and settle against each other." />
     <tag Name="Role" Value="Brute" />
-    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
   </object>
 
-  <!-- Snapjaw miner (user sprite 2026-08-12; build green-lit 2026-08-13). Behavior PARENT in
-       the base two-layer idiom (Snapjaw Scavenger precedent): tier children, if ruled in at
-       wiring, are pure InventoryPopulationTable swaps on top of this. The pickaxe IS the AI
-       (recon 2026-08-13, banked in TODO): DiggingTool installs Digging on the wielder, Drill
-       answers PathAsBurrowerEvent, so he tunnels while traveling and fights through walls to
-       reach a target with zero C#. Placement leans banked (any snapjaw group + sometimes
-       canyon-wild); ExcludeFromDynamicEncounters = controlled debut (Snapjaw parent tags would
-       otherwise seed him into canyon, saltmarsh, and hills pools TODAY, ahead of the wiring
-       pass and the party-table merge). HP is DRAFT (Hunter-grade 6 over base 3, he swings a
-       real tool); Role DRAFT Minion; render colors PLACEHOLDER. Description identity kept
-       NEUTRAL on purpose: what a miner snapjaw wants is still the user's open call. -->
-  <!-- Cobble baboon (settled 2026-08-13 sitting; user structure ruling: creature plain,
-       "-fur" reserved for the pelt items, quartz/quartzfur grammar. NAME LOCKED cobble
-       same day, superseding Claude's gravel pick: "gravel baboon" + the Gravel Whorl effect
-       title colliding in every combat sentence of his signature moment was the user's
-       (correct) log-legibility fear; gravel = considered-and-passed alternate. Chassis:
-       Baboon child, so the StoneScavenger merge, pocket Small Stones, AIThrowAndScoot,
-       Skirmisher role, and the Hills/DesertCanyon table tags all arrive by inheritance
-       (canyon habitat = user lean, confirmed at this sitting by silence on the alternative).
-       Signature: Earthen Barrage — NPC auto-arm shipped 2026-08-06 (mutation re-sculpts
-       every EndTurn, base AI throws the slot natively), so the whole creature is this one
-       XML block. Differentiation from base Quartz Baboon on file: quartz = stone SKIN
-       (armor/reflect, L22 subterrane); gravel = stone THROWN (barrage/whorl, early canyon).
-       STATS + EB LEVEL DRAFT (Hulking-grade body, EB 4 for a visible whorl), numbers
-       sitting owed. Tile = recolored base baboon PLACEHOLDER, sprite debt filed.
-       Corpse: custom, CorpseChance 15 DRAFT (down from the inherited 40; he will be a
-       common canyon spawn and 40% would carpet the canyon in pelts; quartz ships at 6).
-       Butchery = the cobblefur family (bracer/gloves/cloak, quartzfur three-piece idiom),
-       table in PopulationTables.xml. ExcludeFromDynamicEncounters = controlled debut,
-       lift at the spawn-wiring pass. -->
-  <object Name="Cleo_TerraFirma_Cobble Baboon" Inherits="Baboon">
-    <part Name="Render" DisplayName="cobble baboon" Tile="Assets_Content_Textures_Creatures_sw_baboon.bmp" ColorString="&amp;y" DetailColor="K" />
-    <stat Name="Hitpoints" Value="15" />
-    <stat Name="Strength" Boost="2" />
-    <stat Name="AV" Value="3" />
-    <!-- mutation nodes resolve by CLASS name, not display name (caught 2026-08-14: the display
-         name loaded as a MODERROR + unnamed-node warn and the baboon spawned barrage-less) -->
-    <mutation Name="Cleo_TerraFirma_EarthenBarrage" Level="4" />
-    <part Name="Corpse" CorpseChance="15" CorpseBlueprint="Cleo_TerraFirma_Cobble Baboon Corpse" />
-    <part Name="Description" Short="Grit clings to =pronouns.possessive= coat in dun sheets, and around =pronouns.objective= the air is never quite still: pebbles circle =pronouns.possessive= shoulders in a lazy orbit, waiting to be thrown." /> <!-- DRAFT, signoff owed -->
-    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
-  </object>
-  <object Name="Cleo_TerraFirma_Cobble Baboon Corpse" Inherits="Baboon Corpse">
-    <part Name="Render" DisplayName="cobble baboon corpse" />
-    <part Name="Butcherable" OnSuccess="@Cleo_TerraFirma_Cobblefur Items" />
-    <tag Name="Tier" Value="2" />
+  <!-- acid bite, how it breaks down rock (user 2026-10-19): 1d4 base (user) plus acid in the shape of base
+       Hyrkhound_Bite (2d2 + ElementalDamage 1d6+9 Acid, on a level 18 hound). Acid 1d3 is a Codex PROPOSAL
+       scaled down for level 4. No DisplayName, so it reads as a plain bite until the user names it. -->
+  <object Name="Cleo_TerraFirma_Gneisshund_Bite" Inherits="Bite">
+    <part Name="MeleeWeapon" BaseDamage="1d4" />
+    <part Name="ElementalDamage" Damage="1d3" Attributes="Acid" />
   </object>
 
   <object Name="Cleo_TerraFirma_Snapjaw Miner" Inherits="Snapjaw">
     <part Name="Render" DisplayName="snapjaw miner" Tile="snapjaw miner.png" ColorString="&amp;w" DetailColor="y" />
     <stat Name="Hitpoints" Value="6" />
     <inventoryobject Blueprint="Pickaxe" Number="1" />
-    <part Name="Description" Short="Quarry dust grays =pronouns.possessive= tussocked fur, and =pronouns.possessive= knuckles are chipped white from wall-work. =pronouns.Subjective= =verb:eye:afterpronoun= every rockface like a shut door." /> <!-- DRAFT, signoff owed -->
+    <!-- overrides the ConversationID inherited from base Snapjaw (2026-08-16); bank in Conversations.xml -->
+    <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_SnapjawMiner" />
     <tag Name="Role" Value="Minion" />
-    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+  </object>
+  <!-- BOAR VESSEL, wild base (NAME RULED 2026-08-26, user: "boar over pig"; full design record
+       in TODO.md creature roster). INVERTED HIERARCHY ruling 2026-08-11: this base owns the
+       animal; the Husangeion pet (XML/Pets.xml) re-parents onto it only AFTER this blueprint
+       verifies in game. Basin = the creature's own unsealed tank, trending brackish via the salt
+       producer and refilled from pools by VesselDrink (2026-10-19). LiquidProducer.IsNeeded
+       self-stops at full (decomp-verified); glaze lies per the
+       2026-08-11 ruling, VesselTint stays majority-liquid. Cistern = real worn equipment on the
+       plain Body slot, unremovable via NaturalEquipment (USER RULED 2026-08-26, superseding the
+       custom bodyparttype + anatomy, both deleted); drops sealed on death. Flee shape: stock
+       farm-prey idiom only (base has no flee flag; recon 2026-08-26), watch it in game before
+       adding anything. ALL STATS AND RATES DRAFT, numbers sitting owed. Description approved
+       2026-09-08. ExcludeFromDynamicEncounters per
+       the creatures-branch charter; spawn wiring is its own future ruling. -->
+  <object Name="Cleo_TerraFirma_BaseBoarVessel" Inherits="BaseAnimal">
+    <part Name="Brain" Hostile="false" Factions="Swine-100,Prey-100" /> <!-- base Boar idiom + Prey-100 per user soft pick 2026-08-11 -->
+    <part Name="Body" Anatomy="Cleo_TerraFirma_BoarVessel" /> <!-- the pet's own anatomy, shared; see XML/Bodies.xml -->
+    <part Name="Render" DisplayName="boar vessel" Tile="boar vessel.png" RenderString="b" ColorString="&amp;w" DetailColor="B" />
+    <part Name="Description" Short="A depiction of the common sow, painted with the rough brush of clay, roots aimlessly in the dirt. Water sloshes gently in =pronouns.possessive= basin as =pronouns.subjective= =verb:amble:afterpronoun= along." /> <!-- Description approved 2026-09-08. -->
+    <part Name="LiquidVolume" MaxVolume="64" Volume="64" StartVolume="1d33-1" InitialLiquid="water-800,salt-200" ManualSeal="true" /> <!-- basin; pet tank shape, brackish start mix DRAFT -->
+    <part Name="Cleo_TerraFirma_VesselTint" EmptyColor="k" />
+    <part Name="LiquidProducer" Liquid="salt" FillSelfOnly="true" VariableRate="500-5000" WorksOnWearer="false" WorksOnSelf="true" /> <!-- salty fill over time; RATE DRAFT. Pet overrides this by part-name replacement at re-parent. The basin stays brackish (user 2026-10-19: the gut cistern is the desalinator, not the basin) -->
+    <part Name="Cleo_TerraFirma_VesselDrink" SipDrams="1" /> <!-- refills the basin from nearby water/salt pools when half empty (user pick 2026-10-19); one dram a turn, slowed from 4 (user); dials DRAFT -->
+    <stat Name="Level" Value="1" />
+    <stat Name="AV" Value="3" /> <!-- DRAFT; base Boar AV 4 anchor, walks like a boar and breaks like a pot -->
+    <stat Name="Hitpoints" Value="15" /> <!-- DRAFT; base Boar 13 -->
+    <tag Name="Species" Value="oddity" />
+    <tag Name="Gender" Value="neuterperson" />
+    <xtagTextFragments Skin="glaze" PoeticFeatures="artfulness,gentle stillness,childlike wonder" />
+    <tag Name="BleedLiquid" Value="water-900,salt-100" />
+    <tag Name="BleedColor" Value="&amp;B" />
+    <tag Name="BleedPrefix" Value="{{B|wet}}" />
+    <!-- Split 2026-09-27: Terra Firma keeps this body for Husangeion only. The wild spawn
+         tables and the butcherable corpse are Terra Firma 2 content, merged back onto this
+         blueprint by TerraFirma2/XML/Creatures.xml, which also removes this exclude tag. -->
+    <tag Name="ExcludeFromDynamicEncounters" />
   </object>
 </objects>

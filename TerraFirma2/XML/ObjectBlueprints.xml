@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8"?>
+<objects>
+    <!-- Cobblefur family (settled 2026-08-13 sitting): the cobble baboon's butchery drops,
+       quartz/quartzfur grammar (user's catch: "-fur" is base's loot-contract suffix).
+       All three: Fur part + organic + AddsRep Baboons -100 per piece (quartzfur precedent;
+       wearing dead monkey angers living monkeys, stacks per piece worn = self-balancing).
+       Tiles are recolored base PLACEHOLDERS, sprite debt filed for all three.
+       Numbers DRAFT (numbers sitting) except gloves Chance 50 (user 2026-09-30, up from 25); cloak conditional DV 2
+       (Yurtmat parity), commerce/tier modest; bracer is +2 throw range, USER NUMBER
+       2026-08-22 (see the bracer's own comment below). Descriptions are user text 2026-09-29. -->
+    <object Name="Cleo_TerraFirma_Cobblefur Bracer" Inherits="BaseArmlet">
+    <part Name="Armor" AV="1" DV="0" WornOn="Arm" /> <!-- AV 1 user 2026-10-19 -->
+    <part Name="Render" DisplayName="{{y|granitefur}} bracer" RenderString="]" Tile="baboonskin_bracers.png" ColorString="&amp;r" DetailColor="y" /> <!-- user sprite 2026-08-22; rust/brown per the cloak ruling, family palette -->
+    <part Name="Commerce" Value="45" /> <!-- user 2026-10-14, flat set price -->
+    <part Name="Description" Short="Grit-caked flesh was carved from a dead baboon and woven into a bracer." /> <!-- USER TEXT 2026-09-29, quartzfur echo -->
+    <part Name="Physics" Weight="1" Organic="true" />
+    <part Name="Fur" />
+    <!-- MIGRATED to stock IntPropertyChanger 2026-08-29 (XML over C# ladder pass); the custom
+         Cleo_TerraFirma_CobblefurBracer part is deleted. Provenance carried over from its header:
+         +2 throw range is USER NUMBER 2026-08-22 ("swap the bonus to +2 throw range and dodge the
+         problem altogether"), replacing the old cap-aware accuracy lend after the accuracy exam
+         found an order-dependent overflow. ThrowRangeBonus is linear (GetThrowProfileEvent reads
+         the int property straight into Range), safe to stack; same property family as the
+         Parabolic Muscular Subroutine, whose BehaviorDescription phrasing this reuses.
+         NOTE: the old XML here said Bonus="25", a stale survivor of the pre-rework accuracy
+         number; the live game was granting +25 throw range against the ruled +2. Caught and
+         corrected in this migration, 2026-08-29. -->
+    <part Name="IntPropertyChanger" AffectedProperty="ThrowRangeBonus" Amount="2" ChargeUse="0" IsEMPSensitive="false" IsBootSensitive="false" IsTechScannable="false" MustBeUnderstood="false" BehaviorDescription="Your throw range is increased by 2." />
+    <part Name="AddsRep" Faction="Baboons" Value="-100" />
+    <tag Name="EquipSound" Value="sfx_equip_armor_fur" />
+    <tag Name="Tier" Value="2" />
+  </object>
+    <object Name="Cleo_TerraFirma_Cobblefur Gloves" Inherits="BaseGlove">
+    <part Name="Armor" AV="1" DV="0" WornOn="Hands" /> <!-- AV 1, DV 0 user 2026-10-19 -->
+    <part Name="Render" DisplayName="{{y|granitefur}} gloves" RenderString="]" Tile="catching_gloves.png" ColorString="&amp;r" DetailColor="y" /> <!-- user sprite 2026-08-22 -->
+    <part Name="Commerce" Value="45" /> <!-- user 2026-10-14, flat set price -->
+    <part Name="Description" Short="Grit-caked flesh was carved from a dead baboon and sewn into a pair of gloves." /> <!-- USER TEXT 2026-09-29, quartzfur echo -->
+    <part Name="Physics" Weight="5" Organic="true" />
+    <part Name="Fur" />
+    <part Name="Cleo_TerraFirma_CobblefurGloves" Chance="50" />
+    <part Name="AddsRep" Faction="Baboons" Value="-100" />
+    <tag Name="EquipSound" Value="sfx_equip_armor_fur" />
+    <tag Name="Tier" Value="2" />
+  </object>
+    <object Name="Cleo_TerraFirma_Cobblefur Cloak" Inherits="BaseCloak">
+    <part Name="Armor" AV="1" DV="0" WornOn="Back" />
+    <part Name="Render" DisplayName="{{y|granitefur}} cloak" RenderString="]" Tile="Items/sw_cloak_panther.bmp" ColorString="&amp;y" DetailColor="r" /> <!-- recolored base panther cloak; colors reversed 2026-10-14 (user), now grey with rust red detail. Bracer and gloves keep rust with grey detail. -->
+    <part Name="Commerce" Value="45" /> <!-- user 2026-10-14, flat set price -->
+    <part Name="Description" Short="Grit-caked flesh was carved from a dead baboon and sewn into a cloak." /> <!-- USER TEXT 2026-09-29, quartzfur echo -->
+    <part Name="Physics" Weight="3" Organic="true" />
+    <part Name="Fur" />
+    <part Name="Cleo_TerraFirma_CobblefurCloak" Bonus="2" />
+    <part Name="AddsRep" Faction="Baboons" Value="-100" />
+    <tag Name="EquipSound" Value="sfx_equip_armor_fur" />
+    <tag Name="Tier" Value="2" />
+  </object>
+  <!-- Quarried block: RandomTile builder rotates the three user sprites. -->
+  <!-- Quarry stone stacks (warren dress port 2026-08-23): the yard's three
+       grades, user sprites (quarrystones 1a/1b through 3a/3b). Grade 1 is the
+       column being filled NOW, grade 3 is finished stock; the yard recipe reads
+       time through them (fill ordering RULED 2026-07-27). DisplayName draft, approved 2026-09-30;
+       descriptions deliberately absent, ride the release text pass. -->
+  <!-- Moss clump (USER RULED 2026-08-23: wall moss is harvestable, wall reverts).
+       Mirrors base's own Clump of Grave Moss (a Snack): tile is that clump
+       RECOLORED PLACEHOLDER (sprite debt filed, house convention); description
+       absent for the release pass. NAME FORMAT USER-RULED same day ("clump of
+       (dark grey)cave(green)moss" - no space, split-colored); dark grey mapped
+       to the K code, CLAUDE rendering call, strikeable. COOKING: gets an effect
+       later per the user - only the lithovore cooking conversation is benched;
+       this item's effect is planned work, not quarantined. -->
+  <object Name="Cleo_TerraFirma_MossClump" Inherits="Snack">
+    <part Name="Render" DisplayName="clump of {{K|cave}} {{green|moss}}" ColorString="&amp;g" DetailColor="K" RenderString="%" Tile="Items/sw_grave_moss_clump.bmp" />
+    <part Name="Description" Short="A glistening carpet of moss holds the earth in its folds. Grit coats its tufts, promising the texture of salted pebbles." />
+    <part Name="Physics" Weight="1" Organic="true" />
+    <part Name="Commerce" Value="1" />
+    <part Name="Food" Satiation="Snack" Message="It's like eating salted grit, with a loamy aftertaste." /> <!-- user text 2026-09-29 -->
+    <!-- base Clump of Grave Moss -> Crushed Grave Moss, 3 per clump (Foods.xml:510) -->
+    <part Name="PreservableItem" Result="Cleo_TerraFirma_CrushedCaveMoss" Number="3" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
+
+  <!-- CRUSHED CAVE MOSS (2026-09-29): the cooking ingredient, base Crushed Grave Moss shape
+       (Foods.xml:847). Name, description and sprite user-supplied; grey container matches Starapple Preserves' TileColor &amp;y (base
+       grave-moss tile retired 2026-09-29). World ingredient tables are the
+       shale biomes, Hills and DesertCanyon (Hills.cs, Redrock.cs), like Starapple Preserves. -->
+  <object Name="Cleo_TerraFirma_CrushedCaveMoss" Inherits="Preservable">
+    <part Name="Render" DisplayName="crushed {{K|cave}} {{green|moss}}" RenderString="%" ColorString="&amp;g" TileColor="&amp;y" DetailColor="K" RenderLayer="5" Tile="crushedcavemoss.png" />
+    <part Name="Description" Short="A blanket of verdant moss was plucked from its swaddlehome, ground in a mortar, and interred in a glass vessel." /> <!-- user text 2026-09-29 -->
+    <part Name="Commerce" Value="2" />
+    <part Name="PreparedCookingIngredient" type="Cleo_TerraFirma_caveMoss" charges="1" />
+    <tag Name="Plant" />
+    <tag Name="DynamicObjectsTable:Hills_Ingredients" />
+    <tag Name="DynamicObjectsTable:DesertCanyon_Ingredients" />
+  </object>
+
+  <!-- The cooked moss pebble: Earthen Barrage's sculpted pebble with its placeholder
+       damage pinned as real numbers, so Barrage edits cannot change the meal (1d8, PV 4,
+       30-turn expiry inherited). Not IsOurStone, so Barrage scaling never touches it. -->
+  <object Name="Cleo_TerraFirma_MossPebble" Inherits="Cleo_TerraFirma_EphemeralStone">
+    <part Name="ThrownWeapon" Penetration="4" Damage="1d8" Attributes="Cudgel" />
+  </object>
+
+  <!-- Cave moss cooking domain. The engine requires this exact name shape
+       (ProceduralCookingIngredient_ + type), so the Cleo_TerraFirma_ prefix sits in the type.
+       Weights copy regenLowtier (Data.xml:341); menu text copies base phrasing. -->
+  <object Name="ProceduralCookingIngredient_Cleo_TerraFirma_caveMoss" Inherits="IngredientMapping">
+    <tag Name="CookingDomain" Value="Cleo_TerraFirma_caveMoss" />
+    <tag Name="Units" Value="Cleo_TerraFirma_CookingDomainCaveMoss_UnitEarthenBarrage" />
+    <tag Name="Triggers" Value="Cleo_TerraFirma_CookingDomainCaveMoss_OnThrowStone" />
+    <tag Name="Actions" Value="Cleo_TerraFirma_CookingDomainCaveMoss_Pebble_ProceduralCookingTriggeredAction" />
+    <tag Name="Description" Value="stone-based" />
+    <tag Name="RandomWeight" Value="10" />
+    <tag Name="RandomHighTierWeight" Value="0" />
+  </object>
+
+  <!-- trail cairn (user float 2026-08-24, sprites landed 2026-08-25). cairn1 is the
+       STANDING stack, cairn2 the toppled scatter; the first cut wrongly rolled both as
+       RandomTile variants (user flag 2026-08-25). Shale colors and both descriptions are
+       USER TEXT FINAL 2026-08-25. -->
+  <object Name="Cleo_TerraFirma_Cairn" Inherits="Furniture">
+    <!-- colors swapped w/r (user note 1, 2026-08-25) -->
+    <part Name="Render" Tile="cairn1.png" DisplayName="cairn" RenderString="007" ColorString="&amp;w" TileColor="&amp;w" DetailColor="r" Occluding="false" />
+    <part Name="Description" Short="A waystone for those with eyes to the earth, this stack of rocks inhabits an unresolved superposition of endurance and fragility." />
+    <!-- walkable ON PURPOSE (user docket 2026-08-25): it topples when stepped on, so it
+         must be steppable; the topple part carries the ownership trespass channel -->
+    <part Name="Physics" Solid="false" Takeable="false" Weight="400" />
+    <part Name="Cleo_TerraFirma_CairnTopple" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+    <tag Name="NoSparkingQuest" />
+  </object>
+  <object Name="Cleo_TerraFirma_CairnToppled" Inherits="Cleo_TerraFirma_Cairn">
+    <part Name="Render" Tile="cairn2.png" DisplayName="toppled cairn" RenderString="007" ColorString="&amp;w" TileColor="&amp;w" DetailColor="r" Occluding="false" />
+    <part Name="Description" Short="These scattered rocks once formed a waystone; now, only traces of their former order remain." />
+    <part Name="Physics" Solid="false" Takeable="false" Weight="400" />
+    <!-- already fallen: inheriting the topple part made stepping on the scatter
+         print a second topple (user note 2, 2026-08-25) and re-topple forever -->
+    <removepart Name="Cleo_TerraFirma_CairnTopple" />
+    <part Name="Cleo_TerraFirma_CairnRestack" /> <!-- B09 2026-09-29: restack to standing, owner kept, no rep effect -->
+  </object>
+
+  <!-- WARREN BASKETS (port debt paid 2026-08-26; the two tables are USER-RULED 2026-08-18:
+       "we could make our own pop tables - one for stones (baskets of earth), and one for
+       canyon specific preserved foods (yuckwheat, starapples jam, boar jerky)"). The
+       Preserved Food Basket idiom exactly (base Furniture.xml:4001): inherit Woven Basket,
+       add one InventoryPopulationTable tag; GameObjectFactory fills the inventory from the
+       named table at spawn (engine rng, same as vase glazes rolling per spawn). Render and
+       name stay the plain basket's on purpose: which basket it is, you learn by opening it.
+       Contents tables live in PopulationTables.xml beside the warren dress tables. -->
+  <object Name="Cleo_TerraFirma_Stone Basket" Inherits="Woven Basket">
+    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_StoneBasket Contents" />
+  </object>
+  <object Name="Cleo_TerraFirma_Food Basket" Inherits="Woven Basket">
+    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_FoodBasket Contents" />
+  </object>
+
+  <!-- YARD LEDGER BOARD (setup USER-greenlit 2026-08-26: "that sounds fine, set that up").
+       The dress yard's chalkboard as its own blueprint, so the ledger LINES live here as
+       tags instead of C# strings; the =token= substitution style is the game's own
+       vernacular. The lines are the 2026-08-23 draft, approved 2026-09-30;
+       editing these Values needs no recompile. Tokens the
+       carver fills: =day= and =month= (Calendar, at carve time), =blocks= (the site's true
+       carved floor, so the board never lies about the dig it stands in). WarrenCarver
+       keeps deciding WHICH lines appear (the occupancy law); the write-verb part arrives
+       through the base Chalkboard merge in Merges.xml, the writing part is declared
+       here so the carver no longer bolts it on in code. -->
+  <object Name="Cleo_TerraFirma_Yard Board" Inherits="Chalkboard">
+    <part Name="Cleo_TerraFirma_ChalkWriting" />
+    <tag Name="Cleo_TerraFirma_ArrivedLine" Value="arrived the =day= of =month=" />
+    <tag Name="Cleo_TerraFirma_DepartedLine" Value="departed the =day= of =month=" />
+    <tag Name="Cleo_TerraFirma_TallyLine" Value="=blocks= blocks raised" />
+  </object>
+
+  <!-- QUARRY CHEST (gear sitting 2026-08-23; user ruling: "making it a generalized loot table
+       that merchant tables and chests can roll makes sense"). The MiningGear consumer for
+       PLACED loot: a Chest variant whose inventory rolls the table, on the ChestBronzeIngots
+       grammar (base Furniture.xml:3521, inherit Chest + inventoryobject lines). The @-table
+       roll syntax is the templar-grenades idiom from creature inventories; the inventoryobject
+       parser is shared across blueprint types, verify-at-boot item filed. Contents rhyme with
+       the quarrier spine on purpose: the stash holds what the crew carries. The warren
+       dressing places this in the socket, gallery-bay, and room-storage chest rolls.
+       The room-storage chest cap counts this variant too. Vine merchant
+       restock joins when that blueprint lands (intent recorded in TODO.md). Counts and
+       chances CLAUDE DRAFT. Reads as a plain chest (own name dropped 2026-09-30, user). -->
+  <object Name="Cleo_TerraFirma_Quarry Chest" Inherits="Chest">
+    <part Name="Inventory" />
+    <inventoryobject Blueprint="@Cleo_TerraFirma_MiningGear" Number="1-2" />
+    <inventoryobject Blueprint="Pickaxe" Chance="35" />
+    <inventoryobject Blueprint="Torch" Number="1-3" Chance="50" />
+  </object>
+
+  <!-- FISSURE STONE (built 2026-08-23; pitch is the USER'S, "rocks that when thrown, make a
+       fissure detonation at the center of their tile, then are destroyed"; RULED same day:
+       payload is the pulses only, never the redoubt ring; Level 2, so 3d4/2d3/1d3 dice, stun 1
+       round at DC 16; 2-3 per hewer in the kit). Grammar is the goatfolk sower's seed exactly
+       (base Creatures.xml:4663): BaseThrownWeapon plus an IGrenade part in plain inventory, no
+       AI part needed, stock combat AI throws it, AfterThrownEvent detonates it at the landing
+       cell and the part destroys the stone after. PV rides the thrower's Strength mod per the
+       fissure grammar, so a looted stone scales with whoever throws it while the dice stay
+       pinned. No Examiner: carved stone, understood on sight. DetonatedSound is Fissure's own
+       verified slam. Tile is the fallen-rock family's, kin to what the detonation scatters.
+       FLAVOR NOTE 2026-08-24: a "lump of primordial clay" pass landed here for a few hours by
+       misread; the user meant it for the FIGURINE grenade (unbuilt, see TODO roster flags).
+       Name is CLAUDE GUT by the user's license ("go with your gut and i'll edit it
+       later however i desire"), freely editable. Description left empty for the user to write.
+       Commerce and Weight CLAUDE DRAFT. -->
+  <object Name="Cleo_TerraFirma_FissureStone" Inherits="BaseThrownWeapon">
+    <part Name="Render" DisplayName="fissure stone" Tile="Items/sw_smallboulder.bmp" RenderString="*" ColorString="&amp;y" DetailColor="K" />
+    <part Name="Description" Short="" />
+    <part Name="Stacker" />
+    <part Name="Physics" Category="Grenades" Weight="10" />
+    <part Name="Commerce" Value="20" />
+    <part Name="Cleo_TerraFirma_FissureStonePart" Level="2" />
+    <tag Name="DetonatedSound" Value="Sounds/Throw/sfx_throwing_stone_large_impact" />
+    <tag Name="ExcludeFromTurretStock" />
+  </object>
+
+  <!-- PROPER ETCH TOOLS thread RETIRED 2026-08-22 (user: "let's remove the added chisels and
+       mallets from the mod and just use knives and hammers in their place. the existing blunted
+       chisel and splintered mallet is fine"). The steel/carbide chisel+mallet quartet of
+       2026-08-15 is DELETED: since the hammer-and-knife gate (2026-08-06) and the tag-bonus
+       removal, a steel dagger etched identically to a steel chisel, so the quartet was four
+       blueprints buying nothing. Quarrier kits now roll base Steel Dagger / Steel Hammer with
+       rare Dagger4 / Cudgel4 (PopulationTables.xml, same weights, same mismatched-pair law).
+       The blunted chisel + splintered mallet above STAY: starter kit, kept by ruling. -->
+  <!-- C01 body pair (shaped 2026-08-22, built 2026-09-29). Tier 2 for both, user-approved
+       2026-09-29. Tiles per the 08-22 sitting: girdle = base bark armor, pauldrons = base
+       studded leather. Colors, weights and commerce are CLAUDE PROPOSAL. Descriptions are user text
+       2026-09-29; the rules lines come from the parts, approved 2026-09-29. -->
+  <object Name="Cleo_TerraFirma_MudskinGirdle" Inherits="BaseArmor">
+    <part Name="Armor" AV="1" DV="1" WornOn="Body" />
+    <part Name="Render" DisplayName="mudskin girdle" RenderString="]" Tile="Items/sw_armor1.bmp" ColorString="&amp;w" DetailColor="r" />
+    <part Name="Commerce" Value="20" />
+    <part Name="Physics" Weight="12" Organic="true" />
+    <part Name="Description" Short="Clay is shaped to the skin in a makeshift cast. When pierced, it hardens reflexively." /> <!-- USER TEXT 2026-09-29 -->
+    <part Name="Cleo_TerraFirma_MudskinGirdle" Cap="2" FlakeInterval="20" />
+    <tag Name="EquipSound" Value="sfx_equip_armor_leather" />
+    <tag Name="Tier" Value="2" />
+  </object>
+  <object Name="Cleo_TerraFirma_FlintSpikePauldrons" Inherits="BaseArmor">
+    <part Name="Armor" AV="2" DV="-1" WornOn="Body" />
+    <part Name="Render" DisplayName="flint-spike pauldrons" RenderString="]" Tile="Items/sw_leather_armor.bmp" ColorString="&amp;w" DetailColor="K" />
+    <part Name="Commerce" Value="20" />
+    <part Name="Physics" Weight="15" Organic="true" />
+    <part Name="Description" Short="Shards of flint are knapped to needle points and arranged like rows of blackened, gleaming teeth." /> <!-- USER TEXT 2026-09-29 -->
+    <part Name="Cleo_TerraFirma_FlintSpikePauldrons" Damage="1d3" />
+    <xtagGrammar iArticle="a pair of" />
+    <tag Name="Gender" Value="plural" />
+    <tag Name="EquipSound" Value="sfx_equip_armor_leather" />
+    <tag Name="Tier" Value="2" />
+  </object>
+  <!-- Gaslight gauntlets (carving spec closed 2026-09-29). Hands, tier 4, 1 AV / 0 DV, metal
+       (user). Tile = base plastifer gloves, green with yellow detail (user). Gaslight family
+       conventions from the base Gaslight Chisel: cell socket, charged-only light radius 4,
+       Examiner complexity 4, Tinker bits 0004, commerce 120. Weight 3 matches plastifer.
+       Behavior in Part_GaslightGauntlets.cs. Description user text 2026-09-29. -->
+  <object Name="Cleo_TerraFirma_GaslightGauntlets" Inherits="BaseGauntlet">
+    <part Name="Armor" AV="1" DV="0" WornOn="Hands" />
+    <part Name="Render" DisplayName="gaslight gauntlets" RenderString="]" Tile="Items/sw_gloves_skintight.bmp" ColorString="&amp;g" DetailColor="W" />
+    <part Name="Commerce" Value="120" />
+    <part Name="Description" Short="Through bores in the knuckles draw short and tapered beams of pale light. In motion they heat to steel-melting temperature and whirr matter away." /> <!-- USER TEXT 2026-09-29, gaslight family template -->
+    <part Name="Physics" Weight="3" />
+    <part Name="Metal" />
+    <part Name="Examiner" Alternate="UnknownGloves" Complexity="4" />
+    <part Name="EnergyCellSocket" SlotType="EnergyCell" />
+    <part Name="AIOffensiveEnergyCellReload" />
+    <part Name="AIPassiveEnergyCellReload" />
+    <part Name="LightSource" OnlyIfCharged="true" Radius="4" />
+    <part Name="TinkerItem" Bits="0004" CanDisassemble="true" CanBuild="true" />
+    <part Name="Cleo_TerraFirma_GaslightGauntlets" PunchCharge="100" CarveCharge="1000" />
+    <tag Name="Mods" Value="GauntletMods,CommonMods,ElectronicsMods" />
+    <tag Name="EquipSound" Value="sfx_equip_armor_metal_light" />
+    <tag Name="Tier" Value="4" />
+  </object>
+  <!-- The fist the gauntlets lend while worn: 1d4 (user), +5 PV per charged swing (part). -->
+  <object Name="Cleo_TerraFirma_GaslightFist" Inherits="DefaultFist">
+    <part Name="Render" DisplayName="gaslight fist" Tile="Creatures/natural-weapon-fist.bmp" ColorString="&amp;g" DetailColor="W" />
+    <part Name="MeleeWeapon" MaxStrengthBonus="1000" BaseDamage="1d4" Skill="Cudgel" Stat="Strength" />
+    <part Name="Cleo_TerraFirma_GaslightFist" PenetrationBonus="5" />
+  </object>
+  <!-- C12 refractive buckler and shield (user concept 2026-10-13; built 2026-10-14, wish-only).
+       Refraction built in, the rainboweave cloak idiom: a RefractLight part on the item, which
+       also makes base ModRefractive.ModificationApplicable refuse a second roll. RetroVariance
+       1d181-91 copies ModRefractive's own bounce (Angle + 180, plus or minus 90). Positive DV
+       checked 2026-10-14: base Shield.HandleEvent(EquippedEvent) is a plain StatShifter shift.
+       Codex PROPOSAL: Chance 20/30 as briefed (note: base ModRefractive gives an ARM shield 10,
+       a hand shield 30); tier 4 = ModRefractive NativeTier; weight and Metal copy the steel
+       buckler (8) and steel shield (12); commerce 65 = their 50 x the refractive mod's 1.3.
+       Restored for 0.2.8 (2026-10-19): names "refractive targe" (arm, round sprite) and
+       "refractive lune" (hand, crescent sprite) and both tiles are the user's; IDs kept.
+       Both descriptions are one user text, 2026-10-19. No loot rows; both roll in DynamicInheritsTable:BaseShield
+       (RandomMeleeWeapon, Svardym) since 2026-10-19, user dropped the exclusion. -->
+  <object Name="Cleo_TerraFirma_RefractiveBuckler" Inherits="BaseShield">
+    <part Name="Render" DisplayName="refractive targe" Tile="refractive_targe.png" ColorString="&amp;y" DetailColor="Y" />
+    <part Name="Shield" AV="1" DV="1" WornOn="Arm" />
+    <part Name="RefractLight" Chance="10" RetroVariance="1d181-91" ShowInShortDescription="true" /> <!-- targe 10, lune 30 (user 2026-10-19) -->
+    <part Name="Description" Short="The world lies warped in its mirrored lens. Light gleams effortlessly across its surface, diffracted into myriad strands of color." /> <!-- USER TEXT 2026-10-19, shared with the lune -->
+    <part Name="Commerce" Value="65" />
+    <part Name="Physics" Weight="8" />
+    <part Name="Metal" />
+    <tag Name="Tier" Value="4" />
+  </object>
+  <object Name="Cleo_TerraFirma_RefractiveShield" Inherits="BaseShield">
+    <part Name="Render" DisplayName="refractive lune" Tile="refractive_lune.png" ColorString="&amp;y" DetailColor="Y" />
+    <part Name="Shield" AV="2" DV="0" WornOn="Hand" />
+    <part Name="RefractLight" Chance="30" RetroVariance="1d181-91" ShowInShortDescription="true" />
+    <part Name="Description" Short="The world lies warped in its mirrored lens. Light gleams effortlessly across its surface, diffracted into myriad strands of color." /> <!-- USER TEXT 2026-10-19 -->
+    <part Name="Commerce" Value="65" />
+    <part Name="Physics" Weight="12" />
+    <part Name="Metal" />
+    <tag Name="Tier" Value="4" />
+  </object>
+</objects>

@@ -10,6 +10,8 @@
 	      <skill Name="Discipline" />
 	      <skill Name="Survival_DesertCanyonSurvival" /> <!-- Wilderness Lore: Canyons (USER 2026-08-12; was RuinsSurvival) -->
       </skills>
+      <!-- The Quarriers' Guild rep grant lives in TerraFirma2/XML/Callings.xml (split
+           2026-09-27): the faction is TF2 content, so the grant exists exactly when TF2 does. -->
 	</subtype>
 </class>
 </subtypes>

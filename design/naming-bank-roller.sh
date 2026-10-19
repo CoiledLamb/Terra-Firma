@@ -1,4 +1,8 @@
 #!/bin/bash
+# MIRROR NOTE 2026-08-26: the personal-name banks LIVE in TerraFirma/XML/Naming.xml
+# now (the migration landed them in the schema this script was always mimicking);
+# byname banks + grants live in Builder_StonecarverEpithet.cs. This roller keeps its
+# copies as the design-side demo tool - port changes rather than trusting these.
 # draft banks chopped from mysteriousetruscans.com/names.html
 # structure mimics Naming.xml: prefix x1, infix x0-2, postfix x1, TwoNameChance
 # scrubbed banks: junction architecture (prefix C-final, infix VCV, postfix C-initial)
@@ -7,7 +11,9 @@ prefixes=(ar vel lar than ram sem cul tles pev ras mun spur)
 infixes=(utha athi eni ena ari ithi aru eli anthi elthu arna uni avi)
 postfixes=(tha thia na nia ce za til sa cna)
 # two-axis banks (13x13 draft 2026-08-15, pending user pass): material grants perk, craft grants kit
-fam_prefixes=(stone flint scree cairn grit chalk spall marl cobble salt karst quartz lode)
+fam_prefixes=(stone flint scree cairn grit chalk spall marl cobble salt karst quartz slate
+  chert shard sand crag coal ore clod tor talc spar slag tuff geode marble shale cinder silt peat amber clay mica)
+# tradeoff sub-bank closed 2026-09-18 (alongside, uniform draw); values mirror Objects.xml
 fam_postfixes=(smith augur wright knapper reeve ward delver graver scribe reader carter setter slinger)
 
 perk_of() {
@@ -16,7 +22,14 @@ perk_of() {
     cairn*) echo "+2 Ego";; grit*) echo "+2 Will";; chalk*) echo "+2 Int";;
     spall*) echo "+2 DV";; marl*) echo "+HP";; cobble*) echo "+MoveSpeed";;
     salt*) echo "heat 50";; karst*) echo "cold 50";; quartz*) echo "elec 50";;
-    lode*) echo "wealth";;
+    slate*) echo "acid 50";;
+    chert*) echo "Agi +3 / Ego -1";; shard*) echo "Agi +3 / HP -10";; sand*) echo "Agi +3 / Will -1";;
+    crag*) echo "Tou +3 / Ego -1";; coal*) echo "Str +3 / heat -50";; ore*) echo "Str +3 / Ego -1";;
+    clod*) echo "Str +3 / Int -1";; tor*) echo "Will +3 / MS +10";; talc*) echo "DV +3 / Str -1";;
+    spar*) echo "DV +3 / Tou -1";; slag*) echo "AV +2 / Ego -1";; tuff*) echo "MS -20 / HP -10";;
+    geode*) echo "Ego +3 / Tou -1";; marble*) echo "Ego +3 / acid -50";; shale*) echo "DV +3 / AV -1";;
+    cinder*) echo "heat +50 / HP -10";; silt*) echo "HP +15 / MS +10";; peat*) echo "HP +15 / heat -50";;
+    amber*) echo "Int +3 / Agi -1";; clay*) echo "HP +15 / AV -1";; mica*) echo "Int +3 / Will -1";;
   esac
 }
 kit_of() {
@@ -46,7 +59,7 @@ roll_family() {
   cap "$n"
 }
 
-for i in $(seq 1 12); do
+for i in $(seq 1 ${1:-12}); do
   p=$(roll_personal)
   f=$(roll_family)
   # byname is hero-epithet-only in game (ruled 2026-08-15); demo shows the full sheet

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <conversations>
 	<conversation ID="Cleo_TerraFirma_ConversationStoneshaperStatue">
 		<start ID="IsVain" IfSpeakerHaveProperty="Cleo_TerraFirma_IsVain" >
@@ -16,5 +16,24 @@
 			</text>
 			<choice GotoID="End">Thank you for your protection, friend.</choice>
 		</start>
+	</conversation>
+
+	<!-- SNAPJAW MINER (user-written 2026-08-16). The miner INHERITS the base Snapjaw blueprint,
+	     which carries <part Name="ConversationScript" ConversationID="Snapjaw" />, so he was
+	     already talking; he was just saying the generic snapjaw barks. This overrides that ID on
+	     the miner alone. Merging into the base "Snapjaw" conversation was considered and
+	     rejected: it would put pick-and-tunnel lines in the mouth of every snapjaw in Qud.
+	     Shape is the base Snapjaw conversation verbatim, i.e. ONE node whose text is a bank of
+	     tilde-delimited barks picked at random, closing on the live-and-drink exit choice.
+	     USER LINES ONLY below. The bank is short on purpose: at two entries it repeats
+	     immediately, and base ships ~37. Claude drafts are offered in chat, unsigned. -->
+	<conversation ID="Cleo_TerraFirma_SnapjawMiner">
+		<node ID="Start">
+			<text>
+				heheheh. mine rock. rock mine.~
+				bite wall? grehehe.
+			</text>
+			<choice GotoID="End">...live and drink.</choice>
+		</node>
 	</conversation>
 </conversations>

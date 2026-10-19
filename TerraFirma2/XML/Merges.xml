@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<objects>
+	<!-- Cave moss on base vine shale (2026-09-29): ShaleVines greens shale beside wading water;
+	     this part makes some of those walls ripe, harvestable moss. Replaces the warren-only
+	     placement. StartRipeChance 1:20 is Watervine's (Starapple Tree is 1:5). -->
+	<object Name="Shale" Load="Merge">
+		<part Name="Cleo_TerraFirma_ShaleMoss" StartRipeChance="1:20" />
+	</object>
+	<!-- Stone-throw signal (2026-09-29): base fires AfterThrown on the item only; this forwards
+	     it to the thrower for the cave moss cooking trigger. Every BaseStone child inherits it. -->
+	<object Name="BaseStone" Load="Merge">
+		<part Name="Cleo_TerraFirma_StoneThrowSignal" />
+	</object>
+	<!-- Cobblefur cloak cover (RULED 2026-08-13, adjacent-scope sitting): base Rubble is a
+	     solid wall-layer heap outside the BaseStone tree, so the cloak's "amid rubble" check
+	     can't see it via IsAnyStone, and widening IsAnyStone is off the table (load-bearing;
+	     the trade-goods narrow-tag precedent above). Narrow cover tag instead; the cloak
+	     accepts either. Loose stones and all boulders already qualify through BaseStone. -->
+	<object Name="Rubble" Load="Merge">
+		<tag Name="Cleo_TerraFirma_IsRubbleCover" />
+	</object>
+	<!-- Glowsphere break verb (2026-08-22): the glowstone shard's front door. Verb-not-condition
+	     was the delegated call; Floating Glowsphere deliberately unmerged (inherits LightSource,
+	     not Glowsphere - whether it breaks too is an open fork). -->
+	<object Name="Glowsphere" Load="Merge">
+		<part Name="Cleo_TerraFirma_GlowsphereBreak" ShardBlueprint="Cleo_TerraFirma_GlowstoneShard" BreakYield="2-3" ThrowYield="1-3" GlowDuration="30-60" />
+		<!-- thrown glowspheres also break (user 2026-08-22): damage on hit rides this part;
+		     the shatter/scatter/phosphorescent lives in Part_GlowsphereBreak. 1d4 = DIAL. -->
+		<part Name="ThrownWeapon" Damage="1d4" />
+		<!-- auto-equip prefers a hand over the thrown slot (user 2026-10-19): base dagger idiom,
+		     GameObject.AutoEquip skips its thrown-slot branch for this tag and falls to the
+		     off-hand pick; base GlowsphereProperties only lights it in a Hand. -->
+		<tag Name="NoAIEquipAsThrownWeapon" />
+	</object>
+	<!-- Chalkboard write action (ergonomics ruling 2026-08-22: target-side verbs) - the write
+	     verb lives on the board, shown only when the actor carries chalk. -->
+	<object Name="Chalkboard" Load="Merge">
+		<part Name="Cleo_TerraFirma_ChalkboardWritable" />
+	</object>
+	<!-- WARREN TENSE FLIP declarations (2026-08-26, the cold-form migration; the user's
+	     catch shaped it: campfire-family blueprints ALREADY declare their dead form via
+	     the Campfire part's ExtinguishBlueprint, which the tense pass reads first, so
+	     only the two relationships the engine does not encode need this tag). A dead
+	     warren flips each lit item to its Cleo_TerraFirma_ColdForm; an EMPTY value
+	     means the item is gone (scavenged), an absent tag means no flip. -->
+	<object Name="Torchpost" Load="Merge">
+		<tag Name="Cleo_TerraFirma_ColdForm" Value="Unlit Torchpost" />
+	</object>
+	<object Name="Torch" Load="Merge">
+		<tag Name="Cleo_TerraFirma_ColdForm" Value="" />
+	</object>
+	<!-- Carving (spec closed 2026-09-29): the verb lives on the target, etching's rule and
+	     etching's merge root. The part's own gate asks for natural stone and worn gaslight
+	     gauntlets, so the action stays hidden otherwise. -->
+	<object Name="Wall" Load="Merge">
+		<part Name="Cleo_TerraFirma_Carvable" />
+	</object>
+	<!-- Lathe carving (spec closed 2026-09-29): the verb lives on the base Lathe; each input
+	     names the base figurine blueprint it becomes (Items.xml "Random X Figurine" set, whose
+	     RandomFigurine Material already carries base's rep value). -->
+	<object Name="Lathe" Load="Merge">
+		<part Name="Cleo_TerraFirma_LatheCarving" />
+	</object>
+	<object Name="Copper Nugget" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Copper Figurine" />
+	</object>
+	<object Name="Silver Nugget" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Silver Figurine" />
+	</object>
+	<object Name="Gold Nugget" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Gold Figurine" />
+	</object>
+	<object Name="Rough Agate" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Agate Figurine" />
+	</object>
+	<object Name="Polished Agate" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Agate Figurine" />
+	</object>
+	<object Name="Rough Topaz" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Topaz Figurine" />
+	</object>
+	<object Name="Polished Topaz" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Topaz Figurine" />
+	</object>
+	<object Name="Rough Jasper" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Jasper Figurine" />
+	</object>
+	<object Name="Polished Jasper" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Jasper Figurine" />
+	</object>
+	<object Name="Rough Amethyst" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Amethyst Figurine" />
+	</object>
+	<object Name="Polished Amethyst" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Amethyst Figurine" />
+	</object>
+	<object Name="Rough Sapphire" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Sapphire Figurine" />
+	</object>
+	<object Name="Polished Sapphire" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Sapphire Figurine" />
+	</object>
+	<object Name="Rough Emerald" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Emerald Figurine" />
+	</object>
+	<object Name="Polished Emerald" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Emerald Figurine" />
+	</object>
+	<object Name="Rough Peridot" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Peridot Figurine" />
+	</object>
+	<object Name="Polished Peridot" Load="Merge">
+		<tag Name="Cleo_TerraFirma_LatheFigurine" Value="Random Peridot Figurine" />
+	</object>
+</objects>

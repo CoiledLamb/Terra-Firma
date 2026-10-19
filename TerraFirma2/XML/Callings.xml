@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<subtypes>
+<!-- Merges into the base mod's Stonecarver calling (split 2026-09-27). A later subtype node
+     with an existing Name merges field by field and ADDS its reputations
+     (XRL.SubtypeFactory.LoadSubtypeNode, XRL.SubtypeEntry.MergeWith), so this stub carries
+     only the guild grant; gear, stats, skills and tile stay with Terra Firma. -->
+<class ID="Callings">
+      <subtype Name="Stonecarver">
+      <!-- Starting rep with the guild. Closes the USER FLAG of 2026-07-26 ("so I don't forget
+           later"): the Stonecarver calling should begin with reputation among its own people.
+           Mechanism is the base subtype idiom, verified in Subtypes.xml where callings grant
+           rep the same way (Bears 100, Barathrumites 100, Strangers 200, Issachari 200).
+           VALUE RULED 200, 2026-08-15 (user: "starting rep should be the same as farmer's and
+           merchants"). Claude had drafted 100; the base game answers it exactly, because the
+           precedent is our own structural twin. Watervine Farmer is a calling that belongs to a
+           guild, and its subtype is nearly line for line ours: a +2 stat bonus, a skill list
+           carrying a Wilderness Lore, starting gear, and a guild rep grant. That grant is 200.
+           So a stonecarver is one of the guild by birth, not merely vouched for. -->
+      <reputations>
+        <reputation With="Cleo_TerraFirma_Quarriers" Value="200" />
+      </reputations>
+	</subtype>
+</class>
+</subtypes>

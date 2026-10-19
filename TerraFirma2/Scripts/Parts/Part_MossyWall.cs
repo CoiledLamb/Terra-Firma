@@ -1,0 +1,51 @@
+using System;
+
+namespace XRL.World.Parts
+{
+	/// <summary>
+	/// The mossy-wall name adjective (USER RULED 2026-08-23: "shale that has grown
+	/// mossy should be prefixed green|mossy shale"). Rides beside the stock
+	/// Harvestable that carries the moss itself (same ruling: "the moss should be
+	/// harvestable, reverting the wall to its basic form"). The adjective asks
+	/// Ripe on every name build, so harvesting un-prefixes with no name surgery;
+	/// Etchable's "etched" adjective is the house precedent for the idiom.
+	/// </summary>
+	[Serializable]
+	public class Cleo_TerraFirma_MossyWall : IPart
+	{
+		/// <summary>The adjective worn while ripe. XML-settable so any future harvestable
+		/// growth wall reuses this part with one attribute (2026-08-29 ladder pass).</summary>
+		public string Adjective = "{{green|mossy}}";
+
+		public override bool WantEvent(int ID, int cascade)
+		{
+			return base.WantEvent(ID, cascade) || ID == PooledEvent<GetDisplayNameEvent>.ID
+				|| ID == EndTurnEvent.ID;
+		}
+
+		private bool CanReach(GameObject actor)
+		{
+			return actor?.CurrentCell != null && ParentObject.CurrentCell != null
+				&& actor.CurrentCell.ParentZone == ParentObject.CurrentCell.ParentZone
+				&& actor.DistanceTo(ParentObject) <= 1;
+		}
+
+		public override bool HandleEvent(EndTurnEvent E)
+		{
+			// Harvestable.ObjectEnteringCellEvent only gathers from the entered cell.
+			// Walls need an adjacent check; use its automatic path so the player's
+			// Harvestry toggle, hostile checks, yield and energy cost remain native.
+			GameObject actor = The.Player;
+			if (CanReach(actor) && actor.CurrentCell != ParentObject.CurrentCell)
+				ParentObject.GetPart<Harvestable>()?.AttemptHarvest(actor, Automatic: true);
+			return base.HandleEvent(E);
+		}
+
+		public override bool HandleEvent(GetDisplayNameEvent E)
+		{
+			if (ParentObject.GetPart<Harvestable>()?.Ripe == true)
+				E.AddAdjective(Adjective);
+			return base.HandleEvent(E);
+		}
+	}
+}

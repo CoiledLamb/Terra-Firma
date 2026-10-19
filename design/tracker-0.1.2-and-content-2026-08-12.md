@@ -1,7 +1,8 @@
 # Tracker — 0.1.2 patch lane + content buckets (snapshot 2026-08-12)
 
-**Derived view, not a ruling record.** TODO.md stays the source of truth; every item here
-points back at its home entry (TODO:line refs are as of today's file). Regenerate on request.
+**Historical snapshot, not the current task list.** Use [TODO.md](../TODO.md) for work remaining.
+Its original source tracker is preserved in [JOURNAL.md](../JOURNAL.md); line references here
+predate that snapshot and may have drifted. Do not maintain completion status in this view.
 Scope per the user's framing: **0.1.2 = mutation balance pass + small QoL tweaks**; then the
 three content buckets (stonecarvers · creatures · items) that ride toward 1.0.
 Quarantine boundary respected throughout (v1 fissure catalog / cooking / Lithovore excluded).

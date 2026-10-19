@@ -1,0 +1,17 @@
+"...you hear the distant ring of hammers, the scuttling of a thousand legs. the salt winds of change blow, wayfarer. will you follow them?"
+
+this is the **beta** version of terra firma's expansion, diaspora of the stone. it includes:
+
+mutations: gorgon's gaze, earthen barrage, stoneshaper, geomancy, calcify, and fissure, plus the stonecarver calling.
+
+new worldgen: warrens - the desert canyons are now home to 25 cavehomes each game. some will be flourishing, others will be abandoned. they are also home to...
+
+new creatures: the quarriers' guild! meet the hardworking hewer, the officious outrider, the musing mason, and the observant overseer. learn their ways, share your water with them, and ask them to join you on your journeys.
+
+new items: granitefur cloak, granitefur gloves, granitefur bracer, mudskin girdle, flint-spike pauldrons, gaslight gauntlets, seismic shufflers, grinder shotgun, piezoelectric cell, piezoelectric mill, seismophone, box of chalk, lantern, glowsphere fragment, symbiotic mole cricket, gut cistern, animation table, clump of cave moss, crushed cave moss.
+
+new behaviors: etching, carving, writing with chalk, breaking glowspheres.
+
+and more! your feedback is always appreciated, and welcomed, @ coiledlamb on discord. thanks so much for trying out my mod, and thanks to the many collaborators and beta testers for part one!
+
+credits: cleo (concept), ceres (code), ontoclasm (mutation sprites), billy checkers (other sprites), atlasle (burrowbee sprite), and underdoug (warren procgen assistance). also thanks to our beta testers: birdy, bucklerparry, euclid, lyra sieradzka, reverie, umbral, wrbrgrgl, and wyvy willow!

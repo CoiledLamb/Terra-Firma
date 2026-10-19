@@ -1,48 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <objects>
-    <!-- Cobblefur family (settled 2026-08-13 sitting): the cobble baboon's butchery drops,
-       quartz/quartzfur grammar (user's catch: "-fur" is base's loot-contract suffix).
-       All three: Fur part + organic + AddsRep Baboons -100 per piece (quartzfur precedent;
-       wearing dead monkey angers living monkeys, stacks per piece worn = self-balancing).
-       Tiles are recolored base PLACEHOLDERS, sprite debt filed for all three.
-       Numbers all DRAFT (numbers sitting): bracer Bonus 25, gloves Chance 25, cloak
-       conditional DV 2 (Yurtmat parity), commerce/tier modest. Descriptions DRAFT. -->
-    <object Name="Cleo_TerraFirma_Cobblefur Bracer" Inherits="BaseArmlet">
-    <part Name="Armor" AV="0" DV="0" WornOn="Arm" />
-    <part Name="Render" DisplayName="{{y|cobblefur}} bracer" RenderString="]" Tile="Items/sw_armlet.bmp" ColorString="&amp;y" DetailColor="K" />
-    <part Name="Commerce" Value="35" />
-    <part Name="Description" Short="A forearm's length of dun monkey fur, stiff with grit that never quite shakes out. The arm it wraps learns the short arc: how a stone leaves the hand already knowing where it lands." /> <!-- DRAFT, signoff owed -->
-    <part Name="Physics" Weight="1" Organic="true" />
-    <part Name="Fur" />
-    <part Name="Cleo_TerraFirma_CobblefurBracer" Bonus="25" />
-    <part Name="AddsRep" Faction="Baboons" Value="-100" />
-    <tag Name="EquipSound" Value="sfx_equip_armor_fur" />
-    <tag Name="Tier" Value="2" />
-  </object>
-    <object Name="Cleo_TerraFirma_Cobblefur Gloves" Inherits="BaseGlove">
-    <part Name="Armor" AV="0" DV="1" WornOn="Hands" />
-    <part Name="Render" DisplayName="{{y|cobblefur}} gloves" RenderString="]" Tile="Items/sw_quartz_fur_gloves.bmp" ColorString="&amp;y" DetailColor="K" />
-    <part Name="Commerce" Value="35" />
-    <part Name="Description" Short="Dun fur was shorn from a dead monkey and sewn into a pair of gloves. The palms remember catching." /> <!-- DRAFT, signoff owed -->
-    <part Name="Physics" Weight="5" Organic="true" />
-    <part Name="Fur" />
-    <part Name="Cleo_TerraFirma_CobblefurGloves" Chance="25" />
-    <part Name="AddsRep" Faction="Baboons" Value="-100" />
-    <tag Name="EquipSound" Value="sfx_equip_armor_fur" />
-    <tag Name="Tier" Value="2" />
-  </object>
-    <object Name="Cleo_TerraFirma_Cobblefur Cloak" Inherits="BaseCloak">
-    <part Name="Armor" AV="1" DV="0" WornOn="Back" />
-    <part Name="Render" DisplayName="{{y|cobblefur}} cloak" RenderString="]" Tile="Items/sw_yurtmat.bmp" ColorString="&amp;y" DetailColor="K" />
-    <part Name="Commerce" Value="35" />
-    <part Name="Description" Short="Hung from the shoulders, the pelt reads as one more heap of canyon scree. Among strewn stones its wearer is a shape the eye forgives." /> <!-- DRAFT, signoff owed -->
-    <part Name="Physics" Weight="3" Organic="true" />
-    <part Name="Fur" />
-    <part Name="Cleo_TerraFirma_CobblefurCloak" Bonus="2" />
-    <part Name="AddsRep" Faction="Baboons" Value="-100" />
-    <tag Name="EquipSound" Value="sfx_equip_armor_fur" />
-    <tag Name="Tier" Value="2" />
-  </object>
     <object Name="Cleo_TerraFirma_Blunted Chisel" Inherits="BaseDagger">
     <part Name="Render" DisplayName="blunted chisel" Tile="blunted_chisel.png" DetailColor="y" ColorString="&amp;w"/>
     <part Name="MeleeWeapon" MaxStrengthBonus="2" BaseDamage="1d2" />
@@ -83,17 +40,85 @@
     <tag Name="Gender" Value="plural" />
   </object>
 
-  <!-- ===== Painter vertical-slice test objects (2026-07-25). All names/descriptions are DRAFT pending user sign-off. ===== -->
+  <!-- ===== Painter vertical-slice test objects (2026-07-25). Fire dish and quarried stone descriptions approved 2026-09-08/09-10 (TODO.md). ===== -->
   <!-- Fire dish: inherits Campfire wholesale so the flame VFX come free (AnimatedMaterialFire + PrefabImposter particle flames + LightSource). Tile expects Textures/firedish.png (not yet supplied). -->
   <object Name="Cleo_TerraFirma_FireDish" Inherits="Campfire">
-    <part Name="Render" Tile="firedish.png" DisplayName="carved fire dish" />
-    <part Name="Description" Short="A wide basin of dressed stone cradles a bed of embers." />
+    <!-- USER 2026-08-23: "firepits should be brown or grey (your pick) not red".
+         Pick was GREY; SUPERSEDED 2026-08-24, USER RULED BROWN ("fire dish could
+         be brown also?", at the shale-recolor sitting). Brown = &w body; detail
+         r is the shale family inverted (blocks are &r/w), CLAUDE rendering
+         call, strikeable. -->
+    <part Name="Render" Tile="firedish.png" DisplayName="carved fire dish" ColorString="&amp;w" TileColor="&amp;w" DetailColor="r" />
+    <part Name="Description" Short="A chunk of earth is lathed into a finely smoothed bowl. Twigs of dogthorn crackle faintly, their twisting forms reduced to smoke and ash." />
+    <!-- USER 2026-08-23 (fire dish now rolls the dwelling light pool, so both
+         were loud): no flash when lit, i.e. Campfire's inherited
+         AnimatedMaterialFire strobe goes; the dish is dressed stone, it does
+         not flicker as a sprite. The flame overlay (PrefabImposter,
+         CampfireFlames) stays, raised to sit in the basin: Y offset is a first
+         calibration guess, sign and scale unverified in base XML (no blueprint
+         sets it); ONE eyeball iteration expected per the VFX law. -->
+    <removepart Name="AnimatedMaterialFire" />
+    <part Name="PrefabImposter" Prefab="Prefabs/Particles/CampfireFlames" Y="5" />
+    <!-- Extinguish goes to the COLD DISH, not the inherited "Campfire Remains"
+         (USER DOCKET 2026-08-26: "fire dishes should work and be placed like
+         campfires"): dousing a stone basin should not leave wood ash. -->
+    <part Name="Campfire" ExtinguishBlueprint="Cleo_TerraFirma_FireDishCold" />
   </object>
-  <!-- Quarried block: RandomTile builder rotates the three user sprites. -->
-  <object Name="Cleo_TerraFirma_QuarriedBlock" Inherits="Furniture">
-    <part Name="Render" Tile="quarrybricks1.png" DisplayName="quarried stone" RenderString="#" ColorString="&amp;y" DetailColor="K" Occluding="false" />
-    <builder Name="RandomTile" Tiles="quarrybricks1.png,quarrybricks2.png,quarrybricks3.png" />
-    <part Name="Description" Short="Canyon stone, cut square and stacked for the crossing." />
-    <part Name="Physics" Takeable="false" Weight="500" />
+
+  <object Name="Cleo_TerraFirma_QuarryStones1" Inherits="Furniture">
+    <part Name="Render" Tile="quarrystones1a.png" DisplayName="stack of quarried stone" RenderString="#" ColorString="&amp;r" TileColor="&amp;r" DetailColor="w" Occluding="false" />
+    <builder Name="RandomTile" Tiles="quarrystones1a.png,quarrystones1b.png,quarrystones2a.png,quarrystones2b.png,quarrystones3a.png,quarrystones3b.png,quarrybricks1.png,quarrybricks2.png,quarrybricks3.png" />
+    <part Name="Description" Short="The earth is split and partitioned to exact specifications, then arranged into a lattice-grid to preserve an optimal amount of space." />
+    <part Name="Physics" Solid="false" Takeable="false" Weight="300" />
+    <tag Name="ExcludeFromDynamicEncounters" />
   </object>
+  <!-- Keep placement and saved blueprint IDs as aliases of the shared stone stack. -->
+  <object Name="Cleo_TerraFirma_QuarryStones2" Inherits="Cleo_TerraFirma_QuarryStones1" />
+  <object Name="Cleo_TerraFirma_QuarryStones3" Inherits="Cleo_TerraFirma_QuarryStones1" />
+
+  <object Name="Cleo_TerraFirma_QuarriedBlock" Inherits="Cleo_TerraFirma_QuarryStones1" />
+
+  <!-- STONE FIGURINE (2026-08-15). Closes the XML half of the FIGURINE MATERIAL LADDER ruling of
+       2026-08-14 (user: "figurines on the floor have a chance to spawn stone (or wood?) instead
+       of copper, still giving rep, but very little value"). That ruling was built on the SIM side
+       only; the warren lab's own entry still reads "figurine (maquette, mod blueprint TBD)", which
+       is sim first working as intended, the lab leading and the XML catching up.
+       The engine needed no help. RandomFigurine.Material is a plain string and
+       GetFigurineRepValue ends in a default case, so "stone" falls through to DEFAULT_REP_VALUE,
+       which is 60: IDENTICAL to copper. So the ruling lands exactly as worded by accident of the
+       engine, same social weight, and the "very little value" half is pure Commerce.
+       Commerce 3 against copper's 60 is a CLAUDE DRAFT. Display name substitutes *material* so it
+       reads "stone <creature> figurine" with no extra work. -->
+  <object Name="Cleo_TerraFirma_Random Stone Figurine" Inherits="Random Figurine">
+    <part Name="Render" DisplayName="{{y|stone}} {{|*creature*}} figurine" DetailColor="K" RenderString="*" ColorString="&amp;y" RenderLayer="5" />
+    <part Name="Commerce" Value="3" />
+    <part Name="RandomFigurine" Material="stone" />
+    <!-- lang 2.0.212 only replaces =creature.name=, stable only *creature*: this part fills the name in after RandomFigurine on lang (2026-10-19) -->
+    <part Name="Cleo_TerraFirma_FigurineCreatureName" />
+    <tag Name="Tier" Value="1" />
+  </object>
+  <!-- The cold dish (same docket + the user's in-game find 2026-08-26: cold-flipped
+       dishes kept the flame overlay and lit colors, so they LOOKED lit while silently
+       refusing to cook; the old part-strip directive in WarrenCarver died for this).
+       A real blueprint in the Campfire/Campfire Remains idiom: no flame prefab, no
+       light. Colors stay the ruled brown, USER RULED 2026-08-26 ("no need for the ash
+       grey recolor"): cold reads through the dead flames and the name. The tense pass
+       and the extinguish path both land here now. Both dish descriptions approved
+       2026-09-10. -->
+  <object Name="Cleo_TerraFirma_FireDishCold" Inherits="Cleo_TerraFirma_FireDish">
+    <part Name="Render" DisplayName="cold fire dish" />
+    <part Name="Description" Short="A chunk of earth has been lathed into a finely smoothed bowl. Within it, charred dogthorn cradles the half-spoken echoes of idle chatter." />
+    <removepart Name="Campfire" />
+    <removepart Name="LightSource" />
+    <removepart Name="PrefabImposter" />
+  </object>
+
+  <!-- PROPER ETCH TOOLS thread RETIRED 2026-08-22 (user: "let's remove the added chisels and
+       mallets from the mod and just use knives and hammers in their place. the existing blunted
+       chisel and splintered mallet is fine"). The steel/carbide chisel+mallet quartet of
+       2026-08-15 is DELETED: since the hammer-and-knife gate (2026-08-06) and the tag-bonus
+       removal, a steel dagger etched identically to a steel chisel, so the quartet was four
+       blueprints buying nothing. Quarrier kits now roll base Steel Dagger / Steel Hammer with
+       rare Dagger4 / Cudgel4 (PopulationTables.xml, same weights, same mismatched-pair law).
+       The blunted chisel + splintered mallet above STAY: starter kit, kept by ruling. -->
 </objects>

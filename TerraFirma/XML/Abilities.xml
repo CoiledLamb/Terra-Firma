@@ -4,10 +4,10 @@
 		<description>
 			<p>You calcify sturdy walls to form obstacles.</p>
 			<br />
-			<p>Walls are placed in a contiguous shape, beginning adjacent to you. Only empty spaces will form walls.</p>
+			<p>Walls are placed in a contiguous shape, beginning adjacent to you.</p>
 			<!-- rebalance 2026-08-06: walls are true copies of the source stone, so the per-level
-			     HP stat is gone; replacement sentence DRAFT, awaiting signoff -->
-			<p>Creates <stat Name="WallNum" /> walls, true copies of the local stone.</p>
+			     HP stat is gone; replacement sentence approved 2026-09-30 -->
+			<p>Creates <stat Name="WallNum" /> walls.</p>
 			<statline Name="Cooldown" />
 		</description>
 		<UITile Tile="Abilities/abil_calcify.png" Foreground="w" Detail="C" />
@@ -15,13 +15,12 @@
 	<ability Command="Cleo_TerraFirma_CommandEarthenBarrage">
 		<description>
 			<p>When enabled, automatically retrieves stones from your reserves to use as thrown weapons.</p>
-			<p>Thrown pebbles will continually be replaced as long as you have reserves remaining.</p>
 			<br />
 			<!-- daze rider cut 2026-08-06 (rebalance pass); pen line reworked 2026-08-09
-			     (flat bonus retired for a Strength-filled cap) DRAFT wording, user signoff owed -->
-			<p>Stones deal <stat Name="Damage" /> damage; penetration follows your Strength, up to <stat Name="PenetrationCap" /> PV</p>
-			<p>A new stone is sculpted every <stat Name="TurnsPerCharge" /> rounds, up to a reserve of <stat Name="MaxCharges" /></p>
-			<p>Thrown stones disappear after <stat Name="Lifetime" /> consecutive turns of not being held as a thrown weapon</p>
+			     (flat bonus retired for a Strength-filled cap) wording draft, approved 2026-09-30 -->
+			<p>Stones deal <stat Name="Damage" /> damage; penetration follows your Strength, up to <stat Name="PenetrationCap" />.</p>
+			<p>A new stone is sculpted every <stat Name="TurnsPerCharge" /> rounds, up to a reserve of <stat Name="MaxCharges" />.</p>
+			<p>Stones not held as a thrown weapon crumble to dust after <stat Name="Lifetime" /> rounds.</p>
 			<br />
 			<p>While you have stones in reserve, they whorl about you and deflect physical projectiles (up to <stat Name="DeflectFull" />% at full reserve). Lasers and other energy attacks pass through.</p>
 		</description>
@@ -32,10 +31,9 @@
 		<description>
 			<p>Attune your sculpted stones to a keening resonance, or still them again.</p>
 			<br />
-			<p>Resonant stones penetrate as vibro weapons, meeting armor at its own frequency.</p>
+			<p>Resonant stones' penetration value is equal to the defender's armor value.</p>
 			<!-- AV/DV clause cut with the whorl stat shifts (rebalance 2026-08-06) -->
 			<p>While attuned, your gravel whorl deflects light-based projectiles instead of physical ones.</p>
-			<p>Attuning retunes the stone in your hand at no cost. Direct beams pass through the whorl in either mode.</p>
 		</description>
 		<UITile Tile="Abilities/abil_attunestone.png" Foreground="C" Detail="c" />
 	</ability>
@@ -43,7 +41,10 @@
 		<description>
 			<p>Carves an animate statue of the target creature from a target wall, inheriting its body plan and physique but not any mutations, skills, or equipment.</p>
 			<p>The statue guards you: nearby enemies must resist or direct their attacks at it.</p>
-			<p>After <stat Name="Duration" />, the statue returns to lifeless stone, entombing anything it wore or carried.</p>
+			<!-- level 10 permanence: CollectStats sends the text "until destroyed", which the bare
+			     sentence rendered as "After until destroyed round". Base switch idiom (the
+			     PowerSkate card); the permanent case reuses the approved level-text line. -->
+			<p><switch Name="Duration"><case Value="until destroyed">The statue lasts until destroyed. Carving another releases it.</case><default>After <stat Name="Duration" />, the statue returns to lifeless stone, entombing anything it wore or carried.</default></switch></p>
 			<statline Name="Cooldown" />
 		</description>
 		<UITile Tile="Abilities/abil_stoneshaper.png" Foreground="w" Detail="C" />
@@ -65,11 +66,14 @@
 	</ability>
 	<ability Command="Cleo_TerraFirma_CommandFissure">
 		<description>
-			<p>You crack open the earth and draw out its fruits.</p>
+			<!-- v1 card replaced 2026-09-29: the old Range/Area statlines had no stats behind them.
+			     Words are the signed-off v2 description and level-text lines; statlines follow
+			     CollectStats (RingRadius, WaveDamage, Cooldown). -->
+			<p>You send pulses through the earth, raising a ring of broken stone.</p>
 			<br />
-			<p>Results vary by mutation rank.</p>
-			<statline Name="Range" />
-			<statline Name="Area" />
+			<p>Creatures caught in its path are pushed outward and must make a Toughness save or be stunned.</p>
+			<statline Name="RingRadius" DisplayName="Ring radius" Unit="square" />
+			<statline Name="WaveDamage" DisplayName="Damage" />
 			<statline Name="Cooldown" />
 		</description>
 		<UITile Tile="Abilities/abil_fissure.png" Foreground="w" Detail="C" />

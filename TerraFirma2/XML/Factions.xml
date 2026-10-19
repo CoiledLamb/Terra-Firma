@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<factions>
+
+  <!-- THE QUARRIERS' GUILD. Name RULED 2026-08-15 by the user, choosing it over
+       "Stonecarvers' Guild" so the institution gets its own word: "stonecarver" was already
+       naming the calling, the creature, and the workstream, and a fourth job for one word is
+       the same collision the user rejected for "gravel baboon" against "Gravel Whorl".
+       Period RULED the same exchange (user: "post-sultanate"), and the engine says it for us:
+       Old="false" is the flag that separates contemporary institutions from relics, and both
+       base guilds carry it.
+
+       Structure copied verbatim from the base game's only two guilds, Merchants' and Farmers'
+       (Factions.xml): plural possessive, no article in the DisplayName, FormatWithArticle
+       supplying "the" at runtime, HistoricalSignificance 1. Three guilds is now the whole set.
+
+       DRAFT and owed, all of it the user's:
+         - the faction DESCRIPTION and any display text. Nothing is drafted here on purpose.
+         - rep jingles: RULED 2026-08-15 by ear, via the tfjingle audition wish (user: "definitely
+           cragmensch"), replacing the interim Farmers' Guild borrow. Sharing a pair is base game
+           practice rather than a compromise: sultanCult is used by 5 factions and village by 4,
+           out of ~62 pairs, so this is a finished decision and not outstanding asset debt.
+           Side effect worth knowing: quarriers and base cragmensch now sound identical on a rep
+           change, so the ear cannot tell them apart. Read as kinship between stone things.
+         - feelings toward specific factions. The entry ships neutral to everyone rather than
+           inventing a politics; the only attitudes stated are the two the base guilds both
+           state (Girsh and Entropic hostility), which read as house style rather than opinion.
+         - RECEPTION RULED 2026-08-29 (user: "pack opens wary, maybe 100 rep with player.
+           check precedent, something like bey lah could be good"): InitialPlayerReputation
+           is now -200, the exact hindren-of-Bey-Lah number (base Factions.xml:1079), taken
+           over the floated 100 because the user pointed at the precedent as the good shape;
+           wary band, not hostile, same as Bey Lah reads in play. Interplay worth knowing:
+           the Stonecarver calling's +200 grant (Callings.xml) nets a stonecarver player to
+           exactly 0, so the guild is wary of strangers and neutral to its own by birth.
+         - the water ritual. RULED 2026-08-15 to follow the guild pattern, and the absence of a
+           node here IS the ruling. Note the two base guilds DISAGREE: Merchants' writes
+           Join="false" alongside BuyMostValuableItem, because it has special ritual behaviour to
+           declare; Farmers' writes no waterritual node at all and takes the defaults. Quarriers
+           have no special ritual behaviour either, so they take the Farmers' shape, and
+           WaterRitualJoin defaults TRUE. Quarriers can be recruited.
+           Mechanism, for whoever changes it later: Join gates whether THEY join YOU, not whether
+           the player can join the guild (Claude had that backwards; user caught it the same day).
+           Decomp WaterRitualJoinParty: the option shows when the faction allows it, the speaker
+           is not already player led, and the speaker carries no WaterRitual/NoJoin xTag. Cost is
+           roughly 200 rep scaled by the level gap, floor 50. That per creature xTag is the cheap
+           lever if the OVERSEER should ever differ from the rank and file.
+           OVERSEER RULED 2026-08-29 (user: "overseer doesn't differ. uses own dialogue bank"):
+           same water ritual as the rank and file, no xTag; its distinction is a dialogue bank
+           of its own, lines owed at the user's voice sitting (wiring rides the epithet builder
+           when the bank lands, since the overseer is any carver made legendary, not a blueprint).
+       Emblem is stonecarver.png, the HUMAN body, RULED 2026-08-15. The mole emblem lasted about
+       an hour: the user picked stonerat.png, then found it faced the wrong way and asked for it
+       "flipped." Claude read that as colour inverted and swapped the channels, which answered a
+       question nobody asked; the user meant literally MIRRORED. Rather than mirror the art the
+       user settled it the simpler way, "just use the regular stonecarver.png rather than
+       stonerat," so the human fronts the guild after all and the colour swap is reverted to the
+       original y over K.
+       SUPERSEDED IN PART 2026-08-16: the mirror is no longer hypothetical. The user mirrored
+       stonerat.png themselves ("qud tiles need to face a certain direction and it was facing the
+       wrong way"), so the art is now correct on its own terms and the fix was an art fix rather
+       than an emblem workaround. Note it was done for the CREATURES, not for the emblem; the
+       mole carvers are the only things that render this tile. The emblem ruling is untouched,
+       stonecarver.png still fronts the guild.
+       So if the mole is ever wanted back, no new file is needed: stonerat.png already faces the
+       right way, and pointing EmblemTile at it would now just work. -->
+
+  <faction
+    Name="Cleo_TerraFirma_Quarriers"
+    DisplayName="Quarriers' Guild"
+    Old="false"
+    Plural="false"
+    FormatWithArticle="true"
+    InitialPlayerReputation="-200"
+    PositiveSound="Sounds/Reputation/sfx_reputation_cragmensch_positive"
+    NegativeSound="Sounds/Reputation/sfx_reputation_cragmensch_negative"
+    HistoricalSignificance="1"
+    EmblemTile="stonecarver.png"
+    EmblemTileColor="y"
+    EmblemDetailColor="K"
+  >
+    <feeling About="*" Value="0" />
+    <!-- 2026-09-30 (user): quarriers dislike snapjaws, so a canyon crew engages on sight
+         instead of only answering blows. Snapjaws already feel "*" -50 toward the guild.
+         Value copies the Fellowship of Wardens' own Snapjaws line (base Factions.xml). -->
+    <feeling About="Snapjaws" Value="-50" />
+
+    <!-- Interests RULED 2026-08-15 (user: "buying ruins is good, selling desertcanyons and
+         underground works"). These are the water ritual secrets trade, and the buy/sell split is
+         the characterising half: what a faction PAYS to hear says as much as what it will tell.
+         Quarriers sell their own domain, the canyons and everything under them, and buy leads on
+         ruins: worked stone they have not reached yet. The base Farmers' Guild is the model for
+         reading it, a single buy only line that tells you what farmers want to know.
+         Note the ruins direction is deliberate and survives the 2026-08-12 calling change that
+         swapped ruins lore for canyons: the calling stopped being FROM the ruins, the guild still
+         wants to hear about them. -->
+    <interests>
+      <interest Tags="desertcanyons" WillBuy="false" WillSell="true" />
+      <interest Tags="underground" WillBuy="false" WillSell="true" />
+      <interest Tags="ruins" WillBuy="true" WillSell="false" />
+    </interests>
+
+    <factionworshipattitudes>
+      <factionworshipattitude Name="Cleo_TerraFirma_Quarriers" Attitude="50" />
+      <factionworshipattitude Name="Girsh" Attitude="-100" />
+      <factionworshipattitude Name="Entropic" Attitude="-100" />
+    </factionworshipattitudes>
+  </faction>
+
+  <!-- Canyon neighbours (user 2026-09-30: quarriers should not fight stray glowcrows).
+       Birds and Unshelled Reptiles have no catch-all of their own; Faction.InheritParent
+       copies Beasts' "*" -50, which is past Brain.FEELING_HOSTILE_THRESHOLD (-10), so both
+       attacked quarriers on sight and the quarriers (0 toward everyone) fought back.
+       A merge node with only a Name keeps every base attribute (LoadFactionNode sets only
+       what is present). Same idiom as Beasts' own neutral list (Snapjaws, Robots, Cats).
+       Equimaxes need nothing: Prey and its child Equines sit at "*" 0 already. -->
+  <faction Name="Birds">
+    <feeling About="Cleo_TerraFirma_Quarriers" Value="0" />
+  </faction>
+
+  <faction Name="Unshelled Reptiles">
+    <feeling About="Cleo_TerraFirma_Quarriers" Value="0" />
+  </faction>
+
+</factions>

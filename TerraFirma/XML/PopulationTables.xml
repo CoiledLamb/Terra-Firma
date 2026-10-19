@@ -8,7 +8,7 @@
  		<object Blueprint="Cleo_TerraFirma_Splintered Mallet" Number="1" />
 		<object Blueprint="Ash-Stained Robes" Number="1" />
 		<object Blueprint="Sandals" Number="1" />
-    	<object Blueprint="Vinewood Sap Mask" Number="1" />
+		<object Blueprint="Vinewood Sap Mask" Number="1" />
 		<object Blueprint="Bubble Level" Number="1" />
 		<object Blueprint="Random Copper Figurine" Number="1" />
 		<table Name="Cleo_Stonecarver_Maquette"/>
@@ -19,18 +19,31 @@
     </group>
   </population>
   	<population Name="Cleo_Stonecarver_Maquette">
+		<!-- Stone added 2026-08-15 (user: "it's fine to add this"), closing the 08-14 material
+		     ladder ruling on the XML side. HEADS UP, this table is SHARED: it seeds the PLAYER
+		     calling kit as well as the mason, so this also changes what a player stonecarver
+		     starts holding. That reads right (a carver's keepsake is something they carved) but
+		     it is a change to the opening hand, not just to an NPC.
+		     WEIGHTS ARE CLAUDE DRAFT. The entries were previously unweighted, i.e. an even split;
+		     stone leads now because it is the thing these people actually make, and silver stays
+		     the rare one worth stealing. -->
 		<group Name="Maquette" Style="pickone">
-		<object Blueprint="Random Copper Figurine" Number="1-2"/>
-		<object Blueprint="Random Silver Figurine" Number="1"/>
+		<object Weight="50" Blueprint="Cleo_TerraFirma_Random Stone Figurine" Number="1-2"/>
+		<object Weight="35" Blueprint="Random Copper Figurine" Number="1-2"/>
+		<object Weight="15" Blueprint="Random Silver Figurine" Number="1"/>
 	 </group>
 	</population>
-	<!-- Cobble baboon butchery (2026-08-13): quartzfur three-piece idiom, equal weights
-	     mirroring the base Quartz Baboon Corpse table. Weights DRAFT, numbers sitting. -->
-	<population Name="Cleo_TerraFirma_Cobblefur Items">
-		<group Name="Items" Style="pickone" Weight="1">
-		<object Blueprint="Cleo_TerraFirma_Cobblefur Bracer" Number="1" Weight="20"/>
-		<object Blueprint="Cleo_TerraFirma_Cobblefur Gloves" Number="1" Weight="20"/>
-		<object Blueprint="Cleo_TerraFirma_Cobblefur Cloak" Number="1" Weight="20"/>
-	 </group>
+	<!-- Wild snapjaw miners (user 2026-10-19: "low roll, something like 1 to 5 chance"). The
+	     dynamic Snapjaw pool feeds no base table, so the miner joins base's own party lists
+	     (Creatures pick-each groups) at Chance 3, one miner. -->
+	<population Name="SnapjawParty0" Load="Merge">
+		<group Name="Creatures" Style="pickeach">
+			<object Chance="3" Number="1" Blueprint="Cleo_TerraFirma_Snapjaw Miner" />
+		</group>
+	</population>
+	<population Name="SnapjawParty1" Load="Merge">
+		<group Name="Creatures" Style="pickeach">
+			<object Chance="3" Number="1" Blueprint="Cleo_TerraFirma_Snapjaw Miner" />
+		</group>
 	</population>
 </populations>
