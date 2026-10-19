@@ -45,9 +45,10 @@ namespace XRL.World.Parts
 		/// <summary>Chip damage per scrape against the wall. DIAL.</summary>
 		public string DigDamage = "2d4";
 
-		/// <summary>Played at the wall on each scrape: the generic dig foley the mod already uses.
+		/// <summary>Played at the wall on each scrape. Off by default: the generic dig foley on every
+		/// scrape was too much (user 2026-10-19, "let's cut it"); set it on the blueprint to bring one back.
 		/// XML-settable dials; [NonSerialized] so the shipped part keeps its saved layout.</summary>
-		[NonSerialized] public string DigSound = "Sounds/Foley/fly_generic_dig";
+		[NonSerialized] public string DigSound = null;
 		[NonSerialized] public float DigSoundVolume = 0.5f;
 
 		public override bool WantEvent(int ID, int cascade)
