@@ -102,7 +102,22 @@
 				The rocks here are loose. With my wares, you could be rid of them altogether.~
 				Ah, to feel the sunlight on your skin, wayfarer. Tell me, is it sweeter than the taste of fresh water?
 			</text>
+			<choice Target="Kind">You're a plant, right? What kind?</choice>
 			<choice GotoID="End">Rust and earth.</choice>
+		</node>
+		<!-- Pandogrove's chain (user-written 2026-10-18), shaped like base Yurl's Story chain:
+		     each answer inherits Start's choices, the next question sorts first (Priority 1).
+		     The "me" to "we" slip in Here is the supercolony speaking; keep it. -->
+		<node ID="Kind" Inherits="Start">
+			<text>One of many. A spiral in multitude, radiating through the earth.</text>
+			<choice Target="Here" Priority="1">How did you wind up here?</choice>
+		</node>
+		<node ID="Here" Inherits="Start">
+			<text>The vase called me. It sang of home, of basking in the sun's fading glow, of hearing the howling caves on the horizon. To return, we provide for them.</text>
+			<choice Target="Home" Priority="1">Home? Aren't you just a potted plant?</choice>
+		</node>
+		<node ID="Home" Inherits="Start">
+			<text>And what of home, wayfarer? Do you know of such a thing?</text>
 		</node>
 	</conversation>
 </conversations>

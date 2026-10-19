@@ -2,12 +2,18 @@
  <objects> 
   <!-- Jilted Lover chassis, with its wild grabber and spawn lanes removed.
        Merchant HP/AV copy BaseMerchant; intellect and ego copy Yurl (CLAUDE PROPOSAL
-       tuning). Own bank since 2026-09-29 (Conversations.xml). Description: inherits Jilted
-       Lover's on purpose for now (user 2026-09-29); replace with the provisioner's own text
-       later (T04). -->
+       tuning). Own bank since 2026-09-29 (Conversations.xml). Named Pandogrove with its own
+       description and dialogue 2026-10-18 (user): one supercolony vine (after Pando) surfacing
+       at every amphora, so every provisioner is the same proper-named individual (base
+       Sixshrew idiom). -->
   <object Name="Cleo_TerraFirma_Vine Merchant" Inherits="Jilted Lover">
-    <part Name="Render" DisplayName="quarry provisioner" />
-    <part Name="Brain" Hostile="false" Wanders="false" Mobile="false" LivesOnWalls="true" Factions="Consortium-100,Cleo_TerraFirma_Quarriers-50" />
+    <!-- potted, on the floor beside a wall (user 2026-10-18; base Sixshrew is the potted plant
+         merchant precedent): sprite and colors the user's, brown main, light green detail -->
+    <part Name="Render" DisplayName="Pandogrove" Tile="quarry_provisioner.png" ColorString="&amp;w" TileColor="&amp;w" DetailColor="G" />
+    <part Name="Brain" Hostile="false" Wanders="false" Mobile="false" LivesOnWalls="false" Factions="Consortium-100,Cleo_TerraFirma_Quarriers-10" /> <!-- guild share 10 (user 2026-10-18). Base steps rep into feeling (Reputation.GetFeeling: -250 disliked = -50, -600 hated = -100, else 0) and a creature turns hostile below -10. At 50 a player the guild dislikes reads -17, hostile; at 10 even a hated player reads -9, so it stays neutral. -->
+    <removepart Name="WallColor" />
+    <part Name="Description" Short="A writhing coil of mottled vines wreathes a faded amphora. Chips line its rim like jagged teeth, and a single ragged leaf rises from its shaded belly to meet you." />
+    <xtagGrammar Proper="true" />
     <removepart Name="JiltedLoverProperties" />
     <removeinventoryobject Blueprint="Lovers_Thorns" />
     <part Name="Corpse" CorpseChance="0" />
@@ -320,5 +326,106 @@
     <removetag Name="Meat" />
     <intproperty Name="Bleeds" Value="0" />
     <tag Name="Tier" Value="1" />
+  </object>
+
+  <!-- Stone-kissed hermit (design 2026-10-13, description, sprite and colors user 2026-10-17).
+       Hide-Sheathed Hermit's chassis (BaseHumanoid, Hermits-100, AV 6, L8, HP 25, resists 10)
+       with the TF1 gaze as his main weapon, so no cudgel skills and no equipment builder; he
+       carries a plain staff he swings unskilled (user 2026-10-18: fine), robe and sandals.
+       Temper lives in Cleo_TerraFirma_StoneKissedRecluse: keeps his distance, turns on you up
+       close, calms when you back off unless you hurt him, ignores you at loved Hermits rep,
+       rings himself with statues on placement. Gaze level 6 (DC 17 + WIL; user 2026-10-18) set; Role is a Codex
+       PROPOSAL dial. Spawn: PopulationTables.xml merges into Mountains/HillsZoneGlobals-Reachable;
+       no region _Creatures tag, which only the village builders read (user 2026-10-17). -->
+  <object Name="Cleo_TerraFirma_StoneKissedHermit" Inherits="BaseHumanoid">
+    <part Name="Render" DisplayName="stone-kissed hermit" Tile="stonekissed_hermit.png" RenderString="h" ColorString="&amp;y" DetailColor="Y" />
+    <part Name="Corpse" CorpseChance="0" />
+    <stat Name="AV" Value="6" />
+    <stat Name="Level" Value="8" />
+    <stat Name="Hitpoints" Value="25" />
+    <stat Name="ColdResistance" Value="10" />
+    <stat Name="HeatResistance" Value="10" />
+    <stat Name="ElectricResistance" Value="10" />
+    <part Name="Brain" Hostile="false" Factions="Hermits-100" />
+    <part Name="Description" Short="A dusting of stone clings to =pronouns.objective= like winter frost. =pronouns.Possessive= movements are stiff and halting; =pronouns.subjective= =verb:avert:afterpronoun= =pronouns.possessive= face from yours, unwilling, or perhaps unable, to meet your gaze." />
+    <mutation Name="Cleo_TerraFirma_GorgonsGaze" Level="6" />
+    <part Name="Cleo_TerraFirma_StoneKissedRecluse" />
+    <inventoryobject Blueprint="Knollworm Skull" Number="1" />
+    <!-- kit (user 2026-10-18): base @table idiom, Creatures.xml:1554; tables in PopulationTables.xml -->
+    <inventoryobject Blueprint="@Cleo_TerraFirma_StoneKissedHermitStaff" Number="1" />
+    <inventoryobject Blueprint="@Cleo_TerraFirma_StoneKissedHermitClothes" Number="1" />
+    <inventoryobject Blueprint="Sandals" Number="1" />
+    <tag Name="Role" Value="Controller" />
+  </object>
+
+  <!-- Inkling (designed with the user 2026-10-17; sprite, colors, factions and description
+       theirs). Weak cave prey: hides in walls as graffiti when scared, rides on you as a tattoo
+       when petted (base Pettable, so only once it likes you), eats or garbles your other
+       tattoos while riding. All of that is Cleo_TerraFirma_Inkling + _InklingTattoo. Bleeds
+       ink like the base urchins and leaves a base InkDrop puddle on death (SpawnOnDeath, no
+       puff). Stats are Codex PROPOSAL dials. PetResponse and the conversation emote are still
+       BaseAnimal's soft growl; owed to the user if they want the inkling's own. Spawn: merged
+       into Tier2CaveCreatures in PopulationTables.xml. -->
+  <object Name="Cleo_TerraFirma_Inkling" Inherits="BaseAnimal">
+    <part Name="Render" DisplayName="inkling" Tile="inkling.png" RenderString="i" ColorString="&amp;K" DetailColor="Y" />
+    <part Name="Corpse" CorpseChance="0" />
+    <stat Name="Level" Value="2" />
+    <stat Name="Hitpoints" Value="6" />
+    <stat Name="AV" Value="0" />
+    <part Name="Brain" Hostile="false" Factions="Prey-100,Newly Sentient Beings-50" />
+    <part Name="Description" Short="Pitch spilled forth from the primordial brush, and congealed into a skittish, trembling creature." />
+    <part Name="Pettable" />
+    <part Name="SpawnOnDeath" Blueprint="InkDrop" DoPuff="false" />
+    <part Name="Cleo_TerraFirma_Inkling" />
+    <tag Name="BleedLiquid" Value="ink-1000" />
+  </object>
+
+  <!-- Burrowbee (C15, designed with the user 2026-10-17/18; sprite, names, colors, factions and
+       description theirs). A flower-field bee that forages underground: base Burrowing does the
+       burrow, base Burrowed the hiding (invisible, can't attack, forced up when hit), and
+       Cleo_TerraFirma_BurrowbeeForager picks the next flower and surfaces beside it. Hostile,
+       fights when provoked with base Stinger; the three children differ only in Stinger variant
+       and detail color. Level, HP, AV and mutation levels are Codex PROPOSAL dials. -->
+  <object Name="Cleo_TerraFirma_Burrowbee" Inherits="BaseInsect">
+    <part Name="Render" DisplayName="burrowbee" Tile="burrowbee.png" RenderString="b" ColorString="&amp;W" TileColor="&amp;W" DetailColor="g" />
+    <part Name="Brain" Factions="Insects-100,Prey-25" /> <!-- hostile again (user 2026-10-18/19, clusters cut to 2-3): insects start the player at -475 (disliked, -50), so this reads -40; Prey-100,Insects-20 read -8 and left them neutral -->
+    <part Name="Description" Short="Like a dancer mid-pirouette, =pronouns.subjective= =verb:twirl:afterpronoun= through the earth. Unhindered by the quickened loam, =pronouns.subjective= =verb:sup:afterpronoun= life's sweetest nectars against the painted backdrop of inflorescences." />
+    <stat Name="Level" Value="4" />
+    <stat Name="Hitpoints" Value="12" />
+    <stat Name="AV" Value="2" />
+    <mutation Name="Burrowing" Level="3" />
+    <mutation Name="Wings" Level="5" /> <!-- user 2026-10-18; level a Codex PROPOSAL dial (base dragonfly 10, glowmoth 1) -->
+    <part Name="Cleo_TerraFirma_BurrowbeeForager" />
+    <tag Name="BaseObject" Value="*noinherit" />
+  </object>
+  <object Name="Cleo_TerraFirma_DogthornBurrowbee" Inherits="Cleo_TerraFirma_Burrowbee">
+    <part Name="Render" DisplayName="dogthorn burrowbee" DetailColor="g" />
+    <mutation Name="Stinger" Variant="Stinger Poison" Level="2" />
+      <part Name="Corpse" CorpseChance="10" CorpseBlueprint="Cleo_TerraFirma_DogthornBurrowbeeCorpse" /> <!-- user 2026-10-19: 10%, and every corpse butchers (base Salthopper is 8% then a 15% roll) -->
+  </object>
+  <object Name="Cleo_TerraFirma_WitchwoodBurrowbee" Inherits="Cleo_TerraFirma_Burrowbee">
+    <part Name="Render" DisplayName="witchwood burrowbee" DetailColor="w" />
+    <mutation Name="Stinger" Variant="Stinger Confusion" Level="2" />
+      <part Name="Corpse" CorpseChance="10" CorpseBlueprint="Cleo_TerraFirma_WitchwoodBurrowbeeCorpse" /> <!-- user 2026-10-19: 10%, and every corpse butchers (base Salthopper is 8% then a 15% roll) -->
+  </object>
+  <object Name="Cleo_TerraFirma_StillvineBurrowbee" Inherits="Cleo_TerraFirma_Burrowbee">
+    <part Name="Render" DisplayName="stillvine burrowbee" DetailColor="C" />
+    <mutation Name="Stinger" Variant="Stinger Paralysis" Level="2" />
+      <part Name="Corpse" CorpseChance="10" CorpseBlueprint="Cleo_TerraFirma_StillvineBurrowbeeCorpse" /> <!-- user 2026-10-19: 10%, and every corpse butchers (base Salthopper is 8% then a 15% roll) -->
+  </object>
+
+  <!-- Burrowbee corpses (user 2026-10-18/19): butchering yields the bee's stinger as a
+       wieldable LongBlades weapon (Objects.xml). Base Corpse chassis, like the boar vessel's. -->
+  <object Name="Cleo_TerraFirma_DogthornBurrowbeeCorpse" Inherits="Corpse">
+    <part Name="Render" DisplayName="dogthorn burrowbee corpse" DetailColor="g" />
+    <part Name="Butcherable" OnSuccess="Cleo_TerraFirma_DogthornStinger" />
+  </object>
+  <object Name="Cleo_TerraFirma_WitchwoodBurrowbeeCorpse" Inherits="Corpse">
+    <part Name="Render" DisplayName="witchwood burrowbee corpse" DetailColor="w" />
+    <part Name="Butcherable" OnSuccess="Cleo_TerraFirma_WitchwoodStinger" />
+  </object>
+  <object Name="Cleo_TerraFirma_StillvineBurrowbeeCorpse" Inherits="Corpse">
+    <part Name="Render" DisplayName="stillvine burrowbee corpse" DetailColor="C" />
+    <part Name="Butcherable" OnSuccess="Cleo_TerraFirma_StillvineStinger" />
   </object>
 </objects>

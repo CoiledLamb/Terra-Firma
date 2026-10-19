@@ -406,4 +406,35 @@ Perishes when unequipped." />
     <tag Name="IgnoresGravity" />
     <tag Name="ExcludeFromDynamicEncounters" />
   </object>
+  <!-- Burrowbee stingers (user 2026-10-18/19): butchered from burrowbee corpses, wielded as
+       LongBlades like base's Stinger item (Items.xml:3870: LongBlades),
+       which is natural gear and never drops; sprite the user's (2026-10-19). Venom on hit at the base
+       Stinger's 20%: base PoisonOnHit and ConfuseOnHit, and Cleo_TerraFirma_ParalyzeOnHit for
+       stillvine (base has no paralysis twin for weapons). Damage, saves, durations and value
+       are Codex PROPOSAL dials; the description is the user's (final 2026-10-19). -->
+  <object Name="Cleo_TerraFirma_BurrowbeeStinger" Inherits="BaseLongBlade">
+    <part Name="Render" DisplayName="burrowbee stinger" Tile="burrowbee_stinger.png" ColorString="&amp;W" TileColor="&amp;W" DetailColor="g" />
+    <part Name="MeleeWeapon" MaxStrengthBonus="3" BaseDamage="1d6" Skill="LongBlades" /> <!-- user 2026-10-19: a solid step under base SalthopperMandible (Items.xml:8544, 1d10, MaxStrengthBonus 4, tier 3), loses on dice and PV, paid back by the venom; easier to get (10% per bee vs about 1.2%) -->
+    <part Name="Physics" Weight="1" />
+    <part Name="Commerce" Value="25" />
+    <part Name="Description" Short="A wicked curve of chitin, still wet with nascent venom, drips menacingly." />
+    <tag Name="Tier" Value="2" />
+    <tag Name="BaseObject" Value="*noinherit" />
+    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+  </object>
+  <object Name="Cleo_TerraFirma_DogthornStinger" Inherits="Cleo_TerraFirma_BurrowbeeStinger">
+    <part Name="Render" DisplayName="dogthorn stinger" DetailColor="g" />
+    <part Name="PoisonOnHit" Chance="20" Strength="13" DamageIncrement="1d3" Duration="4-6" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
+  <object Name="Cleo_TerraFirma_WitchwoodStinger" Inherits="Cleo_TerraFirma_BurrowbeeStinger">
+    <part Name="Render" DisplayName="witchwood stinger" DetailColor="w" />
+    <part Name="ConfuseOnHit" Chance="20" Strength="13" Duration="4-6" Level="2" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
+  <object Name="Cleo_TerraFirma_StillvineStinger" Inherits="Cleo_TerraFirma_BurrowbeeStinger">
+    <part Name="Render" DisplayName="stillvine stinger" DetailColor="C" />
+    <part Name="Cleo_TerraFirma_ParalyzeOnHit" Chance="20" Strength="13" Duration="1d3" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
 </objects>
