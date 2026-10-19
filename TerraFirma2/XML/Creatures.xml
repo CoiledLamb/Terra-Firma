@@ -316,8 +316,9 @@
        not boar jerky and pig meat). Base StiltPigFarmer with its own restock table (base
        GenericInventoryRestocker idiom, same 71 chance as PigFarmer). Only the pen places it, so
        the inherited village tags are deleted and it stays out of dynamic encounters.
-       DisplayName still the inherited "pig farmer". -->
+       DisplayName "pig vessel farmer" (user 2026-10-19). -->
   <object Name="Cleo_TerraFirma_StiltBoarVesselFarmer" Inherits="StiltPigFarmer">
+    <part Name="Render" DisplayName="pig vessel farmer" />
     <part Name="GenericInventoryRestocker" Table="Cleo_TerraFirma_BoarVesselFarmerInventory" Chance="71" />
     <tag Name="DynamicObjectsTable:DesertCanyon_Creatures" Value="*delete" />
     <tag Name="DynamicObjectsTable:Hills_Creatures" Value="*delete" />
