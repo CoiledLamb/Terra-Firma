@@ -9,7 +9,7 @@
        (Yurtmat parity), commerce/tier modest; bracer is +2 throw range, USER NUMBER
        2026-08-22 (see the bracer's own comment below). Descriptions are user text 2026-09-29. -->
     <object Name="Cleo_TerraFirma_Cobblefur Bracer" Inherits="BaseArmlet">
-    <part Name="Armor" AV="0" DV="0" WornOn="Arm" />
+    <part Name="Armor" AV="1" DV="0" WornOn="Arm" /> <!-- AV 1 user 2026-10-19 -->
     <part Name="Render" DisplayName="{{y|granitefur}} bracer" RenderString="]" Tile="baboonskin_bracers.png" ColorString="&amp;r" DetailColor="y" /> <!-- user sprite 2026-08-22; rust/brown per the cloak ruling, family palette -->
     <part Name="Commerce" Value="45" /> <!-- user 2026-10-14, flat set price -->
     <part Name="Description" Short="Grit-caked flesh was carved from a dead baboon and woven into a bracer." /> <!-- USER TEXT 2026-09-29, quartzfur echo -->
@@ -31,7 +31,7 @@
     <tag Name="Tier" Value="2" />
   </object>
     <object Name="Cleo_TerraFirma_Cobblefur Gloves" Inherits="BaseGlove">
-    <part Name="Armor" AV="0" DV="1" WornOn="Hands" />
+    <part Name="Armor" AV="1" DV="1" WornOn="Hands" /> <!-- AV 1 user 2026-10-19 -->
     <part Name="Render" DisplayName="{{y|granitefur}} gloves" RenderString="]" Tile="catching_gloves.png" ColorString="&amp;r" DetailColor="y" /> <!-- user sprite 2026-08-22 -->
     <part Name="Commerce" Value="45" /> <!-- user 2026-10-14, flat set price -->
     <part Name="Description" Short="Grit-caked flesh was carved from a dead baboon and sewn into a pair of gloves." /> <!-- USER TEXT 2026-09-29, quartzfur echo -->
