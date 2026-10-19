@@ -292,7 +292,7 @@
   <object Name="Cleo_TerraFirma_RefractiveBuckler" Inherits="BaseShield">
     <part Name="Render" DisplayName="refractive targe" Tile="refractive_targe.png" ColorString="&amp;y" DetailColor="Y" />
     <part Name="Shield" AV="1" DV="1" WornOn="Arm" />
-    <part Name="RefractLight" Chance="20" RetroVariance="1d181-91" ShowInShortDescription="true" />
+    <part Name="RefractLight" Chance="10" RetroVariance="1d181-91" ShowInShortDescription="true" /> <!-- targe 10, lune 30 (user 2026-10-19) -->
     <part Name="Description" Short="The world lies warped in its mirrored lens. Light gleams effortlessly across its surface, diffracted into myriad strands of color." /> <!-- USER TEXT 2026-10-19, shared with the lune -->
     <part Name="Commerce" Value="65" />
     <part Name="Physics" Weight="8" />
