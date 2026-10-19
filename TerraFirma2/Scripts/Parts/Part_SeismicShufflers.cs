@@ -23,6 +23,10 @@ namespace XRL.World.Parts
         /// blueprint; [NonSerialized] so the shipped part keeps its saved layout.</summary>
         [NonSerialized] public string PeekSound = "Sounds/Abilities/sfx_ability_leyShift_repetition";
         [NonSerialized] public float PeekSoundVolume = 0.5f;
+        /// <summary>Played instead of PeekSound when the scan finds no walls below (user 2026-10-19:
+        /// "should click"). Base empty-weapon click, written bare as base code writes it.</summary>
+        [NonSerialized] public string EmptyPeekSound = "sfx_missile_reloadFail_noAmmo";
+        [NonSerialized] public float EmptyPeekSoundVolume = 0.5f;
         public Guid AbilityID;
         public string CommandID;
         public List<GameObject> Projections = new List<GameObject>();
@@ -188,8 +192,6 @@ namespace XRL.World.Parts
                 return wearer.Fail(ParentObject.Does("click", int.MaxValue, null, null, "merely") + "."); // base IActivePart unpowered line
 
             ClearProjections();
-            if (!PeekSound.IsNullOrEmpty())
-                ParentObject.PlayWorldSound(PeekSound, PeekSoundVolume);
             int walls = 0;
             for (int dy = -2; dy <= 2; dy++)
             for (int dx = -2; dx <= 2; dx++)
@@ -234,6 +236,11 @@ namespace XRL.World.Parts
             }
             Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHUFFLERS",
                 $"peek {below.ParentZone.ZoneID}: {walls} projected walls, {PreviewDuration} turns");
+            // after the scan, so an empty one clicks instead of rising (user 2026-10-19); the rises
+            // are queued async, so the sound still lands as they start
+            string sound = walls > 0 ? PeekSound : EmptyPeekSound;
+            if (!sound.IsNullOrEmpty())
+                ParentObject.PlayWorldSound(sound, walls > 0 ? PeekSoundVolume : EmptyPeekSoundVolume);
             if (walls == 0)
                 wearer.ShowFailure("You find no walls beneath you.");
             wearer.UseEnergy(1000, "Item Seismic Peek");
