@@ -53,7 +53,11 @@ param(
     [string]$Mod = "Both",
     [switch]$CheckOnly,
     [string]$RepoRoot = (Split-Path -Parent $PSScriptRoot),
-    [string]$QudLib = "C:\Program Files (x86)\Steam\steamapps\common\Caves of Qud\CoQ_Data\Managed"
+    [string]$QudLib = "C:\Program Files (x86)\Steam\steamapps\common\Caves of Qud\CoQ_Data\Managed",
+    # a stable Assembly-CSharp.dll and its references, for when Steam carries the lang build
+    [string]$StableQudLib = (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) "CoQ_TerraFirma-beta-takestones\bin\Debug\netstandard2.0"),
+    # the symbol the game's mod compiler defines on the current lang build (2.0.213); stable is VERSION_1_0
+    [string]$LangDefine = "VERSION_1_2"
 )
 
 $ErrorActionPreference = "Stop"
@@ -107,6 +111,38 @@ if (-not $watchLine) { throw "could not read Helpers.VERIFY_WATCH in $helpersPat
 if ($watchLine.Matches[0].Groups[1].Value -eq "true") {
     if ($CheckOnly) { Write-Warning "VERIFY_WATCH is true in _Helpers.cs:$($watchLine.LineNumber) -- a real run would abort; set it false before staging" }
     else { throw "VERIFY_WATCH is true in _Helpers.cs:$($watchLine.LineNumber) -- set it false before staging; publish aborted, nothing zipped" }
+}
+
+# ---------------------------------------------------------------- compile targets
+# (2026-10-19) The mod ships to stable and lang-experimental players alike, and the game's mod
+# compiler defines VERSION_1_0 on stable and a higher VERSION_1_x on lang, so code guards on
+# VERSION_1_0 / !VERSION_1_0. Every compile check runs once per build against that build's own
+# Assembly-CSharp.dll. Lang is told apart by the PerceptionEvent type, which stable lacks (its
+# metadata holds only ExtraHostilePerceptionEvent). Stable is required; lang is checked when a
+# lang dll is present and only warned about otherwise.
+function Get-QudFlavor([string]$lib) {
+    $dll = Join-Path $lib "Assembly-CSharp.dll"
+    if (-not (Test-Path $dll)) { return $null }
+    $text = [System.Text.Encoding]::GetEncoding(28591).GetString([System.IO.File]::ReadAllBytes($dll))
+    if ($text -match '(?<![A-Za-z_])PerceptionEvent(?![A-Za-z_])') { return "lang" }
+    return "stable"
+}
+$CompileTargets = @()
+foreach ($lib in @($QudLib, $StableQudLib)) {
+    $flavor = Get-QudFlavor $lib
+    if (-not $flavor -or ($CompileTargets | Where-Object { $_.Flavor -eq $flavor })) { continue }
+    $define = if ($flavor -eq "lang") { $LangDefine } else { "VERSION_1_0" }
+    $CompileTargets += @{ Flavor = $flavor; Lib = $lib; Define = $define }
+}
+if (-not ($CompileTargets | Where-Object { $_.Flavor -eq "stable" })) { throw "no stable Assembly-CSharp.dll found (QudLib $QudLib, StableQudLib $StableQudLib) -- publish aborted, nothing zipped" }
+if (-not ($CompileTargets | Where-Object { $_.Flavor -eq "lang" })) { Write-Warning "no lang Assembly-CSharp.dll found; the lang path ($LangDefine) is not compile-checked" }
+foreach ($t in $CompileTargets) { Write-Host "compile target: $($t.Flavor) ($($t.Define)) against $($t.Lib)" }
+
+function Invoke-Build([string]$proj, $target) {
+    # --no-incremental: the two targets share one obj folder and differ only in references and defines
+    $build = & dotnet build $proj --no-incremental -p:QudLibPath="$($target.Lib)" -p:DefineConstants="$($target.Define)" 2>&1
+    $errors = $build | Select-String -Pattern "error CS\d|error MSB\d"
+    return @{ Failed = ($LASTEXITCODE -ne 0 -or $errors); Errors = $errors }
 }
 
 # ---------------------------------------------------------------- C# comment lexer
@@ -320,14 +356,15 @@ function Compile-Check([bool]$withTF2) {
     }
     Push-Location $buildDir
     try {
-        foreach ($proj in $projects) {
-            $build = & dotnet build $proj -p:QudLibPath="$QudLib" 2>&1
-            $errors = $build | Select-String -Pattern "error CS\d|error MSB\d"
-            if ($LASTEXITCODE -ne 0 -or $errors) {
-                $errors | ForEach-Object { Write-Host $_ }
-                throw "stripped copy of $proj FAILED to compile -- publish aborted, nothing zipped"
+        foreach ($target in $CompileTargets) {
+            foreach ($proj in $projects) {
+                $r = Invoke-Build $proj $target
+                if ($r.Failed) {
+                    $r.Errors | ForEach-Object { Write-Host $_ }
+                    throw "stripped copy of $proj FAILED to compile on $($target.Flavor) ($($target.Define)) -- publish aborted, nothing zipped"
+                }
+                Write-Host "compile check green: $proj on $($target.Flavor) ($($target.Define))"
             }
-            Write-Host "compile check green: $proj"
         }
     }
     finally { Pop-Location }
@@ -390,13 +427,14 @@ function Compile-Fused($cfg) {
     Copy-Item -Recurse (Join-Path $pubRoot $cfg.Src) (Join-Path $buildDir "TerraFirma")
     Push-Location $buildDir
     try {
-        $build = & dotnet build "TerraFirma.csproj" -p:QudLibPath="$QudLib" 2>&1
-        $errors = $build | Select-String -Pattern "error CS\d|error MSB\d"
-        if ($LASTEXITCODE -ne 0 -or $errors) {
-            $errors | ForEach-Object { Write-Host $_ }
-            throw "fused build FAILED to compile as one assembly -- nothing zipped"
+        foreach ($target in $CompileTargets) {
+            $r = Invoke-Build "TerraFirma.csproj" $target
+            if ($r.Failed) {
+                $r.Errors | ForEach-Object { Write-Host $_ }
+                throw "fused build FAILED to compile as one assembly on $($target.Flavor) ($($target.Define)) -- nothing zipped"
+            }
+            Write-Host "compile check green: fused $($cfg.Src) on $($target.Flavor) ($($target.Define))"
         }
-        Write-Host "compile check green: fused $($cfg.Src)"
     }
     finally { Pop-Location }
     Remove-Item -Recurse -Force $buildDir
