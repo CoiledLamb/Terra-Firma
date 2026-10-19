@@ -34,6 +34,11 @@ namespace XRL.World.Parts
 		/// <summary>Flat charge per animation (RULED flat; number is a DIAL).</summary>
 		public int AnimationCost = 1000;
 
+		/// <summary>Played at the table when a figurine wakes: the base engraver clip. XML-settable
+		/// dials; [NonSerialized] so the shipped part keeps its saved layout.</summary>
+		[NonSerialized] public string AnimateSound = "Sounds/Interact/sfx_interact_engraver";
+		[NonSerialized] public float AnimateSoundVolume = 0.5f;
+
 		/// <summary>The stoneshaper level the table works at. CLAUDE PICK 1 (delegated):
 		/// statue law makes 1-vs-2 purely 25 vs 50 HP, and "miniature" argues the floor.</summary>
 		public int StoneshaperLevel = 1;
@@ -166,6 +171,8 @@ namespace XRL.World.Parts
 
 				GameObject walker = BuildWalker(pick, E.Actor);
 				spot.AddObject(walker).MakeActive();
+				if (!AnimateSound.IsNullOrEmpty())
+					ParentObject.PlayWorldSound(AnimateSound, AnimateSoundVolume);
 				if (E.Actor.IsPlayer())
 				{
 					IComponent<GameObject>.AddPlayerMessage("You imbue " + pick.t() + " with life."); // approved 2026-09-30, base-shaped (AnimateObject verbatim)

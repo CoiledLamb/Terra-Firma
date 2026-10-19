@@ -29,6 +29,12 @@ namespace XRL.World.Parts
 		public int UsesMin = 8;
 		public int UsesMax = 12;
 
+		/// <summary>Played once per stroke at the chalked cell: the clip base crayon drawing uses
+		/// (Cell.PlayWorldSound at its default 0.5). XML-settable dials; [NonSerialized] so the shipped
+		/// part keeps its saved layout.</summary>
+		[NonSerialized] public string DrawSound = "Sounds/Interact/sfx_interact_crayon_draw";
+		[NonSerialized] public float DrawSoundVolume = 0.5f;
+
 		/// <summary>The draw ability this box granted its holder, if it was the granting box.</summary>
 		public Guid AbilityID = Guid.Empty;
 
@@ -385,8 +391,9 @@ namespace XRL.World.Parts
 				Cleo.TerraFirma.Scripts.Cleo_TerraFirma_ChalkRevealFX.Hold(settle);
 			}
 			target.AddObject(line);
-			// no draw sfx by ruling 2026-08-22 (the tattoo-gun placeholder was removed; the
-			// sound pass picks a real one if any)
+			// the sound pass picked base crayon drawing (2026-10-19; the 2026-08-22 tattoo-gun placeholder stays gone)
+			if (!DrawSound.IsNullOrEmpty())
+				target.PlayWorldSound(DrawSound, DrawSoundVolume);
 			// the new piece reads its neighbors, and the neighbors reach back
 			linePart?.Retile();
 			Cleo_TerraFirma_ChalkLine.RetileNeighbors(target);

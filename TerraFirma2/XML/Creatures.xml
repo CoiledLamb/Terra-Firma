@@ -391,7 +391,7 @@
          pet that can't ride falls back to BaseAnimal's growl in Cleo_TerraFirma_Inkling -->
     <tag Name="PetResponse" Value="" />
     <part Name="SpawnOnDeath" Blueprint="InkDrop" DoPuff="false" />
-    <part Name="Cleo_TerraFirma_Inkling" />
+    <part Name="Cleo_TerraFirma_Inkling" AttachSound="Sounds/Abilities/sfx_ability_spitSlime_spit" />
     <tag Name="BleedLiquid" Value="ink-1000" />
   </object>
 

@@ -66,6 +66,12 @@ namespace XRL.World.Parts
 		/// <summary>Turns a frightened hitchhiker won't jump back onto the host it just fled. DIAL.</summary>
 		public int HitchhikeCooldown = 10;
 
+		/// <summary>Played once at the host when the inkling seeps in (hitchhike or petting). Set on the
+		/// inkling blueprint; the other candidate is Sounds/Interact/sfx_interact_bubbleLevel_flip.
+		/// [NonSerialized] so the shipped part keeps its saved layout.</summary>
+		[NonSerialized] public string AttachSound = "Sounds/Abilities/sfx_ability_spitSlime_spit";
+		[NonSerialized] public float AttachSoundVolume = 0.5f;
+
 		public string FledHostID;
 		public int FledHostTurns;
 
@@ -503,6 +509,8 @@ namespace XRL.World.Parts
 				TattooText = text,
 				TurnsToMeal = Hungry ? 1 : -1, // hungry: eats at the end of this turn
 			});
+			if (!AttachSound.IsNullOrEmpty())
+				Host.PlayWorldSound(AttachSound, AttachSoundVolume);
 			// petted: this line is the pet popup, base Pettable's own channel (user 2026-10-19);
 			// hitchhiking and hunger stay in the message log
 			if (Host.IsPlayer())
