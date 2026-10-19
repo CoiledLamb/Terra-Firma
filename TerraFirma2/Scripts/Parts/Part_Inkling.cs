@@ -63,6 +63,12 @@ namespace XRL.World.Parts
 		/// <summary>What the graffiti reads while it hides (rolled per hiding, base Graffitied's recipe).</summary>
 		public string GraffitiText;
 
+		/// <summary>Turns a frightened hitchhiker won't jump back onto the host it just fled. DIAL.</summary>
+		public int HitchhikeCooldown = 10;
+
+		public string FledHostID;
+		public int FledHostTurns;
+
 		public override bool SameAs(IPart p) => false;
 
 		public override bool WantEvent(int ID, int cascade)
@@ -84,8 +90,15 @@ namespace XRL.World.Parts
 
 		public override bool HandleEvent(AfterPetEvent E)
 		{
+			// pet bias (user 2026-10-19): it settles on the hand that petted it, that arm if the
+			// hand is full, else anywhere; base petting always uses the first hand (Pettable.TryGetLimbs)
 			if (E.Actor != null && E.Actor != ParentObject)
-				RideOn(E.Actor);
+			{
+				BodyPart hand = null;
+				if (E.Actor.Body != null && ParentObject.Body != null)
+					Pettable.TryGetLimbs(E.Actor, ParentObject, out hand, out _);
+				RideOn(E.Actor, Preferred: hand);
+			}
 			return base.HandleEvent(E);
 		}
 
@@ -94,6 +107,9 @@ namespace XRL.World.Parts
 			Brain brain = ParentObject.Brain;
 			if (brain == null || ParentObject.IsPlayer() || brain.PartyLeader != null || ParentObject.CurrentCell == null)
 				return base.HandleEvent(E);
+
+			if (FledHostTurns > 0 && --FledHostTurns == 0)
+				FledHostID = null;
 
 			GameObject threat = FindThreat();
 
@@ -165,6 +181,9 @@ namespace XRL.World.Parts
 			{
 				if (Hide())
 					return false;
+				// no wall to hide in: it hitchhikes on whoever is beside it (user 2026-10-19)
+				if (Hitchhike())
+					return false;
 				if (threat != null && !brain.HasGoal("Flee"))
 				{
 					brain.Goals.Clear();
@@ -227,8 +246,8 @@ namespace XRL.World.Parts
 					{
 						if (obj == ParentObject || !obj.IsCreature)
 							continue;
-						Tattoos tattoos = obj.GetPart<Tattoos>();
-						if (tattoos == null || tattoos.Descriptions.Count == 0)
+						// riders' own tattoos aren't food (sharing, user 2026-10-19)
+						if (!Cleo_TerraFirma_InklingTattoo.HasEdibleTattoo(obj))
 							continue;
 						int d = Math.Max(Math.Abs(dx), Math.Abs(dy));
 						if (d < bestDist)
@@ -240,6 +259,39 @@ namespace XRL.World.Parts
 				}
 			}
 			return best;
+		}
+
+		/// <summary>Defensive ride (user 2026-10-19): with no wall beside it, a scared inkling
+		/// jumps onto an adjacent creature as a tattoo, ones it likes first, then anyone, the thing
+		/// that scared it included. Not back onto the host it just fled for HitchhikeCooldown turns,
+		/// or a host in a fight would bounce it on and off every turn.</summary>
+		bool Hitchhike()
+		{
+			List<GameObject> liked = new List<GameObject>();
+			List<GameObject> others = new List<GameObject>();
+			foreach (Cell cell in ParentObject.CurrentCell.GetLocalAdjacentCells())
+			{
+				foreach (GameObject obj in cell.Objects)
+				{
+					if (obj == ParentObject || !obj.IsCreature || obj.Body == null || obj.HasPart<Cleo_TerraFirma_Inkling>()
+						|| (FledHostID != null && obj.ID == FledHostID))
+						continue;
+					if (ParentObject.Brain.GetFeeling(obj) >= LikedFeeling)
+						liked.Add(obj);
+					else
+						others.Add(obj);
+				}
+			}
+			liked.AddRange(others);
+			foreach (GameObject host in liked)
+			{
+				if (RideOn(host))
+				{
+					Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"hitchhiked onto {host.Blueprint}");
+					return true;
+				}
+			}
+			return false;
 		}
 
 		bool Hide()
@@ -393,14 +445,18 @@ namespace XRL.World.Parts
 		}
 
 		/// <summary>Leave the map and ride on Host as a tattoo. False if Host has no room for one.</summary>
-		public bool RideOn(GameObject Host, bool Hungry = false)
+		public bool RideOn(GameObject Host, bool Hungry = false, BodyPart Preferred = null)
 		{
-			if (Host?.Body == null || Host.HasPart<Cleo_TerraFirma_InklingTattoo>() || ParentObject.CurrentCell == null)
+			if (Host?.Body == null || ParentObject.CurrentCell == null)
 				return false;
+			// sharing (user 2026-10-19): any number may ride, one per body part
+			HashSet<int> taken = new HashSet<int>();
+			foreach (Cleo_TerraFirma_InklingTattoo rider in Cleo_TerraFirma_InklingTattoo.Riders(Host))
+				taken.Add(rider.BodyPartID);
 			List<BodyPart> spots = new List<BodyPart>();
 			foreach (BodyPart part in Host.Body.GetParts())
 			{
-				if (Tattoos.CanApplyTattoo(Host, part, true, true) == Tattoos.ApplyResult.Tattooable)
+				if (!taken.Contains(part.ID) && Tattoos.CanApplyTattoo(Host, part, true, true) == Tattoos.ApplyResult.Tattooable)
 					spots.Add(part);
 			}
 			if (spots.Count == 0)
@@ -408,7 +464,16 @@ namespace XRL.World.Parts
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"ride: no tattooable skin on {Host.Blueprint}");
 				return false;
 			}
-			BodyPart spot = spots.GetRandomElement();
+			BodyPart spot = null;
+			if (Preferred != null)
+			{
+				if (spots.Contains(Preferred))
+					spot = Preferred;
+				else if (Preferred.ParentPart != null && spots.Contains(Preferred.ParentPart))
+					spot = Preferred.ParentPart;
+			}
+			if (spot == null)
+				spot = spots.GetRandomElement();
 			string text = Grammar.A(ParentObject.Render.DisplayName);
 			if (!Tattoos.IsSuccess(Tattoos.ApplyTattoo(Host, spot, true, false, text)))
 				return false;
@@ -431,10 +496,15 @@ namespace XRL.World.Parts
 		}
 
 		/// <summary>Back on the map next to Host (called by the rider part).</summary>
-		public void HopOff(Cell Landing, bool Frightened)
+		public void HopOff(Cell Landing, bool Frightened, GameObject From = null)
 		{
 			Landing.AddObject(ParentObject);
 			Scared = Frightened;
+			if (Frightened && From != null)
+			{
+				FledHostID = From.ID;
+				FledHostTurns = HitchhikeCooldown;
+			}
 		}
 	}
 }

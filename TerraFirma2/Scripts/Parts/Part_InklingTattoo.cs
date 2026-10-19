@@ -57,15 +57,15 @@ namespace XRL.World.Parts
 
 		public override bool FireEvent(Event E)
 		{
-			if (E.ID == "BeforeDeathRemoval")
-				HopOff(Frightened: true, Silent: false);
+			if (E.ID == "BeforeDeathRemoval" && ParentObject != null)
+				HopOffAll(ParentObject);
 			return base.FireEvent(E);
 		}
 
 		public override bool HandleEvent(TookDamageEvent E)
 		{
-			if (E.Damage == null || E.Damage.Amount > 0)
-				HopOff(Frightened: true, Silent: false);
+			if ((E.Damage == null || E.Damage.Amount > 0) && ParentObject != null)
+				HopOffAll(ParentObject);
 			return base.HandleEvent(E);
 		}
 
@@ -103,6 +103,41 @@ namespace XRL.World.Parts
 			return base.HandleEvent(E);
 		}
 
+		/// <summary>Every inkling riding Host (sharing, user 2026-10-19: one rider part each).</summary>
+		public static List<Cleo_TerraFirma_InklingTattoo> Riders(GameObject Host)
+		{
+			List<Cleo_TerraFirma_InklingTattoo> riders = new List<Cleo_TerraFirma_InklingTattoo>();
+			if (Host != null)
+			{
+				foreach (IPart part in Host.PartsList)
+				{
+					if (part is Cleo_TerraFirma_InklingTattoo rider)
+						riders.Add(rider);
+				}
+			}
+			return riders;
+		}
+
+		/// <summary>All riders jump at once: a part removed mid-dispatch can make the engine skip
+		/// the next one in PartsList, so the first to hear the hit takes the rest along.</summary>
+		static void HopOffAll(GameObject Host)
+		{
+			foreach (Cleo_TerraFirma_InklingTattoo rider in Riders(Host))
+				rider.HopOff(Frightened: true, Silent: false);
+		}
+
+		/// <summary>True if Host wears a tattoo that isn't an inkling riding it.</summary>
+		public static bool HasEdibleTattoo(GameObject Host)
+		{
+			Tattoos tattoos = Host?.GetPart<Tattoos>();
+			if (tattoos == null)
+				return false;
+			int count = 0;
+			foreach (List<string> list in tattoos.Descriptions.Values)
+				count += list.Count;
+			return count > Riders(Host).Count;
+		}
+
 		List<string> OwnList()
 		{
 			Tattoos tattoos = ParentObject.GetPart<Tattoos>();
@@ -128,25 +163,29 @@ namespace XRL.World.Parts
 		/// <summary>Eat or garble one of the host's other tattoos. True if it found one.</summary>
 		public bool Feed()
 		{
-			return GameObject.Validate(ref Inkling) && EatOne(Inkling, ParentObject, BodyPartID, TattooText, EatChance);
+			return GameObject.Validate(ref Inkling) && EatOne(Inkling, ParentObject, EatChance);
 		}
 
-		/// <summary>Eater eats or garbles one of Host's tattoos, skipping one entry (a rider's own
-		/// tattoo; pass null to skip none). Shared by riding and wild inklings. True if it ate.</summary>
-		public static bool EatOne(GameObject Eater, GameObject Host, int SkipPart, string SkipText, int EatChance)
+		/// <summary>Eater eats or garbles one of Host's tattoos, skipping every rider's own tattoo
+		/// (its own and its co-riders', user 2026-10-19: sharing is peaceful; a tattoo fight is
+		/// parked for 0.2.9). True if it ate.</summary>
+		public static bool EatOne(GameObject Eater, GameObject Host, int EatChance)
 		{
 			Tattoos tattoos = Host.GetPart<Tattoos>();
 			if (tattoos == null)
 				return false;
+			List<(int Part, string Text)> skip = new List<(int, string)>();
+			foreach (Cleo_TerraFirma_InklingTattoo rider in Riders(Host))
+				skip.Add((rider.BodyPartID, rider.TattooText));
 			List<(int Part, int Index)> meals = new List<(int, int)>();
 			foreach (KeyValuePair<int, List<string>> entry in tattoos.Descriptions)
 			{
-				bool skippedSelf = SkipText == null;
 				for (int i = 0; i < entry.Value.Count; i++)
 				{
-					if (!skippedSelf && entry.Key == SkipPart && entry.Value[i] == SkipText)
+					int s = skip.IndexOf((entry.Key, entry.Value[i]));
+					if (s >= 0)
 					{
-						skippedSelf = true;
+						skip.RemoveAt(s); // one entry per rider
 						continue;
 					}
 					meals.Add((entry.Key, i));
@@ -203,6 +242,8 @@ namespace XRL.World.Parts
 		/// <summary>Put the inkling back on the map beside the host and drop its tattoo.</summary>
 		public bool HopOff(bool Frightened, bool Silent)
 		{
+			if (ParentObject == null || Inkling == null)
+				return false; // already off (a co-rider's HopOffAll got here first)
 			Cell here = ParentObject.CurrentCell;
 			if (here == null || !GameObject.Validate(ref Inkling))
 				return false;
@@ -218,7 +259,7 @@ namespace XRL.World.Parts
 			GameObject inkling = Inkling;
 			Inkling = null;
 			ParentObject.RemovePart(this);
-			inkling.GetPart<Cleo_TerraFirma_Inkling>()?.HopOff(open.GetRandomElement(), Frightened);
+			inkling.GetPart<Cleo_TerraFirma_Inkling>()?.HopOff(open.GetRandomElement(), Frightened, ParentObject);
 			if (!Silent && ParentObject.IsPlayer())
 				MessageQueue.AddPlayerMessage($"{inkling.Does("peel")} off your skin.");
 			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"hopped off {ParentObject.Blueprint} (frightened={Frightened})");
