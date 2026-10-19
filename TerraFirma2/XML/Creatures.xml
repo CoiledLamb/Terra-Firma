@@ -285,6 +285,8 @@
     <stat Name="Agility" Value="16" />
     <tag Name="Role" Value="Minion" />
     <tag Name="ExcludeFromDynamicEncounters" />
+    <!-- base NoFigurine: the carving picker skips it on look, so the lathe never carves a figurine of a figurine (user report 2026-10-19) -->
+    <tag Name="NoFigurine" />
   </object>
   <!-- WILD BOAR VESSEL (split 2026-09-27): Terra Firma owns Cleo_TerraFirma_BaseBoarVessel as
        Husangeion's body, with ExcludeFromDynamicEncounters and no corpse. This merge makes it
