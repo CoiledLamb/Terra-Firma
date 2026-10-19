@@ -9,7 +9,7 @@
   <object Name="Cleo_TerraFirma_Vine Merchant" Inherits="Jilted Lover">
     <!-- potted, on the floor beside a wall (user 2026-10-18; base Sixshrew is the potted plant
          merchant precedent): sprite and colors the user's, brown main, light green detail -->
-    <part Name="Render" DisplayName="Pandogrove" Tile="pandogrove.png" ColorString="&amp;w" TileColor="&amp;w" DetailColor="G" />
+    <part Name="Render" DisplayName="Pandogrove" Tile="pandogrove.png" ColorString="&amp;G" TileColor="&amp;G" DetailColor="w" />
     <part Name="Brain" Hostile="false" Wanders="false" Mobile="false" LivesOnWalls="false" Factions="Consortium-100,Cleo_TerraFirma_Quarriers-50" /> <!-- guild share back to 50 (user 2026-10-19): the 2026-10-18 hostility was the tester's Socially Repugnant, not the share. Base steps rep into feeling (Reputation.GetFeeling: -250 disliked = -50, -600 hated = -100, else 0) and a creature turns hostile below -10. The guild's -200 start reads 0, so a normal player is neutral; a player the guild dislikes reads -17 and it turns hostile, as it should. -->
     <removepart Name="WallColor" />
     <part Name="Description" Short="A writhing coil of mottled vines wreathes a faded amphora. Chips line its rim like jagged teeth, and a single ragged leaf rises from its shaded belly to meet you." />
