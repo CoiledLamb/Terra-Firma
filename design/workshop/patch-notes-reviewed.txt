@@ -35,3 +35,76 @@ b2755a1 noted Stone-kissed hermit description: semicolon for 'but' (user)
 6a074ac skip Patch notes: short plain bullet blocks (user)
 e60c8b5 skip Patch notes: ledger
 233cefc skip Patch notes: Cleo's 0.2.8 block, WORKING section stays out of release output
+7a349fd skip TODO: C10 hermit back-off, aggro and calm seen in game
+b32ec03 skip TODO: C15 burrowbee description (user)
+207e1e1 skip TODO: C15 burrowbee description, final (user)
+4364fe0 skip Stone-kissed hermit: statue ring and gaze seen in game; spawn trace removed
+b9e8e16 skip TODO: C15 burrowbee factions closed, Insects-100,Prey-25
+a928d8b skip TODO: C15 burrowbee forage loop seen in game
+dc233f0 skip TODO: C16 hostile burrowbees with butcherable stingers, awaiting in-game
+ae14120 skip TODO: C16 hostility and butchery seen in game
+b7ea7a6 skip TODO: lathe mod carry-over verified; inkling tattoo fight parked for 0.2.9 (user)
+efb983d skip TODO: shufflers deferred mapping awaiting in-game check
+91980cc noted Revert "TODO: C15 burrowbee description (user)"
+fcd842c noted Close C10 stone-kissed hermit (journal)
+5b55008 noted JOURNAL: wild boar vessel seen in game
+0048664 noted Boar vessel weight 2 in HillCreatures and JungleCreatures; journal: inkling spawned naturally in caves
+d9ed030 noted Inkling messages: left/right body part names (ordinal), DRAFT tags cleared (user approved)
+fbf6e07 noted Quarry provisioner potted: user sprite (brown, light green), off the wall onto a floor cell beside one that never blocks a passage
+6963c34 noted Quarry provisioner sprite revision (user, 2026-10-18)
+ef4bbc3 noted Pandogrove: provisioner named, own description and dialogue chain (user text)
+4761056 noted Build the burrowbee (C15): base blueprint, three stinger variants, forage loop on base Burrowing, flower-field spawns
+e19d9aa noted Credits: atlasle (burrowbee sprite), in every copy
+899ce95 noted Burrowbees: surface Weight 5, no Chance (about one cluster per 3 screens)
+84e4941 noted Burrowbees: Wings (level 5); forager lands before burrowing
+3058bee noted Burrowbees more common: surface Weight 15, caves Weight 25
+d971c7e noted Burrowbees: surface Weight 30, caves Weight 5
+016fdd1 noted Burrowbees: Weight 5 on surface and in caves, clusters of 3-6 of one variant
+af3b7f0 noted Pandogrove: guild share 10 so starting rep leaves it neutral
+b0fb1cc noted Close T04 Pandogrove (journal)
+3698646 noted Burrowbees neutral: Prey-100,Insects-20; Pandogrove faction comment corrected to base's rep steps
+17dc843 noted Close C15 burrowbee (journal)
+8d45dc3 noted Burrowbees hostile; butcherable LongBlades stingers per variant (poison, confusion, real paralysis via Cleo_TerraFirma_ParalyzeOnHit)
+ff36f4d noted Burrowbee clusters 2-3
+02693d3 noted Burrowbee stinger sprite (user)
+ed2850f noted Burrowbee stinger description (user)
+b047aa6 noted Close C16 hostile burrowbees and stingers (journal)
+391ae73 noted Burrowbee stingers retuned toward salthopper mandible: 1d8, MaxStrengthBonus 4, no PV cap, tier 3
+04c2c6c noted Burrowbees: corpse 10% (always butchers); stinger a step under salthopper mandible: 1d6, MaxStrengthBonus 3, tier 2
+ed9bbdd noted C12 refractive targe/lune restored with sprites; C16 seismophone scales with lattice compute
+b8661a8 noted C12 refractive lune description (user text)
+9708f6c noted C12 refractive targe shares the lune description (user text)
+730da91 noted C12 shield descriptions: 'mirrored shield', no item name in the shared text (user)
+f922149 noted C12 shield descriptions: 'in its mirrored lens' (user)
+6b3e9c2 noted C12 refractive shields join the dynamic BaseShield pool (user dropped the exclusion)
+48c380d noted Rockhound, snapjaw miner, seismophone, seismic shufflers, spall sandals join dynamic encounters (user)
+1aa1e7c noted Rockhound renamed gneisshund (DisplayName only; user)
+6b36574 noted Glowsphere auto-equips to a hand, not the thrown slot (NoAIEquipAsThrownWeapon; user)
+f7c5401 noted Granitefur bracer and gloves AV 1 (user); TODO C17 figurine pass slotted for 0.2.9
+3321b86 noted C09 gaze bounce: refractors bounce Gorgon's Gaze back at the gazer, own ten-fail ladder; dev wish tfgazebounce
+8b874c0 noted Lathe keeps the material's mods: figurine created unmodified, input mods copied at tier (playtest, user)
+8f21be2 noted Piezo cell auto-scrap diagnostic: TF-VERIFY log of every auto-disassemble gate on pickup, wish tfscrapcheck (playtest)
+5400409 noted Inkling: hitchhikes onto an adjacent creature when no wall (liked first, cooldown on the fled host), several can share a host one per limb and skip each other's tattoos, petting biases the petting hand then its arm (user)
+b07702d noted C12 refractive targe/lune colors swapped: grey body, white detail (user)
+ea20314 noted C12 refractive lune sprite revision (user)
+53a0cc4 noted Granitefur gloves DV 0 (user: 1 AV, 0 DV; the AV bump had stacked on the old DV 1)
+caac96e noted Pandogrove sprite revision (user, 2026-10-19)
+eab22bc noted Pandogrove sprite: user's second revision (2026-10-19)
+448de62 noted Inkling never hops off onto the world map; retries once the host is back on a local map (playtest)
+87b46cf noted Boar vessel pen farmer sells gut cisterns and salt waterskins (own restock table; user)
+b825e75 noted Boar vessel farmer stock: salt-filled and empty gut cisterns, no salt waterskins (user)
+a034160 noted Boar vessel pen farmer named pig vessel farmer (user)
+ec22081 noted Snapjaw miner at half weight in the dynamic snapjaw pool (user)
+4425cf5 noted Revert snapjaw miner pool weight (user: not yet)
+c7a029c noted Snapjaw miner joins wild snapjaw parties 0 and 1 at Chance 3 (user)
+078a04e noted Hold the burrowing urchin out of spawns, rare tomb inkling, fewer cobble baboons (user)
+8fe9b99 noted Inkling pet: the ride line is the pet popup, stock PetResponse suppressed, growl fallback when it can't ride (user)
+39910de noted Wild gneisshund in canyon, hills and mountains at Chance 3; quarrier party 20 to 10 (user)
+c7be4d1 noted Armor 2R trio 20 to 10; mole cricket halved at artifact tiers 0-2 (user)
+4af0710 noted Flower field wild boar vessel row: Weight 5, no Chance (pickone group; old row was nearly dead) (user)
+cbf55c1 noted Stable compat: guard lang-only AI calls in inkling, burrowbee, hermit
+f2c388e noted Seismophone and seismic shufflers: boot sequence; shufflers get a power switch
+f44cd44 noted Seismic shufflers: passive mapping never builds the stratum below
+4e25c4a noted Seismic Peek: stale projections no longer block a new peek
+aad5022 noted Pandogrove: guild share back to 50; the hostility seen was Socially Repugnant (user)
+f591c34 noted 0.2.8 one-pass test: C09/C12/shufflers verified, C18 closed (journal); patch notes compiled, WORKING folded in
