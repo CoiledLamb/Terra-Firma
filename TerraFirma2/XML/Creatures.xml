@@ -388,7 +388,7 @@
        and detail color. Level, HP, AV and mutation levels are Codex PROPOSAL dials. -->
   <object Name="Cleo_TerraFirma_Burrowbee" Inherits="BaseInsect">
     <part Name="Render" DisplayName="burrowbee" Tile="burrowbee.png" RenderString="b" ColorString="&amp;W" TileColor="&amp;W" DetailColor="g" />
-    <part Name="Brain" Factions="Insects-100,Prey-25" /> <!-- hostile again (user 2026-10-18/19, with 3-6 clusters): insects start the player at -475 (disliked, -50), so this reads -40; Prey-100,Insects-20 read -8 and left them neutral -->
+    <part Name="Brain" Factions="Insects-100,Prey-25" /> <!-- hostile again (user 2026-10-18/19, clusters cut to 2-3): insects start the player at -475 (disliked, -50), so this reads -40; Prey-100,Insects-20 read -8 and left them neutral -->
     <part Name="Description" Short="Like a dancer mid-pirouette, =pronouns.subjective= =verb:twirl:afterpronoun= through the earth. Unhindered by the quickened loam, =pronouns.subjective= =verb:sup:afterpronoun= life's sweetest nectars against the painted backdrop of inflorescences." />
     <stat Name="Level" Value="4" />
     <stat Name="Hitpoints" Value="12" />

@@ -1071,13 +1071,14 @@
 	     biome's creature pick). One variant per roll, a cluster of it. No Chance (base's
 	     pick-one weighs first, then rolls Chance; Chance 10 at weight 1 was about one cluster per
 	     100+ screens). 2026-10-18 (user, after weighing 5/10/30): surface and caves both Weight 5, with
-	     bigger clusters instead, 3-6 of one variant (the old 2-4 plus 1-2 more). Surface about
+	     clusters of 2-3 of one variant (3-6 while neutral; cut to 2-3 when they turned hostile,
+	     user 2026-10-19). Surface about
 	     5% per region, one fresh screen in three; caves about one screen in ten. Number is a Codex PROPOSAL dial. -->
 	<population Name="Cleo_TerraFirma_Burrowbees">
 		<group Name="Variant" Style="pickone">
-			<object Weight="1" Number="3-6" Blueprint="Cleo_TerraFirma_DogthornBurrowbee" />
-			<object Weight="1" Number="3-6" Blueprint="Cleo_TerraFirma_WitchwoodBurrowbee" />
-			<object Weight="1" Number="3-6" Blueprint="Cleo_TerraFirma_StillvineBurrowbee" />
+			<object Weight="1" Number="2-3" Blueprint="Cleo_TerraFirma_DogthornBurrowbee" />
+			<object Weight="1" Number="2-3" Blueprint="Cleo_TerraFirma_WitchwoodBurrowbee" />
+			<object Weight="1" Number="2-3" Blueprint="Cleo_TerraFirma_StillvineBurrowbee" />
 		</group>
 	</population>
 	<population Name="FlowerFieldsPopulation" Load="Merge">
