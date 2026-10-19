@@ -424,6 +424,24 @@ namespace Cleo.TerraFirma.Scripts
 			Helpers.VerifyLog("GRINDER", "tfgrinder kit granted");
 		}
 
+		/// <summary>Auto-scrap diagnostic (playtest 2026-10-19): logs every base auto-disassemble gate
+		/// for each energy cell carried, piezo and base alike, so a toggled chem cell sits next to a
+		/// toggled piezo cell in the log. Strip with the TF-VERIFY family.</summary>
+		[WishCommand(Command = "tfscrapcheck")]
+		public static void ScrapCheck()
+		{
+			GameObject Ply = The.Player;
+			if (Ply == null)
+				return;
+			int n = 0;
+			foreach (GameObject item in Ply.GetInventory(o => o.HasPart<EnergyCell>()))
+			{
+				Cleo_TerraFirma_GrinderCell.LogScrapGates(Ply, item, "tfscrapcheck");
+				n++;
+			}
+			MessageQueue.AddPlayerMessage("tfscrapcheck: logged " + n + " carried cells to Player.log.", Capitalize: false);
+		}
+
 		/// <summary>Mole cricket dev door (2026-08-22).</summary>
 		[WishCommand(Command = "tfcricket")]
 		public static void CricketKit()

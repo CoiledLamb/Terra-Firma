@@ -1,6 +1,9 @@
 using System;
+using XRL;
 using System.Collections.Generic;
 using XRL.UI;
+using XRL.World.Tinkering;
+using XRL.World.Parts.Skill;
 
 namespace XRL.World.Parts
 {
@@ -53,7 +56,46 @@ namespace XRL.World.Parts
 				|| ID == GetInventoryActionsEvent.ID
 				|| ID == InventoryActionEvent.ID
 				|| ID == PooledEvent<GetDisplayNameEvent>.ID
-				|| ID == GetExtrinsicWeightEvent.ID;
+				|| ID == GetExtrinsicWeightEvent.ID
+				|| ID == TakenEvent.ID;
+		}
+
+		/// <summary>Auto-scrap diagnostic (playtest 2026-10-19: piezo cells toggled as scrap never
+		/// auto-disassemble on pickup, chem cells do). Walks base Tinkering_Disassemble.WantToDisassemble
+		/// gate by gate so the log names the one that says no. Strip with the TF-VERIFY family.</summary>
+		public override bool HandleEvent(TakenEvent E)
+		{
+			if (E.Actor != null && E.Actor.IsPlayer())
+				LogScrapGates(E.Actor, ParentObject, "pickup context=" + (E.Context ?? "none"));
+			return base.HandleEvent(E);
+		}
+
+		public static void LogScrapGates(GameObject Actor, GameObject Item, string Why)
+		{
+			try
+			{
+				TinkerItem ti = Item.GetPart<TinkerItem>();
+				Tinkering_Mine mine = Item.GetPart<Tinkering_Mine>();
+				LiquidVolume lv = Item.GetPart<LiquidVolume>();
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCRAP",
+					$"{Why}: {Item.Blueprint} '{Item.DebugName}' count={Item.Count}"
+					+ $" | want={Tinkering_Disassemble.WantToDisassemble(Actor, Item)}"
+					+ $" option={Options.AutoDisassembleScrap} skill={Actor.HasSkill("Tinkering_Disassemble")}"
+					+ $" isReal={Item.IsReal} tinkerItem={ti != null} canDisassemble={ti?.CanDisassemble}"
+					+ $" canBeDisassembled={ti?.CanBeDisassembled(Actor)} creature={Item.IsCreature}"
+					+ $" armedMine={mine != null && mine.Armed} baseObjectTag={Item.HasTag("BaseObject")}"
+					+ $" canBeScrap={Tinkering_Disassemble.CanBeConsideredScrap(Item)}"
+					+ $" scrapTag={TinkeringHelpers.ConsiderStandardScrap(Item)}"
+					+ $" toggleKey={Tinkering_Disassemble.ToggleKey(Item)}"
+					+ $" toggleSet={The.Game.GetBooleanGameState(Tinkering_Disassemble.ToggleKey(Item))}"
+					+ $" understood={Item.Understood()} considerScrap={Tinkering_Disassemble.ConsiderScrap(Item)}"
+					+ $" owner={(Item.Owner.IsNullOrEmpty() ? "none" : Item.Owner)} important={Item.IsImportant()}"
+					+ $" stasis={Item.IsInStasis()} liquid={lv?.Volume ?? 0}");
+			}
+			catch (Exception x)
+			{
+				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SCRAP", $"{Why}: diagnostic threw {x}");
+			}
 		}
 
 		/// <summary>Pounds of stone not yet ground away, derived from the fuel pool.</summary>
