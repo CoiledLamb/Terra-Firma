@@ -159,7 +159,12 @@ namespace XRL.World.Parts
 			{
 				// only when not already walking: MoveTo spends its first turn pathfinding and pushes
 				// Step goals (MoveTo.TakeAction), so re-pushing it every turn never takes a step
+#if VERSION_1_1
 				if (!brain.HasGoal<MoveTo>() && !brain.HasGoal<Step>())
+#else
+				// stable has only the by-name HasGoal
+				if (!brain.HasGoal("MoveTo") && !brain.HasGoal("Step"))
+#endif
 				{
 					// head for an open cell beside the meal; FindPath won't end on an occupied cell
 					Cell goal = null;
@@ -423,6 +428,9 @@ namespace XRL.World.Parts
 			return base.HandleEvent(E);
 		}
 
+#if VERSION_1_1
+		// PerceptionEvent is lang-only. On stable there's no hook into an NPC's sight check, so
+		// only GetHostilityRecognitionLimitsEvent's adjacency limit applies: no Intelligence save.
 		public override void Register(GameObject Object, IEventRegistrar Registrar)
 		{
 			// object side, LATE: runs after PerceptionEvent's base line-of-sight check, which counts
@@ -441,6 +449,7 @@ namespace XRL.World.Parts
 				E.Senses.Remove(Perception.Visual);
 			return base.HandleEvent(E);
 		}
+#endif
 
 		public override bool HandleEvent(GetHostilityRecognitionLimitsEvent E)
 		{

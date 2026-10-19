@@ -147,13 +147,28 @@ namespace XRL.World.Parts
 			Cell cell = ParentObject.CurrentCell;
 			if (cell != null && !brain.StartingCell.IsClear()
 				&& brain.StartingCell.PathDistanceTo(cell) > 2
+#if VERSION_1_1
 				&& !brain.Goals.ContainsDescendedFrom<IMovementGoal>())
+#else
+				&& !HasMovementGoal(brain))
+#endif
 			{
 				brain.Goals.Clear();
 				brain.PushGoal(new MoveTo(brain.StartingCell));
 			}
 			return base.HandleEvent(E);
 		}
+
+#if !VERSION_1_1
+		// stable's CleanStack has no ContainsDescendedFrom
+		static bool HasMovementGoal(Brain brain)
+		{
+			foreach (XRL.World.AI.GoalHandler goal in brain.Goals.Items)
+				if (goal is IMovementGoal)
+					return true;
+			return false;
+		}
+#endif
 
 		void Calm()
 		{
