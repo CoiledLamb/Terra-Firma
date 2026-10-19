@@ -34,6 +34,12 @@ namespace XRL.World.Parts
 		public string ThrowYield = "1-3";
 		public string GlowDuration = "30-60";
 
+		/// <summary>Played once when the sphere breaks, by hand or thrown: base's gemstone shatter (the
+		/// sphere is "opal-like" in its base description). XML-settable dials; [NonSerialized] so the
+		/// shipped part keeps its saved layout.</summary>
+		[NonSerialized] public string BreakSound = "Sounds/Damage/sfx_destroy_gemstone";
+		[NonSerialized] public float BreakSoundVolume = 0.5f;
+
 		public override bool SameAs(IPart p)
 		{
 			return p is Cleo_TerraFirma_GlowsphereBreak o
@@ -84,6 +90,8 @@ namespace XRL.World.Parts
 					Popup.Show("The glowsphere breaks into " + Grammar.Cardinal(count) + " glowing fragments."); // draft, approved 2026-09-30
 				}
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHARD", $"glowsphere broken into {count} fragments by {E.Actor.Blueprint}");
+				if (!BreakSound.IsNullOrEmpty())
+					E.Actor.PlayWorldSound(BreakSound, BreakSoundVolume);
 				E.Actor.UseEnergy(1000, "Item BreakGlowsphere");
 				sphere.Destroy();
 				E.RequestInterfaceExit();
@@ -123,6 +131,8 @@ namespace XRL.World.Parts
 				{
 					IComponent<GameObject>.AddPlayerMessage("The glowsphere shatters, scattering glowing fragments."); // draft, approved 2026-09-30
 				}
+				if (!BreakSound.IsNullOrEmpty())
+					cell.PlayWorldSound(BreakSound, BreakSoundVolume);
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHARD", $"thrown glowsphere shattered into {count} fragments");
 				ParentObject.Destroy();
 			}
