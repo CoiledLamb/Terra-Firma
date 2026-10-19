@@ -285,11 +285,12 @@
        Codex PROPOSAL: Chance 20/30 as briefed (note: base ModRefractive gives an ARM shield 10,
        a hand shield 30); tier 4 = ModRefractive NativeTier; weight and Metal copy the steel
        buckler (8) and steel shield (12); commerce 65 = their 50 x the refractive mod's 1.3.
-       DisplayName, Description and tiles are placeholders owed by the user. No loot rows, and
+       Restored for 0.2.8 (2026-10-19): names "refractive targe" (arm, round sprite) and
+       "refractive lune" (hand, crescent sprite) and both tiles are the user's; IDs kept.
+       Descriptions still placeholders owed by the user. No loot rows, and
        ExcludeFromDynamicEncounters keeps both out of DynamicInheritsTable:BaseShield. -->
-  <!-- HELD for 0.2.8 (user 2026-10-14): both blueprints commented out of 0.2.7; uncomment to restore.
   <object Name="Cleo_TerraFirma_RefractiveBuckler" Inherits="BaseShield">
-    <part Name="Render" DisplayName="refractive buckler" Tile="items/sw_buckler3.bmp" ColorString="&amp;Y" DetailColor="y" />
+    <part Name="Render" DisplayName="refractive targe" Tile="refractive_targe.png" ColorString="&amp;Y" DetailColor="y" />
     <part Name="Shield" AV="1" DV="1" WornOn="Arm" />
     <part Name="RefractLight" Chance="20" RetroVariance="1d181-91" ShowInShortDescription="true" />
     <part Name="Description" Short="PLACEHOLDER description." />
@@ -300,7 +301,7 @@
     <tag Name="ExcludeFromDynamicEncounters" />
   </object>
   <object Name="Cleo_TerraFirma_RefractiveShield" Inherits="BaseShield">
-    <part Name="Render" DisplayName="refractive shield" Tile="Items/sw_shield5.bmp" ColorString="&amp;Y" DetailColor="y" />
+    <part Name="Render" DisplayName="refractive lune" Tile="refractive_lune.png" ColorString="&amp;Y" DetailColor="y" />
     <part Name="Shield" AV="2" DV="0" WornOn="Hand" />
     <part Name="RefractLight" Chance="30" RetroVariance="1d181-91" ShowInShortDescription="true" />
     <part Name="Description" Short="PLACEHOLDER description." />
@@ -310,5 +311,4 @@
     <tag Name="Tier" Value="4" />
     <tag Name="ExcludeFromDynamicEncounters" />
   </object>
-  -->
 </objects>

@@ -104,6 +104,7 @@ namespace XRL.World.Parts
 		public override bool HandleEvent(EndTurnEvent E)
 		{
 			bool result = base.HandleEvent(E);
+			SyncComputeLevel();
 			if (MutationWasAdded != WasGranted)
 			{
 				WasGranted = MutationWasAdded;
@@ -122,6 +123,50 @@ namespace XRL.World.Parts
 						: "self-effect REMOVED from wearer <- if the beep lands here, diagnosis confirmed");
 				}
 			}
+			return result;
+		}
+
+		// Lattice compute scaling (user 2026-10-19, base step size). Base compute-scaled sensors
+		// (CyberneticsPenetratingRadar) take range x (100 + compute) / 100 via
+		// GetAvailableComputePowerEvent.AdjustUp. Hearing takes a level, not a radius
+		// (HeightenedHearing.GetRadius: 3 + 2 x Level), so the radius is scaled the base way and
+		// the highest level that fits is granted: 29+ compute = level 3, 58+ = 4, 86+ = 5 at the
+		// XML level 2. No new saved field (save layout holds): the XML Level stays the base, and the
+		// live grant is moved by retuning the existing equipment tracker's bonus in place, so the
+		// mutation is never removed and re-added (no flicker, no repeat of the 2026-08-24 beep).
+		public int GetComputeLevel(GameObject Wearer)
+		{
+			if (Wearer == null)
+				return Level;
+			int radius = GetAvailableComputePowerEvent.AdjustUp(Wearer, 3 + 2 * Level);
+			return Math.Max(Level, (radius - 3) / 2);
+		}
+
+		private void SyncComputeLevel()
+		{
+			if (!MutationWasAdded)
+				return;
+			GameObject wearer = ParentObject.Equipped;
+			Mutations mutations = wearer?.GetPart<Mutations>();
+			Mutations.MutationModifierTracker tracker = mutations?.MutationMods.Find(m => m.id == Tracker);
+			if (tracker == null)
+				return;
+			int want = GetComputeLevel(wearer);
+			if (tracker.bonus == want)
+				return;
+			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SEISMO", $"compute level {tracker.bonus} -> {want} (lattice compute {GetAvailableComputePowerEvent.GetFor(wearer)})");
+			tracker.bonus = want;
+			wearer.SyncMutationLevelAndGlimmer();
+		}
+
+		public override bool HandleEvent(GetShortDescriptionEvent E)
+		{
+			// the base "Grants you Heightened Hearing at level X." line reads Level; show the live level
+			int baseLevel = Level;
+			Level = GetComputeLevel(ParentObject.Equipped);
+			bool result = base.HandleEvent(E);
+			Level = baseLevel;
+			E.Postfix.AppendRules("Compute power on the local lattice increases this item's range.");
 			return result;
 		}
 	}
