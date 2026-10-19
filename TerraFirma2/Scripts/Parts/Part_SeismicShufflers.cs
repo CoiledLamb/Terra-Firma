@@ -19,6 +19,10 @@ namespace XRL.World.Parts
         public string PeekTile;
         public string PeekColor = "&y";
         public char PeekDetailColor = 'C';
+        /// <summary>Played once per Seismic Peek at the shufflers, as the walls start to rise. Set on the
+        /// blueprint; [NonSerialized] so the shipped part keeps its saved layout.</summary>
+        [NonSerialized] public string PeekSound = "Sounds/Abilities/sfx_ability_leyShift_repetition";
+        [NonSerialized] public float PeekSoundVolume = 0.5f;
         public Guid AbilityID;
         public string CommandID;
         public List<GameObject> Projections = new List<GameObject>();
@@ -184,6 +188,8 @@ namespace XRL.World.Parts
                 return wearer.Fail(ParentObject.Does("click", int.MaxValue, null, null, "merely") + "."); // base IActivePart unpowered line
 
             ClearProjections();
+            if (!PeekSound.IsNullOrEmpty())
+                ParentObject.PlayWorldSound(PeekSound, PeekSoundVolume);
             int walls = 0;
             for (int dy = -2; dy <= 2; dy++)
             for (int dx = -2; dx <= 2; dx++)

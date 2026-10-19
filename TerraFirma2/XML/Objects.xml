@@ -379,7 +379,7 @@ Perishes when unequipped." />
     <part Name="AIDefensiveEnergyCellReload" />
     <part Name="AIPassiveEnergyCellReload" />
     <part Name="BootSequence" BootTime="4" ReadoutInName="true" ReadoutInDescription="true" />
-    <part Name="Cleo_TerraFirma_SeismicShufflers" PreviewDuration="2" PassiveRadius="1" ChargeUse="1" PeekChargeUse="100" RiseSeconds="0.25" RiseStaggerMs="250" RisePixels="8" PeekTile="Abilities/seismic peek.png" PeekColor="&amp;C" PeekDetailColor="y" />
+    <part Name="Cleo_TerraFirma_SeismicShufflers" PreviewDuration="2" PassiveRadius="1" ChargeUse="1" PeekChargeUse="100" RiseSeconds="0.25" RiseStaggerMs="250" RisePixels="8" PeekTile="Abilities/seismic peek.png" PeekColor="&amp;C" PeekDetailColor="y" PeekSound="Sounds/Abilities/sfx_ability_leyShift_repetition" />
     <tag Name="Tier" Value="3" />
   </object>
   <!-- SPALL SANDALS (C04, user 2026-10-01: wall-adjacent move speed, +10 at tier 2; base always-on feet run +5 at T2, +10 at T3, +20 at T4). Numbers copy base
