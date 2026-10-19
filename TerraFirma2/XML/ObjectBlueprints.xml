@@ -287,8 +287,8 @@
        buckler (8) and steel shield (12); commerce 65 = their 50 x the refractive mod's 1.3.
        Restored for 0.2.8 (2026-10-19): names "refractive targe" (arm, round sprite) and
        "refractive lune" (hand, crescent sprite) and both tiles are the user's; IDs kept.
-       Both descriptions are one user text, 2026-10-19. No loot rows, and
-       ExcludeFromDynamicEncounters keeps both out of DynamicInheritsTable:BaseShield. -->
+       Both descriptions are one user text, 2026-10-19. No loot rows; both roll in DynamicInheritsTable:BaseShield
+       (RandomMeleeWeapon, Svardym) since 2026-10-19, user dropped the exclusion. -->
   <object Name="Cleo_TerraFirma_RefractiveBuckler" Inherits="BaseShield">
     <part Name="Render" DisplayName="refractive targe" Tile="refractive_targe.png" ColorString="&amp;Y" DetailColor="y" />
     <part Name="Shield" AV="1" DV="1" WornOn="Arm" />
@@ -298,7 +298,6 @@
     <part Name="Physics" Weight="8" />
     <part Name="Metal" />
     <tag Name="Tier" Value="4" />
-    <tag Name="ExcludeFromDynamicEncounters" />
   </object>
   <object Name="Cleo_TerraFirma_RefractiveShield" Inherits="BaseShield">
     <part Name="Render" DisplayName="refractive lune" Tile="refractive_lune.png" ColorString="&amp;Y" DetailColor="y" />
@@ -309,6 +308,5 @@
     <part Name="Physics" Weight="12" />
     <part Name="Metal" />
     <tag Name="Tier" Value="4" />
-    <tag Name="ExcludeFromDynamicEncounters" />
   </object>
 </objects>
