@@ -247,6 +247,10 @@ namespace XRL.World.Parts
 			Cell here = ParentObject.CurrentCell;
 			if (here == null || !GameObject.Validate(ref Inkling))
 				return false;
+			// never onto the world map (playtest 2026-10-19: a bored inkling crawled off there);
+			// callers retry next turn, so it leaves once the host is back on a local map
+			if (here.ParentZone == null || here.ParentZone.IsWorldMap())
+				return false;
 			List<Cell> open = new List<Cell>();
 			foreach (Cell cell in here.GetLocalAdjacentCells())
 			{
