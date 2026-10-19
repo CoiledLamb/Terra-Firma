@@ -29,6 +29,12 @@ namespace XRL.World.Parts
 		public int PunchCharge = 100;
 		public int CarveCharge = 1000;
 
+		/// <summary>Played at the wearer when a punch spends PunchCharge: base's gaslight blade swing.
+		/// (Carving already sounds through Stoneshaper.PlayCarveReveal.) XML-settable dials;
+		/// [NonSerialized] so the shipped part keeps its saved layout.</summary>
+		[NonSerialized] public string PunchSound = "Sounds/Melee/longBlades/sfx_melee_longBlade_gaslight_swing";
+		[NonSerialized] public float PunchSoundVolume = 0.5f;
+
 		[NonSerialized]
 		private bool Unequipping;
 
@@ -141,6 +147,8 @@ namespace XRL.World.Parts
 				var gauntlets = worn?.GetPart<Cleo_TerraFirma_GaslightGauntlets>();
 				if (gauntlets != null && worn.UseCharge(gauntlets.PunchCharge, LiveOnly: false, 0L))
 				{
+					if (!gauntlets.PunchSound.IsNullOrEmpty())
+						E.Attacker.PlayWorldSound(gauntlets.PunchSound, gauntlets.PunchSoundVolume, Combat: true);
 					E.PenetrationBonus += PenetrationBonus;
 					E.MaxPenetrationBonus += PenetrationBonus;
 				}

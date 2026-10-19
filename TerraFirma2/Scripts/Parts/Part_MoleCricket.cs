@@ -45,6 +45,11 @@ namespace XRL.World.Parts
 		/// <summary>Chip damage per scrape against the wall. DIAL.</summary>
 		public string DigDamage = "2d4";
 
+		/// <summary>Played at the wall on each scrape: the generic dig foley the mod already uses.
+		/// XML-settable dials; [NonSerialized] so the shipped part keeps its saved layout.</summary>
+		[NonSerialized] public string DigSound = "Sounds/Foley/fly_generic_dig";
+		[NonSerialized] public float DigSoundVolume = 0.5f;
+
 		public override bool WantEvent(int ID, int cascade)
 		{
 			return base.WantEvent(ID, cascade)
@@ -74,6 +79,8 @@ namespace XRL.World.Parts
 					if (DigTarget != null)
 					{
 						int dmg = Math.Max(1, DigDamage.RollCached());
+						if (!DigSound.IsNullOrEmpty())
+							DigTarget.CurrentCell?.PlayWorldSound(DigSound, DigSoundVolume);
 						DigTarget.TakeDamage(dmg, "from scraping claws.", "Physical",
 							null, null, Owner: wearer, Attacker: null, Source: ParentObject, Accidental: true);
 						Cleo.TerraFirma.Scripts.Helpers.VerifyLog("CRICKET", $"scraped {DigTarget.Blueprint} for {dmg}");

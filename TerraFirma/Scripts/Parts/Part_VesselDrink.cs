@@ -34,6 +34,13 @@ namespace XRL.World.Parts
 
 		public int CooldownLeft;
 
+		/// <summary>Played once when a drinking session starts (the first sip after a turn without one),
+		/// quiet, since a vessel sips every turn until full. XML-settable; [NonSerialized], as is the
+		/// session flag.</summary>
+		[NonSerialized] public string DrinkSound = "Sounds/Interact/sfx_interact_liquidContainer_drink";
+		[NonSerialized] public float DrinkSoundVolume = 0.3f;
+		[NonSerialized] private bool Sipping;
+
 		public override void Register(GameObject Object, IEventRegistrar Registrar)
 		{
 			Registrar.Register("AITakingAction");
@@ -49,6 +56,8 @@ namespace XRL.World.Parts
 
 		private bool TryDrink()
 		{
+			bool wasSipping = Sipping;
+			Sipping = false;
 			LiquidVolume basin = ParentObject.LiquidVolume;
 			Cell cell = ParentObject.CurrentCell;
 			Brain brain = ParentObject.Brain;
@@ -64,6 +73,9 @@ namespace XRL.World.Parts
 				int amount = Math.Min(SipDrams, Math.Min(basin.MaxVolume - basin.Volume, pool.LiquidVolume.Volume));
 				if (amount > 0 && basin.MixWith(pool.LiquidVolume, PouredFrom: pool, PouredBy: ParentObject, Amount: amount))
 				{
+					Sipping = true;
+					if (!wasSipping && !DrinkSound.IsNullOrEmpty())
+						ParentObject.PlayWorldSound(DrinkSound, DrinkSoundVolume);
 					ParentObject.UseEnergy(1000, "Drinking");
 					return true;
 				}
