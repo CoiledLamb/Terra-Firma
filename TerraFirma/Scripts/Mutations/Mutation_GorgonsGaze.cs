@@ -420,8 +420,11 @@ namespace XRL.World.Parts.Mutation
 				GameObject by = e.GetGameObjectParameter("By");
 				if (!GameObject.Validate(ref by))
 					continue;
+				// base's RefractLight part (the targe and lune) plays sfx_light_refract itself; the other
+				// refractors (ModRefractive, Light Manipulation, gravel whorls) don't, so they keep this one
+				// (duplicate dropped 2026-10-19, user)
 				string sound = e.GetStringParameter("Sound");
-				if (!sound.IsNullOrEmpty())
+				if (!sound.IsNullOrEmpty() && !by.HasPart<RefractLight>())
 					by.PlayWorldSound(sound, 0.5f, Combat: true);
 				XDidY(by, e.GetStringParameter("Verb") ?? "refract", "the unblinking gaze", "!", ColorAsGoodFor: Target, ColorAsBadFor: ParentObject);
 				Helpers.VerifyLog("GAZE", $"BOUNCE: {by.Blueprint} on {Target.Blueprint} {(e.GetStringParameter("Verb") ?? "refract")}s the gaze back at {ParentObject.Blueprint}{(forced ? " (forced pre-roll)" : "")}");
