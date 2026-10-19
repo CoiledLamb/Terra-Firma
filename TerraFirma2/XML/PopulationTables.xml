@@ -897,12 +897,12 @@
 			</group>
 		</group>
 	</population>
-	<!-- Boar vessel farmer stock (user 2026-10-19: gut cisterns and salt). Salt is base's own
-	     salt waterskin (SaltWaterskin_Ingredient, 2d16 drams). Codex PROPOSAL: counts 1-2 each. -->
+	<!-- Boar vessel farmer stock (user 2026-10-19): gut cisterns full of salt and empty gut
+	     cisterns (Objects.xml). Codex PROPOSAL: counts 1-2 each. -->
 	<population Name="Cleo_TerraFirma_BoarVesselFarmerInventory">
 		<group Name="Items" Style="pickeach">
-			<object Blueprint="Cleo_TerraFirma_GutCistern" Number="1-2" />
-			<object Blueprint="SaltWaterskin_Ingredient" Number="1-2" />
+			<object Blueprint="Cleo_TerraFirma_GutCistern_Salt" Number="1-2" />
+			<object Blueprint="Cleo_TerraFirma_GutCistern_Empty" Number="1-2" />
 		</group>
 	</population>
 	<!-- WILD BOAR VESSEL SPAWNS (user 2026-10-18: "add the vessel wild spawns at half"). The

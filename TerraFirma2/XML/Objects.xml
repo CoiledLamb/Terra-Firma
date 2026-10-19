@@ -246,6 +246,17 @@ Perishes when unequipped." />
 		<part Name="Description" Short="A lump of clay crudely shaped in the form of a gullet once collected a purified trickle from a salted basin. Still warm and wet with condensation, the container twitches and yearns for the memory of water." />
 		<tag Name="Tier" Value="1" />
 	</object>
+	<!-- Pen farmer stock (user 2026-10-19: "gut cisterns full of salt, and gut cisterns that are
+	     empty"). Only the boar vessel farmer's restock table places these. A full salt cistern has
+	     no room for its water trickle until some salt is poured out. -->
+	<object Name="Cleo_TerraFirma_GutCistern_Salt" Inherits="Cleo_TerraFirma_GutCistern">
+		<part Name="LiquidVolume" StartVolume="16" InitialLiquid="salt-1000" />
+		<tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+	</object>
+	<object Name="Cleo_TerraFirma_GutCistern_Empty" Inherits="Cleo_TerraFirma_GutCistern">
+		<part Name="LiquidVolume" StartVolume="0" />
+		<tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+	</object>
     <!-- Codex PROPOSAL: B07 native RandomStatue.BaseBlueprint variants. All subjects
          carry DesertCanyon_Creatures in shipped Creatures.xml. Commons only. -->
     <object Name="Cleo_TerraFirma_CanyonStatueBaboon" Inherits="Random Stone Statue">
