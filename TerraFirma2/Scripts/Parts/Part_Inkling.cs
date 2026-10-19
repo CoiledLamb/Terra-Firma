@@ -72,6 +72,11 @@ namespace XRL.World.Parts
 		[NonSerialized] public string AttachSound = "Sounds/Abilities/sfx_ability_spitSlime_spit";
 		[NonSerialized] public float AttachSoundVolume = 0.5f;
 
+		/// <summary>Played once at the wall when the inkling seeps in and becomes graffiti. Set on the
+		/// inkling blueprint; [NonSerialized] like AttachSound.</summary>
+		[NonSerialized] public string GraffitiSound = "Sounds/Interact/sfx_interact_bubbleLevel_flip";
+		[NonSerialized] public float GraffitiSoundVolume = 0.5f;
+
 		public string FledHostID;
 		public int FledHostTurns;
 
@@ -338,6 +343,8 @@ namespace XRL.World.Parts
 			GraffitiText = RollGraffiti();
 			ParentObject.Brain.Goals.Clear();
 			DidX("seep", "into the wall");
+			if (!GraffitiSound.IsNullOrEmpty())
+				target.PlayWorldSound(GraffitiSound, GraffitiSoundVolume);
 			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"hid in {target.GetFirstWall()?.Blueprint} at {target.X},{target.Y}");
 			return true;
 		}
