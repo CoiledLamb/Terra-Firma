@@ -410,13 +410,13 @@ Perishes when unequipped." />
     <tag Name="ExcludeFromDynamicEncounters" />
   </object>
   <!-- Burrowbee stingers (user 2026-10-18/19): butchered from burrowbee corpses, wielded as
-       LongBlades like base's Stinger item (Items.xml:3870: LongBlades, MaxPenetration 1, base
-       sw_stinger tile), which is natural gear and never drops. Venom on hit at the base
+       LongBlades like base's Stinger item (Items.xml:3870: LongBlades, MaxPenetration 1),
+       which is natural gear and never drops; sprite the user's (2026-10-19). Venom on hit at the base
        Stinger's 20%: base PoisonOnHit and ConfuseOnHit, and Cleo_TerraFirma_ParalyzeOnHit for
        stillvine (base has no paralysis twin for weapons). Damage, saves, durations and value
        are Codex PROPOSAL dials; the description is base Stinger's, a DRAFT for the user. -->
   <object Name="Cleo_TerraFirma_BurrowbeeStinger" Inherits="BaseLongBlade">
-    <part Name="Render" DisplayName="burrowbee stinger" Tile="items/sw_stinger.bmp" ColorString="&amp;W" TileColor="&amp;W" DetailColor="g" />
+    <part Name="Render" DisplayName="burrowbee stinger" Tile="burrowbee_stinger.png" ColorString="&amp;W" TileColor="&amp;W" DetailColor="g" />
     <part Name="MeleeWeapon" MaxStrengthBonus="1" BaseDamage="1d3" Skill="LongBlades" />
     <part Name="MaxPenetration" Max="1" />
     <part Name="Physics" Weight="1" />
