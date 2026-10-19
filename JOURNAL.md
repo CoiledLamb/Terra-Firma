@@ -2916,3 +2916,7 @@ C16 closed: the user verified the follow-up to C15 end to end. Burrowbees are ho
 ## Seismophone compute scaling verified — 2026-10-19
 
 C18 closed: the user verified in the 0.2.8 one-pass test that the seismophone's Heightened Hearing level and its description's level line rise with local lattice compute (`Part_Seismophone.cs`, base `GetAvailableComputePowerEvent.AdjustUp`; XML level 2, 29+ compute = 3, 58+ = 4, 86+ = 5).
+
+## Boar vessels drink — 2026-10-19
+
+The user verified in game that wild and farm boar vessels refill their basin from nearby pools (`Part_VesselDrink.cs`, base AISeekHealingPool's shape: below half full, idle, no target, walk to the nearest water/salt-only pool within 20 cells, sip 1 dram a turn). The basin keeps its salt drip and stays brackish; the gut cistern stays the only desalinator (a basin desalinator was tried and backed out the same day). Party members skip it, so the Husangeion is unchanged. Trigger, radius, sip and cooldown remain Codex PROPOSAL dials. Commits c1e1134, d845397, bc87fb5.
