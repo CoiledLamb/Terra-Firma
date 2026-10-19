@@ -11,8 +11,8 @@ namespace XRL.World.Parts
 	/// (AITakingAction, nearest qualifying cell, push MoveTo), minus its Goals.Clear(): this
 	/// only fires when the brain is idle, so it never interrupts fleeing or a fight.
 	/// Once standing in a drinkable pool it pulls up to SipDrams into the basin per turn
-	/// (LiquidVolume.MixWith with Amount splits that much off the pool). The basin's
-	/// LiquidProducer (Liquid=water, ConsumesLiquid=salt) then strains the salt back out.
+	/// (LiquidVolume.MixWith with Amount splits that much off the pool). The basin stays
+	/// brackish on purpose (user 2026-10-19: the gut cistern is the desalinator).
 	/// Drinkable = open ground volume, not dangerous to touch, and only water and salt in it,
 	/// so a vessel never wades into acid, lava or someone's spilled wine. Party members skip
 	/// it (the Husangeion's tank holds whatever its owner pours in). All numbers DRAFT.
