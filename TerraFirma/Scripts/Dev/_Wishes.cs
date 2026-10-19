@@ -424,5 +424,89 @@ namespace Cleo.TerraFirma.Scripts
 			The.Game.SetBooleanGameState(Cleo_TerraFirma_GorgonsGaze.FORCE_BOUNCE_STATE, false);
 			MessageQueue.AddPlayerMessage("tfgazebounceoff: bounce pre-roll back to 50%.", Capitalize: false);
 		}
+
+		/// <summary>Sound audition (2026-10-19, polish pass): every clip set the game can play, from
+		/// SoundManager.SetMap (filled by SoundManager.Initialize from Resources "SoundDatabase" plus
+		/// active mods' audio files; same on stable and lang). "tfsounds [filter]" lists them, filtered
+		/// by substring; picking one plays it and reopens the list on the same line, Esc exits.
+		/// "tfsound name" plays one directly. Names are shown as written in PlayWorldSound / XML.</summary>
+		[WishCommand(Command = "tfsounds")]
+		public static void SoundBrowser() => SoundBrowser(null);
+
+		[WishCommand(Command = "tfsounds")]
+		public static void SoundBrowser(string filter)
+		{
+			List<string> names = SoundNames(filter);
+			if (names.Count == 0)
+			{
+				Popup.Show($"tfsounds: no sound names contain \"{filter}\".");
+				return;
+			}
+			string title = $"{names.Count} sounds" + (string.IsNullOrEmpty(filter) ? "" : $" matching \"{filter}\"");
+			int selected = 0;
+			while (true)
+			{
+				int pick = Popup.PickOption(title, Intro: "Enter plays it; Esc closes.", Sound: null, Options: names, DefaultSelected: selected, AllowEscape: true);
+				if (pick < 0)
+					return;
+				selected = pick;
+				PlayForAudition(names[pick]);
+			}
+		}
+
+		[WishCommand(Command = "tfsound")]
+		public static void PlayOneSound(string name)
+		{
+			name = (name ?? "").Trim();
+			if (name.Length == 0 || !SoundManager.TryGetClipSet(name, out _))
+			{
+				MessageQueue.AddPlayerMessage($"tfsound: no sound named \"{name}\" (try tfsounds {name}).", Capitalize: false);
+				return;
+			}
+			PlayForAudition(name);
+		}
+
+		static void PlayForAudition(string name)
+		{
+			SoundManager.PlayUISound(name, 1f);
+			MessageQueue.AddPlayerMessage($"tfsound: {name}", Capitalize: false);
+		}
+
+		static List<string> SoundNames(string filter)
+		{
+			filter = (filter ?? "").Trim();
+			List<string> names = new List<string>();
+			SoundManager.SetMapLock.EnterReadLock();
+			try
+			{
+				foreach (KeyValuePair<string, AudioEntrySet> kv in (IEnumerable<KeyValuePair<string, AudioEntrySet>>)SoundManager.SetMap)
+				{
+					string name = kv.Key;
+					IList<AudioEntry> entries = kv.Value;
+					if (entries != null && entries.Count > 0 && !string.IsNullOrEmpty(entries[0].Path))
+					{
+						// the set's path as base code writes it: no extension, no "-N" variant suffix
+						name = entries[0].Path;
+						int dot = name.LastIndexOf('.');
+						if (dot > name.LastIndexOf('/'))
+							name = name.Substring(0, dot);
+						if (entries[0].Variant != -1)
+						{
+							int dash = name.LastIndexOf('-');
+							if (dash > name.LastIndexOf('/'))
+								name = name.Substring(0, dash);
+						}
+					}
+					if (filter.Length == 0 || name.IndexOf(filter, System.StringComparison.OrdinalIgnoreCase) >= 0)
+						names.Add(name);
+				}
+			}
+			finally
+			{
+				SoundManager.SetMapLock.ExitReadLock();
+			}
+			names.Sort(System.StringComparer.OrdinalIgnoreCase);
+			return names;
+		}
 	}
 }
