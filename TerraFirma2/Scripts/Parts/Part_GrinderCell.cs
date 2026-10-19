@@ -31,6 +31,10 @@ namespace XRL.World.Parts
 		// dials XML-settable since the 2026-08-29 ladder pass (were consts)
 		public int ChargePerPound = 50; // re-ruled 2026-08-23 ("raise the grind to *50 charge")
 		public int TricklePerTurn = 10;
+		/// <summary>Played once per stone fed (not per trickle turn): base rock crumble, four variants.
+		/// XML-settable dials; [NonSerialized] so the shipped part keeps its saved layout.</summary>
+		[NonSerialized] public string GrindSound = "Sounds/Misc/sfx_rock_crumble_short";
+		[NonSerialized] public float GrindSoundVolume = 0.5f;
 
 		/// <summary>Charge remaining in the stone currently being ground (weight x 50 at load).</summary>
 		public int StoneChargeLeft;
@@ -262,6 +266,8 @@ namespace XRL.World.Parts
 				}
 				Cleo.TerraFirma.Scripts.Helpers.VerifyLog("GRINDER", $"fed {pick.Blueprint} weight={weight} pool={StoneChargeLeft}");
 				pick.Destroy();
+				if (!GrindSound.IsNullOrEmpty())
+					ParentObject.PlayWorldSound(GrindSound, GrindSoundVolume);
 				E.Actor.UseEnergy(1000, "Item FeedGrinderCell");
 				E.RequestInterfaceExit();
 			}

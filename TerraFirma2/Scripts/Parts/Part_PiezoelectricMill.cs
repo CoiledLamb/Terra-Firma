@@ -14,6 +14,10 @@ namespace XRL.World.Parts
 	{
 		public int ChargePerPound = 50;
 		public int FeedEnergy = 1000;
+		/// <summary>Played once per stone fed (not per trickle turn): base rock crumble, four variants.
+		/// XML-settable dials; [NonSerialized] so the shipped part keeps its saved layout.</summary>
+		[NonSerialized] public string GrindSound = "Sounds/Misc/sfx_rock_crumble_short";
+		[NonSerialized] public float GrindSoundVolume = 0.5f;
 		private const string FeedCommand = "Cleo_TerraFirma_FeedPiezoelectricMill";
 
 		public Cleo_TerraFirma_PiezoelectricMill()
@@ -108,6 +112,8 @@ namespace XRL.World.Parts
 			if (cap != null) cap.AddCharge(accepted); else oldCell.AddCharge(accepted);
 			if (E.Actor.IsPlayer()) IComponent<GameObject>.AddPlayerMessage("You feed " + name + " into " + ParentObject.t() + ".");
 			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("MILL", $"burst={burst}, stored={accepted}, charge={Charge()}/{MaxCharge()}");
+			if (!GrindSound.IsNullOrEmpty())
+				ParentObject.PlayWorldSound(GrindSound, GrindSoundVolume);
 			E.Actor.UseEnergy(FeedEnergy, "Item FeedPiezoelectricMill");
 			E.RequestInterfaceExit();
 			return base.HandleEvent(E);
