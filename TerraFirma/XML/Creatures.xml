@@ -43,6 +43,9 @@
     <!-- overrides the ConversationID inherited from base Snapjaw (2026-08-16); bank in Conversations.xml -->
     <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_SnapjawMiner" />
     <tag Name="Role" Value="Minion" />
+    <!-- half weight in the dynamic snapjaw pool (user 2026-10-19: it rolled 230/1000; base
+         FabricateDynamicPopulationTable multiplies by the <table>:Weight tag) -->
+    <tag Name="DynamicInheritsTable:Snapjaw:Weight" Value="0.5" />
   </object>
   <!-- BOAR VESSEL, wild base (NAME RULED 2026-08-26, user: "boar over pig"; full design record
        in TODO.md creature roster). INVERTED HIERARCHY ruling 2026-08-11: this base owns the
