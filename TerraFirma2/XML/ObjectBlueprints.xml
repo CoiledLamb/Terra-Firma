@@ -293,7 +293,7 @@
     <part Name="Render" DisplayName="refractive targe" Tile="refractive_targe.png" ColorString="&amp;Y" DetailColor="y" />
     <part Name="Shield" AV="1" DV="1" WornOn="Arm" />
     <part Name="RefractLight" Chance="20" RetroVariance="1d181-91" ShowInShortDescription="true" />
-    <part Name="Description" Short="The world lies warped in the lens of this mirrored lune. Light gleams effortlessly across its surface, diffracted into myriad strands of color." /> <!-- USER TEXT 2026-10-19, shared with the lune -->
+    <part Name="Description" Short="The world lies warped in the lens of this mirrored shield. Light gleams effortlessly across its surface, diffracted into myriad strands of color." /> <!-- USER TEXT 2026-10-19, shared with the lune -->
     <part Name="Commerce" Value="65" />
     <part Name="Physics" Weight="8" />
     <part Name="Metal" />
@@ -304,7 +304,7 @@
     <part Name="Render" DisplayName="refractive lune" Tile="refractive_lune.png" ColorString="&amp;Y" DetailColor="y" />
     <part Name="Shield" AV="2" DV="0" WornOn="Hand" />
     <part Name="RefractLight" Chance="30" RetroVariance="1d181-91" ShowInShortDescription="true" />
-    <part Name="Description" Short="The world lies warped in the lens of this mirrored lune. Light gleams effortlessly across its surface, diffracted into myriad strands of color." /> <!-- USER TEXT 2026-10-19 -->
+    <part Name="Description" Short="The world lies warped in the lens of this mirrored shield. Light gleams effortlessly across its surface, diffracted into myriad strands of color." /> <!-- USER TEXT 2026-10-19 -->
     <part Name="Commerce" Value="65" />
     <part Name="Physics" Weight="12" />
     <part Name="Metal" />
