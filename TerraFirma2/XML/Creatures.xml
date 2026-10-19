@@ -383,12 +383,12 @@
   <!-- Burrowbee (C15, designed with the user 2026-10-17/18; sprite, names, colors, factions and
        description theirs). A flower-field bee that forages underground: base Burrowing does the
        burrow, base Burrowed the hiding (invisible, can't attack, forced up when hit), and
-       Cleo_TerraFirma_BurrowbeeForager picks the next flower and surfaces beside it. Neutral,
+       Cleo_TerraFirma_BurrowbeeForager picks the next flower and surfaces beside it. Hostile,
        fights when provoked with base Stinger; the three children differ only in Stinger variant
        and detail color. Level, HP, AV and mutation levels are Codex PROPOSAL dials. -->
   <object Name="Cleo_TerraFirma_Burrowbee" Inherits="BaseInsect">
     <part Name="Render" DisplayName="burrowbee" Tile="burrowbee.png" RenderString="b" ColorString="&amp;W" TileColor="&amp;W" DetailColor="g" />
-    <part Name="Brain" Hostile="false" Factions="Prey-100,Insects-20" /> <!-- user 2026-10-18: insects start the player at -475 (disliked, -50); Insects-100 read -40, hostile. Prey-100,Insects-20 reads -8, neutral; Insects-25 sat exactly on the -10 line -->
+    <part Name="Brain" Factions="Insects-100,Prey-25" /> <!-- hostile again (user 2026-10-18/19, with 3-6 clusters): insects start the player at -475 (disliked, -50), so this reads -40; Prey-100,Insects-20 read -8 and left them neutral -->
     <part Name="Description" Short="Like a dancer mid-pirouette, =pronouns.subjective= =verb:twirl:afterpronoun= through the earth. Unhindered by the quickened loam, =pronouns.subjective= =verb:sup:afterpronoun= life's sweetest nectars against the painted backdrop of inflorescences." />
     <stat Name="Level" Value="4" />
     <stat Name="Hitpoints" Value="12" />
@@ -401,13 +401,31 @@
   <object Name="Cleo_TerraFirma_DogthornBurrowbee" Inherits="Cleo_TerraFirma_Burrowbee">
     <part Name="Render" DisplayName="dogthorn burrowbee" DetailColor="g" />
     <mutation Name="Stinger" Variant="Stinger Poison" Level="2" />
+      <part Name="Corpse" CorpseChance="50" CorpseBlueprint="Cleo_TerraFirma_DogthornBurrowbeeCorpse" /> <!-- CHANCE Codex PROPOSAL -->
   </object>
   <object Name="Cleo_TerraFirma_WitchwoodBurrowbee" Inherits="Cleo_TerraFirma_Burrowbee">
     <part Name="Render" DisplayName="witchwood burrowbee" DetailColor="w" />
     <mutation Name="Stinger" Variant="Stinger Confusion" Level="2" />
+      <part Name="Corpse" CorpseChance="50" CorpseBlueprint="Cleo_TerraFirma_WitchwoodBurrowbeeCorpse" /> <!-- CHANCE Codex PROPOSAL -->
   </object>
   <object Name="Cleo_TerraFirma_StillvineBurrowbee" Inherits="Cleo_TerraFirma_Burrowbee">
     <part Name="Render" DisplayName="stillvine burrowbee" DetailColor="C" />
     <mutation Name="Stinger" Variant="Stinger Paralysis" Level="2" />
+      <part Name="Corpse" CorpseChance="50" CorpseBlueprint="Cleo_TerraFirma_StillvineBurrowbeeCorpse" /> <!-- CHANCE Codex PROPOSAL -->
+  </object>
+
+  <!-- Burrowbee corpses (user 2026-10-18/19): butchering yields the bee's stinger as a
+       wieldable LongBlades weapon (Objects.xml). Base Corpse chassis, like the boar vessel's. -->
+  <object Name="Cleo_TerraFirma_DogthornBurrowbeeCorpse" Inherits="Corpse">
+    <part Name="Render" DisplayName="dogthorn burrowbee corpse" DetailColor="g" />
+    <part Name="Butcherable" OnSuccess="Cleo_TerraFirma_DogthornStinger" />
+  </object>
+  <object Name="Cleo_TerraFirma_WitchwoodBurrowbeeCorpse" Inherits="Corpse">
+    <part Name="Render" DisplayName="witchwood burrowbee corpse" DetailColor="w" />
+    <part Name="Butcherable" OnSuccess="Cleo_TerraFirma_WitchwoodStinger" />
+  </object>
+  <object Name="Cleo_TerraFirma_StillvineBurrowbeeCorpse" Inherits="Corpse">
+    <part Name="Render" DisplayName="stillvine burrowbee corpse" DetailColor="C" />
+    <part Name="Butcherable" OnSuccess="Cleo_TerraFirma_StillvineStinger" />
   </object>
 </objects>
