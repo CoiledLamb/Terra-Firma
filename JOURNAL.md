@@ -2912,3 +2912,7 @@ C15 closed: the user verified burrowbees in play: the forage loop (pick a lahblo
 ## Hostile burrowbees and stingers verified — 2026-10-19
 
 C16 closed: the user verified the follow-up to C15 end to end. Burrowbees are hostile again (`Insects-100,Prey-25`, reads -40) in clusters of 2-3; each variant leaves a corpse (now 10%) that butchers into its matching LongBlades stinger (user sprite `burrowbee_stinger.png`, user description), and each stinger's venom lands: dogthorn base PoisonOnHit, witchwood base ConfuseOnHit, stillvine the new `Cleo_TerraFirma_ParalyzeOnHit` (`Part_ParalyzeOnHit.cs`: base PoisonOnHit's shape applying base Paralyzed, because base's only paralysis on hit, StingerParalysisProperties, fires only for a wielder with the Stinger mutation). Retuned the same day against base Salthopper (user): corpse chance 10% and every corpse butchers, so about 10% per bee against the mandible's 8% times 15%, about 1.2%; the stinger sits a solid step under SalthopperMandible (1d10, MaxStrengthBonus 4, tier 3) at 1d6, MaxStrengthBonus 3, no penetration cap, tier 2, value 25, paid back by its venom. Saves, durations and corpse chance remain Codex PROPOSAL dials.
+
+## Seismophone compute scaling verified — 2026-10-19
+
+C18 closed: the user verified in the 0.2.8 one-pass test that the seismophone's Heightened Hearing level and its description's level line rise with local lattice compute (`Part_Seismophone.cs`, base `GetAvailableComputePowerEvent.AdjustUp`; XML level 2, 29+ compute = 3, 58+ = 4, 86+ = 5).

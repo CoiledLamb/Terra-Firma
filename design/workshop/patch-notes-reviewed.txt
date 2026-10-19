@@ -33,3 +33,5 @@ b2755a1 noted Stone-kissed hermit description: semicolon for 'but' (user)
 1737a1b skip Patch notes: stone-kissed hermit verified, into 0.2.8
 73c2cfa skip Patch notes: ledger catches up on hermit gaze level; own commits count as noise
 6a074ac skip Patch notes: short plain bullet blocks (user)
+e60c8b5 skip Patch notes: ledger
+233cefc skip Patch notes: Cleo's 0.2.8 block, WORKING section stays out of release output
