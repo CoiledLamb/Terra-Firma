@@ -59,8 +59,9 @@
   <!-- BOAR VESSEL, wild base (NAME RULED 2026-08-26, user: "boar over pig"; full design record
        in TODO.md creature roster). INVERTED HIERARCHY ruling 2026-08-11: this base owns the
        animal; the Husangeion pet (XML/Pets.xml) re-parents onto it only AFTER this blueprint
-       verifies in game. Basin = the creature's own unsealed tank, trending brackish via the salt
-       producer (LiquidProducer.IsNeeded self-stops at full, decomp-verified); glaze lies per the
+       verifies in game. Basin = the creature's own unsealed tank, desalinated by the producer and
+       refilled by VesselDrink (2026-10-19; it was a salt producer before). LiquidProducer.IsNeeded
+       keeps a full basin ticking while salt remains (decomp-verified); glaze lies per the
        2026-08-11 ruling, VesselTint stays majority-liquid. Cistern = real worn equipment on the
        plain Body slot, unremovable via NaturalEquipment (USER RULED 2026-08-26, superseding the
        custom bodyparttype + anatomy, both deleted); drops sealed on death. Flee shape: stock
@@ -75,7 +76,8 @@
     <part Name="Description" Short="A depiction of the common sow, painted with the rough brush of clay, roots aimlessly in the dirt. Water sloshes gently in =pronouns.possessive= basin as =pronouns.subjective= =verb:amble:afterpronoun= along." /> <!-- Description approved 2026-09-08. -->
     <part Name="LiquidVolume" MaxVolume="64" Volume="64" StartVolume="1d33-1" InitialLiquid="water-800,salt-200" ManualSeal="true" /> <!-- basin; pet tank shape, brackish start mix DRAFT -->
     <part Name="Cleo_TerraFirma_VesselTint" EmptyColor="k" />
-    <part Name="LiquidProducer" Liquid="salt" FillSelfOnly="true" VariableRate="500-5000" WorksOnWearer="false" WorksOnSelf="true" /> <!-- salty fill over time; RATE DRAFT. Pet overrides this by part-name replacement at re-parent -->
+    <part Name="LiquidProducer" Liquid="water" ConsumesLiquid="salt" LiquidMustBePure="false" FillSelfOnly="true" VariableRate="500-5000" WorksOnWearer="false" WorksOnSelf="true" /> <!-- DESALINATOR (user pick 2026-10-19): each tick strains one dram of salt out (ConsumeLiquid impure path, LiquidVolume.UseDrams("salt", n)) and adds one dram of water; no salt left, no output. RATE DRAFT. Pet clears ConsumesLiquid in Pets.xml -->
+    <part Name="Cleo_TerraFirma_VesselDrink" /> <!-- refills the basin from nearby water/salt pools when half empty (user pick 2026-10-19); dials DRAFT -->
     <stat Name="Level" Value="1" />
     <stat Name="AV" Value="3" /> <!-- DRAFT; base Boar AV 4 anchor, walks like a boar and breaks like a pot -->
     <stat Name="Hitpoints" Value="15" /> <!-- DRAFT; base Boar 13 -->

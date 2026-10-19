@@ -22,7 +22,7 @@
     <!-- Pure water is pet privilege (ruled; "fresh water stays a pet privilege"): these two
          part-name merges override the parent's brackish start mix and salt producer. -->
     <part Name="LiquidVolume" MaxVolume="64" Volume="64" StartVolume="1d33-1" InitialLiquid="water-1000" ManualSeal="true" />
-    <part Name="LiquidProducer" Liquid="water" VariableRate="200-2000" WorksOnWearer="false" WorksOnSelf="true" />
+    <part Name="LiquidProducer" Liquid="water" ConsumesLiquid="" VariableRate="200-2000" WorksOnWearer="false" WorksOnSelf="true" />
     <!-- NO GUT CISTERN off the pet (USER RULED 2026-08-26: "the pet gut cistern i'm less keen
          on"; cistern moved to corpse butchery 2026-08-27): the parent now carries a butcherable
          corpse, so the pet suppresses it, preserving its prior corpse-less death. Keeps the
