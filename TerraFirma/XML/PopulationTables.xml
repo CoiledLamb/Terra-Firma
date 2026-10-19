@@ -33,4 +33,17 @@
 		<object Weight="15" Blueprint="Random Silver Figurine" Number="1"/>
 	 </group>
 	</population>
+	<!-- Wild snapjaw miners (user 2026-10-19: "low roll, something like 1 to 5 chance"). The
+	     dynamic Snapjaw pool feeds no base table, so the miner joins base's own party lists
+	     (Creatures pick-each groups) at Chance 3, one miner. -->
+	<population Name="SnapjawParty0" Load="Merge">
+		<group Name="Creatures" Style="pickeach">
+			<object Chance="3" Number="1" Blueprint="Cleo_TerraFirma_Snapjaw Miner" />
+		</group>
+	</population>
+	<population Name="SnapjawParty1" Load="Merge">
+		<group Name="Creatures" Style="pickeach">
+			<object Chance="3" Number="1" Blueprint="Cleo_TerraFirma_Snapjaw Miner" />
+		</group>
+	</population>
 </populations>
