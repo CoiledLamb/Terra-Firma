@@ -290,7 +290,7 @@
        Both descriptions are one user text, 2026-10-19. No loot rows; both roll in DynamicInheritsTable:BaseShield
        (RandomMeleeWeapon, Svardym) since 2026-10-19, user dropped the exclusion. -->
   <object Name="Cleo_TerraFirma_RefractiveBuckler" Inherits="BaseShield">
-    <part Name="Render" DisplayName="refractive targe" Tile="refractive_targe.png" ColorString="&amp;Y" DetailColor="y" />
+    <part Name="Render" DisplayName="refractive targe" Tile="refractive_targe.png" ColorString="&amp;y" DetailColor="Y" />
     <part Name="Shield" AV="1" DV="1" WornOn="Arm" />
     <part Name="RefractLight" Chance="20" RetroVariance="1d181-91" ShowInShortDescription="true" />
     <part Name="Description" Short="The world lies warped in its mirrored lens. Light gleams effortlessly across its surface, diffracted into myriad strands of color." /> <!-- USER TEXT 2026-10-19, shared with the lune -->
@@ -300,7 +300,7 @@
     <tag Name="Tier" Value="4" />
   </object>
   <object Name="Cleo_TerraFirma_RefractiveShield" Inherits="BaseShield">
-    <part Name="Render" DisplayName="refractive lune" Tile="refractive_lune.png" ColorString="&amp;Y" DetailColor="y" />
+    <part Name="Render" DisplayName="refractive lune" Tile="refractive_lune.png" ColorString="&amp;y" DetailColor="Y" />
     <part Name="Shield" AV="2" DV="0" WornOn="Hand" />
     <part Name="RefractLight" Chance="30" RetroVariance="1d181-91" ShowInShortDescription="true" />
     <part Name="Description" Short="The world lies warped in its mirrored lens. Light gleams effortlessly across its surface, diffracted into myriad strands of color." /> <!-- USER TEXT 2026-10-19 -->
