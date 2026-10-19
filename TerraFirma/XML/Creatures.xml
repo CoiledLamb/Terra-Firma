@@ -77,7 +77,7 @@
     <part Name="LiquidVolume" MaxVolume="64" Volume="64" StartVolume="1d33-1" InitialLiquid="water-800,salt-200" ManualSeal="true" /> <!-- basin; pet tank shape, brackish start mix DRAFT -->
     <part Name="Cleo_TerraFirma_VesselTint" EmptyColor="k" />
     <part Name="LiquidProducer" Liquid="salt" FillSelfOnly="true" VariableRate="500-5000" WorksOnWearer="false" WorksOnSelf="true" /> <!-- salty fill over time; RATE DRAFT. Pet overrides this by part-name replacement at re-parent. The basin stays brackish (user 2026-10-19: the gut cistern is the desalinator, not the basin) -->
-    <part Name="Cleo_TerraFirma_VesselDrink" /> <!-- refills the basin from nearby water/salt pools when half empty (user pick 2026-10-19); dials DRAFT -->
+    <part Name="Cleo_TerraFirma_VesselDrink" SipDrams="1" /> <!-- refills the basin from nearby water/salt pools when half empty (user pick 2026-10-19); one dram a turn, slowed from 4 (user); dials DRAFT -->
     <stat Name="Level" Value="1" />
     <stat Name="AV" Value="3" /> <!-- DRAFT; base Boar AV 4 anchor, walks like a boar and breaks like a pot -->
     <stat Name="Hitpoints" Value="15" /> <!-- DRAFT; base Boar 13 -->
