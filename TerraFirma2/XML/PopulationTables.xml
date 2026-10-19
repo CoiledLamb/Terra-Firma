@@ -948,9 +948,12 @@
 			<object Chance="2.5" Number="1-2" Blueprint="Cleo_TerraFirma_BaseBoarVessel" />
 		</group>
 	</population>
+	<!-- Flower fields Creatures is a pickone group: Chance there applies after the pick, so the old
+	     Weight 1 Chance 5 row rolled about once per 1100 regions. Weight 5 like the cave row
+	     (user 2026-10-19, population audit). -->
 	<population Name="FlowerFieldsPopulation" Load="Merge">
 		<group Name="Creatures" Style="pickone">
-			<object Chance="5" Number="1d2" Blueprint="Cleo_TerraFirma_BaseBoarVessel" />
+			<object Weight="5" Number="1" Blueprint="Cleo_TerraFirma_BaseBoarVessel" />
 		</group>
 	</population>
 	<population Name="DesertCanyonCreatures" Load="Merge">
