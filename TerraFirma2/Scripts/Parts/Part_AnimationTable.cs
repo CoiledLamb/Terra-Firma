@@ -34,9 +34,10 @@ namespace XRL.World.Parts
 		/// <summary>Flat charge per animation (RULED flat; number is a DIAL).</summary>
 		public int AnimationCost = 1000;
 
-		/// <summary>Played at the table when a figurine wakes: the base engraver clip. XML-settable
-		/// dials; [NonSerialized] so the shipped part keeps its saved layout.</summary>
-		[NonSerialized] public string AnimateSound = "Sounds/Interact/sfx_interact_engraver";
+		/// <summary>Played at the table when a figurine wakes: one of base's six artifact start-up
+		/// clips (separate sets, not variants of one), picked at random from this comma list.
+		/// XML-settable dials; [NonSerialized] so the shipped part keeps its saved layout.</summary>
+		[NonSerialized] public string AnimateSound = "Sounds/Interact/sfx_interact_artifact_start_beep,Sounds/Interact/sfx_interact_artifact_start_buzz,Sounds/Interact/sfx_interact_artifact_start_cough,Sounds/Interact/sfx_interact_artifact_start_vibrate,Sounds/Interact/sfx_interact_artifact_start_whine,Sounds/Interact/sfx_interact_artifact_start_whirl";
 		[NonSerialized] public float AnimateSoundVolume = 0.5f;
 
 		/// <summary>The stoneshaper level the table works at. CLAUDE PICK 1 (delegated):
@@ -172,7 +173,7 @@ namespace XRL.World.Parts
 				GameObject walker = BuildWalker(pick, E.Actor);
 				spot.AddObject(walker).MakeActive();
 				if (!AnimateSound.IsNullOrEmpty())
-					ParentObject.PlayWorldSound(AnimateSound, AnimateSoundVolume);
+					ParentObject.PlayWorldSound(AnimateSound.Split(',').GetRandomElement().Trim(), AnimateSoundVolume);
 				if (E.Actor.IsPlayer())
 				{
 					IComponent<GameObject>.AddPlayerMessage("You imbue " + pick.t() + " with life."); // approved 2026-09-30, base-shaped (AnimateObject verbatim)

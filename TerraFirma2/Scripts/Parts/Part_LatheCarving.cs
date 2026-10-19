@@ -22,6 +22,11 @@ namespace XRL.World.Parts
 		public const string COMMAND = "Cleo_TerraFirma_LatheCarve";
 		public const string INPUT_TAG = "Cleo_TerraFirma_LatheFigurine";
 
+		/// <summary>Played once at the lathe when a figurine comes off it: the base engraver clip.
+		/// XML-settable dials; [NonSerialized] so the shipped part keeps its saved layout.</summary>
+		[NonSerialized] public string CarveSound = "Sounds/Interact/sfx_interact_engraver";
+		[NonSerialized] public float CarveSoundVolume = 0.5f;
+
 		public override bool WantEvent(int ID, int cascade)
 		{
 			return base.WantEvent(ID, cascade)
@@ -117,6 +122,8 @@ namespace XRL.World.Parts
 
 			material.RemoveOne().Obliterate();
 			Actor.ReceiveObject(figurine);
+			if (!CarveSound.IsNullOrEmpty())
+				ParentObject.PlayWorldSound(CarveSound, CarveSoundVolume);
 			IComponent<GameObject>.XDidYToZ(Actor, "lathe", figurine, EndMark: ".", IndefiniteObject: true, Source: Actor);
 			Actor.UseEnergy(1000, "Item Lathe Carve");
 			return true;
