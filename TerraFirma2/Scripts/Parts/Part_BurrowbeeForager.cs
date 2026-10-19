@@ -113,7 +113,7 @@ namespace XRL.World.Parts
 			}
 
 			// one route at a time: MoveTo spends its first turn pathing and queues Steps
-#if VERSION_1_1
+#if !VERSION_1_0
 			if (!brain.HasGoal<MoveTo>() && !brain.HasGoal<Step>())
 #else
 			// stable has only the by-name HasGoal

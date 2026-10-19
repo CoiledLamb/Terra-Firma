@@ -41,7 +41,12 @@ namespace Cleo.TerraFirma.Scripts
 		[CallAfterGameLoaded]
 		public static void Stamp()
 		{
+#if VERSION_1_0 || VERSION_1_1
 			MutationFactory.CheckInit();
+#endif
+			// 2.0.213 (VERSION_1_2) made MutationFactory a Blueprints.Factory with no CheckInit;
+			// it's loaded by the engine's blueprint pipeline (load order vs these seams not yet checked),
+			// and an entry that isn't there yet is skipped below.
 			for (int i = 0; i < Gates.GetLength(0); i++)
 			{
 				var entry = MutationFactory.GetMutationEntryByName(Gates[i, 1]);

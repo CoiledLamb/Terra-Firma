@@ -159,7 +159,7 @@ namespace XRL.World.Parts
 			{
 				// only when not already walking: MoveTo spends its first turn pathfinding and pushes
 				// Step goals (MoveTo.TakeAction), so re-pushing it every turn never takes a step
-#if VERSION_1_1
+#if !VERSION_1_0
 				if (!brain.HasGoal<MoveTo>() && !brain.HasGoal<Step>())
 #else
 				// stable has only the by-name HasGoal
@@ -428,7 +428,7 @@ namespace XRL.World.Parts
 			return base.HandleEvent(E);
 		}
 
-#if VERSION_1_1
+#if !VERSION_1_0
 		// PerceptionEvent is lang-only. On stable there's no hook into an NPC's sight check, so
 		// only GetHostilityRecognitionLimitsEvent's adjacency limit applies: no Intelligence save.
 		public override void Register(GameObject Object, IEventRegistrar Registrar)

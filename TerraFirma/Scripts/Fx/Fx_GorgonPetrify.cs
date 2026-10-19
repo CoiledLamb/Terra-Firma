@@ -665,9 +665,9 @@ namespace Cleo.TerraFirma.Scripts
 				return state;
 			}
 			Release(state, ShrinkOut: false); // a dying holdover never comes back -- replace it
-			// VERSION_1_1 is defined by the game's mod compiler on the lang-experimental build
-			// (2.0.212), where RenderForUI returns Visual; stable defines VERSION_1_0.
-#if VERSION_1_1
+			// the game's mod compiler defines VERSION_1_0 on stable and a higher VERSION_1_x on
+			// lang-experimental (1_1 on 2.0.212, 1_2 on 2.0.213), where RenderForUI returns Visual.
+#if !VERSION_1_0
 			Visual v = target.RenderForUI();
 			if (!v.Valid || v.Text || v.Tile.IsNullOrEmpty()) // Text: a glyph-only Visual, the old empty-Tile case
 				return null;
@@ -682,7 +682,7 @@ namespace Cleo.TerraFirma.Scripts
 				TargetFrac = frac,
 				Gen = GlobalGen,
 			};
-#if VERSION_1_1
+#if !VERSION_1_0
 			WaterlineColors(target, v, out Color mixer, out Color creatureDetail);
 			CombatJuiceManager.enqueueEntry(new Cleo_TerraFirma_JuicePetrifyBand(
 				new Cleo_TerraFirma_CreatureSnapshotRenderable(v.Tile, STONE_FG, BAND_POROUS ? 'k' : STONE_DETAIL, 'k', v.HFlip, v.VFlip),
@@ -702,7 +702,7 @@ namespace Cleo.TerraFirma.Scripts
 		/// once at snapshot time from the same RenderForUI result the tile came from. On lang the
 		/// Visual reads Detail 'w' when nothing set a detail color; with an empty Render.DetailColor
 		/// that 'w' is the fallback, and no detail means the main color, as on stable.</summary>
-#if VERSION_1_1
+#if !VERSION_1_0
 		private static void WaterlineColors(XRL.World.GameObject target, Visual v, out Color mixer, out Color creatureDetail)
 		{
 			char fg = v.Foreground == '\0' ? 'y' : v.Foreground;

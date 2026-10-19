@@ -147,7 +147,7 @@ namespace XRL.World.Parts
 			Cell cell = ParentObject.CurrentCell;
 			if (cell != null && !brain.StartingCell.IsClear()
 				&& brain.StartingCell.PathDistanceTo(cell) > 2
-#if VERSION_1_1
+#if !VERSION_1_0
 				&& !brain.Goals.ContainsDescendedFrom<IMovementGoal>())
 #else
 				&& !HasMovementGoal(brain))
@@ -159,7 +159,7 @@ namespace XRL.World.Parts
 			return base.HandleEvent(E);
 		}
 
-#if !VERSION_1_1
+#if VERSION_1_0
 		// stable's CleanStack has no ContainsDescendedFrom
 		static bool HasMovementGoal(Brain brain)
 		{
