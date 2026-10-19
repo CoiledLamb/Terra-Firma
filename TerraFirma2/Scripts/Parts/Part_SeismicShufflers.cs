@@ -75,31 +75,87 @@ namespace XRL.World.Parts
         {
             if (cell == null || cell.OnWorldMap() || cell.ParentZone.IsWorldMap())
                 return null;
-            // bLiveZonesOnly:false is intentional: the passive must map unvisited strata.
             return cell.GetCellFromDirectionGlobal("D", bLocalOnly: false, bLiveZonesOnly: false);
+        }
+
+        // The passive never builds or thaws a zone. Generating the stratum below inside the
+        // step's EnteredCell broke a live object's event registry on stable (2026-10-19: floor
+        // cushion Registry.Add, then TurnTick NREs that froze world map travel). A live stratum
+        // is mapped at once; any other one keeps its marks in string game state (one '1' per
+        // cell) and they are revealed the first time the wearer stands in that zone.
+        public const string PENDING_STATE = "Cleo_TerraFirma_ShufflerMarks:";
+
+        private static string BelowZoneID(Zone zone)
+        {
+            if (zone == null || zone.IsWorldMap())
+                return null;
+            try
+            {
+                return ZoneID.Assemble(zone.GetZoneWorld(), zone.GetZonewX(), zone.GetZonewY(),
+                    zone.GetZoneX(), zone.GetZoneY(), zone.GetZoneZ() + 1);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static void ApplyPendingMarks(Zone zone)
+        {
+            if (zone == null || The.Game == null)
+                return;
+            string key = PENDING_STATE + zone.ZoneID;
+            if (!The.Game.HasStringGameState(key))
+                return;
+            string marks = The.Game.GetStringGameState(key);
+            The.Game.RemoveStringGameState(key);
+            int revealed = 0;
+            for (int i = 0; i < marks.Length && i < zone.Width * zone.Height; i++)
+            {
+                if (marks[i] != '1')
+                    continue;
+                zone.GetCell(i % zone.Width, i / zone.Width)?.SetExplored();
+                revealed++;
+            }
+            Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHUFFLERS", $"revealed {revealed} pending cells in {zone.ZoneID}");
         }
 
         public override bool HandleEvent(EnteredCellEvent E)
         {
             GameObject wearer = Wearer;
+            // arrival by stairs or other forced moves still reveals what was queued here
+            if (wearer != null && wearer.IsPlayer() && E.Object == wearer)
+                ApplyPendingMarks(wearer.CurrentCell?.ParentZone);
             if (wearer != null && wearer.IsPlayer() && E.Object == wearer && !E.Forced && !E.System)
             {
-                Cell below = Below(wearer.CurrentCell);
+                Cell here = wearer.CurrentCell;
+                Zone zone = here?.ParentZone;
+                string belowID = BelowZoneID(zone);
                 // StrideMason likewise charges only when its movement effect can run.
-                if (below != null && IsReady(UseCharge: true))
+                if (belowID != null && IsReady(UseCharge: true))
                 {
+                    The.ZoneManager.CachedZones.TryGetValue(belowID, out Zone live);
+                    int w = live?.Width ?? zone.Width, h = live?.Height ?? zone.Height;
+                    string key = PENDING_STATE + belowID;
+                    char[] marks = live != null ? null
+                        : The.Game.GetStringGameState(key).PadRight(w * h, '0').ToCharArray();
                     int mapped = 0;
                     for (int dy = -PassiveRadius; dy <= PassiveRadius; dy++)
                     for (int dx = -PassiveRadius; dx <= PassiveRadius; dx++)
                     {
-                        int x = below.X + dx, y = below.Y + dy;
-                        if (x < 0 || y < 0 || x >= below.ParentZone.Width || y >= below.ParentZone.Height)
+                        int x = here.X + dx, y = here.Y + dy;
+                        if (x < 0 || y < 0 || x >= w || y >= h)
                             continue;
-                        below.ParentZone.GetCell(x, y).SetExplored();
+                        if (live != null)
+                            live.GetCell(x, y)?.SetExplored();
+                        else
+                            marks[y * w + x] = '1';
                         mapped++;
                     }
+                    if (marks != null)
+                        The.Game.SetStringGameState(key, new string(marks));
                     Cleo.TerraFirma.Scripts.Helpers.VerifyLog("SHUFFLERS",
-                        $"mapped {mapped} cells around {below.ParentZone.ZoneID}@{below.X},{below.Y}");
+                        $"{(live != null ? "mapped" : "queued")} {mapped} cells around {belowID}@{here.X},{here.Y}");
                 }
             }
             return base.HandleEvent(E);
