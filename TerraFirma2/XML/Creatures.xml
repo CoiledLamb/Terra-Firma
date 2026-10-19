@@ -387,6 +387,9 @@
     <part Name="Brain" Hostile="false" Factions="Prey-100,Newly Sentient Beings-50" />
     <part Name="Description" Short="Pitch spilled forth from the primordial brush, and congealed into a skittish, trembling creature." />
     <part Name="Pettable" />
+    <!-- empty: no stock pet line; the ride's own line is the pet popup (user 2026-10-19), and a
+         pet that can't ride falls back to BaseAnimal's growl in Cleo_TerraFirma_Inkling -->
+    <tag Name="PetResponse" Value="" />
     <part Name="SpawnOnDeath" Blueprint="InkDrop" DoPuff="false" />
     <part Name="Cleo_TerraFirma_Inkling" />
     <tag Name="BleedLiquid" Value="ink-1000" />

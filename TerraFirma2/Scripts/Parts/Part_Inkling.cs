@@ -97,7 +97,12 @@ namespace XRL.World.Parts
 				BodyPart hand = null;
 				if (E.Actor.Body != null && ParentObject.Body != null)
 					Pettable.TryGetLimbs(E.Actor, ParentObject, out hand, out _);
-				RideOn(E.Actor, Preferred: hand);
+				if (!RideOn(E.Actor, Preferred: hand, Petted: true))
+				{
+					// no room to ride: the stock pet line the empty PetResponse tag suppressed
+					string growl = GameText.VariableReplace("=subject.T= =verb:growl= softly.", ParentObject, E.Actor, StripColors: true);
+					EmitMessage(growl, ' ', FromDialog: false, UsePopup: E.Actor.IsPlayer());
+				}
 			}
 			return base.HandleEvent(E);
 		}
@@ -445,7 +450,7 @@ namespace XRL.World.Parts
 		}
 
 		/// <summary>Leave the map and ride on Host as a tattoo. False if Host has no room for one.</summary>
-		public bool RideOn(GameObject Host, bool Hungry = false, BodyPart Preferred = null)
+		public bool RideOn(GameObject Host, bool Hungry = false, BodyPart Preferred = null, bool Petted = false)
 		{
 			if (Host?.Body == null || ParentObject.CurrentCell == null)
 				return false;
@@ -489,8 +494,10 @@ namespace XRL.World.Parts
 				TattooText = text,
 				TurnsToMeal = Hungry ? 1 : -1, // hungry: eats at the end of this turn
 			});
+			// petted: this line is the pet popup, base Pettable's own channel (user 2026-10-19);
+			// hitchhiking and hunger stay in the message log
 			if (Host.IsPlayer())
-				MessageQueue.AddPlayerMessage($"{ParentObject.Does("seep")} into your skin and settles on your {spot.GetOrdinalName()}.");
+				EmitMessage(Host, $"{ParentObject.Does("seep")} into your skin and settles on your {spot.GetOrdinalName()}.", ' ', FromDialog: false, UsePopup: Petted);
 			Cleo.TerraFirma.Scripts.Helpers.VerifyLog("INKLING", $"riding {Host.Blueprint} on {spot.Name} as '{text}'");
 			return true;
 		}
