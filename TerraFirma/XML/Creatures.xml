@@ -35,9 +35,17 @@
          mute, then we are good on rockhounds also"). BaseDog carries none, so the rockhound is
          mute by inheritance and by intent. Contrast the Husangeion, which opted out the other
          way: it takes PetResponse lines rather than a conversation. -->
-    <inventoryobject Blueprint="Scorpiock_Bite" Number="1" /> <!-- plain base 1d4 bite, no skill, same shape as Dog_Bite (user 2026-10-19) -->
+    <inventoryobject Blueprint="Cleo_TerraFirma_Gneisshund_Bite" Number="1" />
     <part Name="Description" Short="Nose to the ground, =pronouns.subjective= =verb:hunt:afterpronoun= for bits of spall amongst the desert scrub. As =pronouns.subjective= =verb:trot:afterpronoun=, the stones in =pronouns.possessive= stomach click and settle against each other." />
     <tag Name="Role" Value="Brute" />
+  </object>
+
+  <!-- acid bite, how it breaks down rock (user 2026-10-19): 1d4 base (user) plus acid in the shape of base
+       Hyrkhound_Bite (2d2 + ElementalDamage 1d6+9 Acid, on a level 18 hound). Acid 1d3 is a Codex PROPOSAL
+       scaled down for level 4. No DisplayName, so it reads as a plain bite until the user names it. -->
+  <object Name="Cleo_TerraFirma_Gneisshund_Bite" Inherits="Bite">
+    <part Name="MeleeWeapon" BaseDamage="1d4" />
+    <part Name="ElementalDamage" Damage="1d3" Attributes="Acid" />
   </object>
 
   <object Name="Cleo_TerraFirma_Snapjaw Miner" Inherits="Snapjaw">
