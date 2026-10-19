@@ -18,8 +18,8 @@
        Chassis: BaseDog (Pettable and Dogs-100 arrive free). Gut: Cleo_TerraFirma_RockSweeper,
        swallow-and-spill (see the part for provenance). STATS ARE DRAFT, numbers sitting owed.
        Name lock owed ("rockhound" working; candidate list in TODO). Render colors PLACEHOLDER,
-       user's sprite palette to rule. ExcludeFromDynamicEncounters = controlled debut; remove
-       or replace with real table tags at the spawn-wiring pass. -->
+       user's sprite palette to rule. ExcludeFromDynamicEncounters dropped 2026-10-19 (user),
+       so it rolls in the dynamic BaseDog pool; no table rows yet. -->
   <object Name="Cleo_TerraFirma_Rockhound" Inherits="BaseDog">
     <part Name="Render" DisplayName="rockhound" Tile="rockhound.png" RenderString="d" ColorString="&amp;w" DetailColor="y" />
     <part Name="Corpse" CorpseChance="100" CorpseBlueprint="Dog Corpse" />
@@ -34,7 +34,6 @@
     <inventoryobject Blueprint="BigDog_Bite" Number="1" />
     <part Name="Description" Short="Nose to the ground, =pronouns.subjective= =verb:hunt:afterpronoun= for bits of spall amongst the desert scrub. As =pronouns.subjective= =verb:trot:afterpronoun=, the stones in =pronouns.possessive= stomach click and settle against each other." />
     <tag Name="Role" Value="Brute" />
-    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
   </object>
 
   <object Name="Cleo_TerraFirma_Snapjaw Miner" Inherits="Snapjaw">
@@ -44,7 +43,6 @@
     <!-- overrides the ConversationID inherited from base Snapjaw (2026-08-16); bank in Conversations.xml -->
     <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_SnapjawMiner" />
     <tag Name="Role" Value="Minion" />
-    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
   </object>
   <!-- BOAR VESSEL, wild base (NAME RULED 2026-08-26, user: "boar over pig"; full design record
        in TODO.md creature roster). INVERTED HIERARCHY ruling 2026-08-11: this base owns the

@@ -143,7 +143,6 @@ Perishes when unequipped." />
 		<tag Name="EquipSound" Value="sfx_equip_armor_artifact_light" />
 		<tag Name="Mods" Value="HelmetMods,HeadwearMods,CommonMods,ElectronicsMods" />
 		<tag Name="Tier" Value="3" />
-		<tag Name="ExcludeFromDynamicEncounters" />
 	</object>
 	<!-- Figurine animation table (design sitting 2026-08-24, all forks user-ruled; build
 	     docket opened same day, "lets build it"). Internal cell BY RULING (a Capacitor since 2026-10-13) - no socket,
@@ -366,7 +365,6 @@ Perishes when unequipped." />
     <part Name="AIPassiveEnergyCellReload" />
     <part Name="Cleo_TerraFirma_SeismicShufflers" PreviewDuration="2" PassiveRadius="1" ChargeUse="1" PeekChargeUse="100" RiseSeconds="0.25" RiseStaggerMs="250" RisePixels="8" PeekTile="Abilities/seismic peek.png" PeekColor="&amp;C" PeekDetailColor="y" />
     <tag Name="Tier" Value="3" />
-    <tag Name="ExcludeFromDynamicEncounters" />
   </object>
   <!-- SPALL SANDALS (C04, user 2026-10-01: wall-adjacent move speed, +10 at tier 2; base always-on feet run +5 at T2, +10 at T3, +20 at T4). Numbers copy base
        Sandals of the River-Wives, the tier-2 movement sandals (Items.xml:6368): AV/DV 0,
@@ -380,7 +378,6 @@ Perishes when unequipped." />
     <part Name="Cleo_TerraFirma_SpallSandals" MS="10" StoneOnly="true" />
     <tag Name="Tier" Value="2" />
     <stag Name="Movement" />
-    <tag Name="ExcludeFromDynamicEncounters" />
   </object>
   <!-- STONEHANDS BANNER (internal title; user 2026-10-01): a quiet Sunderlies nod, Sotur
        Stonehands in Across Moghra'yi Vol. I. Furniture, not base's cloak banners. Base Banner
