@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<conversations>
+  <conversation ID="Cleo_TerraFirma_ConversationStoneshaperStatue">
+    <start ID="IsVain" IfSpeakerHaveProperty="Cleo_TerraFirma_IsVain">
+      <text>
+				{{emote|*vainglorious preening*}}
+			</text>
+      <choice GotoID="End">Looking good, friend.</choice>
+    </start>
+    <start ID="IsNotVain" IfNotSpeakerHaveProperty="Cleo_TerraFirma_IsVain">
+      <text>
+				{{emote|*menacing rumbling*}}~
+				{{emote|*protective rumbling*}}~
+				{{emote|*powerful rumbling*}}~
+				{{emote|*ominous rumbling*}}
+			</text>
+      <choice GotoID="End">Thank you for your protection, friend.</choice>
+    </start>
+  </conversation>
+  <conversation ID="Cleo_TerraFirma_SnapjawMiner">
+    <node ID="Start">
+      <text>
+				heheheh. mine rock. rock mine.~
+				bite wall? grehehe.
+			</text>
+      <choice GotoID="End">...live and drink.</choice>
+    </node>
+  </conversation>
+  <conversation ID="Cleo_TerraFirma_Outrider">
+    <node ID="Start">
+      <text>
+				Mind the cairns, wayfarer, lest you knock one over.~
+				Seen a few baboons today. Not one made it further than a stone's throw.~
+				The nonsense birds? Don't talk to them, they won't talk to you.~
+				Can hear you coming from a mile away, wayfarer. I'll be hearing you go, too.
+			</text>
+      <choice GotoID="End">Live and drink.</choice>
+    </node>
+  </conversation>
+  <conversation ID="Cleo_TerraFirma_Mason">
+    <node ID="Start">
+      <text>
+				Stones talk sometimes. Just gotta listen real close, and you can hear 'em singing.~
+				Need something sculpted? Man, boar, fish?~
+				I sometimes wonder if the stones feel like we do. Carving must hurt then, eh?~
+				Don't know the name of the rocks around here, but they carve just the same.
+			</text>
+      <choice GotoID="End">Live and drink.</choice>
+    </node>
+  </conversation>
+  <conversation ID="Cleo_TerraFirma_Hewer">
+    <node ID="Start">
+      <text>
+				Smashed through a wall last week, soaked my clothes. Damn aquifers.~
+				Overseer said we needed to square away more rock, but my back's been killing me... got any witchwood?~
+				Ground's not so steady here, wayfarer. I'd watch my step, if're you.~
+				Ever scraped the moss off these here walls?
+
+				=subject.T= =verb:throw= =subject.its= head back and =verb:spit= on the floor in disgust.
+
+				Never again, I tell ya... Never again...
+			</text>
+      <choice GotoID="End">Live and drink.</choice>
+    </node>
+  </conversation>
+  <conversation ID="Cleo_TerraFirma_Overseer">
+    <node ID="Start">
+      <text>
+				Ain't easy work overseein' a warren like this, wayfarer.~
+				Make sure not to find yourself on the wrong side of the outrider, and you'll do fine.
+			</text>
+      <choice GotoID="End" Cleo_TerraFirma_IfTemperOwed="true">
+        <text>I've come to have something tempered.</text>
+        <part Name="Cleo_TerraFirma_TemperReward" />
+      </choice>
+      <choice GotoID="End">Live and drink.</choice>
+    </node>
+  </conversation>
+  <conversation ID="Cleo_TerraFirma_WarrenSurveyor">
+    <node ID="Start" IfHaveActiveQuest="A Signal in the Noise">
+      <text>
+				{{emote|*=subject.T= =verb:continue= listening to the rock face without looking at you.*}}
+				I haven't got all cycle to finish this, you know. The sooner those tinker-bears filter out the signal, the better.
+			</text>
+      <choice GotoID="End">Live and drink.</choice>
+    </node>
+    <node ID="Start" Cleo_TerraFirma_IfNotWarrenStartQuestDone="true">
+      <text>
+				{{emote|*=subject.T= =verb:keep= =subject.its= ear pressed to the rock.*}}
+				Can't you see I'm busy here? Go bother the overseer if you need work, wayfarer.
+			</text>
+      <choice GotoID="End">Live and drink.</choice>
+    </node>
+    <node ID="Start">
+      <text>
+				{{emote|*mumbling*}} ...enough in this seam to meet quota, if those hewers don't ruin it again. Could have brought the whole place down with fissures like that...
+				{{emote|*You catch =subject.its= eye for a moment, but =subject.subjective= =verb:turn= =subject.its= whole body to face you.*}}
+				Ah! Wayfarer. I don't know your face, so you must be the new arrival. Come, I have a task that only you could be entrusted with.
+			</text>
+      <choice GotoID="Cleo_TerraFirma_SurveyorDisk" IfNotHaveQuest="A Signal in the Noise" IfNotFinishedQuest="A Signal in the Noise" Cleo_TerraFirma_IfWarrenStartQuestDone="true">What kind of task?</choice>
+      <choice GotoID="End">Live and drink.</choice>
+    </node>
+    <node ID="Cleo_TerraFirma_SurveyorDisk">
+      <text>
+				{{emote|*=subject.T= =verb:hold= =subject.its= device-clad ear against the rock, as though expecting you to hear something too.*}}
+				It's like a heartbeat. A rhythmic pulse. I've heard centipede nests, aquifers, the very plates of the earth shifting, but never anything like this...
+				And I can hardly do my job with it drowning out every other signal in the rock. It would be irresponsible to keep them digging blind. But if we can't mine this seam, there's little chance we'll make quota, and we'll be kept here another cycle.
+				{{emote|*=subject.T= =verb:pull= away from the wall and =verb:place= a hand on your shoulder.*}}
+				You understand my predicament, yes, wayfarer? Good. I've recorded the pulse onto this disk. Take it to {{C|Grit Gate}}, and have the tinker-bears there inspect the frequencies encoded on it. With any luck, they can simply filter out the noise, and we can get on with our work.
+			</text>
+      <choice GotoID="End" StartQuest="A Signal in the Noise" GiveItem="Stamped Data Disk">Yes, I will take the disk to Grit Gate as you ask.</choice>
+      <choice GotoID="End">No, I must make preparations first.</choice>
+    </node>
+  </conversation>
+  <conversation ID="Cleo_TerraFirma_VineMerchant">
+    <node ID="Start">
+      <text>
+				Come, wayfarer. My stonesup tools are yours to work.~
+				Helmets, lights, picks... make certain of the stock you buy now, for a missing piece could prove fatal.~
+				The rocks here are loose. With my wares, you could be rid of them altogether.~
+				Ah, to feel the sunlight on your skin, wayfarer. Tell me, is it sweeter than the taste of fresh water?
+			</text>
+      <choice Target="Kind">You're a plant, right? What kind?</choice>
+      <choice GotoID="End">Live and drink.</choice>
+    </node>
+    <node ID="Kind" Inherits="Start">
+      <text>One of many. A spiral in multitude, radiating through the earth.</text>
+      <choice Target="Here" Priority="1">How did you wind up here?</choice>
+    </node>
+    <node ID="Here" Inherits="Start">
+      <text>The vase called me. It sang of home, of basking in the sun's fading glow, of hearing the howling caves on the horizon. To return, we provide for them.</text>
+      <choice Target="Home" Priority="1">Home? Aren't you just a potted plant?</choice>
+    </node>
+    <node ID="Home" Inherits="Start">
+      <text>And what of home, wayfarer? Do you know of such a thing?</text>
+    </node>
+  </conversation>
+</conversations>

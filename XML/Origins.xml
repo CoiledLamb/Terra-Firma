@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<origins Encoding="utf-8">
+  <origin Name="Cleo_TerraFirma_QuarryWarren">
+    <displayName>quarry warren</displayName>
+    <title>{{w|quarry}}&#xA;warren</title>
+    <category>Standard</category>
+    <region>DesertCanyon</region>
+    <description>
+      {{c|&#x2219;}} Random quarry warren in the desert canyons.
+      {{c|&#x2219;}} Warren teaches Deft Throwing.
+      {{c|&#x2219;}} +100 reputation with the Quarriers' Guild.
+    </description>
+    <opening>
+      <p>On the =day= of =month=, you arrive at the quarry warren of {{g|=village=}}.</p>
+      <p>Quarriers from the far {{w|Sunderlies}} pry red stone from the canyon walls, portioning out each brick they owe to their guild across the salt.</p>
+      <p>Dust clings to the arid air, and the scuttling of kept centipedes underpins the steady ringing of hammers on stone.</p>
+      <p>On the horizon, {{r|Qud's}} jungles strangle chrome steeples and rusted archways to the earth.</p>
+      <p>Further and beyond, the fabled {{C|Spindle}} rises above the fray and pierces the cloud-ribboned sky.</p>
+    </opening>
+    <module>Cleo_TerraFirma_RandomWarren</module>
+    <state Name="RuinedJoppa">Yes</state>
+    <state Name="Cleo_TerraFirma_WarrenStart">Yes</state>
+    <grid>
+      <entry Key="00" Tile="Terrain/sw_hills2.bmp" Foreground="w" Detail="w" />
+      <entry Key="10" Tile="Terrain/sw_canyon.bmp" Foreground="w" Detail="w" />
+      <entry Key="20" Tile="Terrain/sw_canyon.bmp" Foreground="w" Detail="w" />
+      <entry Key="30" Tile="Terrain/sw_hills2.bmp" Foreground="y" Detail="y" />
+      <entry Key="40" Tile="Terrain/sw_hills_2.bmp" Foreground="y" Detail="y" />
+      <entry Key="01" Tile="Terrain/sw_marsh_worldmap_3.bmp" Foreground="g" Detail="g" />
+      <entry Key="11" Tile="Terrain/sw_hills2.bmp" Foreground="w" Detail="w" />
+      <entry Key="21" Tile="Terrain/tf_quarry_embark.png" Foreground="w" Detail="r" />
+      <entry Key="31" Tile="Terrain/sw_canyon.bmp" Foreground="w" Detail="w" />
+      <entry Key="41" Tile="Terrain/sw_hills.bmp" Foreground="y" Detail="y" />
+      <entry Key="02" Tile="Terrain/sw_marsh_worldmap_1.bmp" Foreground="g" Detail="b" />
+      <entry Key="12" Tile="Terrain/sw_marsh_worldmap_4.bmp" Foreground="g" Detail="g" />
+      <entry Key="22" Tile="Terrain/sw_canyon.bmp" Foreground="w" Detail="w" />
+      <entry Key="32" Tile="Terrain/sw_canyon.bmp" Foreground="w" Detail="w" />
+      <entry Key="42" Tile="Terrain/sw_hills2.bmp" Foreground="w" Detail="w" />
+    </grid>
+    <reputation Name="Cleo_TerraFirma_Quarriers" Value="100" />
+  </origin>
+</origins>

@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<subtypes>
+<class ID="Callings">
+
+      <subtype Name="Porter" Class="Cleo_TerraFirma_PorterKit" Gear="StartingGear_Cleo_TerraFirma_Porter" Tile="castes/porter.png" DetailColor="w">
+      <stat Name="Toughness" Bonus="3" />
+      <stat Name="Strength" Bonus="-1" />
+      <skills>
+            <skill Name="Endurance" />
+            <skill Name="Endurance_Swimming" />
+            <skill Name="Shield" />
+            <skill Name="Axe" />
+      </skills>
+      <reputations>
+        <reputation With="Cleo_TerraFirma_Quarriers" Value="200" />
+      </reputations>
+      <extrainfo>Starts with hauling gear and a parcel to deliver</extrainfo>
+	</subtype>
+
+      <subtype Name="Wayfarer" Class="Cleo_TerraFirma_WayfarerKit" Gear="StartingGear_Cleo_TerraFirma_Wayfarer" Tile="castes/wayfarer.png" DetailColor="w">
+      <stat Name="Agility" Bonus="2" />
+      <skills>
+            <skill Name="Tactics" />
+            <skill Name="Tactics_Throwing" />
+            <skill Name="Physic" />
+            <skill Name="Survival" />
+            <skill Name="Survival_MountainsSurvival" />
+            <skill Name="Survival_DesertCanyonSurvival" />
+            <skill Name="ShortBlades" />
+      </skills>
+      <reputations>
+        <reputation With="Cleo_TerraFirma_Quarriers" Value="200" />
+      </reputations>
+      <extrainfo>Starts with a guild writ</extrainfo>
+	</subtype>
+
+      <subtype Name="Miner" Gear="StartingGear_Cleo_TerraFirma_Miner" Tile="castes/miner.png" DetailColor="w">
+      <stat Name="Strength" Bonus="2" />
+      <skills>
+            <skill Name="Endurance_PoisonTolerance" />
+            <skill Name="Axe" />
+            <skill Name="Axe_Cleave" />
+            <skill Name="Tinkering_Scavenger" />
+      </skills>
+      <reputations>
+        <reputation With="Cleo_TerraFirma_Quarriers" Value="200" />
+      </reputations>
+	</subtype>
+
+</class>
+</subtypes>

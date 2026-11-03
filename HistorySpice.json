@@ -1,0 +1,18 @@
+{
+  "lang": null,
+  "spice": {
+    "cooking": {
+      "recipeNames": {
+        "ingredients": {
+          "Cleo_TerraFirma_CrushedCaveMoss": {
+            "adj": [ "=^:adj1.!random=", "=^:adj2.!random=" ],
+            "adj1": [ "moss" ],
+            "adj2": [ "mossy", "=^:noun.!random=-=spice:cooking.recipeNames.suffix.!random=" ],
+            "nounPlural": [ "cave moss", "moss" ],
+            "noun": [ "cave moss", "moss" ]
+          }
+        }
+      }
+    }
+  }
+}

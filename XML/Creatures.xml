@@ -1,0 +1,480 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<objects>
+  <object Name="Cleo_TerraFirma_Burrowing Urchin" Inherits="BaseUrchin">
+    <part Name="Render" DisplayName="burrowing urchin" ColorString="&amp;w" DetailColor="g" />
+    <part Name="Description" Short="A moss covered ball of spines tumbles across the earth, prying open crevices and bits of scrap to nest in the dank spaces within." />
+    <part Name="Brain" Wanders="true" Mobile="true" LivesOnWalls="true" WallWalker="true" MinKillRadius="1" MaxKillRadius="16" />
+    <stat Name="Hitpoints" Value="6" />
+    <stat Name="Level" Value="12" />
+    <mutation Name="Burrowing" Level="5" />
+    <inventoryobject Blueprint="Cleo_TerraFirma_Aculei" Number="1" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
+  <object Name="Cleo_TerraFirma_Rockhound" Inherits="BaseDog">
+    <part Name="Render" DisplayName="gneisshund" Tile="rockhound.png" RenderString="d" ColorString="&amp;w" DetailColor="y" />
+    <part Name="Corpse" CorpseChance="100" CorpseBlueprint="Dog Corpse" />
+    <stat Name="Level" Value="4" />
+    <stat Name="Hitpoints" Value="12" />
+    <stat Name="AV" Value="2" />
+    <part Name="Cleo_TerraFirma_RockSweeper" />
+    <inventoryobject Blueprint="Cleo_TerraFirma_Gneisshund_Bite" Number="1" />
+    <part Name="Description" Short="Nose to the ground, =pronouns.subjective= =verb:hunt:afterpronoun= for bits of spall amongst the desert scrub. As =pronouns.subjective= =verb:trot:afterpronoun=, the stones in =pronouns.possessive= stomach click and settle against each other." />
+    <tag Name="Role" Value="Brute" />
+  </object>
+  <object Name="Cleo_TerraFirma_Gneisshund_Bite" Inherits="Bite">
+    <part Name="MeleeWeapon" BaseDamage="1d4" />
+    <part Name="ElementalDamage" Damage="1d3" Attributes="Acid" />
+  </object>
+  <object Name="Cleo_TerraFirma_Snapjaw Miner" Inherits="Snapjaw">
+    <part Name="Render" DisplayName="snapjaw miner" Tile="snapjaw miner.png" ColorString="&amp;w" DetailColor="y" />
+    <stat Name="Hitpoints" Value="6" />
+    <inventoryobject Blueprint="Pickaxe" Number="1" />
+    <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_SnapjawMiner" />
+    <tag Name="Role" Value="Minion" />
+  </object>
+  <object Name="Cleo_TerraFirma_BaseBoarVessel" Inherits="BaseAnimal">
+    <part Name="Brain" Hostile="false" Factions="Swine-100,Prey-100" />
+    <part Name="Body" Anatomy="Cleo_TerraFirma_BoarVessel" />
+    <part Name="Render" DisplayName="boar vessel" Tile="boar vessel.png" RenderString="b" ColorString="&amp;w" DetailColor="B" />
+    <part Name="Description" Short="A depiction of the common sow, painted with the rough brush of clay, roots aimlessly in the dirt. Water sloshes gently in =pronouns.possessive= basin as =pronouns.subjective= =verb:amble:afterpronoun= along." />
+    <part Name="LiquidVolume" MaxVolume="64" Volume="64" StartVolume="1d33-1" InitialLiquid="water-800,salt-200" ManualSeal="true" />
+    <part Name="Cleo_TerraFirma_VesselTint" EmptyColor="k" />
+    <part Name="LiquidProducer" Liquid="salt" FillSelfOnly="true" VariableRate="500-5000" WorksOnWearer="false" WorksOnSelf="true" />
+    <part Name="Cleo_TerraFirma_VesselDrink" SipDrams="1" />
+    <stat Name="Level" Value="1" />
+    <stat Name="AV" Value="3" />
+    <stat Name="Hitpoints" Value="15" />
+    <skill Name="Cudgel" />
+    <tag Name="Species" Value="oddity" />
+    <tag Name="Gender" Value="neuterperson" />
+    <xtagTextFragments Skin="glaze" PoeticFeatures="artfulness,gentle stillness,childlike wonder" />
+    <tag Name="BleedLiquid" Value="water-900,salt-100" />
+    <tag Name="BleedColor" Value="&amp;B" />
+    <tag Name="BleedPrefix" Value="{{B|wet}}" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
+  <object Name="Cleo_TerraFirma_Vine Merchant" Inherits="Jilted Lover">
+    <part Name="Render" DisplayName="Pandogrove" Tile="pandogrove.png" ColorString="&amp;G" TileColor="&amp;G" DetailColor="w" />
+    <part Name="Brain" Hostile="false" Wanders="false" Mobile="false" LivesOnWalls="false" Factions="Consortium-100,Cleo_TerraFirma_Quarriers-50" />
+    <removepart Name="WallColor" />
+    <part Name="Description" Short="A writhing coil of mottled vines wreathes a faded amphora. Chips line its rim like jagged teeth, and a single ragged leaf rises from its shaded belly to meet you." />
+    <xtagGrammar Proper="true" />
+    <removepart Name="JiltedLoverProperties" />
+    <removeinventoryobject Blueprint="Lovers_Thorns" />
+    <part Name="Corpse" CorpseChance="0" />
+    <stat Name="Hitpoints" Value="70" />
+    <stat Name="AV" Value="3" />
+    <stat Name="Intelligence" sValue="22" />
+    <stat Name="Ego" sValue="19" />
+    <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_VineMerchant" />
+    <part Name="GenericInventoryRestocker" Table="Cleo_TerraFirma_VineMerchantWares" />
+    <part Name="Interesting" />
+    <tag Name="Role" Value="NPC" />
+    <tag Name="NoSleep" />
+    <tag Name="DynamicObjectsTable:DesertCanyon_Creatures" Value="*delete" />
+    <tag Name="DynamicObjectsTable:Flowerfields_Creatures" Value="*delete" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
+  <object Name="Cleo_TerraFirma_Cobble Baboon" Inherits="Baboon">
+    <part Name="Render" DisplayName="granite baboon" Tile="Creatures/sw_quartz_baboon.bmp" ColorString="&amp;y" DetailColor="r" />
+    <stat Name="Hitpoints" Value="18" />
+    <stat Name="Level" Value="6" />
+    <stat Name="Strength" Boost="2" />
+    <stat Name="AV" Value="2" />
+    <mutation Name="Cleo_TerraFirma_EarthenBarrage" Level="2" />
+    <part Name="Corpse" CorpseChance="10" CorpseBlueprint="Cleo_TerraFirma_Cobble Baboon Corpse" />
+    <part Name="Description" Short="Grit is caked onto =pronouns.possessive= hunched figure like a second skin. Periodically you catch the glint of a wayward stone rising from the earth into =pronouns.possessive= scheming hands." />
+  </object>
+  <object Name="Cleo_TerraFirma_Cobble Baboon Corpse" Inherits="Baboon Corpse">
+    <part Name="Render" DisplayName="granite baboon corpse" />
+    <part Name="Butcherable" OnSuccess="@Cleo_TerraFirma_Cobblefur Items" />
+    <tag Name="Tier" Value="2" />
+  </object>
+  <object Name="Cleo_TerraFirma_Stonecarver" Inherits="BaseHumanoid">
+    <part Name="Render" DisplayName="stonecarver" Tile="stonecarver.png" ColorString="&amp;y" DetailColor="K" />
+    <part Name="Brain" Factions="Cleo_TerraFirma_Quarriers-100" />
+    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Quarrier Kit" />
+    <part Name="Description" Short="Chalk dust has worked so far into the creases of =pronouns.possessive= hands that the lines read like a map of somewhere quarried." />
+    <stat Name="Level" Value="10" />
+    <stat Name="Hitpoints" Value="25" />
+    <stat Name="AV" Value="3" />
+    <skill Name="Endurance" />
+    <skill Name="Survival" />
+    <skill Name="Survival_DesertCanyonSurvival" />
+    <skill Name="Tactics_Throwing" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+    <tag Name="AllowIdleBehavior" />
+    <tag Name="SleepOnBed" />
+    <tag Name="Nocturnal" />
+    <part Name="Cleo_TerraFirma_UnstickWalker" />
+  </object>
+  <object Name="Cleo_TerraFirma_Overseer" Inherits="Cleo_TerraFirma_Stonecarver">
+    <builder Name="Cleo_TerraFirma_StonecarverLegendary" />
+    <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Overseer" />
+    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Overseer Kit" />
+    <stat Name="Hitpoints" Value="40" />
+    <part Name="GivesRep" />
+    <part Name="Description" Short="You can see the responsibility =pronouns.subjective= =verb:carry:afterpronoun= in the creases around =pronouns.possessive= eyes, and in =pronouns.possessive= palms. =pronouns.Possessive= work has made a mark on =pronouns.objective=, as =pronouns.subjective= =verb:have:afterpronoun= on it." />
+    <xtagTextFragments Activity="laboring under the high sun,slaving away until the salt sun waned,toiling tirelessly in the long hours under the Beetle Moon" NeedsItemFor="for my own collection,to slake my greed,because of its trade value,for inspiring my people,to use as a muse for a statue,to decorate the warren" GuestActivity="gossiping at the firepit,relaxing by the hookah,bartering with our provisioner" ValuedOre="rusted artifacts,jasper,fresh water" ArableLand="fresh earth,unworked shale" />
+    <tag Name="Cleo_TerraFirma_SacredThings" Value="the stillness of stone,moving statues,the howling caves" />
+  </object>
+  <object Name="Cleo_TerraFirma_WarrenSurveyor" Inherits="Cleo_TerraFirma_Stonecarver">
+    <part Name="Render" DisplayName="guild {{W|surveyor}}" Tile="castes/surveyor.png" ColorString="&amp;W" DetailColor="w" />
+    <part Name="Description" Short="=pronouns.Possessive= hair spills like coils of brassy wire down =pronouns.possessive= back, half obscuring the saltworn silhouette of =pronouns.possessive= rifle. A strange metal band hangs loose around =pronouns.possessive= neck, its speaker-ear turned toward the wall, listening for any break in the stillness." />
+    <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_WarrenSurveyor" />
+    <skill Name="Cudgel" />
+    <skill Name="Rifles" />
+    <skill Name="Persuasion" />
+    <skill Name="Persuasion_Intimidate" />
+    <inventoryobject Blueprint="Desert Rifle" Number="1" />
+    <inventoryobject Blueprint="Lead Slug" Number="16" />
+    <inventoryobject Blueprint="Steel War Hammer" Number="1" />
+    <inventoryobject Blueprint="Cleo_TerraFirma_Seismophone" Number="1" />
+    <inventoryobject Blueprint="Cleo_TerraFirma_BoxOfChalk" Number="1" />
+    <inventoryobject Blueprint="Leather Armor" Number="1" />
+    <inventoryobject Blueprint="Leather Boots" Number="1" />
+  </object>
+  <object Name="Cleo_TerraFirma_Hewer" Inherits="Cleo_TerraFirma_Stonecarver">
+    <part Name="Render" DisplayName="quarry {{r|hewer}}" ColorString="&amp;r" />
+    <part Name="Description" Short="=pronouns.Possessive= eyes flit from wall to wall like a firefly under the Beetle Moon. It's impossible to tell whether =pronouns.subjective= =verb:are:afterpronoun= judging what weight the stone can bear or finding the weakest spot to strike." />
+    <mutation Name="Cleo_TerraFirma_Fissure" Level="4" />
+    <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Hewer" />
+    <part Name="Cleo_TerraFirma_CrewShift" Job="Dig" />
+    <tag Name="Role" Value="Brute" />
+    <stat Name="Hitpoints" Value="35" />
+    <skill Name="Cudgel" />
+    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Hewer Kit" />
+    <inventoryobject Blueprint="Nanopneumatic Jackhammer" Chance="5" IntProperties="AlwaysEquipAsWeapon:1" />
+  </object>
+  <object Name="Cleo_TerraFirma_Mason" Inherits="Cleo_TerraFirma_Stonecarver">
+    <part Name="Render" DisplayName="quarry {{y|mason}}" ColorString="&amp;y" />
+    <part Name="Description" Short="The wrinkles in =pronouns.possessive= grit-caked hands hold the memories of countless forms: a humble glowpad, a hulking slumberling. All things are possible with the right application of force and pressure to a hunk of stone." />
+    <mutation Name="Cleo_TerraFirma_Stoneshaper" Level="4" />
+    <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Mason" />
+    <tag Name="Role" Value="Summoner" />
+    <stat Name="Hitpoints" Value="20" />
+    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Mason Kit" />
+    <part Name="Cleo_TerraFirma_HasFigurinesPart" NumberOfFigurines="1-3" />
+    <part Name="Cleo_TerraFirma_CrewShift" Job="Etch" />
+  </object>
+  <object Name="Cleo_TerraFirma_Outrider" Inherits="Cleo_TerraFirma_Stonecarver">
+    <part Name="Render" DisplayName="quarry {{B|outrider}}" ColorString="&amp;B" />
+    <part Name="Description" Short="=pronouns.Possessive= eyes move uncertainly from your gait to your arms. For what did you come to =pronouns.possessive= quarry, traveler? A nearby stone rises from the earth in anticipation of your answer." />
+    <mutation Name="Cleo_TerraFirma_EarthenBarrage" Level="4" />
+    <part Name="ConversationScript" ConversationID="Cleo_TerraFirma_Outrider" />
+    <tag Name="Role" Value="Artillery" />
+    <skill Name="Shield" />
+    <tag Name="InventoryPopulationTable" Value="Cleo_TerraFirma_Outrider Kit" />
+    <part Name="Cleo_TerraFirma_OutriderPatrol" BeatRadius="12" BeatInner="3" BeatPoints="6" PauseTurns="3-8" ShiftTurns="400-600" BreakTurns="100-200" />
+  </object>
+  <object Name="Cleo_TerraFirma_Mole Hewer" Inherits="Cleo_TerraFirma_Hewer">
+    <part Name="Render" Tile="stonerat.png" />
+    <mutation Name="BurrowingClaws" Level="4" />
+  </object>
+  <object Name="Cleo_TerraFirma_Mole Mason" Inherits="Cleo_TerraFirma_Mason">
+    <part Name="Render" Tile="stonerat.png" />
+    <mutation Name="BurrowingClaws" Level="4" />
+  </object>
+  <object Name="Cleo_TerraFirma_Mole Outrider" Inherits="Cleo_TerraFirma_Outrider">
+    <part Name="Render" Tile="stonerat.png" />
+    <mutation Name="BurrowingClaws" Level="4" />
+  </object>
+  <object Name="Cleo_TerraFirma_AnimateFigurine" Inherits="BaseHumanoid">
+    <part Name="Render" DisplayName="animate figurine" Tile="Items/figurine.png" RenderString="*" ColorString="&amp;y" DetailColor="K" />
+    <part Name="Description" Short="" />
+    <part Name="Physics" Organic="false" />
+    <builder Name="Cleo_TerraFirma_AnimateFigurineIdentity" Population="Cleo_TerraFirma_AnimateFigurineIdentity" />
+    <part Name="Cleo_TerraFirma_PocketableWalker" />
+    <part Name="Brain" Hostile="False" Factions="Cleo_TerraFirma_Quarriers-100" />
+    <part Name="Swarmer" />
+    <part Name="MentalShield" />
+    <part Name="Corpse" CorpseChance="50" CorpseBlueprint="Cleo_TerraFirma_Random Stone Figurine" />
+    <stat Name="Level" Value="5" />
+    <stat Name="Hitpoints" Value="12" />
+    <stat Name="AV" Value="3" />
+    <stat Name="DV" Value="2" />
+    <stat Name="Strength" Value="14" />
+    <stat Name="Toughness" Value="12" />
+    <stat Name="Agility" Value="16" />
+    <tag Name="Role" Value="Minion" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+    <tag Name="NoFigurine" />
+  </object>
+  <object Name="Cleo_TerraFirma_BaseBoarVessel" Load="Merge">
+    <part Name="Corpse" CorpseChance="50" CorpseBlueprint="Cleo_TerraFirma_Boar Vessel Corpse" />
+    <removetag Name="ExcludeFromDynamicEncounters" />
+    <tag Name="DynamicObjectsTable:DesertCanyon_Creatures" />
+    <tag Name="DynamicObjectsTable:Jungle_Creatures" />
+    <tag Name="DynamicObjectsTable:Hills_Creatures" />
+    <tag Name="DynamicObjectsTable:Flowerfields_Creatures" />
+  </object>
+  <object Name="Cleo_TerraFirma_Farm Boar Vessel" Inherits="Cleo_TerraFirma_BaseBoarVessel">
+    <part Name="Brain" Hostile="false" Factions="Prey-100" />
+    <tag Name="Grazer" />
+    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+  </object>
+  <object Name="Cleo_TerraFirma_StiltBoarVesselFarmer" Inherits="StiltPigFarmer">
+    <part Name="Render" DisplayName="pig vessel farmer" />
+    <part Name="GenericInventoryRestocker" Table="Cleo_TerraFirma_BoarVesselFarmerInventory" Chance="71" />
+    <tag Name="DynamicObjectsTable:DesertCanyon_Creatures" Value="*delete" />
+    <tag Name="DynamicObjectsTable:Hills_Creatures" Value="*delete" />
+    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+  </object>
+  <object Name="Cleo_TerraFirma_Boar Vessel Corpse" Inherits="Corpse">
+    <part Name="Render" DisplayName="boar vessel corpse" TileColor="&amp;w" ColorString="&amp;w" DetailColor="B" />
+    <part Name="Description" Short="Shards of a shattered pictograph lie inert on the ground, where once they trotted under the salt sun." />
+    <part Name="Butcherable" OnSuccess="Cleo_TerraFirma_GutCistern" />
+    <part Name="Commerce" Value="4" />
+    <part Name="Food" Satiation="Meal" Gross="true" IllOnEat="true" Message="You choke on loose grit and unfired clay." />
+    <removetag Name="Meat" />
+    <intproperty Name="Bleeds" Value="0" />
+    <tag Name="Tier" Value="1" />
+  </object>
+  <object Name="Cleo_TerraFirma_StoneKissedHermit" Inherits="BaseHumanoid">
+    <part Name="Render" DisplayName="stone-kissed hermit" Tile="stonekissed_hermit.png" RenderString="h" ColorString="&amp;y" DetailColor="Y" />
+    <part Name="Corpse" CorpseChance="0" />
+    <stat Name="AV" Value="6" />
+    <stat Name="Level" Value="8" />
+    <stat Name="Hitpoints" Value="25" />
+    <stat Name="ColdResistance" Value="10" />
+    <stat Name="HeatResistance" Value="10" />
+    <stat Name="ElectricResistance" Value="10" />
+    <part Name="Brain" Hostile="false" Factions="Hermits-100" />
+    <part Name="Description" Short="A dusting of stone clings to =pronouns.objective= like winter frost. =pronouns.Possessive= movements are stiff and halting; =pronouns.subjective= =verb:avert:afterpronoun= =pronouns.possessive= face from yours, unwilling, or perhaps unable, to meet your gaze." />
+    <mutation Name="Cleo_TerraFirma_GorgonsGaze" Level="6" />
+    <skill Name="Cudgel" />
+    <part Name="Cleo_TerraFirma_StoneKissedRecluse" />
+    <inventoryobject Blueprint="Knollworm Skull" Number="1" />
+    <inventoryobject Blueprint="@Cleo_TerraFirma_StoneKissedHermitStaff" Number="1" />
+    <inventoryobject Blueprint="@Cleo_TerraFirma_StoneKissedHermitClothes" Number="1" />
+    <inventoryobject Blueprint="Sandals" Number="1" />
+    <tag Name="Role" Value="Controller" />
+  </object>
+  <object Name="Cleo_TerraFirma_Inkling" Inherits="BaseAnimal">
+    <part Name="Render" DisplayName="inkling" Tile="inkling.png" RenderString="i" ColorString="&amp;K" DetailColor="Y" />
+    <part Name="Corpse" CorpseChance="0" />
+    <stat Name="Level" Value="2" />
+    <stat Name="Hitpoints" Value="6" />
+    <stat Name="AV" Value="0" />
+    <part Name="Brain" Hostile="false" Factions="Prey-100,Newly Sentient Beings-50" />
+    <part Name="Description" Short="Pitch spilled forth from the primordial brush, and congealed into a skittish, trembling creature." />
+    <part Name="Pettable" />
+    <tag Name="PetResponse" Value="" />
+    <part Name="SpawnOnDeath" Blueprint="InkDrop" DoPuff="false" />
+    <part Name="Cleo_TerraFirma_Inkling" AttachSound="Sounds/Abilities/sfx_ability_spitSlime_spit" GraffitiSound="Sounds/Interact/sfx_interact_bubbleLevel_flip" />
+    <tag Name="BleedLiquid" Value="ink-1000" />
+  </object>
+  <object Name="Cleo_TerraFirma_Mel" Inherits="Cleo_TerraFirma_Inkling">
+    <part Name="Render" DisplayName="{{M|Mel}}" />
+    <part Name="Description" Short="A murky bowl dweller migrated from its amphoral home to skulk in the rust shrouded caves of Qud." />
+    <stat Name="Hitpoints" Value="30" />
+    <stat Name="AV" Value="2" />
+    <part Name="Cleo_TerraFirma_InklingPet" />
+    <tag Name="Pet" />
+    <tag Name="StartingPet" />
+    <xtagGrammar Proper="true" />
+    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+  </object>
+  <object Name="Cleo_TerraFirma_Burrowbee" Inherits="BaseInsect">
+    <part Name="Render" DisplayName="burrowbee" Tile="burrowbee.png" RenderString="b" ColorString="&amp;W" TileColor="&amp;W" DetailColor="g" />
+    <part Name="Brain" Factions="Insects-100,Prey-25" />
+    <part Name="Description" Short="Like a dancer mid-pirouette, =pronouns.subjective= =verb:twirl:afterpronoun= through the earth. Unhindered by the quickened loam, =pronouns.subjective= =verb:sup:afterpronoun= life's sweetest nectars against the painted backdrop of inflorescences." />
+    <stat Name="Level" Value="4" />
+    <stat Name="Hitpoints" Value="12" />
+    <stat Name="AV" Value="2" />
+    <mutation Name="Burrowing" Level="3" />
+    <mutation Name="Wings" Level="5" />
+    <part Name="Cleo_TerraFirma_BurrowbeeForager" />
+    <tag Name="BaseObject" Value="*noinherit" />
+  </object>
+  <object Name="Cleo_TerraFirma_DogthornBurrowbee" Inherits="Cleo_TerraFirma_Burrowbee">
+    <part Name="Render" DisplayName="dogthorn burrowbee" DetailColor="g" />
+    <mutation Name="Stinger" Variant="Stinger Poison" Level="2" />
+    <part Name="Corpse" CorpseChance="10" CorpseBlueprint="Cleo_TerraFirma_DogthornBurrowbeeCorpse" />
+  </object>
+  <object Name="Cleo_TerraFirma_WitchwoodBurrowbee" Inherits="Cleo_TerraFirma_Burrowbee">
+    <part Name="Render" DisplayName="witchwood burrowbee" DetailColor="w" />
+    <mutation Name="Stinger" Variant="Stinger Confusion" Level="2" />
+    <part Name="Corpse" CorpseChance="10" CorpseBlueprint="Cleo_TerraFirma_WitchwoodBurrowbeeCorpse" />
+  </object>
+  <object Name="Cleo_TerraFirma_StillvineBurrowbee" Inherits="Cleo_TerraFirma_Burrowbee">
+    <part Name="Render" DisplayName="stillvine burrowbee" DetailColor="C" />
+    <mutation Name="Stinger" Variant="Stinger Paralysis" Level="2" />
+    <part Name="Corpse" CorpseChance="10" CorpseBlueprint="Cleo_TerraFirma_StillvineBurrowbeeCorpse" />
+  </object>
+  <object Name="Cleo_TerraFirma_DogthornBurrowbeeCorpse" Inherits="Corpse">
+    <part Name="Render" DisplayName="dogthorn burrowbee corpse" DetailColor="g" />
+    <part Name="Butcherable" OnSuccess="Cleo_TerraFirma_DogthornStinger" />
+  </object>
+  <object Name="Cleo_TerraFirma_WitchwoodBurrowbeeCorpse" Inherits="Corpse">
+    <part Name="Render" DisplayName="witchwood burrowbee corpse" DetailColor="w" />
+    <part Name="Butcherable" OnSuccess="Cleo_TerraFirma_WitchwoodStinger" />
+  </object>
+  <object Name="Cleo_TerraFirma_StillvineBurrowbeeCorpse" Inherits="Corpse">
+    <part Name="Render" DisplayName="stillvine burrowbee corpse" DetailColor="C" />
+    <part Name="Butcherable" OnSuccess="Cleo_TerraFirma_StillvineStinger" />
+  </object>
+  <object Name="Cleo_TerraFirma_MammothCentipede" Inherits="BaseInsect">
+    <part Name="Render" DisplayName="mammoth centipede" Tile="mammoth_centipede.png" RenderString="i" ColorString="&amp;y" TileColor="&amp;y" DetailColor="r" />
+    <part Name="Brain" Factions="Insects-100" />
+    <part Name="Corpse" CorpseChance="25" CorpseBlueprint="Cleo_TerraFirma_MammothCentipedeCorpse" />
+    <part Name="Description" Short="A saltspan of coiled chitin writhes sinuously. =pronouns.Possessive= maw unfurls like a vicious tapestry, still wet with acidic sludge." />
+    <part Name="Cleo_TerraFirma_RockSweeper" />
+    <part Name="Pettable" PettableIfPositiveFeeling="True" />
+    <stat Name="Level" Value="12" />
+    <stat Name="Hitpoints" Value="100" />
+    <stat Name="AV" Value="5" />
+    <stat Name="DV" Value="0" />
+    <mutation Name="Burrowing" Level="5" />
+    <mutation Name="Regeneration" />
+    <skill Name="Tactics" />
+    <skill Name="Axe" />
+    <skill Name="Axe_Cleave" />
+    <skill Name="Endurance_Weathered" />
+    <skill Name="Shield" />
+    <inventoryobject Blueprint="Cleo_TerraFirma_MammothCentipede_Jaw" Number="1" />
+    <tag Name="Species" Value="centipede" />
+    <tag Name="Role" Value="Brute" />
+  </object>
+  <object Name="Cleo_TerraFirma_MammothCentipede_Kept" Inherits="Cleo_TerraFirma_MammothCentipede">
+    <part Name="Brain" Hostile="false" Factions="Cleo_TerraFirma_Quarriers-100" />
+    <part Name="Cleo_TerraFirma_PennedBeast" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+    <tag Name="CantOpenDoors" />
+  </object>
+  <object Name="Cleo_TerraFirma_Rockhound_Kept" Inherits="Cleo_TerraFirma_Rockhound">
+    <part Name="Brain" Hostile="false" Factions="Dogs-100,Cleo_TerraFirma_Quarriers-99" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+  </object>
+  <object Name="Cleo_TerraFirma_MammothCentipede_Jaw" Inherits="NaturalWeapon">
+    <part Name="Render" DisplayName="excavating mandibles" Tile="mammoth_centipede_jaw.png" ColorString="&amp;w" TileColor="&amp;w" DetailColor="W" />
+    <part Name="MeleeWeapon" BaseDamage="2d4" PenBonus="1" Skill="Axe" Stat="Strength" Slot="Head" />
+    <part Name="ElementalDamage" Damage="1d3" Attributes="Acid" />
+    <part Name="Shield" AV="1" DV="0" WornOn="Head" />
+    <part Name="Cleo_TerraFirma_PenLatch" />
+    <part Name="Drill" ChargeUse="0" NeedsOtherActivePartOperational="Cleo_TerraFirma_PenLatch" IsBootSensitive="false" IsEMPSensitive="false" IsPowerSwitchSensitive="false" IsPowerLoadSensitive="false" IsTechScannable="false" Sound="fly_generic_dig" />
+    <part Name="DiggingTool" />
+    <tag Name="Gender" Value="plural" />
+  </object>
+  <object Name="Cleo_TerraFirma_MammothCentipedeCorpse" Inherits="Arthropod Corpse">
+    <part Name="Render" DisplayName="mammoth centipede corpse" />
+    <part Name="Butcherable" OnSuccess="Cleo_TerraFirma_ExcavatingMandibles" />
+    <tag Name="Tier" Value="3" />
+  </object>
+  <object Name="Cleo_TerraFirma_Mockette" Inherits="Creature">
+    <part Name="Render" DisplayName="mockette" Tile="mockette.png" RenderString="M" ColorString="&amp;y" TileColor="&amp;y" DetailColor="m" />
+    <part Name="PrefabImposter" Prefab="Prefabs/Imposters/StatueBase" />
+    <part Name="Description" Short="A creature's uncanny likeness wrought in stone sloughs shapes as it slides on a dais of grinding grit." />
+    <part Name="Physics" Organic="false" Weight="2000" />
+    <part Name="Body" Anatomy="Cleo_TerraFirma_Mockette" />
+    <part Name="Brain" Hostile="true" Mobile="true" Wanders="true" Factions="Newly Sentient Beings-100,Entropic-50" />
+    <part Name="Corpse" CorpseChance="0" />
+    <part Name="Cleo_TerraFirma_Mockette" FormTable="BaroqueRuinsZoneGlobals-Creatures" AnyCreatureChance="25" />
+    <stat Name="Level" Value="30" />
+    <stat Name="Hitpoints" Value="200" />
+    <stat Name="AV" Value="10" />
+    <stat Name="DV" Value="0" />
+    <stat Name="Strength" Boost="2" />
+    <skill Name="Cudgel" />
+    <skill Name="Cudgel_Expertise" />
+    <intproperty Name="Bleeds" Value="0" />
+    <tag Name="Species" Value="oddity" />
+    <tag Name="SeveredFaceBlueprint" Value="Cleo_TerraFirma_MocketteMask" />
+    <tag Name="Cleo_TerraFirma_SharedStoneCount" />
+    <tag Name="DeathMessageAsInanimate" />
+    <tag Name="DeathSounds" Value="Sounds/Damage/sfx_damage_stone" />
+    <tag Name="Role" Value="Controller" />
+  </object>
+  <object Name="Cleo_TerraFirma_MocketteEye" Inherits="Armor">
+    <part Name="Render" DisplayName="snakelike eye" Tile="mockette_mask.png" ColorString="&amp;K" TileColor="&amp;K" DetailColor="K" />
+    <part Name="Description" Short="" />
+    <part Name="Armor" AV="0" DV="0" WornOn="Face" />
+    <part Name="MutationOnEquip" DisplayName="Gorgon's Gaze" ClassName="Cleo_TerraFirma_GorgonsGaze" Level="5" />
+    <part Name="NaturalEquipment" />
+    <part Name="NoBreak" />
+    <part Name="NoDamage" />
+    <part Name="Physics" Category="Natural Armor" IsReal="false" Weight="0" />
+    <removepart Name="TinkerItem" />
+    <intproperty Name="Natural" Value="1" />
+    <tag Name="NaturalGear" />
+    <tag Name="NoDefaultBehavior" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+    <tag Name="NoSparkingQuest" />
+    <tag Name="BaseObject" Value="*noinherit" />
+  </object>
+  <object Name="Cleo_TerraFirma_MocketteHand" Inherits="NaturalFist">
+    <part Name="Render" DisplayName="petrified hand" Tile="Creatures/natural-weapon-fist.bmp" ColorString="&amp;y" />
+    <part Name="MeleeWeapon" BaseDamage="2d6" Skill="Cudgel" Stat="Strength" Slot="Hand" />
+    <part Name="Cleo_TerraFirma_PetrifyOnHit" />
+    <tag Name="BaseObject" Value="*noinherit" />
+  </object>
+  <object Name="Cleo_TerraFirma_MocketteMask" Inherits="Armor">
+    <part Name="Render" DisplayName="mockette mask" Tile="mockette_mask.png" RenderString="]" ColorString="&amp;y" TileColor="&amp;y" DetailColor="m" />
+    <part Name="Description" Short="Sneering flesh parts to reveal an unblinking retina, fixed in its deathgaze." />
+    <part Name="Armor" AV="0" DV="0" WornOn="Face" />
+    <part Name="MutationOnEquip" DisplayName="Gorgon's Gaze" ClassName="Cleo_TerraFirma_GorgonsGaze" Level="1" />
+    <part Name="Physics" Category="Armor" Weight="5" />
+    <part Name="Commerce" Value="150" />
+    <tag Name="SeveredLimbKeepAppearance" />
+    <tag Name="ExcludeFromDynamicEncounters" />
+    <tag Name="NoSparkingQuest" />
+    <tag Name="BaseObject" Value="*noinherit" />
+  </object>
+  <object Name="Cleo_TerraFirma_Grotesque" Inherits="BaseBaboon">
+    <part Name="Render" DisplayName="grotesque" Tile="grotesque.png" RenderString="a" ColorString="&amp;y" TileColor="&amp;y" DetailColor="r" />
+    <part Name="Description" Short="A menacing melange of minerals, metals, and monstrosity. Its eyes are polished, rounded gems of wrath, and its form both statuesque and sinuous. The snap of its wings is as the breath of the fearful ruach." />
+    <part Name="Physics" Organic="false" Weight="400" />
+    <part Name="Brain" Hostile="true" />
+    <part Name="Corpse" CorpseChance="0" />
+    <part Name="PrefabImposter" Prefab="Prefabs/Imposters/StatueBase" />
+    <part Name="Cleo_TerraFirma_Grotesque" WakeRadius="3" />
+    <stat Name="Level" Value="6" />
+    <stat Name="Hitpoints" Value="12" />
+    <stat Name="AV" Value="8" />
+    <mutation Name="Wings" Level="3" />
+    <mutation Name="Horns" Level="3" />
+    <mutation Name="BrittleBones" />
+    <mutation Name="Cleo_TerraFirma_Fissure" Level="3" />
+    <inventoryobject Blueprint="Baboon_Bite" Number="1" />
+    <intproperty Name="Bleeds" Value="0" />
+    <tag Name="DynamicObjectsTable:Baboons" Value="*delete" />
+    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+    <tag Name="DeathMessageAsInanimate" />
+    <tag Name="DeathSounds" Value="Sounds/Damage/sfx_destroy_stone" />
+    <tag Name="TakeDamageSound" Value="Sounds/Damage/sfx_damage_stone" />
+    <tag Name="Role" Value="Skirmisher" />
+  </object>
+  <object Name="Cleo_TerraFirma_GemGoatCorpse" Inherits="Goat Corpse">
+    <part Name="Description" Short="Shining ribbons weave through a mound of wet hair and rotting flesh, light refracting in a prismatic swirl off the viscera." />
+    <part Name="Food" Message="It's gritty, but surprisingly decadent." />
+    <tag Name="BaseObject" Value="*noinherit" />
+  </object>
+  <object Name="Cleo_TerraFirma_GemGoatCorpse_Agate" Inherits="Cleo_TerraFirma_GemGoatCorpse">
+    <part Name="Render" DisplayName="{{K|agate}} goat corpse" ColorString="&amp;K" TileColor="&amp;K" DetailColor="Y" />
+    <part Name="Butcherable" OnSuccess="Rough Agate" />
+  </object>
+  <object Name="Cleo_TerraFirma_GemGoatCorpse_Topaz" Inherits="Cleo_TerraFirma_GemGoatCorpse">
+    <part Name="Render" DisplayName="{{W|topaz}} goat corpse" ColorString="&amp;W" TileColor="&amp;W" DetailColor="Y" />
+    <part Name="Butcherable" OnSuccess="Rough Topaz" />
+  </object>
+  <object Name="Cleo_TerraFirma_GemGoatCorpse_Jasper" Inherits="Cleo_TerraFirma_GemGoatCorpse">
+    <part Name="Render" DisplayName="{{R|jasper}} goat corpse" ColorString="&amp;R" TileColor="&amp;R" DetailColor="Y" />
+    <part Name="Butcherable" OnSuccess="Rough Jasper" />
+  </object>
+  <object Name="Cleo_TerraFirma_GemGoatCorpse_Amethyst" Inherits="Cleo_TerraFirma_GemGoatCorpse">
+    <part Name="Render" DisplayName="{{M|amethyst}} goat corpse" ColorString="&amp;M" TileColor="&amp;M" DetailColor="Y" />
+    <part Name="Butcherable" OnSuccess="Rough Amethyst" />
+  </object>
+  <object Name="Cleo_TerraFirma_GemGoatCorpse_Sapphire" Inherits="Cleo_TerraFirma_GemGoatCorpse">
+    <part Name="Render" DisplayName="{{B|sapphire}} goat corpse" ColorString="&amp;B" TileColor="&amp;B" DetailColor="Y" />
+    <part Name="Butcherable" OnSuccess="Rough Sapphire" />
+  </object>
+  <object Name="Cleo_TerraFirma_GemGoatCorpse_Emerald" Inherits="Cleo_TerraFirma_GemGoatCorpse">
+    <part Name="Render" DisplayName="{{G|emerald}} goat corpse" ColorString="&amp;G" TileColor="&amp;G" DetailColor="Y" />
+    <part Name="Butcherable" OnSuccess="Rough Emerald" />
+  </object>
+  <object Name="Cleo_TerraFirma_GemGoatCorpse_Peridot" Inherits="Cleo_TerraFirma_GemGoatCorpse">
+    <part Name="Render" DisplayName="{{peridot|peridot}} goat corpse" ColorString="&amp;G" TileColor="&amp;G" DetailColor="W" />
+    <part Name="Butcherable" OnSuccess="Rough Peridot" />
+  </object>
+</objects>

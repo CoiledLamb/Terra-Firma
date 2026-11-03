@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<objects Encoding="utf-8">
+
+  <object Name="Cleo_TerraFirma_SilverGlaive" Inherits="BaseLongBlade">
+    <part Name="Render" DisplayName="{{Y|silver}} glaive" Tile="castes/silver_glaive.png" ColorString="&amp;Y" DetailColor="y" />
+    <part Name="MeleeWeapon" MaxStrengthBonus="3" BaseDamage="1d6" Skill="LongBlades" />
+    <part Name="ThrownWeapon" Penetration="3" Damage="1d6" Attributes="LongBlades" />
+    <part Name="Commerce" Value="30" />
+    <part Name="Description" Short="A ghostly gleam of moonpale light trails down the crescent edge of this killing instrument." />
+    <part Name="Metal" />
+    <tag Name="NoAIEquipAsThrownWeapon" />
+    <tag Name="HideThrownWeaponPerformance" />
+    <tag Name="Tier" Value="2" />
+    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+  </object>
+
+  <object Name="Cleo_TerraFirma_AcidCanteen" Inherits="Canteen">
+    <part Name="LiquidVolume" MaxVolume="64" Volume="32" StartVolume="1d17+15" InitialLiquid="acid-1000" ManualSeal="true" />
+    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+  </object>
+
+  <object Name="Cleo_TerraFirma_WateredWineskin" Inherits="Waterskin">
+    <part Name="LiquidVolume" InitialLiquid="water-750,wine-250" StartVolume="32" />
+    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+  </object>
+
+  <object Name="Cleo_TerraFirma_TopographicalMappingUnit" Load="Merge">
+    <part Name="CyberneticsBaseItem" Cost="2" BehaviorDescription="Your chance of becoming lost in hills and desert canyons is reduced by 20%.&#10;This effect does not stack with the bonuses of a compass bracelet or navigation system.&#10;You can travel over mountains and the Moon Stair on the world map, at 75% reduced travel speed." />
+    <part Name="Cleo_TerraFirma_OverlandPassage" />
+    <tag Name="StartingCybernetic:Averter" />
+    <tag Name="StartingCybernetic:Starseer" />
+    <tag Name="StartingCybernetic:Surveyor" />
+    <tag Name="StartingCybernetic:Lapidary" />
+    <tag Name="SpecialArcologyText" Value="{{w|[Sunderlies only]}}" />
+  </object>
+  <object Name="Cleo_TerraFirma_JeweledSandals" Inherits="Sandals">
+    <part Name="AddMod" Mods="ModJewelEncrusted" />
+    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+  </object>
+</objects>

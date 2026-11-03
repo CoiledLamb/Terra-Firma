@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<subtypes Encoding="utf-8">
+<class ID="Castes">
+  <category Name="Cleo_TerraFirma_Sunderlies" DisplayName="{{w|The Whistling Comb-Caves of the Sunderlies}}">
+
+    <subtype Name="Averter" Class="Cleo_TerraFirma_AverterKit" Gear="StartingGear_Cleo_TerraFirma_Averter" Tile="castes/averter.png" DetailColor="w">
+      <stat Name="Toughness" Bonus="2" />
+      <stat Name="Agility" Bonus="2" />
+      <stat Name="ElectricResistance" Bonus="15" />
+      <skills>
+        <skill Name="Shield" />
+        <skill Name="Shield_Slam" />
+        <skill Name="SingleWeaponFighting" />
+        <skill Name="LongBlades" />
+        <skill Name="Tactics" />
+        <skill Name="Tactics_Throwing" />
+      </skills>
+      <reputations>
+        <reputation With="Cleo_TerraFirma_Quarriers" Value="200" />
+      </reputations>
+    </subtype>
+
+    <subtype Name="Starseer" Gear="StartingGear_Cleo_TerraFirma_Starseer" Tile="castes/starseer.png" DetailColor="w">
+      <stat Name="Willpower" Bonus="2" />
+      <stat Name="Ego" Bonus="2" />
+      <stat Name="ElectricResistance" Bonus="15" />
+      <skills>
+        <skill Name="Customs" />
+        <skill Name="Customs_TrashDivining" />
+        <skill Name="Discipline" />
+        <skill Name="Discipline_Meditate" />
+        <skill Name="Discipline_IronMind" />
+        <skill Name="Cudgel" />
+      </skills>
+      <reputations>
+        <reputation With="Cleo_TerraFirma_Quarriers" Value="200" />
+      </reputations>
+    </subtype>
+
+    <subtype Name="Surveyor" Gear="StartingGear_Cleo_TerraFirma_Surveyor" Tile="castes/surveyor.png" DetailColor="w">
+      <stat Name="Agility" Bonus="3" />
+      <stat Name="ElectricResistance" Bonus="15" />
+      <skills>
+        <skill Name="Cudgel" />
+        <skill Name="Rifles" />
+        <skill Name="Persuasion" />
+        <skill Name="Survival" />
+        <skill Name="Survival_DesertCanyonSurvival" />
+      </skills>
+      <reputations>
+        <reputation With="Cleo_TerraFirma_Quarriers" Value="200" />
+      </reputations>
+    </subtype>
+
+    <subtype Name="Lapidary" Gear="StartingGear_Cleo_TerraFirma_Lapidary" Tile="castes/lapidary.png" DetailColor="w">
+      <stat Name="Intelligence" Bonus="2" />
+      <stat Name="Ego" Bonus="2" />
+      <stat Name="ElectricResistance" Bonus="15" />
+      <skills>
+        <skill Name="ShortBlades" />
+        <skill Name="Tinkering" />
+        <skill Name="Tinkering_Scavenger" />
+        <skill Name="Tinkering_Disassemble" />
+        <skill Name="Persuasion" />
+        <skill Name="Persuasion_SnakeOiler" />
+      </skills>
+      <reputations>
+        <reputation With="Cleo_TerraFirma_Quarriers" Value="200" />
+      </reputations>
+    </subtype>
+
+  </category>
+</class>
+</subtypes>
