@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<objects>
+  <object Name="Cleo_TerraFirma_BoilerHod_Porter" Inherits="Cleo_TerraFirma_BoilerHod">
+    <part Name="LiquidVolume" StartVolume="8-16" InitialLiquid="water-1000" />
+    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+  </object>
+
+  <object Name="Cleo_TerraFirma_PorterStone" Inherits="Cleo_TerraFirma_QuestQuarriedStone">
+    <part Name="Render" Tile="quarrystones2a.png" />
+    <part Name="Physics" Weight="75" />
+    <builder Name="RandomTile" Tiles="quarrystones2a.png,quarrystones2b.png" />
+    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+  </object>
+
+  <object Name="Cleo_TerraFirma_GuildWrit" Inherits="Item">
+    <part Name="Render" DisplayName="guild writ" Tile="Items/sw_scroll1.bmp" RenderString="?" ColorString="&amp;w" DetailColor="W" RenderLayer="5" />
+    <part Name="Physics" Weight="0" Category="Trade Goods" />
+    <part Name="Description" Short="Words of acknowledgement for the deeds of a passing wayfarer are scrawled on the inside of goat-skin vellum." />
+    <part Name="Cleo_TerraFirma_GuildWrit" />
+    <part Name="Commerce" Value="250" />
+    <tag Name="ExcludeFromDynamicEncounters" Value="*noinherit" />
+  </object>
+</objects>

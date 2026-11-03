@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<bodies>
+  <anatomies>
+    <anatomy Name="Cleo_TerraFirma_BoarVessel" Category="Stone">
+      <part Type="Head">
+        <part Type="Face" />
+      </part>
+      <part Type="Back" />
+      <part Type="Foot" Laterality="Right Fore" SupportsDependent="Forefeet" />
+      <part Type="Foot" Laterality="Left Fore" SupportsDependent="Forefeet" />
+      <part Type="Foot" Laterality="Right Hind" SupportsDependent="Hindfeet" />
+      <part Type="Foot" Laterality="Left Hind" SupportsDependent="Hindfeet" />
+      <part Type="Missile Weapon" Laterality="Right" />
+      <part Type="Missile Weapon" Laterality="Left" />
+      <part Type="Feet" Laterality="Fore" DependsOn="Forefeet" Mobility="0" />
+      <part Type="Feet" Laterality="Hind" DependsOn="Hindfeet" Mobility="0" />
+      <part Type="Tail" />
+    </anatomy>
+  </anatomies>
+  <bodyparttypevariants>
+    <bodyparttypevariant VariantOf="Roots" Type="Gravel" Mobility="0" Category="Stone" Plural="false" Mass="true" />
+  </bodyparttypevariants>
+  <anatomies>
+    <anatomy Name="Cleo_TerraFirma_Mockette" Category="Stone">
+      <part Type="Reflective Surface" Integral="true">
+        <part Type="Membrane">
+          <part Type="Lip" Laterality="Right" />
+          <part Type="Lip" Laterality="Left" />
+        </part>
+        <part Type="Membrane">
+          <part Type="Small Crack" />
+        </part>
+        <part Type="Membrane">
+          <part Type="Gravel" />
+        </part>
+      </part>
+      <part Type="Missile Weapon" Laterality="Right" />
+      <part Type="Missile Weapon" Laterality="Left" />
+      <part Type="Floating Nearby" />
+      <part Type="Floating Nearby" />
+    </anatomy>
+  </anatomies>
+</bodies>

@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<naming Encoding="utf-8">
+  <namestyles>
+    <namestyle Name="Cleo_TerraFirma_SunderliesKin" Base="Cleo_TerraFirma_Stonecarver" Format="AsIs">
+      <scopes>
+        <scope Name="Subtype1" Subtype="Averter" Priority="100" Combine="false" />
+        <scope Name="Subtype2" Subtype="Starseer" Priority="100" Combine="false" />
+        <scope Name="Subtype3" Subtype="Surveyor" Priority="100" Combine="false" />
+        <scope Name="Subtype4" Subtype="Lapidary" Priority="100" Combine="false" />
+      </scopes>
+      <templates>
+        <template Name="=name=" Weight="7" />
+        <template Name="=name= =numeral=" Weight="3" />
+      </templates>
+      <templatevars>
+        <templatevar Name="numeral">
+          <value Name="II" Weight="10" />
+          <value Name="III" Weight="8" />
+          <value Name="IV" Weight="5" />
+          <value Name="V" Weight="4" />
+          <value Name="VI" Weight="3" />
+          <value Name="VII" Weight="2" />
+          <value Name="VIII" Weight="1" />
+          <value Name="IX" Weight="1" />
+          <value Name="X" Weight="1" />
+          <value Name="XI" Weight="1" />
+          <value Name="XII" Weight="1" />
+        </templatevar>
+      </templatevars>
+    </namestyle>
+  </namestyles>
+</naming>

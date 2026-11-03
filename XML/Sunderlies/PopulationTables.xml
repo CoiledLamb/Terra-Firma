@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<populations>
+  <population Name="StartingGear_Cleo_TerraFirma_Averter">
+    <group Name="Items" Style="pickeach">
+      <table Name="StartingGear_Common" />
+      <object Blueprint="HalfFullWaterskin" Number="2" />
+      <object Blueprint="Cleo_TerraFirma_WateredWineskin" Number="1" />
+      <object Blueprint="Hunk of Cheese" Number="3-4" />
+      <object Blueprint="Crusty Loaf" Number="1-2" />
+      <object Blueprint="Cleo_TerraFirma_RefractiveShield" Number="1" />
+      <object Blueprint="Cleo_TerraFirma_SilverGlaive" Number="1" />
+      <object Blueprint="Cleo_TerraFirma_AcidCanteen" Number="1" />
+      <object Blueprint="Chain Mail" Number="1" />
+      <object Blueprint="Leather Boots" Number="1" />
+      <object Blueprint="Mirrorshades" Number="1" />
+      <object Blueprint="SalveTonic" Number="2-3" />
+      <table Name="Injectors" Number="2-5" />
+      <table Name="Artifact 2" Number="0-2" />
+      <table Name="Cells" Number="1" />
+      <object Blueprint="Witchwood Bark" Number="3-4" />
+    </group>
+  </population>
+
+  <population Name="StartingGear_Cleo_TerraFirma_Starseer">
+    <group Name="Items" Style="pickeach">
+      <table Name="StartingGear_Common" />
+      <object Blueprint="HalfFullWaterskin" Number="2" />
+      <object Blueprint="Cleo_TerraFirma_WateredWineskin" Number="1" />
+      <object Blueprint="Hunk of Cheese" Number="3-4" />
+      <object Blueprint="Crusty Loaf" Number="1-2" />
+      <object Blueprint="Amber-Tipped Staff" Number="1" />
+      <object Blueprint="Night-vision Goggles" Number="1" />
+      <table Name="Cells" Number="2" />
+      <table Name="StartingGear_Cleo_TerraFirma_BeadedBracelets" Number="2" />
+      <table Name="Trinkets 1" Number="0-1" />
+      <object Blueprint="Cloth Robe" Number="1" />
+      <object Blueprint="Short Bow" Number="1" />
+      <object Blueprint="Wooden Arrow" Number="30-50" />
+      <object Blueprint="GlitterGrenade1" Number="1-2" />
+      <object Blueprint="Sandals" Number="1" />
+      <object Blueprint="SalveTonic" Number="2-3" />
+      <table Name="Injectors" Number="2-5" />
+      <table Name="Artifact 1" Number="0-2" />
+      <table Name="Artifact 2" Number="0-2" />
+      <table Name="Artifact 3" Number="0-1" />
+      <object Blueprint="Witchwood Bark" Number="3-4" />
+    </group>
+  </population>
+
+  <population Name="StartingGear_Cleo_TerraFirma_Surveyor">
+    <group Name="Items" Style="pickeach">
+      <table Name="StartingGear_Common" />
+      <object Blueprint="HalfFullWaterskin" Number="2" />
+      <object Blueprint="Cleo_TerraFirma_WateredWineskin" Number="1" />
+      <object Blueprint="Hunk of Cheese" Number="3-4" />
+      <object Blueprint="Crusty Loaf" Number="1-2" />
+      <object Blueprint="Desert Rifle" Number="1" />
+      <object Blueprint="Lead Slug" Number="20-33" />
+      <object Blueprint="Steel War Hammer" Number="1" />
+      <object Blueprint="Cleo_TerraFirma_Seismophone" Number="1" />
+      <object Blueprint="Cleo_TerraFirma_BoxOfChalk" Number="1" />
+      <object Blueprint="Leather Armor" Number="1" />
+      <object Blueprint="Leather Boots" Number="1" />
+      <table Name="Cells" Number="2" />
+      <object Blueprint="SalveTonic" Number="2-3" />
+      <table Name="Injectors" Number="2-5" />
+      <table Name="Artifact 2" Number="0-2" />
+      <object Blueprint="Witchwood Bark" Number="3-4" />
+    </group>
+  </population>
+
+  <population Name="StartingGear_Cleo_TerraFirma_Lapidary">
+    <group Name="Items" Style="pickeach">
+      <table Name="StartingGear_Common" />
+      <object Blueprint="HalfFullWaterskin" Number="2" />
+      <object Blueprint="Cleo_TerraFirma_WateredWineskin" Number="1" />
+      <object Blueprint="Hunk of Cheese" Number="3-4" />
+      <object Blueprint="Crusty Loaf" Number="1-2" />
+      <object Blueprint="Obsidian Kris" Number="1" />
+      <object Blueprint="Basic Toolkit" Number="1" />
+      <object Blueprint="Polyhedral Rings" Number="1" />
+      <object Blueprint="Leather Armor" Number="1" />
+      <object Blueprint="Cleo_TerraFirma_JeweledSandals" Number="1" />
+      <object Blueprint="SalveTonic" Number="2-3" />
+      <table Name="Injectors" Number="2-5" />
+      <table Name="Artifact 1" Number="0-2" />
+      <table Name="Artifact 2" Number="0-2" />
+      <table Name="Artifact 3" Number="0-1" />
+      <table Name="Cells" Number="1" />
+      <table Name="Scrap 1" Number="6-12" />
+      <object Blueprint="Witchwood Bark" Number="3-4" />
+    </group>
+  </population>
+
+  <population Name="StartingGear_Cleo_TerraFirma_BeadedBracelets">
+    <group Name="Items" Style="pickone">
+      <object Blueprint="Bracelet1" Number="1" Weight="1" />
+      <object Blueprint="Bracelet2" Number="1" Weight="1" />
+      <object Blueprint="Bracelet3" Number="1" Weight="1" />
+    </group>
+  </population>
+
+</populations>

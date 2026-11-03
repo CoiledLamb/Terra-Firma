@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<!-- Rock-catalog population tables PARKED on branch quarantine-hold (2026-08-22, user ruling:
-     "move it to its own branch so it doesn't come up until i'm ready to address it").
-     ThrowableRocks bands, the FissureTier and FissureTable families, RedoubtSalvage and
-     StrangeRocksPool all live on that branch; the gap-block restores in Mutation_Fissure.cs
-     pull from there. Design record in TODO-quarantine.md. -->
-<populations>
-</populations>

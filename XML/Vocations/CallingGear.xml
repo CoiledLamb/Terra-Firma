@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<populations>
+  <population Name="StartingGear_Cleo_TerraFirma_Porter">
+    <group Name="Items" Style="pickeach">
+      <table Name="StartingGear_Common" />
+      <object Blueprint="HalfFullWaterskin" Number="1-2" />
+      <object Blueprint="Goat Jerky" Number="3-4" />
+      <object Blueprint="Hand Axe" Number="1" />
+      <object Blueprint="Iron Buckler" Number="1" />
+      <object Blueprint="Cleo_TerraFirma_BoilerHod_Porter" Number="1" />
+      <object Blueprint="Wide-brimmed Hat" Number="1" />
+      <object Blueprint="Cloth Overalls" Number="1" />
+      <object Blueprint="Sandals" Number="1" />
+      <object Blueprint="Witchwood Bark" Number="3-4" />
+    </group>
+  </population>
+
+  <population Name="StartingGear_Cleo_TerraFirma_Wayfarer">
+    <group Name="Items" Style="pickeach">
+      <table Name="StartingGear_Common" />
+      <object Blueprint="HalfFullWaterskin" Number="1-2" />
+      <object Blueprint="Crusty Loaf" Number="2-3" />
+      <object Blueprint="Dagger" Number="3" />
+      <object Blueprint="Short Bow" Number="1" />
+      <object Blueprint="Wooden Arrow" Number="20-30" />
+      <object Blueprint="Bandage" Number="4-6" />
+      <object Blueprint="Woven Tunic" Number="1" />
+      <object Blueprint="Witchwood Wreath" Number="1" />
+      <object Blueprint="Sandals" Number="1" />
+      <object Blueprint="Cleo_TerraFirma_GuildWrit" Number="1" />
+      <object Blueprint="Witchwood Bark" Number="3-4" />
+    </group>
+  </population>
+
+  <population Name="StartingGear_Cleo_TerraFirma_Miner">
+    <group Name="Items" Style="pickeach">
+      <table Name="StartingGear_Common" />
+      <object Blueprint="HalfFullWaterskin" Number="1-2" />
+      <object Blueprint="Beetle Jerky" Number="3-4" />
+      <object Blueprint="Pickaxe" Number="1" />
+      <object Blueprint="Cleo_TerraFirma_GlowstoneLanternLoaded" Number="1" />
+      <object Blueprint="SunderGrenade1" Number="2-3" />
+      <object Blueprint="Cloth Overalls" Number="1" />
+      <object Blueprint="Sandals" Number="1" />
+      <table Name="StartingGear_Cleo_TerraFirma_MinerInsect" Number="1" />
+      <table Name="Junk 1" Number="1-3" />
+      <object Blueprint="Witchwood Bark" Number="3-4" />
+    </group>
+  </population>
+
+  <population Name="StartingGear_Cleo_TerraFirma_MinerInsect">
+    <group Name="Items" Style="pickone">
+      <object Blueprint="Symbiotic Firefly" Number="1" Weight="1" />
+      <object Blueprint="Cleo_TerraFirma_MoleCricket" Number="1" Weight="1" />
+    </group>
+  </population>
+</populations>

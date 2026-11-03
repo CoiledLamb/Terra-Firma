@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<naming>
+  <namestyles>
+    <namestyle Name="Cleo_TerraFirma_Stonecarver" Format="TitleCase">
+      <scopes>
+        <scope Name="Main" Special="Cleo_TerraFirma_Stonecarver" Priority="200" Combine="false" />
+        <scope Name="QuarrierItem" Special="Item" Faction="Cleo_TerraFirma_Quarriers" Priority="200" Combine="false" />
+      </scopes>
+      <prefixes Amount="1">
+        <prefix Name="ar" />
+        <prefix Name="vel" />
+        <prefix Name="lar" />
+        <prefix Name="than" />
+        <prefix Name="ram" />
+        <prefix Name="sem" />
+        <prefix Name="cul" />
+        <prefix Name="tles" />
+        <prefix Name="pev" />
+        <prefix Name="ras" />
+        <prefix Name="mun" />
+        <prefix Name="spur" />
+      </prefixes>
+      <infixes Amount="0-1">
+        <infix Name="utha" />
+        <infix Name="athi" />
+        <infix Name="eni" />
+        <infix Name="ena" />
+        <infix Name="ari" />
+        <infix Name="ithi" />
+        <infix Name="aru" />
+        <infix Name="eli" />
+        <infix Name="anthi" />
+        <infix Name="elthu" />
+        <infix Name="arna" />
+        <infix Name="uni" />
+        <infix Name="avi" />
+      </infixes>
+      <postfixes Amount="1">
+        <postfix Name="tha" />
+        <postfix Name="thia" />
+        <postfix Name="na" />
+        <postfix Name="nia" />
+        <postfix Name="ce" />
+        <postfix Name="za" />
+        <postfix Name="til" />
+        <postfix Name="sa" />
+        <postfix Name="cna" />
+      </postfixes>
+    </namestyle>
+
+    <namestyle Name="Cleo_TerraFirma_WarrenSite" Base="Cleo_TerraFirma_Stonecarver" Format="AsIs">
+      <scopes>
+        <scope Name="Main" Type="Site" Special="Cleo_TerraFirma_Warren" Priority="200" Combine="false" />
+      </scopes>
+      <templates>
+        <template Name="=name=" Weight="2" />
+        <template Name="=name= =place=" Weight="4" />
+        <template Name="the =ofplace= of =name=" Weight="1" />
+        <template Name="Har =name=" Weight="1" />
+        <template Name="Oros =name=" Weight="1" />
+        <template Name="=stone==glueplace=" Weight="2" />
+      </templates>
+      <templatevars>
+        <templatevar Name="place">
+          <value Name="Adit" />
+          <value Name="Stope" />
+          <value Name="Delf" />
+          <value Name="Winze" />
+          <value Name="Gallery" />
+          <value Name="Quoin" />
+          <value Name="Ashlar" />
+          <value Name="Cairn" />
+          <value Name="Cavehome" />
+          <value Name="Burrow" />
+          <value Name="Crag" />
+          <value Name="Hermitage" />
+        </templatevar>
+        <templatevar Name="ofplace">
+          <value Name="Adit" Weight="4" />
+          <value Name="Stope" Weight="4" />
+          <value Name="Delf" Weight="4" />
+          <value Name="Winze" Weight="4" />
+          <value Name="Gallery" Weight="4" />
+          <value Name="Quoin" Weight="4" />
+          <value Name="Cairn" Weight="4" />
+          <value Name="Cavehome" Weight="1" />
+          <value Name="Burrow" Weight="4" />
+          <value Name="Crag" Weight="4" />
+          <value Name="Hermitage" Weight="4" />
+        </templatevar>
+        <templatevar Name="glueplace">
+          <value Name="delf" />
+          <value Name="winze" />
+          <value Name="gallery" />
+          <value Name="quoin" />
+          <value Name="cairn" />
+          <value Name="burrow" />
+          <value Name="crag" />
+        </templatevar>
+        <templatevar Name="stone">
+          <value Name="Flint" />
+          <value Name="Slate" />
+          <value Name="Marl" />
+          <value Name="Lode" />
+          <value Name="Granite" />
+          <value Name="Chalk" />
+          <value Name="Shale" />
+          <value Name="Eben" />
+        </templatevar>
+      </templatevars>
+    </namestyle>
+  </namestyles>
+</naming>
